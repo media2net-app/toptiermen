@@ -615,16 +615,16 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                         <span className="text-white font-medium">Koolhydraten</span>
                       </div>
                       <span className="text-white font-bold text-lg">{planData.planPercentages.carbs}%</span>
-                    </div>
+              </div>
                     <div className="flex items-center justify-between p-3 bg-[#232D1A] rounded-lg">
                       <div className="flex items-center gap-3">
                         <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
                         <span className="text-white font-medium">Vet</span>
-                      </div>
+              </div>
                       <span className="text-white font-bold text-lg">{planData.planPercentages.fat}%</span>
-                    </div>
-                  </div>
-                </div>
+              </div>
+              </div>
+            </div>
               )}
               
               {/* Target Values */}
@@ -648,64 +648,35 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                       <div className="text-2xl font-bold text-white">{planData.planTargets?.target_fat || 0}g</div>
                       <div className="text-sm text-gray-400">Vet</div>
                     </div>
-                  </div>
-                </div>
-              )}
+            </div>
+              </div>
+            )}
             </div>
           </div>
         )}
 
-        {/* Daily Requirements & Weekly Average */}
-        <div className="grid md:grid-cols-2 gap-6">
-          {/* Daily Requirements */}
+        {/* Daily Requirements */}
           <div className="bg-[#181F17] border border-[#3A4D23] rounded-xl p-6">
             <div className="flex items-center gap-3 mb-4">
-              <ChartBarIcon className="w-6 h-6 text-[#8BAE5A]" />
-              <h3 className="text-xl font-bold text-white">Jouw Dagelijkse Behoefte</h3>
+            <ChartBarIcon className="w-6 h-6 text-[#8BAE5A]" />
+            <h3 className="text-xl font-bold text-white">Jouw Dagelijkse Behoefte</h3>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="text-center">
-                <div className="text-2xl font-bold text-white">{planData.planTargets?.target_calories || 0}</div>
+              <div className="text-2xl font-bold text-white">{planData.planTargets?.target_calories || 0}</div>
                 <div className="text-sm text-gray-400">Calorieën per dag</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-white">{planData.planTargets?.target_protein || 0}g</div>
+              <div className="text-2xl font-bold text-white">{planData.planTargets?.target_protein || 0}g</div>
                 <div className="text-sm text-gray-400">Eiwitten per dag</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-white">{planData.planTargets?.target_carbs || 0}g</div>
+              <div className="text-2xl font-bold text-white">{planData.planTargets?.target_carbs || 0}g</div>
                 <div className="text-sm text-gray-400">Koolhydraten per dag</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-white">{planData.planTargets?.target_fat || 0}g</div>
+              <div className="text-2xl font-bold text-white">{planData.planTargets?.target_fat || 0}g</div>
                 <div className="text-sm text-gray-400">Vetten per dag</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Weekly Average */}
-          <div className="bg-[#181F17] border border-[#3A4D23] rounded-xl p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <CalendarDaysIcon className="w-6 h-6 text-[#8BAE5A]" />
-              <h3 className="text-xl font-bold text-white">Weekgemiddelde</h3>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-white">{Math.round(planData.weeklyAverages.calories)}</div>
-                <div className="text-sm text-gray-400">Calorieën per dag</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-white">{Math.round(planData.weeklyAverages.protein)}g</div>
-                <div className="text-sm text-gray-400">Eiwitten per dag</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-white">{Math.round(planData.weeklyAverages.carbs)}g</div>
-                <div className="text-sm text-gray-400">Koolhydraten per dag</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-white">{Math.round(planData.weeklyAverages.fat)}g</div>
-                <div className="text-sm text-gray-400">Vetten per dag</div>
-              </div>
             </div>
           </div>
         </div>
