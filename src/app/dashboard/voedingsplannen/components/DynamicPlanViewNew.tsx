@@ -343,10 +343,6 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
     }
   };
 
-  const handleAddSnack = (day: string, snackType: string) => {
-    console.log('➕ Adding snack:', { day, snack: snackType });
-    toast.success(`${MEAL_TYPES_NL[snackType as keyof typeof MEAL_TYPES_NL]} toegevoegd!`);
-  };
 
   // Format unit display for better readability
   const formatUnitDisplay = (unit: string) => {
@@ -1140,18 +1136,6 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                   </div>
                 )}
 
-                {/* Add Snack Button for snack meals */}
-                {(mealType === 'snack1' || mealType === 'snack2' || mealType === 'avondsnack') && (
-                  <div className="mt-4">
-                    <button
-                      onClick={() => handleAddSnack(selectedDay, mealType)}
-                      className="flex items-center gap-2 px-4 py-2 bg-[#3A4D23] text-white rounded-lg hover:bg-[#4A5D33] transition-colors text-sm font-semibold"
-                    >
-                      <PlusIcon className="w-4 h-4" />
-                      + {MEAL_TYPES_NL[mealType as keyof typeof MEAL_TYPES_NL]} toevoegen
-                    </button>
-                  </div>
-                )}
               </div>
             );
           })}
