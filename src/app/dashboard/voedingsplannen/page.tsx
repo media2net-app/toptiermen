@@ -309,6 +309,8 @@ export default function VoedingsplannenPage() {
         toast.success('Voedingsplan geselecteerd!');
         // Refresh the active plan selection
         checkUserNutritionProfile();
+        // Force re-render of daily needs section
+        setSelectedNutritionPlan(planId);
       } else {
         toast.error('Er is een fout opgetreden bij het selecteren van het plan');
       }
@@ -535,6 +537,36 @@ export default function VoedingsplannenPage() {
       fetchNutritionPlans();
     }
   }, [user?.id, userNutritionProfile]);
+
+  // Re-check selected plan when nutrition plans are loaded
+  useEffect(() => {
+    if (user?.id && nutritionPlans.length > 0 && userNutritionProfile) {
+      // Re-check if we have an active plan and it exists in the loaded plans
+      const checkActivePlan = async () => {
+        try {
+          const response = await fetch(`/api/nutrition-plan-active?userId=${user.id}`);
+          const data = await response.json();
+          
+          if (data.success && data.hasActivePlan) {
+            const planExists = nutritionPlans.find(p => p.plan_id === data.activePlanId);
+            if (planExists) {
+              console.log('✅ Active plan confirmed after plans loaded:', data.activePlanId);
+              setSelectedNutritionPlan(data.activePlanId);
+            } else {
+              console.log('⚠️ Active plan not found in loaded plans:', data.activePlanId);
+              setSelectedNutritionPlan(null);
+            }
+          } else {
+            setSelectedNutritionPlan(null);
+          }
+        } catch (error) {
+          console.error('❌ Error re-checking active plan:', error);
+        }
+      };
+      
+      checkActivePlan();
+    }
+  }, [user?.id, nutritionPlans, userNutritionProfile]);
 
   // Show fallback if no user is logged in
   if (!user && !authLoading) {
