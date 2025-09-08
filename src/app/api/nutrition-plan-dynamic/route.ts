@@ -367,7 +367,12 @@ export async function GET(request: NextRequest) {
             
             scaledPlan[day][frontendMealType] = {
               name: meal.name || frontendMealType,
-              ingredients: scaleIngredientAmounts(meal.ingredients || [], scaleFactor),
+              ingredients: scaleIngredientAmounts(meal.ingredients || [], scaleFactor, {
+                calories: profile.target_calories / 7,
+                protein: (profile.target_calories * (planData.protein_percentage || 0) / 100) / 4 / 7,
+                carbs: (profile.target_calories * (planData.carbs_percentage || 0) / 100) / 4 / 7,
+                fat: (profile.target_calories * (planData.fat_percentage || 0) / 100) / 9 / 7
+              }),
               nutrition: mealNutrition
             };
           }
@@ -408,7 +413,12 @@ export async function GET(request: NextRequest) {
             
             scaledPlan[day][frontendMealType] = {
               name: meal.name || frontendMealType,
-              ingredients: scaleIngredientAmounts(meal.ingredients || [], scaleFactor),
+              ingredients: scaleIngredientAmounts(meal.ingredients || [], scaleFactor, {
+                calories: profile.target_calories / 7,
+                protein: (profile.target_calories * (planData.protein_percentage || 0) / 100) / 4 / 7,
+                carbs: (profile.target_calories * (planData.carbs_percentage || 0) / 100) / 4 / 7,
+                fat: (profile.target_calories * (planData.fat_percentage || 0) / 100) / 9 / 7
+              }),
               nutrition: mealNutrition
             };
           }
@@ -509,31 +519,47 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// Function to scale ingredient amounts based on scale factor
-function scaleIngredientAmounts(ingredients, scaleFactor) {
+// Function to calculate nutrition for ingredients
+function calculateIngredientNutrition(ingredients) {
+  let totalCalories = 0;
+  let totalProtein = 0;
+  let totalCarbs = 0;
+  let totalFat = 0;
+  
+  ingredients.forEach(ingredient => {
+    if (ingredient.nutrition) {
+      totalCalories += ingredient.nutrition.calories || 0;
+      totalProtein += ingredient.nutrition.protein || 0;
+      totalCarbs += ingredient.nutrition.carbs || 0;
+      totalFat += ingredient.nutrition.fat || 0;
+    }
+  });
+  
+  return { calories: totalCalories, protein: totalProtein, carbs: totalCarbs, fat: totalFat };
+}
+
+// Function to intelligently scale ingredient amounts with macro optimization
+function scaleIngredientAmounts(ingredients, scaleFactor, targetNutrition = null) {
   if (!ingredients || scaleFactor === 1) return ingredients;
   
-  return ingredients.map(ingredient => {
+  // Step 1: Basic scaling
+  let scaledIngredients = ingredients.map(ingredient => {
     if (ingredient.amount) {
       let scaledAmount = ingredient.amount * scaleFactor;
       
       // Round to reasonable values based on unit type
       if (ingredient.unit === 'per_piece' || ingredient.unit === 'stuk') {
-        // For pieces, round to nearest whole number, minimum 1
         scaledAmount = Math.round(scaledAmount);
-        scaledAmount = Math.max(1, scaledAmount); // Minimum 1 piece
+        scaledAmount = Math.max(1, scaledAmount);
       } else if (ingredient.unit === 'per_100g' || ingredient.unit === 'g') {
-        // For grams, round to nearest 5g
         scaledAmount = Math.round(scaledAmount / 5) * 5;
-        scaledAmount = Math.max(5, scaledAmount); // Minimum 5g
+        scaledAmount = Math.max(5, scaledAmount);
       } else if (ingredient.unit === 'per_ml') {
-        // For ml, round to nearest 10ml
         scaledAmount = Math.round(scaledAmount / 10) * 10;
-        scaledAmount = Math.max(10, scaledAmount); // Minimum 10ml
+        scaledAmount = Math.max(10, scaledAmount);
       } else {
-        // For other units, round to nearest whole number
         scaledAmount = Math.round(scaledAmount);
-        scaledAmount = Math.max(1, scaledAmount); // Minimum 1
+        scaledAmount = Math.max(1, scaledAmount);
       }
       
       return {
@@ -543,6 +569,103 @@ function scaleIngredientAmounts(ingredients, scaleFactor) {
     }
     return ingredient;
   });
+  
+  // Step 2: Macro optimization (if target nutrition provided)
+  if (targetNutrition) {
+    const currentNutrition = calculateIngredientNutrition(scaledIngredients);
+    
+    // Calculate differences
+    const calorieDiff = targetNutrition.calories - currentNutrition.calories;
+    const proteinDiff = targetNutrition.protein - currentNutrition.protein;
+    const carbsDiff = targetNutrition.carbs - currentNutrition.carbs;
+    const fatDiff = targetNutrition.fat - currentNutrition.fat;
+    
+    console.log('🎯 Macro optimization:', {
+      current: currentNutrition,
+      target: targetNutrition,
+      differences: { calorieDiff, proteinDiff, carbsDiff, fatDiff }
+    });
+    
+    // If we're within 5% of targets, no optimization needed
+    const caloriePercentage = Math.abs(calorieDiff / targetNutrition.calories * 100);
+    const proteinPercentage = Math.abs(proteinDiff / targetNutrition.protein * 100);
+    const carbsPercentage = Math.abs(carbsDiff / targetNutrition.carbs * 100);
+    const fatPercentage = Math.abs(fatDiff / targetNutrition.fat * 100);
+    
+    if (caloriePercentage <= 5 && proteinPercentage <= 5 && carbsPercentage <= 5 && fatPercentage <= 5) {
+      console.log('✅ Already within 5% of targets, no optimization needed');
+      return scaledIngredients;
+    }
+    
+    // Find ingredients that can be adjusted for specific macros
+    scaledIngredients = scaledIngredients.map(ingredient => {
+      if (!ingredient.nutrition || !ingredient.amount) return ingredient;
+      
+      let adjustmentFactor = 1;
+      
+      // Protein-rich ingredients (adjust for protein deficit/surplus)
+      if (ingredient.nutrition.protein > 10 && Math.abs(proteinDiff) > 5) {
+        if (proteinDiff > 0) {
+          // Need more protein - increase protein-rich foods
+          adjustmentFactor = 1 + (proteinDiff / 100) * 0.1; // Small adjustment
+        } else {
+          // Too much protein - decrease protein-rich foods
+          adjustmentFactor = 1 + (proteinDiff / 100) * 0.1;
+        }
+      }
+      
+      // Carb-rich ingredients (adjust for carb deficit/surplus)
+      if (ingredient.nutrition.carbs > 10 && Math.abs(carbsDiff) > 5) {
+        if (carbsDiff > 0) {
+          // Need more carbs - increase carb-rich foods
+          adjustmentFactor = 1 + (carbsDiff / 100) * 0.1;
+        } else {
+          // Too much carbs - decrease carb-rich foods
+          adjustmentFactor = 1 + (carbsDiff / 100) * 0.1;
+        }
+      }
+      
+      // Fat-rich ingredients (adjust for fat deficit/surplus)
+      if (ingredient.nutrition.fat > 5 && Math.abs(fatDiff) > 3) {
+        if (fatDiff > 0) {
+          // Need more fat - increase fat-rich foods
+          adjustmentFactor = 1 + (fatDiff / 100) * 0.1;
+        } else {
+          // Too much fat - decrease fat-rich foods
+          adjustmentFactor = 1 + (fatDiff / 100) * 0.1;
+        }
+      }
+      
+      // Apply adjustment with constraints
+      if (adjustmentFactor !== 1) {
+        let adjustedAmount = ingredient.amount * adjustmentFactor;
+        
+        // Apply same rounding rules
+        if (ingredient.unit === 'per_piece' || ingredient.unit === 'stuk') {
+          adjustedAmount = Math.round(adjustedAmount);
+          adjustedAmount = Math.max(1, adjustedAmount);
+        } else if (ingredient.unit === 'per_100g' || ingredient.unit === 'g') {
+          adjustedAmount = Math.round(adjustedAmount / 5) * 5;
+          adjustedAmount = Math.max(5, adjustedAmount);
+        } else if (ingredient.unit === 'per_ml') {
+          adjustedAmount = Math.round(adjustedAmount / 10) * 10;
+          adjustedAmount = Math.max(10, adjustedAmount);
+        } else {
+          adjustedAmount = Math.round(adjustedAmount);
+          adjustedAmount = Math.max(1, adjustedAmount);
+        }
+        
+        return {
+          ...ingredient,
+          amount: adjustedAmount
+        };
+      }
+      
+      return ingredient;
+    });
+  }
+  
+  return scaledIngredients;
 }
 
 // Function to calculate base plan calories from database
