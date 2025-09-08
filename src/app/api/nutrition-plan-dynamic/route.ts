@@ -356,7 +356,7 @@ export async function GET(request: NextRequest) {
       scaledPlan[day] = {};
       
       // Process meal structure - handle both formats
-      let mealTypes = [];
+      let mealTypes: string[] = [];
       
       // Check if this day has the maandag format (with meals object)
       if (dayPlan.meals && typeof dayPlan.meals === 'object') {
