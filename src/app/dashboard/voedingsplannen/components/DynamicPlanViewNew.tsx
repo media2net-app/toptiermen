@@ -648,7 +648,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
             {(() => {
               const current = getDayTotal(selectedDay).calories;
               const target = planData.scalingInfo.planTargetCalories;
-              const percentage = target > 0 ? Math.min(Math.round((current / target) * 100), 100) : 0;
+              const percentage = target > 0 ? Math.round((current / target) * 100) : 0;
               const difference = current - target;
               const isOver = difference > 0;
               const isUnder = difference < 0;
@@ -664,8 +664,14 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                 progressColor = 'bg-green-500';
               } else if (isOver) {
                 statusText = `${Math.abs(difference)} kcal te veel (${percentage}%)`;
-                statusColor = 'text-red-400';
-                progressColor = 'bg-red-500';
+                // Over target - use percentage-based colors
+                if (percentage <= 110) {
+                  statusColor = 'text-orange-400';
+                  progressColor = 'bg-orange-500';
+                } else {
+                  statusColor = 'text-red-400';
+                  progressColor = 'bg-red-500';
+                }
               } else {
                 // Under target - use percentage-based colors
                 if (percentage >= 95) {
@@ -692,7 +698,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                   <div className="w-full bg-gray-700 rounded-full h-3">
                     <div 
                       className={`h-3 rounded-full transition-all duration-300 ${progressColor}`}
-                      style={{ width: `${Math.min(percentage, 100)}%` }}
+                      style={{ width: `${Math.min(percentage, 120)}%` }}
                     ></div>
                   </div>
                 </div>
@@ -703,7 +709,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
             {(() => {
               const current = getDayTotal(selectedDay).protein;
               const target = planData.planTargets?.target_protein || 0;
-              const percentage = target > 0 ? Math.min(Math.round((current / target) * 100), 100) : 0;
+              const percentage = target > 0 ? Math.round((current / target) * 100) : 0;
               const difference = current - target;
               const isOver = difference > 0;
               const isUnder = difference < 0;
@@ -747,7 +753,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                   <div className="w-full bg-gray-700 rounded-full h-3">
                     <div 
                       className={`h-3 rounded-full transition-all duration-300 ${progressColor}`}
-                      style={{ width: `${Math.min(percentage, 100)}%` }}
+                      style={{ width: `${Math.min(percentage, 120)}%` }}
                     ></div>
               </div>
             </div>
@@ -758,7 +764,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
             {(() => {
               const current = getDayTotal(selectedDay).carbs;
               const target = planData.planTargets?.target_carbs || 0;
-              const percentage = target > 0 ? Math.min(Math.round((current / target) * 100), 100) : 0;
+              const percentage = target > 0 ? Math.round((current / target) * 100) : 0;
               const difference = current - target;
               const isOver = difference > 0;
               const isUnder = difference < 0;
@@ -802,7 +808,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                   <div className="w-full bg-gray-700 rounded-full h-3">
                     <div 
                       className={`h-3 rounded-full transition-all duration-300 ${progressColor}`}
-                      style={{ width: `${Math.min(percentage, 100)}%` }}
+                      style={{ width: `${Math.min(percentage, 120)}%` }}
                     ></div>
                   </div>
             </div>
@@ -813,7 +819,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
             {(() => {
               const current = getDayTotal(selectedDay).fat;
               const target = planData.planTargets?.target_fat || 0;
-              const percentage = target > 0 ? Math.min(Math.round((current / target) * 100), 100) : 0;
+              const percentage = target > 0 ? Math.round((current / target) * 100) : 0;
               const difference = current - target;
               const isOver = difference > 0;
               const isUnder = difference < 0;
@@ -857,12 +863,31 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                   <div className="w-full bg-gray-700 rounded-full h-3">
                     <div 
                       className={`h-3 rounded-full transition-all duration-300 ${progressColor}`}
-                      style={{ width: `${Math.min(percentage, 100)}%` }}
+                      style={{ width: `${Math.min(percentage, 120)}%` }}
                     ></div>
             </div>
             </div>
               );
             })()}
+          </div>
+
+          {/* Safety Margin Notice */}
+          <div className="mt-6 p-4 bg-blue-900/20 border border-blue-500/30 rounded-lg">
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0">
+                <svg className="w-5 h-5 text-blue-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <h4 className="text-blue-300 font-semibold mb-1">Veilige Marge</h4>
+                <p className="text-blue-200 text-sm">
+                  Het is begrijpelijk dat je niet altijd precies uitkomt op je dagelijkse calorieën. 
+                  Een marge van <span className="font-semibold">±200 kcal</span> is veilig en realistisch. 
+                  Focus op consistentie over perfectie!
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
