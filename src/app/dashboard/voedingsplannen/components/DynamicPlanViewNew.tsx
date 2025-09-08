@@ -242,20 +242,13 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
   };
 
   const calculateMealNutrition = (ingredients: MealIngredient[]) => {
-    // This would use the same calculation logic as in MealEditModal
-    // For now, return a simple calculation
     return ingredients.reduce((total, ingredient) => {
-      // Simple calculation - in real implementation, this would use the ingredient database
-      const calories = ingredient.amount * 10; // Placeholder
-      const protein = ingredient.amount * 1; // Placeholder
-      const carbs = ingredient.amount * 0.5; // Placeholder
-      const fat = ingredient.amount * 0.3; // Placeholder
-      
+      const nutrition = calculateIngredientNutrition(ingredient);
       return {
-        calories: total.calories + calories,
-        protein: total.protein + protein,
-        carbs: total.carbs + carbs,
-        fat: total.fat + fat
+        calories: total.calories + nutrition.calories,
+        protein: total.protein + nutrition.protein,
+        carbs: total.carbs + nutrition.carbs,
+        fat: total.fat + nutrition.fat
       };
     }, { calories: 0, protein: 0, carbs: 0, fat: 0 });
   };

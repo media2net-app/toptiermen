@@ -81,6 +81,7 @@ export default function MealEditModal({
   const [ingredients, setIngredients] = useState<MealIngredient[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [showIngredientSearch, setShowIngredientSearch] = useState(false);
+  const [ingredientDatabase, setIngredientDatabase] = useState<any>({});
 
   useEffect(() => {
     if (isOpen) {
@@ -88,8 +89,26 @@ export default function MealEditModal({
     }
   }, [isOpen, currentIngredients]);
 
+  // Load ingredient database from API
+  useEffect(() => {
+    const loadIngredientDatabase = async () => {
+      try {
+        const response = await fetch('/api/nutrition-ingredients');
+        const data = await response.json();
+        if (data.success && data.ingredients) {
+          setIngredientDatabase(data.ingredients);
+          console.log('✅ MealEditModal loaded ingredient database:', Object.keys(data.ingredients).length, 'ingredients');
+        }
+      } catch (error) {
+        console.error('❌ Error loading ingredient database in MealEditModal:', error);
+      }
+    };
+
+    loadIngredientDatabase();
+  }, []);
+
   const calculateIngredientNutrition = (ingredient: MealIngredient) => {
-    const data = INGREDIENT_DATABASE[ingredient.name as keyof typeof INGREDIENT_DATABASE];
+    const data = ingredientDatabase[ingredient.name];
     if (!data) return { calories: 0, protein: 0, carbs: 0, fat: 0 };
 
     let multiplier = 1;
@@ -137,7 +156,7 @@ export default function MealEditModal({
   };
 
   const handleAddIngredient = (ingredientName: string) => {
-    const data = INGREDIENT_DATABASE[ingredientName as keyof typeof INGREDIENT_DATABASE];
+    const data = ingredientDatabase[ingredientName];
     if (!data) return;
 
     const newIngredient: MealIngredient = {
@@ -158,7 +177,7 @@ export default function MealEditModal({
   };
 
   const getAvailableIngredients = () => {
-    return Object.keys(INGREDIENT_DATABASE).filter(name => 
+    return Object.keys(ingredientDatabase).filter(name => 
       name.toLowerCase().includes(searchTerm.toLowerCase())
     );
   };
