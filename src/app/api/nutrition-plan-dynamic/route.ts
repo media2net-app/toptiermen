@@ -500,10 +500,10 @@ export async function GET(request: NextRequest) {
           fat: planData.fat_percentage || 0
         },
         planTargets: {
-          calories: planData.target_calories || 0,
-          protein: planData.target_protein || 0,
-          carbs: planData.target_carbs || 0,
-          fat: planData.target_fat || 0
+          target_calories: profile.target_calories,
+          target_protein: Math.round((profile.target_calories * (planData.protein_percentage || 0) / 100) / 4),
+          target_carbs: Math.round((profile.target_calories * (planData.carbs_percentage || 0) / 100) / 4),
+          target_fat: Math.round((profile.target_calories * (planData.fat_percentage || 0) / 100) / 9)
         },
         weekPlan: scaledPlan,
         weeklyAverages,
