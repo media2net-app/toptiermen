@@ -145,11 +145,34 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
   useEffect(() => {
     if (plan) {
       console.log('🔄 PlanBuilder: Plan changed, updating formData:', plan.name);
-      setFormData(plan);
+      
+      // Load target values from plan.meals if available, otherwise use plan properties
+      const targetCalories = (plan as any).meals?.target_calories || plan.target_calories;
+      const targetProtein = (plan as any).meals?.target_protein || plan.target_protein;
+      const targetCarbs = (plan as any).meals?.target_carbs || plan.target_carbs;
+      const targetFat = (plan as any).meals?.target_fat || plan.target_fat;
+      
+      const updatedFormData = {
+        ...plan,
+        target_calories: targetCalories,
+        target_protein: targetProtein,
+        target_carbs: targetCarbs,
+        target_fat: targetFat
+      };
+      
+      setFormData(updatedFormData);
+      
       if (plan.meals) {
         setMealsData(plan.meals);
         console.log('🍽️ PlanBuilder: Meals data updated:', plan.meals);
       }
+      
+      console.log('✅ PlanBuilder: Target macros loaded:', {
+        calories: targetCalories,
+        protein: targetProtein,
+        carbs: targetCarbs,
+        fat: targetFat
+      });
     }
   }, [plan]);
 
