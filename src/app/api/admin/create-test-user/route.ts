@@ -43,19 +43,6 @@ export async function POST(request: NextRequest) {
         ])
         .select();
 
-      // Also create user record in users table with role (bypass RLS with service role)
-      const { error: userError } = await supabase
-        .from('users')
-        .insert([
-          {
-            id: authData.user.id,
-            email: authData.user.email,
-            full_name: fullName,
-            role: 'user'
-          }
-        ])
-        .select();
-
       if (profileError) {
         console.error('❌ Error creating profile:', profileError);
         console.error('Profile error details:', JSON.stringify(profileError, null, 2));
@@ -66,15 +53,7 @@ export async function POST(request: NextRequest) {
         }, { status: 400 });
       }
 
-      if (userError) {
-        console.error('❌ Error creating user record:', userError);
-        console.error('User error details:', JSON.stringify(userError, null, 2));
-        return NextResponse.json({
-          success: false,
-          error: 'Profile created but failed to create user record',
-          details: userError.message
-        }, { status: 400 });
-      }
+      console.log('✅ Profile created successfully');
 
       // Also add to test_profiles table
       const { error: testUserError } = await supabase
