@@ -320,9 +320,9 @@ export async function GET(request: NextRequest) {
     const basePlanCalories = calculateBasePlanCaloriesFromDatabase(basePlan);
     console.log('📊 Base plan average daily calories:', basePlanCalories);
 
-    // Calculate scale factor - use user profile target calories, not plan target
-    const scaleFactor = basePlanCalories > 0 ? profile.target_calories / basePlanCalories : 1;
-    console.log('⚖️ Scale factor:', scaleFactor);
+    // Calculate scale factor - use user profile target calories vs plan target calories
+    const scaleFactor = planData.target_calories > 0 ? profile.target_calories / planData.target_calories : 1;
+    console.log('⚖️ Scale factor:', scaleFactor, '(User:', profile.target_calories, 'vs Plan:', planData.target_calories, ')');
 
     // Generate scaled meal plan
     const scaledPlan = {};
