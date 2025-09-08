@@ -149,11 +149,11 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
     if (plan) {
       console.log('🔄 PlanBuilder: Plan changed, updating formData:', plan.name);
       
-      // Load target values from plan.meals if available, otherwise use plan properties
-      const targetCalories = (plan as any).meals?.target_calories || plan.target_calories;
-      const targetProtein = (plan as any).meals?.target_protein || plan.target_protein;
-      const targetCarbs = (plan as any).meals?.target_carbs || plan.target_carbs;
-      const targetFat = (plan as any).meals?.target_fat || plan.target_fat;
+      // Always use plan properties for target values (not meals data which may be outdated)
+      const targetCalories = plan.target_calories;
+      const targetProtein = plan.target_protein;
+      const targetCarbs = plan.target_carbs;
+      const targetFat = plan.target_fat;
       
       // Use stored percentages if available, otherwise calculate from macros
       let proteinPercentage = plan.protein_percentage;
