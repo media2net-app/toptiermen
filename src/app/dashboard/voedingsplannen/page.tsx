@@ -105,11 +105,16 @@ export default function VoedingsplannenPage() {
         // Filter plans based on user's goal if they have a nutrition profile
         let filteredPlans = data.plans;
         
-        if (userNutritionProfile?.goal) {
-          const userGoal = userNutritionProfile.goal.toLowerCase();
-          console.log('🎯 Filtering plans for user goal:', userGoal);
+        // Check if user has a goal (either from profile or from calculator)
+        const userGoal = userNutritionProfile?.goal || calculatorData.goal;
+        
+        if (userGoal) {
+          const normalizedGoal = userGoal.toLowerCase();
+          console.log('🎯 Filtering plans for user goal:', normalizedGoal);
+          console.log('📊 User nutrition profile:', userNutritionProfile);
+          console.log('🧮 Calculator data:', calculatorData);
           
-          // Map user goals to plan goals
+          // Map user goals to plan goals (case-insensitive)
           const goalMapping = {
             'cut': 'droogtrainen',
             'bulk': 'spiermassa', 
@@ -121,13 +126,14 @@ export default function VoedingsplannenPage() {
             'onderhoud': 'onderhoud'
           };
           
-          const mappedGoal = goalMapping[userGoal] || userGoal;
-          console.log(`🗺️ Mapping user goal "${userGoal}" to plan goal "${mappedGoal}"`);
+          const mappedGoal = goalMapping[normalizedGoal] || normalizedGoal;
+          console.log(`🗺️ Mapping user goal "${normalizedGoal}" to plan goal "${mappedGoal}"`);
           
           filteredPlans = data.plans.filter(plan => {
-            const planGoal = plan.fitness_goal?.toLowerCase() || plan.goal?.toLowerCase();
+            // Use goal field for filtering (not fitness_goal)
+            const planGoal = plan.goal?.toLowerCase();
             const matches = planGoal === mappedGoal;
-            console.log(`Plan "${plan.name}" (fitness_goal: ${plan.fitness_goal}, goal: ${plan.goal}) matches mapped goal (${mappedGoal}):`, matches);
+            console.log(`Plan "${plan.name}" (goal: ${plan.goal}) matches mapped goal (${mappedGoal}):`, matches);
             return matches;
           });
           
