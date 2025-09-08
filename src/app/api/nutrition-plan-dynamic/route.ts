@@ -355,6 +355,8 @@ export async function GET(request: NextRequest) {
       const dayPlan = basePlan[day];
       scaledPlan[day] = {};
       
+      console.log(`🔍 Processing day: ${day}`, JSON.stringify(dayPlan, null, 2));
+      
       // Process all meal types - check if dayPlan has meals object or direct meal structure
       if (dayPlan.meals) {
         const mealTypes = Object.keys(dayPlan.meals);
@@ -390,12 +392,17 @@ export async function GET(request: NextRequest) {
             
             // Check if nutrition data exists in meal.nutrition (new structure) or meal directly (old structure)
             const baseNutrition = meal.nutrition || meal;
+            console.log(`🍽️ Processing meal: ${mealType}`, JSON.stringify(meal, null, 2));
+            console.log(`🍽️ Base nutrition:`, JSON.stringify(baseNutrition, null, 2));
+            
             const mealNutrition = {
               calories: Math.round((baseNutrition.calories || 0) * scaleFactor),
               protein: Math.round(((baseNutrition.protein || 0) * scaleFactor) * 10) / 10,
               carbs: Math.round(((baseNutrition.carbs || 0) * scaleFactor) * 10) / 10,
               fat: Math.round(((baseNutrition.fat || 0) * scaleFactor) * 10) / 10
             };
+            
+            console.log(`🍽️ Calculated nutrition:`, JSON.stringify(mealNutrition, null, 2));
             
             scaledPlan[day][mealType] = {
               name: meal.name || mealType,
