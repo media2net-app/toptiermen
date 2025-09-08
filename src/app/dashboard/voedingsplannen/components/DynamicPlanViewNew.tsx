@@ -172,6 +172,19 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
     toast.success(`${MEAL_TYPES_NL[snackType as keyof typeof MEAL_TYPES_NL]} toegevoegd!`);
   };
 
+  // Format unit display for better readability
+  const formatUnitDisplay = (unit: string) => {
+    switch (unit) {
+      case 'per_100g': return 'g';
+      case 'per_piece': return 'stuk';
+      case 'per_ml': return 'ml';
+      case 'per_tbsp': return 'eetlepel';
+      case 'per_tsp': return 'theelepel';
+      case 'per_cup': return 'kop';
+      default: return unit;
+    }
+  };
+
   // Calculate nutrition for a single ingredient based on amount and unit
   const calculateIngredientNutrition = (ingredient: any) => {
     const amount = ingredient.amount || 0;
@@ -801,12 +814,12 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                                   onChange={(e) => handleIngredientChange(selectedDay, mealType, index, 'unit', e.target.value)}
                                   className="px-2 py-1 bg-[#181F17] border border-[#3A4D23] rounded text-white text-center focus:outline-none focus:border-[#8BAE5A] text-xs"
                                 >
-                                  <option value="per_100g">per 100g</option>
-                                  <option value="per_piece">per stuk</option>
-                                  <option value="per_ml">per ml</option>
-                                  <option value="per_tbsp">per eetlepel</option>
-                                  <option value="per_tsp">per theelepel</option>
-                                  <option value="per_cup">per kop</option>
+                                  <option value="per_100g">g</option>
+                                  <option value="per_piece">stuk</option>
+                                  <option value="per_ml">ml</option>
+                                  <option value="per_tbsp">eetlepel</option>
+                                  <option value="per_tsp">theelepel</option>
+                                  <option value="per_cup">kop</option>
                                 </select>
                               </td>
                               <td className="py-3 text-center text-white">
