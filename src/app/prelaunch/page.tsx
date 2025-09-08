@@ -17,7 +17,6 @@ import {
   ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';
 import { trackEmailSignup } from '@/lib/facebook-pixel';
-import LiveAnalyticsWidget from '@/components/LiveAnalyticsWidget';
 
 // Facebook SDK TypeScript declarations
 declare global {
@@ -875,34 +874,6 @@ export default function PreLaunchPage() {
                 Eerste Gebruikers
               </div>
             </div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Live Analytics Section */}
-      <section className="py-16 px-4 sm:px-8 md:px-12 lg:px-20">
-        <div className="max-w-6xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="text-center mb-12"
-          >
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tight mb-6 text-white">
-              Live <span className="text-[#8BAE5A]">Analytics</span>
-            </h2>
-            <p className="text-lg text-gray-300 max-w-3xl mx-auto">
-              Bekijk real-time bezoekersdata en zie hoe het platform groeit. 
-              Ontdek welke pagina's populair zijn en waar bezoekers vandaan komen.
-            </p>
-          </motion.div>
-          
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-          >
-            <LiveAnalyticsWidget />
           </motion.div>
         </div>
       </section>
