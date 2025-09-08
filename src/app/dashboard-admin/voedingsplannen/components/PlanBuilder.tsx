@@ -1843,9 +1843,9 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
       {/* Copy Day Plan Modal */}
       {showCopyDayModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-[#0F150E] rounded-xl border border-[#3A4D23] w-full max-w-md">
-            <div className="flex items-center justify-between p-6 border-b border-[#3A4D23]">
-              <h3 className="text-xl font-bold text-[#8BAE5A]">Plan Kopiëren</h3>
+          <div className="bg-[#0F150E] rounded-xl border border-[#3A4D23] w-full max-w-md max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between p-4 border-b border-[#3A4D23] flex-shrink-0">
+              <h3 className="text-lg font-bold text-[#8BAE5A]">Plan Kopiëren</h3>
               <button
                 onClick={() => {
                   setShowCopyDayModal(false);
@@ -1853,13 +1853,13 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
                 }}
                 className="text-gray-400 hover:text-white transition-colors"
               >
-                <XMarkIcon className="w-6 h-6" />
+                <XMarkIcon className="w-5 h-5" />
               </button>
             </div>
             
-            <div className="p-6">
+            <div className="p-4 flex-1 overflow-y-auto">
               <div className="mb-4">
-                <p className="text-gray-300 mb-4">
+                <p className="text-gray-300 mb-4 text-sm">
                   Kopieer maaltijden van een bron dag naar meerdere doeldagen
                 </p>
               </div>
@@ -1904,8 +1904,8 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
                       const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
                       setSelectedTargetDays(selectedOptions);
                     }}
-                    className="w-full px-3 py-2 bg-[#0F150E] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:border-[#8BAE5A] min-h-[120px]"
-                    size={6}
+                    className="w-full px-3 py-2 bg-[#0F150E] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:border-[#8BAE5A]"
+                    size={4}
                   >
                     {DAYS.filter(day => day.key !== selectedSourceDay).map(day => {
                       const hasData = mealsData?.weekly_plan?.[day.key] && Object.keys(mealsData.weekly_plan[day.key]).length > 0;
@@ -1913,16 +1913,16 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
                         <option 
                           key={day.key} 
                           value={day.key}
-                          className="py-2 px-3 hover:bg-[#1F2D17]"
+                          className="py-1 px-2 text-sm"
                         >
-                          {day.label} {hasData ? '(heeft maaltijden)' : '(geen maaltijden)'}
+                          {day.label} {hasData ? '✓' : '○'}
                         </option>
                       );
                     })}
                   </select>
                   
-                  <div className="mt-2 text-xs text-gray-400">
-                    Houd Ctrl/Cmd ingedrukt om meerdere dagen te selecteren
+                  <div className="mt-1 text-xs text-gray-400">
+                    Ctrl/Cmd + klik voor meerdere selecties
                   </div>
                 </div>
               )}
@@ -1938,7 +1938,7 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
               )}
             </div>
             
-            <div className="flex items-center justify-end gap-4 p-6 border-t border-[#3A4D23]">
+            <div className="flex items-center justify-end gap-4 p-4 border-t border-[#3A4D23] flex-shrink-0">
               <button
                 onClick={() => {
                   setShowCopyDayModal(false);
