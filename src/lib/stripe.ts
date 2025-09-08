@@ -27,24 +27,24 @@ export const getStripe = () => {
 
 // Subscription plans configuration
 export const SUBSCRIPTION_PLANS = {
-  monthly: {
-    id: 'price_monthly',
-    name: 'Maandelijks',
-    price: 4700, // €47.00 in cents
+  'basic-tier': {
+    id: 'price_basic_tier',
+    name: 'Basic Tier',
+    price: 4900, // €49.00 in cents
     interval: 'month',
-    description: 'Flexibel, opzegbaar per maand'
+    description: 'Minimaal 6 maanden vereist'
   },
-  yearly: {
-    id: 'price_yearly',
-    name: 'Jaarlijks',
-    price: 50800, // €508.00 in cents
-    interval: 'year',
-    description: '10% korting t.o.v. maandelijks'
+  'premium-tier': {
+    id: 'price_premium_tier',
+    name: 'Premium Tier',
+    price: 7900, // €79.00 in cents
+    interval: 'month',
+    description: 'Minimaal 6 maanden vereist'
   },
-  lifetime: {
-    id: 'price_lifetime',
-    name: 'Lifetime',
-    price: 199700, // €1997.00 in cents
+  'lifetime-tier': {
+    id: 'price_lifetime_tier',
+    name: 'Lifetime Tier',
+    price: 199500, // €1995.00 in cents
     interval: 'one-time',
     description: 'Eénmalige betaling, levenslang toegang'
   }

@@ -65,6 +65,7 @@ interface ScalingInfo {
   basePlanCalories: number;
   scaleFactor: number;
   targetCalories: number;
+  planTargetCalories: number;
 }
 
 interface WeeklyAverages {
@@ -406,7 +407,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                     <ClockIcon className="w-5 h-5 text-[#8BAE5A] mr-2" />
                     {MEAL_TYPES_NL[mealType as keyof typeof MEAL_TYPES_NL]}
                     <span className="ml-4 text-sm text-gray-400">
-                      {meal.nutrition.calories} kcal
+                      {'nutrition' in meal ? meal.nutrition.calories : meal.calories} kcal
                     </span>
                   </h4>
                   <button
@@ -421,16 +422,16 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                 {/* Meal Nutrition */}
                 <div className="grid grid-cols-4 gap-4 mb-4">
                   <div className="text-center">
-                    <div className="text-lg font-semibold text-white">Kcal {meal.nutrition.calories}</div>
+                    <div className="text-lg font-semibold text-white">Kcal {'nutrition' in meal ? meal.nutrition.calories : meal.calories}</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-lg font-semibold text-white">Eiwit {meal.nutrition.protein}g</div>
+                    <div className="text-lg font-semibold text-white">Eiwit {'nutrition' in meal ? meal.nutrition.protein : meal.protein}g</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-lg font-semibold text-white">KH {meal.nutrition.carbs}g</div>
+                    <div className="text-lg font-semibold text-white">KH {'nutrition' in meal ? meal.nutrition.carbs : meal.carbs}g</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-lg font-semibold text-white">Vet {meal.nutrition.fat}g</div>
+                    <div className="text-lg font-semibold text-white">Vet {'nutrition' in meal ? meal.nutrition.fat : meal.fat}g</div>
                   </div>
                 </div>
 
