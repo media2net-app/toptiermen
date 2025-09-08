@@ -355,70 +355,39 @@ export async function GET(request: NextRequest) {
       const dayPlan = basePlan[day];
       scaledPlan[day] = {};
       
-      console.log(`🔍 Processing day: ${day}`, JSON.stringify(dayPlan, null, 2));
+      // Process direct meal structure (weekly_plan format)
+      const mealTypes = Object.keys(dayPlan).filter(key => 
+        !['dailyTotals', 'time'].includes(key)
+      );
       
-      // Process all meal types - check if dayPlan has meals object or direct meal structure
-      if (dayPlan.meals) {
-        const mealTypes = Object.keys(dayPlan.meals);
-        
-        mealTypes.forEach(mealType => {
-          const meal = dayPlan.meals[mealType];
+      mealTypes.forEach(mealType => {
+        if (dayPlan[mealType]) {
+          const meal = dayPlan[mealType];
           
-          // Use the meal data directly from our database structure
-          // Check if nutrition data exists in meal.nutrition (new structure) or meal directly (old structure)
+          // Use nutrition data directly from database
           const baseNutrition = meal.nutrition || meal;
-          const mealNutrition = {
-            calories: Math.round((baseNutrition.calories || 0) * scaleFactor),
-            protein: Math.round(((baseNutrition.protein || 0) * scaleFactor) * 10) / 10,
-            carbs: Math.round(((baseNutrition.carbs || 0) * scaleFactor) * 10) / 10,
-            fat: Math.round(((baseNutrition.fat || 0) * scaleFactor) * 10) / 10
-          };
+          
+          // If nutrition data exists, use it directly (scaled if needed)
+          let mealNutrition;
+          if (baseNutrition && baseNutrition.calories !== undefined) {
+            mealNutrition = {
+              calories: Math.round((baseNutrition.calories || 0) * scaleFactor),
+              protein: Math.round(((baseNutrition.protein || 0) * scaleFactor) * 10) / 10,
+              carbs: Math.round(((baseNutrition.carbs || 0) * scaleFactor) * 10) / 10,
+              fat: Math.round(((baseNutrition.fat || 0) * scaleFactor) * 10) / 10
+            };
+          } else {
+            // Fallback to 0 if no nutrition data
+            mealNutrition = { calories: 0, protein: 0, carbs: 0, fat: 0 };
+          }
           
           scaledPlan[day][mealType] = {
             name: meal.name || mealType,
             ingredients: meal.ingredients || [],
             nutrition: mealNutrition
           };
-        });
-      } else {
-        // Process direct meal structure (weekly_plan format)
-        const mealTypes = Object.keys(dayPlan).filter(key => 
-          !['dailyTotals', 'time'].includes(key)
-        );
-        
-        mealTypes.forEach(mealType => {
-          if (dayPlan[mealType]) {
-            const meal = dayPlan[mealType];
-            
-            // Use nutrition data directly from database (no recalculation needed)
-            const baseNutrition = meal.nutrition || meal;
-            console.log(`🍽️ Processing meal: ${mealType}`, JSON.stringify(meal, null, 2));
-            console.log(`🍽️ Base nutrition:`, JSON.stringify(baseNutrition, null, 2));
-            
-            // If nutrition data exists, use it directly (scaled if needed)
-            let mealNutrition;
-            if (baseNutrition.calories !== undefined) {
-              mealNutrition = {
-                calories: Math.round((baseNutrition.calories || 0) * scaleFactor),
-                protein: Math.round(((baseNutrition.protein || 0) * scaleFactor) * 10) / 10,
-                carbs: Math.round(((baseNutrition.carbs || 0) * scaleFactor) * 10) / 10,
-                fat: Math.round(((baseNutrition.fat || 0) * scaleFactor) * 10) / 10
-              };
-            } else {
-              // Fallback to 0 if no nutrition data
-              mealNutrition = { calories: 0, protein: 0, carbs: 0, fat: 0 };
-            }
-            
-            console.log(`🍽️ Final nutrition:`, JSON.stringify(mealNutrition, null, 2));
-            
-            scaledPlan[day][mealType] = {
-              name: meal.name || mealType,
-              ingredients: meal.ingredients || [],
-              nutrition: mealNutrition
-            };
-          }
-        });
-      }
+        }
+      });
       
       // Calculate daily totals including all meals and snacks
       let dailyCalories = 0;
