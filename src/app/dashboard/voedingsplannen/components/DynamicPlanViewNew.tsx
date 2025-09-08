@@ -8,7 +8,6 @@ import {
   CalendarDaysIcon,
   ChartBarIcon,
   ClockIcon,
-  FireIcon,
   PencilIcon,
   PlusIcon
 } from '@heroicons/react/24/outline';
@@ -359,19 +358,6 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
   };
 
 
-  const getCalorieStatus = (day: string) => {
-    const dayTotal = getDayTotal(day);
-    const target = planData?.scalingInfo.planTargetCalories || 0;
-    const difference = target - dayTotal.calories;
-    
-    if (difference > 0) {
-      return { type: 'under', message: `Je zit ${difference} kcal ONDER je dagelijkse behoefte!` };
-    } else if (difference < 0) {
-      return { type: 'over', message: `Je zit ${Math.abs(difference)} kcal BOVEN je dagelijkse behoefte!` };
-    } else {
-      return { type: 'perfect', message: 'Perfect! Je zit precies op je dagelijkse behoefte.' };
-    }
-  };
 
   if (loading) {
     return (
@@ -415,7 +401,6 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
   }
 
   const currentDayData = planData.weekPlan[selectedDay];
-  const calorieStatus = getCalorieStatus(selectedDay);
 
   return (
     <div className="min-h-screen bg-[#0F1419] text-white">
@@ -597,22 +582,6 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
             {DAYS_NL[selectedDay as keyof typeof DAYS_NL]} - Dagtotalen
           </h3>
           
-          {/* Calorie Warning */}
-          {calorieStatus.type !== 'perfect' && (
-            <div className={`p-4 rounded-lg mb-4 ${
-              calorieStatus.type === 'under' 
-                ? 'bg-red-900/20 border border-red-500 text-red-300'
-                : 'bg-yellow-900/20 border border-yellow-500 text-yellow-300'
-            }`}>
-              <div className="flex items-center gap-2">
-                <FireIcon className="w-5 h-5" />
-                <span className="font-semibold">{calorieStatus.message}</span>
-              </div>
-              <div className="text-sm mt-1">
-                Doel: {planData.scalingInfo.planTargetCalories} kcal • Huidig: {getDayTotal(selectedDay).calories} kcal
-              </div>
-            </div>
-          )}
 
           {/* Daily Totals Progress Bars */}
           <div className="space-y-4">
@@ -688,7 +657,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                   <div className="flex justify-between items-center">
                     <span className="text-white font-medium">Eiwit (Protein)</span>
                     <span className={`text-sm ${statusColor}`}>{statusText}</span>
-                  </div>
+              </div>
                   <div className="w-full bg-gray-700 rounded-full h-3">
                     <div 
                       className={`h-3 rounded-full transition-all duration-300 ${
@@ -697,8 +666,8 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                       }`}
                       style={{ width: `${Math.min(percentage, 100)}%` }}
                     ></div>
-                  </div>
-                </div>
+              </div>
+            </div>
               );
             })()}
 
