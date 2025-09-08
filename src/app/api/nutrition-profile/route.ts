@@ -64,8 +64,26 @@ export async function POST(request: NextRequest) {
     const tdee = weight * 22 * activityMultipliers[activityLevel as keyof typeof activityMultipliers];
     
     // Use TTM formula for calories: Gewicht x 22 x activiteitniveau
-    // NO goal adjustments - calories are based purely on TTM formula
-    const targetCalories = tdee;
+    // Apply goal-based adjustments
+    let targetCalories = tdee;
+    
+    // Apply goal-based calorie adjustments
+    switch (goal) {
+      case 'droogtrainen':
+      case 'cut':
+        targetCalories = tdee - 500; // -500 kcal van onderhoud
+        break;
+      case 'onderhoud':
+      case 'maintenance':
+        targetCalories = tdee; // Geen aanpassing
+        break;
+      case 'spiermassa':
+      case 'bulk':
+        targetCalories = tdee + 400; // +400 kcal van onderhoud
+        break;
+      default:
+        targetCalories = tdee;
+    }
 
     // Calculate BMR for reference
     let bmr = 0;
