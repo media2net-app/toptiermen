@@ -206,29 +206,6 @@ function calculateBasePlanCalories() {
   return Math.round(totalCalories / 7); // Gemiddelde per dag
 }
 
-// Schaal ingredients op basis van calorie behoefte
-function scaleIngredientAmounts(ingredients, scaleFactor) {
-  return ingredients.map(ingredient => {
-    let scaledAmount;
-    
-    if (ingredient.unit === 'stuks') {
-      // Voor eieren: rond af naar hele eieren, minimum 1
-      scaledAmount = Math.max(1, Math.round(ingredient.baseAmount * scaleFactor));
-    } else if (ingredient.unit === 'handje') {
-      // Voor noten: altijd 1 handje (blijft constant)
-      scaledAmount = 1;
-    } else {
-      // Voor gram: rond af naar 5g nauwkeurig
-      scaledAmount = Math.round((ingredient.baseAmount * scaleFactor) / 5) * 5;
-      scaledAmount = Math.max(25, scaledAmount); // Minimum 25g
-    }
-    
-    return {
-      ...ingredient,
-      amount: scaledAmount
-    };
-  });
-}
 
 // Bereken nutritionele waarden voor een maaltijd
 function calculateMealNutrition(ingredients) {
