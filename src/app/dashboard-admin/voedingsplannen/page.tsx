@@ -120,6 +120,8 @@ export default function AdminVoedingsplannenPage() {
   const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingFoodItems, setIsLoadingFoodItems] = useState(true);
+  const [customPlans, setCustomPlans] = useState<any[]>([]);
+  const [isLoadingCustomPlans, setIsLoadingCustomPlans] = useState(false);
 
   // Helper function to calculate plan completion status
   const getPlanStatus = (plan: NutritionPlan) => {
@@ -303,12 +305,35 @@ export default function AdminVoedingsplannenPage() {
     }
   };
 
+  const fetchCustomPlans = async () => {
+    try {
+      setIsLoadingCustomPlans(true);
+      console.log('🔍 Fetching custom nutrition plans from database...');
+      
+      const response = await fetch('/api/admin/custom-nutrition-plans');
+      const result = await response.json();
+      
+      if (!response.ok) {
+        console.error('❌ Error fetching custom plans:', result.error);
+        return;
+      }
+      
+      console.log('✅ Custom plans loaded:', result.customPlans?.length || 0);
+      setCustomPlans(result.customPlans || []);
+    } catch (err) {
+      console.error('❌ Exception fetching custom plans:', err);
+    } finally {
+      setIsLoadingCustomPlans(false);
+    }
+  };
+
   const fetchAllData = async () => {
     setIsLoading(true);
     try {
       // Fetch data sequentially to avoid race conditions
       await fetchPlans();
       await fetchFoodItems();
+      await fetchCustomPlans();
     } catch (error) {
       console.error('❌ Error fetching all data:', error);
     } finally {
@@ -678,6 +703,12 @@ export default function AdminVoedingsplannenPage() {
             icon={<BoltIcon className="w-6 h-6" />}
             color="green"
           />
+          <AdminStatsCard
+            title="Custom Plannen"
+            value={customPlans.length.toString()}
+            icon={<PencilIcon className="w-6 h-6" />}
+            color="orange"
+          />
         </div>
 
         {/* Navigation Tabs */}
@@ -691,6 +722,16 @@ export default function AdminVoedingsplannenPage() {
             }`}
           >
             Voedingsplannen
+          </button>
+          <button
+            onClick={() => setActiveTab('custom')}
+            className={`px-4 py-2 rounded-lg transition-colors ${
+              activeTab === 'custom'
+                ? 'bg-[#8BAE5A] text-[#181F17] font-semibold'
+                : 'bg-[#232D1A] text-gray-300 hover:bg-[#2A3420]'
+            }`}
+          >
+            Custom Plannen ({customPlans.length})
           </button>
         </div>
 
@@ -887,7 +928,126 @@ export default function AdminVoedingsplannenPage() {
           </div>
         )}
 
+        {/* Custom Plans Tab */}
+        {activeTab === 'custom' && (
+          <div>
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-white mb-2">Custom Plannen</h2>
+              <p className="text-gray-300">
+                Overzicht van alle aangepaste plannen die gebruikers hebben gemaakt
+              </p>
+            </div>
 
+            {isLoadingCustomPlans ? (
+              <div className="text-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
+                <p className="text-gray-300">Custom plannen laden...</p>
+              </div>
+            ) : customPlans.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="text-gray-400 mb-4">
+                  <svg className="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-medium text-gray-300 mb-2">Geen custom plannen</h3>
+                <p className="text-gray-400">
+                  Er zijn nog geen aangepaste plannen gemaakt door gebruikers.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {customPlans.map((customPlan) => (
+                  <div key={customPlan.id} className="bg-[#232D1A] rounded-lg border border-[#3A4D23] p-6">
+                    <div className="mb-4">
+                      <h3 className="text-lg font-bold text-white mb-2">{customPlan.plan_name}</h3>
+                      <p className="text-sm text-gray-400 mb-2">
+                        Gebaseerd op: <span className="text-[#8BAE5A]">{customPlan.base_plan_id}</span>
+                      </p>
+                      <p className="text-sm text-gray-400">
+                        Gebruiker: <span className="text-[#8BAE5A]">{customPlan.user_email || 'Onbekend'}</span>
+                      </p>
+                    </div>
+
+                    <div className="mb-4">
+                      <div className="text-xs text-gray-400 mb-1">Aangemaakt</div>
+                      <div className="text-sm text-white">
+                        {new Date(customPlan.created_at).toLocaleDateString('nl-NL', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </div>
+                    </div>
+
+                    <div className="mb-4">
+                      <div className="text-xs text-gray-400 mb-1">Laatst bijgewerkt</div>
+                      <div className="text-sm text-white">
+                        {new Date(customPlan.updated_at).toLocaleDateString('nl-NL', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </div>
+                    </div>
+
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => {
+                          // TODO: Implement view custom plan functionality
+                          console.log('View custom plan:', customPlan.id);
+                        }}
+                        className="flex-1 bg-[#8BAE5A] hover:bg-[#8BAE5A]/80 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center justify-center space-x-2"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        <span>Bekijken</span>
+                      </button>
+                      <button
+                        onClick={async () => {
+                          if (confirm('Weet je zeker dat je dit custom plan wilt verwijderen?')) {
+                            try {
+                              const response = await fetch('/api/admin/custom-nutrition-plans', {
+                                method: 'DELETE',
+                                headers: {
+                                  'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                  customPlanId: customPlan.id
+                                }),
+                              });
+
+                              if (response.ok) {
+                                // Refresh custom plans
+                                await fetchCustomPlans();
+                                alert('Custom plan succesvol verwijderd!');
+                              } else {
+                                alert('Fout bij verwijderen van custom plan');
+                              }
+                            } catch (error) {
+                              console.error('Error deleting custom plan:', error);
+                              alert('Fout bij verwijderen van custom plan');
+                            }
+                          }
+                        }}
+                        className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center justify-center space-x-2"
+                      >
+                        <TrashIcon className="w-4 h-4" />
+                        <span>Verwijderen</span>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Modals */}
 
