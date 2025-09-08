@@ -390,7 +390,7 @@ export async function GET(request: NextRequest) {
             
             scaledPlan[day][frontendMealType] = {
               name: meal.name || frontendMealType,
-              ingredients: meal.ingredients || [],
+              ingredients: scaleIngredientAmounts(meal.ingredients || [], scaleFactor),
               nutrition: mealNutrition
             };
           }
@@ -431,7 +431,7 @@ export async function GET(request: NextRequest) {
             
             scaledPlan[day][frontendMealType] = {
               name: meal.name || frontendMealType,
-              ingredients: meal.ingredients || [],
+              ingredients: scaleIngredientAmounts(meal.ingredients || [], scaleFactor),
               nutrition: mealNutrition
             };
           }
@@ -530,6 +530,42 @@ export async function GET(request: NextRequest) {
       error: error.message
     }, { status: 500 });
   }
+}
+
+// Function to scale ingredient amounts based on scale factor
+function scaleIngredientAmounts(ingredients, scaleFactor) {
+  if (!ingredients || scaleFactor === 1) return ingredients;
+  
+  return ingredients.map(ingredient => {
+    if (ingredient.amount) {
+      let scaledAmount = ingredient.amount * scaleFactor;
+      
+      // Round to reasonable values based on unit type
+      if (ingredient.unit === 'per_piece' || ingredient.unit === 'stuk') {
+        // For pieces, round to nearest 0.5 (half pieces)
+        scaledAmount = Math.round(scaledAmount * 2) / 2;
+        scaledAmount = Math.max(0.5, scaledAmount); // Minimum 0.5 pieces
+      } else if (ingredient.unit === 'per_100g' || ingredient.unit === 'g') {
+        // For grams, round to nearest 5g
+        scaledAmount = Math.round(scaledAmount / 5) * 5;
+        scaledAmount = Math.max(5, scaledAmount); // Minimum 5g
+      } else if (ingredient.unit === 'per_ml') {
+        // For ml, round to nearest 10ml
+        scaledAmount = Math.round(scaledAmount / 10) * 10;
+        scaledAmount = Math.max(10, scaledAmount); // Minimum 10ml
+      } else {
+        // For other units, round to nearest whole number
+        scaledAmount = Math.round(scaledAmount);
+        scaledAmount = Math.max(1, scaledAmount); // Minimum 1
+      }
+      
+      return {
+        ...ingredient,
+        amount: scaledAmount
+      };
+    }
+    return ingredient;
+  });
 }
 
 // Function to calculate base plan calories from database
