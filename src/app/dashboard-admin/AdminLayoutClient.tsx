@@ -34,7 +34,10 @@ import {
   UserIcon,
   BellIcon,
   ArrowPathIcon,
-  TicketIcon
+  TicketIcon,
+  TagIcon,
+  SparklesIcon,
+  StarIcon as CrownIcon
 } from '@heroicons/react/24/outline';
 import { SwipeIndicator } from '@/components/ui';
 import SessionMonitor from '@/components/SessionMonitor';
@@ -48,11 +51,12 @@ interface MenuItem {
   href?: string;
   badge?: string;
   type?: string;
+  external?: boolean;
   items?: MenuItem[];
 }
 
 const SidebarContent = ({ pathname }: { pathname: string }) => {
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['Dashboard', 'ANALYTICS', 'LEDEN', 'CONTENT', 'COMMUNITY', 'PRE LAUNCH', 'PLATFORM']));
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['Dashboard', 'Lancering', 'ANALYTICS', 'LEDEN', 'CONTENT', 'COMMUNITY', 'PRE LAUNCH', 'PLATFORM']));
 
   const toggleSection = (sectionLabel: string) => {
     setExpandedSections(prev => {
@@ -71,6 +75,30 @@ const SidebarContent = ({ pathname }: { pathname: string }) => {
       label: 'Dashboard', 
       icon: HomeIcon, 
       href: '/dashboard-admin'
+    },
+    { 
+      label: 'Lancering', 
+      type: 'section',
+      items: [
+        { 
+          label: 'Basic Tier', 
+          icon: TagIcon, 
+          href: '/pakketten/basic-tier',
+          external: true
+        },
+        { 
+          label: 'Premium Tier', 
+          icon: SparklesIcon, 
+          href: '/pakketten/premium-tier',
+          external: true
+        },
+        { 
+          label: 'Lifetime Tier', 
+          icon: CrownIcon, 
+          href: '/pakketten/lifetime-tier',
+          external: true
+        }
+      ]
     },
     { 
       label: 'ANALYTICS', 
@@ -170,25 +198,45 @@ const SidebarContent = ({ pathname }: { pathname: string }) => {
               {isExpanded && (
                 <div className="mt-2 ml-4 space-y-1">
                   {item.items?.map((subItem) => (
-                    <Link
-                      key={subItem.href!}
-                      href={subItem.href!}
-                      className={`flex items-center gap-3 px-4 py-2 rounded-xl font-medium transition-all duration-200 ${
-                        pathname === subItem.href 
-                          ? 'bg-[#8BAE5A] text-[#181F17] shadow-lg' 
-                          : 'text-[#B6C948] hover:bg-[#181F17] hover:text-[#8BAE5A]'
-                      }`}
-                    >
-                      {subItem.icon && <subItem.icon className="w-5 h-5" />}
-                      <span className="flex items-center gap-2">
-                        {subItem.label}
-                        {subItem.badge && (
-                          <span className="px-2 py-1 text-xs font-bold text-white bg-red-500 rounded-full">
-                            {subItem.badge}
-                          </span>
-                        )}
-                      </span>
-                    </Link>
+                    subItem.external ? (
+                      <a
+                        key={subItem.href!}
+                        href={subItem.href!}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 px-4 py-2 rounded-xl font-medium transition-all duration-200 text-[#B6C948] hover:bg-[#181F17] hover:text-[#8BAE5A]"
+                      >
+                        {subItem.icon && <subItem.icon className="w-5 h-5" />}
+                        <span className="flex items-center gap-2">
+                          {subItem.label}
+                          {subItem.badge && (
+                            <span className="px-2 py-1 text-xs font-bold text-white bg-red-500 rounded-full">
+                              {subItem.badge}
+                            </span>
+                          )}
+                        </span>
+                      </a>
+                    ) : (
+                      <Link
+                        key={subItem.href!}
+                        href={subItem.href!}
+                        className={`flex items-center gap-3 px-4 py-2 rounded-xl font-medium transition-all duration-200 ${
+                          pathname === subItem.href 
+                            ? 'bg-[#8BAE5A] text-[#181F17] shadow-lg' 
+                            : 'text-[#B6C948] hover:bg-[#181F17] hover:text-[#8BAE5A]'
+                        }`}
+                      >
+                        {subItem.icon && <subItem.icon className="w-5 h-5" />}
+                        <span className="flex items-center gap-2">
+                          {subItem.label}
+                          {subItem.badge && (
+                            <span className="px-2 py-1 text-xs font-bold text-white bg-red-500 rounded-full">
+                              {subItem.badge}
+                            </span>
+                          )}
+                        </span>
+                      </Link>
+                    )
                   ))}
                 </div>
               )}

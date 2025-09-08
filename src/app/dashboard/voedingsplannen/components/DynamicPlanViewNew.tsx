@@ -75,6 +75,7 @@ interface UserProfile {
   weight: number;
   height: number;
   goal: string;
+  activityLevel?: string;
 }
 
 interface ScalingInfo {
@@ -230,7 +231,8 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
       currentCustomData.weekPlan[editingMeal.day][editingMeal.meal as keyof DayPlan] = {
         name: MEAL_TYPES_NL[editingMeal.meal as keyof typeof MEAL_TYPES_NL],
         ingredients,
-        nutrition
+        nutrition,
+        ...nutrition
       };
 
       // Recalculate daily totals
@@ -530,7 +532,10 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
     // Use custom data if available, otherwise use original plan data
     const dataSource = customPlanData || planData;
     if (!dataSource?.weekPlan[day]) return null;
-    return dataSource.weekPlan[day][mealType as keyof DayPlan];
+    const mealData = dataSource.weekPlan[day][mealType as keyof DayPlan];
+    // Return null if it's dailyTotals (MealNutrition) instead of a Meal
+    if (mealType === 'dailyTotals' || !('ingredients' in mealData)) return null;
+    return mealData as Meal;
   };
 
 
@@ -615,7 +620,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                   </div>
                 )}
                 <p className="text-gray-300">
-                  Gepersonaliseerd voor {planData.userProfile.weight}kg, {planData.userProfile.age} jaar, {planData.userProfile.height}cm, {getActivityLevelDisplay(planData.userProfile.activityLevel)} - {planData.userProfile.goal}
+                  Gepersonaliseerd voor {planData.userProfile.weight}kg, {planData.userProfile.age} jaar, {planData.userProfile.height}cm, {getActivityLevelDisplay(planData.userProfile.activityLevel || 'moderate')} - {planData.userProfile.goal}
                 </p>
               </div>
             </div>
@@ -1247,7 +1252,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                     <ClockIcon className="w-5 h-5 text-[#8BAE5A] mr-2" />
                     {MEAL_TYPES_NL[mealType as keyof typeof MEAL_TYPES_NL]}
                     <span className="ml-4 text-sm text-gray-400">
-                      {'nutrition' in meal ? meal.nutrition.calories : meal.calories} kcal
+                      {meal.nutrition?.calories || 0} kcal
                     </span>
                   </h4>
                   <button
@@ -1262,16 +1267,16 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                 {/* Meal Nutrition */}
                 <div className="grid grid-cols-4 gap-4 mb-4">
                   <div className="text-center">
-                    <div className="text-lg font-semibold text-white">Kcal {Math.round(('nutrition' in meal ? meal.nutrition.calories : meal.calories) * 10) / 10}</div>
+                    <div className="text-lg font-semibold text-white">Kcal {Math.round((meal.nutrition?.calories || 0) * 10) / 10}</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-lg font-semibold text-white">Eiwit {Math.round(('nutrition' in meal ? meal.nutrition.protein : meal.protein) * 10) / 10}g</div>
+                    <div className="text-lg font-semibold text-white">Eiwit {Math.round((meal.nutrition?.protein || 0) * 10) / 10}g</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-lg font-semibold text-white">Koolhydraten {Math.round(('nutrition' in meal ? meal.nutrition.carbs : meal.carbs) * 10) / 10}g</div>
+                    <div className="text-lg font-semibold text-white">Koolhydraten {Math.round((meal.nutrition?.carbs || 0) * 10) / 10}g</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-lg font-semibold text-white">Vet {Math.round(('nutrition' in meal ? meal.nutrition.fat : meal.fat) * 10) / 10}g</div>
+                    <div className="text-lg font-semibold text-white">Vet {Math.round((meal.nutrition?.fat || 0) * 10) / 10}g</div>
                   </div>
                 </div>
 

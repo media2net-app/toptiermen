@@ -151,27 +151,29 @@ const BASE_CARNIVOOR_DROOGTRAINEN_PLAN = {
 };
 
 // Bereken calories van basis plan
-function calculateBasePlanCalories() {
+function calculateBasePlanCalories(ingredientDatabase = {}) {
   let totalCalories = 0;
   const days = Object.keys(BASE_CARNIVOOR_DROOGTRAINEN_PLAN);
   
   days.forEach(day => {
     const dayPlan = BASE_CARNIVOOR_DROOGTRAINEN_PLAN[day];
     ['ontbijt', 'lunch', 'diner', 'ontbijt_snack', 'lunch_snack', 'diner_snack'].forEach(mealType => {
-      dayPlan[mealType].forEach(ingredient => {
-        const nutritionData = CARNIVOOR_INGREDIENTS[ingredient.name];
-        if (nutritionData) {
-          let calories = 0;
-          if (ingredient.unit === 'stuks' && ingredient.name === '1 Ei') {
-            calories = nutritionData.calories * ingredient.baseAmount;
-          } else if (ingredient.unit === 'handje') {
-            calories = nutritionData.calories * ingredient.baseAmount;
-          } else {
-            calories = (nutritionData.calories * ingredient.baseAmount) / 100;
+      if (dayPlan[mealType]) {
+        dayPlan[mealType].forEach(ingredient => {
+          const nutritionData = ingredientDatabase[ingredient.name];
+          if (nutritionData) {
+            let calories = 0;
+            if (ingredient.unit === 'stuks' && ingredient.name === '1 Ei') {
+              calories = nutritionData.calories * ingredient.baseAmount;
+            } else if (ingredient.unit === 'handje') {
+              calories = nutritionData.calories * ingredient.baseAmount;
+            } else {
+              calories = (nutritionData.calories * ingredient.baseAmount) / 100;
+            }
+            totalCalories += calories;
           }
-          totalCalories += calories;
-        }
-      });
+        });
+      }
     });
   });
   
@@ -535,7 +537,7 @@ function calculateIngredientNutrition(ingredients, ingredientDatabase) {
 }
 
 // Function to intelligently scale ingredient amounts with macro optimization
-function scaleIngredientAmounts(ingredients, scaleFactor, targetNutrition = null, ingredientDatabase = {}) {
+function scaleIngredientAmounts(ingredients, scaleFactor, targetNutrition: any = null, ingredientDatabase = {}) {
   if (!ingredients || scaleFactor === 1) return ingredients;
   
   // Step 1: Basic scaling
