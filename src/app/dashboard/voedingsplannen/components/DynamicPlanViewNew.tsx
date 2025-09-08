@@ -392,7 +392,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
     'Volkoren brood': { calories: 247, protein: 13, carbs: 41, fat: 4 },
     'Avocado': { calories: 160, protein: 2, carbs: 9, fat: 15 },
     'Tomaat': { calories: 18, protein: 0.9, carbs: 3.9, fat: 0.2 },
-    'Appel': { calories: 52, protein: 0.3, carbs: 14, fat: 0.2 },
+    'Appel': { calories: 78, protein: 0.4, carbs: 21, fat: 0.3 },
     'Rijstwafels': { calories: 42, protein: 1, carbs: 7, fat: 0 },
     'Whey Shake': { calories: 120, protein: 25, carbs: 3, fat: 1 },
     'Honing': { calories: 304, protein: 0.3, carbs: 82, fat: 0 },

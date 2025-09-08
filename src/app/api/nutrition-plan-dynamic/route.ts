@@ -45,7 +45,7 @@ const CARNIVOOR_INGREDIENTS = {
   // Voedingsplan op maat ingrediënten
   'Havermout': { calories: 68, protein: 2.4, carbs: 12, fat: 1.4 },
   'Banaan': { calories: 89, protein: 1.1, carbs: 23, fat: 0.3 },
-  'Appel': { calories: 52, protein: 0.3, carbs: 14, fat: 0.2 },
+  'Appel': { calories: 78, protein: 0.4, carbs: 21, fat: 0.3 },
   'Amandelen': { calories: 579, protein: 21, carbs: 22, fat: 50 },
   'Melk': { calories: 42, protein: 3.4, carbs: 5, fat: 1 },
   'Volkoren brood': { calories: 247, protein: 13, carbs: 41, fat: 4 },
