@@ -390,19 +390,26 @@ export async function GET(request: NextRequest) {
           if (dayPlan[mealType]) {
             const meal = dayPlan[mealType];
             
-            // Check if nutrition data exists in meal.nutrition (new structure) or meal directly (old structure)
+            // Use nutrition data directly from database (no recalculation needed)
             const baseNutrition = meal.nutrition || meal;
             console.log(`🍽️ Processing meal: ${mealType}`, JSON.stringify(meal, null, 2));
             console.log(`🍽️ Base nutrition:`, JSON.stringify(baseNutrition, null, 2));
             
-            const mealNutrition = {
-              calories: Math.round((baseNutrition.calories || 0) * scaleFactor),
-              protein: Math.round(((baseNutrition.protein || 0) * scaleFactor) * 10) / 10,
-              carbs: Math.round(((baseNutrition.carbs || 0) * scaleFactor) * 10) / 10,
-              fat: Math.round(((baseNutrition.fat || 0) * scaleFactor) * 10) / 10
-            };
+            // If nutrition data exists, use it directly (scaled if needed)
+            let mealNutrition;
+            if (baseNutrition.calories !== undefined) {
+              mealNutrition = {
+                calories: Math.round((baseNutrition.calories || 0) * scaleFactor),
+                protein: Math.round(((baseNutrition.protein || 0) * scaleFactor) * 10) / 10,
+                carbs: Math.round(((baseNutrition.carbs || 0) * scaleFactor) * 10) / 10,
+                fat: Math.round(((baseNutrition.fat || 0) * scaleFactor) * 10) / 10
+              };
+            } else {
+              // Fallback to 0 if no nutrition data
+              mealNutrition = { calories: 0, protein: 0, carbs: 0, fat: 0 };
+            }
             
-            console.log(`🍽️ Calculated nutrition:`, JSON.stringify(mealNutrition, null, 2));
+            console.log(`🍽️ Final nutrition:`, JSON.stringify(mealNutrition, null, 2));
             
             scaledPlan[day][mealType] = {
               name: meal.name || mealType,
