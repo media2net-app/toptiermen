@@ -363,11 +363,13 @@ export async function GET(request: NextRequest) {
           const meal = dayPlan.meals[mealType];
           
           // Use the meal data directly from our database structure
+          // Check if nutrition data exists in meal.nutrition (new structure) or meal directly (old structure)
+          const baseNutrition = meal.nutrition || meal;
           const mealNutrition = {
-            calories: Math.round((meal.calories || 0) * scaleFactor),
-            protein: Math.round(((meal.protein || 0) * scaleFactor) * 10) / 10,
-            carbs: Math.round(((meal.carbs || 0) * scaleFactor) * 10) / 10,
-            fat: Math.round(((meal.fat || 0) * scaleFactor) * 10) / 10
+            calories: Math.round((baseNutrition.calories || 0) * scaleFactor),
+            protein: Math.round(((baseNutrition.protein || 0) * scaleFactor) * 10) / 10,
+            carbs: Math.round(((baseNutrition.carbs || 0) * scaleFactor) * 10) / 10,
+            fat: Math.round(((baseNutrition.fat || 0) * scaleFactor) * 10) / 10
           };
           
           scaledPlan[day][mealType] = {
@@ -384,11 +386,13 @@ export async function GET(request: NextRequest) {
           if (dayPlan[mealType]) {
             const meal = dayPlan[mealType];
             
+            // Check if nutrition data exists in meal.nutrition (new structure) or meal directly (old structure)
+            const baseNutrition = meal.nutrition || meal;
             const mealNutrition = {
-              calories: Math.round((meal.calories || 0) * scaleFactor),
-              protein: Math.round(((meal.protein || 0) * scaleFactor) * 10) / 10,
-              carbs: Math.round(((meal.carbs || 0) * scaleFactor) * 10) / 10,
-              fat: Math.round(((meal.fat || 0) * scaleFactor) * 10) / 10
+              calories: Math.round((baseNutrition.calories || 0) * scaleFactor),
+              protein: Math.round(((baseNutrition.protein || 0) * scaleFactor) * 10) / 10,
+              carbs: Math.round(((baseNutrition.carbs || 0) * scaleFactor) * 10) / 10,
+              fat: Math.round(((baseNutrition.fat || 0) * scaleFactor) * 10) / 10
             };
             
             scaledPlan[day][mealType] = {
