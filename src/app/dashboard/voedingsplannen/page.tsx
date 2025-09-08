@@ -99,6 +99,23 @@ export default function VoedingsplannenPage() {
     goal: '' // droogtrainen, behoud, spiermassa
   });
 
+  // Calculate macro values based on selected plan
+  const calculateMacroValues = (plan: NutritionPlan, targetCalories: number) => {
+    if (!plan.protein_percentage || !plan.carbs_percentage || !plan.fat_percentage) {
+      return { protein: 0, carbs: 0, fats: 0 };
+    }
+    
+    const proteinCalories = (targetCalories * plan.protein_percentage) / 100;
+    const carbsCalories = (targetCalories * plan.carbs_percentage) / 100;
+    const fatCalories = (targetCalories * plan.fat_percentage) / 100;
+    
+    return {
+      protein: Math.round(proteinCalories / 4), // 4 calories per gram protein
+      carbs: Math.round(carbsCalories / 4),     // 4 calories per gram carbs
+      fats: Math.round(fatCalories / 9)         // 9 calories per gram fat
+    };
+  };
+
   // Nutrition functions
   const fetchNutritionPlans = async () => {
     try {
@@ -850,17 +867,35 @@ export default function VoedingsplannenPage() {
                   </div>
                   <div className="bg-[#181F17] rounded-lg p-4 text-center">
                     <h4 className="text-[#8BAE5A] font-semibold mb-1 text-sm">Eiwitten</h4>
-                    <p className="text-2xl font-bold text-white">{userNutritionProfile.protein}g</p>
+                    {selectedNutritionPlan ? (() => {
+                      const selectedPlan = nutritionPlans.find(p => p.plan_id === selectedNutritionPlan);
+                      const macroValues = selectedPlan ? calculateMacroValues(selectedPlan, userNutritionProfile.dailyCalories) : { protein: 0, carbs: 0, fats: 0 };
+                      return <p className="text-2xl font-bold text-white">{macroValues.protein}g</p>;
+                    })() : (
+                      <p className="text-sm text-gray-500">Selecteer eerst plan</p>
+                    )}
                     <p className="text-xs text-gray-400">per dag</p>
                   </div>
                   <div className="bg-[#181F17] rounded-lg p-4 text-center">
                     <h4 className="text-[#8BAE5A] font-semibold mb-1 text-sm">Koolhydraten</h4>
-                    <p className="text-2xl font-bold text-white">{userNutritionProfile.carbs}g</p>
+                    {selectedNutritionPlan ? (() => {
+                      const selectedPlan = nutritionPlans.find(p => p.plan_id === selectedNutritionPlan);
+                      const macroValues = selectedPlan ? calculateMacroValues(selectedPlan, userNutritionProfile.dailyCalories) : { protein: 0, carbs: 0, fats: 0 };
+                      return <p className="text-2xl font-bold text-white">{macroValues.carbs}g</p>;
+                    })() : (
+                      <p className="text-sm text-gray-500">Selecteer eerst plan</p>
+                    )}
                     <p className="text-xs text-gray-400">per dag</p>
                   </div>
                   <div className="bg-[#181F17] rounded-lg p-4 text-center">
                     <h4 className="text-[#8BAE5A] font-semibold mb-1 text-sm">Vetten</h4>
-                    <p className="text-2xl font-bold text-white">{userNutritionProfile.fats}g</p>
+                    {selectedNutritionPlan ? (() => {
+                      const selectedPlan = nutritionPlans.find(p => p.plan_id === selectedNutritionPlan);
+                      const macroValues = selectedPlan ? calculateMacroValues(selectedPlan, userNutritionProfile.dailyCalories) : { protein: 0, carbs: 0, fats: 0 };
+                      return <p className="text-2xl font-bold text-white">{macroValues.fats}g</p>;
+                    })() : (
+                      <p className="text-sm text-gray-500">Selecteer eerst plan</p>
+                    )}
                     <p className="text-xs text-gray-400">per dag</p>
                   </div>
                 </div>

@@ -51,6 +51,15 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
+    // Activity multipliers (TTM formule: Gewicht x 22 x activiteitniveau)
+    const activityMultipliers = {
+      sedentary: 1.0,  // Zittend (Licht actief)
+      light: 1.1,      // Licht actief
+      moderate: 1.3,   // Matig actief  
+      active: 1.5,     // Actief
+      very_active: 1.7 // Zeer actief
+    };
+    
     // Use custom calorie targets based on TTM expertise (not standard formulas)
     // Standard profile: 40y, 100kg, 190cm, male, moderate activity
     let targetCalories = 0;
@@ -65,22 +74,7 @@ export async function POST(request: NextRequest) {
         targetCalories = 3260;
       }
     } else {
-      // For other profiles, use standard Mifflin-St Jeor formula
-      let bmr = 0;
-      if (gender === 'male') {
-        bmr = 10 * weight + 6.25 * height - 5 * age + 5;
-      } else {
-        bmr = 10 * weight + 6.25 * height - 5 * age - 161;
-      }
-      
-      // Activity multipliers (nieuwe 3-niveau structuur)
-      const activityMultipliers = {
-        sedentary: 1.1,  // Zittend (Licht actief)
-        moderate: 1.3,   // Staand (Matig actief)
-        very_active: 1.6 // Lopend (Zeer actief)
-      };
-      
-      // Nieuwe berekening: Gewicht x 22 x activiteitniveau
+      // TTM berekening: Gewicht x 22 x activiteitniveau
       const tdee = weight * 22 * activityMultipliers[activityLevel as keyof typeof activityMultipliers];
       
       // Adjust calories based on goal
@@ -93,7 +87,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Calculate BMR for macro calculations (still needed for protein/fat calculations)
+    // Calculate BMR for reference
     let bmr = 0;
     if (gender === 'male') {
       bmr = 10 * weight + 6.25 * height - 5 * age + 5;
@@ -101,22 +95,14 @@ export async function POST(request: NextRequest) {
       bmr = 10 * weight + 6.25 * height - 5 * age - 161;
     }
     
-    // Activity multipliers for TDEE calculation (nieuwe 3-niveau structuur)
-    const activityMultipliers = {
-      sedentary: 1.1,  // Zittend (Licht actief)
-      moderate: 1.3,   // Staand (Matig actief) 
-      very_active: 1.6 // Lopend (Zeer actief)
-    };
-    
-    // Nieuwe berekening: Gewicht x 22 x activiteitniveau
+    // Calculate TDEE using TTM formula (already calculated above)
     const tdee = weight * 22 * activityMultipliers[activityLevel as keyof typeof activityMultipliers];
 
-    // Calculate macros
-    const targetProtein = Math.round(weight * 2.2); // 2.2g per kg bodyweight (updated per Rick's request)
-    const targetFat = Math.round(weight * 1.0); // 1g per kg bodyweight
-    const proteinCalories = targetProtein * 4;
-    const fatCalories = targetFat * 9;
-    const targetCarbs = Math.round((targetCalories - proteinCalories - fatCalories) / 4);
+    // Macro calculations will be done per plan selection
+    // For now, just store the base calorie target
+    const targetProtein = 0; // Will be calculated per plan
+    const targetCarbs = 0;   // Will be calculated per plan  
+    const targetFat = 0;     // Will be calculated per plan
 
     const profileData = {
       user_id: userId,
