@@ -364,17 +364,17 @@ export async function GET(request: NextRequest) {
         if (dayPlan[mealType]) {
           const meal = dayPlan[mealType];
           
-          // Use nutrition data directly from database
+          // Use nutrition data directly from database (no scaling for now)
           const baseNutrition = meal.nutrition || meal;
           
-          // If nutrition data exists, use it directly (scaled if needed)
+          // If nutrition data exists, use it directly
           let mealNutrition;
           if (baseNutrition && baseNutrition.calories !== undefined) {
             mealNutrition = {
-              calories: Math.round((baseNutrition.calories || 0) * scaleFactor),
-              protein: Math.round(((baseNutrition.protein || 0) * scaleFactor) * 10) / 10,
-              carbs: Math.round(((baseNutrition.carbs || 0) * scaleFactor) * 10) / 10,
-              fat: Math.round(((baseNutrition.fat || 0) * scaleFactor) * 10) / 10
+              calories: baseNutrition.calories || 0,
+              protein: baseNutrition.protein || 0,
+              carbs: baseNutrition.carbs || 0,
+              fat: baseNutrition.fat || 0
             };
           } else {
             // Fallback to 0 if no nutrition data
