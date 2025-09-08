@@ -134,7 +134,8 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
   const [showCopyDayModal, setShowCopyDayModal] = useState(false);
   const [newCategory, setNewCategory] = useState('');
   const [newUnitType, setNewUnitType] = useState('');
-  const [selectedSourceDays, setSelectedSourceDays] = useState<string[]>([]);
+  const [selectedSourceDay, setSelectedSourceDay] = useState<string>('');
+  const [selectedTargetDays, setSelectedTargetDays] = useState<string[]>([]);
   const [copyingDay, setCopyingDay] = useState(false);
   const [mealsData, setMealsData] = useState<any>(null);
   const [availableCategories, setAvailableCategories] = useState<string[]>([]);
@@ -535,14 +536,19 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
     }
   };
 
-  // Copy day plan from another day(s)
+  // Copy day plan from source day to target day(s)
   const handleCopyDayPlan = async () => {
-    if (selectedSourceDays.length === 0) {
-      alert('Selecteer minimaal één bron dag om te kopiëren');
+    if (!selectedSourceDay) {
+      alert('Selecteer een bron dag om te kopiëren');
       return;
     }
 
-    if (selectedSourceDays.includes(selectedDay)) {
+    if (selectedTargetDays.length === 0) {
+      alert('Selecteer minimaal één doeldag om naar te kopiëren');
+      return;
+    }
+
+    if (selectedTargetDays.includes(selectedSourceDay)) {
       alert('Je kunt niet een dag naar zichzelf kopiëren');
       return;
     }
@@ -550,23 +556,26 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
     setCopyingDay(true);
 
     try {
-      // Get the first selected source day's meal data (for now, we'll copy from the first selected day)
-      const sourceDay = selectedSourceDays[0];
-      const sourceMealsData = mealsData?.weekly_plan?.[sourceDay] || {};
+      // Get the source day's meal data
+      const sourceMealsData = mealsData?.weekly_plan?.[selectedSourceDay] || {};
 
       if (!sourceMealsData || Object.keys(sourceMealsData).length === 0) {
-        alert(`Geen maaltijddata gevonden voor ${DAYS.find(d => d.key === sourceDay)?.label}`);
+        alert(`Geen maaltijddata gevonden voor ${DAYS.find(d => d.key === selectedSourceDay)?.label}`);
         return;
       }
 
-      // Create updated meals data with copied day
+      // Create updated meals data with copied days
       const updatedMeals = {
         ...mealsData,
         weekly_plan: {
-          ...mealsData?.weekly_plan,
-          [selectedDay]: sourceMealsData
+          ...mealsData?.weekly_plan
         }
       };
+
+      // Copy to all selected target days
+      selectedTargetDays.forEach(targetDay => {
+        updatedMeals.weekly_plan[targetDay] = sourceMealsData;
+      });
 
       // Update local state immediately
       setMealsData(updatedMeals);
@@ -588,10 +597,11 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
       });
 
       if (response.ok) {
-        const sourceDayNames = selectedSourceDays.map(day => DAYS.find(d => d.key === day)?.label).join(', ');
-        alert(`Maaltijden van ${sourceDayNames} succesvol gekopieerd naar ${DAYS.find(d => d.key === selectedDay)?.label}`);
+        const targetDayNames = selectedTargetDays.map(day => DAYS.find(d => d.key === day)?.label).join(', ');
+        alert(`Maaltijden van ${DAYS.find(d => d.key === selectedSourceDay)?.label} succesvol gekopieerd naar ${targetDayNames}`);
         setShowCopyDayModal(false);
-        setSelectedSourceDays([]);
+        setSelectedSourceDay('');
+        setSelectedTargetDays([]);
       } else {
         const errorText = await response.text();
         console.error('❌ Failed to copy day plan:', {
@@ -1850,45 +1860,25 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
             <div className="p-6">
               <div className="mb-4">
                 <p className="text-gray-300 mb-4">
-                  Kopieer de maaltijden van andere dagen naar <strong className="text-[#8BAE5A]">{DAYS.find(d => d.key === selectedDay)?.label}</strong>
+                  Kopieer maaltijden van een bron dag naar meerdere doeldagen
                 </p>
               </div>
               
-              <div className="mb-4">
-                <div className="flex items-center justify-between mb-3">
-                  <label className="block text-sm font-medium text-gray-300">Selecteer bron dagen:</label>
-                  <button
-                    onClick={() => {
-                      const availableDays = DAYS.filter(day => day.key !== selectedDay);
-                      const allSelected = availableDays.every(day => selectedSourceDays.includes(day.key));
-                      if (allSelected) {
-                        setSelectedSourceDays([]);
-                      } else {
-                        setSelectedSourceDays(availableDays.map(day => day.key));
-                      }
-                    }}
-                    className="text-xs text-[#8BAE5A] hover:text-[#B6C948] transition-colors"
-                  >
-                    {DAYS.filter(day => day.key !== selectedDay).every(day => selectedSourceDays.includes(day.key)) ? 'Alles deselecteren' : 'Alles selecteren'}
-                  </button>
-                </div>
-                
-                <div className="space-y-2 max-h-48 overflow-y-auto">
-                  {DAYS.filter(day => day.key !== selectedDay).map(day => {
+              {/* Step 1: Select Source Day */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-300 mb-3">Stap 1: Selecteer bron dag</label>
+                <div className="space-y-2">
+                  {DAYS.map(day => {
                     const hasData = mealsData?.weekly_plan?.[day.key] && Object.keys(mealsData.weekly_plan[day.key]).length > 0;
                     return (
                       <label key={day.key} className="flex items-center p-3 bg-[#181F17] rounded-lg border border-[#3A4D23] hover:bg-[#1F2D17] transition-colors cursor-pointer">
                         <input
-                          type="checkbox"
-                          checked={selectedSourceDays.includes(day.key)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setSelectedSourceDays([...selectedSourceDays, day.key]);
-                            } else {
-                              setSelectedSourceDays(selectedSourceDays.filter(d => d !== day.key));
-                            }
-                          }}
-                          className="w-4 h-4 text-[#8BAE5A] bg-[#181F17] border-[#3A4D23] rounded focus:ring-[#8BAE5A] focus:ring-2"
+                          type="radio"
+                          name="sourceDay"
+                          value={day.key}
+                          checked={selectedSourceDay === day.key}
+                          onChange={(e) => setSelectedSourceDay(e.target.value)}
+                          className="w-4 h-4 text-[#8BAE5A] bg-[#181F17] border-[#3A4D23] focus:ring-[#8BAE5A] focus:ring-2"
                         />
                         <div className="ml-3 flex-1">
                           <div className="text-sm font-medium text-white">{day.label}</div>
@@ -1902,12 +1892,63 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
                 </div>
               </div>
 
-              {selectedSourceDays.length > 0 && (
+              {/* Step 2: Select Target Days */}
+              {selectedSourceDay && (
+                <div className="mb-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <label className="block text-sm font-medium text-gray-300">Stap 2: Selecteer doeldagen</label>
+                    <button
+                      onClick={() => {
+                        const availableDays = DAYS.filter(day => day.key !== selectedSourceDay);
+                        const allSelected = availableDays.every(day => selectedTargetDays.includes(day.key));
+                        if (allSelected) {
+                          setSelectedTargetDays([]);
+                        } else {
+                          setSelectedTargetDays(availableDays.map(day => day.key));
+                        }
+                      }}
+                      className="text-xs text-[#8BAE5A] hover:text-[#B6C948] transition-colors"
+                    >
+                      {DAYS.filter(day => day.key !== selectedSourceDay).every(day => selectedTargetDays.includes(day.key)) ? 'Alles deselecteren' : 'Alles selecteren'}
+                    </button>
+                  </div>
+                  
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {DAYS.filter(day => day.key !== selectedSourceDay).map(day => {
+                      const hasData = mealsData?.weekly_plan?.[day.key] && Object.keys(mealsData.weekly_plan[day.key]).length > 0;
+                      return (
+                        <label key={day.key} className="flex items-center p-3 bg-[#181F17] rounded-lg border border-[#3A4D23] hover:bg-[#1F2D17] transition-colors cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={selectedTargetDays.includes(day.key)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedTargetDays([...selectedTargetDays, day.key]);
+                              } else {
+                                setSelectedTargetDays(selectedTargetDays.filter(d => d !== day.key));
+                              }
+                            }}
+                            className="w-4 h-4 text-[#8BAE5A] bg-[#181F17] border-[#3A4D23] rounded focus:ring-[#8BAE5A] focus:ring-2"
+                          />
+                          <div className="ml-3 flex-1">
+                            <div className="text-sm font-medium text-white">{day.label}</div>
+                            <div className="text-xs text-gray-400">
+                              {hasData ? '✓ Heeft maaltijden' : '⚠ Geen maaltijden'}
+                            </div>
+                          </div>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {selectedSourceDay && selectedTargetDays.length > 0 && (
                 <div className="mt-4 p-4 bg-[#181F17] rounded-lg border border-[#3A4D23]">
                   <h4 className="text-sm font-medium text-[#8BAE5A] mb-2">Waarschuwing:</h4>
                   <p className="text-sm text-gray-300">
-                    Dit zal alle bestaande maaltijden van <strong className="text-white">{DAYS.find(d => d.key === selectedDay)?.label}</strong> overschrijven 
-                    met de maaltijden van <strong className="text-white">{selectedSourceDays.map(day => DAYS.find(d => d.key === day)?.label).join(', ')}</strong>.
+                    Dit zal alle bestaande maaltijden van <strong className="text-white">{selectedTargetDays.map(day => DAYS.find(d => d.key === day)?.label).join(', ')}</strong> overschrijven 
+                    met de maaltijden van <strong className="text-white">{DAYS.find(d => d.key === selectedSourceDay)?.label}</strong>.
                   </p>
                 </div>
               )}
@@ -1917,7 +1958,8 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
               <button
                 onClick={() => {
                   setShowCopyDayModal(false);
-                  setSelectedSourceDays([]);
+                  setSelectedSourceDay('');
+                  setSelectedTargetDays([]);
                 }}
                 className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
               >
@@ -1925,13 +1967,13 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
               </button>
               <button
                 onClick={handleCopyDayPlan}
-                disabled={selectedSourceDays.length === 0 || copyingDay}
+                disabled={!selectedSourceDay || selectedTargetDays.length === 0 || copyingDay}
                 className="px-4 py-2 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#B6C948] transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 {copyingDay && (
                   <div className="w-4 h-4 border-2 border-[#232D1A] border-t-transparent rounded-full animate-spin"></div>
                 )}
-                {copyingDay ? 'Kopiëren...' : `Kopiëren (${selectedSourceDays.length})`}
+                {copyingDay ? 'Kopiëren...' : `Kopiëren naar ${selectedTargetDays.length} dag(en)`}
               </button>
             </div>
           </div>
