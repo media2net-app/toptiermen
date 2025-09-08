@@ -15,6 +15,20 @@ import {
 import MealEditModal from './MealEditModal';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 
+// Function to map activity level to Dutch display text
+function getActivityLevelDisplay(activityLevel: string): string {
+  switch (activityLevel) {
+    case 'sedentary':
+      return 'Zittend (Licht actief)';
+    case 'moderate':
+      return 'Staand (Matig actief)';
+    case 'very_active':
+      return 'Lopend (Zeer actief)';
+    default:
+      return activityLevel;
+  }
+}
+
 interface DynamicPlanViewProps {
   planId: string;
   planName: string;
@@ -599,7 +613,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                   </div>
                 )}
                 <p className="text-gray-300">
-                  Gepersonaliseerd voor {planData.userProfile.weight}kg, {planData.userProfile.age} jaar, {planData.userProfile.height}cm, {planData.userProfile.activityLevel} - {planData.userProfile.goal}
+                  Gepersonaliseerd voor {planData.userProfile.weight}kg, {planData.userProfile.age} jaar, {planData.userProfile.height}cm, {getActivityLevelDisplay(planData.userProfile.activityLevel)} - {planData.userProfile.goal}
                 </p>
               </div>
             </div>

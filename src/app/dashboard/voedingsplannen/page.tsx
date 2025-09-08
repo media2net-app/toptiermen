@@ -16,6 +16,20 @@ import { useOnboarding } from "@/contexts/OnboardingContext";
 import { useRouter } from 'next/navigation';
 import DynamicPlanViewNew from './components/DynamicPlanViewNew';
 
+// Function to map activity level to Dutch display text
+function getActivityLevelDisplay(activityLevel: string): string {
+  switch (activityLevel) {
+    case 'sedentary':
+      return 'Zittend (Licht actief)';
+    case 'moderate':
+      return 'Staand (Matig actief)';
+    case 'very_active':
+      return 'Lopend (Zeer actief)';
+    default:
+      return activityLevel;
+  }
+}
+
 interface NutritionPlan {
   id: number;
   plan_id: string;
@@ -959,7 +973,7 @@ export default function VoedingsplannenPage() {
                       <div className="text-xs text-gray-500">
                         Lengte: {userNutritionProfile.height}cm
                         {userNutritionProfile.activityLevel && (
-                          <> • Activiteit: <span className="text-[#8BAE5A] capitalize">{userNutritionProfile.activityLevel}</span></>
+                          <> • Activiteit: <span className="text-[#8BAE5A]">{getActivityLevelDisplay(userNutritionProfile.activityLevel)}</span></>
                         )}
                       </div>
                     )}
