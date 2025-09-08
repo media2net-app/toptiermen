@@ -513,23 +513,6 @@ export default function VoedingsplannenPage() {
   };
 
 
-  const getNutritionPlanIcon = (plan: NutritionPlan) => {
-    if (plan.icon) {
-      return <span className="text-2xl">{plan.icon}</span>;
-    }
-    
-    // Default icons based on plan name
-    const name = plan.name.toLowerCase();
-    if (name.includes('carnivoor') || name.includes('carnivore')) {
-      return <span className="text-2xl">🥩</span>;
-    } else if (name.includes('keto') || name.includes('low carb')) {
-      return <span className="text-2xl">🥑</span>;
-    } else if (name.includes('protein')) {
-      return <span className="text-2xl">💪</span>;
-    } else {
-      return <span className="text-2xl">🥗</span>;
-    }
-  };
 
   useEffect(() => {
     if (user?.id) {
@@ -946,30 +929,30 @@ export default function VoedingsplannenPage() {
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={() => handleNutritionPlanClick(plan.plan_id)}
-                        className={`cursor-pointer rounded-2xl p-6 border-2 transition-all duration-300 ${
+                        className={`cursor-pointer rounded-2xl p-6 border-2 transition-all duration-300 relative ${
                           selectedNutritionPlan === plan.plan_id
                             ? 'border-[#8BAE5A] bg-[#8BAE5A]/10'
                             : 'border-[#3A4D23] bg-[#232D1A] hover:border-[#8BAE5A]/50'
                         }`}
                       >
-                        <div className="text-center mb-4">
-                          {getNutritionPlanIcon(plan)}
-                        </div>
-                        
-                        {/* Plan Labels */}
-                        <div className="flex justify-center gap-2 mb-3">
-                          {plan.name.toLowerCase().includes('carnivoor') && (
-                            <div className="inline-flex items-center px-2 py-1 bg-orange-500/20 border border-orange-500 text-orange-400 rounded-md text-xs font-semibold">
+                        {/* Popular Badge - Top Right Corner */}
+                        {plan.name.toLowerCase().includes('carnivoor') && (
+                          <div className="absolute -top-2 -right-2 transform rotate-12">
+                            <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-3 py-1 rounded-lg shadow-lg text-xs font-bold">
                               🔥 Populair
                             </div>
-                          )}
-                          {selectedNutritionPlan === plan.plan_id && (
+                          </div>
+                        )}
+                        
+                        {/* Active Badge */}
+                        {selectedNutritionPlan === plan.plan_id && (
+                          <div className="absolute top-4 left-4">
                             <div className="inline-flex items-center px-2 py-1 bg-[#8BAE5A]/20 border border-[#8BAE5A] text-[#8BAE5A] rounded-md text-xs font-semibold">
                               <CheckIcon className="w-3 h-3 mr-1" />
                               Actief
                             </div>
-                          )}
-                        </div>
+                          </div>
+                        )}
                         
                         <h3 className="text-xl font-bold text-white mb-2 text-center">{plan.name}</h3>
                         {plan.subtitle && (
