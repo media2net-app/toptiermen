@@ -365,6 +365,12 @@ export async function GET(request: NextRequest) {
         mealTypes.forEach(mealType => {
           const meal = dayPlan.meals[mealType];
           if (meal) {
+            // Map database meal types to frontend expected types
+            let frontendMealType = mealType;
+            if (mealType === 'ochtend_snack') frontendMealType = 'snack1';
+            else if (mealType === 'lunch_snack') frontendMealType = 'snack2';
+            else if (mealType === 'avond_snack') frontendMealType = 'avondsnack';
+            
             // Use nutrition data directly from database (maandag format)
             const baseNutrition = meal;
           
@@ -382,8 +388,8 @@ export async function GET(request: NextRequest) {
               mealNutrition = { calories: 0, protein: 0, carbs: 0, fat: 0 };
             }
             
-            scaledPlan[day][mealType] = {
-              name: meal.name || mealType,
+            scaledPlan[day][frontendMealType] = {
+              name: meal.name || frontendMealType,
               ingredients: meal.ingredients || [],
               nutrition: mealNutrition
             };
@@ -399,6 +405,12 @@ export async function GET(request: NextRequest) {
         mealTypes.forEach(mealType => {
           if (dayPlan[mealType]) {
             const meal = dayPlan[mealType];
+            
+            // Map database meal types to frontend expected types
+            let frontendMealType = mealType;
+            if (mealType === 'ochtend_snack') frontendMealType = 'snack1';
+            else if (mealType === 'lunch_snack') frontendMealType = 'snack2';
+            else if (mealType === 'avond_snack') frontendMealType = 'avondsnack';
             
             // Use nutrition data directly from database (other days format)
             const baseNutrition = meal.nutrition || meal;
@@ -417,8 +429,8 @@ export async function GET(request: NextRequest) {
               mealNutrition = { calories: 0, protein: 0, carbs: 0, fat: 0 };
             }
             
-            scaledPlan[day][mealType] = {
-              name: meal.name || mealType,
+            scaledPlan[day][frontendMealType] = {
+              name: meal.name || frontendMealType,
               ingredients: meal.ingredients || [],
               nutrition: mealNutrition
             };
