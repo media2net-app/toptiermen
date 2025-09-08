@@ -63,28 +63,16 @@ export async function POST(request: NextRequest) {
     // Calculate TDEE using TTM formula
     const tdee = weight * 22 * activityMultipliers[activityLevel as keyof typeof activityMultipliers];
     
-    // Use custom calorie targets based on TTM expertise (not standard formulas)
-    // Standard profile: 40y, 100kg, 190cm, male, moderate activity
+    // Use TTM formula for all users: Gewicht x 22 x activiteitniveau
     let targetCalories = 0;
     
-    if (gender === 'male' && age === 40 && weight === 100 && height === 190 && activityLevel === 'moderate') {
-      // Exact TTM targets for standard profile
-      if (goal === 'cut') {
-        targetCalories = 2360; // Corrected TTM value for droogtrainen
-      } else if (goal === 'maintain') {
-        targetCalories = 2860;
-      } else if (goal === 'bulk') {
-        targetCalories = 3260;
-      }
-    } else {
-      // Adjust calories based on goal
-      if (goal === 'cut') {
-        targetCalories = tdee * 0.8; // 20% deficit
-      } else if (goal === 'bulk') {
-        targetCalories = tdee * 1.15; // 15% surplus
-      } else if (goal === 'maintain') {
-        targetCalories = tdee; // No adjustment
-      }
+    // Adjust calories based on goal using TTM formula
+    if (goal === 'cut') {
+      targetCalories = tdee * 0.8; // 20% deficit for droogtrainen
+    } else if (goal === 'bulk') {
+      targetCalories = tdee * 1.15; // 15% surplus for spiermassa
+    } else if (goal === 'maintain') {
+      targetCalories = tdee; // No adjustment for onderhoud
     }
 
     // Calculate BMR for reference
