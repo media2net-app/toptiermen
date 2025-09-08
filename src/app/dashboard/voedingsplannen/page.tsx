@@ -289,6 +289,12 @@ export default function VoedingsplannenPage() {
   };
 
   const handleNutritionPlanClick = async (planId: string) => {
+    // If this plan is already selected, deselect it
+    if (selectedNutritionPlan === planId) {
+      await handleDeselectPlan();
+      return;
+    }
+    
     // Mark plan as selected
     setSelectedNutritionPlan(planId);
     
@@ -321,6 +327,33 @@ export default function VoedingsplannenPage() {
     
     // Navigate to plan details (you can uncomment this if you want navigation)
     // router.push(`/dashboard/trainingscentrum/nutrition/${planId}`);
+  };
+
+  const handleDeselectPlan = async () => {
+    try {
+      const response = await fetch('/api/nutrition-plan-select', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user?.id
+        }),
+      });
+
+      if (response.ok) {
+        toast.success('Voedingsplan gedeselecteerd!');
+        // Clear the selected plan
+        setSelectedNutritionPlan(null);
+        // Refresh the active plan selection
+        checkUserNutritionProfile();
+      } else {
+        toast.error('Er is een fout opgetreden bij het deselecteren van het plan');
+      }
+    } catch (error) {
+      console.error('Error deselecting nutrition plan:', error);
+      toast.error('Er is een fout opgetreden');
+    }
   };
 
   const handleViewDynamicPlan = (planId: string, planName: string) => {
@@ -1084,7 +1117,7 @@ export default function VoedingsplannenPage() {
                         {selectedNutritionPlan === plan.plan_id ? (
                           <>
                             <CheckIcon className="w-4 h-4" />
-                            Geselecteerd
+                            Geselecteerd - Klik om te deselecteren
                           </>
                         ) : (
                           'Selecteer dit plan'

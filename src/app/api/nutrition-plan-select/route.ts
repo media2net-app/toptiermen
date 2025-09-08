@@ -103,3 +103,46 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const { userId } = await request.json();
+
+    if (!userId) {
+      return NextResponse.json(
+        { success: false, error: 'User ID is required' },
+        { status: 400 }
+      );
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Deactivate all active plans for this user
+    const { error: deactivateError } = await supabase
+      .from('user_nutrition_plans')
+      .update({ is_active: false })
+      .eq('user_id', userId);
+
+    if (deactivateError) {
+      console.error('❌ Error deactivating plans:', deactivateError);
+      return NextResponse.json(
+        { success: false, error: `Failed to deselect plans: ${deactivateError.message}` },
+        { status: 500 }
+      );
+    }
+
+    console.log(`✅ All plans deselected for user ${userId}`);
+
+    return NextResponse.json({
+      success: true,
+      message: 'All plans successfully deselected'
+    });
+
+  } catch (error) {
+    console.error('Error in nutrition-plan-deselect:', error);
+    return NextResponse.json(
+      { success: false, error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
