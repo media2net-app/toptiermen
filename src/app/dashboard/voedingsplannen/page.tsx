@@ -988,25 +988,25 @@ export default function VoedingsplannenPage() {
                           </div>
                         )}
                         
-                        {/* Target Values */}
-                        {(plan.target_calories || plan.target_protein || plan.target_carbs || plan.target_fat) && (
+                        {/* Target Values - Calculated based on user's daily needs and plan percentages */}
+                        {userNutritionProfile && (plan.protein_percentage || plan.carbs_percentage || plan.fat_percentage) && (
                           <div className="mb-4 p-3 bg-[#1a1f17] border border-[#3a4d23] rounded-lg">
                             <div className="text-xs text-[#8bae5a] font-semibold mb-2 text-center">Doelwaarden</div>
                             <div className="grid grid-cols-2 gap-2 text-xs">
                               <div className="text-center">
-                                <div className="text-white font-bold">{plan.target_calories || 0}</div>
+                                <div className="text-white font-bold">{userNutritionProfile.dailyCalories}</div>
                                 <div className="text-gray-400">kcal</div>
                               </div>
                               <div className="text-center">
-                                <div className="text-white font-bold">{plan.target_protein || 0}g</div>
+                                <div className="text-white font-bold">{calculateMacroValues(plan, userNutritionProfile.dailyCalories).protein}g</div>
                                 <div className="text-gray-400">Eiwit</div>
                               </div>
                               <div className="text-center">
-                                <div className="text-white font-bold">{plan.target_carbs || 0}g</div>
+                                <div className="text-white font-bold">{calculateMacroValues(plan, userNutritionProfile.dailyCalories).carbs}g</div>
                                 <div className="text-gray-400">Koolhydraten</div>
                               </div>
                               <div className="text-center">
-                                <div className="text-white font-bold">{plan.target_fat || 0}g</div>
+                                <div className="text-white font-bold">{calculateMacroValues(plan, userNutritionProfile.dailyCalories).fats}g</div>
                                 <div className="text-gray-400">Vet</div>
                               </div>
                             </div>
