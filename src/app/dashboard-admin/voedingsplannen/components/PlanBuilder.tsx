@@ -619,6 +619,51 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
     }
   };
 
+  // Delete all data for a specific day
+  const handleDeleteDayData = async (dayKey: string) => {
+    const dayName = DAYS.find(d => d.key === dayKey)?.label || dayKey;
+    
+    if (!confirm(`Weet je zeker dat je alle maaltijddata van ${dayName} wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.`)) {
+      return;
+    }
+
+    try {
+      // Create updated meals data with empty day
+      const updatedMeals = {
+        ...mealsData,
+        weekly_plan: {
+          ...mealsData?.weekly_plan,
+          [dayKey]: {} // Clear all meals for this day
+        }
+      };
+
+      // Update local state immediately
+      setMealsData(updatedMeals);
+
+      // Save to database
+      const response = await fetch('/api/admin/nutrition-plans', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: formData.id,
+          meals: updatedMeals
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update nutrition plan');
+      }
+
+      alert(`Alle maaltijddata van ${dayName} is succesvol verwijderd!`);
+      
+    } catch (error) {
+      console.error('💥 Error deleting day data:', error);
+      alert('Er is een fout opgetreden bij het verwijderen van de dagdata');
+    }
+  };
+
   return (
     <div className={isPageMode ? "flex flex-col" : "fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"}>
       <div className={`${isPageMode ? "" : "bg-[#0F150E] rounded-xl border border-[#3A4D23] w-full max-w-7xl h-[90vh]"} flex flex-col`}>
@@ -1056,15 +1101,26 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
               <div className="p-6 border-b border-[#3A4D23]">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-semibold text-[#8BAE5A]">Selecteer Dag</h3>
-                  <button
-                    onClick={() => setShowCopyDayModal(true)}
-                    className="px-4 py-2 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#B6C948] transition-colors text-sm font-medium flex items-center gap-2"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                    </svg>
-                    Plan kopieren van andere dag
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setShowCopyDayModal(true)}
+                      className="px-4 py-2 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#B6C948] transition-colors text-sm font-medium flex items-center gap-2"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      </svg>
+                      Plan kopieren van andere dag
+                    </button>
+                    <button
+                      onClick={() => handleDeleteDayData(selectedDay)}
+                      className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium flex items-center gap-2"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                      Verwijder alle data van deze dag
+                    </button>
+                  </div>
                 </div>
                 <div className="flex space-x-2 overflow-x-auto">
                   {DAYS.map(day => (
