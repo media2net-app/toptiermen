@@ -362,77 +362,26 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
     }
   };
 
-  // Ingredient database (same as in API)
-  const INGREDIENT_DATABASE = {
-    // Carnivoor ingrediënten
-    'Eieren': { calories: 155, protein: 13, carbs: 1, fat: 11 },
-    'Spek': { calories: 541, protein: 37, carbs: 0, fat: 42 },
-    'Rundvlees': { calories: 250, protein: 26, carbs: 0, fat: 15 },
-    'Boter': { calories: 717, protein: 0.9, carbs: 0.1, fat: 81 },
-    'Zalm': { calories: 208, protein: 25, carbs: 0, fat: 12 },
-    'Ei': { calories: 155, protein: 13, carbs: 1, fat: 11 },
-    'Ham': { calories: 145, protein: 21, carbs: 0, fat: 6 },
-    'Kipfilet': { calories: 165, protein: 31, carbs: 0, fat: 4 },
-    'Varkensvlees': { calories: 242, protein: 27, carbs: 0, fat: 14 },
-    'Tonijn': { calories: 144, protein: 30, carbs: 0, fat: 1 },
-    'Olijfolie': { calories: 884, protein: 0, carbs: 0, fat: 100 },
-    'Biefstuk': { calories: 250, protein: 26, carbs: 0, fat: 15 },
-    'Salami': { calories: 336, protein: 20, carbs: 0, fat: 28 },
-    'Makreel': { calories: 205, protein: 19, carbs: 0, fat: 14 },
-    'Lamsvlees': { calories: 294, protein: 25, carbs: 0, fat: 21 },
-    'Ribeye Steak': { calories: 250, protein: 26, carbs: 0, fat: 15 },
-    'Gerookte Zalm': { calories: 117, protein: 18, carbs: 0, fat: 4 },
-    'Runderlever': { calories: 165, protein: 26, carbs: 4, fat: 4 },
-    
-    // Voedingsplan op maat ingrediënten
-    'Havermout': { calories: 68, protein: 2.4, carbs: 12, fat: 1.4 },
-    'Banaan': { calories: 89, protein: 1.1, carbs: 23, fat: 0.3 },
-    'Amandelen': { calories: 579, protein: 21, carbs: 22, fat: 50 },
-    'Melk': { calories: 42, protein: 3.4, carbs: 5, fat: 1 },
-    'Volkoren brood': { calories: 247, protein: 13, carbs: 41, fat: 4 },
-    'Avocado': { calories: 160, protein: 2, carbs: 9, fat: 15 },
-    'Tomaat': { calories: 18, protein: 0.9, carbs: 3.9, fat: 0.2 },
-    'Appel': { calories: 78, protein: 0.4, carbs: 21, fat: 0.3 },
-    'Rijstwafels': { calories: 42, protein: 1, carbs: 7, fat: 0 },
-    'Whey Shake': { calories: 120, protein: 25, carbs: 3, fat: 1 },
-    'Honing': { calories: 304, protein: 0.3, carbs: 82, fat: 0 },
-    'Magere Kwark': { calories: 67, protein: 12, carbs: 3.6, fat: 0.4 },
-    'Rijst': { calories: 130, protein: 2.7, carbs: 28, fat: 0.3 },
-    'Pasta': { calories: 131, protein: 5, carbs: 25, fat: 1.1 },
-    'Kip': { calories: 165, protein: 31, carbs: 0, fat: 4 },
-    'Broccoli': { calories: 34, protein: 2.8, carbs: 7, fat: 0.4 },
-    'Spinazie': { calories: 23, protein: 2.9, carbs: 3.6, fat: 0.4 },
-    'Wortel': { calories: 41, protein: 0.9, carbs: 10, fat: 0.2 },
-    'Komkommer': { calories: 16, protein: 0.7, carbs: 4, fat: 0.1 },
-    'Paprika': { calories: 31, protein: 1, carbs: 7, fat: 0.3 },
-    'Ui': { calories: 40, protein: 1.1, carbs: 9, fat: 0.1 },
-    'Knoflook': { calories: 149, protein: 6.4, carbs: 33, fat: 0.5 },
-    'Aardappel': { calories: 77, protein: 2, carbs: 17, fat: 0.1 },
-    'Zoete Aardappel': { calories: 86, protein: 1.6, carbs: 20, fat: 0.1 },
-    'Quinoa': { calories: 120, protein: 4.4, carbs: 22, fat: 1.9 },
-    'Bulgur': { calories: 83, protein: 3.1, carbs: 19, fat: 0.2 },
-    'Couscous': { calories: 112, protein: 3.8, carbs: 23, fat: 0.2 },
-    'Linzen': { calories: 116, protein: 9, carbs: 20, fat: 0.4 },
-    'Kikkererwten': { calories: 164, protein: 8.9, carbs: 27, fat: 2.6 },
-    'Bonen': { calories: 127, protein: 8.7, carbs: 23, fat: 0.5 },
-    'Tofu': { calories: 76, protein: 8, carbs: 1.9, fat: 4.8 },
-    'Tempeh': { calories: 192, protein: 20, carbs: 8, fat: 11 },
-    'Noten': { calories: 607, protein: 20, carbs: 21, fat: 54 },
-    'Zaden': { calories: 534, protein: 18, carbs: 28, fat: 42 },
-    'Olijven': { calories: 115, protein: 0.8, carbs: 6, fat: 11 },
-    'Kaas': { calories: 113, protein: 7, carbs: 1, fat: 9 },
-    'Yoghurt': { calories: 59, protein: 10, carbs: 3.6, fat: 0.4 },
-    'Kwark': { calories: 67, protein: 12, carbs: 3.6, fat: 0.4 },
-    'Vlees': { calories: 250, protein: 26, carbs: 0, fat: 15 },
-    'Vis': { calories: 206, protein: 22, carbs: 0, fat: 12 },
-    'Garnalen': { calories: 99, protein: 24, carbs: 0, fat: 0.3 },
-    'Krab': { calories: 97, protein: 20, carbs: 0, fat: 1.5 },
-    'Lobster': { calories: 89, protein: 19, carbs: 0, fat: 0.9 },
-    'Oesters': { calories: 68, protein: 7, carbs: 4, fat: 2.5 },
-    'Mosselen': { calories: 86, protein: 12, carbs: 4, fat: 2.2 },
-    'Inktvis': { calories: 92, protein: 16, carbs: 3, fat: 1.4 },
-    'Octopus': { calories: 82, protein: 15, carbs: 2, fat: 1.0 }
-  };
+  // Ingredient database - loaded from API
+  const [ingredientDatabase, setIngredientDatabase] = useState<any>({});
+
+  // Load ingredient database from API
+  useEffect(() => {
+    const loadIngredientDatabase = async () => {
+      try {
+        const response = await fetch('/api/nutrition-ingredients');
+        const data = await response.json();
+        if (data.success && data.ingredients) {
+          setIngredientDatabase(data.ingredients);
+          console.log('✅ Loaded ingredient database:', Object.keys(data.ingredients).length, 'ingredients');
+        }
+      } catch (error) {
+        console.error('❌ Error loading ingredient database:', error);
+      }
+    };
+
+    loadIngredientDatabase();
+  }, []);
 
   // Calculate nutrition for a single ingredient based on amount and unit
   const calculateIngredientNutrition = (ingredient: any) => {
@@ -441,7 +390,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
     const name = ingredient.name || '';
     
     // Get nutrition data from database
-    const nutritionData = INGREDIENT_DATABASE[name];
+    const nutritionData = ingredientDatabase[name];
     if (!nutritionData) {
       console.warn(`⚠️ Nutrition data not found for ingredient: ${name}`);
       return { calories: 0, protein: 0, carbs: 0, fat: 0 };
@@ -768,24 +717,27 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
               </div>
             </div>
 
-            {/* Ingredient Database Status */}
-            <div className="mt-6 bg-[#181F17] border border-[#3A4D23] rounded-lg p-4">
-              <h4 className="text-white font-semibold mb-3">🗄️ Ingrediënten Database Status</h4>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                {['Appel', 'Banaan', 'Havermout', 'Whey Shake'].map(ingredient => {
-                  const hasData = INGREDIENT_DATABASE[ingredient];
-                  return (
-                    <div key={ingredient} className="flex items-center gap-2">
-                      <span className={`w-2 h-2 rounded-full ${hasData ? 'bg-green-400' : 'bg-red-400'}`}></span>
-                      <span className="text-gray-300">{ingredient}:</span>
-                      <span className={`font-mono ${hasData ? 'text-green-400' : 'text-red-400'}`}>
-                        {hasData ? 'OK' : 'MISSING'}
-                      </span>
+                  {/* Ingredient Database Status */}
+                  <div className="mt-6 bg-[#181F17] border border-[#3A4D23] rounded-lg p-4">
+                    <h4 className="text-white font-semibold mb-3">🗄️ Ingrediënten Database Status</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                      {['Appel', 'Banaan', 'Havermout', 'Whey Shake'].map(ingredient => {
+                        const hasData = ingredientDatabase[ingredient];
+                        return (
+                          <div key={ingredient} className="flex items-center gap-2">
+                            <span className={`w-2 h-2 rounded-full ${hasData ? 'bg-green-400' : 'bg-red-400'}`}></span>
+                            <span className="text-gray-300">{ingredient}:</span>
+                            <span className={`font-mono ${hasData ? 'text-green-400' : 'text-red-400'}`}>
+                              {hasData ? 'OK' : 'MISSING'}
+                            </span>
+                          </div>
+                        );
+                      })}
                     </div>
-                  );
-                })}
-              </div>
-            </div>
+                    <div className="mt-3 text-sm text-gray-400">
+                      Totaal geladen: {Object.keys(ingredientDatabase).length} ingrediënten
+                    </div>
+                  </div>
 
             {/* Current Day Ingredients */}
             <div className="mt-6 bg-[#181F17] border border-[#3A4D23] rounded-lg p-4">
@@ -799,9 +751,9 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                       {meal.ingredients.map((ingredient: any, index: number) => (
                         <div key={index} className="ml-4 text-gray-300">
                           {ingredient.name}: {ingredient.amount} {ingredient.unit}
-                          <span className="ml-2 text-xs text-gray-500">
-                            (DB: {INGREDIENT_DATABASE[ingredient.name] ? '✓' : '✗'})
-                          </span>
+                                <span className="ml-2 text-xs text-gray-500">
+                                  (DB: {ingredientDatabase[ingredient.name] ? '✓' : '✗'})
+                                </span>
                         </div>
                       ))}
                     </div>

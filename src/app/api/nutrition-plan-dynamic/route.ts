@@ -6,127 +6,38 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-// Complete ingrediënten database met nutritionele waarden per 100g
-const CARNIVOOR_INGREDIENTS = {
-  // Carnivoor ingrediënten
-  'Ribeye Steak': { calories: 250, protein: 26, carbs: 0, fat: 15 },
-  'Biefstuk': { calories: 250, protein: 26, carbs: 0, fat: 15 },
-  'T-Bone Steak': { calories: 247, protein: 24, carbs: 0, fat: 16 },
-  'Rundergehakt (15% vet)': { calories: 254, protein: 20, carbs: 0, fat: 18 },
-  'Rundergehakt (20% vet)': { calories: 272, protein: 19, carbs: 0, fat: 21 },
-  'Mager Rundergehakt': { calories: 220, protein: 22, carbs: 0, fat: 14 },
-  'Eendenborst': { calories: 337, protein: 19, carbs: 0, fat: 28 },
-  
-  // Vis
-  'Zalm (Wild)': { calories: 208, protein: 25, carbs: 0, fat: 12 },
-  'Haring': { calories: 158, protein: 18, carbs: 0, fat: 9 },
-  'Makreel': { calories: 205, protein: 19, carbs: 0, fat: 14 },
-  'Sardines': { calories: 208, protein: 25, carbs: 0, fat: 11 },
-  'Tonijn in Olijfolie': { calories: 189, protein: 25, carbs: 0, fat: 9 },
-  'Witvis': { calories: 82, protein: 18, carbs: 0, fat: 1 },
-  
-  // Gevogelte
-  'Kipfilet (Gegrild)': { calories: 165, protein: 31, carbs: 0, fat: 4 },
-  'Kalkoenfilet (Gegrild)': { calories: 135, protein: 30, carbs: 0, fat: 1 },
-  'Kippendijen': { calories: 250, protein: 26, carbs: 0, fat: 15 },
-  'Gans': { calories: 259, protein: 25, carbs: 0, fat: 17 },
-  
-  // Varkensvlees
-  'Varkenshaas': { calories: 143, protein: 26, carbs: 0, fat: 4 },
-  'Spek': { calories: 541, protein: 37, carbs: 0, fat: 42 },
-  'Ham': { calories: 145, protein: 21, carbs: 0, fat: 6 },
-  'Worst': { calories: 300, protein: 20, carbs: 0, fat: 25 },
-  'Duitse Biefstuk': { calories: 250, protein: 16, carbs: 0, fat: 20 },
-  'Salami': { calories: 336, protein: 20, carbs: 0, fat: 28 },
-  
-  // Lam
-  'Lamsvlees': { calories: 294, protein: 25, carbs: 0, fat: 21 },
-  
-  // Voedingsplan op maat ingrediënten
-  'Havermout': { calories: 68, protein: 2.4, carbs: 12, fat: 1.4 },
-  'Banaan': { calories: 89, protein: 1.1, carbs: 23, fat: 0.3 },
-  'Appel': { calories: 78, protein: 0.4, carbs: 21, fat: 0.3 },
-  'Amandelen': { calories: 579, protein: 21, carbs: 22, fat: 50 },
-  'Melk': { calories: 42, protein: 3.4, carbs: 5, fat: 1 },
-  'Volkoren brood': { calories: 247, protein: 13, carbs: 41, fat: 4 },
-  'Avocado': { calories: 160, protein: 2, carbs: 9, fat: 15 },
-  'Tomaat': { calories: 18, protein: 0.9, carbs: 3.9, fat: 0.2 },
-  'Rijstwafels': { calories: 42, protein: 1, carbs: 7, fat: 0 },
-  'Whey Shake': { calories: 120, protein: 25, carbs: 3, fat: 1 },
-  'Honing': { calories: 304, protein: 0.3, carbs: 82, fat: 0 },
-  'Magere Kwark': { calories: 67, protein: 12, carbs: 3.6, fat: 0.4 },
-  'Rijst': { calories: 130, protein: 2.7, carbs: 28, fat: 0.3 },
-  'Pasta': { calories: 131, protein: 5, carbs: 25, fat: 1.1 },
-  'Kip': { calories: 165, protein: 31, carbs: 0, fat: 4 },
-  'Broccoli': { calories: 34, protein: 2.8, carbs: 7, fat: 0.4 },
-  'Spinazie': { calories: 23, protein: 2.9, carbs: 3.6, fat: 0.4 },
-  'Wortel': { calories: 41, protein: 0.9, carbs: 10, fat: 0.2 },
-  'Komkommer': { calories: 16, protein: 0.7, carbs: 4, fat: 0.1 },
-  'Paprika': { calories: 31, protein: 1, carbs: 7, fat: 0.3 },
-  'Ui': { calories: 40, protein: 1.1, carbs: 9, fat: 0.1 },
-  'Knoflook': { calories: 149, protein: 6.4, carbs: 33, fat: 0.5 },
-  'Aardappel': { calories: 77, protein: 2, carbs: 17, fat: 0.1 },
-  'Zoete Aardappel': { calories: 86, protein: 1.6, carbs: 20, fat: 0.1 },
-  'Quinoa': { calories: 120, protein: 4.4, carbs: 22, fat: 1.9 },
-  'Bulgur': { calories: 83, protein: 3.1, carbs: 19, fat: 0.2 },
-  'Couscous': { calories: 112, protein: 3.8, carbs: 23, fat: 0.2 },
-  'Linzen': { calories: 116, protein: 9, carbs: 20, fat: 0.4 },
-  'Kikkererwten': { calories: 164, protein: 8.9, carbs: 27, fat: 2.6 },
-  'Bonen': { calories: 127, protein: 8.7, carbs: 23, fat: 0.5 },
-  'Tofu': { calories: 76, protein: 8, carbs: 1.9, fat: 4.8 },
-  'Tempeh': { calories: 192, protein: 20, carbs: 8, fat: 11 },
-  'Noten': { calories: 607, protein: 20, carbs: 21, fat: 54 },
-  'Zaden': { calories: 534, protein: 18, carbs: 28, fat: 42 },
-  'Olijven': { calories: 115, protein: 0.8, carbs: 6, fat: 11 },
-  'Kaas': { calories: 113, protein: 7, carbs: 1, fat: 9 },
-  'Yoghurt': { calories: 59, protein: 10, carbs: 3.6, fat: 0.4 },
-  'Kwark': { calories: 67, protein: 12, carbs: 3.6, fat: 0.4 },
-  'Eieren': { calories: 155, protein: 13, carbs: 1, fat: 11 },
-  'Ei': { calories: 155, protein: 13, carbs: 1, fat: 11 },
-  'Vlees': { calories: 250, protein: 26, carbs: 0, fat: 15 },
-  'Vis': { calories: 206, protein: 22, carbs: 0, fat: 12 },
-  'Zalm': { calories: 208, protein: 25, carbs: 0, fat: 12 },
-  'Garnalen': { calories: 99, protein: 24, carbs: 0, fat: 0.3 },
-  'Krab': { calories: 97, protein: 20, carbs: 0, fat: 1.5 },
-  'Lobster': { calories: 89, protein: 19, carbs: 0, fat: 0.9 },
-  'Oesters': { calories: 68, protein: 7, carbs: 4, fat: 2.5 },
-  'Mosselen': { calories: 86, protein: 12, carbs: 4, fat: 2.2 },
-  'Inktvis': { calories: 92, protein: 16, carbs: 3, fat: 1.4 },
-  'Octopus': { calories: 82, protein: 15, carbs: 2, fat: 1.0 },
-  'Rundvlees': { calories: 250, protein: 26, carbs: 0, fat: 15 },
-  'Boter': { calories: 717, protein: 0.9, carbs: 0.1, fat: 81 },
-  'Olijfolie': { calories: 884, protein: 0, carbs: 0, fat: 100 },
-  'Tonijn': { calories: 144, protein: 30, carbs: 0, fat: 1 },
-  'Varkensvlees': { calories: 242, protein: 27, carbs: 0, fat: 14 },
-  'Kipfilet': { calories: 165, protein: 31, carbs: 0, fat: 4 },
-  'Gerookte Zalm': { calories: 117, protein: 18, carbs: 0, fat: 4 },
-  'Runderlever': { calories: 165, protein: 26, carbs: 4, fat: 4 },
-  'Lamskotelet': { calories: 294, protein: 25, carbs: 0, fat: 21 },
-  
-  // Orgaanvlees
-  'Orgaanvlees (Lever)': { calories: 135, protein: 20, carbs: 4, fat: 4 },
-  'Orgaanvlees (Hart)': { calories: 112, protein: 17, carbs: 0, fat: 4 },
-  'Runderlever': { calories: 135, protein: 20, carbs: 4, fat: 4 },
-  'Runderhart': { calories: 112, protein: 17, carbs: 0, fat: 4 },
-  
-  // Overig
-  'Tartaar': { calories: 220, protein: 22, carbs: 0, fat: 14 },
-  'Carpaccio': { calories: 120, protein: 21, carbs: 0, fat: 4 },
-  '1 Ei': { calories: 155, protein: 13, carbs: 1, fat: 11 }, // per stuk
-  
-  // Noten (kleine hoeveelheden in carnivoor)
-  '1 Handje Walnoten': { calories: 26, protein: 0.6, carbs: 0.5, fat: 2.6 }, // per handje (4g)
-  '1 Handje Amandelen': { calories: 23, protein: 0.8, carbs: 0.9, fat: 2.0 },
-  '1 Handje Cashewnoten': { calories: 22, protein: 0.7, carbs: 1.2, fat: 1.8 },
-  '1 Handje Hazelnoten': { calories: 25, protein: 0.6, carbs: 0.7, fat: 2.4 },
-  '1 Handje Pecannoten': { calories: 28, protein: 0.4, carbs: 0.6, fat: 2.8 },
-  '1 Handje Pistachenoten': { calories: 23, protein: 0.8, carbs: 1.1, fat: 1.8 },
-  '1 Handje Macadamia Noten': { calories: 30, protein: 0.3, carbs: 0.6, fat: 3.0 },
-  
-  // Supplements
-  'Whey Eiwit Shakes': { calories: 120, protein: 25, carbs: 3, fat: 1 },
-  'Whey Protein': { calories: 120, protein: 25, carbs: 3, fat: 1 }
-};
+// Function to fetch ingredients from database
+async function getIngredientsFromDatabase() {
+  try {
+    const { data: ingredients, error } = await supabase
+      .from('nutrition_ingredients')
+      .select('*')
+      .eq('is_active', true);
+    
+    if (error) {
+      console.error('❌ Error fetching ingredients from database:', error);
+      return {};
+    }
+    
+    // Convert database format to lookup object
+    const ingredientLookup = {};
+    ingredients?.forEach(ingredient => {
+      ingredientLookup[ingredient.name] = {
+        calories: ingredient.calories_per_100g,
+        protein: ingredient.protein_per_100g,
+        carbs: ingredient.carbs_per_100g,
+        fat: ingredient.fat_per_100g,
+        unit_type: ingredient.unit_type
+      };
+    });
+    
+    console.log('✅ Loaded', Object.keys(ingredientLookup).length, 'ingredients from database');
+    return ingredientLookup;
+  } catch (error) {
+    console.error('❌ Error in getIngredientsFromDatabase:', error);
+    return {};
+  }
+}
 
 // Basis weekplan voor Carnivoor - Droogtrainen (met verhoudingen)
 const BASE_CARNIVOOR_DROOGTRAINEN_PLAN = {
@@ -269,25 +180,28 @@ function calculateBasePlanCalories() {
 
 
 // Bereken nutritionele waarden voor een maaltijd
-function calculateMealNutrition(ingredients) {
+function calculateMealNutrition(ingredients, ingredientDatabase) {
   let totalCalories = 0;
   let totalProtein = 0;
   let totalCarbs = 0;
   let totalFat = 0;
   
   ingredients.forEach(ingredient => {
-    const nutritionData = CARNIVOOR_INGREDIENTS[ingredient.name];
+    const nutritionData = ingredientDatabase[ingredient.name];
     if (nutritionData) {
       let multiplier = 0;
       
-      if (ingredient.unit === 'stuks' && ingredient.name === '1 Ei') {
+      // Handle different unit types based on database unit_type
+      if (ingredient.unit === 'per_piece' || ingredient.unit === 'stuk') {
         multiplier = ingredient.amount;
-      } else if (ingredient.unit === 'stuks' && (ingredient.name.includes('Whey') || ingredient.name.includes('Protein'))) {
-        // Whey protein is per scoop (stuk)
-        multiplier = ingredient.amount;
+      } else if (ingredient.unit === 'per_100g' || ingredient.unit === 'g') {
+        multiplier = ingredient.amount / 100;
+      } else if (ingredient.unit === 'per_ml') {
+        multiplier = ingredient.amount / 100; // Assuming 1ml = 1g for liquids
       } else if (ingredient.unit === 'handje') {
         multiplier = ingredient.amount;
       } else {
+        // Default to per 100g calculation
         multiplier = ingredient.amount / 100;
       }
       
@@ -295,6 +209,8 @@ function calculateMealNutrition(ingredients) {
       totalProtein += nutritionData.protein * multiplier;
       totalCarbs += nutritionData.carbs * multiplier;
       totalFat += nutritionData.fat * multiplier;
+    } else {
+      console.warn(`⚠️ Nutrition data not found for ingredient: ${ingredient.name}`);
     }
   });
   
@@ -318,6 +234,11 @@ export async function GET(request: NextRequest) {
         error: 'userId and planId are required'
       }, { status: 400 });
     }
+
+    console.log('🔍 Generating dynamic nutrition plan:', { userId, planId });
+
+    // Load ingredients from database
+    const ingredientDatabase = await getIngredientsFromDatabase();
 
     // Get the plan from database
     const { data: planData, error: planError } = await supabase
@@ -433,7 +354,7 @@ export async function GET(request: NextRequest) {
                 protein: (profile.target_calories * (planData.protein_percentage || 0) / 100) / 4 / 7,
                 carbs: (profile.target_calories * (planData.carbs_percentage || 0) / 100) / 4 / 7,
                 fat: (profile.target_calories * (planData.fat_percentage || 0) / 100) / 9 / 7
-              }),
+              }, ingredientDatabase),
               nutrition: mealNutrition
             };
           }
@@ -479,7 +400,7 @@ export async function GET(request: NextRequest) {
                 protein: (profile.target_calories * (planData.protein_percentage || 0) / 100) / 4 / 7,
                 carbs: (profile.target_calories * (planData.carbs_percentage || 0) / 100) / 4 / 7,
                 fat: (profile.target_calories * (planData.fat_percentage || 0) / 100) / 9 / 7
-              }),
+              }, ingredientDatabase),
               nutrition: mealNutrition
             };
           }
@@ -581,18 +502,32 @@ export async function GET(request: NextRequest) {
 }
 
 // Function to calculate nutrition for ingredients
-function calculateIngredientNutrition(ingredients) {
+function calculateIngredientNutrition(ingredients, ingredientDatabase) {
   let totalCalories = 0;
   let totalProtein = 0;
   let totalCarbs = 0;
   let totalFat = 0;
   
   ingredients.forEach(ingredient => {
-    if (ingredient.nutrition) {
-      totalCalories += ingredient.nutrition.calories || 0;
-      totalProtein += ingredient.nutrition.protein || 0;
-      totalCarbs += ingredient.nutrition.carbs || 0;
-      totalFat += ingredient.nutrition.fat || 0;
+    const nutritionData = ingredientDatabase[ingredient.name];
+    if (nutritionData) {
+      let multiplier = 0;
+      
+      // Handle different unit types
+      if (ingredient.unit === 'per_piece' || ingredient.unit === 'stuk') {
+        multiplier = ingredient.amount;
+      } else if (ingredient.unit === 'per_100g' || ingredient.unit === 'g') {
+        multiplier = ingredient.amount / 100;
+      } else if (ingredient.unit === 'per_ml') {
+        multiplier = ingredient.amount / 100;
+      } else {
+        multiplier = ingredient.amount / 100;
+      }
+      
+      totalCalories += nutritionData.calories * multiplier;
+      totalProtein += nutritionData.protein * multiplier;
+      totalCarbs += nutritionData.carbs * multiplier;
+      totalFat += nutritionData.fat * multiplier;
     }
   });
   
@@ -600,7 +535,7 @@ function calculateIngredientNutrition(ingredients) {
 }
 
 // Function to intelligently scale ingredient amounts with macro optimization
-function scaleIngredientAmounts(ingredients, scaleFactor, targetNutrition = null) {
+function scaleIngredientAmounts(ingredients, scaleFactor, targetNutrition = null, ingredientDatabase = {}) {
   if (!ingredients || scaleFactor === 1) return ingredients;
   
   // Step 1: Basic scaling
@@ -632,8 +567,8 @@ function scaleIngredientAmounts(ingredients, scaleFactor, targetNutrition = null
   });
   
   // Step 2: Macro optimization (if target nutrition provided)
-  if (targetNutrition) {
-    const currentNutrition = calculateIngredientNutrition(scaledIngredients);
+  if (targetNutrition && Object.keys(ingredientDatabase).length > 0) {
+    const currentNutrition = calculateIngredientNutrition(scaledIngredients, ingredientDatabase);
     
     // Calculate differences
     const calorieDiff = targetNutrition.calories - currentNutrition.calories;
