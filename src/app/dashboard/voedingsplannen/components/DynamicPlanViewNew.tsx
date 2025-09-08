@@ -701,16 +701,31 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
               
               let statusText = '';
               let statusColor = '';
+              let progressColor = '';
               
               if (isPerfect) {
                 statusText = 'Doel bereikt! (100%)';
                 statusColor = 'text-green-400';
+                progressColor = 'bg-green-500';
               } else if (isOver) {
                 statusText = `${Math.abs(difference)} kcal te veel (${percentage}%)`;
                 statusColor = 'text-red-400';
+                progressColor = 'bg-red-500';
               } else {
-                statusText = `${Math.abs(difference)} kcal te weinig (${percentage}%)`;
-                statusColor = 'text-yellow-400';
+                // Under target - use percentage-based colors
+                if (percentage >= 95) {
+                  statusText = `${Math.abs(difference)} kcal te weinig (${percentage}%)`;
+                  statusColor = 'text-green-400';
+                  progressColor = 'bg-green-500';
+                } else if (percentage >= 90) {
+                  statusText = `${Math.abs(difference)} kcal te weinig (${percentage}%)`;
+                  statusColor = 'text-orange-400';
+                  progressColor = 'bg-orange-500';
+                } else {
+                  statusText = `${Math.abs(difference)} kcal te weinig (${percentage}%)`;
+                  statusColor = 'text-red-400';
+                  progressColor = 'bg-red-500';
+                }
               }
               
               return (
@@ -721,10 +736,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                   </div>
                   <div className="w-full bg-gray-700 rounded-full h-3">
                     <div 
-                      className={`h-3 rounded-full transition-all duration-300 ${
-                        isPerfect ? 'bg-green-500' : 
-                        isOver ? 'bg-red-500' : 'bg-yellow-500'
-                      }`}
+                      className={`h-3 rounded-full transition-all duration-300 ${progressColor}`}
                       style={{ width: `${Math.min(percentage, 100)}%` }}
                     ></div>
                   </div>
@@ -744,16 +756,31 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
               
               let statusText = '';
               let statusColor = '';
+              let progressColor = '';
               
               if (isPerfect) {
                 statusText = 'Doel bereikt! (100%)';
                 statusColor = 'text-green-400';
+                progressColor = 'bg-green-500';
               } else if (isOver) {
                 statusText = `${Math.abs(Math.round(difference * 10) / 10)}g te veel (${percentage}%)`;
                 statusColor = 'text-red-400';
+                progressColor = 'bg-red-500';
               } else {
-                statusText = `${Math.abs(Math.round(difference * 10) / 10)}g te weinig (${percentage}%)`;
-                statusColor = 'text-yellow-400';
+                // Under target - use percentage-based colors
+                if (percentage >= 95) {
+                  statusText = `${Math.abs(Math.round(difference * 10) / 10)}g te weinig (${percentage}%)`;
+                  statusColor = 'text-green-400';
+                  progressColor = 'bg-green-500';
+                } else if (percentage >= 90) {
+                  statusText = `${Math.abs(Math.round(difference * 10) / 10)}g te weinig (${percentage}%)`;
+                  statusColor = 'text-orange-400';
+                  progressColor = 'bg-orange-500';
+                } else {
+                  statusText = `${Math.abs(Math.round(difference * 10) / 10)}g te weinig (${percentage}%)`;
+                  statusColor = 'text-red-400';
+                  progressColor = 'bg-red-500';
+                }
               }
               
               return (
@@ -761,16 +788,13 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                   <div className="flex justify-between items-center">
                     <span className="text-white font-medium">Eiwit (Protein)</span>
                     <span className={`text-sm ${statusColor}`}>{statusText}</span>
-              </div>
+                  </div>
                   <div className="w-full bg-gray-700 rounded-full h-3">
                     <div 
-                      className={`h-3 rounded-full transition-all duration-300 ${
-                        isPerfect ? 'bg-green-500' : 
-                        isOver ? 'bg-red-500' : 'bg-yellow-500'
-                      }`}
+                      className={`h-3 rounded-full transition-all duration-300 ${progressColor}`}
                       style={{ width: `${Math.min(percentage, 100)}%` }}
                     ></div>
-              </div>
+                  </div>
             </div>
               );
             })()}
@@ -787,16 +811,31 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
               
               let statusText = '';
               let statusColor = '';
+              let progressColor = '';
               
               if (isPerfect) {
                 statusText = 'Doel bereikt! (100%)';
                 statusColor = 'text-green-400';
+                progressColor = 'bg-green-500';
               } else if (isOver) {
                 statusText = `${Math.abs(Math.round(difference * 10) / 10)}g te veel (${percentage}%)`;
                 statusColor = 'text-red-400';
+                progressColor = 'bg-red-500';
               } else {
-                statusText = `${Math.abs(Math.round(difference * 10) / 10)}g te weinig (${percentage}%)`;
-                statusColor = 'text-yellow-400';
+                // Under target - use percentage-based colors
+                if (percentage >= 95) {
+                  statusText = `${Math.abs(Math.round(difference * 10) / 10)}g te weinig (${percentage}%)`;
+                  statusColor = 'text-green-400';
+                  progressColor = 'bg-green-500';
+                } else if (percentage >= 90) {
+                  statusText = `${Math.abs(Math.round(difference * 10) / 10)}g te weinig (${percentage}%)`;
+                  statusColor = 'text-orange-400';
+                  progressColor = 'bg-orange-500';
+                } else {
+                  statusText = `${Math.abs(Math.round(difference * 10) / 10)}g te weinig (${percentage}%)`;
+                  statusColor = 'text-red-400';
+                  progressColor = 'bg-red-500';
+                }
               }
               
               return (
@@ -807,10 +846,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                   </div>
                   <div className="w-full bg-gray-700 rounded-full h-3">
                     <div 
-                      className={`h-3 rounded-full transition-all duration-300 ${
-                        isPerfect ? 'bg-green-500' : 
-                        isOver ? 'bg-red-500' : 'bg-yellow-500'
-                      }`}
+                      className={`h-3 rounded-full transition-all duration-300 ${progressColor}`}
                       style={{ width: `${Math.min(percentage, 100)}%` }}
                     ></div>
                   </div>
@@ -830,16 +866,31 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
               
               let statusText = '';
               let statusColor = '';
+              let progressColor = '';
               
               if (isPerfect) {
                 statusText = 'Doel bereikt! (100%)';
                 statusColor = 'text-green-400';
+                progressColor = 'bg-green-500';
               } else if (isOver) {
                 statusText = `${Math.abs(Math.round(difference * 10) / 10)}g te veel (${percentage}%)`;
                 statusColor = 'text-red-400';
+                progressColor = 'bg-red-500';
               } else {
-                statusText = `${Math.abs(Math.round(difference * 10) / 10)}g te weinig (${percentage}%)`;
-                statusColor = 'text-yellow-400';
+                // Under target - use percentage-based colors
+                if (percentage >= 95) {
+                  statusText = `${Math.abs(Math.round(difference * 10) / 10)}g te weinig (${percentage}%)`;
+                  statusColor = 'text-green-400';
+                  progressColor = 'bg-green-500';
+                } else if (percentage >= 90) {
+                  statusText = `${Math.abs(Math.round(difference * 10) / 10)}g te weinig (${percentage}%)`;
+                  statusColor = 'text-orange-400';
+                  progressColor = 'bg-orange-500';
+                } else {
+                  statusText = `${Math.abs(Math.round(difference * 10) / 10)}g te weinig (${percentage}%)`;
+                  statusColor = 'text-red-400';
+                  progressColor = 'bg-red-500';
+                }
               }
               
               return (
@@ -847,16 +898,13 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                   <div className="flex justify-between items-center">
                     <span className="text-white font-medium">Vet (Fat)</span>
                     <span className={`text-sm ${statusColor}`}>{statusText}</span>
-            </div>
+                  </div>
                   <div className="w-full bg-gray-700 rounded-full h-3">
                     <div 
-                      className={`h-3 rounded-full transition-all duration-300 ${
-                        isPerfect ? 'bg-green-500' : 
-                        isOver ? 'bg-red-500' : 'bg-yellow-500'
-                      }`}
+                      className={`h-3 rounded-full transition-all duration-300 ${progressColor}`}
                       style={{ width: `${Math.min(percentage, 100)}%` }}
                     ></div>
-            </div>
+                  </div>
             </div>
               );
             })()}
