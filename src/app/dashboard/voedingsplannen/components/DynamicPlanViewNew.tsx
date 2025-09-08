@@ -9,9 +9,11 @@ import {
   ChartBarIcon,
   ClockIcon,
   PencilIcon,
-  PlusIcon
+  PlusIcon,
+  BugAntIcon
 } from '@heroicons/react/24/outline';
 import MealEditModal from './MealEditModal';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 
 interface DynamicPlanViewProps {
   planId: string;
@@ -126,6 +128,9 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
   const [editingMeal, setEditingMeal] = useState<{day: string, meal: string} | null>(null);
   const [customPlanData, setCustomPlanData] = useState<PlanData | null>(null);
   const [modifiedMeals, setModifiedMeals] = useState<Set<string>>(new Set());
+  const [showDebugPanel, setShowDebugPanel] = useState(false);
+  
+  const { isAdmin } = useSupabaseAuth();
 
   // Fetch dynamic plan data
   const fetchDynamicPlan = async () => {
@@ -542,7 +547,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
           newSet.delete(mealKey);
           return newSet;
         });
-      } else {
+    } else {
         // Mark this meal as modified
         setModifiedMeals(prev => new Set([...prev, mealKey]));
       }
@@ -649,12 +654,164 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                 </p>
               </div>
             </div>
+            <div className="flex items-center gap-3">
+              {/* Debug Toggle for Admin */}
+              {isAdmin && (
+                <button
+                  onClick={() => setShowDebugPanel(!showDebugPanel)}
+                  className="flex items-center gap-2 px-3 py-2 bg-[#3A4D23] hover:bg-[#4A5D33] text-white rounded-lg transition-colors text-sm font-medium"
+                >
+                  <BugAntIcon className="w-4 h-4" />
+                  Debug
+                </button>
+              )}
             <button className="px-6 py-3 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold">
               Selecteer dit plan
             </button>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Debug Panel for Admin */}
+      {isAdmin && showDebugPanel && (
+        <div className="bg-[#1A1A1A] border-b border-[#3A4D23] p-6">
+          <div className="max-w-7xl mx-auto">
+            <h3 className="text-lg font-bold text-[#8BAE5A] mb-4">🔍 Debug Informatie</h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* Scaling Info */}
+              <div className="bg-[#181F17] border border-[#3A4D23] rounded-lg p-4">
+                <h4 className="text-white font-semibold mb-3">⚖️ Scaling Informatie</h4>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-300">Scale Factor:</span>
+                    <span className="text-white font-mono">
+                      {planData?.scalingInfo?.scaleFactor || 'N/A'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-300">User Target:</span>
+                    <span className="text-white font-mono">
+                      {planData?.scalingInfo?.targetCalories || 'N/A'} kcal
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-300">Plan Target:</span>
+                    <span className="text-white font-mono">
+                      {planData?.scalingInfo?.planTargetCalories || 'N/A'} kcal
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-300">Scaling Actief:</span>
+                    <span className={`font-mono ${(planData?.scalingInfo?.scaleFactor || 1) !== 1 ? 'text-orange-400' : 'text-green-400'}`}>
+                      {(planData?.scalingInfo?.scaleFactor || 1) !== 1 ? 'JA' : 'NEE'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* User Profile */}
+              <div className="bg-[#181F17] border border-[#3A4D23] rounded-lg p-4">
+                <h4 className="text-white font-semibold mb-3">👤 User Profiel</h4>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-300">Gewicht:</span>
+                    <span className="text-white font-mono">
+                      {planData?.userProfile?.weight || 'N/A'} kg
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-300">Leeftijd:</span>
+                    <span className="text-white font-mono">
+                      {planData?.userProfile?.age || 'N/A'} jaar
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-300">Lengte:</span>
+                    <span className="text-white font-mono">
+                      {planData?.userProfile?.height || 'N/A'} cm
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-300">Doel:</span>
+                    <span className="text-white font-mono">
+                      {planData?.userProfile?.goal || 'N/A'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Plan Percentages */}
+              <div className="bg-[#181F17] border border-[#3A4D23] rounded-lg p-4">
+                <h4 className="text-white font-semibold mb-3">📊 Plan Macro's</h4>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-300">Eiwit:</span>
+                    <span className="text-white font-mono">
+                      {planData?.planPercentages?.protein || 'N/A'}%
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-300">Koolhydraten:</span>
+                    <span className="text-white font-mono">
+                      {planData?.planPercentages?.carbs || 'N/A'}%
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-300">Vet:</span>
+                    <span className="text-white font-mono">
+                      {planData?.planPercentages?.fat || 'N/A'}%
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Ingredient Database Status */}
+            <div className="mt-6 bg-[#181F17] border border-[#3A4D23] rounded-lg p-4">
+              <h4 className="text-white font-semibold mb-3">🗄️ Ingrediënten Database Status</h4>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                {['Appel', 'Banaan', 'Havermout', 'Whey Shake'].map(ingredient => {
+                  const hasData = INGREDIENT_DATABASE[ingredient];
+                  return (
+                    <div key={ingredient} className="flex items-center gap-2">
+                      <span className={`w-2 h-2 rounded-full ${hasData ? 'bg-green-400' : 'bg-red-400'}`}></span>
+                      <span className="text-gray-300">{ingredient}:</span>
+                      <span className={`font-mono ${hasData ? 'text-green-400' : 'text-red-400'}`}>
+                        {hasData ? 'OK' : 'MISSING'}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Current Day Ingredients */}
+            <div className="mt-6 bg-[#181F17] border border-[#3A4D23] rounded-lg p-4">
+              <h4 className="text-white font-semibold mb-3">🍽️ Huidige Dag Ingrediënten ({selectedDay})</h4>
+              <div className="space-y-2 text-sm max-h-40 overflow-y-auto">
+                {currentDayData && Object.entries(currentDayData).map(([mealType, meal]: [string, any]) => {
+                  if (!meal || !meal.ingredients) return null;
+                  return (
+                    <div key={mealType} className="border-l-2 border-[#8BAE5A] pl-3">
+                      <div className="font-medium text-[#8BAE5A]">{MEAL_NAMES[mealType] || mealType}</div>
+                      {meal.ingredients.map((ingredient: any, index: number) => (
+                        <div key={index} className="ml-4 text-gray-300">
+                          {ingredient.name}: {ingredient.amount} {ingredient.unit}
+                          <span className="ml-2 text-xs text-gray-500">
+                            (DB: {INGREDIENT_DATABASE[ingredient.name] ? '✓' : '✗'})
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="max-w-7xl mx-auto p-6 space-y-6">
         {/* Plan-Specific Macro Breakdown */}
@@ -675,26 +832,26 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                       <div className="flex items-center gap-3">
                         <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
                         <span className="text-white font-medium">Eiwit</span>
-                      </div>
+              </div>
                       <span className="text-white font-bold text-lg">{planData.planPercentages.protein}%</span>
-                    </div>
+              </div>
                     <div className="flex items-center justify-between p-3 bg-[#232D1A] rounded-lg">
                       <div className="flex items-center gap-3">
                         <div className="w-3 h-3 bg-green-500 rounded-full"></div>
                         <span className="text-white font-medium">Koolhydraten</span>
-                      </div>
+              </div>
                       <span className="text-white font-bold text-lg">{planData.planPercentages.carbs}%</span>
               </div>
                     <div className="flex items-center justify-between p-3 bg-[#232D1A] rounded-lg">
                       <div className="flex items-center gap-3">
                         <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
                         <span className="text-white font-medium">Vet</span>
-              </div>
-                      <span className="text-white font-bold text-lg">{planData.planPercentages.fat}%</span>
-              </div>
-              </div>
             </div>
-              )}
+                      <span className="text-white font-bold text-lg">{planData.planPercentages.fat}%</span>
+            </div>
+              </div>
+              </div>
+            )}
               
               {/* Target Values */}
               {planData.planTargets && (
@@ -704,7 +861,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                     <div className="text-center p-3 bg-[#232D1A] rounded-lg">
                       <div className="text-2xl font-bold text-white">{planData.planTargets?.target_calories || 0}</div>
                       <div className="text-sm text-gray-400">Calorieën</div>
-                    </div>
+          </div>
                     <div className="text-center p-3 bg-[#232D1A] rounded-lg">
                       <div className="text-2xl font-bold text-white">{planData.planTargets?.target_protein || 0}g</div>
                       <div className="text-sm text-gray-400">Eiwit</div>
@@ -832,14 +989,14 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                   <div className="flex justify-between items-center">
                     <span className="text-white font-medium">Kcal (Calorieën)</span>
                     <span className={`text-sm ${statusColor}`}>{statusText}</span>
-                  </div>
+              </div>
                   <div className="w-full bg-gray-700 rounded-full h-3">
                     <div 
                       className={`h-3 rounded-full transition-all duration-300 ${progressColor}`}
                       style={{ width: `${Math.min(percentage, 100)}%` }}
                     ></div>
-                  </div>
-                </div>
+              </div>
+            </div>
               );
             })()}
 
@@ -896,13 +1053,13 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                   <div className="flex justify-between items-center">
                     <span className="text-white font-medium">Eiwit (Protein)</span>
                     <span className={`text-sm ${statusColor}`}>{statusText}</span>
-              </div>
+            </div>
                   <div className="w-full bg-gray-700 rounded-full h-3">
                     <div 
                       className={`h-3 rounded-full transition-all duration-300 ${progressColor}`}
                       style={{ width: `${Math.min(percentage, 100)}%` }}
                     ></div>
-              </div>
+            </div>
             </div>
               );
             })()}
@@ -960,7 +1117,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                   <div className="flex justify-between items-center">
                     <span className="text-white font-medium">Koolhydraten (Carbohydrates)</span>
                     <span className={`text-sm ${statusColor}`}>{statusText}</span>
-                  </div>
+            </div>
                   <div className="w-full bg-gray-700 rounded-full h-3">
                     <div 
                       className={`h-3 rounded-full transition-all duration-300 ${progressColor}`}
@@ -1062,8 +1219,8 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
             const meal = getMealData(selectedDay, mealType);
             // Show all meal types, even if they don't have data
             if (!meal) {
-              return (
-                <div key={mealType} className="bg-[#181F17] border border-[#3A4D23] rounded-xl p-6">
+            return (
+              <div key={mealType} className="bg-[#181F17] border border-[#3A4D23] rounded-xl p-6">
                   {/* Meal Header */}
                   <div className="flex items-center justify-between mb-4">
                     <h4 className="text-lg font-bold text-white flex items-center">
