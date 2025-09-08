@@ -113,6 +113,7 @@ const SidebarContent = ({ pathname }: { pathname: string }) => {
         { label: 'E-book Controle', icon: BookOpenIcon, href: '/dashboard-admin/ebook-controle', badge: 'NEW' },
         { label: 'Ebooks Setup', icon: BookOpenIcon, href: '/dashboard-admin/ebooks-setup', badge: 'NEW' },
         { label: 'Trainingscentrum', icon: FireIcon, href: '/dashboard-admin/trainingscentrum' },
+        { label: 'Trainingschemas Backup', icon: DocumentTextIcon, href: '/dashboard-admin/trainingschemas-backup', badge: 'BACKUP' },
         { label: 'Voedingsplannen', icon: BookOpenIcon, href: '/dashboard-admin/voedingsplannen' },
         { label: 'Voedingsplannen Backup', icon: DocumentTextIcon, href: '/dashboard-admin/voedingsplannen-backup', badge: 'BACKUP' },
         { label: 'Boekenkamer', icon: BookOpenIcon, href: '/dashboard-admin/boekenkamer' },

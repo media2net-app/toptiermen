@@ -8,8 +8,10 @@ import Link from 'next/link';
 import BadgeDisplay from '@/components/BadgeDisplay';
 import UserTasksWidget from '@/components/UserTasksWidget';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { useOnboarding } from '@/contexts/OnboardingContext';
 import DashboardLoadingModal from '@/components/ui/DashboardLoadingModal';
 import DashboardDebugger from '@/components/DashboardDebugger';
+import { useRouter } from 'next/navigation';
 
 
 // Force dynamic rendering to prevent navigator errors
@@ -100,6 +102,15 @@ export default function Dashboard() {
   const [showDebugger, setShowDebugger] = useState(false);
 
   const { user, profile, loading: authLoading } = useSupabaseAuth();
+  const { isOnboarding, currentStep } = useOnboarding();
+  const router = useRouter();
+
+  // Only redirect if user tries to access future onboarding steps
+  // Users can stay on dashboard or access previous steps
+  useEffect(() => {
+    // Remove automatic redirect - let users navigate freely within allowed steps
+    // The middleware will handle blocking access to future steps
+  }, [isOnboarding, currentStep, router]);
 
   // 2.0.1: Fetch real dashboard data from database
   useEffect(() => {
@@ -133,6 +144,11 @@ export default function Dashboard() {
           const data = await response.json();
           setStats(data.stats);
           setUserBadges(data.userBadges || []);
+          
+          // Check for onboarding completion badge unlock
+          if (data.stats && !isOnboarding && (data.userBadges || []).length === 0) {
+            await checkOnboardingCompletionBadge(user.id);
+          }
         } else {
           console.error('Failed to fetch dashboard stats');
           // Set minimal fallback data (not mock, just empty)
@@ -172,7 +188,40 @@ export default function Dashboard() {
     };
 
     fetchDashboardData();
-  }, [user?.id, authLoading]);
+  }, [user?.id, authLoading, isOnboarding]);
+
+  // Check for onboarding completion badge unlock
+  const checkOnboardingCompletionBadge = async (userId: string) => {
+    try {
+      const response = await fetch('/api/badges/check-onboarding-completion', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.unlocked) {
+        // Refresh badges to show the newly unlocked badge
+        const badgesResponse = await fetch(`/api/dashboard-stats`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ userId })
+        });
+
+        if (badgesResponse.ok) {
+          const badgesData = await badgesResponse.json();
+          setUserBadges(badgesData.userBadges || []);
+        }
+      }
+    } catch (error) {
+      console.error('Error checking onboarding completion badge:', error);
+    }
+  };
 
   // Simple fade in effect
   useEffect(() => {
@@ -262,18 +311,18 @@ export default function Dashboard() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8 animate-fade-in-up">
             {/* Mijn Missies */}
             <Link href="/dashboard/mijn-missies" className={`bg-gradient-to-br from-[#181F17] to-[#232D1A] border rounded-xl p-4 sm:p-6 text-center transition-transform duration-300 cursor-pointer block ${
-              stats?.missions.completedToday === stats?.missions.total && (stats?.missions.total || 0) > 0
+              stats?.missions.completedThisWeek === stats?.missions.total && (stats?.missions.total || 0) > 0
                 ? 'border-[#8BAE5A] shadow-2xl shadow-[#8BAE5A]/20 hover:scale-105 hover:shadow-[#8BAE5A]/40'
                 : 'border-[#3A4D23]/30 hover:scale-105 hover:shadow-2xl hover:border-[#8BAE5A]/50'
             }`}>
               <div className="flex items-center justify-between mb-3 sm:mb-4">
                 <h3 className="text-lg sm:text-xl font-bold text-white">Mijn Missies</h3>
                 <span className={`text-xl sm:text-2xl ${
-                  stats?.missions.completedToday === stats?.missions.total && (stats?.missions.total || 0) > 0
+                  stats?.missions.completedThisWeek === stats?.missions.total && (stats?.missions.total || 0) > 0
                     ? 'text-[#FFD700]'
                     : 'text-[#8BAE5A]'
                 }`}>
-                  {stats?.missions.completedToday === stats?.missions.total && (stats?.missions.total || 0) > 0 ? (
+                  {stats?.missions.completedThisWeek === stats?.missions.total && (stats?.missions.total || 0) > 0 ? (
                     <TrophyIcon className="w-6 h-6" />
                   ) : (
                     <CheckCircleIcon className="w-6 h-6" />
@@ -281,19 +330,19 @@ export default function Dashboard() {
                 </span>
               </div>
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-2xl sm:text-3xl font-bold text-[#FFD700]">{stats?.missions.completedToday || 0}/{stats?.missions.total || 0}</span>
+                <span className="text-2xl sm:text-3xl font-bold text-[#FFD700]">{stats?.missions.completedThisWeek || 0}/{stats?.missions.total || 0}</span>
                 <span className={`text-sm sm:text-base ${
-                  stats?.missions.completedToday === stats?.missions.total && (stats?.missions.total || 0) > 0
+                  stats?.missions.completedThisWeek === stats?.missions.total && (stats?.missions.total || 0) > 0
                     ? 'text-[#FFD700] font-bold'
                     : 'text-[#8BAE5A]'
                 }`}>
-                  {stats?.missions.completedToday === stats?.missions.total && (stats?.missions.total || 0) > 0 ? 'VOLBRACHT!' : 'volbracht'}
+                  {stats?.missions.completedThisWeek === stats?.missions.total && (stats?.missions.total || 0) > 0 ? 'VOLBRACHT!' : 'volbracht'}
                 </span>
               </div>
               <div className="w-full h-2 bg-[#3A4D23]/40 rounded-full">
                 <div 
                   className={`h-2 rounded-full transition-all duration-700 ${
-                    stats?.missions.completedToday === stats?.missions.total && (stats?.missions.total || 0) > 0
+                    stats?.missions.completedThisWeek === stats?.missions.total && (stats?.missions.total || 0) > 0
                       ? 'bg-gradient-to-r from-[#FFD700] to-[#f0a14f]'
                       : 'bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f]'
                   }`}
@@ -301,11 +350,11 @@ export default function Dashboard() {
                 ></div>
               </div>
               <div className={`text-xs mt-2 ${
-                stats?.missions.completedToday === stats?.missions.total && (stats?.missions.total || 0) > 0
+                stats?.missions.completedThisWeek === stats?.missions.total && (stats?.missions.total || 0) > 0
                   ? 'text-[#FFD700] font-semibold'
                   : 'text-gray-400'
               }`}>
-                {stats?.missions.completedToday === stats?.missions.total && (stats?.missions.total || 0) > 0 
+                {stats?.missions.completedThisWeek === stats?.missions.total && (stats?.missions.total || 0) > 0 
                   ? '🎉 Perfecte dag behaald!' 
                   : `${stats?.missions.completedToday || 0} vandaag`
                 }

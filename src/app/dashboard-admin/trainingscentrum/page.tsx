@@ -262,6 +262,7 @@ export default function TrainingscentrumBeheer() {
   const [filterCategory, setFilterCategory] = useState('Alle Categorieën');
   const [filterMuscle, setFilterMuscle] = useState('Alle Spiergroepen');
   const [filterEquipment, setFilterEquipment] = useState('Alle Materialen');
+  const [filterGoal, setFilterGoal] = useState('Alle Doelen');
   
   // Database state
   const [exercises, setExercises] = useState<any[]>([]);
@@ -772,10 +773,25 @@ export default function TrainingscentrumBeheer() {
     }
   };
 
-  const filteredSchemas = schemas.filter(schema => 
-    schema.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-    (filterCategory === 'Alle Categorieën' || schema.category === filterCategory)
-  );
+  const filteredSchemas = schemas.filter(schema => {
+    const matchesSearch = schema.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = filterCategory === 'Alle Categorieën' || schema.category === filterCategory;
+    
+    // Goal filter based on title
+    let matchesGoal = true;
+    if (filterGoal !== 'Alle Doelen') {
+      const titleLower = schema.name.toLowerCase();
+      if (filterGoal === 'Kracht') {
+        matchesGoal = titleLower.includes('kracht');
+      } else if (filterGoal === 'Spiermassa') {
+        matchesGoal = titleLower.includes('spiermassa');
+      } else if (filterGoal === 'Conditie') {
+        matchesGoal = titleLower.includes('conditie');
+      }
+    }
+    
+    return matchesSearch && matchesCategory && matchesGoal;
+  });
 
   const filteredExercises = exercises.filter(exercise => {
     const matchesSearch = exercise.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -935,6 +951,16 @@ export default function TrainingscentrumBeheer() {
                   <option key={category} value={category}>{category}</option>
                 ))}
               </select>
+              <select
+                value={filterGoal}
+                onChange={(e) => setFilterGoal(e.target.value)}
+                className="px-4 py-3 rounded-xl bg-[#232D1A] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+              >
+                <option value="Alle Doelen">Alle Doelen</option>
+                <option value="Kracht">Kracht</option>
+                <option value="Spiermassa">Spiermassa</option>
+                <option value="Conditie">Conditie</option>
+              </select>
             </div>
             <div className="flex gap-3">
               <AdminButton
@@ -1009,7 +1035,7 @@ export default function TrainingscentrumBeheer() {
                 <CalendarIcon className="w-12 h-12 text-[#8BAE5A]/50 mx-auto mb-4" />
                 <p className="text-[#B6C948] text-lg mb-2">Geen trainingsschema's gevonden</p>
                 <p className="text-[#B6C948]/70 text-sm">
-                  {searchTerm || filterCategory !== 'Alle Categorieën' 
+                  {searchTerm || filterCategory !== 'Alle Categorieën' || filterGoal !== 'Alle Doelen'
                     ? 'Probeer je zoekcriteria aan te passen.' 
                     : 'Er zijn nog geen trainingsschema\'s toegevoegd.'}
                 </p>

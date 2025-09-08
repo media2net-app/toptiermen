@@ -220,9 +220,9 @@ const transformPlanData = (data: any): PlanData => {
         ontbijt: transformMealData(dayData.ontbijt),
         lunch: transformMealData(dayData.lunch),
         diner: transformMealData(dayData.diner),
-        ontbijt_snack: transformMealData(dayData.ochtend_snack),
-        lunch_snack: transformMealData(dayData.lunch_snack),
-        diner_snack: transformMealData(dayData.avond_snack || dayData.avondsnack || dayData.diner_snack),
+        ontbijt_snack: transformMealData(dayData.snack1),
+        lunch_snack: transformMealData(dayData.snack2),
+        diner_snack: transformMealData(dayData.avondsnack),
         dailyTotals: dayData.dailyTotals ? {
           calories: dayData.dailyTotals.calories || 0,
           protein: dayData.dailyTotals.protein || 0,

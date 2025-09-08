@@ -90,13 +90,23 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
     },
     {
       id: 5,
+      title: 'Challenge selecteren',
+      description: 'Kies een challenge om jezelf uit te dagen',
+      targetPage: '/dashboard/challenges',
+      targetMenuLabel: 'Challenges',
+      completed: false,
+      icon: '🏆',
+      instructions: 'Selecteer een challenge die past bij je doelen en voorkeuren'
+    },
+    {
+      id: 6,
       title: 'Forum introductie',
       description: 'Stel je voor aan de community',
-      targetPage: '/dashboard/brotherhood/forum/nieuwe-leden',
+      targetPage: '/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden',
       targetMenuLabel: 'Forum',
       completed: false,
       icon: '💬',
-      instructions: 'Ga naar het "Nieuwe Leden" topic en maak je eerste forum post om je voor te stellen aan de community'
+      instructions: 'Ga naar het "Voorstellen - Nieuwe Leden" topic in de Algemeen categorie en maak je eerste forum post om je voor te stellen aan de community'
     }
   ];
 
@@ -126,8 +136,12 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
         case '/dashboard/voedingsplannen':
           pageBasedStep = 4; // Step 4: Select nutrition plan
           break;
+        case '/dashboard/challenges':
+          pageBasedStep = 5; // Step 5: Challenge selection
+          break;
         case '/dashboard/brotherhood/forum':
-          pageBasedStep = 5; // Step 5: Forum introduction
+        case '/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden':
+          pageBasedStep = 6; // Step 6: Forum introduction
           break;
         default:
           pageBasedStep = currentStep; // Keep current step if page doesn't match
@@ -155,28 +169,31 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
         const isChiel = user?.email === 'chiel@media2net.nl';
         const shouldBeInOnboarding = !data.onboarding_completed && !isChiel;
         
+        console.log('🔍 Onboarding check:', {
+          onboarding_completed: data.onboarding_completed,
+          isChiel,
+          shouldBeInOnboarding,
+          current_step: data.current_step
+        });
+        
         if (shouldBeInOnboarding) {
           setIsOnboarding(true);
           
-          // Determine current step based on completion status
-          if (!data.welcome_video_watched) {
-            setCurrentStep(0);
-          } else if (!data.step_1_completed) {
-            setCurrentStep(1);
-          } else if (!data.step_2_completed) {
-            setCurrentStep(2);
-          } else if (!data.step_3_completed) {
-            setCurrentStep(3);
-          } else if (!data.step_4_completed) {
-            setCurrentStep(4);
-          } else if (!data.step_5_completed) {
-            setCurrentStep(5);
-          } else {
-            // All steps completed but onboarding not marked as complete
-            setCurrentStep(5);
-          }
+          // Use the current_step from database directly
+          setCurrentStep(data.current_step);
+          
+          console.log('✅ Onboarding active:', {
+            current_step: data.current_step,
+            onboarding_completed: data.onboarding_completed,
+            isOnboarding: true
+          });
         } else {
           setIsOnboarding(false);
+          console.log('❌ Onboarding inactive:', {
+            onboarding_completed: data.onboarding_completed,
+            isChiel,
+            isOnboarding: false
+          });
         }
         
         // Log the onboarding status for debugging
@@ -266,9 +283,11 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
         return 'Bekijk de beschikbare trainingsschema\'s en selecteer er één die bij je past';
       case '/dashboard/voedingsplannen':
         return 'Vul je dagelijkse behoefte in en selecteer een voedingsplan dat bij je doel past';
+      case '/dashboard/challenges':
+        return 'Selecteer een challenge die past bij je doelen en voorkeuren';
       case '/dashboard/brotherhood/forum':
-      case '/dashboard/brotherhood/forum/nieuwe-leden':
-        return 'Ga naar het "Nieuwe Leden" topic en maak je eerste forum post om je voor te stellen aan de community';
+      case '/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden':
+        return 'Ga naar het "Voorstellen - Nieuwe Leden" topic in de Algemeen categorie en maak je eerste forum post om je voor te stellen aan de community';
       default:
         return steps[currentStep]?.instructions || 'Voltooi de huidige stap om door te gaan';
     }

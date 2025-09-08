@@ -16,6 +16,66 @@ export async function middleware(req: NextRequest) {
     data: { session },
   } = await supabase.auth.getSession();
 
+  // Only check onboarding redirects for authenticated users on dashboard routes
+  if (session?.user && req.nextUrl.pathname.startsWith('/dashboard')) {
+    try {
+      // Get onboarding status
+      const { data: onboardingData, error } = await supabase
+        .from('onboarding_status')
+        .select('current_step, onboarding_completed')
+        .eq('user_id', session.user.id)
+        .single();
+
+      if (!error && onboardingData && !onboardingData.onboarding_completed) {
+        const currentStep = onboardingData.current_step;
+        const currentPath = req.nextUrl.pathname;
+        
+        // Define allowed paths for each onboarding step
+        // Users can access their current step and all previous steps
+        const allowedPaths = {
+          0: ['/dashboard', '/dashboard/welcome-video'],
+          1: ['/dashboard', '/dashboard/welcome-video', '/dashboard/profiel'],
+          2: ['/dashboard', '/dashboard/welcome-video', '/dashboard/profiel', '/dashboard/mijn-missies'],
+          3: ['/dashboard', '/dashboard/welcome-video', '/dashboard/profiel', '/dashboard/mijn-missies', '/dashboard/trainingsschemas'],
+          4: ['/dashboard', '/dashboard/welcome-video', '/dashboard/profiel', '/dashboard/mijn-missies', '/dashboard/trainingsschemas', '/dashboard/voedingsplannen'],
+          5: ['/dashboard', '/dashboard/welcome-video', '/dashboard/profiel', '/dashboard/mijn-missies', '/dashboard/trainingsschemas', '/dashboard/voedingsplannen', '/dashboard/challenges'],
+          6: ['/dashboard', '/dashboard/welcome-video', '/dashboard/profiel', '/dashboard/mijn-missies', '/dashboard/trainingsschemas', '/dashboard/voedingsplannen', '/dashboard/challenges', '/dashboard/brotherhood/forum', '/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden']
+        };
+
+        // Check if current path is allowed for this step
+        const isAllowedPath = allowedPaths[currentStep]?.some(allowedPath => 
+          currentPath === allowedPath || currentPath.startsWith(allowedPath + '/')
+        );
+
+        if (!isAllowedPath) {
+          // Redirect to the correct step - use the most specific path for each step
+          let redirectPath = '/dashboard';
+          
+          if (currentStep === 0) {
+            redirectPath = '/dashboard/welcome-video';
+          } else if (currentStep === 1) {
+            redirectPath = '/dashboard/profiel';
+          } else if (currentStep === 2) {
+            redirectPath = '/dashboard/mijn-missies';
+          } else if (currentStep === 3) {
+            redirectPath = '/dashboard/trainingsschemas';
+          } else if (currentStep === 4) {
+            redirectPath = '/dashboard/voedingsplannen';
+          } else if (currentStep === 5) {
+            redirectPath = '/dashboard/challenges';
+          } else if (currentStep === 6) {
+            redirectPath = '/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden';
+          }
+          
+          console.log(`🔄 Onboarding redirect: ${currentPath} -> ${redirectPath} (step ${currentStep})`);
+          return NextResponse.redirect(new URL(redirectPath, req.url));
+        }
+      }
+    } catch (error) {
+      console.error('❌ Onboarding middleware error:', error);
+    }
+  }
+
   return res;
 }
 

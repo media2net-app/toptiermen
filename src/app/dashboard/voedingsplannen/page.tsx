@@ -75,6 +75,10 @@ export default function VoedingsplannenPage() {
   const [showRequiredIntake, setShowRequiredIntake] = useState(false);
   const [viewingDynamicPlan, setViewingDynamicPlan] = useState<{planId: string, planName: string} | null>(null);
   
+  // Onboarding state
+  const [onboardingStatus, setOnboardingStatus] = useState<any>(null);
+  const [showOnboardingStep4, setShowOnboardingStep4] = useState(false);
+  
   // Nutrition calculator state
   const [calculatorData, setCalculatorData] = useState({
     age: '',
@@ -119,9 +123,9 @@ export default function VoedingsplannenPage() {
           console.log(`🗺️ Mapping user goal "${userGoal}" to plan goal "${mappedGoal}"`);
           
           filteredPlans = data.plans.filter(plan => {
-            const planGoal = plan.goal?.toLowerCase() || plan.fitness_goal?.toLowerCase();
+            const planGoal = plan.fitness_goal?.toLowerCase() || plan.goal?.toLowerCase();
             const matches = planGoal === mappedGoal;
-            console.log(`Plan "${plan.name}" (${planGoal}) matches mapped goal (${mappedGoal}):`, matches);
+            console.log(`Plan "${plan.name}" (fitness_goal: ${plan.fitness_goal}, goal: ${plan.goal}) matches mapped goal (${mappedGoal}):`, matches);
             return matches;
           });
           
@@ -152,6 +156,23 @@ export default function VoedingsplannenPage() {
     }
   };
 
+  const checkOnboardingStatus = async () => {
+    if (!user?.id) return;
+
+    try {
+      const response = await fetch(`/api/onboarding?userId=${user?.id}`);
+      if (response.ok) {
+        const data = await response.json();
+        setOnboardingStatus(data);
+        
+        // Only show onboarding step 4 if onboarding is not completed and user is on step 4
+        setShowOnboardingStep4(!data.onboarding_completed && data.current_step === 4);
+      }
+    } catch (error) {
+      console.error('Error checking onboarding status:', error);
+    }
+  };
+
   const checkUserNutritionProfile = async () => {
     if (!user?.id) return;
     
@@ -177,19 +198,30 @@ export default function VoedingsplannenPage() {
         };
         console.log('✅ Profile found, setting user profile:', profile);
         setUserNutritionProfile(profile);
-        setShowRequiredIntake(false);
         
-        // Pre-populate calculator form with existing data
-        setCalculatorData({
-          age: data.profile.age?.toString() || '',
-          weight: data.profile.weight?.toString() || '',
-          height: data.profile.height?.toString() || '',
-          activityLevel: data.profile.activity_level || 'moderate', // Default to moderate if not set
-          goal: data.profile.goal === 'cut' ? 'droogtrainen' : 
-                data.profile.goal === 'bulk' ? 'spiermassa' : 
-                data.profile.goal === 'maintenance' ? 'behoud' : ''
-        });
-        console.log('📝 Calculator form pre-populated with existing profile data');
+        // During onboarding step 4, only show calculator if no profile exists
+        if (showOnboardingStep4) {
+          console.log('🎯 Onboarding step 4: profile exists, hiding calculator to show nutrition plans');
+          setShowRequiredIntake(false);
+        } else {
+          setShowRequiredIntake(false);
+        }
+        
+        // Pre-populate calculator form with existing data (only if not in onboarding step 4)
+        if (!showOnboardingStep4) {
+          setCalculatorData({
+            age: data.profile.age?.toString() || '',
+            weight: data.profile.weight?.toString() || '',
+            height: data.profile.height?.toString() || '',
+            activityLevel: data.profile.activity_level || 'moderate', // Default to moderate if not set
+            goal: data.profile.goal === 'cut' ? 'droogtrainen' : 
+                  data.profile.goal === 'bulk' ? 'spiermassa' : 
+                  data.profile.goal === 'maintenance' ? 'behoud' : ''
+          });
+          console.log('📝 Calculator form pre-populated with existing profile data');
+        } else {
+          console.log('🎯 Onboarding step 4: keeping calculator form empty for user input');
+        }
         
         // Also fetch the active nutrition plan
         try {
@@ -220,9 +252,35 @@ export default function VoedingsplannenPage() {
     }
   };
 
-  const handleNutritionPlanClick = (planId: string) => {
+  const handleNutritionPlanClick = async (planId: string) => {
     // Mark plan as selected
     setSelectedNutritionPlan(planId);
+    
+    // If in onboarding, save the selection
+    if (showOnboardingStep4) {
+      try {
+        const response = await fetch('/api/nutrition-plan-select', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userId: user?.id,
+            planId: planId
+          }),
+        });
+
+        if (response.ok) {
+          toast.success('Voedingsplan geselecteerd!');
+        } else {
+          toast.error('Er is een fout opgetreden bij het selecteren van het plan');
+        }
+      } catch (error) {
+        console.error('Error selecting nutrition plan:', error);
+        toast.error('Er is een fout opgetreden');
+      }
+    }
+    
     // Navigate to plan details (you can uncomment this if you want navigation)
     // router.push(`/dashboard/trainingscentrum/nutrition/${planId}`);
   };
@@ -304,7 +362,15 @@ export default function VoedingsplannenPage() {
 
       console.log('💾 Profile calculated via API:', profile);
       setUserNutritionProfile(profile);
-      setShowRequiredIntake(false);
+      
+      // During onboarding step 4, hide calculator after calculation to show nutrition plans
+      if (showOnboardingStep4) {
+        console.log('🎯 Onboarding step 4: hiding calculator after calculation to show nutrition plans');
+        setShowRequiredIntake(false);
+      } else {
+        setShowRequiredIntake(false);
+      }
+      
       // Reset calculator data
       setCalculatorData({ age: '', weight: '', height: '', activityLevel: '', goal: '' });
       
@@ -393,6 +459,14 @@ export default function VoedingsplannenPage() {
         } else {
           toast.success('Je voedingsprofiel is opgeslagen!');
         }
+        
+        // During onboarding step 4, hide calculator after successful save to show nutrition plans
+        if (showOnboardingStep4) {
+          console.log('🎯 Onboarding step 4: hiding calculator after save to show nutrition plans');
+          setShowRequiredIntake(false);
+        } else {
+          setShowRequiredIntake(false);
+        }
       } else {
         throw new Error(data.error || 'Failed to save profile');
       }
@@ -424,9 +498,17 @@ export default function VoedingsplannenPage() {
   useEffect(() => {
     if (user?.id) {
       console.log('🔍 Checking user nutrition profile for user:', user.id);
-      checkUserNutritionProfile();
+      checkOnboardingStatus();
     }
   }, [user?.id]);
+
+  // Check nutrition profile after onboarding status is set
+  useEffect(() => {
+    if (user?.id && onboardingStatus !== null) {
+      console.log('🔍 Checking user nutrition profile after onboarding status:', user.id);
+      checkUserNutritionProfile();
+    }
+  }, [user?.id, onboardingStatus, showOnboardingStep4]);
 
   // Fetch plans when user profile changes or initially
   useEffect(() => {
@@ -476,6 +558,93 @@ export default function VoedingsplannenPage() {
       subtitle="Beheer je voedingsplannen en bereken je dagelijkse behoeften"
     >
       <div className="w-full">
+        {/* Onboarding Progress - Step 4: Nutrition Plans */}
+        {showOnboardingStep4 && (
+          <div className="mb-8">
+            <div className="bg-gradient-to-br from-[#8BAE5A]/10 to-[#FFD700]/10 border-2 border-[#8BAE5A] rounded-2xl p-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl sm:text-3xl">🍽️</span>
+                  <div>
+                    <h2 className="text-lg sm:text-xl font-bold text-white">Onboarding Stap 4: Voedingsplan Selecteren</h2>
+                    <p className="text-[#8BAE5A] text-xs sm:text-sm">Vul je voedingsprofiel in en selecteer een voedingsplan</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-xl sm:text-2xl font-bold text-[#FFD700]">4/6</div>
+                  <div className="text-[#8BAE5A] text-xs sm:text-sm">Stappen voltooid</div>
+                </div>
+              </div>
+              
+              {!userNutritionProfile ? (
+                <div className="bg-[#181F17]/80 rounded-xl p-4 border border-[#3A4D23]">
+                  <p className="text-[#f0a14f] text-sm font-semibold mb-2">
+                    ⚠️ Je moet eerst je voedingsprofiel invullen
+                  </p>
+                  <p className="text-gray-300 text-sm">
+                    Vul je lichaamsgegevens in om je dagelijkse voedingsbehoeften te berekenen en gepersonaliseerde voedingsplannen te krijgen.
+                  </p>
+                </div>
+              ) : !selectedNutritionPlan ? (
+                <div className="bg-[#181F17]/80 rounded-xl p-4 border border-[#3A4D23]">
+                  <p className="text-[#f0a14f] text-sm font-semibold mb-2">
+                    ⚠️ Selecteer een voedingsplan om door te gaan
+                  </p>
+                  <p className="text-gray-300 text-sm">
+                    Kies een voedingsplan dat past bij je doelen en voorkeuren.
+                  </p>
+                </div>
+              ) : (
+                <div className="bg-[#8BAE5A]/20 rounded-xl p-4 border border-[#8BAE5A]">
+                  <p className="text-[#8BAE5A] text-sm font-semibold mb-2">
+                    ✅ Perfect! Je hebt een voedingsplan geselecteerd
+                  </p>
+                  <p className="text-gray-300 text-sm mb-4">
+                    Je kunt nu door naar de volgende stap van de onboarding.
+                  </p>
+                  <button
+                    onClick={async () => {
+                      try {
+                        // Mark step 4 as completed
+                        const response = await fetch('/api/onboarding', {
+                          method: 'POST',
+                          headers: {
+                            'Content-Type': 'application/json',
+                          },
+                          body: JSON.stringify({
+                            userId: user?.id,
+                            step: 4,
+                            action: 'complete_step',
+                            selectedNutritionPlan: selectedNutritionPlan
+                          }),
+                        });
+
+                        if (response.ok) {
+                          toast.success('Voedingsplan opgeslagen! Doorsturen naar challenges...');
+                          // Navigate to challenges
+                          setTimeout(() => {
+                            window.location.href = '/dashboard/challenges';
+                          }, 1500);
+                        } else {
+                          toast.error('Er is een fout opgetreden');
+                        }
+                      } catch (error) {
+                        console.error('Error completing step:', error);
+                        toast.error('Er is een fout opgetreden');
+                      }
+                    }}
+                    className="bg-[#8BAE5A] hover:bg-[#B6C948] text-[#181F17] px-6 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center gap-2"
+                  >
+                    Volgende Stap
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
         <AnimatePresence mode="wait">
           {/* Dynamic Plan View */}
           {viewingDynamicPlan ? (
@@ -493,7 +662,7 @@ export default function VoedingsplannenPage() {
                 onBack={handleBackFromDynamicPlan}
               />
             </motion.div>
-          ) : showRequiredIntake ? (
+          ) : showRequiredIntake || (showOnboardingStep4 && !userNutritionProfile) ? (
             <motion.div
               key="required-calculator"
               initial={{ opacity: 0, y: 20 }}
@@ -637,22 +806,24 @@ export default function VoedingsplannenPage() {
                     <ChartBarIcon className="w-6 h-6 text-[#8BAE5A] mr-2" />
                     Jouw Dagelijkse Behoefte
                   </h3>
-                  <button
-                    onClick={() => {
-                      // Pre-fill calculator with existing data
-                      setCalculatorData({
-                        age: userNutritionProfile.age?.toString() || '',
-                        weight: userNutritionProfile.weight?.toString() || '',
-                        height: userNutritionProfile.height?.toString() || '',
-                        activityLevel: userNutritionProfile.activity_level || 'moderate',
-                        goal: userNutritionProfile.goal || ''
-                      });
-                      setShowRequiredIntake(true);
-                    }}
-                    className="text-[#8BAE5A] hover:text-[#B6C948] text-sm font-semibold transition-colors"
-                  >
-                    ✏️ Bewerken
-                  </button>
+                  {!showOnboardingStep4 && (
+                    <button
+                      onClick={() => {
+                        // Pre-fill calculator with existing data
+                        setCalculatorData({
+                          age: userNutritionProfile.age?.toString() || '',
+                          weight: userNutritionProfile.weight?.toString() || '',
+                          height: userNutritionProfile.height?.toString() || '',
+                          activityLevel: userNutritionProfile.activity_level || 'moderate',
+                          goal: userNutritionProfile.goal || ''
+                        });
+                        setShowRequiredIntake(true);
+                      }}
+                      className="text-[#8BAE5A] hover:text-[#B6C948] text-sm font-semibold transition-colors"
+                    >
+                      ✏️ Bewerken
+                    </button>
+                  )}
                 </div>
                 <div className="grid md:grid-cols-4 gap-4">
                   <div className="bg-[#181F17] rounded-lg p-4 text-center">
@@ -687,8 +858,9 @@ export default function VoedingsplannenPage() {
               </div>
             )}
 
-            {/* Nutrition Plans */}
-            <div className="space-y-6">
+            {/* Nutrition Plans - Show if user has profile OR if in onboarding step 4 */}
+            {(userNutritionProfile || showOnboardingStep4) && (
+              <div className="space-y-6">
                 {nutritionLoading ? (
                   <div className="text-center py-12">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
@@ -712,7 +884,11 @@ export default function VoedingsplannenPage() {
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={() => handleNutritionPlanClick(plan.plan_id)}
-                        className="cursor-pointer rounded-2xl p-6 border-2 transition-all duration-300 border-[#3A4D23] bg-[#232D1A] hover:border-[#8BAE5A]/50"
+                        className={`cursor-pointer rounded-2xl p-6 border-2 transition-all duration-300 ${
+                          selectedNutritionPlan === plan.plan_id
+                            ? 'border-[#8BAE5A] bg-[#8BAE5A]/10'
+                            : 'border-[#3A4D23] bg-[#232D1A] hover:border-[#8BAE5A]/50'
+                        }`}
                       >
                         <div className="text-center mb-4">
                           {getNutritionPlanIcon(plan)}
@@ -754,6 +930,30 @@ export default function VoedingsplannenPage() {
                         <EyeIcon className="w-4 h-4" />
                         Bekijk Gepersonaliseerd Plan
                       </button>
+                      
+                      {/* Select Plan Button for Onboarding */}
+                      {showOnboardingStep4 && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleNutritionPlanClick(plan.plan_id);
+                          }}
+                          className={`w-full px-4 py-2 rounded-lg transition-colors font-semibold flex items-center justify-center gap-2 ${
+                            selectedNutritionPlan === plan.plan_id
+                              ? 'bg-[#8BAE5A] text-[#232D1A]'
+                              : 'bg-[#3A4D23] text-white hover:bg-[#4A5D33]'
+                          }`}
+                        >
+                          {selectedNutritionPlan === plan.plan_id ? (
+                            <>
+                              <CheckIcon className="w-4 h-4" />
+                              Geselecteerd
+                            </>
+                          ) : (
+                            'Selecteer dit plan'
+                          )}
+                        </button>
+                      )}
                         </div>
                       </motion.div>
                     ))}
@@ -770,6 +970,7 @@ export default function VoedingsplannenPage() {
                   </div>
                 )}
               </div>
+            )}
           </motion.div>
           )}
         </AnimatePresence>

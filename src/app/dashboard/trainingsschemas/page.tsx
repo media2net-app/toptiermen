@@ -10,13 +10,16 @@ import {
   EyeIcon,
   AcademicCapIcon,
   FireIcon,
-  ClockIcon
+  ClockIcon,
+  CalendarDaysIcon
 } from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
 import PageLayout from '@/components/PageLayout';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { useOnboarding } from "@/contexts/OnboardingContext";
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
+import DynamicTrainingPlanView from './components/DynamicTrainingPlanView';
 
 interface TrainingSchema {
   id: string;
@@ -32,14 +35,30 @@ interface TrainingSchema {
   rep_range: string;
   rest_time_seconds: number;
   equipment_type: string;
+  duration?: string;
+  training_schema_days?: {
+    id: string;
+    day_number: number;
+    name: string;
+    training_schema_exercises?: {
+      id: string;
+      exercise_name: string;
+      notes?: string;
+      sets: number;
+      reps: string;
+      rest_time_seconds?: number;
+      order_index: number;
+      exercise_id?: number;
+      video_url?: string;
+    }[];
+  }[];
 }
 
 interface TrainingProfile {
   id?: string;
   user_id: string;
   training_goal: 'spiermassa' | 'kracht_uithouding' | 'power_kracht';
-  training_frequency: 3 | 4 | 5 | 6;
-  experience_level: 'beginner' | 'intermediate' | 'advanced';
+  training_frequency: 1 | 2 | 3 | 4 | 5 | 6;
   equipment_type: 'gym' | 'home' | 'outdoor';
   created_at?: string;
   updated_at?: string;
@@ -69,29 +88,6 @@ const trainingGoals = [
   }
 ];
 
-const experienceLevels = [
-  {
-    id: 'beginner',
-    name: 'Beginner',
-    subtitle: 'Minder dan 1 jaar ervaring',
-    description: 'Focus op techniek en basisbewegingen',
-    icon: '🌱',
-  },
-  {
-    id: 'intermediate',
-    name: 'Gemiddeld',
-    subtitle: '1-3 jaar ervaring',
-    description: 'Kan complexere oefeningen uitvoeren',
-    icon: '📈',
-  },
-  {
-    id: 'advanced',
-    name: 'Gevorderd',
-    subtitle: 'Meer dan 3 jaar ervaring',
-    description: 'Geavanceerde technieken en zware gewichten',
-    icon: '🏆',
-  }
-];
 
 const equipmentTypes = [
   {
@@ -118,6 +114,8 @@ const equipmentTypes = [
 ];
 
 const trainingFrequencies = [
+  { id: 1, name: '1x per week', description: 'Minimale training' },
+  { id: 2, name: '2x per week', description: 'Basis training' },
   { id: 3, name: '3x per week', description: 'Perfect voor beginners' },
   { id: 4, name: '4x per week', description: 'Ideaal voor consistentie' },
   { id: 5, name: '5x per week', description: 'Voor gevorderden' },
@@ -128,6 +126,7 @@ export default function TrainingschemasPage() {
   const { user, loading: authLoading } = useSupabaseAuth();
   const { isOnboarding, currentStep: onboardingStep, completeStep } = useOnboarding();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   // Training schemas state
   const [trainingSchemas, setTrainingSchemas] = useState<TrainingSchema[]>([]);
@@ -136,41 +135,83 @@ export default function TrainingschemasPage() {
   const [userTrainingProfile, setUserTrainingProfile] = useState<TrainingProfile | null>(null);
   const [selectedTrainingSchema, setSelectedTrainingSchema] = useState<string | null>(null);
   const [showRequiredProfile, setShowRequiredProfile] = useState(false);
+  const [showCalculator, setShowCalculator] = useState(false);
+  const [showAllSchemas, setShowAllSchemas] = useState(false);
+  const [selectedSchemaDetail, setSelectedSchemaDetail] = useState<TrainingSchema | null>(null);
+  const [profileLoading, setProfileLoading] = useState(true);
+  const [videoModal, setVideoModal] = useState<{isOpen: boolean, exerciseName: string, videoUrl: string}>({
+    isOpen: false,
+    exerciseName: '',
+    videoUrl: ''
+  });
+  const [viewingDynamicPlan, setViewingDynamicPlan] = useState<{schemaId: string, schemaName: string} | null>(null);
+  
+  // Onboarding state
+  const [onboardingStatus, setOnboardingStatus] = useState<any>(null);
+  const [showOnboardingStep3, setShowOnboardingStep3] = useState(false);
   
   // Training calculator state
   const [calculatorData, setCalculatorData] = useState({
     training_goal: '',
     training_frequency: '',
-    experience_level: '',
     equipment_type: ''
   });
 
-  // Training functions
+  // Training functions - using same method as admin dashboard
   const fetchTrainingSchemas = async () => {
     try {
       setTrainingLoading(true);
       
-      const response = await fetch('/api/training-schemas');
+      console.log('🔍 Fetching training schemas directly from database (same as admin)...');
       
-      if (!response.ok) {
-        throw new Error('Failed to fetch training schemas');
+      // Use the same direct Supabase query as the admin dashboard, including days
+      const { data, error } = await supabase
+        .from('training_schemas')
+        .select(`
+          *,
+          training_schema_days (
+            id,
+            day_number,
+            name
+          )
+        `)
+        .eq('status', 'published')
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        console.error('❌ Error fetching training schemas:', error);
+        setTrainingError('Failed to load training schemas');
+        return;
       }
       
-      const data = await response.json();
+      console.log('✅ Training schemas fetched from database:', data?.length || 0);
       
-      if (data.success) {
-        // Filter schemas based on user's profile if they have one
-        let filteredSchemas = data.schemas || [];
-        
-        if (userTrainingProfile) {
-          filteredSchemas = filterSchemasByProfile(filteredSchemas, userTrainingProfile);
-        }
-        
-        setTrainingSchemas(filteredSchemas);
-        console.log('✅ Training schemas loaded:', filteredSchemas.length);
-      } else {
-        setTrainingError(data.error || 'Failed to load training schemas');
+      // Filter schemas based on user's profile if they have one
+      let filteredSchemas = data || [];
+      
+      if (userTrainingProfile && !showOnboardingStep3) {
+        // Only filter during normal use, not during onboarding
+        filteredSchemas = filterSchemasByProfile(filteredSchemas, userTrainingProfile);
+      } else if (showOnboardingStep3 && userTrainingProfile) {
+        // During onboarding, show schemas that match the user's training frequency and equipment
+        filteredSchemas = data?.filter(schema => {
+          const schemaDays = schema.training_schema_days?.length || 0;
+          const userFrequency = userTrainingProfile.training_frequency;
+          const frequencyMatch = schemaDays === userFrequency;
+          
+          // Also match equipment type
+          const equipmentMatch = schema.equipment_type === userTrainingProfile.equipment_type;
+          
+          console.log(`🎯 Onboarding Schema "${schema.name}": ${schemaDays} days (${frequencyMatch}), ${schema.equipment_type} equipment (${equipmentMatch})`);
+          
+          return frequencyMatch && equipmentMatch;
+        }) || [];
+        console.log('🎯 Onboarding: Showing schemas for frequency', userTrainingProfile.training_frequency, 'days and equipment', userTrainingProfile.equipment_type, ':', filteredSchemas.length);
       }
+      
+      setTrainingSchemas(filteredSchemas);
+      console.log('✅ Training schemas loaded:', filteredSchemas.length, 'from', data?.length || 0, 'total');
+      
     } catch (error) {
       console.error('Error fetching training schemas:', error);
       setTrainingError('Failed to load training schemas');
@@ -180,6 +221,12 @@ export default function TrainingschemasPage() {
   };
 
   const filterSchemasByProfile = (schemas: TrainingSchema[], profile: TrainingProfile) => {
+    // If showAllSchemas is true, return all schemas without filtering
+    if (showAllSchemas) {
+      console.log('🔍 Showing all schemas (filtering disabled)');
+      return schemas;
+    }
+    
     console.log('🔍 Filtering schemas for profile:', profile);
     console.log('📊 Total schemas before filtering:', schemas.length);
     
@@ -197,30 +244,48 @@ export default function TrainingschemasPage() {
         'outdoor': 'Outdoor'
       };
       
-      // Filter by training goal (more flexible)
-      const allowedGoals = goalMapping[profile.training_goal] || ['spiermassa'];
-      const goalMatch = allowedGoals.includes(schema.training_goal);
+      // Filter by training goal based on schema name - STRICT matching
+      let goalMatch = false;
+      const schemaName = schema.name.toLowerCase();
       
-      // Filter by equipment type
-      const mappedEquipment = equipmentMapping[profile.equipment_type];
-      const equipmentMatch = schema.category === mappedEquipment;
+      if (profile.training_goal === 'spiermassa') {
+        // Only show schemas with 'spiermassa' in the name
+        goalMatch = schemaName.includes('spiermassa');
+      } else if (profile.training_goal === 'kracht_uithouding') {
+        // Only show schemas with 'conditie' in the name (not kracht)
+        goalMatch = schemaName.includes('conditie');
+      } else if (profile.training_goal === 'power_kracht') {
+        // Only show schemas with 'kracht' in the name
+        goalMatch = schemaName.includes('kracht');
+      }
       
-      // Filter by training frequency - EXACT match only
-      let frequencyMatch = true;
-      // Note: training_frequency not available in schema, skipping frequency filter
+      // Filter by equipment type - STRICT matching
+      let equipmentMatch = false;
+      const schemaEquipment = schema.category?.toLowerCase();
+      const userEquipment = profile.equipment_type?.toLowerCase();
       
-      // Filter by difficulty level - EXACT match only
-      const difficultyMapping = {
-        'beginner': 'Beginner',
-        'intermediate': 'Intermediate', 
-        'advanced': 'Advanced'
-      };
-      const mappedDifficulty = difficultyMapping[profile.experience_level];
-      const difficultyMatch = schema.difficulty === mappedDifficulty;
+      if (userEquipment === 'gym') {
+        // Gym users can only use gym schemas
+        equipmentMatch = schemaEquipment === 'gym';
+      } else if (userEquipment === 'home') {
+        // Home users can use home and bodyweight schemas
+        equipmentMatch = ['home', 'bodyweight'].includes(schemaEquipment || '');
+      } else if (userEquipment === 'outdoor') {
+        // Outdoor users can use outdoor and bodyweight schemas
+        equipmentMatch = ['outdoor', 'bodyweight'].includes(schemaEquipment || '');
+      }
       
-      console.log(`📋 Schema "${schema.name}": goal=${schema.training_goal} (${goalMatch}), category=${schema.category} (${equipmentMatch}), frequency=N/A (${frequencyMatch}), difficulty=${schema.difficulty} (${difficultyMatch})`);
+      // Filter by training frequency - EXACT match with number of days
+      const schemaDays = schema.training_schema_days?.length || 0;
+      const userFrequency = profile.training_frequency;
+      const frequencyMatch = schemaDays === userFrequency;
       
-      return goalMatch && equipmentMatch && frequencyMatch && difficultyMatch;
+      console.log(`📅 Schema "${schema.name}": ${schemaDays} days vs user frequency ${userFrequency} (${frequencyMatch})`);
+      
+      console.log(`📋 Schema "${schema.name}": goal=${schema.training_goal} (${goalMatch}), category=${schema.category} (${equipmentMatch}), frequency=${schemaDays} days (${frequencyMatch})`);
+      console.log(`   User profile: goal=${profile.training_goal}, equipment=${profile.equipment_type}, frequency=${profile.training_frequency}`);
+      
+      return goalMatch && equipmentMatch && frequencyMatch;
     });
     
     console.log('✅ Filtered schemas:', filtered.length);
@@ -231,6 +296,7 @@ export default function TrainingschemasPage() {
     try {
       if (!user?.id) return;
       
+      setProfileLoading(true);
       console.log('🔍 Fetching training profile for user:', user.email);
       
       // Use user.email directly since our API now handles email as user_id
@@ -246,17 +312,21 @@ export default function TrainingschemasPage() {
           setCalculatorData({
             training_goal: data.profile.training_goal,
             training_frequency: data.profile.training_frequency.toString(),
-            experience_level: data.profile.experience_level,
             equipment_type: data.profile.equipment_type
           });
         } else {
           console.log('ℹ️ No training profile found');
+          setUserTrainingProfile(null);
         }
       } else {
         console.log('❌ Failed to fetch training profile:', response.status);
+        setUserTrainingProfile(null);
       }
     } catch (error) {
       console.error('Error fetching training profile:', error);
+      setUserTrainingProfile(null);
+    } finally {
+      setProfileLoading(false);
     }
   };
 
@@ -270,7 +340,6 @@ export default function TrainingschemasPage() {
         userEmail: user.email, // Send email instead of trying to convert
         training_goal: profileData.training_goal,
         training_frequency: parseInt(profileData.training_frequency),
-        experience_level: profileData.experience_level,
         equipment_type: profileData.equipment_type
       };
       
@@ -293,8 +362,9 @@ export default function TrainingschemasPage() {
         toast.success('Je trainingsprofiel is opgeslagen!');
         setUserTrainingProfile(data.profile);
         setShowRequiredProfile(false);
+        setShowCalculator(false); // Hide calculator after saving
         // Reset calculator data
-        setCalculatorData({ training_goal: '', training_frequency: '', experience_level: '', equipment_type: '' });
+        setCalculatorData({ training_goal: '', training_frequency: '', equipment_type: '' });
         
         // Fetch updated training schemas
         await fetchTrainingSchemas();
@@ -309,11 +379,11 @@ export default function TrainingschemasPage() {
   };
 
   const calculateTrainingProfile = () => {
-    const { training_goal, training_frequency, experience_level, equipment_type } = calculatorData;
+    const { training_goal, training_frequency, equipment_type } = calculatorData;
     
     console.log('🧮 Calculating training profile with data:', calculatorData);
     
-    if (!training_goal || !training_frequency || !experience_level || !equipment_type) {
+    if (!training_goal || !training_frequency || !equipment_type) {
       toast.error('Vul alle velden in om je trainingsprofiel te berekenen');
       return;
     }
@@ -321,7 +391,6 @@ export default function TrainingschemasPage() {
     const profile = {
       training_goal,
       training_frequency: parseInt(training_frequency),
-      experience_level,
       equipment_type
     };
 
@@ -382,6 +451,62 @@ export default function TrainingschemasPage() {
     }
   };
 
+  const viewSchemaDetail = async (schemaId: string) => {
+    try {
+      console.log('🔍 Fetching schema detail for:', schemaId);
+      const response = await fetch('/api/training-schema-detail/' + schemaId);
+      if (!response.ok) {
+        throw new Error('Failed to fetch schema details');
+      }
+      
+      const data = await response.json();
+      console.log('📋 API response:', data);
+      
+      if (data.success && data.schema) {
+        setSelectedSchemaDetail(data.schema);
+        console.log('✅ Schema detail loaded:', data.schema.name);
+      } else {
+        console.error('❌ Invalid API response:', data);
+        throw new Error('Invalid response format');
+      }
+    } catch (error) {
+      console.error('❌ Error fetching schema detail:', error);
+      toast.error('Kon schema details niet laden');
+    }
+  };
+
+  const openVideoModal = (exerciseName: string, videoUrl: string) => {
+    setVideoModal({
+      isOpen: true,
+      exerciseName,
+      videoUrl
+    });
+  };
+
+  const closeVideoModal = () => {
+    setVideoModal({
+      isOpen: false,
+      exerciseName: '',
+      videoUrl: ''
+    });
+  };
+
+  const handleViewDynamicPlan = (schemaId: string, schemaName: string) => {
+    if (!userTrainingProfile) {
+      toast.error('Vul eerst je trainingsprofiel in om het schema te kunnen bekijken');
+      setShowRequiredProfile(true);
+      return;
+    }
+    
+    console.log('✅ Setting viewingDynamicPlan to:', { schemaId, schemaName });
+    setViewingDynamicPlan({ schemaId, schemaName });
+  };
+
+  const handleBackFromDynamicPlan = () => {
+    console.log('🔄 Going back from dynamic plan view');
+    setViewingDynamicPlan(null);
+  };
+
   // Effects
   useEffect(() => {
     if (user?.id) {
@@ -390,10 +515,55 @@ export default function TrainingschemasPage() {
     }
   }, [user?.id]);
 
+  // Re-fetch schemas when showAllSchemas changes
+  useEffect(() => {
+    if (user?.id && userTrainingProfile) {
+      console.log('🔄 showAllSchemas changed, re-fetching schemas...');
+      fetchTrainingSchemas();
+    }
+  }, [showAllSchemas]);
+
   useEffect(() => {
     console.log('🔄 UserTrainingProfile changed:', userTrainingProfile);
     fetchTrainingSchemas();
   }, [userTrainingProfile]);
+
+  // Handle schema selection from URL parameter
+  useEffect(() => {
+    const selectParam = searchParams?.get('select');
+    if (selectParam && trainingSchemas.length > 0) {
+      const schema = trainingSchemas.find(s => s.id === selectParam);
+      if (schema) {
+        selectTrainingSchema(selectParam);
+        // Remove the select parameter from URL
+        const newUrl = new URL(window.location.href);
+        newUrl.searchParams.delete('select');
+        window.history.replaceState({}, '', newUrl.toString());
+      }
+    }
+  }, [searchParams, trainingSchemas]);
+
+  // Check onboarding status
+  useEffect(() => {
+    if (!user?.id) return;
+
+    async function checkOnboardingStatus() {
+      try {
+        const response = await fetch(`/api/onboarding?userId=${user?.id}`);
+        if (response.ok) {
+          const data = await response.json();
+          setOnboardingStatus(data);
+          
+          // Only show onboarding step 3 if onboarding is not completed and user is on step 3
+          setShowOnboardingStep3(!data.onboarding_completed && data.current_step === 3);
+        }
+      } catch (error) {
+        console.error('Error checking onboarding status:', error);
+      }
+    }
+
+    checkOnboardingStatus();
+  }, [user?.id]);
 
   if (authLoading) {
     return (
@@ -408,217 +578,363 @@ export default function TrainingschemasPage() {
   return (
     <PageLayout title="Training Schemas">
       <div className="max-w-6xl mx-auto p-6">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">Trainingsschemas</h1>
-          <p className="text-gray-300">
-            Kies en beheer je trainingsschemas voor optimale resultaten
-          </p>
-        </div>
+        {/* Dynamic Training Plan View */}
+        <AnimatePresence mode="wait">
+          {viewingDynamicPlan ? (
+            <DynamicTrainingPlanView
+              schemaId={viewingDynamicPlan.schemaId}
+              schemaName={viewingDynamicPlan.schemaName}
+              userId={user?.id || ''}
+              onBack={handleBackFromDynamicPlan}
+            />
+          ) : (
+            <>
+              {/* Header */}
+              <div className="mb-8">
+                <h1 className="text-3xl font-bold text-white mb-2">Trainingsschemas</h1>
+                <p className="text-gray-300">
+                  Kies en beheer je trainingsschemas voor optimale resultaten
+                </p>
+              </div>
 
-        {/* Daily Requirements Notice */}
+        {/* Onboarding Progress - Step 3: Training Schemas */}
+        {!profileLoading && showOnboardingStep3 && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8"
+          >
+            <div className="bg-gradient-to-br from-[#8BAE5A]/10 to-[#FFD700]/10 border-2 border-[#8BAE5A] rounded-2xl p-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl sm:text-3xl">💪</span>
+                  <div>
+                    <h2 className="text-lg sm:text-xl font-bold text-white">Onboarding Stap 3: Trainingsschema Selecteren</h2>
+                    <p className="text-[#8BAE5A] text-xs sm:text-sm">Vul je trainingsprofiel in en selecteer een trainingsschema</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-xl sm:text-2xl font-bold text-[#FFD700]">3/6</div>
+                  <div className="text-[#8BAE5A] text-xs sm:text-sm">Stappen voltooid</div>
+                </div>
+              </div>
+              
+              {!userTrainingProfile ? (
+                <div className="bg-[#181F17]/80 rounded-xl p-4 border border-[#3A4D23]">
+                  <p className="text-[#f0a14f] text-sm font-semibold mb-2">
+                    ⚠️ Je moet eerst je trainingsprofiel invullen
+                  </p>
+                  <p className="text-gray-300 text-sm">
+                    Vul je trainingsvoorkeuren in om gepersonaliseerde trainingsschemas te krijgen die perfect bij jou passen.
+                  </p>
+                </div>
+              ) : !selectedTrainingSchema ? (
+                <div className="bg-[#181F17]/80 rounded-xl p-4 border border-[#3A4D23]">
+                  <p className="text-[#f0a14f] text-sm font-semibold mb-2">
+                    ⚠️ Selecteer een trainingsschema om door te gaan
+                  </p>
+                  <p className="text-gray-300 text-sm">
+                    Kies een trainingsschema dat past bij je doelen en ervaringsniveau.
+                  </p>
+                </div>
+              ) : (
+                <div className="bg-[#8BAE5A]/20 rounded-xl p-4 border border-[#8BAE5A]">
+                  <p className="text-[#8BAE5A] text-sm font-semibold mb-2">
+                    ✅ Perfect! Je hebt een trainingsschema geselecteerd
+                  </p>
+                  <p className="text-gray-300 text-sm mb-4">
+                    Je kunt nu door naar de volgende stap van de onboarding.
+                  </p>
+                  <button
+                    onClick={async () => {
+                      try {
+                        // Mark step 3 as completed
+                        const response = await fetch('/api/onboarding', {
+                          method: 'POST',
+                          headers: {
+                            'Content-Type': 'application/json',
+                          },
+                          body: JSON.stringify({
+                            userId: user?.id,
+                            step: 3,
+                            action: 'complete_step',
+                            selectedTrainingSchema: selectedTrainingSchema
+                          }),
+                        });
+
+                        if (response.ok) {
+                          toast.success('Trainingsschema opgeslagen! Doorsturen naar voedingsplannen...');
+                          // Navigate to nutrition plans
+                          setTimeout(() => {
+                            window.location.href = '/dashboard/voedingsplannen';
+                          }, 1500);
+                        } else {
+                          toast.error('Er is een fout opgetreden');
+                        }
+                      } catch (error) {
+                        console.error('Error completing step:', error);
+                        toast.error('Er is een fout opgetreden');
+                      }
+                    }}
+                    className="bg-[#8BAE5A] hover:bg-[#B6C948] text-[#181F17] px-6 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center gap-2"
+                  >
+                    Volgende Stap
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+
+        {/* User Training Profile Summary */}
         {userTrainingProfile && (
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-8 p-6 bg-[#232D1A] border border-[#8BAE5A] rounded-xl"
+            className="mb-8"
           >
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-semibold text-white mb-2">Jouw Trainingsprofiel</h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                  <div>
-                    <span className="text-gray-400">Doel:</span>
-                    <p className="text-white font-medium">
-                      {trainingGoals.find(g => g.id === userTrainingProfile.training_goal)?.name}
-                    </p>
+            <div className="bg-gradient-to-r from-[#8BAE5A]/10 to-[#8BAE5A]/5 border border-[#8BAE5A]/30 rounded-2xl p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-[#8BAE5A]/20 rounded-lg">
+                    <ChartBarIcon className="h-6 w-6 text-[#8BAE5A]" />
                   </div>
                   <div>
-                    <span className="text-gray-400">Frequentie:</span>
-                    <p className="text-white font-medium">{userTrainingProfile.training_frequency}x per week</p>
+                    <h3 className="text-xl font-semibold text-white">Jouw Trainingsprofiel</h3>
+                    <p className="text-sm text-gray-400">Gepersonaliseerd voor jouw doelen</p>
                   </div>
-                  <div>
-                    <span className="text-gray-400">Niveau:</span>
-                    <p className="text-white font-medium">
-                      {experienceLevels.find(l => l.id === userTrainingProfile.experience_level)?.name}
-                    </p>
+                </div>
+                <button
+                  onClick={() => {
+                    setShowCalculator(true);
+                    // Pre-fill calculator with current profile data
+                    setCalculatorData({
+                      training_goal: userTrainingProfile.training_goal,
+                      training_frequency: userTrainingProfile.training_frequency.toString(),
+                      equipment_type: userTrainingProfile.equipment_type
+                    });
+                  }}
+                  className="flex items-center gap-2 px-4 py-2 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors text-sm font-medium"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                  Bewerken
+                </button>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-[#1A1A1A]/50 rounded-lg p-4 border border-gray-800">
+                  <div className="flex items-center gap-3 mb-2">
+                    <span className="text-2xl">
+                      {trainingGoals.find(g => g.id === userTrainingProfile.training_goal)?.icon}
+                    </span>
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-400">Doel</h4>
+                      <p className="text-white font-semibold">
+                        {trainingGoals.find(g => g.id === userTrainingProfile.training_goal)?.name}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <span className="text-gray-400">Equipment:</span>
-                    <p className="text-white font-medium">
-                      {equipmentTypes.find(t => t.id === userTrainingProfile.equipment_type)?.name}
-                    </p>
+                </div>
+                
+                <div className="bg-[#1A1A1A]/50 rounded-lg p-4 border border-gray-800">
+                  <div className="flex items-center gap-3 mb-2">
+                    <CalendarDaysIcon className="h-6 w-6 text-[#8BAE5A]" />
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-400">Frequentie</h4>
+                      <p className="text-white font-semibold">{userTrainingProfile.training_frequency}x per week</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-[#1A1A1A]/50 rounded-lg p-4 border border-gray-800">
+                  <div className="flex items-center gap-3 mb-2">
+                    <span className="text-2xl">
+                      {equipmentTypes.find(t => t.id === userTrainingProfile.equipment_type)?.icon}
+                    </span>
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-400">Equipment</h4>
+                      <p className="text-white font-semibold">
+                        {equipmentTypes.find(t => t.id === userTrainingProfile.equipment_type)?.name}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
-              <button
-                onClick={() => setShowRequiredProfile(true)}
-                className="px-4 py-2 bg-[#3A4D23] text-white rounded-lg hover:bg-[#4A5D33] transition-colors text-sm"
-              >
-                Bewerken
-              </button>
             </div>
           </motion.div>
         )}
 
         {/* Training Profile Calculator */}
         <AnimatePresence>
-          {showRequiredProfile && (
+          {(showRequiredProfile || showCalculator) && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="mb-8 p-6 bg-[#232D1A] border border-[#8BAE5A] rounded-xl"
+              className="mb-8"
             >
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-semibold text-white">Trainingsprofiel Calculator</h3>
-                <button
-                  onClick={() => setShowRequiredProfile(false)}
-                  className="text-gray-400 hover:text-white transition-colors"
-                >
-                  ✕
-                </button>
-              </div>
+              <div className="bg-gradient-to-r from-[#8BAE5A]/10 to-[#8BAE5A]/5 border border-[#8BAE5A]/30 rounded-2xl p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-[#8BAE5A]/20 rounded-lg">
+                      <CalculatorIcon className="h-6 w-6 text-[#8BAE5A]" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-semibold text-white">Trainingsprofiel Calculator</h3>
+                      <p className="text-sm text-gray-400">Stel je persoonlijke trainingsvoorkeuren in</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setShowRequiredProfile(false);
+                      setShowCalculator(false);
+                    }}
+                    className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Training Goal */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-3">Wat is je trainingsdoel?</label>
-                  <div className="space-y-2">
-                    {trainingGoals.map((goal) => (
-                      <label key={goal.id} className={`flex items-center p-3 border rounded-lg cursor-pointer transition-colors ${
-                        calculatorData.training_goal === goal.id 
-                          ? 'border-[#8BAE5A] bg-[#8BAE5A]/10' 
-                          : 'border-gray-600 hover:border-[#8BAE5A]'
-                      }`}>
-                        <input
-                          type="radio"
-                          name="training_goal"
-                          value={goal.id}
-                          checked={calculatorData.training_goal === goal.id}
-                          onChange={(e) => setCalculatorData(prev => ({ ...prev, training_goal: e.target.value }))}
-                          className="mr-3 h-4 w-4 text-[#8BAE5A] border-gray-300 focus:ring-[#8BAE5A]"
-                        />
-                        <div className="flex items-center space-x-3">
-                          <span className="text-2xl">{goal.icon}</span>
-                          <div>
-                            <div className="text-white font-medium">{goal.name}</div>
-                            <div className="text-sm text-gray-400">{goal.subtitle}</div>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  {/* Training Goal */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-4 flex items-center gap-2">
+                      <span className="text-lg">🎯</span>
+                      Wat is je trainingsdoel?
+                    </label>
+                    <div className="space-y-3">
+                      {trainingGoals.map((goal) => (
+                        <label key={goal.id} className={`flex items-start p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ${
+                          calculatorData.training_goal === goal.id 
+                            ? 'border-[#8BAE5A] bg-[#8BAE5A]/10 shadow-lg shadow-[#8BAE5A]/20' 
+                            : 'border-gray-700 hover:border-[#8BAE5A]/50 hover:bg-gray-800/50'
+                        }`}>
+                          <input
+                            type="radio"
+                            name="training_goal"
+                            value={goal.id}
+                            checked={calculatorData.training_goal === goal.id}
+                            onChange={(e) => setCalculatorData(prev => ({ ...prev, training_goal: e.target.value }))}
+                            className="mt-1 mr-4 h-4 w-4 text-[#8BAE5A] border-gray-300 focus:ring-[#8BAE5A]"
+                          />
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <span className="text-2xl">{goal.icon}</span>
+                              <div className="text-white font-semibold">{goal.name}</div>
+                            </div>
+                            <div className="text-sm text-gray-300 mb-1">{goal.subtitle}</div>
                             <div className="text-xs text-gray-500">{goal.description}</div>
                           </div>
-                        </div>
-                      </label>
-                    ))}
+                        </label>
+                      ))}
+                    </div>
                   </div>
-                </div>
 
-                {/* Training Frequency */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-3">Hoe vaak wil je per week trainen?</label>
-                  <div className="space-y-2">
-                    {trainingFrequencies.map((freq) => (
-                      <label key={freq.id} className={`flex items-center p-3 border rounded-lg cursor-pointer transition-colors ${
-                        calculatorData.training_frequency === freq.id.toString() 
-                          ? 'border-[#8BAE5A] bg-[#8BAE5A]/10' 
-                          : 'border-gray-600 hover:border-[#8BAE5A]'
-                      }`}>
-                        <input
-                          type="radio"
-                          name="training_frequency"
-                          value={freq.id}
-                          checked={calculatorData.training_frequency === freq.id.toString()}
-                          onChange={(e) => setCalculatorData(prev => ({ ...prev, training_frequency: e.target.value }))}
-                          className="mr-3 h-4 w-4 text-[#8BAE5A] border-gray-300 focus:ring-[#8BAE5A]"
-                        />
-                        <div className="flex items-center space-x-3">
-                          <span className="text-2xl">📅</span>
-                          <div>
-                            <div className="text-white font-medium">{freq.name}</div>
-                            <div className="text-sm text-gray-400">{freq.description}</div>
+                  {/* Training Frequency */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-4 flex items-center gap-2">
+                      <CalendarDaysIcon className="h-5 w-5 text-[#8BAE5A]" />
+                      Hoe vaak wil je per week trainen?
+                    </label>
+                    <div className="space-y-3">
+                      {trainingFrequencies.map((freq) => (
+                        <label key={freq.id} className={`flex items-start p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ${
+                          calculatorData.training_frequency === freq.id.toString() 
+                            ? 'border-[#8BAE5A] bg-[#8BAE5A]/10 shadow-lg shadow-[#8BAE5A]/20' 
+                            : 'border-gray-700 hover:border-[#8BAE5A]/50 hover:bg-gray-800/50'
+                        }`}>
+                          <input
+                            type="radio"
+                            name="training_frequency"
+                            value={freq.id}
+                            checked={calculatorData.training_frequency === freq.id.toString()}
+                            onChange={(e) => setCalculatorData(prev => ({ ...prev, training_frequency: e.target.value }))}
+                            className="mt-1 mr-4 h-4 w-4 text-[#8BAE5A] border-gray-300 focus:ring-[#8BAE5A]"
+                          />
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <CalendarDaysIcon className="h-5 w-5 text-[#8BAE5A]" />
+                              <div className="text-white font-semibold">{freq.name}</div>
+                            </div>
+                            <div className="text-sm text-gray-300">{freq.description}</div>
                           </div>
-                        </div>
-                      </label>
-                    ))}
+                        </label>
+                      ))}
+                    </div>
                   </div>
-                </div>
 
-                {/* Experience Level */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-3">Wat is je ervaringsniveau?</label>
-                  <div className="space-y-2">
-                    {experienceLevels.map((level) => (
-                      <label key={level.id} className={`flex items-center p-3 border rounded-lg cursor-pointer transition-colors ${
-                        calculatorData.experience_level === level.id 
-                          ? 'border-[#8BAE5A] bg-[#8BAE5A]/10' 
-                          : 'border-gray-600 hover:border-[#8BAE5A]'
-                      }`}>
-                        <input
-                          type="radio"
-                          name="experience_level"
-                          value={level.id}
-                          checked={calculatorData.experience_level === level.id}
-                          onChange={(e) => setCalculatorData(prev => ({ ...prev, experience_level: e.target.value }))}
-                          className="mr-3 h-4 w-4 text-[#8BAE5A] border-gray-300 focus:ring-[#8BAE5A]"
-                        />
-                        <div className="flex items-center space-x-3">
-                          <span className="text-2xl">{level.icon}</span>
-                          <div>
-                            <div className="text-white font-medium">{level.name}</div>
-                            <div className="text-sm text-gray-400">{level.subtitle}</div>
-                            <div className="text-xs text-gray-500">{level.description}</div>
-                          </div>
-                        </div>
-                      </label>
-                    ))}
-                  </div>
-                </div>
 
-                {/* Equipment Type */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-3">Waar ga je trainen?</label>
-                  <div className="space-y-2">
-                    {equipmentTypes.map((type) => (
-                      <label key={type.id} className={`flex items-center p-3 border rounded-lg cursor-pointer transition-colors ${
-                        calculatorData.equipment_type === type.id 
-                          ? 'border-[#8BAE5A] bg-[#8BAE5A]/10' 
-                          : 'border-gray-600 hover:border-[#8BAE5A]'
-                      }`}>
-                        <input
-                          type="radio"
-                          name="equipment_type"
-                          value={type.id}
-                          checked={calculatorData.equipment_type === type.id}
-                          onChange={(e) => setCalculatorData(prev => ({ ...prev, equipment_type: e.target.value }))}
-                          className="mr-3 h-4 w-4 text-[#8BAE5A] border-gray-300 focus:ring-[#8BAE5A]"
-                        />
-                        <div className="flex items-center space-x-3">
-                          <span className="text-2xl">{type.icon}</span>
-                          <div>
-                            <div className="text-white font-medium">{type.name}</div>
-                            <div className="text-sm text-gray-400">{type.subtitle}</div>
+                  {/* Equipment Type */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-4 flex items-center gap-2">
+                      <span className="text-lg">🏋️</span>
+                      Waar ga je trainen?
+                    </label>
+                    <div className="space-y-3">
+                      {equipmentTypes.map((type) => (
+                        <label key={type.id} className={`flex items-start p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ${
+                          calculatorData.equipment_type === type.id 
+                            ? 'border-[#8BAE5A] bg-[#8BAE5A]/10 shadow-lg shadow-[#8BAE5A]/20' 
+                            : 'border-gray-700 hover:border-[#8BAE5A]/50 hover:bg-gray-800/50'
+                        }`}>
+                          <input
+                            type="radio"
+                            name="equipment_type"
+                            value={type.id}
+                            checked={calculatorData.equipment_type === type.id}
+                            onChange={(e) => setCalculatorData(prev => ({ ...prev, equipment_type: e.target.value }))}
+                            className="mt-1 mr-4 h-4 w-4 text-[#8BAE5A] border-gray-300 focus:ring-[#8BAE5A]"
+                          />
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <span className="text-2xl">{type.icon}</span>
+                              <div className="text-white font-semibold">{type.name}</div>
+                            </div>
+                            <div className="text-sm text-gray-300 mb-1">{type.subtitle}</div>
                             <div className="text-xs text-gray-500">{type.description}</div>
                           </div>
-                        </div>
-                      </label>
-                    ))}
+                        </label>
+                      ))}
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="mt-6 flex justify-end">
-                <button
-                  onClick={calculateTrainingProfile}
-                  className="px-6 py-3 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold"
-                >
-                  Profiel Opslaan
-                </button>
+                <div className="mt-8 flex justify-end">
+                  <button
+                    onClick={calculateTrainingProfile}
+                    className="flex items-center gap-2 px-8 py-3 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold shadow-lg shadow-[#8BAE5A]/20"
+                  >
+                    <CheckIcon className="w-5 h-5" />
+                    Profiel Opslaan
+                  </button>
+                </div>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
 
+        {/* Loading State */}
+        {profileLoading && (
+          <div className="text-center py-12 mb-8">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
+            <h3 className="text-xl font-semibold text-white mb-2">
+              Laden...
+            </h3>
+            <p className="text-gray-300">
+              Je trainingsprofiel wordt geladen...
+            </p>
+          </div>
+        )}
+
         {/* No Profile - Show Calculator Button */}
-        {!userTrainingProfile && !showRequiredProfile && (
+        {!profileLoading && !userTrainingProfile && !showRequiredProfile && (
           <div className="text-center py-12 mb-8">
             <CalculatorIcon className="mx-auto h-16 w-16 text-[#8BAE5A] mb-4" />
             <h3 className="text-xl font-semibold text-white mb-2">
@@ -637,14 +953,43 @@ export default function TrainingschemasPage() {
         )}
 
         {/* Training Schemas */}
-        {userTrainingProfile && (
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-semibold text-white">Beschikbare Trainingsschemas</h2>
-              <div className="text-sm text-gray-400">
-                {trainingSchemas.length} schema{trainingSchemas.length !== 1 ? "'s" : ""} beschikbaar
+        {!profileLoading && userTrainingProfile && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8"
+          >
+            <div className="bg-gradient-to-r from-[#8BAE5A]/10 to-[#8BAE5A]/5 border border-[#8BAE5A]/30 rounded-2xl p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-[#8BAE5A]/20 rounded-lg">
+                    <AcademicCapIcon className="h-6 w-6 text-[#8BAE5A]" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-semibold text-white">Beschikbare Trainingsschemas</h2>
+                    <p className="text-sm text-gray-400">Gepersonaliseerd voor jouw profiel</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-sm text-gray-400">
+                    {trainingSchemas.length} schema{trainingSchemas.length !== 1 ? "'s" : ""} beschikbaar
+                    {showAllSchemas && (
+                      <span className="ml-2 text-[#8BAE5A]">(alle schemas)</span>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => setShowAllSchemas(!showAllSchemas)}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors text-sm ${
+                      showAllSchemas
+                        ? 'bg-[#8BAE5A] text-[#232D1A]'
+                        : 'bg-[#3A4D23] text-white hover:bg-[#4A5D33]'
+                    }`}
+                  >
+                    <EyeIcon className="w-4 h-4" />
+                    {showAllSchemas ? 'Toon gefilterde' : 'Bekijk alle schemas'}
+                  </button>
+                </div>
               </div>
-            </div>
 
             {trainingLoading ? (
               <div className="flex items-center justify-center py-12">
@@ -667,16 +1012,16 @@ export default function TrainingschemasPage() {
                 {trainingSchemas.map((schema) => (
                   <motion.div
                     key={schema.id}
-                    whileHover={{ scale: 1.02 }}
-                    className={`p-6 rounded-xl border-2 transition-all duration-200 ${
+                    whileHover={{ scale: 1.02, y: -5 }}
+                    className={`p-6 rounded-2xl border-2 transition-all duration-300 shadow-lg ${
                       selectedTrainingSchema === schema.id
-                        ? 'border-[#8BAE5A] bg-[#8BAE5A]/10'
-                        : 'border-[#3A4D23] bg-[#232D1A] hover:border-[#8BAE5A]/50'
+                        ? 'border-[#8BAE5A] bg-[#8BAE5A]/10 shadow-[#8BAE5A]/20'
+                        : 'border-gray-700 bg-[#1A1A1A]/50 hover:border-[#8BAE5A]/50 hover:shadow-[#8BAE5A]/10'
                     }`}
                   >
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center space-x-3">
-                        <div className="p-2 bg-[#8BAE5A]/20 rounded-lg">
+                        <div className="p-3 bg-[#8BAE5A]/20 rounded-xl">
                           <AcademicCapIcon className="h-6 w-6 text-[#8BAE5A]" />
                         </div>
                         <div>
@@ -685,7 +1030,9 @@ export default function TrainingschemasPage() {
                         </div>
                       </div>
                       {selectedTrainingSchema === schema.id && (
-                        <CheckIcon className="h-6 w-6 text-[#8BAE5A]" />
+                        <div className="p-2 bg-[#8BAE5A] rounded-full">
+                          <CheckIcon className="h-5 w-5 text-[#232D1A]" />
+                        </div>
                       )}
                     </div>
 
@@ -693,56 +1040,148 @@ export default function TrainingschemasPage() {
                       {schema.description}
                     </p>
 
-                    <div className="flex items-center justify-between text-sm text-gray-400 mb-4">
+                    <div className="flex items-center justify-between text-sm text-gray-400 mb-6">
                       <div className="flex items-center space-x-4">
                         <div className="flex items-center space-x-1">
-                          <ClockIcon className="h-4 w-4" />
+                          <ClockIcon className="h-4 w-4 text-[#8BAE5A]" />
                           <span>{schema.estimated_duration}</span>
                         </div>
                         <div className="flex items-center space-x-1">
-                          <FireIcon className="h-4 w-4" />
+                          <FireIcon className="h-4 w-4 text-[#8BAE5A]" />
                           <span>{schema.rep_range}</span>
                         </div>
                       </div>
-                      <span className="px-2 py-1 bg-[#3A4D23] rounded text-xs">
+                      <span className="px-3 py-1 bg-[#3A4D23] rounded-full text-xs font-medium">
                         {schema.category}
                       </span>
                     </div>
 
-                    <button
-                      onClick={() => selectTrainingSchema(schema.id)}
-                      className={`w-full py-2 px-4 rounded-lg font-medium transition-colors ${
-                        selectedTrainingSchema === schema.id
-                          ? 'bg-[#8BAE5A] text-[#232D1A]'
-                          : 'bg-[#3A4D23] text-white hover:bg-[#4A5D33]'
-                      }`}
-                    >
-                      {selectedTrainingSchema === schema.id ? 'Geselecteerd' : 'Selecteer dit plan'}
-                    </button>
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => handleViewDynamicPlan(schema.id, schema.name)}
+                        className="flex-1 py-3 px-4 rounded-lg font-medium transition-colors bg-[#8BAE5A] text-[#232D1A] hover:bg-[#7A9D4A] shadow-lg shadow-[#8BAE5A]/20"
+                      >
+                        Bekijk schema
+                      </button>
+                      <button
+                        onClick={() => selectTrainingSchema(schema.id)}
+                        className={`flex-1 py-3 px-4 rounded-lg font-medium transition-colors ${
+                          selectedTrainingSchema === schema.id
+                            ? 'bg-[#8BAE5A] text-[#232D1A] shadow-lg shadow-[#8BAE5A]/20'
+                            : 'bg-[#3A4D23] text-white hover:bg-[#4A5D33]'
+                        }`}
+                      >
+                        {selectedTrainingSchema === schema.id ? 'Geselecteerd' : 'Selecteer'}
+                      </button>
+                    </div>
                   </motion.div>
                 ))}
               </div>
             )}
-          </div>
+            </div>
+          </motion.div>
         )}
 
-        {/* Continue to Voedingsplannen Button - Only show during onboarding */}
-        {userTrainingProfile && trainingSchemas.length > 0 && isOnboarding && (
-          <div className="mt-8 text-center">
-            <button
-              onClick={() => {
-                completeStep(3);
-                window.location.href = '/dashboard/voedingsplannen';
-              }}
-              className="px-8 py-3 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold"
+
+        {/* Continue to Voedingsplannen Button - Only show during onboarding and when schema is selected */}
+        {userTrainingProfile && trainingSchemas.length > 0 && isOnboarding && selectedTrainingSchema && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-8 text-center"
+          >
+            <div className="bg-gradient-to-r from-[#8BAE5A]/10 to-[#8BAE5A]/5 border border-[#8BAE5A]/30 rounded-2xl p-6">
+              <div className="flex items-center justify-center gap-3 mb-4">
+                <div className="p-2 bg-[#8BAE5A]/20 rounded-lg">
+                  <CheckIcon className="h-6 w-6 text-[#8BAE5A]" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-white">Trainingsschema Geselecteerd!</h3>
+                  <p className="text-sm text-gray-400">Je bent klaar voor de volgende stap</p>
+                </div>
+              </div>
+              
+              <button
+                onClick={() => {
+                  completeStep(3);
+                  window.location.href = '/dashboard/voedingsplannen';
+                }}
+                className="flex items-center gap-2 px-8 py-3 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold shadow-lg shadow-[#8BAE5A]/20 mx-auto"
+              >
+                Doorgaan naar Voedingsplannen
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+              
+              <p className="mt-4 text-sm text-gray-400">
+                Je kunt later altijd terugkomen om je trainingsschema te wijzigen
+              </p>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Video Modal */}
+        {videoModal.isOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="bg-[#1A1A1A] rounded-2xl p-6 border border-gray-800 max-w-5xl w-full max-h-[90vh] overflow-hidden shadow-2xl"
             >
-              Doorgaan naar Voedingsplannen →
-            </button>
-            <p className="mt-2 text-sm text-gray-400">
-              Je kunt later altijd terugkomen om je trainingsschema te wijzigen
-            </p>
+              {/* Modal Header */}
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-[#8BAE5A]/20 rounded-lg">
+                    <svg className="w-6 h-6 text-[#8BAE5A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-xl font-semibold text-white">{videoModal.exerciseName}</h3>
+                </div>
+                <button
+                  onClick={closeVideoModal}
+                  className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              {/* Video Player */}
+              <div className="aspect-video bg-black rounded-xl overflow-hidden shadow-lg">
+                <video
+                  src={videoModal.videoUrl}
+                  className="w-full h-full object-contain"
+                  controls
+                  controlsList="nodownload"
+                  autoPlay
+                  onError={(e) => {
+                    console.error('❌ Video error:', e);
+                    toast.error('Video kon niet worden geladen');
+                  }}
+                >
+                  Je browser ondersteunt geen video element.
+                </video>
+              </div>
+              
+              {/* Modal Footer */}
+              <div className="mt-6 flex justify-end">
+                <button
+                  onClick={closeVideoModal}
+                  className="px-6 py-3 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-medium shadow-lg shadow-[#8BAE5A]/20"
+                >
+                  Sluiten
+                </button>
+              </div>
+            </motion.div>
           </div>
         )}
+            </>
+          )}
+        </AnimatePresence>
       </div>
     </PageLayout>
   );

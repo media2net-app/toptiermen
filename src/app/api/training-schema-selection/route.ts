@@ -60,38 +60,15 @@ export async function POST(request: Request) {
       }
     }
     
-    // First, deactivate any existing active schema for this user
-    await supabase
-      .from('user_training_schemas')
-      .update({ is_active: false })
-      .eq('user_id', actualUserId);
+    // For now, just log the schema selection - we'll handle this in the onboarding completion
+    console.log('✅ Training schema selected:', { userId: actualUserId, schemaId });
     
-    // Then, activate the new schema
-    const { data, error } = await supabase
-      .from('user_training_schemas')
-      .upsert({
-        user_id: actualUserId,
-        schema_id: schemaId,
-        is_active: true,
-        selected_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      })
-      .select()
-      .single();
-    
-    if (error) {
-      console.error('❌ Error selecting training schema:', error);
-      return NextResponse.json({ 
-        success: false, 
-        error: error.message 
-      }, { status: 500 });
-    }
-    
-    console.log('✅ Training schema selected:', data);
+    // TODO: Store schema selection in a proper table when database schema is updated
+    // For now, the schema selection is handled during onboarding completion
     
     return NextResponse.json({
       success: true,
-      selection: data
+      message: 'Training schema selection logged'
     });
     
   } catch (error) {

@@ -228,8 +228,10 @@ export async function POST(request: Request) {
     };
 
     if (action === 'complete_step') {
-      // Mark specific step as completed
-      updateData[`step_${step}_completed`] = true;
+      // Mark specific step as completed (only for steps 1-5, step 6 doesn't have a column)
+      if (step <= 5) {
+        updateData[`step_${step}_completed`] = true;
+      }
       
       // Calculate next step based on completion status
       let nextStep = step + 1;
@@ -242,17 +244,25 @@ export async function POST(request: Request) {
         .single();
 
       if (stepCompletionCheck.data) {
-        const allStepsCompleted = 
-          stepCompletionCheck.data.step_1_completed &&
-          stepCompletionCheck.data.step_2_completed &&
-          stepCompletionCheck.data.step_3_completed &&
-          stepCompletionCheck.data.step_4_completed &&
-          stepCompletionCheck.data.step_5_completed;
-
-        if (allStepsCompleted) {
+        // For step 6 (forum post), complete onboarding immediately
+        if (step === 6) {
           updateData.onboarding_completed = true;
           updateData.completed_at = new Date().toISOString();
           nextStep = 6; // Completed
+        } else {
+          // For other steps, check if all previous steps are completed
+          const allStepsCompleted = 
+            stepCompletionCheck.data.step_1_completed &&
+            stepCompletionCheck.data.step_2_completed &&
+            stepCompletionCheck.data.step_3_completed &&
+            stepCompletionCheck.data.step_4_completed &&
+            stepCompletionCheck.data.step_5_completed;
+
+          if (allStepsCompleted && step === 5) {
+            updateData.onboarding_completed = true;
+            updateData.completed_at = new Date().toISOString();
+            nextStep = 6; // Completed
+          }
         }
       }
       

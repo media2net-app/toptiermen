@@ -355,28 +355,35 @@ export async function GET(request: NextRequest) {
       const dayPlan = basePlan[day];
       scaledPlan[day] = {};
       
-      // Process all meal types including avond snack
-      const mealTypes = ['ontbijt', 'lunch', 'diner', 'avondsnack', 'avond_snack'];
-      
-      mealTypes.forEach(mealType => {
-        if (dayPlan[mealType]) {
-          const meal = dayPlan[mealType];
+      // Process all meal types - check if dayPlan has meals object
+      if (dayPlan.meals) {
+        const mealTypes = Object.keys(dayPlan.meals);
+        
+        mealTypes.forEach(mealType => {
+          const meal = dayPlan.meals[mealType];
           
-          // Handle new weekly_plan structure
-          if (meal.nutrition) {
-            const mealNutrition = {
-              calories: Math.round(meal.nutrition.calories * scaleFactor),
-              protein: Math.round((meal.nutrition.protein * scaleFactor) * 10) / 10,
-              carbs: Math.round((meal.nutrition.carbs * scaleFactor) * 10) / 10,
-              fat: Math.round((meal.nutrition.fat * scaleFactor) * 10) / 10
-            };
+          // Use the meal data directly from our database structure
+          const mealNutrition = {
+            calories: Math.round((meal.calories || 0) * scaleFactor),
+            protein: Math.round(((meal.protein || 0) * scaleFactor) * 10) / 10,
+            carbs: Math.round(((meal.carbs || 0) * scaleFactor) * 10) / 10,
+            fat: Math.round(((meal.fat || 0) * scaleFactor) * 10) / 10
+          };
+          
+          scaledPlan[day][mealType] = {
+            name: meal.name || mealType,
+            ingredients: meal.ingredients || [],
+            nutrition: mealNutrition
+          };
+        });
+      } else {
+        // Fallback to old structure for backward compatibility
+        const mealTypes = ['ontbijt', 'lunch', 'diner', 'avondsnack', 'avond_snack'];
+        
+        mealTypes.forEach(mealType => {
+          if (dayPlan[mealType]) {
+            const meal = dayPlan[mealType];
             
-            scaledPlan[day][mealType] = {
-              ingredients: meal.ingredients || [],
-              nutrition: mealNutrition
-            };
-          } else {
-            // Fallback to old structure
             const mealNutrition = {
               calories: Math.round((meal.calories || 0) * scaleFactor),
               protein: Math.round(((meal.protein || 0) * scaleFactor) * 10) / 10,
@@ -385,12 +392,13 @@ export async function GET(request: NextRequest) {
             };
             
             scaledPlan[day][mealType] = {
+              name: meal.name || mealType,
               ingredients: meal.ingredients || [],
               nutrition: mealNutrition
             };
           }
-        }
-      });
+        });
+      }
       
       // Calculate daily totals including all meals and snacks
       let dailyCalories = 0;
@@ -398,8 +406,8 @@ export async function GET(request: NextRequest) {
       let dailyCarbs = 0;
       let dailyFat = 0;
       
-      mealTypes.forEach(mealType => {
-        const meal = scaledPlan[day][mealType];
+      // Sum up all meals for this day
+      Object.values(scaledPlan[day]).forEach(meal => {
         if (meal && meal.nutrition) {
           dailyCalories += meal.nutrition.calories;
           dailyProtein += meal.nutrition.protein;
@@ -407,13 +415,6 @@ export async function GET(request: NextRequest) {
           dailyFat += meal.nutrition.fat;
         }
       });
-      
-      // Also check for avond_snack if avondsnack is not found
-      if (!scaledPlan[day]['avondsnack'] && scaledPlan[day]['avond_snack']) {
-        const avondSnack = scaledPlan[day]['avond_snack'];
-        scaledPlan[day]['avondsnack'] = avondSnack;
-        // Don't add to daily totals again - already counted in mealTypes loop
-      }
       
       scaledPlan[day].dailyTotals = {
         calories: Math.round(dailyCalories),

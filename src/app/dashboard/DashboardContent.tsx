@@ -27,35 +27,34 @@ import PWAInstallPrompt from '@/components/PWAInstallPrompt';
 import V2MonitoringDashboard from '@/components/V2MonitoringDashboard';
 import V2PerformanceAlerts from '@/components/V2PerformanceAlerts';
 import CacheIssueHelper from '@/components/CacheIssueHelper';
-import OnboardingBanner from '@/components/OnboardingBanner';
 import NotificationBell from '@/components/NotificationBell';
 import InboxIcon from '@/components/InboxIcon';
 import SupportButton from '@/components/SupportButton';
 
 // 2.0.1: Dashboard menu configuration
 const menu = [
-  { label: 'Dashboard', icon: HomeIcon, href: '/dashboard' },
-  { label: 'Onboarding', icon: CheckCircleIcon, href: '/dashboard/onboarding' },
-  { label: 'Mijn Profiel', icon: UserCircleIcon, parent: 'Dashboard', href: '/dashboard/mijn-profiel', isSub: true },
-  { label: 'Inbox', icon: EnvelopeIcon, parent: 'Dashboard', href: '/dashboard/inbox', isSub: true },
-  { label: 'Notificaties', icon: BellIcon, parent: 'Dashboard', href: '/dashboard/notificaties', isSub: true },
-  { label: 'Mijn Missies', icon: FireIcon, parent: 'Dashboard', href: '/dashboard/mijn-missies', isSub: true },
-  { label: 'Mijn Trainingen', icon: AcademicCapIcon, parent: 'Dashboard', href: '/dashboard/mijn-trainingen', isSub: true },
-          { label: 'Voedingsplannen', icon: BookOpenIcon, href: '/dashboard/voedingsplannen' },
-  { label: 'Challenges', icon: TrophyIcon, href: '/dashboard/challenges' },
-  { label: 'Finance & Business', icon: CurrencyDollarIcon, href: '/dashboard/finance-en-business' },
-  { label: 'Academy', icon: FireIcon, href: '/dashboard/academy' },
-  { label: 'Trainingsschemas', icon: AcademicCapIcon, href: '/dashboard/trainingsschemas' },
-  { label: 'Mind & Focus', icon: ChartBarIcon, href: '/dashboard/mind-en-focus' },
-  { label: 'Brotherhood', icon: UsersIcon, href: '/dashboard/brotherhood' },
-  { label: 'Social Feed', icon: ChatBubbleLeftRightIcon, parent: 'Brotherhood', href: '/dashboard/brotherhood/social-feed', isSub: true },
-  { label: 'Forum', icon: FireIcon, parent: 'Brotherhood', href: '/dashboard/brotherhood/forum', isSub: true },
-  { label: 'Leden', icon: UsersIcon, parent: 'Brotherhood', href: '/dashboard/brotherhood/leden', isSub: true },
-  { label: 'Mijn Groepen & Evenementen', icon: StarIcon, parent: 'Brotherhood', href: '/dashboard/brotherhood/mijn-groepen', isSub: true },
-  { label: 'Boekenkamer', icon: BookOpenIcon, href: '/dashboard/boekenkamer' },
-  { label: 'Badges & Rangen', icon: StarIcon, href: '/dashboard/badges-en-rangen' },
-  { label: 'Producten', icon: ShoppingBagIcon, href: '/dashboard/producten' },
-  { label: 'Mentorship & Coaching', icon: ChatBubbleLeftRightIcon, href: '/dashboard/mentorship-en-coaching' },
+  { label: 'Onboarding', icon: CheckCircleIcon, href: '/dashboard/onboarding', onboardingStep: 0, isOnboardingItem: true },
+  { label: 'Dashboard', icon: HomeIcon, href: '/dashboard', onboardingStep: 0 },
+  { label: 'Mijn Profiel', icon: UserCircleIcon, parent: 'Dashboard', href: '/dashboard/mijn-profiel', isSub: true, onboardingStep: 0 },
+  { label: 'Inbox', icon: EnvelopeIcon, parent: 'Dashboard', href: '/dashboard/inbox', isSub: true, onboardingStep: 0 },
+  { label: 'Notificaties', icon: BellIcon, parent: 'Dashboard', href: '/dashboard/notificaties', isSub: true, onboardingStep: 0 },
+  { label: 'Mijn Missies', icon: FireIcon, parent: 'Dashboard', href: '/dashboard/mijn-missies', isSub: true, onboardingStep: 2 },
+  { label: 'Mijn Trainingen', icon: AcademicCapIcon, parent: 'Dashboard', href: '/dashboard/mijn-trainingen', isSub: true, onboardingStep: 0 },
+  { label: 'Voedingsplannen', icon: BookOpenIcon, href: '/dashboard/voedingsplannen', onboardingStep: 4 },
+  { label: 'Challenges', icon: TrophyIcon, href: '/dashboard/challenges', onboardingStep: 5 },
+  { label: 'Finance & Business', icon: CurrencyDollarIcon, href: '/dashboard/finance-en-business', onboardingStep: 7 },
+  { label: 'Academy', icon: FireIcon, href: '/dashboard/academy', onboardingStep: 7 },
+  { label: 'Trainingsschemas', icon: AcademicCapIcon, href: '/dashboard/trainingsschemas', onboardingStep: 3 },
+  { label: 'Mind & Focus', icon: ChartBarIcon, href: '/dashboard/mind-en-focus', onboardingStep: 7 },
+  { label: 'Brotherhood', icon: UsersIcon, href: '/dashboard/brotherhood', onboardingStep: 7 },
+  { label: 'Social Feed', icon: ChatBubbleLeftRightIcon, parent: 'Brotherhood', href: '/dashboard/brotherhood/social-feed', isSub: true, onboardingStep: 7 },
+  { label: 'Forum', icon: FireIcon, parent: 'Brotherhood', href: '/dashboard/brotherhood/forum', isSub: true, onboardingStep: 6 },
+  { label: 'Leden', icon: UsersIcon, parent: 'Brotherhood', href: '/dashboard/brotherhood/leden', isSub: true, onboardingStep: 7 },
+  { label: 'Mijn Groepen & Evenementen', icon: StarIcon, parent: 'Brotherhood', href: '/dashboard/brotherhood/mijn-groepen', isSub: true, onboardingStep: 7 },
+  { label: 'Boekenkamer', icon: BookOpenIcon, href: '/dashboard/boekenkamer', onboardingStep: 7 },
+  { label: 'Badges & Rangen', icon: StarIcon, href: '/dashboard/badges-en-rangen', onboardingStep: 7 },
+  { label: 'Producten', icon: ShoppingBagIcon, href: '/dashboard/producten', onboardingStep: 7 },
+  { label: 'Mentorship & Coaching', icon: ChatBubbleLeftRightIcon, href: '/dashboard/mentorship-en-coaching', onboardingStep: 7 },
 ];
 
 // 2.0.1: Sidebar component with enhanced monitoring
@@ -67,11 +66,53 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
   const pathname = usePathname();
   const [openBrotherhood, setOpenBrotherhood] = useState(false);
   const [openDashboard, setOpenDashboard] = useState(false);
-  const { isOnboarding, highlightedMenu } = useOnboarding();
+  const [showOnboardingCompletion, setShowOnboardingCompletion] = useState(false);
+  const { isOnboarding, highlightedMenu, currentStep } = useOnboarding();
+  
+  // Use onboardingStatus from props if available, otherwise fallback to context
+  const actualOnboardingStatus = onboardingStatus || { current_step: currentStep, onboarding_completed: !isOnboarding };
   // const { trackFeatureUsage } = useV2Monitoring();
   const { user } = useSupabaseAuth();
   
   const safePathname = pathname || '';
+  
+  // Use currentStep from actualOnboardingStatus if available, otherwise fallback to useOnboarding hook
+  const actualCurrentStep = actualOnboardingStatus?.current_step ?? currentStep;
+
+  // Handle onboarding completion animation
+  useEffect(() => {
+    if (actualOnboardingStatus?.onboarding_completed && !showOnboardingCompletion) {
+      setShowOnboardingCompletion(true);
+      
+      // Hide onboarding item after 5 seconds
+      setTimeout(() => {
+        setShowOnboardingCompletion(false);
+      }, 5000);
+    }
+  }, [actualOnboardingStatus?.onboarding_completed, showOnboardingCompletion]);
+
+  // Function to check if a menu item should be disabled during onboarding
+  const isMenuItemDisabled = (item: any) => {
+    // If onboarding is completed, no items should be disabled
+    if (actualOnboardingStatus?.onboarding_completed) return false;
+    
+    if (!isOnboarding || !actualOnboardingStatus) return false;
+    
+    // If item has onboardingStep defined, check if current step allows access
+    if (item.onboardingStep !== undefined) {
+      // During onboarding, only allow access to the current step and earlier completed steps
+      // But disable future steps and past steps that are not the current step
+      const isDisabled = actualCurrentStep !== item.onboardingStep;
+      
+      // Force console log to be visible
+      if (typeof window !== 'undefined') {
+        console.log(`🔍 [NAV] ${item.label}: currentStep=${actualCurrentStep}, requiredStep=${item.onboardingStep}, disabled=${isDisabled}`);
+      }
+      return isDisabled;
+    }
+    
+    return false;
+  };
 
   const handleLinkClick = (href: string, label: string, e?: React.MouseEvent) => {
     // Don't prevent default - let the Link component handle navigation
@@ -99,50 +140,67 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
     } else if (currentItem?.parent === 'Brotherhood') {
       setOpenBrotherhood(true);
     }
-  }, [safePathname]);
+    
+    // Auto-open Brotherhood submenu during onboarding step 6 (forum introduction)
+    if (isOnboarding && actualCurrentStep === 6) {
+      setOpenBrotherhood(true);
+    }
+  }, [safePathname, isOnboarding, actualCurrentStep]);
 
   return (
     <nav className="flex flex-col gap-2">
       {menu.map((item) => {
-        // Skip onboarding menu item if onboarding is completed or user is not in onboarding mode
-        if (item.label === 'Onboarding' && (onboardingStatus?.onboarding_completed || !isOnboarding || onboardingStatus?.onboarding_completed)) {
+        // Skip onboarding menu item if onboarding is completed and animation is done, or user is not in onboarding mode
+        if (item.isOnboardingItem && (actualOnboardingStatus?.onboarding_completed && !showOnboardingCompletion || !isOnboarding)) {
           return null;
         }
         
         if (!item.parent) {
-          const isActive = safePathname === item.href;
+          // During onboarding, only the current step should be active
+          const isActive = isOnboarding 
+            ? (safePathname === item.href && item.onboardingStep === actualCurrentStep)
+            : safePathname === item.href;
           const hasSubmenu = menu.some(sub => sub.parent === item.label);
 
           if (hasSubmenu) {
             const isOpen = item.label === 'Dashboard' ? openDashboard : openBrotherhood;
             const setIsOpen = item.label === 'Dashboard' ? setOpenDashboard : setOpenBrotherhood;
             const subItems = menu.filter(sub => sub.parent === item.label);
-            const hasActiveSubItem = subItems.some(sub => sub.href === safePathname);
+            const hasActiveSubItem = subItems.some(sub => 
+              isOnboarding 
+                ? (sub.href === safePathname && sub.onboardingStep === actualCurrentStep)
+                : sub.href === safePathname
+            );
+            const allSubItemsDisabled = subItems.every(sub => isMenuItemDisabled(sub));
             
             return (
               <div key={item.label} className="group">
                 <button
                   className={`grid grid-cols-[auto_1fr_auto] items-center gap-4 px-4 py-3 rounded-xl font-bold uppercase text-sm tracking-wide transition-all duration-150 font-figtree w-full text-left ${
-                    isActive || hasActiveSubItem 
-                      ? 'bg-[#8BAE5A] text-black shadow-lg' 
-                      : 'text-white hover:text-[#8BAE5A] hover:bg-[#3A4D23]/50'
+                    allSubItemsDisabled
+                      ? 'text-gray-500 cursor-not-allowed opacity-50'
+                      : isActive || hasActiveSubItem 
+                        ? 'bg-[#8BAE5A] text-black shadow-lg' 
+                        : 'text-white hover:text-[#8BAE5A] hover:bg-[#3A4D23]/50'
                   } ${collapsed ? 'justify-center px-2' : ''}`}
                   onClick={(e) => {
                     // Only prevent default for submenu toggles, not for navigation
-                    if (!collapsed) {
+                    if (!collapsed && !allSubItemsDisabled) {
                       e.preventDefault();
                       e.stopPropagation();
                       setIsOpen(v => !v);
                     }
                   }}
+                  disabled={allSubItemsDisabled}
+                  title={allSubItemsDisabled ? "Nog niet beschikbaar tijdens onboarding" : undefined}
                 >
-                  <item.icon className={`w-6 h-6 ${isActive || hasActiveSubItem ? 'text-white' : 'text-[#8BAE5A]'}`} />
+                  <item.icon className={`w-6 h-6 ${allSubItemsDisabled ? 'text-gray-500' : isActive || hasActiveSubItem ? 'text-white' : 'text-[#8BAE5A]'}`} />
                   {!collapsed && (
                     <span className="truncate col-start-2">{item.label}</span>
                   )}
                   {!collapsed && (
                     <ChevronDownIcon 
-                      className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} 
+                      className={`w-4 h-4 transition-transform duration-200 ${allSubItemsDisabled ? 'text-gray-500' : ''} ${isOpen ? 'rotate-180' : ''}`} 
                     />
                   )}
                 </button>
@@ -155,8 +213,24 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
                     transition={{ duration: 0.2 }}
                   >
                     {subItems.map(sub => {
-                      const isSubActive = safePathname === sub.href;
+                      const isSubActive = isOnboarding 
+                        ? (safePathname === sub.href && sub.onboardingStep === actualCurrentStep)
+                        : safePathname === sub.href;
                       const isHighlighted = isOnboarding && highlightedMenu === sub.label;
+                      const isDisabled = isMenuItemDisabled(sub);
+                      
+                      if (isDisabled) {
+                        return (
+                          <div
+                            key={sub.label}
+                            className="block px-4 py-2 rounded-lg text-sm text-gray-500 cursor-not-allowed opacity-50"
+                            title="Nog niet beschikbaar tijdens onboarding"
+                          >
+                            {sub.label}
+                          </div>
+                        );
+                      }
+                      
                       return (
                         <Link
                           key={sub.label}
@@ -180,25 +254,64 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
           }
 
           const isHighlighted = isOnboarding && highlightedMenu === item.label;
+          const isDisabled = isMenuItemDisabled(item);
+          const isOnboardingItem = item.isOnboardingItem;
+          
+          // Only the onboarding menu item should be yellow during onboarding, green when completed
+          const shouldBeYellow = isOnboardingItem && isOnboarding && !actualOnboardingStatus?.onboarding_completed;
+          const shouldBeGreen = isOnboardingItem && actualOnboardingStatus?.onboarding_completed && showOnboardingCompletion;
+          
+          // Special case: Onboarding menu item should always be yellow during onboarding, never disabled
+          if (isDisabled && !isOnboardingItem) {
+            return (
+              <div
+                key={item.label}
+                className={`grid grid-cols-[auto_1fr] items-center gap-4 px-4 py-3 rounded-xl font-bold uppercase text-sm tracking-wide font-figtree text-gray-500 cursor-not-allowed opacity-50 ${collapsed ? 'justify-center px-2' : ''}`}
+                title="Nog niet beschikbaar tijdens onboarding"
+              >
+                <item.icon className="w-6 h-6 text-gray-500" />
+                {!collapsed && (
+                  <div className="flex items-center justify-between w-full">
+                    <span className="truncate">{item.label}</span>
+                  </div>
+                )}
+              </div>
+            );
+          }
+          
           return (
-            <Link
+            <motion.div
               key={item.label}
-              href={item.href}
-              className={`grid grid-cols-[auto_1fr] items-center gap-4 px-4 py-3 rounded-xl font-bold uppercase text-sm tracking-wide transition-all duration-150 font-figtree ${
-                isActive 
-                  ? 'bg-[#8BAE5A] text-black shadow-lg' 
-                  : isHighlighted 
-                    ? 'bg-[#FFD700]/20 text-[#FFD700] border border-[#FFD700]/30' 
-                      : 'text-white hover:text-[#8BAE5A] hover:bg-[#3A4D23]/50'
-              } ${collapsed ? 'justify-center px-2' : ''}`}
+              initial={false}
+              animate={{ 
+                opacity: shouldBeGreen ? [1, 1, 0] : 1,
+                scale: shouldBeGreen ? [1, 1.05, 0.95] : 1
+              }}
+              transition={{ 
+                duration: shouldBeGreen ? 5 : 0,
+                times: shouldBeGreen ? [0, 0.8, 1] : [0]
+              }}
             >
-              <item.icon className={`w-6 h-6 ${isActive ? 'text-white' : isHighlighted ? 'text-[#FFD700]' : 'text-[#8BAE5A]'}`} />
+              <Link
+                href={item.href}
+                className={`grid grid-cols-[auto_1fr] items-center gap-4 px-4 py-3 rounded-xl font-bold uppercase text-sm tracking-wide transition-all duration-500 font-figtree ${
+                  isActive 
+                    ? 'bg-[#8BAE5A] text-black shadow-lg' 
+                    : shouldBeYellow
+                      ? 'bg-[#FFD700]/20 text-[#FFD700] border border-[#FFD700]/30 shadow-lg'
+                      : shouldBeGreen
+                        ? 'bg-[#8BAE5A]/20 text-[#8BAE5A] border border-[#8BAE5A]/30 shadow-lg animate-pulse'
+                        : 'text-white hover:text-[#8BAE5A] hover:bg-[#3A4D23]/50'
+                } ${collapsed ? 'justify-center px-2' : ''}`}
+              >
+              <item.icon className={`w-6 h-6 ${isActive ? 'text-white' : shouldBeYellow ? 'text-[#FFD700]' : shouldBeGreen ? 'text-[#8BAE5A]' : 'text-[#8BAE5A]'}`} />
               {!collapsed && (
                 <div className="flex items-center justify-between w-full">
                   <span className="truncate">{item.label}</span>
                 </div>
               )}
             </Link>
+            </motion.div>
           );
         }
         return null;
@@ -679,15 +792,14 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
           </AnimatePresence>
 
           {/* Page Content */}
-          <div className={`p-3 sm:p-4 md:p-6 lg:p-8 ${isOnboarding ? 'pt-24' : ''}`}>
+          <div className="p-3 sm:p-4 md:p-6 lg:p-8">
             <div className={`transition-all duration-300 ${isTransitioning ? 'opacity-50 scale-95' : 'opacity-100 scale-100'}`}>
               {children}
             </div>
           </div>
         </div>
 
-        {/* Onboarding Banner - Hide during test user video */}
-        {!showTestUserVideo && <OnboardingBanner />}
+        {/* Onboarding Banner - Removed */}
 
         {/* Modals and Components */}
         <ForcedOnboardingModal 

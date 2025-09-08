@@ -73,9 +73,9 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { userId, userEmail, training_goal, training_frequency, experience_level, equipment_type } = body;
+    const { userId, userEmail, training_goal, training_frequency, equipment_type } = body;
 
-    if ((!userId && !userEmail) || !training_goal || !training_frequency || !experience_level || !equipment_type) {
+    if ((!userId && !userEmail) || !training_goal || !training_frequency || !equipment_type) {
       return NextResponse.json({ 
         success: false, 
         error: 'All fields are required' 
@@ -99,19 +99,33 @@ export async function POST(request: Request) {
       user_id: emailToLookup, // Store email directly as user_id (TEXT field)
       training_goal,
       training_frequency,
-      experience_level,
       equipment_type,
       updated_at: new Date().toISOString()
     };
     
-    const { data, error } = await supabase
+    // First try to update existing profile
+    let { data, error } = await supabase
       .from('training_profiles')
-      .upsert(profileData, { 
-        onConflict: 'user_id',
-        ignoreDuplicates: false 
-      })
+      .update(profileData)
+      .eq('user_id', emailToLookup)
       .select()
       .single();
+    
+    // If no existing profile found, create a new one
+    if (error && error.code === 'PGRST116') {
+      console.log('📝 No existing profile found, creating new one...');
+      const { data: newData, error: newError } = await supabase
+        .from('training_profiles')
+        .insert({
+          ...profileData,
+          experience_level: 'intermediate' // Temporary default value
+        })
+        .select()
+        .single();
+      
+      data = newData;
+      error = newError;
+    }
     
     if (error) {
       console.error('❌ Error saving training profile:', error);

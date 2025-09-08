@@ -105,6 +105,12 @@ export default function TestUserVideoModal({ isOpen, onComplete }: TestUserVideo
                 preload="metadata"
                 onEnded={() => setVideoWatched(true)}
                 onPlay={() => setShowVideoOverlay(false)}
+                onLoadedMetadata={() => {
+                  // Show first frame when metadata is loaded
+                  if (videoRef.current) {
+                    videoRef.current.currentTime = 0.1;
+                  }
+                }}
               >
                 <source src="/testgebruikers-v2.mp4" type="video/mp4" />
                 Je browser ondersteunt geen video afspelen.
@@ -113,7 +119,7 @@ export default function TestUserVideoModal({ isOpen, onComplete }: TestUserVideo
               {/* Video Play Overlay */}
               {showVideoOverlay && (
                 <div 
-                  className="absolute inset-0 bg-black/60 flex items-center justify-center cursor-pointer group rounded-lg"
+                  className="absolute inset-0 bg-black/40 flex items-center justify-center cursor-pointer group rounded-lg"
                   onClick={() => {
                     if (videoRef.current) {
                       videoRef.current.play();

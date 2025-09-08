@@ -295,19 +295,18 @@ export default function ForcedOnboardingModal({ isOpen, onComplete }: ForcedOnbo
             <h2 className="text-xl font-semibold text-white">
               {currentStep === 0 ? 'Welkom bij Toptiermen' : `Stap ${currentStep + 1} van 6`}
             </h2>
-            {/* Always show progress bar for all steps */}
-            <div className="flex items-center gap-2">
-              <div className="w-32 bg-[#181F17] rounded-full h-2">
-                <div 
-                  className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${((currentStep + 1) / 6) * 100}%` }}
-                ></div>
-              </div>
-              <span className="text-sm text-[#8BAE5A]">
-                {currentStep + 1}/6
-              </span>
-            </div>
           </div>
+          
+          {/* Hide next button for welcome video step (step 0) and main goal step (step 1) */}
+          {currentStep !== 0 && currentStep !== 1 && (
+            <button
+              onClick={() => setCurrentStep(currentStep + 1)}
+              className="bg-[#8BAE5A] hover:bg-[#B6C948] text-[#181F17] px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center gap-2"
+            >
+              Volgende
+              <ArrowRightIcon className="w-4 h-4" />
+            </button>
+          )}
         </div>
 
         {/* Content */}

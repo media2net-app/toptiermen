@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { 
   UserGroupIcon, 
-  VideoCameraIcon, 
   ChatBubbleLeftRightIcon,
   CheckCircleIcon,
   ArrowRightIcon,
@@ -187,16 +186,6 @@ export default function IntroductionTaskWidget({ isVisible, onComplete }: Introd
               <li>• Je interesses en passies</li>
             </ul>
 
-            <div className="mt-3 pt-3 border-t border-[#3A4D23]">
-              <h4 className="text-[#8BAE5A] font-semibold mb-2 flex items-center">
-                <VideoCameraIcon className="w-4 h-4 mr-2" />
-                Video introductie (aanbevolen):
-              </h4>
-              <p className="text-[#B6C948] text-sm">
-                Neem een korte video op (30-60 seconden) om jezelf persoonlijk voor te stellen. 
-                Dit is een geweldige manier om uit je comfort zone te stappen en authentiek contact te maken!
-              </p>
-            </div>
           </div>
 
           {/* Action Buttons */}

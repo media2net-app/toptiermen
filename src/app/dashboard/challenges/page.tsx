@@ -15,6 +15,8 @@ import AdminCard from '@/components/admin/AdminCard';
 import AdminButton from '@/components/admin/AdminButton';
 import Breadcrumb, { createBreadcrumbs, BREADCRUMB_CONFIGS } from '@/components/Breadcrumb';
 import ChallengeDetailModal from './components/ChallengeDetailModal';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import toast from 'react-hot-toast';
 
 // Supabase client
 const supabase = createClient(
@@ -48,6 +50,29 @@ export default function ChallengesPage() {
   const [activeTab, setActiveTab] = useState<'all' | 'weekly' | 'monthly' | 'special'>('all');
   const [selectedChallenge, setSelectedChallenge] = useState<Challenge | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  
+  // Onboarding state
+  const [onboardingStatus, setOnboardingStatus] = useState<any>(null);
+  const [showOnboardingStep5, setShowOnboardingStep5] = useState(false);
+  const [selectedChallengeId, setSelectedChallengeId] = useState<string | null>(null);
+  
+  const { user } = useSupabaseAuth();
+
+  // Check onboarding status
+  const checkOnboardingStatus = async () => {
+    if (!user?.id) return;
+
+    try {
+      const response = await fetch(`/api/onboarding?userId=${user?.id}`);
+      if (response.ok) {
+        const data = await response.json();
+        setOnboardingStatus(data);
+        setShowOnboardingStep5(!data.onboarding_completed && data.current_step === 5);
+      }
+    } catch (error) {
+      console.error('Error checking onboarding status:', error);
+    }
+  };
 
   // Mock data for now - will be replaced with real data from database
   const mockChallenges: Challenge[] = [
@@ -144,6 +169,12 @@ export default function ChallengesPage() {
   ];
 
   useEffect(() => {
+    if (user?.id) {
+      checkOnboardingStatus();
+    }
+  }, [user?.id]);
+
+  useEffect(() => {
     // Load challenges from database or use mock data
     const loadChallenges = async () => {
       try {
@@ -187,8 +218,15 @@ export default function ChallengesPage() {
   });
 
   const handleChallengeClick = (challenge: Challenge) => {
-    setSelectedChallenge(challenge);
-    setShowDetailModal(true);
+    if (showOnboardingStep5) {
+      // During onboarding, select the challenge
+      setSelectedChallengeId(challenge.id);
+      toast.success(`Challenge "${challenge.title}" geselecteerd!`);
+    } else {
+      // Normal behavior - show detail modal
+      setSelectedChallenge(challenge);
+      setShowDetailModal(true);
+    }
   };
 
   const handleStartChallenge = async (challengeId: string) => {
@@ -278,6 +316,85 @@ export default function ChallengesPage() {
           </div>
         </div>
 
+        {/* Onboarding Progress - Step 5: Challenges */}
+        {showOnboardingStep5 && (
+          <div className="mb-8">
+            <div className="bg-gradient-to-br from-[#8BAE5A]/10 to-[#FFD700]/10 border-2 border-[#8BAE5A] rounded-2xl p-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl sm:text-3xl">🏆</span>
+                  <div>
+                    <h2 className="text-lg sm:text-xl font-bold text-white">Onboarding Stap 5: Challenge Selecteren</h2>
+                    <p className="text-[#8BAE5A] text-xs sm:text-sm">Kies een challenge om jezelf uit te dagen en punten te verdienen</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-xl sm:text-2xl font-bold text-[#FFD700]">5/6</div>
+                  <div className="text-[#8BAE5A] text-xs sm:text-sm">Stappen voltooid</div>
+                </div>
+              </div>
+              
+              {!selectedChallengeId ? (
+                <div className="bg-[#181F17]/80 rounded-xl p-4 border border-[#3A4D23]">
+                  <p className="text-[#f0a14f] text-sm font-semibold mb-2">
+                    ⚠️ Selecteer een challenge om door te gaan
+                  </p>
+                  <p className="text-gray-300 text-sm">
+                    Kies een challenge die past bij je doelen en voorkeuren. Je kunt later altijd andere challenges proberen.
+                  </p>
+                </div>
+              ) : (
+                <div className="bg-[#8BAE5A]/20 rounded-xl p-4 border border-[#8BAE5A]">
+                  <p className="text-[#8BAE5A] text-sm font-semibold mb-2">
+                    ✅ Perfect! Je hebt een challenge geselecteerd
+                  </p>
+                  <p className="text-gray-300 text-sm mb-4">
+                    Je kunt nu door naar de laatste stap van de onboarding.
+                  </p>
+                  <button
+                    onClick={async () => {
+                      try {
+                        // Mark step 5 as completed
+                        const response = await fetch('/api/onboarding', {
+                          method: 'POST',
+                          headers: {
+                            'Content-Type': 'application/json',
+                          },
+                          body: JSON.stringify({
+                            userId: user?.id,
+                            step: 5,
+                            action: 'complete_step',
+                            selectedChallenge: selectedChallengeId
+                          }),
+                        });
+
+                        if (response.ok) {
+                          toast.success('Challenge opgeslagen! Doorsturen naar forum...');
+                          // Navigate to specific forum topic for step 6 (forum introduction)
+                          setTimeout(() => {
+                            window.location.href = '/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden';
+                          }, 1500);
+                        } else {
+                          toast.error('Er is een fout opgetreden');
+                        }
+                      } catch (error) {
+                        console.error('Error completing step:', error);
+                        toast.error('Er is een fout opgetreden');
+                      }
+                    }}
+                    className="bg-[#8BAE5A] hover:bg-[#B6C948] text-[#181F17] px-6 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center gap-2"
+                  >
+                    Volgende Stap
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <AdminCard>
@@ -362,7 +479,16 @@ export default function ChallengesPage() {
           {filteredChallenges.map((challenge) => {
             const TypeIcon = getTypeIcon(challenge.type);
             return (
-              <AdminCard key={challenge.id} className="hover:scale-105 transition-transform">
+              <AdminCard 
+                key={challenge.id} 
+                className={`hover:scale-105 transition-transform cursor-pointer ${
+                  showOnboardingStep5 && selectedChallengeId === challenge.id
+                    ? 'border-2 border-[#8BAE5A] bg-[#8BAE5A]/10'
+                    : showOnboardingStep5
+                    ? 'border-2 border-[#3A4D23] hover:border-[#8BAE5A]/50'
+                    : ''
+                }`}
+              >
                 <div className="space-y-4">
                   {/* Header */}
                   <div className="flex items-start justify-between">
@@ -434,14 +560,37 @@ export default function ChallengesPage() {
                   </div>
 
                   {/* Action Button */}
-                  <AdminButton
-                    className="w-full"
-                    variant="primary"
-                    icon={<PlayIcon className="w-4 h-4" />}
-                    onClick={() => handleChallengeClick(challenge)}
-                  >
-                    Bekijk Details
-                  </AdminButton>
+                  {showOnboardingStep5 ? (
+                    <button
+                      className={`w-full px-4 py-2 rounded-lg transition-colors font-semibold flex items-center justify-center gap-2 ${
+                        selectedChallengeId === challenge.id
+                          ? 'bg-[#8BAE5A] text-[#232D1A]'
+                          : 'bg-[#3A4D23] text-white hover:bg-[#4A5D33]'
+                      }`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleChallengeClick(challenge);
+                      }}
+                    >
+                      {selectedChallengeId === challenge.id ? (
+                        <>
+                          <CheckCircleIcon className="w-4 h-4" />
+                          Geselecteerd
+                        </>
+                      ) : (
+                        'Selecteer deze challenge'
+                      )}
+                    </button>
+                  ) : (
+                    <AdminButton
+                      className="w-full"
+                      variant="primary"
+                      icon={<PlayIcon className="w-4 h-4" />}
+                      onClick={() => handleChallengeClick(challenge)}
+                    >
+                      Bekijk Details
+                    </AdminButton>
+                  )}
                 </div>
               </AdminCard>
             );

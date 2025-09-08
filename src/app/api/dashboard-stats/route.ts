@@ -97,36 +97,25 @@ async function fetchDashboardStats(userId: string) {
 
 async function fetchMissionsStats(userId: string) {
   try {
-    // Get total missions
+    // Get total missions (all missions assigned to user)
     const { data: totalMissions, error: totalError } = await supabaseAdmin
       .from('user_missions')
-      .select('id')
-      .eq('user_id', userId)
-      .eq('status', 'active');
+      .select('id, status')
+      .eq('user_id', userId);
 
-    // Get completed missions today
-    const today = new Date().toISOString().split('T')[0];
-    const { data: completedToday, error: todayError } = await supabaseAdmin
-      .from('user_mission_logs')
-      .select('id')
-      .eq('user_id', userId)
-      .gte('completed_at', `${today}T00:00:00`)
-      .lte('completed_at', `${today}T23:59:59`);
+    if (totalError) {
+      console.error('Error fetching total missions:', totalError);
+      return { total: 0, completedToday: 0, completedThisWeek: 0, progress: 0 };
+    }
 
-    // Get completed missions this week
-    const weekStart = new Date();
-    weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-    const weekStartStr = weekStart.toISOString().split('T')[0];
-    const { data: completedThisWeek, error: weekError } = await supabaseAdmin
-      .from('user_mission_logs')
-      .select('id')
-      .eq('user_id', userId)
-      .gte('completed_at', `${weekStartStr}T00:00:00`);
-
+    // Count completed missions (status = 'completed')
+    const completedMissions = totalMissions?.filter(mission => mission.status === 'completed') || [];
     const total = totalMissions?.length || 0;
-    const completedTodayCount = completedToday?.length || 0;
-    const completedThisWeekCount = completedThisWeek?.length || 0;
-    const progress = total > 0 ? Math.round((completedTodayCount / total) * 100) : 0;
+    const completedTodayCount = 0; // For now, we don't have daily tracking
+    const completedThisWeekCount = completedMissions.length;
+    const progress = total > 0 ? Math.round((completedMissions.length / total) * 100) : 0;
+
+    console.log(`📊 Missions stats for user ${userId}: ${completedMissions.length}/${total} completed (${progress}%)`);
 
     return {
       total,

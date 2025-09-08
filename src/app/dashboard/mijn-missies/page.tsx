@@ -389,8 +389,8 @@ export default function MijnMissiesPage() {
           const data = await response.json();
           setOnboardingStatus(data);
           
-          // Only show onboarding step 3 if onboarding is not completed and user is on step 3
-          setShowOnboardingStep3(!data.onboarding_completed && data.current_step === 3);
+          // Only show onboarding step 3 if onboarding is not completed and user is on step 2 (missions step)
+          setShowOnboardingStep3(!data.onboarding_completed && data.current_step === 2);
         }
       } catch (error) {
         console.error('Error checking onboarding status:', error);
@@ -839,10 +839,10 @@ export default function MijnMissiesPage() {
                       });
 
                       if (response.ok) {
-                        toast.success('Missies opgeslagen! Doorsturen naar trainingscentrum...');
-                        // Navigate to training center
+                        toast.success('Missies opgeslagen! Doorsturen naar trainingsschemas...');
+                        // Navigate directly to training schemas
                         setTimeout(() => {
-                          window.location.href = '/dashboard/trainingscentrum';
+                          window.location.href = '/dashboard/trainingsschemas';
                         }, 1500);
                       } else {
                         toast.error('Er is een fout opgetreden');
