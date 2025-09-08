@@ -15,7 +15,27 @@ export async function GET(request: NextRequest) {
 
     const { data: plan, error } = await supabaseAdmin
       .from('nutrition_plans')
-      .select('id, name, meals')
+      .select(`
+        id,
+        plan_id,
+        name,
+        description,
+        target_calories,
+        target_protein,
+        target_carbs,
+        target_fat,
+        protein_percentage,
+        carbs_percentage,
+        fat_percentage,
+        duration_weeks,
+        difficulty,
+        goal,
+        is_featured,
+        is_public,
+        meals,
+        created_at,
+        updated_at
+      `)
       .eq('id', planId)
       .single();
 
@@ -32,8 +52,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ 
       success: true, 
       plan: {
-        id: plan.id,
-        name: plan.name,
+        ...plan,
         meals: plan.meals || {
           weekly_plan: {
             maandag: {},

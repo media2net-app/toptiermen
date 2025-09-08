@@ -71,10 +71,12 @@ export default function MealEditModal({
   const [unit, setUnit] = useState('g');
   const [loading, setLoading] = useState(false);
   const [showAmountModal, setShowAmountModal] = useState(false);
+  const [editingIngredientIndex, setEditingIngredientIndex] = useState<number | null>(null);
 
   // Set unit and default amount based on selected ingredient's unit_type
   useEffect(() => {
-    if (selectedIngredient) {
+    if (selectedIngredient && editingIngredientIndex === null) {
+      // Only set defaults when adding new ingredient, not when editing
       if (selectedIngredient.unit_type) {
         setUnit(selectedIngredient.unit_type);
         // Set default amount based on unit type
@@ -94,7 +96,7 @@ export default function MealEditModal({
         setAmount('100'); // Default to 100g
       }
     }
-  }, [selectedIngredient]);
+  }, [selectedIngredient, editingIngredientIndex]);
 
   const filteredIngredients = availableIngredients.filter(ingredient => {
     const matchesSearch = ingredient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -117,13 +119,37 @@ export default function MealEditModal({
       fat_per_100g: selectedIngredient.fat_per_100g
     };
 
-    setCurrentIngredients([...currentIngredients, newIngredient]);
+    if (editingIngredientIndex !== null) {
+      // Update existing ingredient
+      const updatedIngredients = [...currentIngredients];
+      updatedIngredients[editingIngredientIndex] = newIngredient;
+      setCurrentIngredients(updatedIngredients);
+      setEditingIngredientIndex(null);
+    } else {
+      // Add new ingredient
+      setCurrentIngredients([...currentIngredients, newIngredient]);
+    }
+    
     setSelectedIngredient(null);
     setAmount('');
+    setShowAmountModal(false);
   };
 
   const removeIngredient = (index: number) => {
     setCurrentIngredients(currentIngredients.filter((_, i) => i !== index));
+  };
+
+  const editIngredient = (index: number) => {
+    const ingredient = currentIngredients[index];
+    const availableIngredient = availableIngredients.find(ing => ing.id === ingredient.id);
+    
+    if (availableIngredient) {
+      setSelectedIngredient(availableIngredient);
+      setAmount(ingredient.amount.toString());
+      setUnit(ingredient.unit);
+      setEditingIngredientIndex(index);
+      setShowAmountModal(true);
+    }
   };
 
   const calculateMealNutrition = () => {
@@ -330,12 +356,24 @@ export default function MealEditModal({
                             {calories} kcal | Eiwit: {protein}g | Koolhydraten: {carbs}g | Vet: {fat}g
                           </div>
                         </div>
-                        <button
-                          onClick={() => removeIngredient(index)}
-                          className="p-2 text-red-400 hover:text-red-300 transition-colors"
-                        >
-                          <TrashIcon className="w-4 h-4" />
-                        </button>
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => editIngredient(index)}
+                            className="p-2 text-blue-400 hover:text-blue-300 transition-colors"
+                            title="Bewerken"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                          </button>
+                          <button
+                            onClick={() => removeIngredient(index)}
+                            className="p-2 text-red-400 hover:text-red-300 transition-colors"
+                            title="Verwijderen"
+                          >
+                            <TrashIcon className="w-4 h-4" />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   );
@@ -375,7 +413,7 @@ export default function MealEditModal({
           <div className="bg-[#0F150E] rounded-xl border border-[#3A4D23] w-full max-w-md">
             <div className="p-6">
               <h3 className="text-lg font-semibold text-[#8BAE5A] mb-4">
-                {selectedIngredient.name} toevoegen
+                {editingIngredientIndex !== null ? `${selectedIngredient.name} bewerken` : `${selectedIngredient.name} toevoegen`}
               </h3>
               
               <div className="space-y-4">
@@ -393,14 +431,17 @@ export default function MealEditModal({
                 
                 <div>
                   <label className="block text-sm text-gray-300 mb-2">Eenheid</label>
-                  <div className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded text-white">
-                    {unit === 'per_piece' ? 'Per stuk' : 
-                     unit === 'per_handful' ? 'Per handje' : 
-                     unit === 'per_plakje' ? 'Per plakje' : 
-                     unit === 'per_30g' ? 'Per 30g' : 
-                     unit === 'per_100g' ? 'Per 100g' : 
-                     unit}
-                  </div>
+                  <select
+                    value={unit}
+                    onChange={(e) => setUnit(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded text-white focus:outline-none focus:border-[#8BAE5A]"
+                  >
+                    <option value="per_piece">Per stuk</option>
+                    <option value="per_handful">Per handje</option>
+                    <option value="per_plakje">Per plakje</option>
+                    <option value="per_30g">Per 30g</option>
+                    <option value="per_100g">Per 100g</option>
+                  </select>
                 </div>
               </div>
               
@@ -410,6 +451,7 @@ export default function MealEditModal({
                     setShowAmountModal(false);
                     setSelectedIngredient(null);
                     setAmount('');
+                    setEditingIngredientIndex(null);
                   }}
                   variant="secondary"
                   className="flex-1"
@@ -417,13 +459,10 @@ export default function MealEditModal({
                   Annuleren
                 </AdminButton>
                 <AdminButton
-                  onClick={() => {
-                    addIngredient();
-                    setShowAmountModal(false);
-                  }}
+                  onClick={addIngredient}
                   className="flex-1"
                 >
-                  Toevoegen
+                  {editingIngredientIndex !== null ? 'Bijwerken' : 'Toevoegen'}
                 </AdminButton>
               </div>
             </div>

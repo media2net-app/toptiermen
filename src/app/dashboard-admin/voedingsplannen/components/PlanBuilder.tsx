@@ -155,12 +155,14 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
       const targetCarbs = (plan as any).meals?.target_carbs || plan.target_carbs;
       const targetFat = (plan as any).meals?.target_fat || plan.target_fat;
       
-      // Calculate percentages if we have calories and macros
+      // Use stored percentages if available, otherwise calculate from macros
       let proteinPercentage = plan.protein_percentage;
       let carbsPercentage = plan.carbs_percentage;
       let fatPercentage = plan.fat_percentage;
       
-      if (targetCalories && targetProtein && targetCarbs && targetFat && !proteinPercentage) {
+      // Only calculate if percentages are not stored in database (null, undefined, or 0)
+      if (targetCalories && targetProtein && targetCarbs && targetFat && 
+          (proteinPercentage === null || proteinPercentage === undefined || proteinPercentage === 0)) {
         proteinPercentage = Math.round((targetProtein * 4 / targetCalories) * 100);
         carbsPercentage = Math.round((targetCarbs * 4 / targetCalories) * 100);
         fatPercentage = Math.round((targetFat * 9 / targetCalories) * 100);
@@ -191,7 +193,12 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
         fat: targetFat,
         proteinPercentage,
         carbsPercentage,
-        fatPercentage
+        fatPercentage,
+        storedPercentages: {
+          protein: plan.protein_percentage,
+          carbs: plan.carbs_percentage,
+          fat: plan.fat_percentage
+        }
       });
     }
   }, [plan]);
@@ -1076,15 +1083,28 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         {/* Calories Progress */}
                         <div className="text-center">
+                          <div className="text-sm text-white mb-1">
+                            Doel: {formData.target_calories || 0} kcal
+                          </div>
                           <div className="text-3xl font-bold text-[#8BAE5A] mb-2">
                             {getDayTotal(selectedDay).calories}
                           </div>
                           <div className="text-sm text-gray-400 mb-1">kcal</div>
                           <div className="text-xs text-[#B6C948]">
-                            {formData.target_calories ? 
-                              `${Math.round((getDayTotal(selectedDay).calories / formData.target_calories) * 100)}% van doel` : 
-                              'Geen doel ingesteld'
-                            }
+                            {formData.target_calories ? (() => {
+                              const current = getDayTotal(selectedDay).calories;
+                              const target = formData.target_calories;
+                              const difference = current - target;
+                              const percentage = Math.round((current / target) * 100);
+                              
+                              if (difference > 0) {
+                                return `+${Math.round(difference)} kcal te veel (${percentage}%)`;
+                              } else if (difference < 0) {
+                                return `${Math.round(Math.abs(difference))} kcal te weinig (${percentage}%)`;
+                              } else {
+                                return `Doel bereikt! (${percentage}%)`;
+                              }
+                            })() : 'Geen doel ingesteld'}
                           </div>
                           {formData.target_calories && (
                             <div className="w-full bg-[#0F150E] rounded-full h-2 mt-2">
@@ -1100,15 +1120,28 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
 
                         {/* Protein Progress */}
                         <div className="text-center">
+                          <div className="text-sm text-white mb-1">
+                            Doel: {formData.target_protein || 0}g
+                          </div>
                           <div className="text-2xl font-bold text-blue-400 mb-2">
                             {Math.round(getDayTotal(selectedDay).protein * 10) / 10}g
                           </div>
                           <div className="text-sm text-gray-400 mb-1">Eiwit</div>
                           <div className="text-xs text-[#B6C948]">
-                            {formData.target_protein ? 
-                              `${Math.round((getDayTotal(selectedDay).protein / formData.target_protein) * 100)}% van doel` : 
-                              'Geen doel ingesteld'
-                            }
+                            {formData.target_protein ? (() => {
+                              const current = getDayTotal(selectedDay).protein;
+                              const target = formData.target_protein;
+                              const difference = current - target;
+                              const percentage = Math.round((current / target) * 100);
+                              
+                              if (difference > 0) {
+                                return `+${Math.round(difference * 10) / 10}g te veel (${percentage}%)`;
+                              } else if (difference < 0) {
+                                return `${Math.round(Math.abs(difference) * 10) / 10}g te weinig (${percentage}%)`;
+                              } else {
+                                return `Doel bereikt! (${percentage}%)`;
+                              }
+                            })() : 'Geen doel ingesteld'}
                           </div>
                           {formData.target_protein && (
                             <div className="w-full bg-[#0F150E] rounded-full h-2 mt-2">
@@ -1124,15 +1157,28 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
 
                         {/* Carbs Progress */}
                         <div className="text-center">
+                          <div className="text-sm text-white mb-1">
+                            Doel: {formData.target_carbs || 0}g
+                          </div>
                           <div className="text-2xl font-bold text-orange-400 mb-2">
                             {Math.round(getDayTotal(selectedDay).carbs * 10) / 10}g
                           </div>
                           <div className="text-sm text-gray-400 mb-1">Koolhydraten</div>
                           <div className="text-xs text-[#B6C948]">
-                            {formData.target_carbs ? 
-                              `${Math.round((getDayTotal(selectedDay).carbs / formData.target_carbs) * 100)}% van doel` : 
-                              'Geen doel ingesteld'
-                            }
+                            {formData.target_carbs ? (() => {
+                              const current = getDayTotal(selectedDay).carbs;
+                              const target = formData.target_carbs;
+                              const difference = current - target;
+                              const percentage = Math.round((current / target) * 100);
+                              
+                              if (difference > 0) {
+                                return `+${Math.round(difference * 10) / 10}g te veel (${percentage}%)`;
+                              } else if (difference < 0) {
+                                return `${Math.round(Math.abs(difference) * 10) / 10}g te weinig (${percentage}%)`;
+                              } else {
+                                return `Doel bereikt! (${percentage}%)`;
+                              }
+                            })() : 'Geen doel ingesteld'}
                           </div>
                           {formData.target_carbs && (
                             <div className="w-full bg-[#0F150E] rounded-full h-2 mt-2">
@@ -1148,15 +1194,28 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
 
                         {/* Fat Progress */}
                         <div className="text-center">
+                          <div className="text-sm text-white mb-1">
+                            Doel: {formData.target_fat || 0}g
+                          </div>
                           <div className="text-2xl font-bold text-yellow-400 mb-2">
                             {Math.round(getDayTotal(selectedDay).fat * 10) / 10}g
                           </div>
                           <div className="text-sm text-gray-400 mb-1">Vet</div>
                           <div className="text-xs text-[#B6C948]">
-                            {formData.target_fat ? 
-                              `${Math.round((getDayTotal(selectedDay).fat / formData.target_fat) * 100)}% van doel` : 
-                              'Geen doel ingesteld'
-                            }
+                            {formData.target_fat ? (() => {
+                              const current = getDayTotal(selectedDay).fat;
+                              const target = formData.target_fat;
+                              const difference = current - target;
+                              const percentage = Math.round((current / target) * 100);
+                              
+                              if (difference > 0) {
+                                return `+${Math.round(difference * 10) / 10}g te veel (${percentage}%)`;
+                              } else if (difference < 0) {
+                                return `${Math.round(Math.abs(difference) * 10) / 10}g te weinig (${percentage}%)`;
+                              } else {
+                                return `Doel bereikt! (${percentage}%)`;
+                              }
+                            })() : 'Geen doel ingesteld'}
                           </div>
                           {formData.target_fat && (
                             <div className="w-full bg-[#0F150E] rounded-full h-2 mt-2">
