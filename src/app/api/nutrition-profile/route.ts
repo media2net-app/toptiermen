@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
     if (gender === 'male' && age === 40 && weight === 100 && height === 190 && activityLevel === 'moderate') {
       // Exact TTM targets for standard profile
       if (goal === 'cut') {
-        targetCalories = 2500;
+        targetCalories = 2360; // Corrected TTM value for droogtrainen
       } else if (goal === 'maintain') {
         targetCalories = 2860;
       } else if (goal === 'bulk') {
