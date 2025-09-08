@@ -251,10 +251,34 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
     }), { calories: 0, protein: 0, carbs: 0, fat: 0 });
   };
 
+  // Check if a meal is back to its original state
+  const checkIfMealIsBackToOriginal = (day: string, mealType: string, currentPlanData: PlanData) => {
+    if (!planData) return false;
+    
+    const currentMeal = currentPlanData.weekPlan[day][mealType];
+    const originalMeal = planData.weekPlan[day][mealType];
+    
+    if (!currentMeal || !originalMeal || !currentMeal.ingredients || !originalMeal.ingredients) {
+      return false;
+    }
+    
+    // Check if all ingredients match original amounts
+    return currentMeal.ingredients.every((currentIngredient, index) => {
+      const originalIngredient = originalMeal.ingredients[index];
+      if (!originalIngredient) return false;
+      
+      return currentIngredient.amount === originalIngredient.amount &&
+             currentIngredient.unit === originalIngredient.unit &&
+             currentIngredient.name === originalIngredient.name;
+    });
+  };
+
   const saveCustomPlan = async (customData: PlanData) => {
     try {
-      // Only save if there are modifications
-      if (modifiedMeals.size === 0) {
+      // Check if there are still modifications after potential reversions
+      const hasModifications = modifiedMeals.size > 0;
+      
+      if (!hasModifications) {
         console.log('ℹ️ No modifications detected, skipping custom plan save');
         return;
       }
@@ -393,9 +417,21 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
     if (meal && meal.ingredients && meal.ingredients[ingredientIndex]) {
       meal.ingredients[ingredientIndex][field] = value;
       
-      // Mark this meal as modified
+      // Check if this meal is back to original state
       const mealKey = `${day}-${mealType}`;
-      setModifiedMeals(prev => new Set([...prev, mealKey]));
+      const isBackToOriginal = checkIfMealIsBackToOriginal(day, mealType, updatedPlanData);
+      
+      if (isBackToOriginal) {
+        // Remove from modified meals if back to original
+        setModifiedMeals(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(mealKey);
+          return newSet;
+        });
+      } else {
+        // Mark this meal as modified
+        setModifiedMeals(prev => new Set([...prev, mealKey]));
+      }
       
       // Recalculate meal nutrition
       let totalCalories = 0;
