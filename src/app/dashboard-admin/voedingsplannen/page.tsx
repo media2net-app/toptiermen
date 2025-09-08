@@ -799,21 +799,6 @@ export default function AdminVoedingsplannenPage() {
                            <h3 className="text-lg font-bold text-[#8BAE5A] mb-1">{plan.name}</h3>
                            <p className="text-gray-300 text-sm leading-relaxed">{plan.description}</p>
                          </div>
-                         {/* Status Badge */}
-                         <div className="ml-4 flex flex-col items-end space-y-1">
-                           <div className={`px-2 py-1 rounded-full text-xs font-medium ${
-                             planStatus.color === 'green' ? 'bg-green-500/20 text-green-400 border border-green-500/30' :
-                             planStatus.color === 'blue' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' :
-                             planStatus.color === 'yellow' ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' :
-                             planStatus.color === 'red' ? 'bg-red-500/20 text-red-400 border border-red-500/30' :
-                             'bg-gray-500/20 text-gray-400 border border-gray-500/30'
-                           }`}>
-                             {planStatus.label}
-                           </div>
-                           <div className="text-xs text-gray-400">
-                             {planStatus.completion}% voltooid
-                           </div>
-                         </div>
                        </div>
                      </div>
                      
@@ -869,31 +854,6 @@ export default function AdminVoedingsplannenPage() {
                              )}
                            </div>
 
-                           {/* Quality Indicator */}
-                           {planStatus.completion > 0 && (
-                             <div className="mt-4 pt-3 border-t border-[#3A4D23]">
-                               <div className="text-center">
-                                 <div className="text-sm text-gray-400 mb-2">Kwaliteit vs Target</div>
-                                 <div className="flex items-center justify-center space-x-2">
-                                   <div className="text-lg font-bold text-white">{planStatus.quality}%</div>
-                                   <div className="w-16 bg-[#0F150E] rounded-full h-2">
-                                     <div 
-                                       className={`h-2 rounded-full transition-all duration-300 ${
-                                         planStatus.quality >= 95 ? 'bg-green-500' :
-                                         planStatus.quality >= 90 ? 'bg-orange-500' : 'bg-red-500'
-                                       }`}
-                                       style={{ width: `${Math.min(planStatus.quality, 100)}%` }}
-                                     ></div>
-                                   </div>
-                                 </div>
-                                 <div className="text-xs text-gray-500 mt-1">
-                                   {planStatus.avgCalories && planStatus.avgCalories > 0 && (
-                                     <span>Gemiddeld: {planStatus.avgCalories} kcal/dag</span>
-                                   )}
-                                 </div>
-                               </div>
-                             </div>
-                           )}
                          </div>
                        </div>
                      )}
