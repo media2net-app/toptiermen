@@ -66,6 +66,13 @@ interface Ingredient {
   unit_type: string;
 }
 
+interface DailyPlan {
+  day: string;
+  theme: string;
+  focus: string;
+  meals: any;
+}
+
 interface PlanBuilderProps {
   isOpen: boolean;
   onClose: () => void;
