@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   BookOpenIcon,
@@ -122,7 +122,7 @@ const trainingFrequencies = [
   { id: 6, name: '6x per week', description: 'Maximale intensiteit' }
 ];
 
-export default function TrainingschemasPage() {
+function TrainingschemasContent() {
   const { user, loading: authLoading } = useSupabaseAuth();
   const { isOnboarding, currentStep: onboardingStep, completeStep } = useOnboarding();
   const router = useRouter();
@@ -1184,5 +1184,19 @@ export default function TrainingschemasPage() {
         </AnimatePresence>
       </div>
     </PageLayout>
+  );
+}
+
+export default function TrainingschemasPage() {
+  return (
+    <Suspense fallback={
+      <PageLayout title="Training Schemas">
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#8BAE5A]"></div>
+        </div>
+      </PageLayout>
+    }>
+      <TrainingschemasContent />
+    </Suspense>
   );
 }
