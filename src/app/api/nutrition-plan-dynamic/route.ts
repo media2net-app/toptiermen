@@ -6,8 +6,9 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-// Carnivoor ingrediënten database met nutritionele waarden per 100g
+// Complete ingrediënten database met nutritionele waarden per 100g
 const CARNIVOOR_INGREDIENTS = {
+  // Carnivoor ingrediënten
   'Ribeye Steak': { calories: 250, protein: 26, carbs: 0, fat: 15 },
   'Biefstuk': { calories: 250, protein: 26, carbs: 0, fat: 15 },
   'T-Bone Steak': { calories: 247, protein: 24, carbs: 0, fat: 16 },
@@ -40,6 +41,66 @@ const CARNIVOOR_INGREDIENTS = {
   
   // Lam
   'Lamsvlees': { calories: 294, protein: 25, carbs: 0, fat: 21 },
+  
+  // Voedingsplan op maat ingrediënten
+  'Havermout': { calories: 68, protein: 2.4, carbs: 12, fat: 1.4 },
+  'Banaan': { calories: 89, protein: 1.1, carbs: 23, fat: 0.3 },
+  'Appel': { calories: 52, protein: 0.3, carbs: 14, fat: 0.2 },
+  'Amandelen': { calories: 579, protein: 21, carbs: 22, fat: 50 },
+  'Melk': { calories: 42, protein: 3.4, carbs: 5, fat: 1 },
+  'Volkoren brood': { calories: 247, protein: 13, carbs: 41, fat: 4 },
+  'Avocado': { calories: 160, protein: 2, carbs: 9, fat: 15 },
+  'Tomaat': { calories: 18, protein: 0.9, carbs: 3.9, fat: 0.2 },
+  'Rijstwafels': { calories: 42, protein: 1, carbs: 7, fat: 0 },
+  'Whey Shake': { calories: 120, protein: 25, carbs: 3, fat: 1 },
+  'Honing': { calories: 304, protein: 0.3, carbs: 82, fat: 0 },
+  'Magere Kwark': { calories: 67, protein: 12, carbs: 3.6, fat: 0.4 },
+  'Rijst': { calories: 130, protein: 2.7, carbs: 28, fat: 0.3 },
+  'Pasta': { calories: 131, protein: 5, carbs: 25, fat: 1.1 },
+  'Kip': { calories: 165, protein: 31, carbs: 0, fat: 4 },
+  'Broccoli': { calories: 34, protein: 2.8, carbs: 7, fat: 0.4 },
+  'Spinazie': { calories: 23, protein: 2.9, carbs: 3.6, fat: 0.4 },
+  'Wortel': { calories: 41, protein: 0.9, carbs: 10, fat: 0.2 },
+  'Komkommer': { calories: 16, protein: 0.7, carbs: 4, fat: 0.1 },
+  'Paprika': { calories: 31, protein: 1, carbs: 7, fat: 0.3 },
+  'Ui': { calories: 40, protein: 1.1, carbs: 9, fat: 0.1 },
+  'Knoflook': { calories: 149, protein: 6.4, carbs: 33, fat: 0.5 },
+  'Aardappel': { calories: 77, protein: 2, carbs: 17, fat: 0.1 },
+  'Zoete Aardappel': { calories: 86, protein: 1.6, carbs: 20, fat: 0.1 },
+  'Quinoa': { calories: 120, protein: 4.4, carbs: 22, fat: 1.9 },
+  'Bulgur': { calories: 83, protein: 3.1, carbs: 19, fat: 0.2 },
+  'Couscous': { calories: 112, protein: 3.8, carbs: 23, fat: 0.2 },
+  'Linzen': { calories: 116, protein: 9, carbs: 20, fat: 0.4 },
+  'Kikkererwten': { calories: 164, protein: 8.9, carbs: 27, fat: 2.6 },
+  'Bonen': { calories: 127, protein: 8.7, carbs: 23, fat: 0.5 },
+  'Tofu': { calories: 76, protein: 8, carbs: 1.9, fat: 4.8 },
+  'Tempeh': { calories: 192, protein: 20, carbs: 8, fat: 11 },
+  'Noten': { calories: 607, protein: 20, carbs: 21, fat: 54 },
+  'Zaden': { calories: 534, protein: 18, carbs: 28, fat: 42 },
+  'Olijven': { calories: 115, protein: 0.8, carbs: 6, fat: 11 },
+  'Kaas': { calories: 113, protein: 7, carbs: 1, fat: 9 },
+  'Yoghurt': { calories: 59, protein: 10, carbs: 3.6, fat: 0.4 },
+  'Kwark': { calories: 67, protein: 12, carbs: 3.6, fat: 0.4 },
+  'Eieren': { calories: 155, protein: 13, carbs: 1, fat: 11 },
+  'Ei': { calories: 155, protein: 13, carbs: 1, fat: 11 },
+  'Vlees': { calories: 250, protein: 26, carbs: 0, fat: 15 },
+  'Vis': { calories: 206, protein: 22, carbs: 0, fat: 12 },
+  'Zalm': { calories: 208, protein: 25, carbs: 0, fat: 12 },
+  'Garnalen': { calories: 99, protein: 24, carbs: 0, fat: 0.3 },
+  'Krab': { calories: 97, protein: 20, carbs: 0, fat: 1.5 },
+  'Lobster': { calories: 89, protein: 19, carbs: 0, fat: 0.9 },
+  'Oesters': { calories: 68, protein: 7, carbs: 4, fat: 2.5 },
+  'Mosselen': { calories: 86, protein: 12, carbs: 4, fat: 2.2 },
+  'Inktvis': { calories: 92, protein: 16, carbs: 3, fat: 1.4 },
+  'Octopus': { calories: 82, protein: 15, carbs: 2, fat: 1.0 },
+  'Rundvlees': { calories: 250, protein: 26, carbs: 0, fat: 15 },
+  'Boter': { calories: 717, protein: 0.9, carbs: 0.1, fat: 81 },
+  'Olijfolie': { calories: 884, protein: 0, carbs: 0, fat: 100 },
+  'Tonijn': { calories: 144, protein: 30, carbs: 0, fat: 1 },
+  'Varkensvlees': { calories: 242, protein: 27, carbs: 0, fat: 14 },
+  'Kipfilet': { calories: 165, protein: 31, carbs: 0, fat: 4 },
+  'Gerookte Zalm': { calories: 117, protein: 18, carbs: 0, fat: 4 },
+  'Runderlever': { calories: 165, protein: 26, carbs: 4, fat: 4 },
   'Lamskotelet': { calories: 294, protein: 25, carbs: 0, fat: 21 },
   
   // Orgaanvlees
