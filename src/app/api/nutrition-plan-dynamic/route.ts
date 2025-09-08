@@ -408,7 +408,7 @@ export async function GET(request: NextRequest) {
       
       // Sum up all meals for this day
       Object.values(scaledPlan[day]).forEach(meal => {
-        if (meal && meal.nutrition) {
+        if (meal && typeof meal === 'object' && 'nutrition' in meal && meal.nutrition) {
           dailyCalories += meal.nutrition.calories;
           dailyProtein += meal.nutrition.protein;
           dailyCarbs += meal.nutrition.carbs;
