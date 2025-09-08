@@ -83,6 +83,18 @@ interface PlanData {
   weekPlan: Record<string, DayPlan>;
   weeklyAverages: WeeklyAverages;
   generatedAt: string;
+  // New plan-specific macro data
+  planPercentages?: {
+    protein: number;
+    carbs: number;
+    fat: number;
+  };
+  planTargets?: {
+    calories: number;
+    protein: number;
+    carbs: number;
+    fat: number;
+  };
 }
 
 const DAYS_NL = {
@@ -260,6 +272,73 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
       </div>
 
       <div className="max-w-7xl mx-auto p-6 space-y-6">
+        {/* Plan-Specific Macro Breakdown */}
+        {(planData.planPercentages || planData.planTargets) && (
+          <div className="bg-gradient-to-r from-[#1a1f17] to-[#2d3a23] border border-[#3a4d23] rounded-xl p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <ChartBarIcon className="w-6 h-6 text-[#8BAE5A]" />
+              <h3 className="text-xl font-bold text-white">Plan Macro Verdeling</h3>
+            </div>
+            
+            <div className="grid md:grid-cols-2 gap-6">
+              {/* Macro Percentages */}
+              {planData.planPercentages && (
+                <div className="space-y-4">
+                  <h4 className="text-lg font-semibold text-[#8BAE5A] mb-3">Macro Percentages</h4>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3 bg-[#232D1A] rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                        <span className="text-white font-medium">Eiwit</span>
+                      </div>
+                      <span className="text-white font-bold text-lg">{planData.planPercentages.protein}%</span>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-[#232D1A] rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                        <span className="text-white font-medium">Koolhydraten</span>
+                      </div>
+                      <span className="text-white font-bold text-lg">{planData.planPercentages.carbs}%</span>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-[#232D1A] rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                        <span className="text-white font-medium">Vet</span>
+                      </div>
+                      <span className="text-white font-bold text-lg">{planData.planPercentages.fat}%</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {/* Target Values */}
+              {planData.planTargets && (
+                <div className="space-y-4">
+                  <h4 className="text-lg font-semibold text-[#8BAE5A] mb-3">Doelwaarden</h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="text-center p-3 bg-[#232D1A] rounded-lg">
+                      <div className="text-2xl font-bold text-white">{planData.planTargets.calories}</div>
+                      <div className="text-sm text-gray-400">Calorieën</div>
+                    </div>
+                    <div className="text-center p-3 bg-[#232D1A] rounded-lg">
+                      <div className="text-2xl font-bold text-white">{planData.planTargets.protein}g</div>
+                      <div className="text-sm text-gray-400">Eiwit</div>
+                    </div>
+                    <div className="text-center p-3 bg-[#232D1A] rounded-lg">
+                      <div className="text-2xl font-bold text-white">{planData.planTargets.carbs}g</div>
+                      <div className="text-sm text-gray-400">Koolhydraten</div>
+                    </div>
+                    <div className="text-center p-3 bg-[#232D1A] rounded-lg">
+                      <div className="text-2xl font-bold text-white">{planData.planTargets.fat}g</div>
+                      <div className="text-sm text-gray-400">Vet</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Daily Requirements & Weekly Average */}
         <div className="grid md:grid-cols-2 gap-6">
           {/* Daily Requirements */}

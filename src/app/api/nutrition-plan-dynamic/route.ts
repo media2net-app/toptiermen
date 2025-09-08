@@ -475,8 +475,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: {
-        planId: 'carnivoor-droogtrainen',
-        planName: 'Carnivoor - Droogtrainen',
+        planId: planData.plan_id,
+        planName: planData.name,
         userProfile: {
           targetCalories: profile.target_calories,
           targetProtein: profile.target_protein,
@@ -492,6 +492,18 @@ export async function GET(request: NextRequest) {
           scaleFactor: scaleFactor ? Math.round(scaleFactor * 100) / 100 : 1,
           targetCalories: profile.target_calories,
           planTargetCalories: planData.target_calories
+        },
+        // Plan-specific macro data
+        planPercentages: {
+          protein: planData.protein_percentage || 0,
+          carbs: planData.carbs_percentage || 0,
+          fat: planData.fat_percentage || 0
+        },
+        planTargets: {
+          calories: planData.target_calories || 0,
+          protein: planData.target_protein || 0,
+          carbs: planData.target_carbs || 0,
+          fat: planData.target_fat || 0
         },
         weekPlan: scaledPlan,
         weeklyAverages,

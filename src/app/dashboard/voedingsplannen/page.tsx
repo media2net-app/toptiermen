@@ -28,6 +28,17 @@ interface NutritionPlan {
   is_active: boolean;
   created_at: string;
   updated_at: string;
+  // New macro percentage fields
+  protein_percentage?: number;
+  carbs_percentage?: number;
+  fat_percentage?: number;
+  // Target macro values
+  target_calories?: number;
+  target_protein?: number;
+  target_carbs?: number;
+  target_fat?: number;
+  // Goal field for filtering
+  goal?: string;
 }
 
 const dietTypes = [
@@ -920,6 +931,52 @@ export default function VoedingsplannenPage() {
                           <p className="text-[#8BAE5A] text-sm text-center mb-3">{plan.subtitle}</p>
                         )}
                         <p className="text-gray-300 text-center text-sm mb-4">{plan.description}</p>
+                        
+                        {/* Macro Percentages */}
+                        {(plan.protein_percentage || plan.carbs_percentage || plan.fat_percentage) && (
+                          <div className="mb-4 p-3 bg-[#1a1f17] border border-[#3a4d23] rounded-lg">
+                            <div className="text-xs text-[#8bae5a] font-semibold mb-2 text-center">Macro Verdeling</div>
+                            <div className="flex justify-between text-xs">
+                              <div className="text-center">
+                                <div className="text-white font-bold">{plan.protein_percentage || 0}%</div>
+                                <div className="text-gray-400">Eiwit</div>
+                              </div>
+                              <div className="text-center">
+                                <div className="text-white font-bold">{plan.carbs_percentage || 0}%</div>
+                                <div className="text-gray-400">Koolhydraten</div>
+                              </div>
+                              <div className="text-center">
+                                <div className="text-white font-bold">{plan.fat_percentage || 0}%</div>
+                                <div className="text-gray-400">Vet</div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Target Values */}
+                        {(plan.target_calories || plan.target_protein || plan.target_carbs || plan.target_fat) && (
+                          <div className="mb-4 p-3 bg-[#1a1f17] border border-[#3a4d23] rounded-lg">
+                            <div className="text-xs text-[#8bae5a] font-semibold mb-2 text-center">Doelwaarden</div>
+                            <div className="grid grid-cols-2 gap-2 text-xs">
+                              <div className="text-center">
+                                <div className="text-white font-bold">{plan.target_calories || 0}</div>
+                                <div className="text-gray-400">kcal</div>
+                              </div>
+                              <div className="text-center">
+                                <div className="text-white font-bold">{plan.target_protein || 0}g</div>
+                                <div className="text-gray-400">Eiwit</div>
+                              </div>
+                              <div className="text-center">
+                                <div className="text-white font-bold">{plan.target_carbs || 0}g</div>
+                                <div className="text-gray-400">Koolhydraten</div>
+                              </div>
+                              <div className="text-center">
+                                <div className="text-white font-bold">{plan.target_fat || 0}g</div>
+                                <div className="text-gray-400">Vet</div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
                         
                         <div className="space-y-3">
                           
