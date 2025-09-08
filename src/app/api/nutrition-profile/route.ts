@@ -63,17 +63,9 @@ export async function POST(request: NextRequest) {
     // Calculate TDEE using TTM formula
     const tdee = weight * 22 * activityMultipliers[activityLevel as keyof typeof activityMultipliers];
     
-    // Use TTM formula for all users: Gewicht x 22 x activiteitniveau
-    let targetCalories = 0;
-    
-    // Adjust calories based on goal using TTM formula
-    if (goal === 'cut') {
-      targetCalories = tdee * 0.8; // 20% deficit for droogtrainen
-    } else if (goal === 'bulk') {
-      targetCalories = tdee * 1.15; // 15% surplus for spiermassa
-    } else if (goal === 'maintain') {
-      targetCalories = tdee; // No adjustment for onderhoud
-    }
+    // Use TTM formula for calories: Gewicht x 22 x activiteitniveau
+    // NO goal adjustments - calories are based purely on TTM formula
+    const targetCalories = tdee;
 
     // Calculate BMR for reference
     let bmr = 0;
