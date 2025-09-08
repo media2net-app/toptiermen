@@ -799,7 +799,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                                   onChange={(e) => handleIngredientChange(selectedDay, mealType, index, 'amount', parseFloat(e.target.value) || 0)}
                                   className="w-20 px-2 py-1 bg-[#181F17] border border-[#3A4D23] rounded text-white text-center focus:outline-none focus:border-[#8BAE5A]"
                                   min="0"
-                                  step="0.1"
+                                  step="1"
                                 />
                               </td>
                               <td className="py-3 text-center">

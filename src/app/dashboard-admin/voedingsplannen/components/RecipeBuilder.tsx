@@ -463,7 +463,7 @@ export default function RecipeBuilder({ isOpen, onClose, recipe, ingredients, on
                         onChange={(e) => setIngredientAmount(parseFloat(e.target.value))}
                         className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white focus:border-[#8BAE5A] focus:ring-1 focus:ring-[#8BAE5A] transition-colors"
                         min="0"
-                        step="0.1"
+                        step="1"
                       />
                     </div>
                     <div>
