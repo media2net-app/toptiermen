@@ -524,9 +524,6 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                 <div className="text-sm text-gray-400">Vetten per dag</div>
               </div>
             </div>
-            <div className="mt-4 text-center text-sm text-gray-300">
-              Doel: {planData.userProfile.goal} • {planData.userProfile.weight}kg • {planData.userProfile.age} jaar
-            </div>
           </div>
 
           {/* Weekly Average */}
