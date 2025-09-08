@@ -1355,8 +1355,8 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
                                         {ingredient.amount} {ingredient.unit === 'per_piece' ? 'stuk' : 
                                                          ingredient.unit === 'per_handful' ? 'handje' : 
                                                          ingredient.unit === 'per_plakje' ? 'plakje' : 
-                                                         ingredient.unit === 'per_30g' ? '30g' : 
-                                                         ingredient.unit === 'per_100g' ? '100g' : ingredient.unit}
+                                                         ingredient.unit === 'per_30g' ? 'g' : 
+                                                         ingredient.unit === 'per_100g' ? 'g' : ingredient.unit}
                                       </div>
                                     </div>
                                     <div className="text-right">

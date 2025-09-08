@@ -348,8 +348,8 @@ export default function MealEditModal({
                             {ingredient.amount} {ingredient.unit === 'per_piece' ? 'stuk' : 
                              ingredient.unit === 'per_handful' ? 'handje' : 
                              ingredient.unit === 'per_plakje' ? 'plakje' : 
-                             ingredient.unit === 'per_30g' ? '30g' : 
-                             ingredient.unit === 'per_100g' ? '100g' : 
+                             ingredient.unit === 'per_30g' ? 'g' : 
+                             ingredient.unit === 'per_100g' ? 'g' : 
                              ingredient.unit}
                           </div>
                           <div className="text-xs text-[#B6C948] mt-1">
