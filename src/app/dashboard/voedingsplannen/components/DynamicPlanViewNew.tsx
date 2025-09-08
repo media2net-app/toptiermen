@@ -906,7 +906,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
           <div className="space-y-4">
             {/* Calories Progress Bar */}
             {(() => {
-              const current = getDayTotal(selectedDay).calories;
+              const current = Math.round(getDayTotal(selectedDay).calories);
               const target = planData.scalingInfo.planTargetCalories;
               const percentage = target > 0 ? Math.round((current / target) * 100) : 0;
               const difference = current - target;
@@ -970,7 +970,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
 
             {/* Protein Progress Bar */}
             {(() => {
-              const current = getDayTotal(selectedDay).protein;
+              const current = Math.round(getDayTotal(selectedDay).protein * 10) / 10;
               const target = planData.planTargets?.target_protein || 0;
               const percentage = target > 0 ? Math.round((current / target) * 100) : 0;
               const difference = current - target;
@@ -1034,7 +1034,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
 
             {/* Carbs Progress Bar */}
             {(() => {
-              const current = getDayTotal(selectedDay).carbs;
+              const current = Math.round(getDayTotal(selectedDay).carbs * 10) / 10;
               const target = planData.planTargets?.target_carbs || 0;
               const percentage = target > 0 ? Math.round((current / target) * 100) : 0;
               const difference = current - target;
@@ -1098,7 +1098,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
 
             {/* Fat Progress Bar */}
             {(() => {
-              const current = getDayTotal(selectedDay).fat;
+              const current = Math.round(getDayTotal(selectedDay).fat * 10) / 10;
               const target = planData.planTargets?.target_fat || 0;
               const percentage = target > 0 ? Math.round((current / target) * 100) : 0;
               const difference = current - target;
@@ -1262,16 +1262,16 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                 {/* Meal Nutrition */}
                 <div className="grid grid-cols-4 gap-4 mb-4">
                   <div className="text-center">
-                    <div className="text-lg font-semibold text-white">Kcal {'nutrition' in meal ? meal.nutrition.calories : meal.calories}</div>
+                    <div className="text-lg font-semibold text-white">Kcal {Math.round(('nutrition' in meal ? meal.nutrition.calories : meal.calories) * 10) / 10}</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-lg font-semibold text-white">Eiwit {'nutrition' in meal ? meal.nutrition.protein : meal.protein}g</div>
+                    <div className="text-lg font-semibold text-white">Eiwit {Math.round(('nutrition' in meal ? meal.nutrition.protein : meal.protein) * 10) / 10}g</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-lg font-semibold text-white">Koolhydraten {'nutrition' in meal ? meal.nutrition.carbs : meal.carbs}g</div>
+                    <div className="text-lg font-semibold text-white">Koolhydraten {Math.round(('nutrition' in meal ? meal.nutrition.carbs : meal.carbs) * 10) / 10}g</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-lg font-semibold text-white">Vet {'nutrition' in meal ? meal.nutrition.fat : meal.fat}g</div>
+                    <div className="text-lg font-semibold text-white">Vet {Math.round(('nutrition' in meal ? meal.nutrition.fat : meal.fat) * 10) / 10}g</div>
                   </div>
                 </div>
 
