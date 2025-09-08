@@ -419,7 +419,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
               <div>
                 <h1 className="text-2xl font-bold text-white">{planData.planName}</h1>
                 <p className="text-gray-300">
-                  Gepersonaliseerd voor {planData.userProfile.weight}kg, {planData.userProfile.age} jaar - {planData.userProfile.goal}
+                  Gepersonaliseerd voor {planData.userProfile.weight}kg, {planData.userProfile.age} jaar, {planData.userProfile.height}cm, {planData.userProfile.activityLevel} - {planData.userProfile.goal}
                 </p>
               </div>
             </div>
