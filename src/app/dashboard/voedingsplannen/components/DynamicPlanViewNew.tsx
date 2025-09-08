@@ -90,10 +90,10 @@ interface PlanData {
     fat: number;
   };
   planTargets?: {
-    calories: number;
-    protein: number;
-    carbs: number;
-    fat: number;
+    target_calories: number;
+    target_protein: number;
+    target_carbs: number;
+    target_fat: number;
   };
 }
 
@@ -478,19 +478,19 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                   <h4 className="text-lg font-semibold text-[#8BAE5A] mb-3">Doelwaarden</h4>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="text-center p-3 bg-[#232D1A] rounded-lg">
-                      <div className="text-2xl font-bold text-white">{planData.planTargets.calories}</div>
+                      <div className="text-2xl font-bold text-white">{planData.planTargets?.target_calories || 0}</div>
                       <div className="text-sm text-gray-400">Calorieën</div>
                     </div>
                     <div className="text-center p-3 bg-[#232D1A] rounded-lg">
-                      <div className="text-2xl font-bold text-white">{planData.planTargets.protein}g</div>
+                      <div className="text-2xl font-bold text-white">{planData.planTargets?.target_protein || 0}g</div>
                       <div className="text-sm text-gray-400">Eiwit</div>
                     </div>
                     <div className="text-center p-3 bg-[#232D1A] rounded-lg">
-                      <div className="text-2xl font-bold text-white">{planData.planTargets.carbs}g</div>
+                      <div className="text-2xl font-bold text-white">{planData.planTargets?.target_carbs || 0}g</div>
                       <div className="text-sm text-gray-400">Koolhydraten</div>
                     </div>
                     <div className="text-center p-3 bg-[#232D1A] rounded-lg">
-                      <div className="text-2xl font-bold text-white">{planData.planTargets.fat}g</div>
+                      <div className="text-2xl font-bold text-white">{planData.planTargets?.target_fat || 0}g</div>
                       <div className="text-sm text-gray-400">Vet</div>
                     </div>
                   </div>
