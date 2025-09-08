@@ -277,6 +277,35 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
     }
   };
 
+  const resetToOriginalPlan = async () => {
+    try {
+      // Delete custom plan from database
+      const response = await fetch('/api/custom-nutrition-plans', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId,
+          basePlanId: planId
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete custom plan');
+      }
+
+      // Reset local state
+      setCustomPlanData(null);
+      
+      toast.success('Plan gereset naar origineel!');
+      console.log('✅ Plan reset to original');
+    } catch (error) {
+      console.error('❌ Error resetting plan:', error);
+      toast.error('Fout bij resetten van plan');
+    }
+  };
+
   const handleAddSnack = (day: string, snackType: string) => {
     console.log('➕ Adding snack:', { day, snack: snackType });
     toast.success(`${MEAL_TYPES_NL[snackType as keyof typeof MEAL_TYPES_NL]} toegevoegd!`);
@@ -480,6 +509,19 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                     </span>
                   )}
                 </h1>
+                {customPlanData && (
+                  <div className="mt-2">
+                    <button
+                      onClick={resetToOriginalPlan}
+                      className="inline-flex items-center px-3 py-1 bg-red-600/20 border border-red-500/30 text-red-400 text-sm rounded-lg hover:bg-red-600/30 transition-colors"
+                    >
+                      <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
+                      Reset naar origineel
+                    </button>
+                  </div>
+                )}
                 <p className="text-gray-300">
                   Gepersonaliseerd voor {planData.userProfile.weight}kg, {planData.userProfile.age} jaar, {planData.userProfile.height}cm, {planData.userProfile.activityLevel} - {planData.userProfile.goal}
                 </p>

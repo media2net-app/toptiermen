@@ -112,13 +112,11 @@ export async function GET(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
-    const basePlanId = searchParams.get('basePlanId');
+    const { userId, basePlanId } = await request.json();
 
     if (!userId || !basePlanId) {
       return NextResponse.json(
-        { error: 'User ID and Base Plan ID are required' },
+        { error: 'userId and basePlanId are required' },
         { status: 400 }
       );
     }
