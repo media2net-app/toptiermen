@@ -355,7 +355,7 @@ export async function GET(request: NextRequest) {
       const dayPlan = basePlan[day];
       scaledPlan[day] = {};
       
-      // Process all meal types - check if dayPlan has meals object
+      // Process all meal types - check if dayPlan has meals object or direct meal structure
       if (dayPlan.meals) {
         const mealTypes = Object.keys(dayPlan.meals);
         
@@ -379,8 +379,10 @@ export async function GET(request: NextRequest) {
           };
         });
       } else {
-        // Fallback to old structure for backward compatibility
-        const mealTypes = ['ontbijt', 'lunch', 'diner', 'avondsnack', 'avond_snack'];
+        // Process direct meal structure (weekly_plan format)
+        const mealTypes = Object.keys(dayPlan).filter(key => 
+          !['dailyTotals', 'time'].includes(key)
+        );
         
         mealTypes.forEach(mealType => {
           if (dayPlan[mealType]) {
