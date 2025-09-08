@@ -344,8 +344,8 @@ export async function GET(request: NextRequest) {
     console.log('📊 Base plan average daily calories:', basePlanCalories);
 
     // Calculate scale factor - use user profile target calories, not plan target
-    const scaleFactor = profile.target_calories / basePlanCalories;
-    console.log('⚖️ Scale factor:', scaleFactor.toFixed(2));
+    const scaleFactor = basePlanCalories > 0 ? profile.target_calories / basePlanCalories : 1;
+    console.log('⚖️ Scale factor:', scaleFactor);
 
     // Generate scaled meal plan
     const scaledPlan = {};
@@ -489,7 +489,7 @@ export async function GET(request: NextRequest) {
         },
         scalingInfo: {
           basePlanCalories,
-          scaleFactor: Math.round(scaleFactor * 100) / 100,
+          scaleFactor: scaleFactor ? Math.round(scaleFactor * 100) / 100 : 1,
           targetCalories: profile.target_calories,
           planTargetCalories: planData.target_calories
         },
@@ -521,11 +521,24 @@ function calculateBasePlanCaloriesFromDatabase(basePlan) {
     // Check if this is the new weekly_plan structure
     if (dayPlan.dailyTotals && dayPlan.dailyTotals.calories > 0) {
       dayCalories = dayPlan.dailyTotals.calories;
+    } else if (dayPlan.meals && typeof dayPlan.meals === 'object') {
+      // Handle maandag format with meals object
+      Object.values(dayPlan.meals).forEach(meal => {
+        if (meal && meal.calories) {
+          dayCalories += meal.calories;
+        }
+      });
     } else {
-      // Fallback to old structure
-      ['ontbijt', 'lunch', 'diner', 'avondsnack'].forEach(mealType => {
-        if (dayPlan[mealType] && dayPlan[mealType].calories) {
-          dayCalories += dayPlan[mealType].calories;
+      // Fallback to old structure - check all possible meal types
+      const mealTypes = ['ontbijt', 'lunch', 'diner', 'avondsnack', 'snack1', 'snack2'];
+      mealTypes.forEach(mealType => {
+        if (dayPlan[mealType]) {
+          const meal = dayPlan[mealType];
+          if (meal.calories) {
+            dayCalories += meal.calories;
+          } else if (meal.nutrition && meal.nutrition.calories) {
+            dayCalories += meal.nutrition.calories;
+          }
         }
       });
     }
@@ -537,6 +550,6 @@ function calculateBasePlanCaloriesFromDatabase(basePlan) {
     }
   });
   
-  // Return average of days with data, or 0 if no days have data
+  // Return average of days with data, or use plan target calories as fallback
   return daysWithData > 0 ? totalCalories / daysWithData : 0;
 }

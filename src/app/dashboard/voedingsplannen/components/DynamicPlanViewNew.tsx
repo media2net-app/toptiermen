@@ -289,7 +289,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
             <div className="mt-4 text-center text-sm text-gray-300">
               Doel: {planData.userProfile.goal} • {planData.userProfile.weight}kg • {planData.userProfile.age} jaar
             </div>
-            {planData.scalingInfo.scaleFactor !== 1 && (
+            {planData.scalingInfo.scaleFactor && planData.scalingInfo.scaleFactor !== 1 && (
               <div className="mt-2 text-center text-xs text-[#8BAE5A]">
                 ⚖️ Plan geschaald met factor {planData.scalingInfo.scaleFactor.toFixed(2)} 
                 <br />
