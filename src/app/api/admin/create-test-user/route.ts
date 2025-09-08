@@ -38,7 +38,8 @@ export async function POST(request: NextRequest) {
           {
             id: authData.user.id,
             email: authData.user.email,
-            full_name: fullName
+            full_name: fullName,
+            role: 'user'
           }
         ])
         .select();
