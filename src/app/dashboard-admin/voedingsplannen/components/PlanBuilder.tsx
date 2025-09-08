@@ -1895,50 +1895,34 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
               {/* Step 2: Select Target Days */}
               {selectedSourceDay && (
                 <div className="mb-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <label className="block text-sm font-medium text-gray-300">Stap 2: Selecteer doeldagen</label>
-                    <button
-                      onClick={() => {
-                        const availableDays = DAYS.filter(day => day.key !== selectedSourceDay);
-                        const allSelected = availableDays.every(day => selectedTargetDays.includes(day.key));
-                        if (allSelected) {
-                          setSelectedTargetDays([]);
-                        } else {
-                          setSelectedTargetDays(availableDays.map(day => day.key));
-                        }
-                      }}
-                      className="text-xs text-[#8BAE5A] hover:text-[#B6C948] transition-colors"
-                    >
-                      {DAYS.filter(day => day.key !== selectedSourceDay).every(day => selectedTargetDays.includes(day.key)) ? 'Alles deselecteren' : 'Alles selecteren'}
-                    </button>
-                  </div>
+                  <label className="block text-sm font-medium text-gray-300 mb-3">Stap 2: Selecteer doeldagen</label>
                   
-                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                  <select
+                    multiple
+                    value={selectedTargetDays}
+                    onChange={(e) => {
+                      const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
+                      setSelectedTargetDays(selectedOptions);
+                    }}
+                    className="w-full px-3 py-2 bg-[#0F150E] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:border-[#8BAE5A] min-h-[120px]"
+                    size={6}
+                  >
                     {DAYS.filter(day => day.key !== selectedSourceDay).map(day => {
                       const hasData = mealsData?.weekly_plan?.[day.key] && Object.keys(mealsData.weekly_plan[day.key]).length > 0;
                       return (
-                        <label key={day.key} className="flex items-center p-3 bg-[#181F17] rounded-lg border border-[#3A4D23] hover:bg-[#1F2D17] transition-colors cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={selectedTargetDays.includes(day.key)}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setSelectedTargetDays([...selectedTargetDays, day.key]);
-                              } else {
-                                setSelectedTargetDays(selectedTargetDays.filter(d => d !== day.key));
-                              }
-                            }}
-                            className="w-4 h-4 text-[#8BAE5A] bg-[#181F17] border-[#3A4D23] rounded focus:ring-[#8BAE5A] focus:ring-2"
-                          />
-                          <div className="ml-3 flex-1">
-                            <div className="text-sm font-medium text-white">{day.label}</div>
-                            <div className="text-xs text-gray-400">
-                              {hasData ? '✓ Heeft maaltijden' : '⚠ Geen maaltijden'}
-                            </div>
-                          </div>
-                        </label>
+                        <option 
+                          key={day.key} 
+                          value={day.key}
+                          className="py-2 px-3 hover:bg-[#1F2D17]"
+                        >
+                          {day.label} {hasData ? '(heeft maaltijden)' : '(geen maaltijden)'}
+                        </option>
                       );
                     })}
+                  </select>
+                  
+                  <div className="mt-2 text-xs text-gray-400">
+                    Houd Ctrl/Cmd ingedrukt om meerdere dagen te selecteren
                   </div>
                 </div>
               )}
