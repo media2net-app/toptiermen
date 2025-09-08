@@ -38,8 +38,7 @@ export async function POST(request: NextRequest) {
           {
             id: authData.user.id,
             email: authData.user.email,
-            full_name: fullName,
-            role: 'USER' // Set role to 'USER' for test users
+            full_name: fullName
           }
         ])
         .select();
@@ -83,7 +82,7 @@ export async function POST(request: NextRequest) {
           email: authData.user.email,
           full_name: fullName,
           password: password, // Only for testing!
-          role: 'USER'
+          role: 'test'
         }
       });
     }
