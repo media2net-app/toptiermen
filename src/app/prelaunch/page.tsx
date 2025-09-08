@@ -360,6 +360,59 @@ export default function PreLaunchPage() {
         </div>
       </section>
 
+      {/* Sneakpeak Video Section */}
+      <section className="py-16 px-4 sm:px-8 md:px-12 lg:px-20">
+        <div className="max-w-4xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="text-center mb-12"
+          >
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tight mb-6 text-white">
+              Bekijk de exclusieve <span className="text-[#8BAE5A]">preview</span> van het platform
+            </h2>
+            <p className="text-lg text-gray-300 max-w-3xl mx-auto">
+              Krijg een eerste blik achter de schermen van het Top Tier Men platform. 
+              Ontdek de Academy, Voedingsplannen, Trainingsschema's en Brotherhood community.
+            </p>
+          </motion.div>
+          
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="relative"
+          >
+            <div className="bg-[#1A1F1A] border border-[#8BAE5A]/20 rounded-xl p-6">
+              <div className="relative aspect-video bg-black rounded-lg overflow-hidden">
+                <video
+                  className="w-full h-full object-cover"
+                  controls
+                  poster="/platform-preview.png"
+                  preload="metadata"
+                >
+                  <source src="/platform-preview.mp4" type="video/mp4" />
+                  <source src="/welkom-v2.MP4" type="video/mp4" />
+                  <source src="/welkom.MP4" type="video/mp4" />
+                  Je browser ondersteunt de video tag niet.
+                </video>
+              </div>
+              
+              <div className="mt-6 text-center">
+                <div className="inline-flex items-center px-4 py-2 bg-[#8BAE5A]/20 border border-[#8BAE5A]/30 rounded-full text-[#8BAE5A] text-sm font-medium">
+                  <PlayIcon className="w-4 h-4 mr-2" />
+                  ⏱️ Duurtijd: ~3 minuten
+                </div>
+                <p className="text-sm text-gray-400 mt-3">
+                  🔒 Exclusief voor pre-launch leden
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
       {/* Hero Section */}
       <section className="prelaunch-hero relative py-8 sm:py-12 md:py-16 lg:py-20 px-4 sm:px-8 md:px-12 lg:px-20">
         <div className="w-full">
