@@ -417,22 +417,6 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
     if (meal && meal.ingredients && meal.ingredients[ingredientIndex]) {
       meal.ingredients[ingredientIndex][field] = value;
       
-      // Check if this meal is back to original state
-      const mealKey = `${day}-${mealType}`;
-      const isBackToOriginal = checkIfMealIsBackToOriginal(day, mealType, updatedPlanData);
-      
-      if (isBackToOriginal) {
-        // Remove from modified meals if back to original
-        setModifiedMeals(prev => {
-          const newSet = new Set(prev);
-          newSet.delete(mealKey);
-          return newSet;
-        });
-      } else {
-        // Mark this meal as modified
-        setModifiedMeals(prev => new Set([...prev, mealKey]));
-      }
-      
       // Recalculate meal nutrition
       let totalCalories = 0;
       let totalProtein = 0;
@@ -477,6 +461,21 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
       };
 
       setPlanData(updatedPlanData);
+      
+      // Check if this meal is back to original state after state update
+      const isBackToOriginal = checkIfMealIsBackToOriginal(day, mealType, updatedPlanData);
+      
+      if (isBackToOriginal) {
+        // Remove from modified meals if back to original
+        setModifiedMeals(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(mealKey);
+          return newSet;
+        });
+      } else {
+        // Mark this meal as modified
+        setModifiedMeals(prev => new Set([...prev, mealKey]));
+      }
     }
   };
 
