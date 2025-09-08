@@ -25,10 +25,10 @@ export async function GET(request: NextRequest) {
     const ingredientLookup = {};
     ingredients?.forEach(ingredient => {
       ingredientLookup[ingredient.name] = {
-        calories: ingredient.calories_per_100g,
-        protein: ingredient.protein_per_100g,
-        carbs: ingredient.carbs_per_100g,
-        fat: ingredient.fat_per_100g,
+        calories_per_100g: ingredient.calories_per_100g,
+        protein_per_100g: ingredient.protein_per_100g,
+        carbs_per_100g: ingredient.carbs_per_100g,
+        fat_per_100g: ingredient.fat_per_100g,
         unit_type: ingredient.unit_type
       };
     });

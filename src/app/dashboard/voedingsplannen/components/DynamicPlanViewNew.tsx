@@ -439,10 +439,10 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
     }
 
     return {
-      calories: Math.round(nutritionData.calories * multiplier * 10) / 10,
-      protein: Math.round(nutritionData.protein * multiplier * 10) / 10,
-      carbs: Math.round(nutritionData.carbs * multiplier * 10) / 10,
-      fat: Math.round(nutritionData.fat * multiplier * 10) / 10
+      calories: Math.round(nutritionData.calories_per_100g * multiplier * 10) / 10,
+      protein: Math.round(nutritionData.protein_per_100g * multiplier * 10) / 10,
+      carbs: Math.round(nutritionData.carbs_per_100g * multiplier * 10) / 10,
+      fat: Math.round(nutritionData.fat_per_100g * multiplier * 10) / 10
     };
   };
 
