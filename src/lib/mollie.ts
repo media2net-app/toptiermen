@@ -24,29 +24,29 @@ export const mollie = process.env.MOLLIE_LIVE_KEY || process.env.MOLLIE_TEST_KEY
 
 // Subscription plans
 export const SUBSCRIPTION_PLANS = {
-  monthly: {
-    id: 'monthly',
-    name: 'Maandelijkse Membership',
-    price: 29.99,
+  'basic-tier': {
+    id: 'basic-tier',
+    name: 'Basic Tier',
+    price: 49.00,
     currency: 'EUR',
     interval: 'month',
-    description: 'Volledige toegang tot het Top Tier Men platform'
+    description: 'Minimaal 6 maanden vereist'
   },
-  yearly: {
-    id: 'yearly',
-    name: 'Jaarlijkse Membership',
-    price: 299.99,
+  'premium-tier': {
+    id: 'premium-tier',
+    name: 'Premium Tier',
+    price: 79.00,
     currency: 'EUR',
-    interval: 'year',
-    description: 'Volledige toegang tot het Top Tier Men platform (2 maanden gratis)'
+    interval: 'month',
+    description: 'Minimaal 6 maanden vereist'
   },
-  lifetime: {
-    id: 'lifetime',
-    name: 'Lifetime Membership',
-    price: 999.99,
+  'lifetime-tier': {
+    id: 'lifetime-tier',
+    name: 'Lifetime Tier',
+    price: 1995.00,
     currency: 'EUR',
     interval: 'once',
-    description: 'Lifetime toegang tot het Top Tier Men platform'
+    description: 'Eénmalige betaling, levenslang toegang'
   }
 };
 

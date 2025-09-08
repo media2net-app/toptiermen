@@ -125,7 +125,7 @@ export default function PrivacyPolicy() {
             </p>
             
             <ul className="list-disc list-inside text-gray-300 space-y-2 mb-4">
-              <li>Betalingen (Mollie, Stripe)</li>
+              <li>Betalingen (Mollie)</li>
               <li>Analytics en tracking (Google Analytics)</li>
               <li>E-mail services</li>
               <li>Cloud hosting en opslag</li>

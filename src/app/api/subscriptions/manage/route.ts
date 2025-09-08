@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getStripeServer } from '@/lib/stripe';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 
 export async function GET(request: NextRequest) {
@@ -28,30 +27,16 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    if (!user.stripe_customer_id) {
-      return NextResponse.json({
-        subscription: null,
-        customer: null,
-      });
-    }
-
-    // Get Stripe customer and subscription data
-    const stripe = getStripeServer();
-    const customer = await stripe.customers.retrieve(user.stripe_customer_id);
-    const subscriptions = await stripe.subscriptions.list({
-      customer: user.stripe_customer_id,
-      status: 'all',
-    });
-
     return NextResponse.json({
-      subscription: subscriptions.data[0] || null,
-      customer,
+      subscription: null, // Mollie doesn't have traditional subscriptions
+      customer: null,
       user: {
         subscription_status: user.subscription_status,
         subscription_plan: user.subscription_plan,
         subscription_start_date: user.subscription_start_date,
         subscription_end_date: user.subscription_end_date,
         payment_status: user.payment_status,
+        mollie_customer_id: user.mollie_customer_id,
       },
     });
 
@@ -75,9 +60,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Initialize Stripe
-    const stripe = getStripeServer();
-
     // Get user data
     const { data: user, error: userError } = await supabaseAdmin
       .from('profiles')
@@ -94,46 +76,21 @@ export async function POST(request: NextRequest) {
 
     switch (action) {
       case 'cancel':
-        if (!subscriptionId) {
-          return NextResponse.json(
-            { error: 'Subscription ID is required for cancellation' },
-            { status: 400 }
-          );
-        }
-
-        // Cancel subscription at period end
-        const cancelledSubscription = await stripe.subscriptions.update(subscriptionId, {
-          cancel_at_period_end: true,
-        }) as any;
-
-        // Update user status
+        // For Mollie, we just update the user status
         await supabaseAdmin
           .from('profiles')
           .update({
-            subscription_status: 'cancelling',
-            subscription_end_date: new Date(cancelledSubscription.current_period_end * 1000).toISOString(),
+            subscription_status: 'cancelled',
+            subscription_end_date: new Date().toISOString(),
           })
           .eq('id', userId);
 
         return NextResponse.json({
           message: 'Subscription cancelled successfully',
-          subscription: cancelledSubscription,
         });
 
       case 'reactivate':
-        if (!subscriptionId) {
-          return NextResponse.json(
-            { error: 'Subscription ID is required for reactivation' },
-            { status: 400 }
-          );
-        }
-
-        // Reactivate subscription
-        const reactivatedSubscription = await stripe.subscriptions.update(subscriptionId, {
-          cancel_at_period_end: false,
-        });
-
-        // Update user status
+        // For Mollie, we reactivate by updating status
         await supabaseAdmin
           .from('profiles')
           .update({
@@ -144,18 +101,13 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json({
           message: 'Subscription reactivated successfully',
-          subscription: reactivatedSubscription,
         });
 
       case 'update_payment_method':
-        // Create a setup intent for updating payment method
-        const setupIntent = await stripe.setupIntents.create({
-          customer: user.stripe_customer_id,
-          payment_method_types: ['card', 'ideal', 'sepa_debit'],
-        });
-
+        // For Mollie, we redirect to a new payment flow
         return NextResponse.json({
-          clientSecret: setupIntent.client_secret,
+          message: 'Redirect to payment method update',
+          redirectUrl: `/dashboard/instellingen?action=update_payment`,
         });
 
       default:
@@ -172,4 +124,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-} 
+}

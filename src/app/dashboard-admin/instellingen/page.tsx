@@ -47,7 +47,7 @@ interface PlatformConfig {
 }
 
 export default function AdminSettings() {
-  const [activeTab, setActiveTab] = useState('stripe');
+  const [activeTab, setActiveTab] = useState('mollie');
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   
