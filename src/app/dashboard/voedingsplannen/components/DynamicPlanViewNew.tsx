@@ -132,6 +132,15 @@ const MEAL_TYPES_NL = {
   avondsnack: 'Avond Snack'
 };
 
+const MEAL_NAMES = {
+  ontbijt: 'Ontbijt',
+  snack1: 'Ochtend Snack',
+  lunch: 'Lunch',
+  snack2: 'Lunch Snack',
+  diner: 'Diner',
+  avondsnack: 'Avond Snack'
+};
+
 const MEAL_ORDER = ['ontbijt', 'snack1', 'lunch', 'snack2', 'diner', 'avondsnack'];
 
 export default function DynamicPlanViewNew({ planId, planName, userId, onBack }: DynamicPlanViewProps) {
