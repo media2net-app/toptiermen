@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
+import LiveAnalyticsWidget from '@/components/LiveAnalyticsWidget';
 
 // Timeline data representing the development journey
 const timelineData = [
@@ -433,6 +434,23 @@ export default function PlatformLanceringPage() {
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Live Analytics Section */}
+      <section className="py-16 px-4 sm:px-8 md:px-12 lg:px-20">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tight mb-6 text-white">
+              Live <span className="text-[#8BAE5A]">Platform Data</span>
+            </h2>
+            <p className="text-lg text-[#D1D5DB] max-w-3xl mx-auto">
+              Bekijk real-time platform activiteit en groei. 
+              Zie hoeveel gebruikers er nu online zijn en welke pagina's het populairst zijn.
+            </p>
+          </div>
+          
+          <LiveAnalyticsWidget />
         </div>
       </section>
 
