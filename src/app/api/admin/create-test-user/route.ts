@@ -43,11 +43,32 @@ export async function POST(request: NextRequest) {
         ])
         .select();
 
+      // Also create user record in users table with role
+      const { error: userError } = await supabase
+        .from('users')
+        .insert([
+          {
+            id: authData.user.id,
+            email: authData.user.email,
+            full_name: fullName,
+            role: 'user'
+          }
+        ])
+        .select();
+
       if (profileError) {
         console.error('❌ Error creating profile:', profileError);
         return NextResponse.json({
           success: false,
           error: 'Auth user created but failed to create profile'
+        }, { status: 400 });
+      }
+
+      if (userError) {
+        console.error('❌ Error creating user record:', userError);
+        return NextResponse.json({
+          success: false,
+          error: 'Profile created but failed to create user record'
         }, { status: 400 });
       }
 
