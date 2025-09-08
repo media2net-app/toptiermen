@@ -17,6 +17,9 @@
 /.next/
 /out/
 
+# TypeScript build cache
+.next/cache/tsconfig.tsbuildinfo
+
 # production
 /build
 

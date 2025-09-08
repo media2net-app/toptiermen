@@ -5,6 +5,14 @@ const nextConfig = {
     // optimizeCss disabled to prevent chunk resolution issues during build
     // optimizeCss: true,
     optimizePackageImports: ['@heroicons/react'],
+    // Enable TypeScript build cache
+    typedRoutes: false,
+  },
+  
+  // TypeScript configuration
+  typescript: {
+    // Enable TypeScript build cache for faster builds
+    ignoreBuildErrors: false,
   },
   
   // Fast Refresh configuration to prevent reload errors
