@@ -1865,31 +1865,23 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
               </div>
               
               {/* Step 1: Select Source Day */}
-              <div className="mb-6">
+              <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-300 mb-3">Stap 1: Selecteer bron dag</label>
-                <div className="space-y-2">
+                <select
+                  value={selectedSourceDay}
+                  onChange={(e) => setSelectedSourceDay(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#0F150E] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:border-[#8BAE5A]"
+                >
+                  <option value="">-- Selecteer een dag --</option>
                   {DAYS.map(day => {
                     const hasData = mealsData?.weekly_plan?.[day.key] && Object.keys(mealsData.weekly_plan[day.key]).length > 0;
                     return (
-                      <label key={day.key} className="flex items-center p-3 bg-[#181F17] rounded-lg border border-[#3A4D23] hover:bg-[#1F2D17] transition-colors cursor-pointer">
-                        <input
-                          type="radio"
-                          name="sourceDay"
-                          value={day.key}
-                          checked={selectedSourceDay === day.key}
-                          onChange={(e) => setSelectedSourceDay(e.target.value)}
-                          className="w-4 h-4 text-[#8BAE5A] bg-[#181F17] border-[#3A4D23] focus:ring-[#8BAE5A] focus:ring-2"
-                        />
-                        <div className="ml-3 flex-1">
-                          <div className="text-sm font-medium text-white">{day.label}</div>
-                          <div className="text-xs text-gray-400">
-                            {hasData ? '✓ Heeft maaltijden' : '⚠ Geen maaltijden'}
-                          </div>
-                        </div>
-                      </label>
+                      <option key={day.key} value={day.key}>
+                        {day.label} {hasData ? '✓' : '○'}
+                      </option>
                     );
                   })}
-                </div>
+                </select>
               </div>
 
               {/* Step 2: Select Target Days */}
