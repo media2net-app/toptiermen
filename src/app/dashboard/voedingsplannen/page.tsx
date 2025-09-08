@@ -900,12 +900,22 @@ export default function VoedingsplannenPage() {
                   </div>
                 </div>
                 <div className="mt-4 text-center">
-                  <span className="text-sm text-gray-400">
-                    Doel: <span className="text-[#8BAE5A] font-semibold capitalize">{userNutritionProfile.goal}</span>
-                    {userNutritionProfile.weight && userNutritionProfile.age && (
-                      <> • {userNutritionProfile.weight}kg • {userNutritionProfile.age} jaar</>
+                  <div className="text-sm text-gray-400">
+                    <div className="mb-1">
+                      <span className="text-[#8BAE5A] font-semibold capitalize">{userNutritionProfile.goal}</span>
+                      {userNutritionProfile.weight && userNutritionProfile.age && (
+                        <> • {userNutritionProfile.weight}kg • {userNutritionProfile.age} jaar</>
+                      )}
+                    </div>
+                    {userNutritionProfile.height && (
+                      <div className="text-xs text-gray-500">
+                        Lengte: {userNutritionProfile.height}cm
+                        {userNutritionProfile.activityLevel && (
+                          <> • Activiteit: <span className="text-[#8BAE5A] capitalize">{userNutritionProfile.activityLevel}</span></>
+                        )}
+                      </div>
                     )}
-                  </span>
+                  </div>
                 </div>
               </div>
             )}
