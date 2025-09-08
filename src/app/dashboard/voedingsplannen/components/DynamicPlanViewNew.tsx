@@ -723,7 +723,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                         <div className="text-lg font-semibold text-gray-500">Eiwit 0g</div>
                       </div>
                       <div className="text-center">
-                        <div className="text-lg font-semibold text-gray-500">KH 0g</div>
+                        <div className="text-lg font-semibold text-gray-500">Koolhydraten 0g</div>
                       </div>
                       <div className="text-center">
                         <div className="text-lg font-semibold text-gray-500">Vet 0g</div>
@@ -763,7 +763,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                     <div className="text-lg font-semibold text-white">Eiwit {'nutrition' in meal ? meal.nutrition.protein : meal.protein}g</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-lg font-semibold text-white">KH {'nutrition' in meal ? meal.nutrition.carbs : meal.carbs}g</div>
+                    <div className="text-lg font-semibold text-white">Koolhydraten {'nutrition' in meal ? meal.nutrition.carbs : meal.carbs}g</div>
                   </div>
                   <div className="text-center">
                     <div className="text-lg font-semibold text-white">Vet {'nutrition' in meal ? meal.nutrition.fat : meal.fat}g</div>
@@ -783,7 +783,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                             <th className="text-center py-2 text-gray-300">Eenheid</th>
                             <th className="text-center py-2 text-gray-300">Kcal</th>
                             <th className="text-center py-2 text-gray-300">Eiwit</th>
-                            <th className="text-center py-2 text-gray-300">KH</th>
+                            <th className="text-center py-2 text-gray-300">Koolhydraten</th>
                             <th className="text-center py-2 text-gray-300">Vet</th>
                             <th className="text-center py-2 text-gray-300">Acties</th>
                           </tr>
