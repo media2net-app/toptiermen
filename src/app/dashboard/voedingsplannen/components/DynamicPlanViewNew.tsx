@@ -164,16 +164,22 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
   }, [planId, userId]);
 
   const handleEditMeal = (day: string, mealType: string) => {
+    // Create custom plan data if it doesn't exist yet
+    if (!customPlanData && planData) {
+      console.log('🔄 Creating custom plan from base plan');
+      setCustomPlanData({ ...planData });
+    }
+    
     setEditingMeal({ day, meal: mealType });
     console.log('✏️ Editing meal:', { day, meal: mealType });
   };
 
   const handleSaveMeal = async (ingredients: MealIngredient[]) => {
-    if (!editingMeal || !planData) return;
+    if (!editingMeal || !customPlanData) return;
 
     try {
-      // Create custom plan data if it doesn't exist
-      let currentCustomData = customPlanData || { ...planData };
+      // Use existing custom plan data
+      let currentCustomData = { ...customPlanData };
       
       // Update the specific meal with new ingredients
       if (!currentCustomData.weekPlan[editingMeal.day]) {
@@ -392,64 +398,6 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
     }
   };
 
-  // Handle ingredient removal
-  const handleRemoveIngredient = (day: string, mealType: string, ingredientIndex: number) => {
-    if (!planData) return;
-
-    const updatedPlanData = { ...planData };
-    const meal = updatedPlanData.weekPlan[day][mealType];
-    
-    if (meal && meal.ingredients) {
-      meal.ingredients.splice(ingredientIndex, 1);
-      
-      // Recalculate meal nutrition
-      let totalCalories = 0;
-      let totalProtein = 0;
-      let totalCarbs = 0;
-      let totalFat = 0;
-
-      meal.ingredients.forEach((ingredient: any) => {
-        const nutrition = calculateIngredientNutrition(ingredient);
-        totalCalories += nutrition.calories;
-        totalProtein += nutrition.protein;
-        totalCarbs += nutrition.carbs;
-        totalFat += nutrition.fat;
-      });
-
-      meal.nutrition = {
-        calories: Math.round(totalCalories * 10) / 10,
-        protein: Math.round(totalProtein * 10) / 10,
-        carbs: Math.round(totalCarbs * 10) / 10,
-        fat: Math.round(totalFat * 10) / 10
-      };
-
-      // Recalculate daily totals
-      let dailyCalories = 0;
-      let dailyProtein = 0;
-      let dailyCarbs = 0;
-      let dailyFat = 0;
-
-      Object.values(updatedPlanData.weekPlan[day]).forEach((mealData: any) => {
-        if (mealData && typeof mealData === 'object' && 'nutrition' in mealData && mealData.nutrition) {
-          dailyCalories += mealData.nutrition.calories;
-          dailyProtein += mealData.nutrition.protein;
-          dailyCarbs += mealData.nutrition.carbs;
-          dailyFat += mealData.nutrition.fat;
-        }
-      });
-
-      updatedPlanData.weekPlan[day].dailyTotals = {
-        calories: Math.round(dailyCalories),
-        protein: Math.round(dailyProtein * 10) / 10,
-        carbs: Math.round(dailyCarbs * 10) / 10,
-        fat: Math.round(dailyFat * 10) / 10
-      };
-
-      setPlanData(updatedPlanData);
-      toast.success('Ingrediënt verwijderd');
-    }
-  };
-
   const getDayTotal = (day: string) => {
     // Use custom data if available, otherwise use original plan data
     const dataSource = customPlanData || planData;
@@ -524,7 +472,14 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                 Terug naar overzicht
               </button>
               <div>
-                <h1 className="text-2xl font-bold text-white">{planData.planName}</h1>
+                <h1 className="text-2xl font-bold text-white">
+                  {planData.planName}
+                  {customPlanData && (
+                    <span className="ml-3 px-2 py-1 bg-[#8BAE5A] text-[#232D1A] text-sm rounded-full font-medium">
+                      Aangepast
+                    </span>
+                  )}
+                </h1>
                 <p className="text-gray-300">
                   Gepersonaliseerd voor {planData.userProfile.weight}kg, {planData.userProfile.age} jaar, {planData.userProfile.height}cm, {planData.userProfile.activityLevel} - {planData.userProfile.goal}
                 </p>
@@ -788,13 +743,13 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                   <div className="flex justify-between items-center">
                     <span className="text-white font-medium">Eiwit (Protein)</span>
                     <span className={`text-sm ${statusColor}`}>{statusText}</span>
-                  </div>
+              </div>
                   <div className="w-full bg-gray-700 rounded-full h-3">
                     <div 
                       className={`h-3 rounded-full transition-all duration-300 ${progressColor}`}
                       style={{ width: `${Math.min(percentage, 100)}%` }}
                     ></div>
-                  </div>
+              </div>
             </div>
               );
             })()}
@@ -898,13 +853,13 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                   <div className="flex justify-between items-center">
                     <span className="text-white font-medium">Vet (Fat)</span>
                     <span className={`text-sm ${statusColor}`}>{statusText}</span>
-                  </div>
+            </div>
                   <div className="w-full bg-gray-700 rounded-full h-3">
                     <div 
                       className={`h-3 rounded-full transition-all duration-300 ${progressColor}`}
                       style={{ width: `${Math.min(percentage, 100)}%` }}
                     ></div>
-                  </div>
+            </div>
             </div>
               );
             })()}
@@ -1008,7 +963,6 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                             <th className="text-center py-2 text-gray-300">Eiwit</th>
                             <th className="text-center py-2 text-gray-300">Koolhydraten</th>
                             <th className="text-center py-2 text-gray-300">Vet</th>
-                            <th className="text-center py-2 text-gray-300">Acties</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -1050,17 +1004,6 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                               </td>
                               <td className="py-3 text-center text-white">
                                 {calculateIngredientNutrition(ingredient).fat.toFixed(1)}g
-                              </td>
-                              <td className="py-3 text-center">
-                                <button
-                                  onClick={() => handleRemoveIngredient(selectedDay, mealType, index)}
-                                  className="text-red-400 hover:text-red-300 transition-colors"
-                                  title="Verwijder ingrediënt"
-                                >
-                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                  </svg>
-                                </button>
                               </td>
                             </tr>
                           ))}
