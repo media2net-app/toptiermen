@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'react-hot-toast';
 import { 
   ArrowLeftIcon,
   CalendarDaysIcon,
@@ -170,6 +171,167 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
   const handleAddSnack = (day: string, snackType: string) => {
     console.log('➕ Adding snack:', { day, snack: snackType });
     toast.success(`${MEAL_TYPES_NL[snackType as keyof typeof MEAL_TYPES_NL]} toegevoegd!`);
+  };
+
+  // Calculate nutrition for a single ingredient based on amount and unit
+  const calculateIngredientNutrition = (ingredient: any) => {
+    const amount = ingredient.amount || 0;
+    const unit = ingredient.unit || 'per_100g';
+    
+    // Base nutrition per 100g (this would come from ingredient database)
+    const baseNutrition = {
+      calories: ingredient.calories_per_100g || 0,
+      protein: ingredient.protein_per_100g || 0,
+      carbs: ingredient.carbs_per_100g || 0,
+      fat: ingredient.fat_per_100g || 0
+    };
+
+    // Convert based on unit type
+    let multiplier = 1;
+    switch (unit) {
+      case 'per_100g':
+        multiplier = amount / 100;
+        break;
+      case 'per_piece':
+        multiplier = amount; // Assuming 1 piece = 100g for now
+        break;
+      case 'per_ml':
+        multiplier = amount / 100; // Assuming 1ml = 1g for liquids
+        break;
+      case 'per_tbsp':
+        multiplier = (amount * 15) / 100; // 1 tbsp = 15ml
+        break;
+      case 'per_tsp':
+        multiplier = (amount * 5) / 100; // 1 tsp = 5ml
+        break;
+      case 'per_cup':
+        multiplier = (amount * 240) / 100; // 1 cup = 240ml
+        break;
+      default:
+        multiplier = amount / 100;
+    }
+
+    return {
+      calories: baseNutrition.calories * multiplier,
+      protein: baseNutrition.protein * multiplier,
+      carbs: baseNutrition.carbs * multiplier,
+      fat: baseNutrition.fat * multiplier
+    };
+  };
+
+  // Handle ingredient changes
+  const handleIngredientChange = (day: string, mealType: string, ingredientIndex: number, field: string, value: any) => {
+    if (!planData) return;
+
+    const updatedPlanData = { ...planData };
+    const meal = updatedPlanData.weekPlan[day][mealType];
+    
+    if (meal && meal.ingredients && meal.ingredients[ingredientIndex]) {
+      meal.ingredients[ingredientIndex][field] = value;
+      
+      // Recalculate meal nutrition
+      let totalCalories = 0;
+      let totalProtein = 0;
+      let totalCarbs = 0;
+      let totalFat = 0;
+
+      meal.ingredients.forEach((ingredient: any) => {
+        const nutrition = calculateIngredientNutrition(ingredient);
+        totalCalories += nutrition.calories;
+        totalProtein += nutrition.protein;
+        totalCarbs += nutrition.carbs;
+        totalFat += nutrition.fat;
+      });
+
+      meal.nutrition = {
+        calories: Math.round(totalCalories * 10) / 10,
+        protein: Math.round(totalProtein * 10) / 10,
+        carbs: Math.round(totalCarbs * 10) / 10,
+        fat: Math.round(totalFat * 10) / 10
+      };
+
+      // Recalculate daily totals
+      let dailyCalories = 0;
+      let dailyProtein = 0;
+      let dailyCarbs = 0;
+      let dailyFat = 0;
+
+      Object.values(updatedPlanData.weekPlan[day]).forEach((mealData: any) => {
+        if (mealData && typeof mealData === 'object' && 'nutrition' in mealData && mealData.nutrition) {
+          dailyCalories += mealData.nutrition.calories;
+          dailyProtein += mealData.nutrition.protein;
+          dailyCarbs += mealData.nutrition.carbs;
+          dailyFat += mealData.nutrition.fat;
+        }
+      });
+
+      updatedPlanData.weekPlan[day].dailyTotals = {
+        calories: Math.round(dailyCalories),
+        protein: Math.round(dailyProtein * 10) / 10,
+        carbs: Math.round(dailyCarbs * 10) / 10,
+        fat: Math.round(dailyFat * 10) / 10
+      };
+
+      setPlanData(updatedPlanData);
+    }
+  };
+
+  // Handle ingredient removal
+  const handleRemoveIngredient = (day: string, mealType: string, ingredientIndex: number) => {
+    if (!planData) return;
+
+    const updatedPlanData = { ...planData };
+    const meal = updatedPlanData.weekPlan[day][mealType];
+    
+    if (meal && meal.ingredients) {
+      meal.ingredients.splice(ingredientIndex, 1);
+      
+      // Recalculate meal nutrition
+      let totalCalories = 0;
+      let totalProtein = 0;
+      let totalCarbs = 0;
+      let totalFat = 0;
+
+      meal.ingredients.forEach((ingredient: any) => {
+        const nutrition = calculateIngredientNutrition(ingredient);
+        totalCalories += nutrition.calories;
+        totalProtein += nutrition.protein;
+        totalCarbs += nutrition.carbs;
+        totalFat += nutrition.fat;
+      });
+
+      meal.nutrition = {
+        calories: Math.round(totalCalories * 10) / 10,
+        protein: Math.round(totalProtein * 10) / 10,
+        carbs: Math.round(totalCarbs * 10) / 10,
+        fat: Math.round(totalFat * 10) / 10
+      };
+
+      // Recalculate daily totals
+      let dailyCalories = 0;
+      let dailyProtein = 0;
+      let dailyCarbs = 0;
+      let dailyFat = 0;
+
+      Object.values(updatedPlanData.weekPlan[day]).forEach((mealData: any) => {
+        if (mealData && typeof mealData === 'object' && 'nutrition' in mealData && mealData.nutrition) {
+          dailyCalories += mealData.nutrition.calories;
+          dailyProtein += mealData.nutrition.protein;
+          dailyCarbs += mealData.nutrition.carbs;
+          dailyFat += mealData.nutrition.fat;
+        }
+      });
+
+      updatedPlanData.weekPlan[day].dailyTotals = {
+        calories: Math.round(dailyCalories),
+        protein: Math.round(dailyProtein * 10) / 10,
+        carbs: Math.round(dailyCarbs * 10) / 10,
+        fat: Math.round(dailyFat * 10) / 10
+      };
+
+      setPlanData(updatedPlanData);
+      toast.success('Ingrediënt verwijderd');
+    }
   };
 
   const getDayTotal = (day: string) => {
@@ -554,19 +716,79 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                   </div>
                 </div>
 
-                {/* Ingredients */}
+                {/* Ingredients Table */}
                 {'ingredients' in meal && meal.ingredients && meal.ingredients.length > 0 && (
                   <div className="mb-4">
-                    <h5 className="text-sm font-semibold text-gray-300 mb-2">Ingrediënten:</h5>
-                    <div className="flex flex-wrap gap-2">
+                    <h5 className="text-sm font-semibold text-gray-300 mb-3">Ingrediënten:</h5>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="border-b border-[#3A4D23]">
+                            <th className="text-left py-2 text-gray-300">Ingrediënt</th>
+                            <th className="text-center py-2 text-gray-300">Aantal</th>
+                            <th className="text-center py-2 text-gray-300">Eenheid</th>
+                            <th className="text-center py-2 text-gray-300">Kcal</th>
+                            <th className="text-center py-2 text-gray-300">Eiwit</th>
+                            <th className="text-center py-2 text-gray-300">KH</th>
+                            <th className="text-center py-2 text-gray-300">Vet</th>
+                            <th className="text-center py-2 text-gray-300">Acties</th>
+                          </tr>
+                        </thead>
+                        <tbody>
                       {meal.ingredients.map((ingredient, index) => (
-                        <span
-                          key={index}
-                          className="px-3 py-1 bg-[#3A4D23] text-white rounded-full text-sm"
-                        >
-                          {ingredient.name} ({ingredient.amount}{ingredient.unit})
-                        </span>
-                      ))}
+                            <tr key={index} className="border-b border-[#3A4D23]/50 hover:bg-[#1F2D17]">
+                              <td className="py-3 text-white font-medium">{ingredient.name}</td>
+                              <td className="py-3 text-center">
+                                <input
+                                  type="number"
+                                  value={ingredient.amount || 0}
+                                  onChange={(e) => handleIngredientChange(selectedDay, mealType, index, 'amount', parseFloat(e.target.value) || 0)}
+                                  className="w-20 px-2 py-1 bg-[#181F17] border border-[#3A4D23] rounded text-white text-center focus:outline-none focus:border-[#8BAE5A]"
+                                  min="0"
+                                  step="0.1"
+                                />
+                              </td>
+                              <td className="py-3 text-center">
+                                <select
+                                  value={ingredient.unit || 'per_100g'}
+                                  onChange={(e) => handleIngredientChange(selectedDay, mealType, index, 'unit', e.target.value)}
+                                  className="px-2 py-1 bg-[#181F17] border border-[#3A4D23] rounded text-white text-center focus:outline-none focus:border-[#8BAE5A] text-xs"
+                                >
+                                  <option value="per_100g">per 100g</option>
+                                  <option value="per_piece">per stuk</option>
+                                  <option value="per_ml">per ml</option>
+                                  <option value="per_tbsp">per eetlepel</option>
+                                  <option value="per_tsp">per theelepel</option>
+                                  <option value="per_cup">per kop</option>
+                                </select>
+                              </td>
+                              <td className="py-3 text-center text-white">
+                                {calculateIngredientNutrition(ingredient).calories.toFixed(1)}
+                              </td>
+                              <td className="py-3 text-center text-white">
+                                {calculateIngredientNutrition(ingredient).protein.toFixed(1)}g
+                              </td>
+                              <td className="py-3 text-center text-white">
+                                {calculateIngredientNutrition(ingredient).carbs.toFixed(1)}g
+                              </td>
+                              <td className="py-3 text-center text-white">
+                                {calculateIngredientNutrition(ingredient).fat.toFixed(1)}g
+                              </td>
+                              <td className="py-3 text-center">
+                                <button
+                                  onClick={() => handleRemoveIngredient(selectedDay, mealType, index)}
+                                  className="text-red-400 hover:text-red-300 transition-colors"
+                                  title="Verwijder ingrediënt"
+                                >
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                  </svg>
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
                     </div>
                   </div>
                 )}
