@@ -234,28 +234,6 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
     }
   };
 
-  const refreshPlanData = async () => {
-    try {
-      console.log('🔄 Refreshing plan data from database...');
-      const response = await fetch(`/api/admin/plan-meals?planId=${plan.id}`);
-      const result = await response.json();
-      
-      if (result.success && result.plan) {
-        console.log('✅ Plan data refreshed:', result.plan.name);
-        setFormData(result.plan);
-        if (result.plan.meals) {
-          setMealsData(result.plan.meals);
-          console.log('🍽️ Meals data refreshed:', result.plan.meals);
-        }
-      } else {
-        console.error('❌ Failed to refresh plan data:', result.error);
-        alert('Fout bij vernieuwen van data: ' + (result.error || 'Onbekende fout'));
-      }
-    } catch (error) {
-      console.error('❌ Error refreshing plan data:', error);
-      alert('Fout bij vernieuwen van data: ' + error.message);
-    }
-  };
 
   const handleSave = async () => {
     try {
@@ -686,17 +664,6 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
                 <span>Opslaan</span>
               </button>
             
-            {/* Refresh Button */}
-            <button
-              onClick={refreshPlanData}
-              className="flex items-center space-x-2 px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
-              title="Vernieuw data vanuit database"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-              <span>Vernieuwen</span>
-            </button>
             {!isPageMode && (
               <button
                 onClick={onClose}
