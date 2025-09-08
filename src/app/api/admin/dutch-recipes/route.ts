@@ -1,12 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { 
-  dutchRecipes, 
-  dutchIngredients, 
-  calculateRecipeNutrition,
-  searchRecipes,
-  getIngredientsByCategory 
-} from '@/lib/dutch-recipes';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -32,9 +25,21 @@ export async function GET(request: NextRequest) {
 
     switch (action) {
       case 'recipes':
-        // Gebruik altijd lokale recepten voor nu
-        result = dutchRecipes;
-        console.log('📊 Local recipes loaded:', result.length);
+        // Haal alle recepten uit database
+        const { data: recipes, error: recipesError } = await supabaseAdmin
+          .from('nutrition_recipes')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (recipesError) {
+          console.error('❌ Error fetching recipes:', recipesError);
+          return NextResponse.json({ 
+            error: 'Failed to fetch recipes from database' 
+          }, { status: 500 });
+        }
+
+        result = recipes || [];
+        console.log('📊 Database recipes loaded:', result.length);
         break;
 
       case 'search':
@@ -44,12 +49,26 @@ export async function GET(request: NextRequest) {
           }, { status: 400 });
         }
         
-        const filters: any = {};
-        if (mealType) filters.mealType = mealType;
-        if (cuisine) filters.cuisine = cuisine;
-        if (dietTags) filters.dietTags = dietTags.split(',');
+        // Zoek in database
+        let searchQuery = supabaseAdmin
+          .from('nutrition_recipes')
+          .select('*')
+          .ilike('name', `%${query}%`);
 
-        result = searchRecipes(query, filters);
+        if (mealType) {
+          searchQuery = searchQuery.eq('meal_type', mealType);
+        }
+
+        const { data: searchResults, error: searchError } = await searchQuery;
+        
+        if (searchError) {
+          console.error('❌ Error searching recipes:', searchError);
+          return NextResponse.json({ 
+            error: 'Failed to search recipes' 
+          }, { status: 500 });
+        }
+
+        result = searchResults || [];
         break;
 
       case 'recipe':
@@ -60,7 +79,6 @@ export async function GET(request: NextRequest) {
           }, { status: 400 });
         }
 
-        // Probeer eerst uit database
         const { data: recipe, error: recipeError } = await supabaseAdmin
           .from('nutrition_recipes')
           .select('*')
@@ -68,65 +86,74 @@ export async function GET(request: NextRequest) {
           .single();
 
         if (recipeError || !recipe) {
-          // Fallback naar lokale recepten
-          result = dutchRecipes.find(r => r.id === recipeId);
-        } else {
-          result = recipe;
+          return NextResponse.json({ 
+            error: 'Recipe not found' 
+          }, { status: 404 });
         }
+
+        result = recipe;
         break;
 
       case 'ingredients':
+        let ingredientsQuery = supabaseAdmin
+          .from('nutrition_ingredients')
+          .select('*');
+
         if (category) {
-          result = getIngredientsByCategory(category);
-        } else {
-          result = dutchIngredients;
+          ingredientsQuery = ingredientsQuery.eq('category', category);
         }
+
+        const { data: ingredients, error: ingredientsError } = await ingredientsQuery;
+        
+        if (ingredientsError) {
+          console.error('❌ Error fetching ingredients:', ingredientsError);
+          return NextResponse.json({ 
+            error: 'Failed to fetch ingredients' 
+          }, { status: 500 });
+        }
+
+        result = ingredients || [];
         break;
 
       case 'categories':
-        const categories = [...new Set(dutchIngredients.map(i => i.category))];
-        result = categories;
+        const { data: categories, error: categoriesError } = await supabaseAdmin
+          .from('nutrition_ingredients')
+          .select('category')
+          .not('category', 'is', null);
+
+        if (categoriesError) {
+          console.error('❌ Error fetching categories:', categoriesError);
+          return NextResponse.json({ 
+            error: 'Failed to fetch categories' 
+          }, { status: 500 });
+        }
+
+        const uniqueCategories = [...new Set(categories?.map(c => c.category) || [])];
+        result = uniqueCategories;
         break;
 
       case 'meal-types':
-        const mealTypes = ['ontbijt', 'lunch', 'diner', 'snack'];
+        const mealTypes = ['breakfast', 'lunch', 'dinner', 'snack'];
         result = mealTypes;
         break;
 
-      case 'diet-tags':
-        const allDietTags = new Set<string>();
-        dutchIngredients.forEach(ingredient => {
-          ingredient.dietTags?.forEach(tag => allDietTags.add(tag));
-        });
-        dutchRecipes.forEach(recipe => {
-          recipe.dietTags.forEach(tag => allDietTags.add(tag));
-        });
-        result = Array.from(allDietTags);
-        break;
-
       case 'popular':
-        // Top 10 populaire recepten
-        result = dutchRecipes
-          .sort((a, b) => b.popularity - a.popularity)
-          .slice(0, 10);
-        break;
+        // Top 10 populaire recepten uit database
+        const { data: popularRecipes, error: popularError } = await supabaseAdmin
+          .from('nutrition_recipes')
+          .select('*')
+          .eq('is_featured', true)
+          .order('created_at', { ascending: false })
+          .limit(10);
 
-      case 'calculate-nutrition':
-        const ingredients = searchParams.get('ingredients');
-        if (!ingredients) {
+        if (popularError) {
+          console.error('❌ Error fetching popular recipes:', popularError);
           return NextResponse.json({ 
-            error: 'Ingredients parameter is required' 
-          }, { status: 400 });
+            error: 'Failed to fetch popular recipes' 
+          }, { status: 500 });
         }
 
-        try {
-          const ingredientsArray = JSON.parse(ingredients);
-          result = calculateRecipeNutrition(ingredientsArray);
-        } catch (parseError) {
-          return NextResponse.json({ 
-            error: 'Invalid ingredients format' 
-          }, { status: 400 });
-        }
+        result = popularRecipes || [];
         break;
 
       default:
@@ -170,16 +197,7 @@ export async function POST(request: NextRequest) {
           }, { status: 400 });
         }
 
-        // Bereken voeding op basis van ingrediënten
-        if (recipe.ingredients && recipe.ingredients.length > 0) {
-          const nutrition = calculateRecipeNutrition(
-            recipe.ingredients.map((i: any) => ({
-              ingredientId: i.ingredientId,
-              amount: i.amount
-            }))
-          );
-          recipe.nutrition = nutrition;
-        }
+        // Voeding wordt handmatig ingevoerd of via andere methode berekend
 
         const { data: newRecipe, error: addError } = await supabaseAdmin
           .from('nutrition_recipes')
@@ -210,16 +228,7 @@ export async function POST(request: NextRequest) {
           }, { status: 400 });
         }
 
-        // Bereken voeding opnieuw als ingrediënten zijn gewijzigd
-        if (updateData.ingredients && updateData.ingredients.length > 0) {
-          const nutrition = calculateRecipeNutrition(
-            updateData.ingredients.map((i: any) => ({
-              ingredientId: i.ingredientId,
-              amount: i.amount
-            }))
-          );
-          updateData.nutrition = nutrition;
-        }
+        // Voeding wordt handmatig bijgewerkt
 
         const { data: updatedRecipe, error: updateError } = await supabaseAdmin
           .from('nutrition_recipes')

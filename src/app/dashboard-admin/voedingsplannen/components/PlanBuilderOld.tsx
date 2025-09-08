@@ -2074,16 +2074,16 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
       </div>
 
                   {/* Meal Edit Modal */}
-            <MealEditModal
-              isOpen={isMealModalOpen}
-              onClose={() => setIsMealModalOpen(false)}
-              meal={editingMeal}
-              mealType={editingMealType}
-              onSave={handleSaveMeal}
-              onDelete={handleDeleteMeal}
-              baseCalories={formData.target_calories}
-              planType={plan?.name}
-            />
+            {isMealModalOpen && (
+              <MealEditModal
+                day={editingMeal?.day || 'maandag'}
+                meal={editingMeal?.meal || 'ontbijt'}
+                ingredients={editingMeal?.ingredients || []}
+                availableIngredients={[]}
+                onSave={handleSaveMeal}
+                onClose={() => setIsMealModalOpen(false)}
+              />
+            )}
     </div>
   );
 } 
