@@ -125,6 +125,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
   const [selectedDay, setSelectedDay] = useState<string>('maandag');
   const [editingMeal, setEditingMeal] = useState<{day: string, meal: string} | null>(null);
   const [customPlanData, setCustomPlanData] = useState<PlanData | null>(null);
+  const [modifiedMeals, setModifiedMeals] = useState<Set<string>>(new Set());
 
   // Fetch dynamic plan data
   const fetchDynamicPlan = async () => {
@@ -252,6 +253,14 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
 
   const saveCustomPlan = async (customData: PlanData) => {
     try {
+      // Only save if there are modifications
+      if (modifiedMeals.size === 0) {
+        console.log('ℹ️ No modifications detected, skipping custom plan save');
+        return;
+      }
+
+      console.log('💾 Saving custom plan with modifications:', modifiedMeals.size);
+      
       const response = await fetch('/api/custom-nutrition-plans', {
         method: 'POST',
         headers: {
@@ -271,6 +280,9 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
 
       const result = await response.json();
       console.log('✅ Custom plan saved:', result);
+      
+      // Clear modified meals after successful save
+      setModifiedMeals(new Set());
     } catch (error) {
       console.error('❌ Error saving custom plan:', error);
       throw error;
@@ -297,6 +309,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
 
       // Reset local state
       setCustomPlanData(null);
+      setModifiedMeals(new Set());
       
       toast.success('Plan gereset naar origineel!');
       console.log('✅ Plan reset to original');
@@ -379,6 +392,10 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
     
     if (meal && meal.ingredients && meal.ingredients[ingredientIndex]) {
       meal.ingredients[ingredientIndex][field] = value;
+      
+      // Mark this meal as modified
+      const mealKey = `${day}-${mealType}`;
+      setModifiedMeals(prev => new Set([...prev, mealKey]));
       
       // Recalculate meal nutrition
       let totalCalories = 0;
@@ -1009,8 +1026,20 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
               );
             }
 
+            const mealKey = `${selectedDay}-${mealType}`;
+            const isModified = modifiedMeals.has(mealKey);
+
             return (
-              <div key={mealType} className="bg-[#181F17] border border-[#3A4D23] rounded-xl p-6">
+              <div key={mealType} className="bg-[#181F17] border border-[#3A4D23] rounded-xl p-6 relative">
+                {/* Modified Label */}
+                {isModified && (
+                  <div className="absolute -top-2 -left-2 transform -rotate-12">
+                    <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-3 py-1 rounded-lg shadow-lg text-xs font-bold">
+                      ✏️ Aangepast
+                    </div>
+                  </div>
+                )}
+                
                 {/* Meal Header */}
                 <div className="flex items-center justify-between mb-4">
                   <h4 className="text-lg font-bold text-white flex items-center">
@@ -1048,7 +1077,6 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                 {/* Ingredients Table */}
                 {'ingredients' in meal && meal.ingredients && meal.ingredients.length > 0 && (
                   <div className="mb-4">
-                    <h5 className="text-sm font-semibold text-gray-300 mb-3">Ingrediënten:</h5>
                     <div className="overflow-x-auto">
                       <table className="w-full text-sm">
                         <thead>
