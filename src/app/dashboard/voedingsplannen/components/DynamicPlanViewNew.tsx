@@ -11,6 +11,7 @@ import {
   PencilIcon,
   PlusIcon
 } from '@heroicons/react/24/outline';
+import MealEditModal from './MealEditModal';
 
 interface DynamicPlanViewProps {
   planId: string;
@@ -123,6 +124,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
   const [error, setError] = useState<string | null>(null);
   const [selectedDay, setSelectedDay] = useState<string>('maandag');
   const [editingMeal, setEditingMeal] = useState<{day: string, meal: string} | null>(null);
+  const [customPlanData, setCustomPlanData] = useState<PlanData | null>(null);
 
   // Fetch dynamic plan data
   const fetchDynamicPlan = async () => {
@@ -164,6 +166,109 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
   const handleEditMeal = (day: string, mealType: string) => {
     setEditingMeal({ day, meal: mealType });
     console.log('✏️ Editing meal:', { day, meal: mealType });
+  };
+
+  const handleSaveMeal = async (ingredients: MealIngredient[]) => {
+    if (!editingMeal || !planData) return;
+
+    try {
+      // Create custom plan data if it doesn't exist
+      let currentCustomData = customPlanData || { ...planData };
+      
+      // Update the specific meal with new ingredients
+      if (!currentCustomData.weekPlan[editingMeal.day]) {
+        currentCustomData.weekPlan[editingMeal.day] = {
+          ontbijt: { name: 'Ontbijt', ingredients: [], nutrition: { calories: 0, protein: 0, carbs: 0, fat: 0 } },
+          snack1: { name: 'Ochtend Snack', ingredients: [], nutrition: { calories: 0, protein: 0, carbs: 0, fat: 0 } },
+          lunch: { name: 'Lunch', ingredients: [], nutrition: { calories: 0, protein: 0, carbs: 0, fat: 0 } },
+          snack2: { name: 'Lunch Snack', ingredients: [], nutrition: { calories: 0, protein: 0, carbs: 0, fat: 0 } },
+          diner: { name: 'Diner', ingredients: [], nutrition: { calories: 0, protein: 0, carbs: 0, fat: 0 } },
+          avondsnack: { name: 'Avond Snack', ingredients: [], nutrition: { calories: 0, protein: 0, carbs: 0, fat: 0 } },
+          dailyTotals: { calories: 0, protein: 0, carbs: 0, fat: 0 }
+        };
+      }
+
+      // Calculate nutrition for the meal
+      const nutrition = calculateMealNutrition(ingredients);
+      
+      // Update the meal
+      currentCustomData.weekPlan[editingMeal.day][editingMeal.meal as keyof DayPlan] = {
+        name: MEAL_TYPES_NL[editingMeal.meal as keyof typeof MEAL_TYPES_NL],
+        ingredients,
+        nutrition
+      };
+
+      // Recalculate daily totals
+      currentCustomData.weekPlan[editingMeal.day].dailyTotals = calculateDailyTotals(currentCustomData.weekPlan[editingMeal.day]);
+
+      // Update state
+      setCustomPlanData(currentCustomData);
+      setEditingMeal(null);
+
+      // Save to database
+      await saveCustomPlan(currentCustomData);
+
+      toast.success('Maaltijd opgeslagen!');
+    } catch (error) {
+      console.error('❌ Error saving meal:', error);
+      toast.error('Fout bij opslaan maaltijd');
+    }
+  };
+
+  const calculateMealNutrition = (ingredients: MealIngredient[]) => {
+    // This would use the same calculation logic as in MealEditModal
+    // For now, return a simple calculation
+    return ingredients.reduce((total, ingredient) => {
+      // Simple calculation - in real implementation, this would use the ingredient database
+      const calories = ingredient.amount * 10; // Placeholder
+      const protein = ingredient.amount * 1; // Placeholder
+      const carbs = ingredient.amount * 0.5; // Placeholder
+      const fat = ingredient.amount * 0.3; // Placeholder
+      
+      return {
+        calories: total.calories + calories,
+        protein: total.protein + protein,
+        carbs: total.carbs + carbs,
+        fat: total.fat + fat
+      };
+    }, { calories: 0, protein: 0, carbs: 0, fat: 0 });
+  };
+
+  const calculateDailyTotals = (dayPlan: DayPlan) => {
+    const meals = [dayPlan.ontbijt, dayPlan.snack1, dayPlan.lunch, dayPlan.snack2, dayPlan.diner, dayPlan.avondsnack];
+    return meals.reduce((total, meal) => ({
+      calories: total.calories + meal.nutrition.calories,
+      protein: total.protein + meal.nutrition.protein,
+      carbs: total.carbs + meal.nutrition.carbs,
+      fat: total.fat + meal.nutrition.fat
+    }), { calories: 0, protein: 0, carbs: 0, fat: 0 });
+  };
+
+  const saveCustomPlan = async (customData: PlanData) => {
+    try {
+      const response = await fetch('/api/custom-nutrition-plans', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId,
+          basePlanId: planId,
+          customPlanData: customData,
+          planName: `${planName} (Aangepast)`
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save custom plan');
+      }
+
+      const result = await response.json();
+      console.log('✅ Custom plan saved:', result);
+    } catch (error) {
+      console.error('❌ Error saving custom plan:', error);
+      throw error;
+    }
   };
 
   const handleAddSnack = (day: string, snackType: string) => {
@@ -346,15 +451,17 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
   };
 
   const getDayTotal = (day: string) => {
-    if (!planData?.weekPlan[day]) return { calories: 0, protein: 0, carbs: 0, fat: 0 };
-    // Backend already calculates scaled daily totals, so return as-is
-    return planData.weekPlan[day].dailyTotals;
+    // Use custom data if available, otherwise use original plan data
+    const dataSource = customPlanData || planData;
+    if (!dataSource?.weekPlan[day]) return { calories: 0, protein: 0, carbs: 0, fat: 0 };
+    return dataSource.weekPlan[day].dailyTotals;
   };
 
   const getMealData = (day: string, mealType: string) => {
-    if (!planData?.weekPlan[day]) return null;
-    // Backend already applies scaling, so return the meal as-is
-    return planData.weekPlan[day][mealType as keyof DayPlan];
+    // Use custom data if available, otherwise use original plan data
+    const dataSource = customPlanData || planData;
+    if (!dataSource?.weekPlan[day]) return null;
+    return dataSource.weekPlan[day][mealType as keyof DayPlan];
   };
 
 
@@ -932,6 +1039,18 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
           })}
         </div>
       </div>
+
+      {/* Meal Edit Modal */}
+      {editingMeal && (
+        <MealEditModal
+          isOpen={!!editingMeal}
+          onClose={() => setEditingMeal(null)}
+          day={editingMeal.day}
+          mealType={editingMeal.meal}
+          currentIngredients={getMealData(editingMeal.day, editingMeal.meal)?.ingredients || []}
+          onSave={handleSaveMeal}
+        />
+      )}
     </div>
   );
 }
