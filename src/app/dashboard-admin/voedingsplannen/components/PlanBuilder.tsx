@@ -22,6 +22,9 @@ interface NutritionPlan {
   target_protein?: number;
   target_carbs?: number;
   target_fat?: number;
+  protein_percentage?: number;
+  carbs_percentage?: number;
+  fat_percentage?: number;
   duration_weeks?: number;
   difficulty?: string;
   goal?: string;
@@ -152,12 +155,26 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
       const targetCarbs = (plan as any).meals?.target_carbs || plan.target_carbs;
       const targetFat = (plan as any).meals?.target_fat || plan.target_fat;
       
+      // Calculate percentages if we have calories and macros
+      let proteinPercentage = plan.protein_percentage;
+      let carbsPercentage = plan.carbs_percentage;
+      let fatPercentage = plan.fat_percentage;
+      
+      if (targetCalories && targetProtein && targetCarbs && targetFat && !proteinPercentage) {
+        proteinPercentage = Math.round((targetProtein * 4 / targetCalories) * 100);
+        carbsPercentage = Math.round((targetCarbs * 4 / targetCalories) * 100);
+        fatPercentage = Math.round((targetFat * 9 / targetCalories) * 100);
+      }
+      
       const updatedFormData = {
         ...plan,
         target_calories: targetCalories,
         target_protein: targetProtein,
         target_carbs: targetCarbs,
-        target_fat: targetFat
+        target_fat: targetFat,
+        protein_percentage: proteinPercentage,
+        carbs_percentage: carbsPercentage,
+        fat_percentage: fatPercentage
       };
       
       setFormData(updatedFormData);
@@ -171,7 +188,10 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
         calories: targetCalories,
         protein: targetProtein,
         carbs: targetCarbs,
-        fat: targetFat
+        fat: targetFat,
+        proteinPercentage,
+        carbsPercentage,
+        fatPercentage
       });
     }
   }, [plan]);
@@ -816,65 +836,132 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
                 {/* Target Macros */}
                 <div className="bg-[#181F17] rounded-lg p-6 border border-[#3A4D23]">
                   <h3 className="text-lg font-semibold text-[#8BAE5A] mb-4">Target Macros</h3>
-                  <div className="grid grid-cols-2 gap-4">
+                  
+                  {/* Calorieën */}
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-300 mb-1">Calorieën</label>
+                    <input
+                      type="number"
+                      value={formData.target_calories || ''}
+                      onChange={(e) => setFormData({ ...formData, target_calories: parseInt(e.target.value) })}
+                      className="w-full px-3 py-2 bg-[#0F150E] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:border-[#8BAE5A]"
+                    />
+                  </div>
+
+                  {/* Macro Percentages */}
+                  <div className="grid grid-cols-3 gap-4 mb-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-1">Calorieën</label>
+                      <label className="block text-sm font-medium text-gray-300 mb-1">Eiwit (%)</label>
                       <input
                         type="number"
-                        value={formData.target_calories || ''}
-                        onChange={(e) => setFormData({ ...formData, target_calories: parseInt(e.target.value) })}
+                        min="0"
+                        max="100"
+                        value={formData.protein_percentage || ''}
+                        onChange={(e) => {
+                          const proteinPct = parseInt(e.target.value) || 0;
+                          setFormData({ 
+                            ...formData, 
+                            protein_percentage: proteinPct,
+                            target_protein: formData.target_calories ? Math.round((proteinPct / 100) * formData.target_calories / 4) : 0
+                          });
+                        }}
                         className="w-full px-3 py-2 bg-[#0F150E] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:border-[#8BAE5A]"
                       />
+                      {formData.target_protein && (
+                        <div className="text-xs text-[#B6C948] mt-1">
+                          {formData.target_protein}g eiwit
+                        </div>
+                      )}
                     </div>
+                    
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-1">
-                        Eiwit (g) 
-                        {formData.target_calories && formData.target_protein && (
-                          <span className="text-xs text-[#B6C948] ml-2">
-                            ({Math.round((formData.target_protein * 4 / formData.target_calories) * 100)}%)
-                          </span>
-                        )}
-                      </label>
+                      <label className="block text-sm font-medium text-gray-300 mb-1">Koolhydraten (%)</label>
                       <input
                         type="number"
-                        value={formData.target_protein || ''}
-                        onChange={(e) => setFormData({ ...formData, target_protein: parseInt(e.target.value) })}
+                        min="0"
+                        max="100"
+                        value={formData.carbs_percentage || ''}
+                        onChange={(e) => {
+                          const carbsPct = parseInt(e.target.value) || 0;
+                          setFormData({ 
+                            ...formData, 
+                            carbs_percentage: carbsPct,
+                            target_carbs: formData.target_calories ? Math.round((carbsPct / 100) * formData.target_calories / 4) : 0
+                          });
+                        }}
                         className="w-full px-3 py-2 bg-[#0F150E] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:border-[#8BAE5A]"
                       />
+                      {formData.target_carbs && (
+                        <div className="text-xs text-[#B6C948] mt-1">
+                          {formData.target_carbs}g koolhydraten
+                        </div>
+                      )}
                     </div>
+                    
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-1">
-                        Koolhydraten (g)
-                        {formData.target_calories && formData.target_carbs && (
-                          <span className="text-xs text-[#B6C948] ml-2">
-                            ({Math.round((formData.target_carbs * 4 / formData.target_calories) * 100)}%)
-                          </span>
-                        )}
-                      </label>
+                      <label className="block text-sm font-medium text-gray-300 mb-1">Vet (%)</label>
                       <input
                         type="number"
-                        value={formData.target_carbs || ''}
-                        onChange={(e) => setFormData({ ...formData, target_carbs: parseInt(e.target.value) })}
+                        min="0"
+                        max="100"
+                        value={formData.fat_percentage || ''}
+                        onChange={(e) => {
+                          const fatPct = parseInt(e.target.value) || 0;
+                          setFormData({ 
+                            ...formData, 
+                            fat_percentage: fatPct,
+                            target_fat: formData.target_calories ? Math.round((fatPct / 100) * formData.target_calories / 9) : 0
+                          });
+                        }}
                         className="w-full px-3 py-2 bg-[#0F150E] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:border-[#8BAE5A]"
                       />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-1">
-                        Vet (g)
-                        {formData.target_calories && formData.target_fat && (
-                          <span className="text-xs text-[#B6C948] ml-2">
-                            ({Math.round((formData.target_fat * 9 / formData.target_calories) * 100)}%)
-                          </span>
-                        )}
-                      </label>
-                      <input
-                        type="number"
-                        value={formData.target_fat || ''}
-                        onChange={(e) => setFormData({ ...formData, target_fat: parseInt(e.target.value) })}
-                        className="w-full px-3 py-2 bg-[#0F150E] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:border-[#8BAE5A]"
-                      />
+                      {formData.target_fat && (
+                        <div className="text-xs text-[#B6C948] mt-1">
+                          {formData.target_fat}g vet
+                        </div>
+                      )}
                     </div>
                   </div>
+
+                  {/* Percentage Validation */}
+                  {(() => {
+                    const totalPercentage = (formData.protein_percentage || 0) + (formData.carbs_percentage || 0) + (formData.fat_percentage || 0);
+                    if (totalPercentage > 100) {
+                      return (
+                        <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-3 mb-4">
+                          <div className="flex items-center gap-2">
+                            <span className="text-red-400">⚠️</span>
+                            <span className="text-red-400 font-medium">
+                              Totaal percentage is {totalPercentage}%. Dit moet 100% zijn.
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    } else if (totalPercentage < 100 && totalPercentage > 0) {
+                      return (
+                        <div className="bg-yellow-500/20 border border-yellow-500/50 rounded-lg p-3 mb-4">
+                          <div className="flex items-center gap-2">
+                            <span className="text-yellow-400">ℹ️</span>
+                            <span className="text-yellow-400 font-medium">
+                              Totaal percentage is {totalPercentage}%. Nog {100 - totalPercentage}% te verdelen.
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    } else if (totalPercentage === 100) {
+                      return (
+                        <div className="bg-green-500/20 border border-green-500/50 rounded-lg p-3 mb-4">
+                          <div className="flex items-center gap-2">
+                            <span className="text-green-400">✅</span>
+                            <span className="text-green-400 font-medium">
+                              Macro verdeling is correct (100%)
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    }
+                    return null;
+                  })()}
                 </div>
 
                 {/* Formula Calculation */}
