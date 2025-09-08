@@ -1076,19 +1076,14 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                                   step="1"
                                 />
                               </td>
-                              <td className="py-3 text-center">
-                                <select
-                                  value={ingredient.unit || 'per_100g'}
-                                  onChange={(e) => handleIngredientChange(selectedDay, mealType, index, 'unit', e.target.value)}
-                                  className="px-2 py-1 bg-[#181F17] border border-[#3A4D23] rounded text-white text-center focus:outline-none focus:border-[#8BAE5A] text-xs"
-                                >
-                                  <option value="per_100g">g</option>
-                                  <option value="per_piece">stuk</option>
-                                  <option value="per_ml">ml</option>
-                                  <option value="per_tbsp">eetlepel</option>
-                                  <option value="per_tsp">theelepel</option>
-                                  <option value="per_cup">kop</option>
-                                </select>
+                              <td className="py-3 text-center text-gray-300">
+                                {ingredient.unit === 'per_100g' ? 'g' :
+                                 ingredient.unit === 'per_piece' ? 'stuk' :
+                                 ingredient.unit === 'per_ml' ? 'ml' :
+                                 ingredient.unit === 'per_tbsp' ? 'eetlepel' :
+                                 ingredient.unit === 'per_tsp' ? 'theelepel' :
+                                 ingredient.unit === 'per_cup' ? 'kop' :
+                                 'g'}
                               </td>
                               <td className="py-3 text-center text-white">
                                 {calculateIngredientNutrition(ingredient).calories.toFixed(1)}
