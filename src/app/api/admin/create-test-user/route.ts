@@ -54,29 +54,6 @@ export async function POST(request: NextRequest) {
       }
 
       console.log('✅ Profile created successfully');
-
-      // Also add to test_profiles table
-      const { error: testUserError } = await supabase
-        .from('test_users')
-        .insert([
-          {
-            user_id: authData.user.id,
-            name: fullName,
-            email: authData.user.email,
-            status: 'active',
-            assigned_modules: ['Dashboard', 'Academy', 'Trainingscentrum'],
-            test_start_date: new Date().toISOString().split('T')[0],
-            test_end_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-          }
-        ])
-        .select();
-
-      if (testUserError) {
-        console.error('❌ Error creating test user record:', testUserError);
-        // Don't fail completely, user was created
-      }
-
-      console.log('✅ User profile and test user record created');
       
       return NextResponse.json({
         success: true,
