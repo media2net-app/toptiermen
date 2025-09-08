@@ -398,28 +398,45 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
           };
         }
         
-        // Extract nutrition from the meal data
-        const nutrition = mealData.nutrition || { calories: 0, protein: 0, carbs: 0, fat: 0 };
+        // Handle both formats: direct meal data OR meal data with nutrition object
+        let nutrition, ingredients;
+        
+        if (mealData.nutrition) {
+          // Format 1: mealData.nutrition (most days)
+          nutrition = mealData.nutrition;
+          ingredients = mealData.ingredients || [];
+        } else {
+          // Format 2: direct properties (maandag format)
+          nutrition = {
+            calories: mealData.calories || 0,
+            protein: mealData.protein || 0,
+            carbs: mealData.carbs || 0,
+            fat: mealData.fat || 0
+          };
+          ingredients = mealData.ingredients || [];
+        }
         
         // Convert ingredients format for PlanBuilder
-        const ingredients = (mealData.ingredients || []).map((ing: any) => ({
+        const convertedIngredients = ingredients.map((ing: any) => ({
           name: ing.name,
           amount: ing.amount,
-          unit: 'g'
+          unit: ing.unit || 'g'
         }));
         
         // Create suggestions format
-        const suggestions = ingredients.map((ing: any) => `${ing.name} (${ing.amount}g)`);
+        const suggestions = convertedIngredients.map((ing: any) => `${ing.name} (${ing.amount}${ing.unit})`);
         
-        return {
-          name: defaultName,
-          calories: Math.round(nutrition.calories || 0),
+        const result = {
+          name: mealData.name || defaultName,
+          calories: Math.round((nutrition.calories || 0) * 10) / 10,
           protein: Math.round((nutrition.protein || 0) * 10) / 10,
           carbs: Math.round((nutrition.carbs || 0) * 10) / 10,
           fat: Math.round((nutrition.fat || 0) * 10) / 10,
           suggestions,
-          ingredients
+          ingredients: convertedIngredients
         };
+        
+        return result;
       };
       
       return {
@@ -427,12 +444,12 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
         theme: `${dayNames[index]} Plan`,
         focus: 'protein',
         meals: {
-          ontbijt: convertMeal(dayData.ontbijt, 'Carnivoor Ontbijt'),
-          snack1: convertMeal(dayData.ochtend_snack, 'Ochtend Snack'),
-          lunch: convertMeal(dayData.lunch, 'Carnivoor Lunch'),
-          snack2: convertMeal(dayData.lunch_snack, 'Middag Snack'),
-          diner: convertMeal(dayData.diner, 'Carnivoor Diner'),
-          avondsnack: convertMeal(dayData.avond_snack, 'Avond Snack')
+          ontbijt: convertMeal(dayData.meals?.ontbijt || dayData.ontbijt, 'Carnivoor Ontbijt'),
+          snack1: convertMeal(dayData.meals?.snack1 || dayData.ochtend_snack, 'Ochtend Snack'),
+          lunch: convertMeal(dayData.meals?.lunch || dayData.lunch, 'Carnivoor Lunch'),
+          snack2: convertMeal(dayData.meals?.snack2 || dayData.lunch_snack, 'Middag Snack'),
+          diner: convertMeal(dayData.meals?.diner || dayData.diner, 'Carnivoor Diner'),
+          avondsnack: convertMeal(dayData.meals?.avondsnack || dayData.avond_snack, 'Avond Snack')
         }
       };
     });

@@ -14,7 +14,7 @@ import PageLayout from '@/components/PageLayout';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { useOnboarding } from "@/contexts/OnboardingContext";
 import { useRouter } from 'next/navigation';
-import DynamicPlanView from './components/DynamicPlanView';
+import DynamicPlanViewNew from './components/DynamicPlanViewNew';
 
 interface NutritionPlan {
   id: number;
@@ -113,10 +113,12 @@ export default function VoedingsplannenPage() {
           const goalMapping = {
             'cut': 'droogtrainen',
             'bulk': 'spiermassa', 
-            'maintenance': 'balans',
+            'maintain': 'onderhoud',
+            'maintenance': 'onderhoud',
             'droogtrainen': 'droogtrainen',
             'spiermassa': 'spiermassa',
-            'balans': 'balans'
+            'behoud': 'onderhoud',
+            'onderhoud': 'onderhoud'
           };
           
           const mappedGoal = goalMapping[userGoal] || userGoal;
@@ -317,7 +319,7 @@ export default function VoedingsplannenPage() {
     try {
       // Map frontend goal to API goal format
       const apiGoal = goal === 'droogtrainen' ? 'cut' : 
-                     goal === 'spiermassa' ? 'bulk' : 'maintenance';
+                     goal === 'spiermassa' ? 'bulk' : 'maintain'; // Use 'maintain' for 'behoud'
 
       // Use the API for calculation
       const response = await fetch('/api/nutrition-profile', {
@@ -655,7 +657,7 @@ export default function VoedingsplannenPage() {
               exit={{ opacity: 0, x: -20 }}
               className="w-full"
             >
-              <DynamicPlanView
+              <DynamicPlanViewNew
                 planId={viewingDynamicPlan.planId}
                 planName={viewingDynamicPlan.planName}
                 userId={user?.id || ''}

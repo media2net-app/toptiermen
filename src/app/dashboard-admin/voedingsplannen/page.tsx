@@ -93,7 +93,7 @@ export default function AdminVoedingsplannenPage() {
   const [weekplans, setWeekplans] = useState<any[]>([]);
   const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
   const [meals, setMeals] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [isLoadingFoodItems, setIsLoadingFoodItems] = useState(true);
 
   // Fetch all data functions
@@ -172,21 +172,40 @@ export default function AdminVoedingsplannenPage() {
       console.log('✅ Raw plans response:', result);
       console.log('📋 Plans array:', result.plans);
       
-      // Debug specific plan
-      const carnivoorPlan = result.plans?.find((p: any) => p.plan_id === 'carnivoor-droogtrainen');
-      if (carnivoorPlan) {
+      // Debug specific plans
+      const carnivoorDroogtrainen = result.plans?.find((p: any) => p.plan_id === 'carnivoor-droogtrainen');
+      const carnivoorOnderhoud = result.plans?.find((p: any) => p.plan_id === 'carnivoor-onderhoud');
+      
+      if (carnivoorDroogtrainen) {
         console.log('🥩 Carnivoor-droogtrainen plan found:');
-        console.log('📊 Plan details:', carnivoorPlan);
-        console.log('🍽️ Meals data:', carnivoorPlan.meals);
+        console.log('📊 Plan details:', carnivoorDroogtrainen);
+        console.log('🍽️ Meals data:', carnivoorDroogtrainen.meals);
         
-        if (carnivoorPlan.meals && carnivoorPlan.meals.weekly_plan) {
-          console.log('📅 Weekly plan data:', carnivoorPlan.meals.weekly_plan);
-          console.log('🗓️ Monday data:', carnivoorPlan.meals.weekly_plan.monday);
+        if (carnivoorDroogtrainen.meals && carnivoorDroogtrainen.meals.weekly_plan) {
+          console.log('📅 Weekly plan data:', carnivoorDroogtrainen.meals.weekly_plan);
+          console.log('🗓️ Monday data:', carnivoorDroogtrainen.meals.weekly_plan.monday);
         } else {
-          console.log('⚠️ No weekly_plan found in carnivoor plan meals data');
+          console.log('⚠️ No weekly_plan found in carnivoor-droogtrainen plan meals data');
         }
       } else {
         console.log('❌ Carnivoor-droogtrainen plan not found in response');
+      }
+      
+      if (carnivoorOnderhoud) {
+        console.log('🥩 Carnivoor-onderhoud plan found:');
+        console.log('📊 Plan details:', carnivoorOnderhoud);
+        console.log('🍽️ Meals data:', carnivoorOnderhoud.meals);
+        
+        if (carnivoorOnderhoud.meals && carnivoorOnderhoud.meals.weekly_plan) {
+          console.log('📅 Weekly plan data:', carnivoorOnderhoud.meals.weekly_plan);
+          console.log('🗓️ Monday data:', carnivoorOnderhoud.meals.weekly_plan.monday);
+          console.log('🍳 Monday ontbijt:', carnivoorOnderhoud.meals.weekly_plan.monday?.ontbijt);
+          console.log('🥓 Monday ontbijt ingredients:', carnivoorOnderhoud.meals.weekly_plan.monday?.ontbijt?.ingredients);
+        } else {
+          console.log('⚠️ No weekly_plan found in carnivoor-onderhoud plan meals data');
+        }
+      } else {
+        console.log('❌ Carnivoor-onderhoud plan not found in response');
       }
       
       setPlans(result.plans || []);
@@ -198,17 +217,83 @@ export default function AdminVoedingsplannenPage() {
 
   const fetchAllData = async () => {
     setIsLoading(true);
-    await Promise.all([
-      fetchPlans(),
-      fetchWeekplans(),
-      fetchMeals(),
-      fetchFoodItems()
-    ]);
-    setIsLoading(false);
+    try {
+      // Fetch data sequentially to avoid race conditions
+      await fetchPlans();
+      await fetchWeekplans();
+      await fetchMeals();
+      await fetchFoodItems();
+    } catch (error) {
+      console.error('❌ Error fetching all data:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
     fetchAllData();
+  }, []);
+
+  // Force data loading on component mount
+  useEffect(() => {
+    if (plans.length === 0 && foodItems.length === 0) {
+      fetchAllData();
+    }
+  }, [plans.length, foodItems.length]);
+
+  // Debug: Log current state
+  useEffect(() => {
+    console.log('🔍 Admin page state:', {
+      plans: plans.length,
+      foodItems: foodItems.length,
+      meals: meals.length,
+      weekplans: weekplans.length,
+      isLoading
+    });
+  }, [plans.length, foodItems.length, meals.length, weekplans.length, isLoading]);
+
+  // Force data loading on page load
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (plans.length === 0 && foodItems.length === 0) {
+        console.log('🔄 Force loading data...');
+        fetchAllData();
+      }
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Emergency fallback - if after 3 seconds we still have no data, try direct API calls
+  useEffect(() => {
+    const emergencyTimer = setTimeout(async () => {
+      if (plans.length === 0) {
+        console.log('🚨 Emergency data loading...');
+        try {
+          const response = await fetch('/api/admin/nutrition-plans');
+          const result = await response.json();
+          if (result.success && result.plans) {
+            setPlans(result.plans);
+            console.log('✅ Emergency plans loaded:', result.plans.length);
+          }
+        } catch (error) {
+          console.error('❌ Emergency plans fetch failed:', error);
+        }
+      }
+      
+      if (foodItems.length === 0) {
+        try {
+          const response = await fetch('/api/admin/nutrition-ingredients');
+          const result = await response.json();
+          if (result.success && result.ingredients) {
+            setFoodItems(result.ingredients);
+            console.log('✅ Emergency ingredients loaded:', result.ingredients.length);
+          }
+        } catch (error) {
+          console.error('❌ Emergency ingredients fetch failed:', error);
+        }
+      }
+    }, 3000);
+    return () => clearTimeout(emergencyTimer);
   }, []);
 
   const handleSaveMeal = async (mealData: any) => {

@@ -343,8 +343,8 @@ export async function GET(request: NextRequest) {
     const basePlanCalories = calculateBasePlanCaloriesFromDatabase(basePlan);
     console.log('📊 Base plan average daily calories:', basePlanCalories);
 
-    // Calculate scale factor - use plan target calories, not user profile
-    const scaleFactor = planData.target_calories / basePlanCalories;
+    // Calculate scale factor - use user profile target calories, not plan target
+    const scaleFactor = profile.target_calories / basePlanCalories;
     console.log('⚖️ Scale factor:', scaleFactor.toFixed(2));
 
     // Generate scaled meal plan
@@ -355,39 +355,76 @@ export async function GET(request: NextRequest) {
       const dayPlan = basePlan[day];
       scaledPlan[day] = {};
       
-      // Process direct meal structure (weekly_plan format)
-      const mealTypes = Object.keys(dayPlan).filter(key => 
-        !['dailyTotals', 'time'].includes(key)
-      );
+      // Process meal structure - handle both formats
+      let mealTypes = [];
       
-      mealTypes.forEach(mealType => {
-        if (dayPlan[mealType]) {
-          const meal = dayPlan[mealType];
+      // Check if this day has the maandag format (with meals object)
+      if (dayPlan.meals && typeof dayPlan.meals === 'object') {
+        console.log(`📊 Processing ${day} with meals object format`);
+        mealTypes = Object.keys(dayPlan.meals);
+        mealTypes.forEach(mealType => {
+          const meal = dayPlan.meals[mealType];
+          if (meal) {
+            // Use nutrition data directly from database (maandag format)
+            const baseNutrition = meal;
           
-          // Use nutrition data directly from database (no scaling for now)
-          const baseNutrition = meal.nutrition || meal;
-          
-          // If nutrition data exists, use it directly
-          let mealNutrition;
-          if (baseNutrition && baseNutrition.calories !== undefined) {
-            mealNutrition = {
-              calories: baseNutrition.calories || 0,
-              protein: baseNutrition.protein || 0,
-              carbs: baseNutrition.carbs || 0,
-              fat: baseNutrition.fat || 0
+            // If nutrition data exists, use it directly
+            let mealNutrition;
+            if (baseNutrition && baseNutrition.calories !== undefined) {
+              mealNutrition = {
+                calories: baseNutrition.calories || 0,
+                protein: baseNutrition.protein || 0,
+                carbs: baseNutrition.carbs || 0,
+                fat: baseNutrition.fat || 0
+              };
+            } else {
+              // Fallback to 0 if no nutrition data
+              mealNutrition = { calories: 0, protein: 0, carbs: 0, fat: 0 };
+            }
+            
+            scaledPlan[day][mealType] = {
+              name: meal.name || mealType,
+              ingredients: meal.ingredients || [],
+              nutrition: mealNutrition
             };
-          } else {
-            // Fallback to 0 if no nutrition data
-            mealNutrition = { calories: 0, protein: 0, carbs: 0, fat: 0 };
           }
-          
-          scaledPlan[day][mealType] = {
-            name: meal.name || mealType,
-            ingredients: meal.ingredients || [],
-            nutrition: mealNutrition
-          };
-        }
-      });
+        });
+      } else {
+        // Process direct meal structure (weekly_plan format for other days)
+        console.log(`📊 Processing ${day} with direct meal format`);
+        mealTypes = Object.keys(dayPlan).filter(key => 
+          !['dailyTotals', 'time'].includes(key)
+        );
+        
+        mealTypes.forEach(mealType => {
+          if (dayPlan[mealType]) {
+            const meal = dayPlan[mealType];
+            
+            // Use nutrition data directly from database (other days format)
+            const baseNutrition = meal.nutrition || meal;
+            
+            // If nutrition data exists, use it directly
+            let mealNutrition;
+            if (baseNutrition && baseNutrition.calories !== undefined) {
+              mealNutrition = {
+                calories: baseNutrition.calories || 0,
+                protein: baseNutrition.protein || 0,
+                carbs: baseNutrition.carbs || 0,
+                fat: baseNutrition.fat || 0
+              };
+            } else {
+              // Fallback to 0 if no nutrition data
+              mealNutrition = { calories: 0, protein: 0, carbs: 0, fat: 0 };
+            }
+            
+            scaledPlan[day][mealType] = {
+              name: meal.name || mealType,
+              ingredients: meal.ingredients || [],
+              nutrition: mealNutrition
+            };
+          }
+        });
+      }
       
       // Calculate daily totals including all meals and snacks
       let dailyCalories = 0;
@@ -453,7 +490,8 @@ export async function GET(request: NextRequest) {
         scalingInfo: {
           basePlanCalories,
           scaleFactor: Math.round(scaleFactor * 100) / 100,
-          targetCalories: profile.target_calories
+          targetCalories: profile.target_calories,
+          planTargetCalories: planData.target_calories
         },
         weekPlan: scaledPlan,
         weeklyAverages,
