@@ -476,7 +476,47 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
         <div className="space-y-4">
           {MEAL_ORDER.map((mealType) => {
             const meal = getMealData(selectedDay, mealType);
-            if (!meal) return null;
+            // Show all meal types, even if they don't have data
+            if (!meal) {
+              return (
+                <div key={mealType} className="bg-[#181F17] border border-[#3A4D23] rounded-xl p-6">
+                  {/* Meal Header */}
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="text-lg font-bold text-white flex items-center">
+                      <ClockIcon className="w-5 h-5 text-[#8BAE5A] mr-2" />
+                      {MEAL_TYPES_NL[mealType as keyof typeof MEAL_TYPES_NL]}
+                      <span className="ml-4 text-sm text-gray-400">0 kcal</span>
+                    </h4>
+                    <button
+                      onClick={() => handleEditMeal(selectedDay, mealType)}
+                      className="flex items-center gap-2 px-3 py-2 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors text-sm font-semibold"
+                    >
+                      <PencilIcon className="w-4 h-4" />
+                      Bewerken
+                    </button>
+                  </div>
+
+                  {/* Empty Meal Content */}
+                  <div className="text-center py-8">
+                    <div className="text-gray-400 mb-4">Geen maaltijd gedefinieerd</div>
+                    <div className="grid grid-cols-4 gap-4 mb-4">
+                      <div className="text-center">
+                        <div className="text-lg font-semibold text-gray-500">Kcal 0</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-lg font-semibold text-gray-500">Eiwit 0g</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-lg font-semibold text-gray-500">KH 0g</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-lg font-semibold text-gray-500">Vet 0g</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            }
 
             return (
               <div key={mealType} className="bg-[#181F17] border border-[#3A4D23] rounded-xl p-6">
