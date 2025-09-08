@@ -60,6 +60,9 @@ export async function POST(request: NextRequest) {
       very_active: 1.7 // Zeer actief
     };
     
+    // Calculate TDEE using TTM formula
+    const tdee = weight * 22 * activityMultipliers[activityLevel as keyof typeof activityMultipliers];
+    
     // Use custom calorie targets based on TTM expertise (not standard formulas)
     // Standard profile: 40y, 100kg, 190cm, male, moderate activity
     let targetCalories = 0;
@@ -74,9 +77,6 @@ export async function POST(request: NextRequest) {
         targetCalories = 3260;
       }
     } else {
-      // TTM berekening: Gewicht x 22 x activiteitniveau
-      const tdee = weight * 22 * activityMultipliers[activityLevel as keyof typeof activityMultipliers];
-      
       // Adjust calories based on goal
       if (goal === 'cut') {
         targetCalories = tdee * 0.8; // 20% deficit
@@ -94,9 +94,6 @@ export async function POST(request: NextRequest) {
     } else {
       bmr = 10 * weight + 6.25 * height - 5 * age - 161;
     }
-    
-    // Calculate TDEE using TTM formula (already calculated above)
-    const tdee = weight * 22 * activityMultipliers[activityLevel as keyof typeof activityMultipliers];
 
     // Macro calculations will be done per plan selection
     // For now, just store the base calorie target
