@@ -510,19 +510,19 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="text-center">
-                <div className="text-2xl font-bold text-white">{planData.scalingInfo.planTargetCalories}</div>
+                <div className="text-2xl font-bold text-white">{planData.planTargets?.target_calories || 0}</div>
                 <div className="text-sm text-gray-400">Calorieën per dag</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-white">{planData.userProfile.targetProtein}g</div>
+                <div className="text-2xl font-bold text-white">{planData.planTargets?.target_protein || 0}g</div>
                 <div className="text-sm text-gray-400">Eiwitten per dag</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-white">{planData.userProfile.targetCarbs}g</div>
+                <div className="text-2xl font-bold text-white">{planData.planTargets?.target_carbs || 0}g</div>
                 <div className="text-sm text-gray-400">Koolhydraten per dag</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-white">{planData.userProfile.targetFat}g</div>
+                <div className="text-2xl font-bold text-white">{planData.planTargets?.target_fat || 0}g</div>
                 <div className="text-sm text-gray-400">Vetten per dag</div>
               </div>
             </div>
