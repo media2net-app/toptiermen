@@ -133,7 +133,7 @@ export default function MealEditModal({
     let totalFat = 0;
 
     currentIngredients.forEach(ingredient => {
-      const amount = parseFloat(ingredient.amount) || 0;
+      const amount = typeof ingredient.amount === 'string' ? parseFloat(ingredient.amount) || 0 : ingredient.amount || 0;
       const unit = ingredient.unit || 'per_100g';
       let factor = 1;
       
