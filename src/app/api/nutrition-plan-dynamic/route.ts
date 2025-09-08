@@ -536,8 +536,8 @@ function calculateBasePlanCaloriesFromDatabase(basePlan) {
     } else if (dayPlan.meals && typeof dayPlan.meals === 'object') {
       // Handle maandag format with meals object
       Object.values(dayPlan.meals).forEach(meal => {
-        if (meal && meal.calories) {
-          dayCalories += meal.calories;
+        if (meal && typeof meal === 'object' && 'calories' in meal && meal.calories) {
+          dayCalories += (meal as any).calories;
         }
       });
     } else {

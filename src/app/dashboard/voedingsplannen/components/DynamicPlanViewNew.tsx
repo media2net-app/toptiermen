@@ -12,7 +12,6 @@ import {
   PencilIcon,
   PlusIcon
 } from '@heroicons/react/24/outline';
-import { toast } from 'react-hot-toast';
 
 interface DynamicPlanViewProps {
   planId: string;
