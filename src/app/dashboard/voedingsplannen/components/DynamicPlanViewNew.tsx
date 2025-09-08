@@ -463,6 +463,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
       setPlanData(updatedPlanData);
       
       // Check if this meal is back to original state after state update
+      const mealKey = `${day}-${mealType}`;
       const isBackToOriginal = checkIfMealIsBackToOriginal(day, mealType, updatedPlanData);
       
       if (isBackToOriginal) {
