@@ -30,19 +30,60 @@ export async function POST(request: NextRequest) {
       console.log('✅ All existing plans deactivated');
     }
 
-    // Then, activate the selected plan
-    const { error: activateError } = await supabase
+    // Check if a record exists for this user and plan
+    const { data: existingRecord, error: checkError } = await supabase
       .from('user_nutrition_plans')
-      .update({ is_active: true })
+      .select('id')
       .eq('user_id', userId)
-      .eq('plan_type', planId);
+      .eq('plan_type', planId)
+      .single();
 
-    if (activateError) {
-      console.error('❌ Error activating plan:', activateError);
-      return NextResponse.json(
-        { success: false, error: `Failed to activate selected plan: ${activateError.message}` },
-        { status: 500 }
-      );
+    if (existingRecord) {
+      // Update existing record to active
+      const { error: activateError } = await supabase
+        .from('user_nutrition_plans')
+        .update({ is_active: true })
+        .eq('user_id', userId)
+        .eq('plan_type', planId);
+
+      if (activateError) {
+        console.error('❌ Error activating plan:', activateError);
+        return NextResponse.json(
+          { success: false, error: `Failed to activate selected plan: ${activateError.message}` },
+          { status: 500 }
+        );
+      }
+    } else {
+      // Create new record for this user and plan
+      const { error: insertError } = await supabase
+        .from('user_nutrition_plans')
+        .insert({
+          user_id: userId,
+          plan_type: planId,
+          nutrition_goals: {
+            calories: 2000,
+            protein: 150,
+            carbs: 200,
+            fat: 70
+          },
+          user_data: {
+            age: 30,
+            weight: 70,
+            height: 175,
+            goal: 'maintenance',
+            activityLevel: 'moderate'
+          },
+          week_plan: {},
+          is_active: true
+        });
+
+      if (insertError) {
+        console.error('❌ Error creating plan record:', insertError);
+        return NextResponse.json(
+          { success: false, error: `Failed to create plan record: ${insertError.message}` },
+          { status: 500 }
+        );
+      }
     }
 
     console.log('✅ Plan activated successfully');

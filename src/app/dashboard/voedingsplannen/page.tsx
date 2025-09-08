@@ -292,29 +292,29 @@ export default function VoedingsplannenPage() {
     // Mark plan as selected
     setSelectedNutritionPlan(planId);
     
-    // If in onboarding, save the selection
-    if (showOnboardingStep4) {
-      try {
-        const response = await fetch('/api/nutrition-plan-select', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            userId: user?.id,
-            planId: planId
-          }),
-        });
+    // Always save the selection to database
+    try {
+      const response = await fetch('/api/nutrition-plan-select', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user?.id,
+          planId: planId
+        }),
+      });
 
-        if (response.ok) {
-          toast.success('Voedingsplan geselecteerd!');
-        } else {
-          toast.error('Er is een fout opgetreden bij het selecteren van het plan');
-        }
-      } catch (error) {
-        console.error('Error selecting nutrition plan:', error);
-        toast.error('Er is een fout opgetreden');
+      if (response.ok) {
+        toast.success('Voedingsplan geselecteerd!');
+        // Refresh the active plan selection
+        checkUserNutritionProfile();
+      } else {
+        toast.error('Er is een fout opgetreden bij het selecteren van het plan');
       }
+    } catch (error) {
+      console.error('Error selecting nutrition plan:', error);
+      toast.error('Er is een fout opgetreden');
     }
     
     // Navigate to plan details (you can uncomment this if you want navigation)
@@ -1037,29 +1037,27 @@ export default function VoedingsplannenPage() {
                         Bekijk Gepersonaliseerd Plan
                       </button>
                       
-                      {/* Select Plan Button for Onboarding */}
-                      {showOnboardingStep4 && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleNutritionPlanClick(plan.plan_id);
-                          }}
-                          className={`w-full px-4 py-2 rounded-lg transition-colors font-semibold flex items-center justify-center gap-2 ${
-                            selectedNutritionPlan === plan.plan_id
-                              ? 'bg-[#8BAE5A] text-[#232D1A]'
-                              : 'bg-[#3A4D23] text-white hover:bg-[#4A5D33]'
-                          }`}
-                        >
-                          {selectedNutritionPlan === plan.plan_id ? (
-                            <>
-                              <CheckIcon className="w-4 h-4" />
-                              Geselecteerd
-                            </>
-                          ) : (
-                            'Selecteer dit plan'
-                          )}
-                        </button>
-                      )}
+                      {/* Select Plan Button - Always visible */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleNutritionPlanClick(plan.plan_id);
+                        }}
+                        className={`w-full px-4 py-2 rounded-lg transition-colors font-semibold flex items-center justify-center gap-2 ${
+                          selectedNutritionPlan === plan.plan_id
+                            ? 'bg-[#8BAE5A] text-[#232D1A]'
+                            : 'bg-[#3A4D23] text-white hover:bg-[#4A5D33]'
+                        }`}
+                      >
+                        {selectedNutritionPlan === plan.plan_id ? (
+                          <>
+                            <CheckIcon className="w-4 h-4" />
+                            Geselecteerd
+                          </>
+                        ) : (
+                          'Selecteer dit plan'
+                        )}
+                      </button>
                         </div>
                       </motion.div>
                     ))}
