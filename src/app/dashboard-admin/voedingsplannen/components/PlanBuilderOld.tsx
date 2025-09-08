@@ -19,6 +19,7 @@ interface NutritionPlan {
   fitness_goal?: 'droogtrainen' | 'spiermassa' | 'onderhoud';
   is_featured?: boolean;
   is_public?: boolean;
+  daily_plans?: any[];
   meals?: {
     weekly_plan: {
       [key: string]: {
