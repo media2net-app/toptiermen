@@ -99,11 +99,11 @@ function SortableExerciseItem({
         placeholder="Reps"
       />
       <input
-        type="number"
+        type="text"
         value={exercise.rest_time}
-        onChange={(e) => updateExerciseInDay(dayIndex, exerciseIndex, 'rest_time', parseInt(e.target.value))}
+        onChange={(e) => updateExerciseInDay(dayIndex, exerciseIndex, 'rest_time', e.target.value)}
         className="w-20 px-2 py-1 bg-gray-700 border border-gray-600 rounded text-white text-center"
-        placeholder="Rest (s)"
+        placeholder="45-60"
       />
       <button
         onClick={() => removeExerciseFromDay(dayIndex, exerciseIndex)}
@@ -131,7 +131,7 @@ interface SchemaExercise {
   exercise_name: string;
   sets: number;
   reps: string;
-  rest_time: number;
+  rest_time: string | number;
   order_index: number;
   exercise?: Exercise;
 }
@@ -248,7 +248,7 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
         ...exercise,
         sets: bulkEditData.sets ? parseInt(bulkEditData.sets) : exercise.sets,
         reps: bulkEditData.reps || exercise.reps,
-        rest_time: bulkEditData.restTime ? parseInt(bulkEditData.restTime) : exercise.rest_time
+        rest_time: bulkEditData.restTime || exercise.rest_time
       }))
     }));
 
@@ -947,7 +947,7 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
                             type="text"
                             value={bulkEditData.restTime}
                             onChange={(e) => setBulkEditData(prev => ({ ...prev, restTime: e.target.value }))}
-                            placeholder="Bijv. 90"
+                            placeholder="Bijv. 45-60 of 90"
                             className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-[#8BAE5A] focus:ring-2"
                           />
                         </div>
