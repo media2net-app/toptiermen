@@ -146,21 +146,21 @@ export default function BasicTierPage() {
             </div>
 
             {/* Title with Navigation */}
-            <div className="flex items-center justify-center space-x-8 mb-6">
+            <div className="flex items-center justify-center space-x-4 sm:space-x-6 md:space-x-8 mb-6">
               {/* Left Arrow */}
               <button
                 onClick={navigateLeft}
-                className="group flex items-center justify-center w-12 h-12 bg-white/10 hover:bg-white/20 border border-white/20 hover:border-white/40 rounded-full transition-all duration-300"
+                className="group flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-white/10 hover:bg-white/20 border border-white/20 hover:border-white/40 rounded-full transition-all duration-300 touch-manipulation"
                 title="Vorige tier"
               >
-                <FaChevronLeft className="w-5 h-5 text-white group-hover:text-[#8BAE5A] transition-colors" />
+                <FaChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 text-white group-hover:text-[#8BAE5A] transition-colors" />
               </button>
 
               {/* Title */}
-              <div className="text-center">
-                <h1 className="text-4xl md:text-6xl font-bold text-white">
-                  <span className="block">{packageData.name.toUpperCase()}</span>
-                  <span className="block text-[#8BAE5A]">
+              <div className="text-center flex-1 min-w-0 px-2">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-bold text-white">
+                  <span className="block truncate">{packageData.name.toUpperCase()}</span>
+                  <span className="block text-[#8BAE5A] text-lg sm:text-xl md:text-2xl lg:text-3xl">
                     €{packageData.monthlyPrice},-
                   </span>
                 </h1>
@@ -169,33 +169,33 @@ export default function BasicTierPage() {
               {/* Right Arrow */}
               <button
                 onClick={navigateRight}
-                className="group flex items-center justify-center w-12 h-12 bg-white/10 hover:bg-white/20 border border-white/20 hover:border-white/40 rounded-full transition-all duration-300"
+                className="group flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-white/10 hover:bg-white/20 border border-white/20 hover:border-white/40 rounded-full transition-all duration-300 touch-manipulation"
                 title="Volgende tier"
               >
-                <FaChevronRight className="w-5 h-5 text-white group-hover:text-[#8BAE5A] transition-colors" />
+                <FaChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-white group-hover:text-[#8BAE5A] transition-colors" />
               </button>
             </div>
 
             {/* Tier Navigation Indicator */}
-            <div className="flex items-center justify-center space-x-4 mb-6">
-              <span className="text-sm text-[#8BAE5A] font-medium">Lifetime</span>
-              <div className="flex space-x-2">
-                <div className={`w-2 h-2 rounded-full ${selectedTier === 'lifetime' ? 'bg-[#8BAE5A]' : 'bg-[#8BAE5A]/30'}`}></div>
-                <div className={`w-2 h-2 rounded-full ${selectedTier === 'basic' ? 'bg-[#8BAE5A]' : 'bg-[#8BAE5A]/30'}`}></div>
-                <div className={`w-2 h-2 rounded-full ${selectedTier === 'premium' ? 'bg-[#8BAE5A]' : 'bg-[#8BAE5A]/30'}`}></div>
+            <div className="flex items-center justify-center space-x-2 sm:space-x-4 mb-6">
+              <span className="text-xs sm:text-sm text-[#8BAE5A] font-medium hidden sm:block">Lifetime</span>
+              <div className="flex space-x-1 sm:space-x-2">
+                <div className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full ${selectedTier === 'lifetime' ? 'bg-[#8BAE5A]' : 'bg-[#8BAE5A]/30'}`}></div>
+                <div className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full ${selectedTier === 'basic' ? 'bg-[#8BAE5A]' : 'bg-[#8BAE5A]/30'}`}></div>
+                <div className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full ${selectedTier === 'premium' ? 'bg-[#8BAE5A]' : 'bg-[#8BAE5A]/30'}`}></div>
               </div>
-              <span className="text-sm text-[#8BAE5A] font-medium">Premium</span>
+              <span className="text-xs sm:text-sm text-[#8BAE5A] font-medium hidden sm:block">Premium</span>
             </div>
 
             {/* Subtitle */}
-            <p className="text-xl text-[#D1D5DB] mb-8 max-w-3xl mx-auto">
+            <p className="text-lg sm:text-xl text-[#D1D5DB] mb-8 max-w-3xl mx-auto px-4">
               {packageData.description}
             </p>
 
             {/* Select Package Button */}
             <button
               onClick={scrollToCheckout}
-              className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-[#8BAE5A] to-[#B6C948] text-white rounded-lg font-semibold text-lg hover:opacity-90 transition-all duration-300"
+              className="inline-flex items-center px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-[#8BAE5A] to-[#B6C948] text-white rounded-lg font-semibold text-base sm:text-lg hover:opacity-90 transition-all duration-300 touch-manipulation"
             >
               Kies {packageData.name}
             </button>
