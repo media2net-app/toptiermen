@@ -213,6 +213,14 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
   const [showDayOrderModal, setShowDayOrderModal] = useState(false);
   const [tempDayOrder, setTempDayOrder] = useState<TrainingDay[]>([]);
   const [showSaveProgress, setShowSaveProgress] = useState(false);
+  
+  // Bulk edit state
+  const [showBulkEdit, setShowBulkEdit] = useState(false);
+  const [bulkEditData, setBulkEditData] = useState({
+    sets: '',
+    reps: '',
+    restTime: ''
+  });
   const [saveProgress, setSaveProgress] = useState<string[]>([]);
   const progressScrollRef = useRef<HTMLDivElement>(null);
 
@@ -222,6 +230,47 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
     const logMessage = `[${timestamp}] ${message}`;
     setSaveProgress(prev => [...prev, logMessage]);
     console.log(logMessage);
+  };
+
+  // Bulk edit functions
+  const applyBulkEdit = () => {
+    if (!bulkEditData.sets && !bulkEditData.reps && !bulkEditData.restTime) {
+      toast.error('Vul ten minste één veld in voor bulk bewerking');
+      return;
+    }
+
+    console.log('🔧 Bulk edit data:', bulkEditData);
+    console.log('📊 Current formData.days before bulk edit:', formData.days);
+
+    const updatedDays = formData.days.map(day => ({
+      ...day,
+      exercises: day.exercises.map(exercise => ({
+        ...exercise,
+        sets: bulkEditData.sets ? parseInt(bulkEditData.sets) : exercise.sets,
+        reps: bulkEditData.reps || exercise.reps,
+        rest_time: bulkEditData.restTime ? parseInt(bulkEditData.restTime) : exercise.rest_time
+      }))
+    }));
+
+    console.log('📊 Updated days after bulk edit:', updatedDays);
+
+    // Use functional update to ensure we get the latest state
+    setFormData(prev => {
+      const newFormData = { ...prev, days: updatedDays };
+      console.log('📊 New formData after setFormData:', newFormData);
+      return newFormData;
+    });
+    
+    setShowBulkEdit(false);
+    setBulkEditData({ sets: '', reps: '', restTime: '' });
+    
+    const totalExercises = updatedDays.reduce((sum, day) => sum + day.exercises.length, 0);
+    toast.success(`${totalExercises} oefeningen bijgewerkt`);
+  };
+
+  const resetBulkEdit = () => {
+    setBulkEditData({ sets: '', reps: '', restTime: '' });
+    setShowBulkEdit(false);
   };
 
   // Auto-scroll to bottom when new logs are added
@@ -246,6 +295,12 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
     days: [],
     status: 'draft'
   });
+  const formDataRef = useRef<TrainingSchema | null>(null);
+
+  // Keep formDataRef in sync with formData
+  useEffect(() => {
+    formDataRef.current = formData;
+  }, [formData]);
 
   useEffect(() => {
     if (isOpen) {
@@ -559,34 +614,65 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
   };
 
   const handleSave = async () => {
-    const validationError = validateSchema(formData);
+    console.log('🎯 handleSave function called!');
+    
+    // Use the ref to get the most current formData
+    const currentFormData = formDataRef.current || formData;
+    
+    console.log('🎯 Current formData for save:', currentFormData);
+    
+    const validationError = validateSchema(currentFormData);
     if (validationError) {
+      console.log('❌ Validation error:', validationError);
       toast.error(validationError);
       return;
     }
 
+    console.log('🎯 Starting save process...');
     setLoading(true);
     setShowSaveProgress(true);
     setSaveProgress([]);
     
     try {
       addProgressLog('🚀 Starting schema save operation...');
-      addProgressLog(`📋 Schema: ${formData.name}`);
-      addProgressLog(`📅 Days to save: ${formData.days.length}`);
+      addProgressLog(`📋 Schema: ${currentFormData.name}`);
+      addProgressLog(`📅 Days to save: ${currentFormData.days.length}`);
+      
+      // Debug: Log the current formData
+      console.log('💾 Save operation - Current formData (from ref):', currentFormData);
+      console.log('💾 Save operation - Days data (from ref):', currentFormData.days);
 
       addProgressLog('💾 Saving schema to database...');
-      const { data: schemaData, error: schemaError } = await supabase
+      console.log('🔍 About to save schema with data:', {
+        id: currentFormData.id,
+        name: currentFormData.name,
+        description: currentFormData.description,
+        category: currentFormData.category,
+        difficulty: currentFormData.difficulty,
+        status: currentFormData.status
+      });
+      
+      // Add timeout to prevent hanging
+      const savePromise = supabase
         .from('training_schemas')
         .upsert({
-          id: formData.id,
-          name: formData.name,
-          description: formData.description,
-          category: formData.category,
-          difficulty: formData.difficulty,
-          status: formData.status
+          id: currentFormData.id,
+          name: currentFormData.name,
+          description: currentFormData.description,
+          category: currentFormData.category,
+          difficulty: currentFormData.difficulty,
+          status: currentFormData.status
         })
         .select()
         .single();
+        
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Schema save timeout after 10 seconds')), 10000)
+      );
+      
+      const { data: schemaData, error: schemaError } = await Promise.race([savePromise, timeoutPromise]) as any;
+        
+      console.log('🔍 Schema save result:', { schemaData, schemaError });
 
       if (schemaError) {
         addProgressLog(`❌ Schema save error: ${schemaError.message}`);
@@ -611,11 +697,14 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
       addProgressLog('✅ Existing days deleted successfully');
 
       // Save days with correct day_number
-      addProgressLog(`📅 Starting to save ${formData.days.length} days...`);
-      for (let i = 0; i < formData.days.length; i++) {
-        const day = formData.days[i];
+      addProgressLog(`📅 Starting to save ${currentFormData.days.length} days...`);
+      console.log('🔍 About to save days:', currentFormData.days);
+      
+      for (let i = 0; i < currentFormData.days.length; i++) {
+        const day = currentFormData.days[i];
         const dayNumber = day.day_number || (i + 1); // Use day.day_number if set, otherwise use array index + 1
         
+        console.log(`🔍 Processing day ${i}:`, day);
         addProgressLog(`💾 Saving day ${dayNumber}: "${day.name}" (${day.exercises.length} exercises)`);
 
         const { data: dayData, error: dayError } = await supabase
@@ -655,6 +744,15 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
           for (let j = 0; j < day.exercises.length; j++) {
             const exercise = day.exercises[j];
             addProgressLog(`  💾 Saving exercise ${j + 1}/${day.exercises.length}: "${exercise.exercise_name}" (order: ${exercise.order_index})`);
+            
+            // Debug: Log exercise data being saved
+            console.log(`💾 Exercise ${j + 1} data:`, {
+              exercise_name: exercise.exercise_name,
+              sets: exercise.sets,
+              reps: exercise.reps,
+              rest_time: exercise.rest_time,
+              order_index: exercise.order_index
+            });
 
           const { error: exerciseError } = await supabase
             .from('training_schema_exercises')
@@ -681,7 +779,7 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
 
       addProgressLog('🎉 Schema save completed successfully!');
       toast.success('Schema succesvol opgeslagen!');
-      onSave({ ...formData, id: schemaId });
+      onSave({ ...currentFormData, id: schemaId });
       setShowSaveProgress(false);
       onClose();
     } catch (error) {
@@ -690,7 +788,7 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
       console.error('Error details:', {
         message: error instanceof Error ? error.message : 'Unknown error',
         stack: error instanceof Error ? error.stack : undefined,
-        formData: formData
+        formData: currentFormData
       });
       
       // More specific error messages
@@ -797,6 +895,81 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
                   </div>
                 </div>
               </div>
+
+              {/* Bulk Edit Section */}
+              {formData.days.length > 0 && (
+                <div className="bg-gray-800 p-4 rounded-lg border border-gray-600">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-lg font-semibold text-white">Bulk Bewerking</h3>
+                    <button
+                      onClick={() => setShowBulkEdit(!showBulkEdit)}
+                      className="px-3 py-1 bg-[#8BAE5A] text-[#181F17] rounded-md hover:bg-[#B6C948] text-sm"
+                    >
+                      {showBulkEdit ? 'Verberg' : 'Bulk Bewerken'}
+                    </button>
+                  </div>
+                  
+                  {showBulkEdit && (
+                    <div className="space-y-3">
+                      <p className="text-gray-300 text-sm">
+                        Pas Sets, Reps en Rust tijd toe op alle oefeningen in dit schema
+                      </p>
+                      <div className="grid grid-cols-3 gap-3">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-1">
+                            Sets
+                          </label>
+                          <input
+                            type="number"
+                            value={bulkEditData.sets}
+                            onChange={(e) => setBulkEditData(prev => ({ ...prev, sets: e.target.value }))}
+                            placeholder="Bijv. 4"
+                            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-[#8BAE5A] focus:ring-2"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-1">
+                            Reps
+                          </label>
+                          <input
+                            type="text"
+                            value={bulkEditData.reps}
+                            onChange={(e) => setBulkEditData(prev => ({ ...prev, reps: e.target.value }))}
+                            placeholder="Bijv. 8-12"
+                            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-[#8BAE5A] focus:ring-2"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-1">
+                            Rust (s)
+                          </label>
+                          <input
+                            type="text"
+                            value={bulkEditData.restTime}
+                            onChange={(e) => setBulkEditData(prev => ({ ...prev, restTime: e.target.value }))}
+                            placeholder="Bijv. 90"
+                            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-[#8BAE5A] focus:ring-2"
+                          />
+                        </div>
+                      </div>
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={applyBulkEdit}
+                          className="px-4 py-2 bg-[#8BAE5A] text-[#181F17] rounded-md hover:bg-[#B6C948] font-medium"
+                        >
+                          Toepassen op Alle Oefeningen
+                        </button>
+                        <button
+                          onClick={resetBulkEdit}
+                          className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-500"
+                        >
+                          Annuleren
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Days */}
               <div className="space-y-4">

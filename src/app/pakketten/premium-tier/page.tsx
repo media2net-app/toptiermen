@@ -172,7 +172,14 @@ export default function PremiumTierPage() {
       </section>
 
       {/* Checkout Section */}
-      <CheckoutSection packageData={packageData} />
+      <CheckoutSection 
+        packageId={packageData.id}
+        packageName={packageData.name}
+        packageDescription={packageData.description}
+        monthlyPrice={packageData.monthlyPrice}
+        yearlyPrice={packageData.yearlyPrice}
+        features={packageData.features}
+      />
 
       {/* Footer */}
       <footer className="py-12 px-4 sm:px-8 md:px-12 lg:px-20 border-t border-white/10">

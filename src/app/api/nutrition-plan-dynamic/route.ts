@@ -237,7 +237,31 @@ export async function GET(request: NextRequest) {
       }, { status: 400 });
     }
 
-    console.log('🔍 Generating dynamic nutrition plan:', { userId, planId });
+    console.log('🔍 Fetching dynamic plan:', { planId, userId });
+
+    // First check if user has a custom plan
+    const { data: customPlanData, error: customError } = await supabase
+      .from('user_nutrition_plans')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('plan_type', planId)
+      .order('updated_at', { ascending: false })
+      .limit(1);
+
+    if (!customError && customPlanData && customPlanData.length > 0) {
+      console.log('✅ Custom plan found, returning custom data');
+      const customPlan = customPlanData[0];
+      
+      // Return the custom plan data
+      return NextResponse.json({
+        success: true,
+        data: customPlan.week_plan,
+        isCustomPlan: true,
+        lastUpdated: customPlan.updated_at
+      });
+    }
+
+    console.log('ℹ️ No custom plan found, generating base plan');
 
     // Load ingredients from database
     const ingredientDatabase = await getIngredientsFromDatabase();
@@ -256,7 +280,6 @@ export async function GET(request: NextRequest) {
       }, { status: 404 });
     }
 
-    console.log('🥩 Generating dynamic carnivoor-droogtrainen plan for user:', userId);
 
     // Get user's nutrition profile
     const { data: userProfile, error: profileError } = await supabase
@@ -268,7 +291,6 @@ export async function GET(request: NextRequest) {
     // For testing purposes, create a default profile if not found
     let profile = userProfile;
     if (profileError || !userProfile) {
-      console.log('⚠️ User profile not found, using default profile for testing');
       profile = {
         user_id: userId,
         age: 30,
@@ -285,28 +307,18 @@ export async function GET(request: NextRequest) {
       };
     }
 
-    console.log('👤 User profile found:', {
-      targetCalories: profile.target_calories,
-      age: profile.age,
-      weight: profile.weight
-    });
 
     // Use the database plan - check for weekly_plan structure first
     let basePlan = planData.meals;
     if (planData.meals && planData.meals.weekly_plan) {
       basePlan = planData.meals.weekly_plan;
-      console.log('📊 Using weekly_plan structure for:', planData.name);
-    } else {
-      console.log('📊 Using legacy meals structure for:', planData.name);
     }
 
     // Calculate base plan calories from database plan
     const basePlanCalories = calculateBasePlanCaloriesFromDatabase(basePlan);
-    console.log('📊 Base plan average daily calories:', basePlanCalories);
 
     // Calculate scale factor - use user profile target calories vs plan target calories
     const scaleFactor = planData.target_calories > 0 ? profile.target_calories / planData.target_calories : 1;
-    console.log('⚖️ Scale factor:', scaleFactor, '(User:', profile.target_calories, 'vs Plan:', planData.target_calories, ')');
 
     // Generate scaled meal plan
     const scaledPlan = {};
@@ -321,7 +333,6 @@ export async function GET(request: NextRequest) {
       
       // Check if this day has the maandag format (with meals object)
       if (dayPlan.meals && typeof dayPlan.meals === 'object') {
-        console.log(`📊 Processing ${day} with meals object format`);
         mealTypes = Object.keys(dayPlan.meals);
         mealTypes.forEach(mealType => {
           const meal = dayPlan.meals[mealType];
@@ -363,7 +374,6 @@ export async function GET(request: NextRequest) {
         });
       } else {
         // Process direct meal structure (weekly_plan format for other days)
-        console.log(`📊 Processing ${day} with direct meal format`);
         mealTypes = Object.keys(dayPlan).filter(key => 
           !['dailyTotals', 'time'].includes(key)
         );
@@ -578,11 +588,6 @@ function scaleIngredientAmounts(ingredients, scaleFactor, targetNutrition: any =
     const carbsDiff = targetNutrition.carbs - currentNutrition.carbs;
     const fatDiff = targetNutrition.fat - currentNutrition.fat;
     
-    console.log('🎯 Macro optimization:', {
-      current: currentNutrition,
-      target: targetNutrition,
-      differences: { calorieDiff, proteinDiff, carbsDiff, fatDiff }
-    });
     
     // If we're within 5% of targets, no optimization needed
     const caloriePercentage = Math.abs(calorieDiff / targetNutrition.calories * 100);
@@ -591,7 +596,6 @@ function scaleIngredientAmounts(ingredients, scaleFactor, targetNutrition: any =
     const fatPercentage = Math.abs(fatDiff / targetNutrition.fat * 100);
     
     if (caloriePercentage <= 5 && proteinPercentage <= 5 && carbsPercentage <= 5 && fatPercentage <= 5) {
-      console.log('✅ Already within 5% of targets, no optimization needed');
       return scaledIngredients;
     }
     

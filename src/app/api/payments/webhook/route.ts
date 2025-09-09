@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-const MOLLIE_API_KEY = process.env.MOLLIE_API_KEY;
+const MOLLIE_API_KEY = process.env.MOLLIE_LIVE_KEY || process.env.MOLLIE_TEST_KEY || process.env.MOLLIE_API_KEY;
 const MOLLIE_API_URL = 'https://api.mollie.com/v2';
 
 const supabase = createClient(

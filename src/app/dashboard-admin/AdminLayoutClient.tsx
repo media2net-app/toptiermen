@@ -37,7 +37,8 @@ import {
   TicketIcon,
   TagIcon,
   SparklesIcon,
-  StarIcon as CrownIcon
+  StarIcon as CrownIcon,
+  CheckCircleIcon
 } from '@heroicons/react/24/outline';
 import { SwipeIndicator } from '@/components/ui';
 import SessionMonitor from '@/components/SessionMonitor';
@@ -81,9 +82,9 @@ const SidebarContent = ({ pathname }: { pathname: string }) => {
       type: 'section',
       items: [
         { 
-          label: 'Basic Tier', 
+          label: 'Prelaunch Korting', 
           icon: TagIcon, 
-          href: '/pakketten/basic-tier',
+          href: '/pakketten/prelaunchkorting',
           external: true
         },
         { 
@@ -96,6 +97,24 @@ const SidebarContent = ({ pathname }: { pathname: string }) => {
           label: 'Lifetime Tier', 
           icon: CrownIcon, 
           href: '/pakketten/lifetime-tier',
+          external: true
+        },
+        { 
+          label: 'Basic Tier Success', 
+          icon: CheckCircleIcon, 
+          href: '/payment/success?package=basic-tier&period=12months',
+          external: true
+        },
+        { 
+          label: 'Premium Tier Success', 
+          icon: CheckCircleIcon, 
+          href: '/payment/success?package=premium-tier&period=12months',
+          external: true
+        },
+        { 
+          label: 'Lifetime Tier Success', 
+          icon: CheckCircleIcon, 
+          href: '/payment/success?package=lifetime-tier&period=lifetime',
           external: true
         }
       ]

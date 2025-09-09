@@ -23,7 +23,7 @@ function PaymentSuccessContent() {
       setPaymentData({
         packageId,
         period,
-        amount: period === 'yearly' ? 508 : 282,
+        amount: 1, // Test betaling van €1
         status: 'success'
       });
       setLoading(false);
@@ -43,9 +43,13 @@ function PaymentSuccessContent() {
     if (id === 'lifetime') {
       return 'Levenslang toegang tot alle content en features';
     }
-    return period === 'yearly' 
-      ? 'Jaarlijkse toegang met 10% korting'
-      : '6 maanden toegang tot alle content';
+    if (period === 'yearly' || period === '12months') {
+      return '12 maanden toegang tot alle content met 10% korting';
+    }
+    if (period === '6months') {
+      return '6 maanden toegang tot alle content';
+    }
+    return '6 maanden toegang tot alle content';
   };
 
   if (loading) {
@@ -88,7 +92,9 @@ function PaymentSuccessContent() {
                 <div className="flex justify-between">
                   <span className="text-[#8BAE5A]">Periode:</span>
                   <span className="text-white font-medium">
-                    {period === 'yearly' ? '1 jaar' : '6 maanden'}
+                    {period === 'yearly' ? '1 jaar' : 
+                     period === '12months' ? '12 maanden' : 
+                     period === '6months' ? '6 maanden' : '6 maanden'}
                   </span>
                 </div>
                 <div className="flex justify-between">
@@ -111,21 +117,39 @@ function PaymentSuccessContent() {
           {/* Next Steps */}
           <div className="bg-[#1A2313] rounded-lg p-6 mb-8">
             <h3 className="text-lg font-semibold text-white mb-4">Wat nu?</h3>
+            
+            {/* Launch Date Banner */}
+            <div className="bg-gradient-to-r from-orange-500/20 to-orange-600/20 border border-orange-500/50 rounded-lg p-4 mb-6">
+              <div className="text-center">
+                <div className="flex items-center justify-center space-x-2 mb-2">
+                  <span className="text-2xl">🚀</span>
+                  <span className="text-orange-400 font-bold text-lg">PLATFORM LANCERING</span>
+                  <span className="text-2xl">⚡</span>
+                </div>
+                <p className="text-orange-100 text-lg font-semibold">10 september 12:00</p>
+                <p className="text-orange-200 text-sm mt-1">Het platform gaat live!</p>
+              </div>
+            </div>
+
             <div className="space-y-3 text-left">
               <div className="flex items-center gap-3">
                 <div className="w-6 h-6 bg-[#8BAE5A] rounded-full flex items-center justify-center text-[#181F17] text-sm font-bold">1</div>
-                <span className="text-[#8BAE5A]">Je ontvangt een bevestigingsmail met je inloggegevens</span>
+                <span className="text-[#8BAE5A]"><strong>10 september 12:00</strong> - Het platform gaat live</span>
               </div>
               <div className="flex items-center gap-3">
                 <div className="w-6 h-6 bg-[#8BAE5A] rounded-full flex items-center justify-center text-[#181F17] text-sm font-bold">2</div>
-                <span className="text-[#8BAE5A]">Log in op het platform en voltooi je profiel</span>
+                <span className="text-[#8BAE5A]">Je ontvangt <strong>automatisch</strong> je login gegevens op het email adres dat je hebt ingevuld bij de checkout</span>
               </div>
               <div className="flex items-center gap-3">
                 <div className="w-6 h-6 bg-[#8BAE5A] rounded-full flex items-center justify-center text-[#181F17] text-sm font-bold">3</div>
-                <span className="text-[#8BAE5A]">Start met je eerste training en voedingsplan</span>
+                <span className="text-[#8BAE5A]">Log in op het platform en voltooi je profiel</span>
               </div>
               <div className="flex items-center gap-3">
                 <div className="w-6 h-6 bg-[#8BAE5A] rounded-full flex items-center justify-center text-[#181F17] text-sm font-bold">4</div>
+                <span className="text-[#8BAE5A]">Start met je eerste training en voedingsplan</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-6 h-6 bg-[#8BAE5A] rounded-full flex items-center justify-center text-[#181F17] text-sm font-bold">5</div>
                 <span className="text-[#8BAE5A]">Word onderdeel van de Brotherhood community</span>
               </div>
             </div>

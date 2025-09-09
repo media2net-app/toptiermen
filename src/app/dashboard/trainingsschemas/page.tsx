@@ -244,41 +244,55 @@ function TrainingschemasContent() {
         'outdoor': 'Outdoor'
       };
       
-      // Filter by training goal based on schema name - STRICT matching
+      // Filter by training goal based on schema name - FLEXIBLE matching
       let goalMatch = false;
       const schemaName = schema.name.toLowerCase();
       
       if (profile.training_goal === 'spiermassa') {
-        // Only show schemas with 'spiermassa' in the name
-        goalMatch = schemaName.includes('spiermassa');
+        // Show schemas with 'spiermassa', 'split', or general gym schemas
+        goalMatch = schemaName.includes('spiermassa') || 
+                   schemaName.includes('split') || 
+                   schemaName.includes('gym') ||
+                   schemaName.includes('training');
       } else if (profile.training_goal === 'kracht_uithouding') {
-        // Only show schemas with 'conditie' in the name (not kracht)
-        goalMatch = schemaName.includes('conditie');
+        // Show schemas with 'conditie', 'uithouding', or general fitness
+        goalMatch = schemaName.includes('conditie') || 
+                   schemaName.includes('uithouding') ||
+                   schemaName.includes('fitness') ||
+                   schemaName.includes('cardio');
       } else if (profile.training_goal === 'power_kracht') {
-        // Only show schemas with 'kracht' in the name
-        goalMatch = schemaName.includes('kracht');
+        // Show schemas with 'kracht', 'power', or strength-related
+        goalMatch = schemaName.includes('kracht') || 
+                   schemaName.includes('power') ||
+                   schemaName.includes('strength') ||
+                   schemaName.includes('maximale');
       }
       
-      // Filter by equipment type - STRICT matching
+      // Filter by equipment type - FLEXIBLE matching
       let equipmentMatch = false;
       const schemaEquipment = schema.category?.toLowerCase();
       const userEquipment = profile.equipment_type?.toLowerCase();
       
       if (userEquipment === 'gym') {
-        // Gym users can only use gym schemas
-        equipmentMatch = schemaEquipment === 'gym';
+        // Gym users can use gym schemas and most general schemas
+        equipmentMatch = schemaEquipment === 'gym' || 
+                        schemaEquipment === 'home' || 
+                        !schemaEquipment; // Allow schemas without specific equipment
       } else if (userEquipment === 'home') {
-        // Home users can use home and bodyweight schemas
-        equipmentMatch = ['home', 'bodyweight'].includes(schemaEquipment || '');
+        // Home users can use home, bodyweight, and gym schemas
+        equipmentMatch = ['home', 'bodyweight', 'gym'].includes(schemaEquipment || '') ||
+                        !schemaEquipment; // Allow schemas without specific equipment
       } else if (userEquipment === 'outdoor') {
-        // Outdoor users can use outdoor and bodyweight schemas
-        equipmentMatch = ['outdoor', 'bodyweight'].includes(schemaEquipment || '');
+        // Outdoor users can use outdoor, bodyweight, and home schemas
+        equipmentMatch = ['outdoor', 'bodyweight', 'home'].includes(schemaEquipment || '') ||
+                        !schemaEquipment; // Allow schemas without specific equipment
       }
       
-      // Filter by training frequency - EXACT match with number of days
+      // Filter by training frequency - FLEXIBLE matching (±1 day tolerance)
       const schemaDays = schema.training_schema_days?.length || 0;
       const userFrequency = profile.training_frequency;
-      const frequencyMatch = schemaDays === userFrequency;
+      const frequencyMatch = Math.abs(schemaDays - userFrequency) <= 1 || 
+                            schemaDays === userFrequency;
       
       console.log(`📅 Schema "${schema.name}": ${schemaDays} days vs user frequency ${userFrequency} (${frequencyMatch})`);
       
@@ -289,6 +303,30 @@ function TrainingschemasContent() {
     });
     
     console.log('✅ Filtered schemas:', filtered.length);
+    
+    // If no schemas match the strict criteria, show some general schemas as fallback
+    if (filtered.length === 0) {
+      console.log('⚠️ No schemas match strict criteria, showing fallback schemas');
+      const fallbackSchemas = schemas.filter(schema => {
+        const schemaEquipment = schema.category?.toLowerCase();
+        const userEquipment = profile.equipment_type?.toLowerCase();
+        
+        // Show schemas that match equipment type at least
+        if (userEquipment === 'gym') {
+          return schemaEquipment === 'gym' || !schemaEquipment;
+        } else if (userEquipment === 'home') {
+          return ['home', 'bodyweight', 'gym'].includes(schemaEquipment || '') || !schemaEquipment;
+        } else if (userEquipment === 'outdoor') {
+          return ['outdoor', 'bodyweight', 'home'].includes(schemaEquipment || '') || !schemaEquipment;
+        }
+        
+        return true; // Show all if equipment type is unknown
+      }).slice(0, 5); // Limit to 5 fallback schemas
+      
+      console.log('🔄 Showing fallback schemas:', fallbackSchemas.length);
+      return fallbackSchemas;
+    }
+    
     return filtered;
   };
 
@@ -492,7 +530,11 @@ function TrainingschemasContent() {
   };
 
   const handleViewDynamicPlan = (schemaId: string, schemaName: string) => {
+    console.log('🔍 handleViewDynamicPlan called with:', { schemaId, schemaName });
+    console.log('👤 User training profile:', userTrainingProfile);
+    
     if (!userTrainingProfile) {
+      console.log('❌ No user training profile found');
       toast.error('Vul eerst je trainingsprofiel in om het schema te kunnen bekijken');
       setShowRequiredProfile(true);
       return;
@@ -500,6 +542,7 @@ function TrainingschemasContent() {
     
     console.log('✅ Setting viewingDynamicPlan to:', { schemaId, schemaName });
     setViewingDynamicPlan({ schemaId, schemaName });
+    console.log('🔄 State updated, should show DynamicTrainingPlanView component');
   };
 
   const handleBackFromDynamicPlan = () => {

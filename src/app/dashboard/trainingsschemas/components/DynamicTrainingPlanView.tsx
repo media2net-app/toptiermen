@@ -59,30 +59,48 @@ export default function DynamicTrainingPlanView({ schemaId, schemaName, userId, 
     const fetchSchemaData = async () => {
       try {
         setLoading(true);
+        console.log('🔍 Fetching schema data for ID:', schemaId);
+        
         const response = await fetch(`/api/training-schema-detail/${schemaId}`);
+        console.log('📡 API Response status:', response.status);
         
         if (!response.ok) {
-          throw new Error('Failed to fetch schema details');
+          const errorText = await response.text();
+          console.error('❌ API Error response:', errorText);
+          throw new Error(`Failed to fetch schema details: ${response.status} ${errorText}`);
         }
         
         const data = await response.json();
+        console.log('📋 API Response data:', data);
         
         if (data.success && data.schema) {
           setSchemaData(data.schema);
-          console.log('✅ Schema data loaded:', data.schema.name);
+          console.log('✅ Schema data loaded successfully:', {
+            name: data.schema.name,
+            days: data.schema.training_schema_days?.length || 0,
+            totalExercises: data.schema.training_schema_days?.reduce((total: number, day: any) => 
+              total + (day.training_schema_exercises?.length || 0), 0) || 0
+          });
         } else {
-          throw new Error('Invalid response format');
+          console.error('❌ Invalid response format:', data);
+          throw new Error('Invalid response format - missing success or schema data');
         }
       } catch (error) {
         console.error('❌ Error fetching schema data:', error);
-        setError('Kon schema details niet laden');
+        setError(`Kon schema details niet laden: ${error.message}`);
         toast.error('Kon schema details niet laden');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchSchemaData();
+    if (schemaId) {
+      fetchSchemaData();
+    } else {
+      console.error('❌ No schemaId provided');
+      setError('Geen schema ID opgegeven');
+      setLoading(false);
+    }
   }, [schemaId]);
 
   const openVideoModal = (exerciseName: string, videoUrl: string) => {

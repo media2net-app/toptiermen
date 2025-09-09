@@ -162,8 +162,6 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
       setLoading(true);
       setError(null);
       
-      console.log('🔍 Fetching dynamic plan:', { planId, userId });
-      
       const response = await fetch(`/api/nutrition-plan-dynamic?planId=${planId}&userId=${userId}`);
       
       if (!response.ok) {
@@ -174,7 +172,6 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
       const data = await response.json();
       
       if (data.success) {
-        console.log('✅ Dynamic plan loaded successfully:', data.data);
         setPlanData(data.data);
       } else {
         throw new Error(data.error || 'Failed to load dynamic plan');
@@ -182,7 +179,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
       
     } catch (error) {
       console.error('❌ Error fetching dynamic plan:', error);
-      setError(error.message);
+      setError(`Kon voedingsplan niet laden: ${error.message}`);
       toast.error('Fout bij laden voedingsplan');
     } finally {
       setLoading(false);
@@ -190,7 +187,9 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
   };
 
   useEffect(() => {
-    fetchDynamicPlan();
+    if (planId && userId && userId !== 'anonymous') {
+      fetchDynamicPlan();
+    }
   }, [planId, userId]);
 
   const handleEditMeal = (day: string, mealType: string) => {
@@ -296,6 +295,12 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
     });
   };
 
+  // Check if a specific meal has been modified
+  const isMealModified = (day: string, mealType: string) => {
+    const mealKey = `${day}-${mealType}`;
+    return modifiedMeals.has(mealKey);
+  };
+
   const saveCustomPlan = async (customData: PlanData) => {
     try {
       // Check if there are still modifications after potential reversions
@@ -338,15 +343,15 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
 
   const resetToOriginalPlan = async () => {
     try {
-      // Delete custom plan from database
-      const response = await fetch('/api/custom-nutrition-plans', {
+      // Delete custom plan from user_nutrition_plans table
+      const response = await fetch('/api/nutrition-plan-save', {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           userId,
-          basePlanId: planId
+          planId: planId
         }),
       });
 
@@ -358,11 +363,62 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
       setCustomPlanData(null);
       setModifiedMeals(new Set());
       
+      // Reload the plan to get the original version
+      await fetchDynamicPlan();
+      
       toast.success('Plan gereset naar origineel!');
       console.log('✅ Plan reset to original');
     } catch (error) {
       console.error('❌ Error resetting plan:', error);
       toast.error('Fout bij resetten van plan');
+    }
+  };
+
+  const selectThisPlan = async () => {
+    try {
+      // Get current plan data (either custom or original)
+      const currentPlanData = customPlanData || planData;
+      
+      if (!currentPlanData) {
+        toast.error('Geen plan data beschikbaar');
+        return;
+      }
+
+      console.log('💾 Saving and selecting plan:', { 
+        hasModifications: modifiedMeals.size > 0, 
+        hasCustomData: !!customPlanData,
+        planId 
+      });
+
+      // Save this plan as active for the user (this will store in user_nutrition_plans)
+      const response = await fetch('/api/nutrition-plan-save', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId,
+          planId: planId,
+          customizedPlan: currentPlanData
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to select plan');
+      }
+
+      const result = await response.json();
+      console.log('✅ Plan selected and saved successfully:', result);
+      
+      toast.success('Plan geselecteerd en opgeslagen!');
+      
+      // Navigate back to overview
+      onBack();
+      
+    } catch (error) {
+      console.error('❌ Error selecting plan:', error);
+      toast.error('Fout bij selecteren van plan: ' + error.message);
     }
   };
 
@@ -438,6 +494,56 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
         break;
       default:
         multiplier = amount / 100;
+    }
+
+    return {
+      calories: Math.round(nutritionData.calories_per_100g * multiplier * 10) / 10,
+      protein: Math.round(nutritionData.protein_per_100g * multiplier * 10) / 10,
+      carbs: Math.round(nutritionData.carbs_per_100g * multiplier * 10) / 10,
+      fat: Math.round(nutritionData.fat_per_100g * multiplier * 10) / 10
+    };
+  };
+
+  // Calculate original ingredient values before scaling (for debug mode)
+  const calculateOriginalIngredientNutrition = (ingredient: any) => {
+    const amount = ingredient.amount || 0;
+    const unit = ingredient.unit || 'per_100g';
+    const name = ingredient.name || '';
+    const scaleFactor = planData?.scalingInfo?.scaleFactor || 1;
+    
+    // Get nutrition data from database
+    const nutritionData = ingredientDatabase[name];
+    if (!nutritionData) {
+      return { calories: 0, protein: 0, carbs: 0, fat: 0 };
+    }
+
+    // Calculate original amount before scaling
+    const originalAmount = scaleFactor !== 1 ? amount / scaleFactor : amount;
+
+    // Convert based on unit type
+    let multiplier = 1;
+    switch (unit) {
+      case 'per_100g':
+        multiplier = originalAmount / 100;
+        break;
+      case 'per_piece':
+      case 'stuk':
+        multiplier = originalAmount; // For pieces, use amount directly
+        break;
+      case 'per_ml':
+        multiplier = originalAmount / 100; // Assuming 1ml = 1g for liquids
+        break;
+      case 'per_tbsp':
+        multiplier = (originalAmount * 15) / 100; // 1 tbsp = 15ml
+        break;
+      case 'per_tsp':
+        multiplier = (originalAmount * 5) / 100; // 1 tsp = 5ml
+        break;
+      case 'per_cup':
+        multiplier = (originalAmount * 240) / 100; // 1 cup = 240ml
+        break;
+      default:
+        multiplier = originalAmount / 100;
     }
 
     return {
@@ -531,10 +637,18 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
   const getMealData = (day: string, mealType: string) => {
     // Use custom data if available, otherwise use original plan data
     const dataSource = customPlanData || planData;
-    if (!dataSource?.weekPlan[day]) return null;
+    
+    if (!dataSource?.weekPlan?.[day]) {
+      return null;
+    }
+    
     const mealData = dataSource.weekPlan[day][mealType as keyof DayPlan];
+    
     // Return null if it's dailyTotals (MealNutrition) instead of a Meal
-    if (mealType === 'dailyTotals' || !('ingredients' in mealData)) return null;
+    if (mealType === 'dailyTotals' || !mealData || !('ingredients' in mealData)) {
+      return null;
+    }
+    
     return mealData as Meal;
   };
 
@@ -635,7 +749,10 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                   Debug
                 </button>
               )}
-            <button className="px-6 py-3 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold">
+            <button 
+              onClick={selectThisPlan}
+              className="px-6 py-3 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold"
+            >
               Selecteer dit plan
             </button>
             </div>
@@ -650,6 +767,35 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
             <h3 className="text-lg font-bold text-[#8BAE5A] mb-4">🔍 Debug Informatie</h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* Plan Status */}
+              <div className="bg-[#181F17] border border-[#3A4D23] rounded-lg p-4">
+                <h4 className="text-white font-semibold mb-3">📋 Plan Status</h4>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-300">Plan Type:</span>
+                    <span className={`font-mono ${customPlanData ? 'text-orange-400' : 'text-green-400'}`}>
+                      {customPlanData ? 'CUSTOM' : 'ORIGINEEL'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-300">Aangepaste Maaltijden:</span>
+                    <span className={`font-mono ${modifiedMeals.size > 0 ? 'text-orange-400' : 'text-green-400'}`}>
+                      {modifiedMeals.size}
+                    </span>
+                  </div>
+                  {modifiedMeals.size > 0 && (
+                    <div className="mt-2">
+                      <span className="text-gray-300 text-xs">Aangepast:</span>
+                      <div className="text-xs text-orange-400 mt-1">
+                        {Array.from(modifiedMeals).map(meal => (
+                          <div key={meal} className="truncate">{meal}</div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
               {/* Scaling Info */}
               <div className="bg-[#181F17] border border-[#3A4D23] rounded-lg p-4">
                 <h4 className="text-white font-semibold mb-3">⚖️ Scaling Informatie</h4>
@@ -1251,6 +1397,11 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                   <h4 className="text-lg font-bold text-white flex items-center">
                     <ClockIcon className="w-5 h-5 text-[#8BAE5A] mr-2" />
                     {MEAL_TYPES_NL[mealType as keyof typeof MEAL_TYPES_NL]}
+                    {isAdmin && showDebugPanel && isMealModified(selectedDay, mealType) && (
+                      <span className="ml-2 px-2 py-1 text-xs bg-orange-500 text-white rounded-full">
+                        AANGEPAST
+                      </span>
+                    )}
                     <span className="ml-4 text-sm text-gray-400">
                       {meal.nutrition?.calories || 0} kcal
                     </span>
@@ -1309,6 +1460,11 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                                   min="0"
                                   step="1"
                                 />
+                                {isAdmin && showDebugPanel && (planData?.scalingInfo?.scaleFactor || 1) !== 1 && (
+                                  <div className="text-green-400 text-xs mt-1">
+                                    ({((ingredient.amount || 0) / (planData?.scalingInfo?.scaleFactor || 1)).toFixed(1)})
+                                  </div>
+                                )}
                               </td>
                               <td className="py-3 text-center text-gray-300">
                                 {ingredient.unit === 'per_100g' ? 'g' :
@@ -1321,15 +1477,35 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                               </td>
                               <td className="py-3 text-center text-white">
                                 {calculateIngredientNutrition(ingredient).calories.toFixed(1)}
+                                {isAdmin && showDebugPanel && (planData?.scalingInfo?.scaleFactor || 1) !== 1 && (
+                                  <div className="text-green-400 text-xs">
+                                    ({calculateOriginalIngredientNutrition(ingredient).calories.toFixed(1)})
+                                  </div>
+                                )}
                               </td>
                               <td className="py-3 text-center text-white">
                                 {calculateIngredientNutrition(ingredient).protein.toFixed(1)}g
+                                {isAdmin && showDebugPanel && (planData?.scalingInfo?.scaleFactor || 1) !== 1 && (
+                                  <div className="text-green-400 text-xs">
+                                    ({calculateOriginalIngredientNutrition(ingredient).protein.toFixed(1)}g)
+                                  </div>
+                                )}
                               </td>
                               <td className="py-3 text-center text-white">
                                 {calculateIngredientNutrition(ingredient).carbs.toFixed(1)}g
+                                {isAdmin && showDebugPanel && (planData?.scalingInfo?.scaleFactor || 1) !== 1 && (
+                                  <div className="text-green-400 text-xs">
+                                    ({calculateOriginalIngredientNutrition(ingredient).carbs.toFixed(1)}g)
+                                  </div>
+                                )}
                               </td>
                               <td className="py-3 text-center text-white">
                                 {calculateIngredientNutrition(ingredient).fat.toFixed(1)}g
+                                {isAdmin && showDebugPanel && (planData?.scalingInfo?.scaleFactor || 1) !== 1 && (
+                                  <div className="text-green-400 text-xs">
+                                    ({calculateOriginalIngredientNutrition(ingredient).fat.toFixed(1)}g)
+                                  </div>
+                                )}
                               </td>
                             </tr>
                           ))}

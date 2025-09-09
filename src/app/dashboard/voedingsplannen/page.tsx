@@ -378,12 +378,10 @@ export default function VoedingsplannenPage() {
     }
     
     // All plans with meals data support dynamic viewing
-    console.log('✅ Setting viewingDynamicPlan to:', { planId, planName });
     setViewingDynamicPlan({ planId, planName });
   };
 
   const handleBackFromDynamicPlan = () => {
-    console.log('🔄 Going back from dynamic plan view');
     setViewingDynamicPlan(null);
     // Refresh the active plan selection to show the updated selection
     checkUserNutritionProfile();
@@ -578,6 +576,19 @@ export default function VoedingsplannenPage() {
     }
   }, [user?.id, onboardingStatus, showOnboardingStep4]);
 
+  // Auto-refresh profile data when user returns to page (e.g., after editing profile elsewhere)
+  useEffect(() => {
+    const handleFocus = () => {
+      if (user?.id && userNutritionProfile) {
+        console.log('🔄 Page focused, refreshing nutrition profile data');
+        checkUserNutritionProfile();
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [user?.id, userNutritionProfile]);
+
   // Fetch plans when user profile changes or initially
   useEffect(() => {
     if (user?.id) {
@@ -756,7 +767,7 @@ export default function VoedingsplannenPage() {
               <DynamicPlanViewNew
                 planId={viewingDynamicPlan.planId}
                 planName={viewingDynamicPlan.planName}
-                userId={user?.id || ''}
+                userId={user?.id || 'anonymous'}
                 onBack={handleBackFromDynamicPlan}
               />
             </motion.div>
@@ -903,22 +914,34 @@ export default function VoedingsplannenPage() {
                     Jouw Dagelijkse Behoefte
                   </h3>
                   {!showOnboardingStep4 && (
-                    <button
-                      onClick={() => {
-                        // Pre-fill calculator with existing data
-                        setCalculatorData({
-                          age: userNutritionProfile.age?.toString() || '',
-                          weight: userNutritionProfile.weight?.toString() || '',
-                          height: userNutritionProfile.height?.toString() || '',
-                          activityLevel: userNutritionProfile.activity_level || 'moderate',
-                          goal: userNutritionProfile.goal || ''
-                        });
-                        setShowRequiredIntake(true);
-                      }}
-                      className="text-[#8BAE5A] hover:text-[#B6C948] text-sm font-semibold transition-colors"
-                    >
-                      ✏️ Bewerken
-                    </button>
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={checkUserNutritionProfile}
+                        className="flex items-center gap-2 px-3 py-1.5 bg-[#3A4D23] text-white rounded-lg hover:bg-[#4A5D33] transition-colors text-sm"
+                        title="Ververs profiel data"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        Ververs
+                      </button>
+                      <button
+                        onClick={() => {
+                          // Pre-fill calculator with existing data
+                          setCalculatorData({
+                            age: userNutritionProfile.age?.toString() || '',
+                            weight: userNutritionProfile.weight?.toString() || '',
+                            height: userNutritionProfile.height?.toString() || '',
+                            activityLevel: userNutritionProfile.activity_level || 'moderate',
+                            goal: userNutritionProfile.goal || ''
+                          });
+                          setShowRequiredIntake(true);
+                        }}
+                        className="text-[#8BAE5A] hover:text-[#B6C948] text-sm font-semibold transition-colors"
+                      >
+                        ✏️ Bewerken
+                      </button>
+                    </div>
                   )}
                 </div>
                 <div className="grid md:grid-cols-4 gap-4">
@@ -931,8 +954,16 @@ export default function VoedingsplannenPage() {
                     <h4 className="text-[#8BAE5A] font-semibold mb-1 text-sm">Eiwitten</h4>
                     {selectedNutritionPlan ? (() => {
                       const selectedPlan = nutritionPlans.find(p => p.plan_id === selectedNutritionPlan);
-                      const macroValues = selectedPlan ? calculateMacroValues(selectedPlan, userNutritionProfile.dailyCalories) : { protein: 0, carbs: 0, fats: 0 };
-                      return <p className="text-2xl font-bold text-white">{macroValues.protein}g</p>;
+                      if (selectedPlan) {
+                        // Use direct target values if available, otherwise calculate from percentages
+                        if (selectedPlan.target_protein) {
+                          return <p className="text-2xl font-bold text-white">{selectedPlan.target_protein}g</p>;
+                        } else {
+                          const macroValues = calculateMacroValues(selectedPlan, userNutritionProfile.dailyCalories);
+                          return <p className="text-2xl font-bold text-white">{macroValues.protein}g</p>;
+                        }
+                      }
+                      return <p className="text-sm text-gray-500">Plan niet gevonden</p>;
                     })() : (
                       <p className="text-sm text-gray-500">Selecteer eerst plan</p>
                     )}
@@ -942,8 +973,16 @@ export default function VoedingsplannenPage() {
                     <h4 className="text-[#8BAE5A] font-semibold mb-1 text-sm">Koolhydraten</h4>
                     {selectedNutritionPlan ? (() => {
                       const selectedPlan = nutritionPlans.find(p => p.plan_id === selectedNutritionPlan);
-                      const macroValues = selectedPlan ? calculateMacroValues(selectedPlan, userNutritionProfile.dailyCalories) : { protein: 0, carbs: 0, fats: 0 };
-                      return <p className="text-2xl font-bold text-white">{macroValues.carbs}g</p>;
+                      if (selectedPlan) {
+                        // Use direct target values if available, otherwise calculate from percentages
+                        if (selectedPlan.target_carbs) {
+                          return <p className="text-2xl font-bold text-white">{selectedPlan.target_carbs}g</p>;
+                        } else {
+                          const macroValues = calculateMacroValues(selectedPlan, userNutritionProfile.dailyCalories);
+                          return <p className="text-2xl font-bold text-white">{macroValues.carbs}g</p>;
+                        }
+                      }
+                      return <p className="text-sm text-gray-500">Plan niet gevonden</p>;
                     })() : (
                       <p className="text-sm text-gray-500">Selecteer eerst plan</p>
                     )}
@@ -953,8 +992,16 @@ export default function VoedingsplannenPage() {
                     <h4 className="text-[#8BAE5A] font-semibold mb-1 text-sm">Vetten</h4>
                     {selectedNutritionPlan ? (() => {
                       const selectedPlan = nutritionPlans.find(p => p.plan_id === selectedNutritionPlan);
-                      const macroValues = selectedPlan ? calculateMacroValues(selectedPlan, userNutritionProfile.dailyCalories) : { protein: 0, carbs: 0, fats: 0 };
-                      return <p className="text-2xl font-bold text-white">{macroValues.fats}g</p>;
+                      if (selectedPlan) {
+                        // Use direct target values if available, otherwise calculate from percentages
+                        if (selectedPlan.target_fat) {
+                          return <p className="text-2xl font-bold text-white">{selectedPlan.target_fat}g</p>;
+                        } else {
+                          const macroValues = calculateMacroValues(selectedPlan, userNutritionProfile.dailyCalories);
+                          return <p className="text-2xl font-bold text-white">{macroValues.fats}g</p>;
+                        }
+                      }
+                      return <p className="text-sm text-gray-500">Plan niet gevonden</p>;
                     })() : (
                       <p className="text-sm text-gray-500">Selecteer eerst plan</p>
                     )}
@@ -977,6 +1024,26 @@ export default function VoedingsplannenPage() {
                         )}
                       </div>
                     )}
+                    {selectedNutritionPlan && (() => {
+                      const selectedPlan = nutritionPlans.find(p => p.plan_id === selectedNutritionPlan);
+                      if (selectedPlan && (selectedPlan.protein_percentage || selectedPlan.carbs_percentage || selectedPlan.fat_percentage)) {
+                        return (
+                          <div className="mt-2 pt-2 border-t border-[#3A4D23]">
+                            <div className="text-xs text-gray-500">
+                              <span className="text-gray-400">Macro verdeling: </span>
+                              <span className="text-[#8BAE5A] font-semibold">
+                                {selectedPlan.protein_percentage ? `${selectedPlan.protein_percentage}% Eiwit` : ''}
+                                {selectedPlan.protein_percentage && selectedPlan.carbs_percentage ? ' • ' : ''}
+                                {selectedPlan.carbs_percentage ? `${selectedPlan.carbs_percentage}% Koolhydraten` : ''}
+                                {selectedPlan.carbs_percentage && selectedPlan.fat_percentage ? ' • ' : ''}
+                                {selectedPlan.fat_percentage ? `${selectedPlan.fat_percentage}% Vet` : ''}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      }
+                      return null;
+                    })()}
                   </div>
                 </div>
               </div>

@@ -330,24 +330,44 @@ export default function TrainingscentrumBeheer() {
     setLoadingSchemas(true);
     setErrorSchemas(null);
     
-    const maxRetries = 2; // Reduced retries for faster failure
-    const retryDelay = 500 * (retryCount + 1); // Faster retry
+    const maxRetries = 1; // Reduced retries for faster failure
+    const retryDelay = 1000; // Single retry delay
     
     try {
       console.log(`🔄 Fetching training schemas (attempt ${retryCount + 1}/${maxRetries + 1})...`);
       
-      // Add timeout to prevent hanging
-      const timeoutPromise = new Promise<never>((_, reject) => 
-        setTimeout(() => reject(new Error('Request timeout')), 10000)
-      );
-      
-      const fetchPromise = supabase
+      // Simplified query - only get essential data first
+      const { data, error } = await supabase
         .from('training_schemas')
-        .select(`*,training_schema_days (id,day_number,name,training_schema_exercises (id,exercise_id,exercise_name,sets,reps,rest_time,order_index))`)
-        .order('created_at', { ascending: false });
-      
-      const result = await Promise.race([fetchPromise, timeoutPromise]);
-      const { data, error } = result;
+        .select(`
+          id,
+          name,
+          description,
+          category,
+          difficulty,
+          status,
+          training_goal,
+          rep_range,
+          rest_time_seconds,
+          created_at,
+          training_schema_days (
+            id,
+            day_number,
+            name,
+            description,
+            training_schema_exercises (
+              id,
+              exercise_id,
+              exercise_name,
+              sets,
+              reps,
+              rest_time,
+              order_index
+            )
+          )
+        `)
+        .order('created_at', { ascending: false })
+        .limit(50); // Limit to prevent overwhelming queries
         
       if (error) {
         console.error('❌ Error fetching schemas:', error);
@@ -356,15 +376,24 @@ export default function TrainingscentrumBeheer() {
       
       console.log(`✅ Successfully fetched ${data?.length || 0} training schemas`);
       
-      // Sort schemas by number of days (ascending) and sort days within each schema by day_number
-      const sortedSchemas = (data || []).map(schema => ({
-        ...schema,
-        training_schema_days: (schema.training_schema_days || []).sort((a, b) => (a.day_number || 0) - (b.day_number || 0))
-      })).sort((a, b) => {
-        const daysA = a.training_schema_days?.length || 0;
-        const daysB = b.training_schema_days?.length || 0;
-        return daysA - daysB;
-      });
+      // Sort schemas by number of days (ascending) and then by creation date
+      const sortedSchemas = (data || [])
+        .map(schema => ({
+          ...schema,
+          training_schema_days: (schema.training_schema_days || []).sort((a, b) => (a.day_number || 0) - (b.day_number || 0))
+        }))
+        .sort((a, b) => {
+          const aDays = a.training_schema_days?.length || 0;
+          const bDays = b.training_schema_days?.length || 0;
+          
+          // First sort by number of days (ascending)
+          if (aDays !== bDays) {
+            return aDays - bDays;
+          }
+          
+          // If same number of days, sort by creation date (newest first)
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        });
       
       setSchemas(sortedSchemas);
       setErrorSchemas(null);
@@ -442,7 +471,7 @@ export default function TrainingscentrumBeheer() {
     }
   }, []);
 
-  // Load data when component mounts - improved error handling and retry logic
+  // Load data when component mounts - optimized parallel loading
   useEffect(() => {
     if (!mounted) return;
     
@@ -450,17 +479,27 @@ export default function TrainingscentrumBeheer() {
     
     const loadData = async () => {
       try {
-        // Load data sequentially to avoid overwhelming the database
-        console.log('📊 Loading exercises...');
-        await fetchExercises();
+        // Load data in parallel for better performance
+        console.log('📊 Loading data in parallel...');
         
-        console.log('📋 Loading schemas...');
-        await fetchSchemas();
+        const [exercisesResult, schemasResult, statsResult] = await Promise.allSettled([
+          fetchExercises(),
+          fetchSchemas(),
+          fetchStats()
+        ]);
         
-        console.log('📈 Loading stats...');
-        await fetchStats();
+        // Check results and log any failures
+        if (exercisesResult.status === 'rejected') {
+          console.error('❌ Failed to load exercises:', exercisesResult.reason);
+        }
+        if (schemasResult.status === 'rejected') {
+          console.error('❌ Failed to load schemas:', schemasResult.reason);
+        }
+        if (statsResult.status === 'rejected') {
+          console.error('❌ Failed to load stats:', statsResult.reason);
+        }
         
-        console.log('✅ All data loaded successfully');
+        console.log('✅ Data loading completed');
       } catch (error) {
         console.error('❌ Error loading data:', error);
         toast.error('Fout bij het laden van data. Probeer de pagina te verversen.');
@@ -470,17 +509,27 @@ export default function TrainingscentrumBeheer() {
     loadData();
   }, [mounted, fetchExercises, fetchSchemas, fetchStats]);
 
-  // Manual refresh function
+  // Manual refresh function - optimized
   const handleRefresh = async () => {
     setIsRefreshing(true);
     try {
       console.log('🔄 Manual refresh triggered...');
-      await Promise.all([
+      
+      const [exercisesResult, schemasResult, statsResult] = await Promise.allSettled([
         fetchExercises(),
         fetchSchemas(),
         fetchStats()
       ]);
-      toast.success('Data succesvol ververst!');
+      
+      // Check if any failed
+      const failures = [exercisesResult, schemasResult, statsResult].filter(result => result.status === 'rejected');
+      
+      if (failures.length === 0) {
+        toast.success('Data succesvol ververst!');
+      } else {
+        console.warn(`⚠️ ${failures.length} data sources failed to refresh`);
+        toast.success('Data gedeeltelijk ververst!');
+      }
     } catch (error) {
       console.error('❌ Error during refresh:', error);
       toast.error('Fout bij het verversen van data');
@@ -988,14 +1037,20 @@ export default function TrainingscentrumBeheer() {
           {loadingSchemas ? (
             <AdminCard>
               <div className="space-y-4">
-                {/* Skeleton Header */}
+                {/* Loading Header */}
                 <div className="flex items-center justify-between">
-                  <div className="h-6 bg-[#3A4D23] rounded w-48 animate-pulse"></div>
-                  <div className="h-6 bg-[#3A4D23] rounded w-32 animate-pulse"></div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-6 h-6 bg-[#3A4D23] rounded animate-pulse"></div>
+                    <div className="h-6 bg-[#3A4D23] rounded w-48 animate-pulse"></div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <ArrowPathIcon className="w-4 h-4 text-[#8BAE5A] animate-spin" />
+                    <span className="text-[#8BAE5A] text-sm">Laden...</span>
+                  </div>
                 </div>
                 
                 {/* Skeleton Rows */}
-                {[...Array(3)].map((_, i) => (
+                {[...Array(5)].map((_, i) => (
                   <div key={i} className="flex items-center space-x-4 p-4 border-b border-[#3A4D23]">
                     <div className="w-12 h-12 bg-[#3A4D23] rounded-xl animate-pulse"></div>
                     <div className="flex-1 space-y-2">

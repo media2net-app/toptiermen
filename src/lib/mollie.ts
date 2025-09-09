@@ -81,8 +81,8 @@ export const createPayment = async (data: {
     metadata: data.metadata
   };
 
-  // Only add webhook URL in production
-  if (process.env.NODE_ENV === 'production' && data.webhookUrl) {
+  // Add webhook URL if provided (for both development and production)
+  if (data.webhookUrl) {
     paymentData.webhookUrl = data.webhookUrl;
   }
 
