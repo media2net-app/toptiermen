@@ -12,6 +12,15 @@ interface CheckoutSectionProps {
   features?: string[];
   selectedPeriod?: '6months' | '12months';
   selectedPayment?: 'monthly' | 'yearly';
+  onPackageChange?: (packageId: string) => void;
+  availablePackages?: Array<{
+    id: string;
+    name: string;
+    description: string;
+    monthlyPrice: number;
+    yearlyPrice: number;
+    features: string[];
+  }>;
 }
 
 export default function CheckoutSection({ 
@@ -22,7 +31,9 @@ export default function CheckoutSection({
   yearlyPrice, 
   features = [],
   selectedPeriod = '12months',
-  selectedPayment = 'monthly'
+  selectedPayment = 'monthly',
+  onPackageChange,
+  availablePackages = []
 }: CheckoutSectionProps) {
   const [billingPeriod, setBillingPeriod] = useState<'6months' | '12months'>(selectedPeriod);
   const [paymentFrequency, setPaymentFrequency] = useState<'monthly' | 'once'>(selectedPayment === 'yearly' ? 'once' : 'monthly');
@@ -90,9 +101,9 @@ export default function CheckoutSection({
 
     setIsProcessing(true);
     try {
-      console.log('💳 Creating real Mollie payment...');
+      console.log('💳 Creating prelaunch Mollie payment...');
       
-      const response = await fetch('/api/payments/create-payment', {
+      const response = await fetch('/api/payments/create-payment-prelaunch', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -101,8 +112,6 @@ export default function CheckoutSection({
           packageId: packageId,
           billingPeriod: billingPeriod,
           paymentFrequency: paymentFrequency,
-          amount: finalPrice,
-          description: `${packageName} - ${pricing.period} - ${paymentFrequency === 'once' ? 'Eenmalig' : 'Maandelijks'} - 50% Prelaunch Korting`,
           customerName: formData.name,
           customerEmail: formData.email
         }),
@@ -114,19 +123,76 @@ export default function CheckoutSection({
         throw new Error(data.error || 'Payment creation failed');
       }
       
-      if (data.checkoutUrl || data.paymentUrl) {
-        const paymentUrl = data.checkoutUrl || data.paymentUrl;
-        console.log('✅ Real Mollie payment created:', paymentUrl);
+      if (data.checkoutUrl) {
+        console.log('✅ Prelaunch Mollie payment created:', data.checkoutUrl);
+        console.log('💰 Package info:', data.packageInfo);
         console.log('🔄 Redirecting to Mollie checkout...');
         
-        // Always redirect to real Mollie checkout
-        window.location.href = paymentUrl;
+        // Redirect to Mollie checkout
+        window.location.href = data.checkoutUrl;
       } else {
         throw new Error('No payment URL received from Mollie');
       }
     } catch (error) {
       console.error('Payment error:', error);
       alert(`Er is een fout opgetreden bij het verwerken van je betaling:\n\n${error.message}\n\nControleer of de Mollie API key is geconfigureerd.`);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleTestPayment = async () => {
+    // Validate form data
+    if (!formData.name.trim()) {
+      alert('Vul je volledige naam in');
+      return;
+    }
+    
+    if (!formData.email.trim()) {
+      alert('Vul je e-mailadres in');
+      return;
+    }
+    
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      alert('Vul een geldig e-mailadres in');
+      return;
+    }
+
+    setIsProcessing(true);
+    try {
+      console.log('🧪 Creating TEST payment...');
+      
+      const response = await fetch('/api/payments/create-payment-test', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          packageId: packageId,
+          billingPeriod: billingPeriod,
+          paymentFrequency: paymentFrequency,
+          amount: finalPrice,
+          description: `[TEST] ${packageName} - ${pricing.period} - ${paymentFrequency === 'once' ? 'Eenmalig' : 'Maandelijks'} - 50% Prelaunch Korting`,
+          customerName: formData.name,
+          customerEmail: formData.email,
+          isTestPayment: true
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Test payment creation failed');
+      }
+      
+      console.log('✅ Test payment created successfully:', data);
+      alert(`✅ Test betaling succesvol aangemaakt!\n\nDe gegevens zijn opgeslagen in de database.\n\nGa naar de admin dashboard om de test betaling te bekijken.`);
+      
+    } catch (error) {
+      console.error('Test payment error:', error);
+      alert(`Er is een fout opgetreden bij het maken van de test betaling:\n\n${error.message}`);
     } finally {
       setIsProcessing(false);
     }
@@ -251,6 +317,59 @@ export default function CheckoutSection({
               </div>
             </div>
 
+            {/* Gekozen Pakket Section */}
+            <div className="mb-8">
+              <h3 className="text-2xl font-bold text-white mb-6 text-center">Gekozen pakket</h3>
+              <div className="bg-[#232D1A] rounded-xl p-6 border border-[#3A4D23]/30">
+                <div className="flex items-center justify-between">
+                  {/* Left Arrow */}
+                  <button
+                    onClick={() => {
+                      if (availablePackages.length > 0 && onPackageChange) {
+                        const currentIndex = availablePackages.findIndex(pkg => pkg.id === packageId);
+                        const prevIndex = currentIndex > 0 ? currentIndex - 1 : availablePackages.length - 1;
+                        onPackageChange(availablePackages[prevIndex].id);
+                      }
+                    }}
+                    className="group flex items-center justify-center w-10 h-10 bg-white/10 hover:bg-white/20 border border-white/20 hover:border-white/40 rounded-full transition-all duration-300"
+                    title="Vorige pakket"
+                  >
+                    <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 320 512" className="w-5 h-5 text-white group-hover:text-[#8BAE5A] transition-colors" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M34.52 239.03L228.87 44.69c9.37-9.37 24.57-9.37 33.94 0l22.67 22.67c9.36 9.36 9.37 24.52.04 33.9L131.49 256l154.02 154.75c9.34 9.38 9.32 24.54-.04 33.9l-22.67 22.67c-9.37 9.37-24.57 9.37-33.94 0L34.52 272.97c-9.37-9.37-9.37-24.57 0-33.94z"></path>
+                    </svg>
+                  </button>
+
+                  {/* Package Info */}
+                  <div className="text-center flex-1 mx-6">
+                    <h4 className="text-xl font-bold text-white mb-2">{packageName}</h4>
+                    <p className="text-[#8BAE5A] text-sm mb-3">{packageDescription}</p>
+                    <div className="flex items-center justify-center space-x-4">
+                      <span className="text-sm text-[#8BAE5A] font-medium">
+                        {availablePackages.length > 0 && availablePackages.findIndex(pkg => pkg.id === packageId) + 1} van {availablePackages.length}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Right Arrow */}
+                  <button
+                    onClick={() => {
+                      if (availablePackages.length > 0 && onPackageChange) {
+                        const currentIndex = availablePackages.findIndex(pkg => pkg.id === packageId);
+                        const nextIndex = currentIndex < availablePackages.length - 1 ? currentIndex + 1 : 0;
+                        onPackageChange(availablePackages[nextIndex].id);
+                      }
+                    }}
+                    className="group flex items-center justify-center w-10 h-10 bg-white/10 hover:bg-white/20 border border-white/20 hover:border-white/40 rounded-full transition-all duration-300"
+                    title="Volgende pakket"
+                  >
+                    <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 320 512" className="w-5 h-5 text-white group-hover:text-[#8BAE5A] transition-colors" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M285.476 272.971L91.132 467.314c-9.373 9.373-24.569 9.373-33.941 0l-22.667-22.667c-9.357-9.357-9.375-24.522-.04-33.901L188.505 256 34.484 101.255c-9.335-9.379-9.317-24.544.04-33.901l22.667-22.667c9.373-9.373 24.569-9.373 33.941 0L285.475 239.03c9.373 9.372 9.373 24.568.001 33.941z"></path>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
             <h3 className="text-2xl font-bold text-white mb-8 text-center">Kies je betalingsperiode</h3>
 
             {!isLifetime && (
@@ -275,7 +394,10 @@ export default function CheckoutSection({
 
                   {/* 12 Months Option */}
                   <button
-                    onClick={() => setBillingPeriod('12months')}
+                    onClick={() => {
+                      setBillingPeriod('12months');
+                      setPaymentFrequency('once'); // Auto-select "In één keer" for yearly
+                    }}
                     className={`p-6 rounded-xl border-2 transition-all relative ${
                       billingPeriod === '12months'
                         ? 'border-[#8BAE5A] bg-[#8BAE5A]/10'
@@ -297,18 +419,23 @@ export default function CheckoutSection({
                 <div className="space-y-4">
                   <h4 className="text-lg font-semibold text-white text-center">Kies je betalingswijze</h4>
                   <div className="grid grid-cols-2 gap-4">
-                    {/* Monthly Payment */}
+                    {/* Monthly Payment - Only available for 6 months */}
                     <button
                       onClick={() => setPaymentFrequency('monthly')}
+                      disabled={billingPeriod === '12months'}
                       className={`p-4 rounded-xl border-2 transition-all ${
-                        paymentFrequency === 'monthly'
+                        paymentFrequency === 'monthly' && billingPeriod !== '12months'
                           ? 'border-[#8BAE5A] bg-[#8BAE5A]/10'
+                          : billingPeriod === '12months'
+                          ? 'border-[#3A4D23]/30 bg-[#3A4D23]/10 opacity-50 cursor-not-allowed'
                           : 'border-[#3A4D23] hover:border-[#8BAE5A]/50'
                       }`}
                     >
                       <div className="text-center">
                         <div className="text-lg font-bold text-white mb-1">Maandelijks</div>
-                        <div className="text-sm text-[#8BAE5A]">€{pricing.monthlyPrice} per maand</div>
+                        <div className="text-sm text-[#8BAE5A]">
+                          {billingPeriod === '12months' ? 'Niet beschikbaar' : `€${pricing.monthlyPrice} per maand`}
+                        </div>
                       </div>
                     </button>
 
@@ -396,6 +523,19 @@ export default function CheckoutSection({
 
             <p className="text-center text-sm text-[#8BAE5A]/70 mt-4">
               Je wordt doorgestuurd naar een beveiligde betalingspagina
+            </p>
+
+            {/* Test Payment Button */}
+            <button
+              onClick={handleTestPayment}
+              disabled={isProcessing || !formData.name.trim() || !formData.email.trim()}
+              className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold py-3 px-6 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-300 flex items-center justify-center gap-2 text-sm hover:shadow-lg hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed mt-4"
+            >
+              <span className="text-lg">🧪</span>
+              Test Kopen
+            </button>
+            <p className="text-center text-xs text-blue-400/70 mt-2">
+              Test betaling - gegevens worden opgeslagen in database
             </p>
           </div>
         </div>

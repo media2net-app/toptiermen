@@ -40,7 +40,7 @@ export default function BasicTierPage() {
 
   const allPackages = {
     basic: {
-      id: 'basic-tier',
+      id: 'basic',
       name: 'Basic Tier',
       description: 'Toegang tot alle basis content en community features',
       monthlyPrice: 49, // 6 maanden prijs
@@ -57,42 +57,33 @@ export default function BasicTierPage() {
       badge: 'Populair'
     },
     premium: {
-      id: 'premium-tier',
+      id: 'premium',
       name: 'Premium Tier',
-      description: 'Alles van Basic + exclusieve premium content en 1-op-1 coaching',
+      description: 'Alles van Basic + custom plannen',
       monthlyPrice: 79, // 6 maanden prijs
       yearlyPrice: 71, // 12 maanden prijs (10% korting)
       features: [
-        'Alles van Basic Tier',
-        '1-op-1 coaching sessies',
-        'Premium video content',
-        'Exclusieve masterclasses',
-        'Priority support',
-        'Advanced tools & analytics',
-        'Personalized meal plans'
+        'Alles uit Basic',
+        'Custom voedingsplannen',
+        'Custom trainingsplannen'
       ],
-      badge: 'Meest populair'
+      badge: 'Meest gekozen'
     },
     lifetime: {
       id: 'lifetime',
-      name: 'Lifetime Access',
-      description: 'Eenmalige betaling voor levenslange toegang tot alle content',
+      name: 'Lifetime Tier',
+      description: 'Lifetime toegang tot alle content',
       monthlyPrice: 1995, // Eenmalige betaling
       yearlyPrice: 1995, // Eenmalige betaling
       features: [
-        'Alles van Premium Tier',
-        'Levenslange toegang',
-        'Alle toekomstige updates',
-        'Exclusieve lifetime community',
-        'Priority feature requests',
-        'Lifetime support',
-        'Exclusieve events'
+        'Alles uit Premium',
+        'Levenslang'
       ],
       badge: 'Best Value'
     }
   };
 
-  const packageData = allPackages[selectedTier as keyof typeof allPackages];
+  const packageData = allPackages[selectedTier as keyof typeof allPackages] || allPackages.basic;
 
   const benefits = [
     {
@@ -151,7 +142,7 @@ export default function BasicTierPage() {
             {/* Badge */}
             <div className="inline-flex items-center px-4 py-2 bg-[#8BAE5A]/20 border border-[#8BAE5A]/30 rounded-full text-[#8BAE5A] text-sm font-medium mb-8">
               <FaStar className="w-4 h-4 mr-2" />
-              {packageData.badge}
+              {packageData.badge || 'Premium'}
             </div>
 
             {/* Title with Navigation */}
@@ -170,14 +161,8 @@ export default function BasicTierPage() {
                 <h1 className="text-4xl md:text-6xl font-bold text-white">
                   <span className="block">{packageData.name.toUpperCase()}</span>
                   <span className="block text-[#8BAE5A]">
-                    {selectedTier === 'lifetime' 
-                      ? `€${packageData.monthlyPrice},- eenmalig`
-                      : `€${packageData.monthlyPrice},- / 6 maanden`
-                    }
+                    €{packageData.monthlyPrice},-
                   </span>
-                  {selectedTier !== 'lifetime' && (
-                    <span className="block text-sm text-[#8BAE5A] mt-2">€{packageData.yearlyPrice},- / 12 maanden (10% korting)</span>
-                  )}
                 </h1>
               </div>
 
@@ -285,6 +270,8 @@ export default function BasicTierPage() {
         monthlyPrice={packageData.monthlyPrice}
         yearlyPrice={packageData.yearlyPrice}
         features={packageData.features}
+        onPackageChange={selectTier}
+        availablePackages={Object.values(allPackages)}
       />
 
       {/* Footer */}

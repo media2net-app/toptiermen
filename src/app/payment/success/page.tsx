@@ -23,7 +23,7 @@ function PaymentSuccessContent() {
       setPaymentData({
         packageId,
         period,
-        amount: 1, // Test betaling van €1
+        amount: null, // Bedrag wordt niet getoond
         status: 'success'
       });
       setLoading(false);
@@ -99,7 +99,7 @@ function PaymentSuccessContent() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-[#8BAE5A]">Bedrag:</span>
-                  <span className="text-[#B6C948] font-semibold">€{paymentData.amount}</span>
+                  <span className="text-[#B6C948] font-semibold">Betaald</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-[#8BAE5A]">Status:</span>
@@ -126,7 +126,7 @@ function PaymentSuccessContent() {
                   <span className="text-orange-400 font-bold text-lg">PLATFORM LANCERING</span>
                   <span className="text-2xl">⚡</span>
                 </div>
-                <p className="text-orange-100 text-lg font-semibold">10 september 12:00</p>
+                <p className="text-orange-100 text-lg font-semibold">10 september 20:00</p>
                 <p className="text-orange-200 text-sm mt-1">Het platform gaat live!</p>
               </div>
             </div>
@@ -134,7 +134,7 @@ function PaymentSuccessContent() {
             <div className="space-y-3 text-left">
               <div className="flex items-center gap-3">
                 <div className="w-6 h-6 bg-[#8BAE5A] rounded-full flex items-center justify-center text-[#181F17] text-sm font-bold">1</div>
-                <span className="text-[#8BAE5A]"><strong>10 september 12:00</strong> - Het platform gaat live</span>
+                <span className="text-[#8BAE5A]"><strong>10 september 20:00</strong> - Het platform gaat live</span>
               </div>
               <div className="flex items-center gap-3">
                 <div className="w-6 h-6 bg-[#8BAE5A] rounded-full flex items-center justify-center text-[#181F17] text-sm font-bold">2</div>

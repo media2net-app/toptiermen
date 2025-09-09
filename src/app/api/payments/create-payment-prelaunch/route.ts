@@ -1,0 +1,183 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+import { createPayment } from '@/lib/mollie';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
+
+// Package pricing configuration with 50% prelaunch discount
+const PACKAGE_PRICING = {
+  'basic': {
+    name: 'Basic Tier',
+    monthlyPrice: 49, // 6 months
+    yearlyPrice: 44,  // 12 months (10% discount)
+    lifetimePrice: null // Not applicable
+  },
+  'premium': {
+    name: 'Premium Tier', 
+    monthlyPrice: 79, // 6 months
+    yearlyPrice: 71,  // 12 months (10% discount)
+    lifetimePrice: null // Not applicable
+  },
+  'lifetime': {
+    name: 'Lifetime Access',
+    monthlyPrice: 1995, // One-time payment
+    yearlyPrice: 1995,  // One-time payment
+    lifetimePrice: 1995 // One-time payment
+  }
+};
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { 
+      packageId, 
+      billingPeriod, 
+      paymentFrequency, 
+      customerName, 
+      customerEmail 
+    } = body;
+
+    console.log('💳 Creating prelaunch Mollie payment:', { 
+      packageId, 
+      billingPeriod, 
+      paymentFrequency, 
+      customerName, 
+      customerEmail 
+    });
+
+    // Validate required fields
+    if (!packageId || !billingPeriod || !paymentFrequency || !customerName || !customerEmail) {
+      return NextResponse.json({ 
+        error: 'Missing required fields: packageId, billingPeriod, paymentFrequency, customerName, customerEmail' 
+      }, { status: 400 });
+    }
+
+    // Get package pricing
+    const packageInfo = PACKAGE_PRICING[packageId as keyof typeof PACKAGE_PRICING];
+    if (!packageInfo) {
+      return NextResponse.json({ 
+        error: `Invalid package ID: ${packageId}` 
+      }, { status: 400 });
+    }
+
+    // Calculate pricing based on package and billing period
+    let originalPrice: number;
+    let periodDescription: string;
+    let paymentDescription: string;
+
+    if (packageId === 'lifetime') {
+      // Lifetime package - always one-time payment
+      originalPrice = packageInfo.lifetimePrice!;
+      periodDescription = 'Levenslang';
+      paymentDescription = `${packageInfo.name} - Levenslang - Eenmalig - 50% Prelaunch Korting`;
+    } else {
+      // Basic or Premium packages
+      if (billingPeriod === '6months') {
+        if (paymentFrequency === 'monthly') {
+          originalPrice = packageInfo.monthlyPrice;
+          periodDescription = '6 maanden (maandelijks)';
+          paymentDescription = `${packageInfo.name} - 6 maanden - Maandelijks - 50% Prelaunch Korting`;
+        } else { // once
+          originalPrice = packageInfo.monthlyPrice * 6;
+          periodDescription = '6 maanden (eenmalig)';
+          paymentDescription = `${packageInfo.name} - 6 maanden - Eenmalig - 50% Prelaunch Korting`;
+        }
+      } else { // 12months
+        if (paymentFrequency === 'monthly') {
+          originalPrice = packageInfo.yearlyPrice;
+          periodDescription = '12 maanden (maandelijks)';
+          paymentDescription = `${packageInfo.name} - 12 maanden - Maandelijks - 50% Prelaunch Korting`;
+        } else { // once
+          originalPrice = packageInfo.yearlyPrice * 12;
+          periodDescription = '12 maanden (eenmalig)';
+          paymentDescription = `${packageInfo.name} - 12 maanden - Eenmalig - 50% Prelaunch Korting`;
+        }
+      }
+    }
+
+    // Apply 50% prelaunch discount
+    const discountedPrice = Math.round(originalPrice * 0.5);
+
+    console.log('💰 Pricing calculation:', {
+      packageId,
+      originalPrice,
+      discountedPrice,
+      periodDescription,
+      paymentDescription
+    });
+
+    // Create payment using Mollie library
+    const payment = await createPayment({
+      amount: discountedPrice,
+      currency: 'EUR',
+      description: paymentDescription,
+      redirectUrl: `https://platform.toptiermen.eu/payment/success?package=${packageId}&period=${billingPeriod}&frequency=${paymentFrequency}`,
+      webhookUrl: `https://platform.toptiermen.eu/api/payments/webhook`,
+      metadata: {
+        packageId,
+        packageName: packageInfo.name,
+        billingPeriod,
+        paymentFrequency,
+        originalPrice,
+        discountedPrice,
+        discountPercentage: 50,
+        customerName,
+        customerEmail,
+        timestamp: new Date().toISOString()
+      }
+    });
+
+    console.log('✅ Mollie payment created:', payment.id);
+
+    // Store payment in database
+    const { error: dbError } = await supabase
+      .from('prelaunch_packages')
+      .insert({
+        mollie_payment_id: payment.id,
+        package_id: packageId,
+        package_name: packageInfo.name,
+        payment_period: `${billingPeriod}_${paymentFrequency}`,
+        original_price: originalPrice,
+        discounted_price: discountedPrice,
+        discount_percentage: 50,
+        payment_method: paymentFrequency,
+        full_name: customerName,
+        email: customerEmail,
+        payment_status: 'pending',
+        is_test_payment: false,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      });
+
+    if (dbError) {
+      console.error('Database error:', dbError);
+      console.error('Failed to save payment data to database');
+      // Don't fail the request if database insert fails
+    } else {
+      console.log('✅ Payment data saved to database successfully');
+    }
+
+    return NextResponse.json({
+      paymentId: payment.id,
+      checkoutUrl: payment.getCheckoutUrl(),
+      status: payment.status,
+      packageInfo: {
+        name: packageInfo.name,
+        originalPrice,
+        discountedPrice,
+        periodDescription,
+        paymentDescription
+      }
+    });
+
+  } catch (error) {
+    console.error('Payment creation error:', error);
+    return NextResponse.json({ 
+      error: 'Internal server error',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 });
+  }
+}

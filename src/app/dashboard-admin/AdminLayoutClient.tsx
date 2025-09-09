@@ -88,6 +88,17 @@ const SidebarContent = ({ pathname }: { pathname: string }) => {
           external: true
         },
         { 
+          label: 'Prelaunch Pakketten', 
+          icon: CurrencyDollarIcon, 
+          href: '/dashboard-admin/prelaunch-pakketten'
+        },
+        { 
+          label: 'Database View', 
+          icon: CurrencyDollarIcon, 
+          href: '/dashboard-admin/database-view',
+          badge: 'NEW'
+        },
+        { 
           label: 'Premium Tier', 
           icon: SparklesIcon, 
           href: '/pakketten/premium-tier',
