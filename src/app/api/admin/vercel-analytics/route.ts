@@ -1,77 +1,103 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-// Helper functie om datums te berekenen op basis van period
-function getDateFromPeriod(period: string): string {
-  const today = new Date();
-  let daysAgo = 7; // default 7d
-  
-  switch (period) {
-    case '7d':
-      daysAgo = 7;
-      break;
-    case '30d':
-      daysAgo = 30;
-      break;
-    case '90d':
-      daysAgo = 90;
-      break;
-  }
-  
-  const fromDate = new Date(today);
-  fromDate.setDate(today.getDate() - daysAgo);
-  
-  return fromDate.toISOString().split('T')[0];
-}
-
-// Vercel Analytics API endpoint
 export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const type = searchParams.get('type') || 'analytics';
+  const period = searchParams.get('period') || '7d';
+  const path = searchParams.get('path');
+
   try {
-    const { searchParams } = new URL(request.url);
-    const period = searchParams.get('period') || '7d';
-    const type = searchParams.get('type') || 'analytics'; // 'analytics' or 'speed-insights'
-
-    console.log('📊 Fetching Vercel data:', { type, period });
-
-    // Get Vercel credentials from environment
+    // Check if Vercel credentials are configured
     const vercelToken = process.env.VERCEL_TOKEN;
-    const projectId = process.env.VERCEL_PROJECT_ID;
+    const vercelProjectId = process.env.VERCEL_PROJECT_ID;
 
-    if (!vercelToken || !projectId) {
-      console.warn('⚠️ Vercel credentials not configured');
+    if (!vercelToken || !vercelProjectId) {
+      // Return mock data if credentials not configured
+      if (type === 'page' && path) {
+        return NextResponse.json({
+          success: true,
+          data: getMockPageData(path),
+          mock: true
+        });
+      }
+
       return NextResponse.json({
         success: false,
-        error: 'Vercel credentials not configured',
-        message: 'Please set VERCEL_TOKEN and VERCEL_PROJECT_ID environment variables'
-      }, { status: 200 }); // Changed from 400 to 200 so frontend can handle gracefully
+        error: 'Vercel credentials not configured. Please add VERCEL_TOKEN and VERCEL_PROJECT_ID to your environment variables.',
+        mock: true
+      });
     }
 
-    let data;
+    // For now, return mock data since we don't have live Vercel Analytics API integration
+    // In production, you would make actual API calls to Vercel Analytics here
     
-    if (type === 'speed-insights') {
-      data = await fetchSpeedInsights(vercelToken, projectId, period);
-    } else {
-      data = await fetchAnalytics(vercelToken, projectId, period);
+    if (type === 'page' && path) {
+      return NextResponse.json({
+        success: true,
+        data: getMockPageData(path),
+        mock: true
+      });
     }
 
     return NextResponse.json({
       success: true,
-      data,
-      type,
-      period,
-      fetchedAt: new Date().toISOString()
+      data: getMockAnalyticsData(),
+      mock: true
     });
 
   } catch (error) {
-    console.error('❌ Error fetching Vercel data:', error);
+    console.error('Vercel Analytics API Error:', error);
     return NextResponse.json({
       success: false,
-      error: 'Failed to fetch Vercel data',
-      details: error instanceof Error ? error.message : 'Unknown error'
+      error: 'Failed to fetch analytics data',
+      mock: true
     }, { status: 500 });
   }
 }
 
-// Mock data functies voor development/testing
+function getMockPageData(path: string) {
+  // Generate realistic mock data based on the path
+  const baseVisitors = path.includes('prelaunchkorting') ? 127 : 45;
+  const baseConversions = path.includes('prelaunchkorting') ? 11 : 3;
+  const baseRevenue = path.includes('prelaunchkorting') ? 1240 : 180;
+
+  return {
+    path,
+    visitors: baseVisitors,
+    pageViews: Math.round(baseVisitors * 1.5),
+    bounceRate: path.includes('prelaunchkorting') ? 23 : 45,
+    avgTimeOnPage: path.includes('prelaunchkorting') ? 145 : 67,
+    conversionRate: path.includes('prelaunchkorting') ? 8.7 : 6.7,
+    revenue: baseRevenue,
+    topReferrers: [
+      { referrer: 'Direct', visitors: Math.round(baseVisitors * 0.35) },
+      { referrer: 'Google', visitors: Math.round(baseVisitors * 0.25) },
+      { referrer: 'Facebook', visitors: Math.round(baseVisitors * 0.22) },
+      { referrer: 'Instagram', visitors: Math.round(baseVisitors * 0.12) },
+      { referrer: 'LinkedIn', visitors: Math.round(baseVisitors * 0.06) }
+    ],
+    countries: [
+      { country: 'Netherlands', percentage: 78 },
+      { country: 'Belgium', percentage: 12 },
+      { country: 'Germany', percentage: 6 },
+      { country: 'Spain', percentage: 4 }
+    ],
+    devices: [
+      { device: 'Mobile', percentage: 65 },
+      { device: 'Desktop', percentage: 30 },
+      { device: 'Tablet', percentage: 5 }
+    ],
+    browsers: [
+      { browser: 'Chrome', percentage: 52 },
+      { browser: 'Safari', percentage: 28 },
+      { browser: 'Firefox', percentage: 12 },
+      { browser: 'Edge', percentage: 8 }
+    ],
+    trendData: generateTrendData(baseVisitors, baseConversions),
+    hourlyData: generateHourlyData(baseVisitors)
+  };
+}
+
 function getMockAnalyticsData() {
   return {
     visitors: 58,
@@ -85,10 +111,10 @@ function getMockAnalyticsData() {
       { path: '/dashboard-admin', visitors: 6 }
     ],
     topReferrers: [
-      { referrer: 'l.facebook.com', visitors: 20 },
-      { referrer: 'm.facebook.com', visitors: 11 },
-      { referrer: 'instagram.com', visitors: 5 },
-      { referrer: 'facebook.com', visitors: 1 }
+      { referrer: 'Direct', visitors: 25 },
+      { referrer: 'Google', visitors: 18 },
+      { referrer: 'Facebook', visitors: 10 },
+      { referrer: 'Instagram', visitors: 5 }
     ],
     countries: [
       { country: 'Netherlands', percentage: 84 },
@@ -97,79 +123,59 @@ function getMockAnalyticsData() {
       { country: 'Belgium', percentage: 3 }
     ],
     devices: [
-      { device: 'Mobile', percentage: 90 },
-      { device: 'Desktop', percentage: 5 },
+      { device: 'Mobile', percentage: 60 },
+      { device: 'Desktop', percentage: 35 },
       { device: 'Tablet', percentage: 5 }
     ],
     browsers: [
-      { browser: 'Chrome', percentage: 45 },
-      { browser: 'Safari', percentage: 35 },
+      { browser: 'Chrome', percentage: 55 },
+      { browser: 'Safari', percentage: 25 },
       { browser: 'Firefox', percentage: 15 },
       { browser: 'Edge', percentage: 5 }
     ],
     operatingSystems: [
-      { os: 'Android', percentage: 62 },
-      { os: 'iOS', percentage: 33 },
-      { os: 'Mac', percentage: 3 },
-      { os: 'Windows', percentage: 2 }
+      { os: 'Windows', percentage: 45 },
+      { os: 'macOS', percentage: 30 },
+      { os: 'iOS', percentage: 15 },
+      { os: 'Android', percentage: 10 }
     ],
     trendData: [
-      { date: '2025-08-26', visitors: 2 },
-      { date: '2025-08-27', visitors: 1 },
-      { date: '2025-08-28', visitors: 3 },
-      { date: '2025-08-29', visitors: 2 },
-      { date: '2025-08-30', visitors: 1 },
-      { date: '2025-09-01', visitors: 35 },
-      { date: '2025-09-02', visitors: 14 }
+      { date: '2024-01-15', visitors: 8 },
+      { date: '2024-01-16', visitors: 12 },
+      { date: '2024-01-17', visitors: 6 },
+      { date: '2024-01-18', visitors: 15 },
+      { date: '2024-01-19', visitors: 9 },
+      { date: '2024-01-20', visitors: 4 },
+      { date: '2024-01-21', visitors: 4 }
     ]
   };
 }
 
-function getMockSpeedInsightsData() {
-  return {
-    realExperienceScore: 90,
-    coreWebVitals: {
-      firstContentfulPaint: 0.45,
-      largestContentfulPaint: 1.66,
-      interactionToNextPaint: 72,
-      cumulativeLayoutShift: 0.22,
-      firstInputDelay: 12,
-      timeToFirstByte: 0.07
-    },
-    performanceByRoute: [
-      { route: '/dashboard', cls: 0.18, status: 'needs-improvement' },
-      { route: '/dashboard/academy', cls: 0.22, status: 'needs-improvement' },
-      { route: '/login', cls: 0, status: 'good' },
-      { route: '/dashboard-admin/bug-meldingen', cls: 0.07, status: 'good' }
-    ],
-    performanceByCountry: [
-      { country: 'Spain', cls: 0.22, status: 'needs-improvement', occurrences: 19 }
-    ],
-    performanceByDevice: [
-      { device: 'Mobile', cls: 0.22, status: 'needs-improvement', percentage: 90 },
-      { device: 'Desktop', cls: 0.05, status: 'good', percentage: 10 }
-    ],
-    trendData: [
-      { date: '2025-08-27', cls: 0.15 },
-      { date: '2025-08-28', cls: 0.12 },
-      { date: '2025-08-29', cls: 0.18 },
-      { date: '2025-08-30', cls: 0.20 },
-      { date: '2025-09-01', cls: 0.25 },
-      { date: '2025-09-02', cls: 0.08 }
-    ]
-  };
+function generateTrendData(baseVisitors: number, baseConversions: number) {
+  const days = 7;
+  const trendData = [];
+  
+  for (let i = 0; i < days; i++) {
+    const date = new Date();
+    date.setDate(date.getDate() - (days - 1 - i));
+    
+    const visitors = Math.round(baseVisitors * (0.7 + Math.random() * 0.6));
+    const conversions = Math.round(baseConversions * (0.5 + Math.random() * 1.0));
+    
+    trendData.push({
+      date: date.toISOString().split('T')[0],
+      visitors,
+      conversions
+    });
+  }
+  
+  return trendData;
 }
 
-async function fetchAnalytics(token: string, projectId: string, period: string) {
-  // Vercel Web Analytics heeft geen directe API - gebruik mock data voor nu
-  console.log('⚠️ Vercel Web Analytics API not directly accessible, returning mock data');
-  return getMockAnalyticsData();
+function generateHourlyData(baseVisitors: number) {
+  const hours = ['00:00', '06:00', '09:00', '12:00', '15:00', '18:00', '21:00'];
+  return hours.map(hour => ({
+    hour,
+    visitors: Math.round(baseVisitors * (0.1 + Math.random() * 0.3))
+  }));
 }
-
-async function fetchSpeedInsights(token: string, projectId: string, period: string) {
-  // Vercel Speed Insights heeft geen directe API - gebruik mock data voor nu
-  console.log('⚠️ Vercel Speed Insights API not directly accessible, returning mock data');
-  return getMockSpeedInsightsData();
-}
-
-

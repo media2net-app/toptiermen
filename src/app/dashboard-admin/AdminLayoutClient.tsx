@@ -143,6 +143,7 @@ const SidebarContent = ({ pathname }: { pathname: string }) => {
         { label: 'Technische Performance', icon: WrenchScrewdriverIcon, href: '/dashboard-admin?tab=technical' },
         { label: 'Session Monitoring', icon: ClockIcon, href: '/dashboard-admin?tab=session-logs', badge: 'NEW' },
         { label: 'Google Analytics', icon: ChartBarIcon, href: '/dashboard-admin/analytics/google-analytics', badge: 'LIVE' },
+        { label: 'Pakketten Analytics', icon: ChartBarIcon, href: '/dashboard-admin/pakketten-analytics', badge: 'NEW' },
         { label: 'A/B Testing', icon: EyeIcon, href: '/dashboard-admin/ab-testing' },
         { label: 'Trial Management', icon: ClockIcon, href: '/dashboard-admin/trial-management' }
       ]
