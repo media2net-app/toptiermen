@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
-import { EnvelopeIcon, LockClosedIcon } from '@heroicons/react/24/outline';
+import { EnvelopeIcon, LockClosedIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import LoginDebugger from '@/components/LoginDebugger';
 // import { useCacheBuster } from '@/components/CacheBuster'; - DISABLED TO PREVENT LOGOUT
 
@@ -30,6 +30,7 @@ function LoginPageContent() {
     isLoading: false,
     redirecting: false,
     isClient: false,
+    showPassword: false,
     // Forgot password states
     showForgotPassword: false,
     forgotPasswordEmail: "",
@@ -580,15 +581,28 @@ function LoginPageContent() {
           <div className="relative">
             <LockClosedIcon className="w-5 h-5 text-[#B6C948] absolute left-3 top-1/2 -translate-y-1/2" />
             <input
-              type="password"
+              type={loginState.showPassword ? "text" : "password"}
               value={loginState.password}
               onChange={e => updateLoginState({ password: e.target.value })}
-              className={`w-full pl-10 pr-4 py-3 rounded-xl bg-[#181F17] text-[#B6C948] placeholder-[#B6C948] focus:outline-none focus:ring-2 focus:ring-[#B6C948] transition shadow-inner border border-[#3A4D23] font-figtree ${loginState.isLoading ? 'cursor-wait opacity-75' : 'cursor-text'}`}
+              className={`w-full pl-10 pr-12 py-3 rounded-xl bg-[#181F17] text-[#B6C948] placeholder-[#B6C948] focus:outline-none focus:ring-2 focus:ring-[#B6C948] transition shadow-inner border border-[#3A4D23] font-figtree ${loginState.isLoading ? 'cursor-wait opacity-75' : 'cursor-text'}`}
               placeholder="Wachtwoord"
               autoComplete="current-password"
               required
               disabled={loginState.isLoading}
             />
+            <button
+              type="button"
+              onClick={() => updateLoginState({ showPassword: !loginState.showPassword })}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#B6C948] hover:text-white transition-colors focus:outline-none focus:text-white"
+              disabled={loginState.isLoading}
+              aria-label={loginState.showPassword ? "Wachtwoord verbergen" : "Wachtwoord tonen"}
+            >
+              {loginState.showPassword ? (
+                <EyeSlashIcon className="w-5 h-5" />
+              ) : (
+                <EyeIcon className="w-5 h-5" />
+              )}
+            </button>
           </div>
           
           {/* Remember Me Checkbox */}

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { FaCheck, FaArrowRight, FaUsers, FaDumbbell, FaBrain, FaChartLine, FaCrown, FaStar, FaGift, FaBook, FaTools, FaComments, FaBullseye, FaTrophy, FaBookOpen, FaChevronLeft, FaChevronRight, FaClock } from 'react-icons/fa';
 import { PlayIcon } from '@heroicons/react/24/outline';
 import CheckoutSection from '@/components/CheckoutSection';
+import PrelaunchCountdown from '@/components/PrelaunchCountdown';
 
 interface VideoPlayerProps {
   src: string;
@@ -266,9 +267,17 @@ export default function MaandelijksPage() {
         <div className="w-full text-center">
           <div className="max-w-6xl mx-auto">
             {/* Badge */}
-            <div className="inline-flex items-center px-4 py-2 bg-[#8BAE5A]/20 border border-[#8BAE5A]/30 rounded-full text-[#8BAE5A] text-sm font-medium mb-8">
+            <div className="inline-flex items-center px-4 py-2 bg-[#8BAE5A]/20 border border-[#8BAE5A]/30 rounded-full text-[#8BAE5A] text-sm font-medium mb-4">
               <FaStar className="w-4 h-4 mr-2" />
               {packageData.badge || 'Premium'}
+            </div>
+
+            {/* Countdown */}
+            <div className="mb-8">
+              <PrelaunchCountdown 
+                endDate={new Date(Date.now() + 5 * 24 * 60 * 60 * 1000)} // 5 days from now
+                className="text-base"
+              />
             </div>
 
             {/* Title with Navigation */}
@@ -403,8 +412,14 @@ export default function MaandelijksPage() {
                     €{formatPrice(packageData.monthlyPrice)} per maand
                   </span>
                 </div>
-                <div className="inline-flex items-center px-3 py-1 bg-red-500/20 border border-red-500/30 rounded-full text-red-400 text-sm font-medium">
-                  🔥 50% PRELAUNCH KORTING
+                <div className="flex flex-col items-center space-y-3 mb-4">
+                  <div className="inline-flex items-center px-3 py-1 bg-red-500/20 border border-red-500/30 rounded-full text-red-400 text-sm font-medium">
+                    🔥 50% PRELAUNCH KORTING
+                  </div>
+                  <PrelaunchCountdown 
+                    endDate={new Date(Date.now() + 5 * 24 * 60 * 60 * 1000)} // 5 days from now
+                    className="text-sm"
+                  />
                 </div>
               </div>
               <p className="text-[#D1D5DB] mb-4">

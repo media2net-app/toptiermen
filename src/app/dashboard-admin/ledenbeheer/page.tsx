@@ -86,6 +86,180 @@ export default function Ledenbeheer() {
     confirmPassword: ''
   });
 
+  // Handle password reset function
+  const handlePasswordReset = async (email: string) => {
+    try {
+      setIsLoading(true);
+      
+      // Show confirmation dialog
+      const confirmed = window.confirm(
+        `Weet je zeker dat je een wachtwoord reset link wilt versturen naar ${email}?\n\n` +
+        'Dit zal een email versturen met een link om het wachtwoord te resetten.'
+      );
+      
+      if (!confirmed) {
+        setIsLoading(false);
+        return;
+      }
+
+      console.log('🔐 Sending password reset to:', email);
+      
+      const response = await fetch('/api/admin/send-password-reset', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: email,
+          testMode: true // Always use test mode for now
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        toast.success(`Wachtwoord reset link verstuurd naar ${email}`, {
+          position: "top-right",
+          duration: 5000,
+        });
+        
+        // Log details for debugging
+        console.log('🔐 Password reset result:', result);
+      } else {
+        toast.error(`Fout bij versturen: ${result.error}`, {
+          position: "top-right",
+          duration: 5000,
+        });
+      }
+    } catch (error) {
+      console.error('❌ Error sending password reset:', error);
+      toast.error('Er is een fout opgetreden bij het versturen van de reset link', {
+        position: "top-right",
+        duration: 5000,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Create users with passwords function (Supabase-based)
+  const createUsersWithPasswords = async () => {
+    try {
+      setIsLoading(true);
+      
+      // Show confirmation dialog
+      const confirmed = window.confirm(
+        'Weet je zeker dat je accounts wilt aanmaken met wachtwoorden voor alle leden?\n\n' +
+        'Dit zal:\n' +
+        '- Nieuwe Supabase auth accounts aanmaken\n' +
+        '- Wachtwoorden genereren en instellen\n' +
+        '- Accountgegevens emails versturen\n\n' +
+        'In test mode worden alleen Chiel en Rick verwerkt.'
+      );
+      
+      if (!confirmed) {
+        setIsLoading(false);
+        return;
+      }
+
+      console.log('🔐 Creating users with passwords...');
+      
+      const response = await fetch('/api/admin/create-users-with-passwords', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          testMode: true // Always use test mode for now
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        toast.success(
+          `Accounts verwerkt: ${result.results.created} aangemaakt, ${result.results.updated} bijgewerkt, ${result.results.emailsSent} emails verstuurd`, 
+          {
+            position: "top-right",
+            duration: 7000,
+          }
+        );
+        
+        // Log details for debugging
+        console.log('🔐 User creation results:', result.results);
+      } else {
+        toast.error(`Fout bij verwerken: ${result.error}`, {
+          position: "top-right",
+          duration: 5000,
+        });
+      }
+    } catch (error) {
+      console.error('❌ Error creating users with passwords:', error);
+      toast.error('Er is een fout opgetreden bij het aanmaken van accounts', {
+        position: "top-right",
+        duration: 5000,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Send account credentials function
+  const sendAccountCredentials = async () => {
+    try {
+      setIsLoading(true);
+      
+      // Show confirmation dialog
+      const confirmed = window.confirm(
+        'Weet je zeker dat je accountgegevens wilt versturen naar alle actieve leden?\n\n' +
+        'Dit zal een email versturen met login gegevens naar alle gebruikers.\n' +
+        'In test mode worden alleen emails verstuurd naar Chiel en Rick.'
+      );
+      
+      if (!confirmed) {
+        setIsLoading(false);
+        return;
+      }
+
+      console.log('📧 Sending account credentials...');
+      
+      const response = await fetch('/api/admin/send-account-credentials', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          testMode: true // Always use test mode for now
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        toast.success(`Accountgegevens verstuurd naar ${result.results.sent} gebruikers`, {
+          position: "top-right",
+          duration: 5000,
+        });
+        
+        // Log details for debugging
+        console.log('📧 Email results:', result.results);
+      } else {
+        toast.error(`Fout bij versturen: ${result.error}`, {
+          position: "top-right",
+          duration: 5000,
+        });
+      }
+    } catch (error) {
+      console.error('❌ Error sending account credentials:', error);
+      toast.error('Er is een fout opgetreden bij het versturen van emails', {
+        position: "top-right",
+        duration: 5000,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Fetch members function
   const fetchMembers = async () => {
     setLoadingMembers(true);
@@ -359,22 +533,6 @@ export default function Ledenbeheer() {
     }
   };
 
-  const handlePasswordReset = async () => {
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      toast.success('Wachtwoord reset e-mail verzonden', {
-        position: "top-right",
-        duration: 3000,
-      });
-    } catch (error) {
-      toast.error('Er is een fout opgetreden bij het verzenden van de e-mail', {
-        position: "top-right",
-        duration: 3000,
-      });
-    }
-  };
 
   const handleAddNewUser = async () => {
     // Validate form data
@@ -622,6 +780,14 @@ export default function Ledenbeheer() {
           Bewerken
         </AdminButton>
         <AdminButton
+          variant="secondary"
+          size="sm"
+          onClick={() => handlePasswordReset(member.email)}
+          icon={<KeyIcon className="w-4 h-4" />}
+        >
+          🔐 Reset
+        </AdminButton>
+        <AdminButton
           variant="danger"
           size="sm"
           onClick={async () => {
@@ -674,6 +840,22 @@ export default function Ledenbeheer() {
               loading={loadingMembers}
             >
               Verversen
+            </AdminButton>
+            <AdminButton 
+              variant="secondary" 
+              icon={<EnvelopeIcon className="w-4 h-5 sm:w-5 sm:h-5" />}
+              onClick={sendAccountCredentials}
+            >
+              <span className="hidden sm:inline">📧 Verstuur Accountgegevens</span>
+              <span className="sm:hidden">📧 Email</span>
+            </AdminButton>
+            <AdminButton 
+              variant="success" 
+              icon={<KeyIcon className="w-4 h-5 sm:w-5 sm:h-5" />}
+              onClick={createUsersWithPasswords}
+            >
+              <span className="hidden sm:inline">🔐 Maak Accounts + Wachtwoorden</span>
+              <span className="sm:hidden">🔐 Accounts</span>
             </AdminButton>
             <AdminButton 
               variant="primary" 
@@ -1039,7 +1221,7 @@ export default function Ledenbeheer() {
                   <div className="pt-4 border-t border-[#3A4D23] space-y-3">
                     <AdminButton
                       variant="secondary"
-                      onClick={handlePasswordReset}
+                      onClick={() => handlePasswordReset(editingMember?.email)}
                       icon={<KeyIcon className="w-4 h-4" />}
                     >
                       Verstuur Wachtwoord Reset E-mail

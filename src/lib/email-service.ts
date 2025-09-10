@@ -354,6 +354,179 @@ Het Top Tier Men Team
 ---
 © 2025 Top Tier Men | platform.toptiermen.eu
         `
+      },
+      
+      'account-credentials': {
+        subject: '🔐 Je Top Tier Men Accountgegevens - Platform Live!',
+        html: `
+          <div style="background: linear-gradient(135deg, #0F1419 0%, #1F2D17 100%); min-height: 100vh; padding: 40px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+            <div style="max-width: 600px; margin: 0 auto; background: #0F1419; border-radius: 16px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.3);">
+              
+              <!-- Header -->
+              <div style="background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%); padding: 40px 30px; text-align: center;">
+                <img src="https://platform.toptiermen.eu/logo_white-full.svg" alt="Top Tier Men Logo" style="width: 200px; height: auto; margin-bottom: 20px;">
+                <h1 style="color: white; font-size: 32px; font-weight: 700; margin: 0; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+                  🚀 PLATFORM IS LIVE!
+                </h1>
+                <p style="color: rgba(255,255,255,0.95); font-size: 18px; margin: 12px 0 0 0; font-weight: 500;">
+                  Je accountgegevens zijn hier
+                </p>
+              </div>
+
+              <!-- Content -->
+              <div style="padding: 40px 30px; color: #E5E7EB;">
+                <p style="font-size: 18px; color: #8BAE5A; font-weight: 600; margin: 0 0 24px 0;">
+                  Beste \${name},
+                </p>
+                
+                <p style="font-size: 16px; line-height: 1.6; margin: 0 0 24px 0;">
+                  Het moment is daar! Het Top Tier Men platform is nu live en je kunt direct aan de slag. Hier zijn je accountgegevens:
+                </p>
+
+                <!-- Account Details -->
+                <div style="background: rgba(139, 174, 90, 0.1); border: 2px solid #8BAE5A; padding: 30px; margin: 24px 0; border-radius: 12px;">
+                  <h3 style="color: #8BAE5A; font-size: 20px; font-weight: 700; margin: 0 0 20px 0; text-align: center;">
+                    🔐 JE ACCOUNTGEGEVENS
+                  </h3>
+                  
+                  <div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 8px; margin: 16px 0;">
+                    <div style="margin-bottom: 16px;">
+                      <strong style="color: #8BAE5A; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Platform URL:</strong>
+                      <div style="color: #B6C948; font-size: 16px; font-weight: 600; margin-top: 4px;">
+                        \${platformUrl}
+                      </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 16px;">
+                      <strong style="color: #8BAE5A; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">E-mailadres:</strong>
+                      <div style="color: #FFFFFF; font-size: 16px; font-weight: 600; margin-top: 4px;">
+                        \${email}
+                      </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 16px;">
+                      <strong style="color: #8BAE5A; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Gebruikersnaam:</strong>
+                      <div style="color: #FFFFFF; font-size: 16px; font-weight: 600; margin-top: 4px;">
+                        \${username}
+                      </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 16px;">
+                      <strong style="color: #8BAE5A; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Tijdelijk Wachtwoord:</strong>
+                      <div style="color: #FFFFFF; font-size: 16px; font-weight: 600; margin-top: 4px; background: rgba(255,255,255,0.1); padding: 8px 12px; border-radius: 6px; font-family: monospace;">
+                        \${tempPassword}
+                      </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 16px;">
+                      <strong style="color: #8BAE5A; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Pakket:</strong>
+                      <div style="color: #B6C948; font-size: 16px; font-weight: 600; margin-top: 4px;">
+                        \${packageType}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div style="text-align: center; margin-top: 20px;">
+                    <a href="\${loginUrl}" style="display: inline-block; background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%); color: white; text-decoration: none; padding: 16px 32px; border-radius: 8px; font-weight: 700; font-size: 16px; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 4px 12px rgba(139, 174, 90, 0.3);">
+                      🚀 LOGIN NU
+                    </a>
+                  </div>
+                </div>
+
+                <!-- Important Notes -->
+                <div style="background: rgba(255, 193, 7, 0.1); border-left: 4px solid #FFC107; padding: 20px; margin: 24px 0; border-radius: 0 8px 8px 0;">
+                  <h3 style="color: #FFC107; font-size: 18px; font-weight: 700; margin: 0 0 12px 0;">
+                    ⚠️ BELANGRIJKE INFORMATIE
+                  </h3>
+                  <ul style="color: #D1D5DB; font-size: 15px; line-height: 1.6; margin: 0; padding-left: 20px;">
+                    <li style="margin-bottom: 8px;">Wijzig je wachtwoord direct na je eerste login voor extra beveiliging</li>
+                    <li style="margin-bottom: 8px;">Je account is al geactiveerd en klaar voor gebruik</li>
+                    <li style="margin-bottom: 8px;">Alle content en features zijn direct beschikbaar</li>
+                    <li>Bij vragen kun je altijd contact opnemen via het platform</li>
+                  </ul>
+                </div>
+
+                <h3 style="color: #8BAE5A; font-size: 20px; font-weight: 700; margin: 32px 0 16px 0;">
+                  Wat kun je nu doen?
+                </h3>
+                
+                <div style="display: grid; gap: 16px; margin: 20px 0;">
+                  <div style="background: rgba(139, 174, 90, 0.05); padding: 16px; border-radius: 8px; border-left: 3px solid #8BAE5A;">
+                    <strong style="color: #8BAE5A;">🎯 Dashboard Verken</strong>
+                    <p style="margin: 8px 0 0 0; color: #D1D5DB; font-size: 14px;">Bekijk je persoonlijke dashboard en alle beschikbare modules</p>
+                  </div>
+                  
+                  <div style="background: rgba(139, 174, 90, 0.05); padding: 16px; border-radius: 8px; border-left: 3px solid #8BAE5A;">
+                    <strong style="color: #8BAE5A;">💪 Start je Training</strong>
+                    <p style="margin: 8px 0 0 0; color: #D1D5DB; font-size: 14px;">Begin met je gepersonaliseerde trainings- en voedingsplannen</p>
+                  </div>
+                  
+                  <div style="background: rgba(139, 174, 90, 0.05); padding: 16px; border-radius: 8px; border-left: 3px solid #8BAE5A;">
+                    <strong style="color: #8BAE5A;">👥 Join de Brotherhood</strong>
+                    <p style="margin: 8px 0 0 0; color: #D1D5DB; font-size: 14px;">Maak kennis met je broeders in de exclusieve community</p>
+                  </div>
+                </div>
+
+                <div style="text-align: center; margin: 40px 0 20px 0;">
+                  <a href="\${loginUrl}" style="display: inline-block; background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%); color: white; text-decoration: none; padding: 16px 32px; border-radius: 8px; font-weight: 700; font-size: 18px; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 6px 20px rgba(139, 174, 90, 0.4);">
+                    🚀 START JE TRANSFORMATIE
+                  </a>
+                </div>
+
+                <p style="font-size: 16px; line-height: 1.6; margin: 32px 0 0 0; color: #8BAE5A; font-weight: 600;">
+                  Welkom in de broederschap!<br>
+                  Het Top Tier Men Team
+                </p>
+              </div>
+
+              <!-- Footer -->
+              <div style="background: rgba(0,0,0,0.3); padding: 30px; text-align: center; border-top: 1px solid rgba(139, 174, 90, 0.2);">
+                <p style="color: #8BAE5A; font-size: 14px; margin: 0 0 12px 0; font-weight: 600;">
+                  Top Tier Men Platform
+                </p>
+                <p style="color: #6B7280; font-size: 12px; margin: 0; line-height: 1.5;">
+                  Dit is een automatisch gegenereerde email. Reageer niet op dit bericht.<br>
+                  Voor vragen kun je contact opnemen via het platform.
+                </p>
+              </div>
+            </div>
+          </div>
+        `,
+        text: `
+Beste \${name},
+
+Het moment is daar! Het Top Tier Men platform is nu live en je kunt direct aan de slag.
+
+JE ACCOUNTGEGEVENS:
+==================
+
+Platform URL: \${platformUrl}
+E-mailadres: \${email}
+Gebruikersnaam: \${username}
+Tijdelijk Wachtwoord: \${tempPassword}
+Pakket: \${packageType}
+
+LOGIN NU: \${loginUrl}
+
+BELANGRIJKE INFORMATIE:
+- Wijzig je wachtwoord direct na je eerste login voor extra beveiliging
+- Je account is al geactiveerd en klaar voor gebruik
+- Alle content en features zijn direct beschikbaar
+- Bij vragen kun je altijd contact opnemen via het platform
+
+WAT KUN JE NU DOEN:
+- Dashboard Verken: Bekijk je persoonlijke dashboard en alle beschikbare modules
+- Start je Training: Begin met je gepersonaliseerde trainings- en voedingsplannen
+- Join de Brotherhood: Maak kennis met je broeders in de exclusieve community
+
+Welkom in de broederschap!
+
+Het Top Tier Men Team
+
+---
+Dit is een automatisch gegenereerde email. Reageer niet op dit bericht.
+Voor vragen kun je contact opnemen via het platform.
+        `
       }
     };
 
