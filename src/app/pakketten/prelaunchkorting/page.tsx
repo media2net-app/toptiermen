@@ -309,11 +309,6 @@ export default function BasicTierPage() {
                       €{formatPrice(packageData.monthlyPrice)}
                     </span>
                   </div>
-                  <div className="mt-2">
-                    <span className="inline-flex items-center px-2 py-1 bg-red-500/20 border border-red-500/30 rounded-full text-red-400 text-xs font-medium">
-                      🔥 NORMALE PRIJZEN
-                    </span>
-                  </div>
                 </h1>
               </div>
 
@@ -418,9 +413,6 @@ export default function BasicTierPage() {
                       : `€${formatPrice(packageData.monthlyPrice)} per maand`
                     }
                   </span>
-                </div>
-                <div className="inline-flex items-center px-3 py-1 bg-red-500/20 border border-red-500/30 rounded-full text-red-400 text-sm font-medium">
-                  🔥 NORMALE PRIJZEN
                 </div>
               </div>
               {selectedTier !== 'lifetime' && (

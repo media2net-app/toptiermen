@@ -300,11 +300,6 @@ export default function MaandelijksPage() {
                       €{formatPrice(packageData.monthlyPrice)}
                     </span>
                   </div>
-                  <div className="mt-2">
-                    <span className="inline-flex items-center px-2 py-1 bg-red-500/20 border border-red-500/30 rounded-full text-red-400 text-xs font-medium">
-                      🔥 NORMALE PRIJZEN
-                    </span>
-                  </div>
                 </h1>
               </div>
 
@@ -407,9 +402,6 @@ export default function MaandelijksPage() {
                   </span>
                 </div>
                 <div className="flex flex-col items-center space-y-3 mb-4">
-                  <div className="inline-flex items-center px-3 py-1 bg-red-500/20 border border-red-500/30 rounded-full text-red-400 text-sm font-medium">
-                    🔥 NORMALE PRIJZEN
-                  </div>
                   <PrelaunchCountdown 
                     endDate={new Date(Date.now() + 5 * 24 * 60 * 60 * 1000)} // 5 days from now
                     className="text-sm"
