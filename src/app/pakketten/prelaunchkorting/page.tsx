@@ -217,8 +217,8 @@ export default function BasicTierPage() {
       description: 'Toegang tot alle basis content en community features',
       originalMonthlyPrice: 49, // Originele 6 maanden prijs
       originalYearlyPrice: 44, // Originele 12 maanden prijs (10% korting)
-      monthlyPrice: 24.50, // Prijs na 50% korting (€49 * 0.5)
-      yearlyPrice: 22, // Prijs na 50% korting (€44 * 0.5)
+      monthlyPrice: 49, // Original price
+      yearlyPrice: 44, // Original price
       features: [
         'TTM Academy',
         'Financiële tools & gidsen',
@@ -236,8 +236,8 @@ export default function BasicTierPage() {
       description: 'Alles van Basic + custom plannen',
       originalMonthlyPrice: 79, // Originele 6 maanden prijs
       originalYearlyPrice: 71, // Originele 12 maanden prijs (10% korting)
-      monthlyPrice: 39.50, // Prijs na 50% korting (€79 * 0.5)
-      yearlyPrice: 35.50, // Prijs na 50% korting (€71 * 0.5)
+      monthlyPrice: 79, // Original price
+      yearlyPrice: 71, // Original price
       features: [
         'Alles uit Basic',
         'Custom voedingsplannen',
@@ -251,8 +251,8 @@ export default function BasicTierPage() {
       description: 'Lifetime toegang tot alle content',
       originalMonthlyPrice: 1995, // Originele eenmalige betaling
       originalYearlyPrice: 1995, // Originele eenmalige betaling
-      monthlyPrice: 997.50, // Prijs na 50% korting (€1995 * 0.5)
-      yearlyPrice: 997.50, // Prijs na 50% korting (€1995 * 0.5)
+      monthlyPrice: 1995, // Original price
+      yearlyPrice: 1995, // Original price
       features: [
         'Alles uit Premium',
         'Levenslang'
@@ -347,7 +347,7 @@ export default function BasicTierPage() {
 
             <div className="bg-gradient-to-r from-[#8BAE5A]/10 to-[#B6C948]/10 border border-[#8BAE5A]/20 rounded-xl p-6 mb-8">
               <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">
-                50% KORTING - Beperkte tijd!
+                NORMALE PRIJZEN - Beperkte tijd!
               </h2>
               <p className="text-[#8BAE5A] font-medium">
                 Exclusieve prelaunch aanbieding
@@ -393,7 +393,7 @@ export default function BasicTierPage() {
                   </div>
                   <div className="mt-2">
                     <span className="inline-flex items-center px-2 py-1 bg-red-500/20 border border-red-500/30 rounded-full text-red-400 text-xs font-medium">
-                      🔥 50% KORTING
+                      🔥 NORMALE PRIJZEN
                     </span>
                   </div>
                 </h1>
@@ -505,7 +505,7 @@ export default function BasicTierPage() {
                   </span>
                 </div>
                 <div className="inline-flex items-center px-3 py-1 bg-red-500/20 border border-red-500/30 rounded-full text-red-400 text-sm font-medium">
-                  🔥 50% KORTING
+                  🔥 NORMALE PRIJZEN
                 </div>
               </div>
               {selectedTier !== 'lifetime' && (

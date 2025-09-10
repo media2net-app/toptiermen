@@ -192,8 +192,8 @@ export default function LifetimeTierPage() {
     description: 'Lifetime toegang tot alle content',
     originalMonthlyPrice: 1995, // Originele eenmalige betaling
     originalYearlyPrice: 1995, // Originele eenmalige betaling
-    monthlyPrice: 997.50, // Prijs na 50% korting (€1995 * 0.5)
-    yearlyPrice: 997.50, // Prijs na 50% korting (€1995 * 0.5)
+    monthlyPrice: 1995, // Original price
+    yearlyPrice: 1995, // Original price
     features: [
       'Alles uit Premium',
       'Levenslang'
@@ -285,7 +285,7 @@ export default function LifetimeTierPage() {
 
             <div className="bg-gradient-to-r from-[#8BAE5A]/10 to-[#B6C948]/10 border border-[#8BAE5A]/20 rounded-xl p-6 mb-8">
               <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">
-                50% KORTING - Beperkte tijd!
+                NORMALE PRIJZEN - Beperkte tijd!
               </h2>
               <p className="text-[#8BAE5A] font-medium">
                 Exclusieve prelaunch aanbieding
@@ -320,7 +320,7 @@ export default function LifetimeTierPage() {
                 </div>
                 <div className="mt-2">
                   <span className="inline-flex items-center px-2 py-1 bg-red-500/20 border border-red-500/30 rounded-full text-red-400 text-xs font-medium">
-                    🔥 50% KORTING
+                    🔥 NORMALE PRIJZEN
                   </span>
                 </div>
               </h1>
@@ -408,7 +408,7 @@ export default function LifetimeTierPage() {
                   </span>
                 </div>
                 <div className="inline-flex items-center px-3 py-1 bg-red-500/20 border border-red-500/30 rounded-full text-red-400 text-sm font-medium">
-                  🔥 50% KORTING
+                  🔥 NORMALE PRIJZEN
                 </div>
               </div>
               <p className="text-sm text-[#8BAE5A]">
