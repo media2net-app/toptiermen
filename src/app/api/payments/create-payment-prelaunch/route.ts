@@ -7,25 +7,25 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-// Package pricing configuration - these are the FINAL prices that customers pay (already discounted)
+// Package pricing configuration - these are the FINAL prices that customers pay (50% discounted)
 const PACKAGE_PRICING = {
   'basic': {
     name: 'Basic Tier',
-    monthlyPrice: 24.50, // 6 months - prelaunch price (€49 * 0.5)
-    yearlyPrice: 22.00,  // 12 months - prelaunch price (€44 * 0.5)
+    monthlyPrice: 24.50, // 6 months - 50% discount (€49 * 0.5)
+    yearlyPrice: 22,  // 12 months - 50% discount (€44 * 0.5)
     lifetimePrice: null // Not applicable
   },
   'premium': {
     name: 'Premium Tier', 
-    monthlyPrice: 39.50, // 6 months - prelaunch price (€79 * 0.5)
-    yearlyPrice: 35.50,  // 12 months - prelaunch price (€71 * 0.5)
+    monthlyPrice: 39.50, // 6 months - 50% discount (€79 * 0.5)
+    yearlyPrice: 35.50,  // 12 months - 50% discount (€71 * 0.5)
     lifetimePrice: null // Not applicable
   },
   'lifetime': {
     name: 'Lifetime Access',
-    monthlyPrice: 997.50, // One-time payment - prelaunch price (€1995 * 0.5)
-    yearlyPrice: 997.50,  // One-time payment - prelaunch price (€1995 * 0.5)
-    lifetimePrice: 997.50 // One-time payment - prelaunch price (€1995 * 0.5)
+    monthlyPrice: 997.50, // One-time payment - 50% discount (€1995 * 0.5)
+    yearlyPrice: 997.50,  // One-time payment - 50% discount (€1995 * 0.5)
+    lifetimePrice: 997.50 // One-time payment - 50% discount (€1995 * 0.5)
   }
 };
 
@@ -134,8 +134,8 @@ export async function POST(request: NextRequest) {
         package_id: packageId,
         package_name: packageInfo.name,
         payment_period: `${billingPeriod}_${paymentFrequency}`,
-        original_price: finalPrice, // This is now the final price customers pay
-        discounted_price: finalPrice, // Same as original since it's already discounted
+        original_price: finalPrice * 2, // Original price before 50% discount
+        discounted_price: finalPrice, // Final price after 50% discount
         discount_percentage: 50,
         payment_method: paymentFrequency,
         full_name: customerName,
