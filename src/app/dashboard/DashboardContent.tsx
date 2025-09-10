@@ -256,10 +256,13 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
                       return (
                         <Link
                           key={sub.label}
-                          href={sub.href}
-                          onClick={onLinkClick}
+                          href={sub.href || '#'}
+                          onClick={sub.disabled ? (e) => e.preventDefault() : onLinkClick}
+                          title={sub.disabled ? "Binnenkort online" : undefined}
                           className={`block px-4 py-2 rounded-lg text-sm transition-all duration-150 ${
-                            isSubActive 
+                            sub.disabled
+                              ? 'text-gray-500 cursor-not-allowed opacity-50'
+                              : isSubActive 
                               ? 'bg-[#8BAE5A] text-black font-semibold' 
                               : isHighlighted
                               ? 'bg-[#FFD700]/20 text-[#FFD700] border border-[#FFD700]/30'
@@ -316,7 +319,7 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
               }}
             >
               <Link
-                href={item.disabled ? '#' : item.href}
+                href={item.disabled ? '#' : (item.href || '#')}
                 onClick={item.disabled ? (e) => e.preventDefault() : onLinkClick}
                 title={item.disabled ? "Binnenkort online" : undefined}
                 className={`grid grid-cols-[auto_1fr] items-center gap-4 px-4 py-3 rounded-xl font-bold uppercase text-sm tracking-wide transition-all duration-500 font-figtree ${
