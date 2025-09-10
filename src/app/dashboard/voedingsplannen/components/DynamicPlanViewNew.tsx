@@ -736,6 +736,20 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                 <p className="text-gray-300">
                   Gepersonaliseerd voor {planData.userProfile.weight}kg, {planData.userProfile.age} jaar, {planData.userProfile.height}cm, {getActivityLevelDisplay(planData.userProfile.activityLevel || 'moderate')} - {planData.userProfile.goal}
                 </p>
+                <div className="mt-2 flex items-center gap-4 text-sm">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[#8BAE5A] font-semibold">Factor:</span>
+                    <span className="text-white font-bold">{planData.scalingInfo?.scaleFactor?.toFixed(2) || '1.00'}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-gray-400">Standaard:</span>
+                    <span className="text-white">{planData.scalingInfo?.planTargetCalories || 0} kcal</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-gray-400">Jouw doel:</span>
+                    <span className="text-white">{planData.userProfile?.targetCalories || 0} kcal</span>
+                  </div>
+                </div>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -798,12 +812,18 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
 
               {/* Scaling Info */}
               <div className="bg-[#181F17] border border-[#3A4D23] rounded-lg p-4">
-                <h4 className="text-white font-semibold mb-3">⚖️ Scaling Informatie</h4>
+                <h4 className="text-white font-semibold mb-3">⚖️ Personalisatie Informatie</h4>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-gray-300">Scale Factor:</span>
                     <span className="text-white font-mono">
-                      {planData?.scalingInfo?.scaleFactor || 'N/A'}
+                      {planData?.scalingInfo?.scaleFactor?.toFixed(2) || '1.00'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-300">User Gewicht:</span>
+                    <span className="text-white font-mono">
+                      {planData?.userProfile?.weight || 'N/A'} kg
                     </span>
                   </div>
                   <div className="flex justify-between">
@@ -813,7 +833,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-300">Plan Target:</span>
+                    <span className="text-gray-300">Plan Target (100kg):</span>
                     <span className="text-white font-mono">
                       {planData?.scalingInfo?.planTargetCalories || 'N/A'} kcal
                     </span>
@@ -823,6 +843,12 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                     <span className={`font-mono ${(planData?.scalingInfo?.scaleFactor || 1) !== 1 ? 'text-orange-400' : 'text-green-400'}`}>
                       {(planData?.scalingInfo?.scaleFactor || 1) !== 1 ? 'JA' : 'NEE'}
                     </span>
+                  </div>
+                  <div className="mt-3 pt-2 border-t border-[#3A4D23]">
+                    <div className="text-xs text-gray-400">
+                      <div>TTM Formule: {planData?.userProfile?.weight || 'N/A'}kg × 22 × 1.3 = {planData?.scalingInfo?.targetCalories || 'N/A'} kcal</div>
+                      <div>Factor: {planData?.scalingInfo?.targetCalories || 'N/A'} ÷ {planData?.scalingInfo?.planTargetCalories || 'N/A'} = {planData?.scalingInfo?.scaleFactor?.toFixed(2) || '1.00'}</div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1001,27 +1027,53 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
         )}
 
         {/* Daily Requirements */}
-          <div className="bg-[#181F17] border border-[#3A4D23] rounded-xl p-6">
-            <div className="flex items-center gap-3 mb-4">
+        <div className="bg-[#181F17] border border-[#3A4D23] rounded-xl p-6">
+          <div className="flex items-center gap-3 mb-4">
             <ChartBarIcon className="w-6 h-6 text-[#8BAE5A]" />
-            <h3 className="text-xl font-bold text-white">Jouw Dagelijkse Behoefte</h3>
+            <h3 className="text-xl font-bold text-white">Jouw Gepersonaliseerde Dagelijkse Behoefte</h3>
+          </div>
+          
+          {/* Scaling Information */}
+          <div className="mb-6 p-4 bg-[#232D1A] border border-[#3A4D23] rounded-lg">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-[#8BAE5A] font-semibold">⚖️ Personalisatie Factor:</span>
+              <span className="text-white font-bold text-lg">
+                {planData.scalingInfo?.scaleFactor ? planData.scalingInfo.scaleFactor.toFixed(2) : '1.00'}
+              </span>
             </div>
+            <div className="text-sm text-gray-300">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <span className="text-gray-400">Standaard plan (100kg):</span>
+                  <span className="text-white ml-2">{planData.scalingInfo?.planTargetCalories || 0} kcal</span>
+                </div>
+                <div>
+                  <span className="text-gray-400">Jouw behoefte ({planData.userProfile?.weight}kg):</span>
+                  <span className="text-white ml-2">{planData.scalingInfo?.targetCalories || 0} kcal</span>
+                </div>
+              </div>
+              <div className="mt-2 text-xs text-gray-500">
+                Alle ingrediënten worden automatisch aangepast met factor {planData.scalingInfo?.scaleFactor ? planData.scalingInfo.scaleFactor.toFixed(2) : '1.00'}
+              </div>
+            </div>
+          </div>
+
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="text-center">
-              <div className="text-2xl font-bold text-white">{planData.planTargets?.target_calories || 0}</div>
-                <div className="text-sm text-gray-400">Calorieën per dag</div>
-              </div>
-              <div className="text-center">
-              <div className="text-2xl font-bold text-white">{planData.planTargets?.target_protein || 0}g</div>
-                <div className="text-sm text-gray-400">Eiwitten per dag</div>
-              </div>
-              <div className="text-center">
-              <div className="text-2xl font-bold text-white">{planData.planTargets?.target_carbs || 0}g</div>
-                <div className="text-sm text-gray-400">Koolhydraten per dag</div>
-              </div>
-              <div className="text-center">
-              <div className="text-2xl font-bold text-white">{planData.planTargets?.target_fat || 0}g</div>
-                <div className="text-sm text-gray-400">Vetten per dag</div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-white">{planData.userProfile?.targetCalories || 0}</div>
+              <div className="text-sm text-gray-400">Calorieën per dag</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-white">{planData.userProfile?.targetProtein || 0}g</div>
+              <div className="text-sm text-gray-400">Eiwitten per dag</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-white">{planData.userProfile?.targetCarbs || 0}g</div>
+              <div className="text-sm text-gray-400">Koolhydraten per dag</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-white">{planData.userProfile?.targetFat || 0}g</div>
+              <div className="text-sm text-gray-400">Vetten per dag</div>
             </div>
           </div>
         </div>
@@ -1058,7 +1110,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
             {/* Calories Progress Bar */}
             {(() => {
               const current = Math.round(getDayTotal(selectedDay).calories);
-              const target = planData.scalingInfo.planTargetCalories;
+              const target = planData.userProfile?.targetCalories || planData.scalingInfo?.targetCalories || 0;
               const percentage = target > 0 ? Math.round((current / target) * 100) : 0;
               const difference = current - target;
               const isOver = difference > 0;
@@ -1122,7 +1174,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
             {/* Protein Progress Bar */}
             {(() => {
               const current = Math.round(getDayTotal(selectedDay).protein * 10) / 10;
-              const target = planData.planTargets?.target_protein || 0;
+              const target = planData.userProfile?.targetProtein || 0;
               const percentage = target > 0 ? Math.round((current / target) * 100) : 0;
               const difference = current - target;
               const isOver = difference > 0;
@@ -1186,7 +1238,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
             {/* Carbs Progress Bar */}
             {(() => {
               const current = Math.round(getDayTotal(selectedDay).carbs * 10) / 10;
-              const target = planData.planTargets?.target_carbs || 0;
+              const target = planData.userProfile?.targetCarbs || 0;
               const percentage = target > 0 ? Math.round((current / target) * 100) : 0;
               const difference = current - target;
               const isOver = difference > 0;
@@ -1250,7 +1302,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
             {/* Fat Progress Bar */}
             {(() => {
               const current = Math.round(getDayTotal(selectedDay).fat * 10) / 10;
-              const target = planData.planTargets?.target_fat || 0;
+              const target = planData.userProfile?.targetFat || 0;
               const percentage = target > 0 ? Math.round((current / target) * 100) : 0;
               const difference = current - target;
               const isOver = difference > 0;
@@ -1312,8 +1364,31 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
             })()}
           </div>
 
+          {/* Personalization Explanation */}
+          <div className="mt-6 p-4 bg-[#8BAE5A]/10 border border-[#8BAE5A]/30 rounded-lg">
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0">
+                <svg className="w-5 h-5 text-[#8BAE5A] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <h4 className="text-[#8BAE5A] font-semibold mb-1">Hoe werkt de personalisatie?</h4>
+                <p className="text-gray-300 text-sm mb-2">
+                  Dit plan is automatisch aangepast voor jouw gewicht van <span className="font-semibold text-white">{planData.userProfile?.weight}kg</span>. 
+                  Alle ingrediënten zijn geschaald met factor <span className="font-semibold text-white">{planData.scalingInfo?.scaleFactor?.toFixed(2) || '1.00'}</span>.
+                </p>
+                <div className="text-xs text-gray-400">
+                  <div className="mb-1">• <span className="text-[#8BAE5A]">Standaard plan:</span> Voor 100kg matig actief ({planData.scalingInfo?.planTargetCalories || 0} kcal)</div>
+                  <div className="mb-1">• <span className="text-[#8BAE5A]">Jouw plan:</span> Voor {planData.userProfile?.weight}kg matig actief ({planData.userProfile?.targetCalories || 0} kcal)</div>
+                  <div>• <span className="text-[#8BAE5A]">Factor:</span> {planData.scalingInfo?.scaleFactor?.toFixed(2) || '1.00'} (alle ingrediënten worden automatisch aangepast)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Safety Margin Notice */}
-          <div className="mt-6 p-4 bg-blue-900/20 border border-blue-500/30 rounded-lg">
+          <div className="mt-4 p-4 bg-blue-900/20 border border-blue-500/30 rounded-lg">
             <div className="flex items-start gap-3">
               <div className="flex-shrink-0">
                 <svg className="w-5 h-5 text-blue-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1462,7 +1537,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                                 />
                                 {isAdmin && showDebugPanel && (planData?.scalingInfo?.scaleFactor || 1) !== 1 && (
                                   <div className="text-green-400 text-xs mt-1">
-                                    ({((ingredient.amount || 0) / (planData?.scalingInfo?.scaleFactor || 1)).toFixed(1)})
+                                    Orig: {((ingredient.amount || 0) / (planData?.scalingInfo?.scaleFactor || 1)).toFixed(1)}
                                   </div>
                                 )}
                               </td>

@@ -34,6 +34,26 @@ export default function DatabaseViewPage() {
       setLoading(true);
       console.log('🔍 Fetching packages from API...');
       
+      // First try the debug endpoint to see what's happening
+      const debugResponse = await fetch('/api/admin/debug-packages');
+      const debugResult = await debugResponse.json();
+      
+      console.log('🔍 Debug result:', debugResult);
+      
+      if (!debugResult.success) {
+        console.error('❌ Debug API error:', debugResult.error);
+        setError(`Debug error: ${debugResult.error} (Step: ${debugResult.step})`);
+        setPackages([]);
+        return;
+      }
+      
+      console.log('✅ Debug successful:', {
+        tableExists: debugResult.tableExists,
+        count: debugResult.count,
+        packagesLength: debugResult.packages?.length || 0
+      });
+      
+      // Now try the regular endpoint
       const response = await fetch('/api/admin/get-packages-for-frontend');
       const result = await response.json();
 
@@ -48,7 +68,7 @@ export default function DatabaseViewPage() {
       }
     } catch (err) {
       console.error('❌ Error:', err);
-      setError('Error fetching data');
+      setError(`Error fetching data: ${err.message}`);
     } finally {
       setLoading(false);
     }
@@ -141,12 +161,30 @@ export default function DatabaseViewPage() {
           <div className="text-white">
             {loading ? 'Laden...' : `${packages.length} pakketten gevonden`}
           </div>
-          <button
-            onClick={fetchPackages}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
-          >
-            🔄 Vernieuwen
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={async () => {
+                try {
+                  const response = await fetch('/api/admin/debug-packages');
+                  const result = await response.json();
+                  console.log('🔍 Debug result:', result);
+                  alert(`Debug Info:\nTable exists: ${result.tableExists}\nCount: ${result.count}\nPackages: ${result.packages?.length || 0}\nError: ${result.error || 'None'}`);
+                } catch (err) {
+                  console.error('Debug error:', err);
+                  alert(`Debug error: ${err.message}`);
+                }
+              }}
+              className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors"
+            >
+              🔍 Debug Info
+            </button>
+            <button
+              onClick={fetchPackages}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+            >
+              🔄 Vernieuwen
+            </button>
+          </div>
         </div>
 
         {/* Error Message */}
