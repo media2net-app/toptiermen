@@ -174,52 +174,52 @@ export default function ProfielDetail() {
   const memberBadges = badges.slice(0, Math.min(3, Math.floor((member.points || 0) / 100) + 1));
 
   return (
-    <div className="px-4 md:px-12 py-8">
+    <div className="px-4 sm:px-6 md:px-12 py-6 sm:py-8">
       {/* Back button */}
-      <div className="mb-6">
+      <div className="mb-4 sm:mb-6">
         <button
           onClick={handleBack}
-          className="flex items-center gap-2 text-[#8BAE5A] hover:text-[#B6C948] transition-colors"
+          className="flex items-center gap-2 text-[#8BAE5A] hover:text-[#B6C948] transition-colors text-sm sm:text-base"
         >
           ← Terug naar leden
         </button>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-8 items-start mb-8">
-        <div className="relative">
+      <div className="flex flex-col sm:flex-col md:flex-row gap-4 sm:gap-6 md:gap-8 items-start mb-6 sm:mb-8">
+        <div className="relative mx-auto sm:mx-0">
           <Image 
             src={avatarUrl} 
             alt={member.full_name || 'Lid profiel'} 
             width={120} 
             height={120} 
-            className="w-32 h-32 rounded-full border-4 border-[#8BAE5A] object-cover" 
+            className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-full border-2 sm:border-4 border-[#8BAE5A] object-cover" 
           />
         </div>
-        <div className="flex-1 flex flex-col gap-2">
-          <div className="flex items-center gap-3">
-            <h2 className="text-2xl font-bold text-white">{member.full_name || 'Onbekende gebruiker'}</h2>
-            <span className="flex items-center gap-1 text-[#FFD700] font-semibold text-lg">
+        <div className="flex-1 flex flex-col gap-2 text-center sm:text-left">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-2 sm:gap-3">
+            <h2 className="text-xl sm:text-2xl font-bold text-white">{member.full_name || 'Onbekende gebruiker'}</h2>
+            <span className="flex items-center gap-1 text-[#FFD700] font-semibold text-sm sm:text-lg">
               {rankIcon} {currentMemberRank ? `Level ${currentMemberRank.rank_order} - ${currentMemberRank.name}` : displayRank}
             </span>
           </div>
           <div className="text-[#8BAE5A] text-sm">{member.location || 'Locatie onbekend'}</div>
           {memberInterests.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-1">
+            <div className="flex flex-wrap gap-2 mt-1 justify-center sm:justify-start">
               {memberInterests.map(tag => (
                 <span key={tag} className="bg-[#3A4D23]/60 text-[#8BAE5A] px-2 py-0.5 rounded-full text-xs font-semibold">#{tag}</span>
               ))}
             </div>
           )}
           {member.bio && (
-            <div className="mt-3 text-white/80 text-base">{member.bio}</div>
+            <div className="mt-3 text-white/80 text-sm sm:text-base">{member.bio}</div>
           )}
           {member.points && (
-            <div className="mt-2 text-[#FFD700] font-semibold">
+            <div className="mt-2 text-[#FFD700] font-semibold text-sm sm:text-base">
               {member.points} punten • {member.missions_completed || 0} missies voltooid
             </div>
           )}
           {memberBadges.length > 0 && (
-            <div className="flex gap-2 mt-3">
+            <div className="flex gap-2 mt-3 justify-center sm:justify-start">
               {memberBadges.map(b => (
                 <div key={b.name} className="flex flex-col items-center">
                   <Image src={b.img} alt={b.name} width={32} height={32} className="rounded-full" />
@@ -232,12 +232,12 @@ export default function ProfielDetail() {
       </div>
 
       {/* Lid sinds */}
-      <div className="mb-8">
-        <h3 className="text-lg font-bold text-white mb-2">Lidmaatschap</h3>
-        <div className="bg-[#232D1A]/80 rounded-lg px-4 py-3 text-white border border-[#3A4D23]/40">
-          <div className="text-[#8BAE5A] font-semibold">Lid sinds {formatDate(member.created_at)}</div>
+      <div className="mb-6 sm:mb-8">
+        <h3 className="text-base sm:text-lg font-bold text-white mb-2">Lidmaatschap</h3>
+        <div className="bg-[#232D1A]/80 rounded-lg px-3 sm:px-4 py-3 text-white border border-[#3A4D23]/40">
+          <div className="text-[#8BAE5A] font-semibold text-sm sm:text-base">Lid sinds {formatDate(member.created_at)}</div>
           {member.last_login && (
-            <div className="text-sm text-white/70 mt-1">
+            <div className="text-xs sm:text-sm text-white/70 mt-1">
               Laatste login: {formatDate(member.last_login)}
             </div>
           )}
@@ -246,16 +246,16 @@ export default function ProfielDetail() {
 
       {/* Prestaties */}
       {(member.points || member.missions_completed) && (
-        <div className="mb-8">
-          <h3 className="text-lg font-bold text-white mb-2">Prestaties</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-[#232D1A]/80 rounded-lg px-4 py-3 text-white border border-[#3A4D23]/40">
-              <div className="text-[#FFD700] font-bold text-xl">{member.points || 0}</div>
-              <div className="text-[#8BAE5A] text-sm">Totaal punten</div>
+        <div className="mb-6 sm:mb-8">
+          <h3 className="text-base sm:text-lg font-bold text-white mb-2">Prestaties</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            <div className="bg-[#232D1A]/80 rounded-lg px-3 sm:px-4 py-3 text-white border border-[#3A4D23]/40">
+              <div className="text-[#FFD700] font-bold text-lg sm:text-xl">{member.points || 0}</div>
+              <div className="text-[#8BAE5A] text-xs sm:text-sm">Totaal punten</div>
             </div>
-            <div className="bg-[#232D1A]/80 rounded-lg px-4 py-3 text-white border border-[#3A4D23]/40">
-              <div className="text-[#FFD700] font-bold text-xl">{member.missions_completed || 0}</div>
-              <div className="text-[#8BAE5A] text-sm">Missies voltooid</div>
+            <div className="bg-[#232D1A]/80 rounded-lg px-3 sm:px-4 py-3 text-white border border-[#3A4D23]/40">
+              <div className="text-[#FFD700] font-bold text-lg sm:text-xl">{member.missions_completed || 0}</div>
+              <div className="text-[#8BAE5A] text-xs sm:text-sm">Missies voltooid</div>
             </div>
           </div>
         </div>

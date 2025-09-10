@@ -414,9 +414,9 @@ export default function LedenOverzicht() {
   return (
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
       {/* Header */}
-      <div className="mb-6 sm:mb-8">
-        <h2 className="text-2xl sm:text-3xl font-bold text-white mb-1">De Broeders</h2>
-        <p className="text-[#8BAE5A] text-sm sm:text-lg mb-2">Vind, connect en leer van de andere leden van Top Tier Men.</p>
+      <div className="mb-4 sm:mb-6 md:mb-8">
+        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-1">De Broeders</h2>
+        <p className="text-[#8BAE5A] text-sm sm:text-base md:text-lg mb-2">Vind, connect en leer van de andere leden van Top Tier Men.</p>
         <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-[#FFD700] text-xs sm:text-sm font-semibold">
           <span>Momenteel {members.length} actieve leden</span>
           <span className="flex items-center gap-1">
@@ -431,7 +431,7 @@ export default function LedenOverzicht() {
         </div>
       </div>
       {/* Filters & Search */}
-      <div className="flex flex-col gap-3 sm:gap-4 mb-6 sm:mb-8">
+      <div className="flex flex-col gap-3 sm:gap-4 mb-4 sm:mb-6 md:mb-8">
         <input
           type="text"
           className="w-full bg-[#232D1A]/80 rounded-xl p-3 text-white placeholder:text-[#8BAE5A] border border-[#3A4D23]/40 text-sm sm:text-base"
@@ -439,7 +439,7 @@ export default function LedenOverzicht() {
           value={search}
           onChange={e => setSearch(e.target.value)}
         />
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
           <select
             className="w-full bg-[#232D1A]/80 rounded-xl p-3 text-white border border-[#3A4D23]/40 text-sm sm:text-base"
             value={selectedRank}
@@ -483,7 +483,7 @@ export default function LedenOverzicht() {
         </div>
       </div>
       {/* Leden Gallerij */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
         {filtered.map((m) => {
           const memberInterests = getMemberInterests(m.interests);
           const memberRank = m.current_rank?.name || m.fallback_rank || 'Recruit';
@@ -509,8 +509,8 @@ export default function LedenOverzicht() {
           };
           
           return (
-            <div key={m.id} className="bg-[#232D1A]/90 rounded-2xl shadow-xl border border-[#3A4D23]/40 p-4 sm:p-5 flex flex-col items-center gap-3 hover:shadow-2xl transition-all">
-              <Link href={`/dashboard/brotherhood/leden/${m.id}`} className="w-full flex flex-col items-center gap-3 group cursor-pointer" style={{ textDecoration: 'none' }}>
+            <div key={m.id} className="bg-[#232D1A]/90 rounded-2xl shadow-xl border border-[#3A4D23]/40 p-3 sm:p-4 md:p-5 flex flex-col items-center gap-2 sm:gap-3 hover:shadow-2xl transition-all">
+              <Link href={`/dashboard/brotherhood/leden/${m.id}`} className="w-full flex flex-col items-center gap-2 sm:gap-3 group cursor-pointer" style={{ textDecoration: 'none' }}>
                 <div className="relative">
                   {m.avatar_url ? (
                     <Image 
@@ -518,39 +518,39 @@ export default function LedenOverzicht() {
                       alt={memberName} 
                       width={80} 
                       height={80} 
-                      className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 border-[#8BAE5A] object-cover group-hover:scale-105 transition-transform" 
+                      className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full border-2 border-[#8BAE5A] object-cover group-hover:scale-105 transition-transform" 
                     />
                   ) : (
-                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 border-[#8BAE5A] bg-gradient-to-br from-[#3A4D23] to-[#232D1A] flex items-center justify-center group-hover:scale-105 transition-transform">
-                      <span className="text-[#8BAE5A] font-bold text-lg sm:text-xl">
+                    <div className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full border-2 border-[#8BAE5A] bg-gradient-to-br from-[#3A4D23] to-[#232D1A] flex items-center justify-center group-hover:scale-105 transition-transform">
+                      <span className="text-[#8BAE5A] font-bold text-sm sm:text-lg md:text-xl">
                         {getInitials(memberName)}
                       </span>
                     </div>
                   )}
                   {isMemberOnline && (
                     <span 
-                      className="absolute bottom-1 right-1 w-4 h-4 sm:w-5 sm:h-5 bg-[#8BAE5A] border-3 border-white rounded-full shadow-lg" 
+                      className="absolute bottom-0 right-0 w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 bg-[#8BAE5A] border-2 border-white rounded-full shadow-lg" 
                       title="Online nu"
                       style={{
                         animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
                       }}
                     />
                   )}
-                  {isMemberNew && <span className="absolute -top-1 -right-1 bg-[#FFD700] text-[#181F17] text-xs px-2 py-1 rounded-full font-bold">Nieuw</span>}
+                  {isMemberNew && <span className="absolute -top-1 -right-1 bg-[#FFD700] text-[#181F17] text-xs px-1 sm:px-2 py-0.5 sm:py-1 rounded-full font-bold">Nieuw</span>}
                 </div>
-                <div className="text-base sm:text-lg font-bold text-white text-center group-hover:text-[#FFD700] transition-colors break-words w-full">{memberName}</div>
-                <div className="flex items-center gap-2 text-[#FFD700] font-semibold text-xs sm:text-sm text-center">
+                <div className="text-sm sm:text-base md:text-lg font-bold text-white text-center group-hover:text-[#FFD700] transition-colors break-words w-full">{memberName}</div>
+                <div className="flex items-center gap-1 sm:gap-2 text-[#FFD700] font-semibold text-xs sm:text-sm text-center">
                   <span>{rankIcon}</span>
-                  <span className="break-words">{displayRank}</span>
+                  <span className="break-words text-xs sm:text-sm">{displayRank}</span>
                 </div>
                 <div className="text-xs text-[#8BAE5A] mb-1 text-center break-words">{m.location || 'Locatie onbekend'}</div>
                 {memberInterests.length > 0 && (
                   <div className="flex flex-wrap gap-1 sm:gap-2 justify-center mb-2 w-full">
                     {memberInterests.slice(0, 2).map(tag => (
-                      <span key={tag} className="bg-[#3A4D23]/60 text-[#8BAE5A] px-2 py-0.5 rounded-full text-xs font-semibold break-words">#{tag}</span>
+                      <span key={tag} className="bg-[#3A4D23]/60 text-[#8BAE5A] px-1 sm:px-2 py-0.5 rounded-full text-xs font-semibold break-words">#{tag}</span>
                     ))}
                     {memberInterests.length > 2 && (
-                      <span className="bg-[#3A4D23]/60 text-[#8BAE5A] px-2 py-0.5 rounded-full text-xs font-semibold">+{memberInterests.length - 2}</span>
+                      <span className="bg-[#3A4D23]/60 text-[#8BAE5A] px-1 sm:px-2 py-0.5 rounded-full text-xs font-semibold">+{memberInterests.length - 2}</span>
                     )}
                   </div>
                 )}

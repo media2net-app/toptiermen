@@ -225,36 +225,36 @@ export default function Brotherhood() {
       
       <div className="space-y-8">
         {/* Stats Overview */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-[#232D1A]/80 rounded-xl p-4 text-center border border-[#3A4D23]/40">
-            <FaUsers className="w-8 h-8 text-[#8BAE5A] mx-auto mb-2" />
-            <div className="text-2xl font-bold text-white">{myConnections.length}</div>
-            <div className="text-[#8BAE5A] text-sm">Connecties</div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+          <div className="bg-[#232D1A]/80 rounded-xl p-3 sm:p-4 text-center border border-[#3A4D23]/40">
+            <FaUsers className="w-6 h-6 sm:w-8 sm:h-8 text-[#8BAE5A] mx-auto mb-2" />
+            <div className="text-lg sm:text-2xl font-bold text-white">{myConnections.length}</div>
+            <div className="text-[#8BAE5A] text-xs sm:text-sm">Connecties</div>
           </div>
-          <div className="bg-[#232D1A]/80 rounded-xl p-4 text-center border border-[#3A4D23]/40">
-            <FaTrophy className="w-8 h-8 text-[#8BAE5A] mx-auto mb-2" />
-            <div className="text-2xl font-bold text-white">{myGroups.length}</div>
-            <div className="text-[#8BAE5A] text-sm">Groepen</div>
+          <div className="bg-[#232D1A]/80 rounded-xl p-3 sm:p-4 text-center border border-[#3A4D23]/40">
+            <FaTrophy className="w-6 h-6 sm:w-8 sm:h-8 text-[#8BAE5A] mx-auto mb-2" />
+            <div className="text-lg sm:text-2xl font-bold text-white">{myGroups.length}</div>
+            <div className="text-[#8BAE5A] text-xs sm:text-sm">Groepen</div>
           </div>
-          <div className="bg-[#232D1A]/80 rounded-xl p-4 text-center border border-[#3A4D23]/40">
-            <FaCalendarAlt className="w-8 h-8 text-[#8BAE5A] mx-auto mb-2" />
-            <div className="text-2xl font-bold text-white">{upcomingEvents.length}</div>
-            <div className="text-[#8BAE5A] text-sm">Evenementen</div>
+          <div className="bg-[#232D1A]/80 rounded-xl p-3 sm:p-4 text-center border border-[#3A4D23]/40">
+            <FaCalendarAlt className="w-6 h-6 sm:w-8 sm:h-8 text-[#8BAE5A] mx-auto mb-2" />
+            <div className="text-lg sm:text-2xl font-bold text-white">{upcomingEvents.length}</div>
+            <div className="text-[#8BAE5A] text-xs sm:text-sm">Evenementen</div>
           </div>
-          <div className="bg-[#232D1A]/80 rounded-xl p-4 text-center border border-[#3A4D23]/40">
-            <FaComments className="w-8 h-8 text-[#8BAE5A] mx-auto mb-2" />
-            <div className="text-2xl font-bold text-white">{recentTopics.length}</div>
-            <div className="text-[#8BAE5A] text-sm">Topics</div>
+          <div className="bg-[#232D1A]/80 rounded-xl p-3 sm:p-4 text-center border border-[#3A4D23]/40">
+            <FaComments className="w-6 h-6 sm:w-8 sm:h-8 text-[#8BAE5A] mx-auto mb-2" />
+            <div className="text-lg sm:text-2xl font-bold text-white">{recentTopics.length}</div>
+            <div className="text-[#8BAE5A] text-xs sm:text-sm">Topics</div>
           </div>
         </div>
 
         {/* Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
           {/* My Groups */}
-          <div className="bg-[#232D1A]/80 rounded-2xl p-6 border border-[#3A4D23]/40">
+          <div className="bg-[#232D1A]/80 rounded-2xl p-4 sm:p-6 border border-[#3A4D23]/40">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-white">Mijn Groepen</h2>
-              <Link href="/dashboard/brotherhood/mijn-groepen" className="text-[#8BAE5A] hover:text-[#FFD700] text-sm">
+              <h2 className="text-lg sm:text-xl font-bold text-white">Mijn Groepen</h2>
+              <Link href="/dashboard/brotherhood/mijn-groepen" className="text-[#8BAE5A] hover:text-[#FFD700] text-xs sm:text-sm">
                 Bekijk alle
               </Link>
             </div>
@@ -266,11 +266,11 @@ export default function Brotherhood() {
                     alt={group.name}
                     width={40}
                     height={40}
-                    className="rounded-full"
+                    className="w-8 h-8 sm:w-10 sm:h-10 rounded-full"
                   />
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-white">{group.name}</h3>
-                    <p className="text-[#8BAE5A] text-sm">{group.member_count} leden</p>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-white text-sm sm:text-base truncate">{group.name}</h3>
+                    <p className="text-[#8BAE5A] text-xs sm:text-sm">{group.member_count} leden</p>
                   </div>
                 </div>
               ))}
@@ -278,14 +278,14 @@ export default function Brotherhood() {
           </div>
 
           {/* My Connections */}
-          <div className="bg-[#232D1A]/80 rounded-2xl p-6 border border-[#3A4D23]/40">
+          <div className="bg-[#232D1A]/80 rounded-2xl p-4 sm:p-6 border border-[#3A4D23]/40">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-white">Mijn Connecties</h2>
-              <Link href="/dashboard/brotherhood/leden" className="text-[#8BAE5A] hover:text-[#FFD700] text-sm">
+              <h2 className="text-lg sm:text-xl font-bold text-white">Mijn Connecties</h2>
+              <Link href="/dashboard/brotherhood/leden" className="text-[#8BAE5A] hover:text-[#FFD700] text-xs sm:text-sm">
                 Bekijk alle
               </Link>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {myConnections.map((connection) => (
                 <div key={connection.id} className="flex items-center gap-2 p-2 bg-[#181F17] rounded-lg">
                   <Image
@@ -293,10 +293,10 @@ export default function Brotherhood() {
                     alt={connection.name}
                     width={32}
                     height={32}
-                    className="rounded-full"
+                    className="w-6 h-6 sm:w-8 sm:h-8 rounded-full"
                   />
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-white text-sm truncate">{connection.name}</h3>
+                    <h3 className="font-semibold text-white text-xs sm:text-sm truncate">{connection.name}</h3>
                     <p className="text-[#8BAE5A] text-xs">{connection.rank}</p>
                   </div>
                 </div>
@@ -305,18 +305,18 @@ export default function Brotherhood() {
           </div>
 
           {/* Upcoming Events */}
-          <div className="bg-[#232D1A]/80 rounded-2xl p-6 border border-[#3A4D23]/40">
+          <div className="bg-[#232D1A]/80 rounded-2xl p-4 sm:p-6 border border-[#3A4D23]/40">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-white">Aankomende Evenementen</h2>
-              <Link href="/dashboard/brotherhood/evenementen" className="text-[#8BAE5A] hover:text-[#FFD700] text-sm">
+              <h2 className="text-lg sm:text-xl font-bold text-white">Aankomende Evenementen</h2>
+              <Link href="/dashboard/brotherhood/evenementen" className="text-[#8BAE5A] hover:text-[#FFD700] text-xs sm:text-sm">
                 Bekijk alle
               </Link>
             </div>
             <div className="space-y-3">
               {upcomingEvents.map((event) => (
                 <div key={event.id} className="p-3 bg-[#181F17] rounded-lg">
-                  <h3 className="font-semibold text-white">{event.title}</h3>
-                  <p className="text-[#8BAE5A] text-sm">{event.date} • {event.type}</p>
+                  <h3 className="font-semibold text-white text-sm sm:text-base">{event.title}</h3>
+                  <p className="text-[#8BAE5A] text-xs sm:text-sm">{event.date} • {event.type}</p>
                   <p className="text-[#8BAE5A] text-xs">{event.attendees} deelnemers</p>
                 </div>
               ))}
@@ -324,10 +324,10 @@ export default function Brotherhood() {
           </div>
 
           {/* Recent Topics */}
-          <div className="bg-[#232D1A]/80 rounded-2xl p-6 border border-[#3A4D23]/40">
+          <div className="bg-[#232D1A]/80 rounded-2xl p-4 sm:p-6 border border-[#3A4D23]/40">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-white">Recente Topics</h2>
-              <Link href="/dashboard/brotherhood/forum" className="text-[#8BAE5A] hover:text-[#FFD700] text-sm">
+              <h2 className="text-lg sm:text-xl font-bold text-white">Recente Topics</h2>
+              <Link href="/dashboard/brotherhood/forum" className="text-[#8BAE5A] hover:text-[#FFD700] text-xs sm:text-sm">
                 Bekijk alle
               </Link>
             </div>
@@ -348,9 +348,9 @@ export default function Brotherhood() {
         <div className="text-center">
           <Link
             href="/dashboard/brotherhood/forum"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] rounded-xl font-semibold hover:from-[#A6C97B] hover:to-[#FFE55C] transition-all shadow-lg"
+            className="inline-flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] rounded-xl font-semibold hover:from-[#A6C97B] hover:to-[#FFE55C] transition-all shadow-lg text-sm sm:text-base"
           >
-            <FaComments className="w-5 h-5" />
+            <FaComments className="w-4 h-4 sm:w-5 sm:h-5" />
             Start een Discussie
           </Link>
         </div>

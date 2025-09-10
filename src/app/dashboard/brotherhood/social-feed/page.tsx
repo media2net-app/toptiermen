@@ -476,7 +476,7 @@ const SocialFeedPage = () => {
       </section>
 
       {/* Feed List */}
-      <section className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {loading ? (
           <div className="col-span-full bg-[#232D1A]/80 rounded-xl shadow-xl border border-[#3A4D23]/40 p-8 text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
@@ -489,24 +489,25 @@ const SocialFeedPage = () => {
           </div>
         ) : (
           posts.map((post) => (
-            <div key={post.id} className="bg-[#232D1A]/80 rounded-xl shadow-xl border border-[#3A4D23]/40 p-6">
+            <div key={post.id} className="bg-[#232D1A]/80 rounded-xl shadow-xl border border-[#3A4D23]/40 p-4 sm:p-6">
               {/* Post header */}
-              <div className="flex items-center gap-3 mb-4">
+              <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
                 <Image 
                   src={post.user.avatar_url || "/profielfoto.png"} 
                   alt={post.user.full_name} 
                   width={40} 
                   height={40} 
-                  className="w-10 h-10 rounded-full border-2 border-[#8BAE5A] object-cover flex-shrink-0" 
+                  className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-[#8BAE5A] object-cover flex-shrink-0" 
                 />
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center flex-wrap gap-2">
-                    <span className="font-semibold text-white text-base truncate">
+                  <div className="flex items-center flex-wrap gap-1 sm:gap-2">
+                    <span className="font-semibold text-white text-sm sm:text-base truncate">
                       {post.user.full_name}
                     </span>
-                    <span className="text-xs text-[#FFD700] bg-[#3A4D23] px-2 py-1 rounded inline-flex items-center">
+                    <span className="text-xs text-[#FFD700] bg-[#3A4D23] px-1 sm:px-2 py-0.5 sm:py-1 rounded inline-flex items-center">
                       <span className="mr-1">👑</span>
-                      {post.user.rank || 'Member'}
+                      <span className="hidden sm:inline">{post.user.rank || 'Member'}</span>
+                      <span className="sm:hidden">{post.user.rank || 'M'}</span>
                     </span>
                     <span className="text-xs text-[#8BAE5A]">
                       {getPostTypeIcon(post.post_type)}
@@ -519,15 +520,15 @@ const SocialFeedPage = () => {
               </div>
 
               {/* Post content */}
-              <div className="mb-4 text-[#E1CBB3] text-base whitespace-pre-wrap">
+              <div className="mb-3 sm:mb-4 text-[#E1CBB3] text-sm sm:text-base whitespace-pre-wrap">
                 {post.content}
               </div>
 
               {/* Post tags */}
               {post.tags && post.tags.length > 0 && (
-                <div className="mb-4 flex flex-wrap gap-2">
+                <div className="mb-3 sm:mb-4 flex flex-wrap gap-1 sm:gap-2">
                   {post.tags.map((tag, index) => (
-                    <span key={index} className="text-xs bg-[#3A4D23] text-[#8BAE5A] px-3 py-1 rounded-full">
+                    <span key={index} className="text-xs bg-[#3A4D23] text-[#8BAE5A] px-2 sm:px-3 py-0.5 sm:py-1 rounded-full">
                       #{tag}
                     </span>
                   ))}
@@ -536,37 +537,37 @@ const SocialFeedPage = () => {
 
               {/* Post location */}
               {post.location && (
-                <div className="mb-4 flex items-center gap-2 text-sm text-[#8BAE5A]">
-                  <MapPinIcon className="w-4 h-4" />
-                  {post.location}
+                <div className="mb-3 sm:mb-4 flex items-center gap-2 text-xs sm:text-sm text-[#8BAE5A]">
+                  <MapPinIcon className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <span className="truncate">{post.location}</span>
                 </div>
               )}
 
               {/* Post actions */}
-              <div className="flex items-center gap-6 text-[#8BAE5A]">
+              <div className="flex items-center gap-3 sm:gap-6 text-[#8BAE5A]">
                 <button 
                   onClick={() => toggleLike(post.id, 'boks')}
-                  className={`flex items-center gap-2 hover:text-[#FFD700] active:text-[#FFD700] transition-colors py-2 px-3 -ml-3 rounded-lg ${
+                  className={`flex items-center gap-1 sm:gap-2 hover:text-[#FFD700] active:text-[#FFD700] transition-colors py-1 sm:py-2 px-2 sm:px-3 -ml-2 sm:-ml-3 rounded-lg ${
                     post.user_liked && post.user_like_type === 'boks' ? 'text-[#FFD700]' : ''
                   }`}
                 >
-                  <span className="text-xl">👊</span>
-                  <span className="text-sm">{post.likes_count} Boks</span>
+                  <span className="text-lg sm:text-xl">👊</span>
+                  <span className="text-xs sm:text-sm">{post.likes_count} Boks</span>
                 </button>
                 
                 <button 
                   onClick={() => openCommentModal(post)}
-                  className="flex items-center gap-2 hover:text-[#FFD700] active:text-[#FFD700] transition-colors py-2 px-3 rounded-lg"
+                  className="flex items-center gap-1 sm:gap-2 hover:text-[#FFD700] active:text-[#FFD700] transition-colors py-1 sm:py-2 px-2 sm:px-3 rounded-lg"
                 >
-                  <span className="text-xl">💬</span>
-                  <span className="text-sm">{post.comments_count} Reacties</span>
+                  <span className="text-lg sm:text-xl">💬</span>
+                  <span className="text-xs sm:text-sm">{post.comments_count} Reacties</span>
                 </button>
 
                 {/* Additional like types */}
-                <div className="flex gap-2">
+                <div className="flex gap-1 sm:gap-2">
                   <button 
                     onClick={() => toggleLike(post.id, 'fire')}
-                    className={`p-2 rounded-lg hover:bg-[#3A4D23] transition-colors ${
+                    className={`p-1 sm:p-2 rounded-lg hover:bg-[#3A4D23] transition-colors ${
                       post.user_liked && post.user_like_type === 'fire' ? 'text-[#FFD700]' : ''
                     }`}
                   >
@@ -574,7 +575,7 @@ const SocialFeedPage = () => {
                   </button>
                   <button 
                     onClick={() => toggleLike(post.id, 'respect')}
-                    className={`p-2 rounded-lg hover:bg-[#3A4D23] transition-colors ${
+                    className={`p-1 sm:p-2 rounded-lg hover:bg-[#3A4D23] transition-colors ${
                       post.user_liked && post.user_like_type === 'respect' ? 'text-[#FFD700]' : ''
                     }`}
                   >
@@ -582,7 +583,7 @@ const SocialFeedPage = () => {
                   </button>
                   <button 
                     onClick={() => toggleLike(post.id, 'love')}
-                    className={`p-2 rounded-lg hover:bg-[#3A4D23] transition-colors ${
+                    className={`p-1 sm:p-2 rounded-lg hover:bg-[#3A4D23] transition-colors ${
                       post.user_liked && post.user_like_type === 'love' ? 'text-[#FFD700]' : ''
                     }`}
                   >
