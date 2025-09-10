@@ -9,13 +9,15 @@ interface PrelaunchCountdownProps {
 }
 
 export default function PrelaunchCountdown({ 
-  endDate = (() => {
+  endDate,
+  className = ''
+}: PrelaunchCountdownProps) {
+  // Calculate endDate only once
+  const targetDate = endDate || (() => {
     const today = new Date();
     today.setHours(20, 0, 0, 0); // Set to 20:00 today
     return today;
-  })(),
-  className = ''
-}: PrelaunchCountdownProps) {
+  })();
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
     hours: 0,
@@ -27,7 +29,7 @@ export default function PrelaunchCountdown({
   useEffect(() => {
     const calculateTimeLeft = () => {
       const now = new Date().getTime();
-      const end = endDate.getTime();
+      const end = targetDate.getTime();
       const difference = end - now;
 
       if (difference > 0) {
@@ -50,7 +52,7 @@ export default function PrelaunchCountdown({
     const timer = setInterval(calculateTimeLeft, 1000);
 
     return () => clearInterval(timer);
-  }, [endDate]);
+  }, [targetDate]);
 
   if (isExpired) {
     return (

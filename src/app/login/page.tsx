@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { EnvelopeIcon, LockClosedIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import LoginDebugger from '@/components/LoginDebugger';
-import PrelaunchCountdown from '@/components/PrelaunchCountdown';
 // import { useCacheBuster } from '@/components/CacheBuster'; - DISABLED TO PREVENT LOGOUT
 
 // Auth configuration constants
@@ -493,13 +492,6 @@ function LoginPageContent() {
             />
           </div>
           
-          {/* Platform Live Timer */}
-          <div className="flex justify-center mb-4">
-            <div className="text-center">
-              <p className="text-[#8BAE5A] text-sm mb-2 font-figtree">Platform gaat live om 20:00:</p>
-              <PrelaunchCountdown className="text-sm" />
-            </div>
-          </div>
           
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#B6C948] mx-auto mb-4"></div>
@@ -570,13 +562,6 @@ function LoginPageContent() {
           />
         </div>
 
-        {/* Platform Live Timer */}
-        <div className="flex justify-center mb-4">
-          <div className="text-center">
-            <p className="text-[#8BAE5A] text-sm mb-2 font-figtree">Platform gaat live om 20:00:</p>
-            <PrelaunchCountdown className="text-sm" />
-          </div>
-        </div>
 
         <p className="text-[#B6C948] text-center mb-6 sm:mb-8 text-base sm:text-lg font-figtree">Log in op je dashboard</p>
         
@@ -831,13 +816,6 @@ export default function LoginPage() {
             />
           </div>
           
-          {/* Platform Live Timer */}
-          <div className="flex justify-center mb-4">
-            <div className="text-center">
-              <p className="text-[#8BAE5A] text-sm mb-2 font-figtree">Platform gaat live om 20:00:</p>
-              <PrelaunchCountdown className="text-sm" />
-            </div>
-          </div>
           
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#8BAE5A] mx-auto"></div>

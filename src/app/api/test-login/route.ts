@@ -8,10 +8,13 @@ export async function POST(request: NextRequest) {
   try {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
-    // Test login with a known user (Chiel)
+    const body = await request.json();
+    const { email, password } = body;
+    
+    // Test login with provided credentials
     const { data, error } = await supabase.auth.signInWithPassword({
-      email: 'chiel@toptiermen.eu',
-      password: 'Test123!'
+      email: email,
+      password: password
     });
 
     if (error) {
