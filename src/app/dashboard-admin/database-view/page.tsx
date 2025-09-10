@@ -222,7 +222,10 @@ export default function DatabaseViewPage() {
                     Type
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                    Datum
+                    Aanmaakdatum
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    Betalingstijd
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                     Acties
@@ -303,6 +306,21 @@ export default function DatabaseViewPage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
                         {formatDate(pkg.created_at)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                        {pkg.payment_status === 'paid' ? (
+                          <span className="text-green-400">
+                            {formatDate(pkg.updated_at)}
+                          </span>
+                        ) : pkg.payment_status === 'failed' ? (
+                          <span className="text-red-400">
+                            {formatDate(pkg.updated_at)}
+                          </span>
+                        ) : (
+                          <span className="text-gray-500">
+                            Nog niet betaald
+                          </span>
+                        )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <button
