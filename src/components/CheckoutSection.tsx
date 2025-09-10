@@ -374,7 +374,7 @@ export default function CheckoutSection({
                       <div className="text-center">
                         <div className="text-base sm:text-lg font-bold text-white mb-1">Maandelijks</div>
                         <div className="text-xs sm:text-sm text-[#8BAE5A]">
-                          {billingPeriod === '12months' ? 'Niet beschikbaar' : `€${originalMonthlyPrice || pricing.monthlyPrice} per maand`}
+                          {billingPeriod === '12months' ? 'Niet beschikbaar' : `€${pricing.monthlyPrice} per maand`}
                         </div>
                       </div>
                     </button>
@@ -390,7 +390,7 @@ export default function CheckoutSection({
                     >
                       <div className="text-center">
                         <div className="text-base sm:text-lg font-bold text-white mb-1">In één keer</div>
-                        <div className="text-xs sm:text-sm text-[#8BAE5A]">€{(originalMonthlyPrice || pricing.monthlyPrice) * (billingPeriod === '6months' ? 6 : 12)} totaal</div>
+                        <div className="text-xs sm:text-sm text-[#8BAE5A]">€{pricing.monthlyPrice * (billingPeriod === '6months' ? 6 : 12)} totaal</div>
                       </div>
                     </button>
                   </div>
