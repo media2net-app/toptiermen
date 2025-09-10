@@ -63,6 +63,7 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
   onboardingStatus?: any 
 }) => {
   const pathname = usePathname();
+  const router = useRouter();
   const [openBrotherhood, setOpenBrotherhood] = useState(false);
   const [openDashboard, setOpenDashboard] = useState(false);
   const [showOnboardingCompletion, setShowOnboardingCompletion] = useState(false);
@@ -147,6 +148,16 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
 
   return (
     <nav className="flex flex-col gap-2">
+      {/* Mijn Dashboard Button */}
+      <Link
+        href="/dashboard"
+        onClick={onLinkClick}
+        className="flex items-center gap-3 px-4 py-3 bg-[#8BAE5A] text-black font-bold rounded-xl hover:bg-[#7A9D4A] transition-colors mb-4"
+      >
+        <HomeIcon className="w-5 h-5" />
+        <span>Mijn Dashboard</span>
+      </Link>
+      
       {menu.map((item) => {
         // Skip onboarding menu item if onboarding is completed and animation is done, or user is not in onboarding mode
         if (item.isOnboardingItem && (actualOnboardingStatus?.onboarding_completed && !showOnboardingCompletion || !isOnboarding)) {
@@ -1036,7 +1047,11 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
                   {/* Header */}
                   <div className="p-4 border-b border-[#3A4D23] flex-shrink-0 bg-[#232D1A] z-10">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
+                      <Link 
+                        href="/dashboard" 
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+                      >
                         <Image
                           src="/logo_white-full.svg"
                           alt="Top Tier Men Logo"
@@ -1044,7 +1059,7 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
                           height={30}
                           className="h-8 w-auto object-contain"
                         />
-                      </div>
+                      </Link>
                       <motion.button
                         onClick={() => setIsMobileMenuOpen(false)}
                         className="p-2 bg-[#181F17] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors"
