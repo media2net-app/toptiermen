@@ -803,32 +803,32 @@
           {
             "name": "Machine Shoulder Press",
             "sets": 5,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Barbell Shoulder Press",
             "sets": 4,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Supine Press",
             "sets": 5,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Military Press",
             "sets": 4,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           }
@@ -842,32 +842,32 @@
           {
             "name": "Lat Pulldown",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Fixed Lat Pulldown",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "T-Bar Row",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Cable Pull Rope",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           }
@@ -881,32 +881,32 @@
           {
             "name": "Seated Leg Curl",
             "sets": 5,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Calf Raises",
             "sets": 5,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Leg Press",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Leg Raises",
             "sets": 4,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           }
@@ -929,40 +929,40 @@
           {
             "name": "Pike Push-ups",
             "sets": 5,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Push-ups",
             "sets": 4,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Barbell Shoulder Press",
             "sets": 5,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Bench Press",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Incline Dumbell Press",
             "sets": 4,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           }
@@ -976,40 +976,40 @@
           {
             "name": "Cable Pull Rope",
             "sets": 4,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Machine Pull Up",
             "sets": 5,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "T-Bar Row",
             "sets": 4,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Leg Curl",
             "sets": 5,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Cable Biceps Curl",
             "sets": 5,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           }
@@ -1023,40 +1023,40 @@
           {
             "name": "Deadlift",
             "sets": 4,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Hack Squat",
             "sets": 5,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Calf Raises",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Seated Leg Curl",
             "sets": 5,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Squat",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           }
@@ -1079,40 +1079,40 @@
           {
             "name": "Leg Press",
             "sets": 5,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Machine Biceps Curl",
             "sets": 5,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Dumbbell Biceps Curl",
             "sets": 5,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Cable Triceps Pushdown",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Kneeling Leg Curl",
             "sets": 4,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           }
@@ -1126,40 +1126,40 @@
           {
             "name": "Lunges",
             "sets": 4,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Leg Curl",
             "sets": 5,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Squat",
             "sets": 4,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Kneeling Leg Curl",
             "sets": 4,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Stiff Leg Deadlift",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           }
@@ -1173,40 +1173,40 @@
           {
             "name": "Handstand Push-ups",
             "sets": 4,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Dumbbell Biceps Curl",
             "sets": 4,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Cable Triceps Pushdown",
             "sets": 4,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Barbell Biceps Curl",
             "sets": 4,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Dumbbell Shoulder Press",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           }
@@ -1220,40 +1220,40 @@
           {
             "name": "Hack Squat",
             "sets": 4,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Lunges",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Squat",
             "sets": 5,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Walking Lunges",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Leg Press",
             "sets": 4,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           }
@@ -1757,32 +1757,32 @@
           {
             "name": "Supine Press",
             "sets": 4,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Military Press",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Incline Dumbell flyes",
             "sets": 5,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Incline Dumbell Press",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           }
@@ -1796,32 +1796,32 @@
           {
             "name": "T-Bar Row",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Cable Pull Rope",
             "sets": 4,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Pull-ups",
             "sets": 4,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Fixed Lat Pulldown",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           }
@@ -1835,32 +1835,32 @@
           {
             "name": "Hack Squat",
             "sets": 5,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Stiff Leg Deadlift",
             "sets": 4,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Squat",
             "sets": 4,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Calf Press",
             "sets": 5,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           }
@@ -1874,32 +1874,32 @@
           {
             "name": "Supine Press (Dag 4)",
             "sets": 4,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Military Press (Dag 4)",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Incline Dumbell flyes (Dag 4)",
             "sets": 5,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Incline Dumbell Press (Dag 4)",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           }
@@ -1913,32 +1913,32 @@
           {
             "name": "Supine Press (Dag 5)",
             "sets": 4,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Military Press (Dag 5)",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Incline Dumbell flyes (Dag 5)",
             "sets": 5,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Incline Dumbell Press (Dag 5)",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           }
@@ -1952,32 +1952,32 @@
           {
             "name": "Supine Press (Dag 6)",
             "sets": 4,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Military Press (Dag 6)",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Incline Dumbell flyes (Dag 6)",
             "sets": 5,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Incline Dumbell Press (Dag 6)",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           }
@@ -2204,32 +2204,32 @@
           {
             "name": "Dumbbell Press",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Cable Flye",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Military Press",
             "sets": 5,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Supine Press",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           }
@@ -2243,32 +2243,32 @@
           {
             "name": "Dumbell Row",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Cable Row",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "T-Bar Row",
             "sets": 4,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Fixed Lat Pulldown",
             "sets": 5,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           }
@@ -2282,32 +2282,32 @@
           {
             "name": "Calf Press",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Leg Press",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Leg Curl",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Leg Extension",
             "sets": 5,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           }
@@ -2321,32 +2321,32 @@
           {
             "name": "Dumbbell Press (Dag 4)",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Cable Flye (Dag 4)",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Military Press (Dag 4)",
             "sets": 5,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Supine Press (Dag 4)",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           }
@@ -2360,32 +2360,32 @@
           {
             "name": "Dumbbell Press (Dag 5)",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Cable Flye (Dag 5)",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Military Press (Dag 5)",
             "sets": 5,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Supine Press (Dag 5)",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           }
@@ -2573,32 +2573,32 @@
           {
             "name": "Calf Press",
             "sets": 5,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Pectoral Fly",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Military Press",
             "sets": 4,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Dumbbell Shoulder Press",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           }
@@ -2612,32 +2612,32 @@
           {
             "name": "Cable Row",
             "sets": 5,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Lat Pulldown",
             "sets": 5,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "T-Bar Row",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Pull-ups",
             "sets": 4,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           }
@@ -2651,32 +2651,32 @@
           {
             "name": "Pistol Squats",
             "sets": 5,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Deadlift",
             "sets": 4,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Leg Raises",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Squat",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           }
@@ -2690,32 +2690,32 @@
           {
             "name": "Calf Press (Dag 4)",
             "sets": 5,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Pectoral Fly (Dag 4)",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Military Press (Dag 4)",
             "sets": 4,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Dumbbell Shoulder Press (Dag 4)",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           }
@@ -2864,32 +2864,32 @@
           {
             "name": "Military Press",
             "sets": 5,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Machine Chest Press",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Dumbbell Press",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Supine Press",
             "sets": 5,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           }
@@ -2903,32 +2903,32 @@
           {
             "name": "Machine Pull Up",
             "sets": 5,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Dumbell Row",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Lat Pulldown",
             "sets": 4,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Fixed Lat Pulldown",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           }
@@ -2942,32 +2942,32 @@
           {
             "name": "Deadlift",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Leg Press",
             "sets": 5,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Squat",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Calf Raises",
             "sets": 5,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "3-6",
+            "rest": "150-180 sec",
             "alternatives": [],
             "feedback": ""
           }
@@ -4085,48 +4085,48 @@
           {
             "name": "Cable Triceps Rope",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Jumping Jacks",
             "sets": 4,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Lat Pulldown",
             "sets": 5,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Burpees",
             "sets": 4,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "T-Bar Row",
             "sets": 5,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Stiff Leg Deadlift",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           }
@@ -4140,48 +4140,48 @@
           {
             "name": "Military Press",
             "sets": 5,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Cable Triceps Pushdown",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Cable Flye",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Spider-man Push-ups",
             "sets": 5,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Dumbbell Press",
             "sets": 4,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Abductie Machine",
             "sets": 4,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           }
@@ -4711,48 +4711,48 @@
           {
             "name": "Bench Press",
             "sets": 4,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Pike Push-ups",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Seated Dip",
             "sets": 5,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Test chiel",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Stiff Leg Deadlift",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Cable Flye",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           }
@@ -4766,48 +4766,48 @@
           {
             "name": "Side Raises",
             "sets": 5,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "L-sit Hold",
             "sets": 5,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Machine Chest Press",
             "sets": 4,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Wall Walks",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Test chiel 2",
             "sets": 4,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Bench Press",
             "sets": 4,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           }
@@ -4956,48 +4956,48 @@
           {
             "name": "Burpees",
             "sets": 5,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Machine Chest Press",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Side Raises",
             "sets": 5,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Fixed Lat Pulldown",
             "sets": 4,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Wall Walks",
             "sets": 4,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Seated Leg Curl",
             "sets": 4,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           }
@@ -5011,48 +5011,48 @@
           {
             "name": "Cable Triceps Rope",
             "sets": 4,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Cable Triceps Pushdown",
             "sets": 5,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Seated Dip",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Test chiel 2",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Dumbbell Flyes",
             "sets": 3,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           },
           {
             "name": "Leg Raises",
             "sets": 4,
-            "reps": "8-12",
-            "rest": "60-90 sec",
+            "reps": "15-20",
+            "rest": "45-60 sec",
             "alternatives": [],
             "feedback": ""
           }
