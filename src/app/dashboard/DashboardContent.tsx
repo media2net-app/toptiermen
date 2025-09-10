@@ -64,8 +64,8 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
 }) => {
   const pathname = usePathname();
   const router = useRouter();
-  const [openBrotherhood, setOpenBrotherhood] = useState(false);
-  const [openDashboard, setOpenDashboard] = useState(false);
+  const [openBrotherhood, setOpenBrotherhood] = useState(true); // Default expanded
+  const [openDashboard, setOpenDashboard] = useState(true); // Default expanded
   const [showOnboardingCompletion, setShowOnboardingCompletion] = useState(false);
   const { isOnboarding, highlightedMenu, currentStep } = useOnboarding();
   
