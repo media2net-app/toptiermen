@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { FaCheck, FaArrowRight, FaUsers, FaDumbbell, FaBrain, FaChartLine, FaCrown, FaStar, FaGift, FaBook, FaTools, FaComments, FaBullseye, FaTrophy, FaBookOpen, FaUtensils, FaDumbbell as FaDumbbellIcon, FaInfinity, FaClock } from 'react-icons/fa';
+import { FaCheck, FaArrowRight, FaUsers, FaDumbbell, FaBrain, FaChartLine, FaCrown, FaStar, FaGift, FaBook, FaTools, FaComments, FaBullseye, FaTrophy, FaBookOpen, FaChevronLeft, FaChevronRight, FaClock } from 'react-icons/fa';
 import { PlayIcon } from '@heroicons/react/24/outline';
 import CheckoutSection from '@/components/CheckoutSection';
 
@@ -137,69 +137,79 @@ function VideoPlayer({ src, poster }: VideoPlayerProps) {
   );
 }
 
-export default function LifetimeTierPage() {
+export default function MaandelijksPage() {
   const router = useRouter();
   const [isHovered, setIsHovered] = useState(false);
+  const [selectedTier, setSelectedTier] = useState('basic');
 
   // Format price with comma as decimal separator
   const formatPrice = (price: number) => {
     return price.toFixed(2).replace('.', ',');
   };
 
-  const [timeLeft, setTimeLeft] = useState({
-    days: 0,
-    hours: 0,
-    minutes: 0,
-    seconds: 0
-  });
-
-  // Countdown timer effect
-  useEffect(() => {
-    const launchDate = new Date('2025-09-10T20:00:00').getTime(); // 10 september 20:00
-    
-    const timer = setInterval(() => {
-      const now = new Date().getTime();
-      const distance = launchDate - now;
-      
-      if (distance > 0) {
-        setTimeLeft({
-          days: Math.floor(distance / (1000 * 60 * 60 * 24)),
-          hours: Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
-          minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
-          seconds: Math.floor((distance % (1000 * 60)) / 1000)
-        });
-      } else {
-        // Timer expired - platform is live
-        setTimeLeft({
-          days: 0,
-          hours: 0,
-          minutes: 0,
-          seconds: 0
-        });
-      }
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, []);
-
   const scrollToCheckout = () => {
     document.getElementById('checkout-section')?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const packageData = {
-    id: 'lifetime',
-    name: 'Lifetime Tier',
-    description: 'Lifetime toegang tot alle content',
-    originalMonthlyPrice: 1995, // Originele eenmalige betaling
-    originalYearlyPrice: 1995, // Originele eenmalige betaling
-    monthlyPrice: 997.50, // Prijs na 50% korting voor weergave (€1995 * 0.5)
-    yearlyPrice: 997.50, // Prijs na 50% korting voor weergave (€1995 * 0.5)
-    features: [
-      'Alles uit Premium',
-      'Levenslang'
-    ],
-    badge: 'Best Value'
+  const selectTier = (tier: string) => {
+    setSelectedTier(tier);
   };
+
+  const navigateLeft = () => {
+    if (selectedTier === 'basic') {
+      setSelectedTier('premium');
+    } else if (selectedTier === 'premium') {
+      setSelectedTier('basic');
+    }
+  };
+
+  const navigateRight = () => {
+    if (selectedTier === 'basic') {
+      setSelectedTier('premium');
+    } else if (selectedTier === 'premium') {
+      setSelectedTier('basic');
+    }
+  };
+
+  // Only Basic and Premium packages (no Lifetime)
+  const monthlyPackages = {
+    basic: {
+      id: 'basic',
+      name: 'Basic Tier',
+      description: 'Toegang tot alle basis content en community features',
+      originalMonthlyPrice: 49, // Originele 6 maanden prijs
+      originalYearlyPrice: 44, // Originele 12 maanden prijs (10% korting)
+      monthlyPrice: 24.50, // Prijs na 50% korting voor weergave (€49 * 0.5)
+      yearlyPrice: 22.00, // Prijs na 50% korting voor weergave (€44 * 0.5)
+      features: [
+        'TTM Academy',
+        'Financiële tools & gidsen',
+        'TTM Brotherhood',
+        'Mind-focus tools & gidsen',
+        'Challenges',
+        'Boekenkamer',
+        'Q&A iedere twee weken'
+      ],
+      badge: 'Populair'
+    },
+    premium: {
+      id: 'premium',
+      name: 'Premium Tier',
+      description: 'Alles van Basic + custom plannen',
+      originalMonthlyPrice: 79, // Originele 6 maanden prijs
+      originalYearlyPrice: 71, // Originele 12 maanden prijs (10% korting)
+      monthlyPrice: 39.50, // Prijs na 50% korting voor weergave (€79 * 0.5)
+      yearlyPrice: 35.50, // Prijs na 50% korting voor weergave (€71 * 0.5)
+      features: [
+        'Alles uit Basic',
+        'Custom voedingsplannen',
+        'Custom trainingsplannen'
+      ],
+      badge: 'Meest gekozen'
+    }
+  };
+
+  const packageData = monthlyPackages[selectedTier as keyof typeof monthlyPackages] || monthlyPackages.basic;
 
   const benefits = [
     {
@@ -251,51 +261,6 @@ export default function LifetimeTierPage() {
         </div>
       </header>
 
-      {/* Countdown Timer Section */}
-      <section className="py-8 sm:py-12 md:py-16 lg:py-20 px-4 sm:px-8 md:px-12 lg:px-20">
-        <div className="w-full text-center">
-          <div className="max-w-4xl mx-auto">
-            <div className="inline-flex items-center px-4 py-2 bg-[#8BAE5A]/20 border border-[#8BAE5A]/30 rounded-full text-[#8BAE5A] text-sm font-medium mb-6">
-              <FaClock className="w-4 h-4 mr-2" />
-              🔥PRELAUNCH ACTIE⚡
-            </div>
-            
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black uppercase tracking-tight mb-6 text-white leading-tight">
-              Platform Launch <span className="text-[#8BAE5A]">10 September</span>
-            </h1>
-            
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 mb-6">
-              <div className="bg-[#181F17] rounded-xl p-2 sm:p-3 border border-[#3A4D23]">
-                <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#B6C948]">{timeLeft.days}</div>
-                <div className="text-xs sm:text-sm text-[#8BAE5A] uppercase tracking-wide">Dagen</div>
-              </div>
-              <div className="bg-[#181F17] rounded-xl p-2 sm:p-3 border border-[#3A4D23]">
-                <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#B6C948]">{timeLeft.hours}</div>
-                <div className="text-xs sm:text-sm text-[#8BAE5A] uppercase tracking-wide">Uren</div>
-              </div>
-              <div className="bg-[#181F17] rounded-xl p-2 sm:p-3 border border-[#3A4D23]">
-                <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#B6C948]">{timeLeft.minutes}</div>
-                <div className="text-xs sm:text-sm text-[#8BAE5A] uppercase tracking-wide">Minuten</div>
-              </div>
-              <div className="bg-[#181F17] rounded-xl p-2 sm:p-3 border border-[#3A4D23]">
-                <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#B6C948]">{timeLeft.seconds}</div>
-                <div className="text-xs sm:text-sm text-[#8BAE5A] uppercase tracking-wide">Seconden</div>
-              </div>
-            </div>
-
-            <div className="bg-gradient-to-r from-[#8BAE5A]/10 to-[#B6C948]/10 border border-[#8BAE5A]/20 rounded-xl p-6 mb-8">
-              <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">
-                50% PRELAUNCH KORTING - Beperkte tijd!
-              </h2>
-              <p className="text-[#8BAE5A] font-medium">
-                Exclusieve prelaunch aanbieding
-              </p>
-            </div>
-
-          </div>
-        </div>
-      </section>
-
       {/* Hero Section */}
       <section className="py-8 sm:py-12 md:py-16 lg:py-20 px-4 sm:px-8 md:px-12 lg:px-20">
         <div className="w-full text-center">
@@ -306,24 +271,55 @@ export default function LifetimeTierPage() {
               {packageData.badge || 'Premium'}
             </div>
 
-            {/* Title */}
-            <div className="text-center mb-6">
-              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-bold text-white">
-                <span className="block truncate">{packageData.name.toUpperCase()}</span>
-                <div className="flex items-center justify-center space-x-3 mt-2">
-                  <span className="text-gray-400 line-through text-lg sm:text-xl md:text-2xl lg:text-3xl">
-                    €{formatPrice(packageData.originalMonthlyPrice)}
-                  </span>
-                  <span className="text-[#8BAE5A] text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold">
-                    €{formatPrice(packageData.monthlyPrice)}
-                  </span>
-                </div>
-                <div className="mt-2">
-                  <span className="inline-flex items-center px-2 py-1 bg-red-500/20 border border-red-500/30 rounded-full text-red-400 text-xs font-medium">
-                    🔥 50% KORTING
-                  </span>
-                </div>
-              </h1>
+            {/* Title with Navigation */}
+            <div className="flex items-center justify-center space-x-4 sm:space-x-6 md:space-x-8 mb-6">
+              {/* Left Arrow */}
+              <button
+                onClick={navigateLeft}
+                className="group flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-white/10 hover:bg-white/20 border border-white/20 hover:border-white/40 rounded-full transition-all duration-300 touch-manipulation"
+                title="Vorige tier"
+              >
+                <FaChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 text-white group-hover:text-[#8BAE5A] transition-colors" />
+              </button>
+
+              {/* Title */}
+              <div className="text-center flex-1 min-w-0 px-2">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-bold text-white">
+                  <span className="block truncate">{packageData.name.toUpperCase()}</span>
+                  <div className="flex items-center justify-center space-x-3 mt-2">
+                    <span className="text-gray-400 line-through text-lg sm:text-xl md:text-2xl lg:text-3xl">
+                      €{formatPrice(packageData.originalMonthlyPrice)}
+                    </span>
+                    <span className="text-[#8BAE5A] text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold">
+                      €{formatPrice(packageData.monthlyPrice)}
+                    </span>
+                  </div>
+                  <div className="mt-2">
+                    <span className="inline-flex items-center px-2 py-1 bg-red-500/20 border border-red-500/30 rounded-full text-red-400 text-xs font-medium">
+                      🔥 50% KORTING
+                    </span>
+                  </div>
+                </h1>
+              </div>
+
+              {/* Right Arrow */}
+              <button
+                onClick={navigateRight}
+                className="group flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-white/10 hover:bg-white/20 border border-white/20 hover:border-white/40 rounded-full transition-all duration-300 touch-manipulation"
+                title="Volgende tier"
+              >
+                <FaChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-white group-hover:text-[#8BAE5A] transition-colors" />
+              </button>
+            </div>
+
+            {/* Tier Navigation Indicator */}
+            <div className="flex items-center justify-center space-x-2 sm:space-x-4 mb-6">
+              <span className="text-xs sm:text-sm text-[#8BAE5A] font-medium hidden sm:block">Basic</span>
+              <div className="flex space-x-1 sm:space-x-2">
+                <div className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full ${selectedTier === 'basic' ? 'bg-[#8BAE5A]' : 'bg-[#8BAE5A]/30'}`}></div>
+                <div className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full ${selectedTier === 'premium' ? 'bg-[#8BAE5A]' : 'bg-[#8BAE5A]/30'}`}></div>
+              </div>
+              <span className="text-xs sm:text-sm text-[#8BAE5A] font-medium hidden sm:block">Premium</span>
             </div>
 
             {/* Subtitle */}
@@ -404,13 +400,16 @@ export default function LifetimeTierPage() {
                     €{formatPrice(packageData.originalMonthlyPrice)}
                   </span>
                   <span className="text-2xl font-bold text-white">
-                    €{formatPrice(packageData.monthlyPrice)} eenmalig
+                    €{formatPrice(packageData.monthlyPrice)} per maand
                   </span>
                 </div>
                 <div className="inline-flex items-center px-3 py-1 bg-red-500/20 border border-red-500/30 rounded-full text-red-400 text-sm font-medium">
                   🔥 50% PRELAUNCH KORTING
                 </div>
               </div>
+              <p className="text-[#D1D5DB] mb-4">
+                (minimaal 6 maanden)
+              </p>
               <p className="text-sm text-[#8BAE5A]">
                 {packageData.description}
               </p>
@@ -429,8 +428,8 @@ export default function LifetimeTierPage() {
         originalMonthlyPrice={packageData.originalMonthlyPrice}
         originalYearlyPrice={packageData.originalYearlyPrice}
         features={packageData.features}
-        onPackageChange={() => {}} // No package change for lifetime only
-        availablePackages={[packageData]}
+        onPackageChange={selectTier}
+        availablePackages={Object.values(monthlyPackages)}
       />
 
       {/* Footer */}
