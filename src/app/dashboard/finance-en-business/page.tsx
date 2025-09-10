@@ -715,11 +715,11 @@ function FinanceDashboardContent() {
         )}
 
       {activeTab === 'planning' && (
-        <div className="space-y-8">
+        <div className="space-y-6 sm:space-y-8">
           {/* Fundamentele Planningstools */}
           <div>
-            <h2 className="text-2xl font-bold text-[#B6C948] mb-6">Fundamentele Planningstools</h2>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <h2 className="text-xl sm:text-2xl font-bold text-[#B6C948] mb-4 sm:mb-6">Fundamentele Planningstools</h2>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
               <ZeroBasedBudget />
               <DebtSnowball />
             </div>
@@ -727,8 +727,8 @@ function FinanceDashboardContent() {
 
           {/* Investerings- & Groeitools */}
           <div>
-            <h2 className="text-2xl font-bold text-[#B6C948] mb-6">Investerings- & Groeitools</h2>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <h2 className="text-xl sm:text-2xl font-bold text-[#B6C948] mb-4 sm:mb-6">Investerings- & Groeitools</h2>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
               <CompoundInterest />
               <FIRECalculator />
             </div>
@@ -738,9 +738,9 @@ function FinanceDashboardContent() {
 
       {/* Edit Goal Progress Modal */}
       {showEditModal && editingGoal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-[#232D1A] border border-[#3A4D23] rounded-xl p-6 max-w-md w-full mx-4">
-            <h3 className="text-xl font-bold text-white mb-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-[#232D1A] border border-[#3A4D23] rounded-xl p-4 sm:p-6 max-w-md w-full">
+            <h3 className="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4">
               Voortgang bijwerken: {editingGoal.title}
             </h3>
             
@@ -757,20 +757,20 @@ function FinanceDashboardContent() {
               />
             </div>
 
-            <div className="flex space-x-3">
+            <div className="flex flex-col sm:flex-row gap-3 sm:space-x-3">
               <button
                 onClick={() => {
                   setShowEditModal(false);
                   setEditingGoal(null);
                   setNewCurrentAmount('');
                 }}
-                className="flex-1 px-4 py-2 bg-[#181F17] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors"
+                className="flex-1 px-4 py-2 sm:py-2 bg-[#181F17] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors text-sm sm:text-base"
               >
                 Annuleren
               </button>
               <button
                 onClick={handleSaveGoalProgress}
-                className="flex-1 px-4 py-2 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold"
+                className="flex-1 px-4 py-2 sm:py-2 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold text-sm sm:text-base"
               >
                 Opslaan
               </button>
@@ -781,10 +781,10 @@ function FinanceDashboardContent() {
 
       {/* Settings Modal */}
       {showSettingsModal && editingProfile && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-[#232D1A] border border-[#3A4D23] rounded-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold text-white">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+          <div className="bg-[#232D1A] border border-[#3A4D23] rounded-xl p-4 sm:p-6 max-w-2xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4 sm:mb-6">
+              <h3 className="text-lg sm:text-xl font-bold text-white">
                 Financiële Profiel Bewerken
               </h3>
               <button
@@ -792,17 +792,17 @@ function FinanceDashboardContent() {
                   setShowSettingsModal(false);
                   setEditingProfile(null);
                 }}
-                className="text-[#8BAE5A] hover:text-[#B6C948] transition-colors"
+                className="text-[#8BAE5A] hover:text-[#B6C948] transition-colors text-lg sm:text-xl"
               >
                 ✕
               </button>
             </div>
             
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               {/* Stap 1: Huidige Financiële Situatie */}
               <div>
-                <h4 className="text-lg font-semibold text-[#B6C948] mb-4">Huidige Financiële Situatie</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <h4 className="text-base sm:text-lg font-semibold text-[#B6C948] mb-3 sm:mb-4">Huidige Financiële Situatie</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
                     <label className="block text-sm font-medium text-[#8BAE5A] mb-2">
                       Netto Waarde (€)
@@ -812,7 +812,7 @@ function FinanceDashboardContent() {
                       value={editingProfile.net_worth || ''}
                       onChange={(e) => updateEditingProfile('net_worth', parseFloat(e.target.value) || 0)}
                       placeholder="0"
-                      className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded text-white"
+                      className="w-full px-3 py-2 sm:py-2 bg-[#181F17] border border-[#3A4D23] rounded text-white text-sm sm:text-base"
                     />
                   </div>
                   <div>
@@ -824,7 +824,7 @@ function FinanceDashboardContent() {
                       value={editingProfile.monthly_income || ''}
                       onChange={(e) => updateEditingProfile('monthly_income', parseFloat(e.target.value) || 0)}
                       placeholder="0"
-                      className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded text-white"
+                      className="w-full px-3 py-2 sm:py-2 bg-[#181F17] border border-[#3A4D23] rounded text-white text-sm sm:text-base"
                     />
                   </div>
                   <div>
@@ -836,7 +836,7 @@ function FinanceDashboardContent() {
                       value={editingProfile.monthly_expenses || ''}
                       onChange={(e) => updateEditingProfile('monthly_expenses', parseFloat(e.target.value) || 0)}
                       placeholder="0"
-                      className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded text-white"
+                      className="w-full px-3 py-2 sm:py-2 bg-[#181F17] border border-[#3A4D23] rounded text-white text-sm sm:text-base"
                     />
                   </div>
                   <div>
@@ -854,8 +854,8 @@ function FinanceDashboardContent() {
 
               {/* Stap 2: Financiële Doelen */}
               <div>
-                <h4 className="text-lg font-semibold text-[#B6C948] mb-4">Financiële Doelen</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <h4 className="text-base sm:text-lg font-semibold text-[#B6C948] mb-3 sm:mb-4">Financiële Doelen</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
                     <label className="block text-sm font-medium text-[#8BAE5A] mb-2">
                       Passief Inkomen Doel (€/maand)
@@ -865,7 +865,7 @@ function FinanceDashboardContent() {
                       value={editingProfile.passive_income_goal || ''}
                       onChange={(e) => updateEditingProfile('passive_income_goal', parseFloat(e.target.value) || 0)}
                       placeholder="0"
-                      className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded text-white"
+                      className="w-full px-3 py-2 sm:py-2 bg-[#181F17] border border-[#3A4D23] rounded text-white text-sm sm:text-base"
                     />
                   </div>
                   <div>
@@ -877,7 +877,7 @@ function FinanceDashboardContent() {
                         <button
                           key={risk}
                           onClick={() => updateEditingProfile('risk_tolerance', risk)}
-                          className={`py-2 px-3 rounded text-sm font-medium transition-colors ${
+                          className={`py-2 px-2 sm:px-3 rounded text-xs sm:text-sm font-medium transition-colors ${
                             editingProfile.risk_tolerance === risk
                               ? 'bg-[#8BAE5A] text-[#232D1A]'
                               : 'bg-[#181F17] text-[#8BAE5A] hover:bg-[#3A4D23]'
@@ -893,8 +893,8 @@ function FinanceDashboardContent() {
 
               {/* Stap 3: Investeringsvoorkeuren */}
               <div>
-                <h4 className="text-lg font-semibold text-[#B6C948] mb-4">Investeringsvoorkeuren</h4>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                <h4 className="text-base sm:text-lg font-semibold text-[#B6C948] mb-3 sm:mb-4">Investeringsvoorkeuren</h4>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
                   {investmentCategories.map((category) => (
                     <label key={category} className="flex items-center space-x-2 cursor-pointer">
                       <input
@@ -916,19 +916,19 @@ function FinanceDashboardContent() {
               </div>
             </div>
 
-            <div className="flex space-x-3 mt-8">
+            <div className="flex flex-col sm:flex-row gap-3 sm:space-x-3 mt-6 sm:mt-8">
               <button
                 onClick={() => {
                   setShowSettingsModal(false);
                   setEditingProfile(null);
                 }}
-                className="flex-1 px-4 py-2 bg-[#181F17] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors"
+                className="flex-1 px-4 py-2 sm:py-2 bg-[#181F17] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors text-sm sm:text-base"
               >
                 Annuleren
               </button>
               <button
                 onClick={handleSaveProfile}
-                className="flex-1 px-4 py-2 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold"
+                className="flex-1 px-4 py-2 sm:py-2 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold text-sm sm:text-base"
               >
                 Opslaan
               </button>
@@ -939,9 +939,9 @@ function FinanceDashboardContent() {
 
       {/* Add Goal Modal */}
       {showAddGoalModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-[#232D1A] border border-[#3A4D23] rounded-xl p-6 max-w-md w-full">
-            <div className="flex justify-between items-center mb-6">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+          <div className="bg-[#232D1A] border border-[#3A4D23] rounded-xl p-4 sm:p-6 max-w-md w-full">
+            <div className="flex justify-between items-center mb-4 sm:mb-6">
               <h3 className="text-xl font-bold text-white">
                 Nieuw Financieel Doel Toevoegen
               </h3>
