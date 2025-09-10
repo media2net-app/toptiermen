@@ -13,7 +13,7 @@ import {
 interface MealIngredient {
   name: string;
   unit: string;
-  amount: number;
+  amount: number | string;
 }
 
 interface MealNutrition {
@@ -99,17 +99,21 @@ export default function MealEditModal({
     
     const data = ingredientDatabase[ingredient.name];
 
+    // Handle empty or invalid amounts
+    const amount = typeof ingredient.amount === 'string' ? parseFloat(ingredient.amount) || 0 : ingredient.amount;
+    if (amount <= 0) return { calories: 0, protein: 0, carbs: 0, fat: 0 };
+
     let multiplier = 1;
     if (ingredient.unit === 'per_100g' && data.unit_type === 'per_100g') {
-      multiplier = ingredient.amount / 100;
+      multiplier = amount / 100;
     } else if (ingredient.unit === 'per_piece' && data.unit_type === 'per_piece') {
-      multiplier = ingredient.amount;
+      multiplier = amount;
     } else if (ingredient.unit === 'per_100g' && data.unit_type === 'per_piece') {
       // Convert piece to 100g equivalent (assuming average piece weight)
-      multiplier = (ingredient.amount * 50) / 100; // Average piece = 50g
+      multiplier = (amount * 50) / 100; // Average piece = 50g
     } else if (ingredient.unit === 'per_piece' && data.unit_type === 'per_100g') {
       // Convert 100g to piece equivalent
-      multiplier = ingredient.amount / 50; // Average piece = 50g
+      multiplier = amount / 50; // Average piece = 50g
     }
 
     return {
@@ -277,11 +281,28 @@ export default function MealEditModal({
                         <div className="col-span-2">
                           <input
                             type="number"
-                            value={ingredient.amount}
-                            onChange={(e) => handleIngredientChange(index, 'amount', parseFloat(e.target.value) || 0)}
+                            value={ingredient.amount || ''}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              if (value === '') {
+                                handleIngredientChange(index, 'amount', '');
+                              } else {
+                                const numValue = parseFloat(value);
+                                if (!isNaN(numValue) && numValue >= 0) {
+                                  handleIngredientChange(index, 'amount', numValue);
+                                }
+                              }
+                            }}
+                            onBlur={(e) => {
+                              const value = e.target.value;
+                              if (value === '' || parseFloat(value) === 0) {
+                                handleIngredientChange(index, 'amount', 1); // Default to 1 instead of 0
+                              }
+                            }}
                             className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white focus:border-[#8BAE5A] focus:ring-1 focus:ring-[#8BAE5A] transition-colors"
                             min="0"
-                            step="1"
+                            step="0.1"
+                            placeholder="0"
                           />
                         </div>
                         <div className="col-span-2">

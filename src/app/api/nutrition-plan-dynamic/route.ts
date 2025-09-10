@@ -224,6 +224,51 @@ function calculateMealNutrition(ingredients, ingredientDatabase) {
   };
 }
 
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const userId = searchParams.get('userId');
+    const planId = searchParams.get('planId');
+    
+    if (!userId || !planId) {
+      return NextResponse.json({
+        success: false,
+        error: 'userId and planId are required'
+      }, { status: 400 });
+    }
+
+    console.log('🗑️ Deleting custom plan:', { planId, userId });
+
+    // Delete custom plan
+    const { error } = await supabase
+      .from('user_nutrition_plans')
+      .delete()
+      .eq('user_id', userId)
+      .eq('plan_type', planId);
+
+    if (error) {
+      console.error('❌ Error deleting custom plan:', error);
+      return NextResponse.json({
+        success: false,
+        error: error.message
+      }, { status: 500 });
+    }
+
+    console.log('✅ Custom plan deleted successfully');
+    return NextResponse.json({
+      success: true,
+      message: 'Custom plan deleted successfully'
+    });
+
+  } catch (error) {
+    console.error('❌ Error deleting custom plan:', error);
+    return NextResponse.json({
+      success: false,
+      error: error.message
+    }, { status: 500 });
+  }
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -249,16 +294,43 @@ export async function GET(request: NextRequest) {
       .limit(1);
 
     if (!customError && customPlanData && customPlanData.length > 0) {
-      console.log('✅ Custom plan found, returning custom data');
-      const customPlan = customPlanData[0];
+      console.log('✅ Custom plan found, checking if user profile has been updated');
       
-      // Return the custom plan data
-      return NextResponse.json({
-        success: true,
-        data: customPlan.week_plan,
-        isCustomPlan: true,
-        lastUpdated: customPlan.updated_at
-      });
+      // Get current user profile to check if it has been updated
+      const { data: currentProfile, error: profileError } = await supabase
+        .from('nutrition_profiles')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
+
+      if (!profileError && currentProfile) {
+        const customPlan = customPlanData[0];
+        const customPlanWeekData = customPlan.week_plan;
+        
+        // Check if the custom plan's user profile matches current profile
+        if (customPlanWeekData.userProfile && 
+            customPlanWeekData.userProfile.weight === currentProfile.weight &&
+            customPlanWeekData.userProfile.targetCalories === currentProfile.target_calories) {
+          console.log('✅ Custom plan is up to date, returning custom data');
+          return NextResponse.json({
+            success: true,
+            data: customPlanWeekData,
+            isCustomPlan: true,
+            lastUpdated: customPlan.updated_at
+          });
+        } else {
+          console.log('🔄 Custom plan is outdated, will regenerate with current profile');
+        }
+      } else {
+        console.log('⚠️ Could not fetch current profile, proceeding with custom plan');
+        const customPlan = customPlanData[0];
+        return NextResponse.json({
+          success: true,
+          data: customPlan.week_plan,
+          isCustomPlan: true,
+          lastUpdated: customPlan.updated_at
+        });
+      }
     }
 
     console.log('ℹ️ No custom plan found, generating base plan');
@@ -317,8 +389,10 @@ export async function GET(request: NextRequest) {
     // Calculate base plan calories from database plan
     const basePlanCalories = calculateBasePlanCaloriesFromDatabase(basePlan);
 
-    // Calculate scale factor - use user profile target calories vs plan target calories
-    const scaleFactor = planData.target_calories > 0 ? profile.target_calories / planData.target_calories : 1;
+    // Calculate scale factor based on weight ratio (90kg vs 100kg = 0.9)
+    // This ensures the scaling factor reflects the weight difference, not calorie difference
+    const standardWeight = 100; // Standard plan is based on 100kg
+    const scaleFactor = profile.weight / standardWeight;
 
     // Generate scaled meal plan
     const scaledPlan = {};
@@ -465,6 +539,18 @@ export async function GET(request: NextRequest) {
       fat: Math.round((weeklyFat / 7) * 10) / 10
     };
 
+    console.log('🔍 Debug scalingInfo:', {
+      basePlanCalories,
+      scaleFactor,
+      targetCalories: profile.target_calories,
+      planTargetCalories: profile.target_calories
+    });
+
+    // Calculate macro targets based on plan percentages and user's target calories
+    const targetProtein = Math.round((profile.target_calories * (planData.protein_percentage || 0) / 100) / 4);
+    const targetCarbs = Math.round((profile.target_calories * (planData.carbs_percentage || 0) / 100) / 4);
+    const targetFat = Math.round((profile.target_calories * (planData.fat_percentage || 0) / 100) / 9);
+
     return NextResponse.json({
       success: true,
       data: {
@@ -472,9 +558,9 @@ export async function GET(request: NextRequest) {
         planName: planData.name,
         userProfile: {
           targetCalories: profile.target_calories,
-          targetProtein: profile.target_protein,
-          targetCarbs: profile.target_carbs,
-          targetFat: profile.target_fat,
+          targetProtein: targetProtein,
+          targetCarbs: targetCarbs,
+          targetFat: targetFat,
           age: profile.age,
           weight: profile.weight,
           height: profile.height,
@@ -484,7 +570,7 @@ export async function GET(request: NextRequest) {
           basePlanCalories,
           scaleFactor: scaleFactor ? Math.round(scaleFactor * 100) / 100 : 1,
           targetCalories: profile.target_calories,
-          planTargetCalories: planData.target_calories
+          planTargetCalories: planData.target_calories // Standard plan calories for 100kg
         },
         // Plan-specific macro data
         planPercentages: {
@@ -553,13 +639,40 @@ function scaleIngredientAmounts(ingredients, scaleFactor, targetNutrition: any =
   // Step 1: Basic scaling
   let scaledIngredients = ingredients.map(ingredient => {
     if (ingredient.amount) {
-      let scaledAmount = ingredient.amount * scaleFactor;
+      const originalAmount = ingredient.amount; // Store original amount
       
-      // Round to reasonable values based on unit type
+      // Handle piece-based ingredients (stuk, per_piece) with smart scaling
       if (ingredient.unit === 'per_piece' || ingredient.unit === 'stuk') {
-        scaledAmount = Math.round(scaledAmount);
-        scaledAmount = Math.max(1, scaledAmount);
-      } else if (ingredient.unit === 'per_100g' || ingredient.unit === 'g') {
+        // Only scale if factor is significant enough
+        if (scaleFactor >= 1.2) {
+          // Round up for significant scaling (e.g., 1.4 -> 2 pieces)
+          const scaledAmount = Math.ceil(ingredient.amount * scaleFactor);
+          return {
+            ...ingredient,
+            amount: scaledAmount,
+            originalAmount: originalAmount // Store original for debug
+          };
+        } else if (scaleFactor <= 0.8) {
+          // Round down for significant reduction (e.g., 0.7 -> 1 piece, but could be 0)
+          const scaledAmount = Math.max(1, Math.floor(ingredient.amount * scaleFactor));
+          return {
+            ...ingredient,
+            amount: scaledAmount,
+            originalAmount: originalAmount // Store original for debug
+          };
+        } else {
+          // Keep original for moderate scaling (0.8 < factor < 1.2)
+          return {
+            ...ingredient,
+            originalAmount: originalAmount // Store original for debug
+          };
+        }
+      }
+
+      let scaledAmount = ingredient.amount * scaleFactor;
+
+      // Round to reasonable values based on unit type
+      if (ingredient.unit === 'per_100g' || ingredient.unit === 'g') {
         scaledAmount = Math.round(scaledAmount / 5) * 5;
         scaledAmount = Math.max(5, scaledAmount);
       } else if (ingredient.unit === 'per_ml') {
@@ -569,10 +682,11 @@ function scaleIngredientAmounts(ingredients, scaleFactor, targetNutrition: any =
         scaledAmount = Math.round(scaledAmount);
         scaledAmount = Math.max(1, scaledAmount);
       }
-      
+
       return {
         ...ingredient,
-        amount: scaledAmount
+        amount: scaledAmount,
+        originalAmount: originalAmount // Store original for debug
       };
     }
     return ingredient;
