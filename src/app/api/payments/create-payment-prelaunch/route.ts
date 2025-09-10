@@ -11,21 +11,21 @@ const supabase = createClient(
 const PACKAGE_PRICING = {
   'basic': {
     name: 'Basic Tier',
-    monthlyPrice: 25, // 6 months - prelaunch price
-    yearlyPrice: 22,  // 12 months - prelaunch price
+    monthlyPrice: 24.5, // 6 months - prelaunch price (€49 * 0.5)
+    yearlyPrice: 22,  // 12 months - prelaunch price (€44 * 0.5)
     lifetimePrice: null // Not applicable
   },
   'premium': {
     name: 'Premium Tier', 
-    monthlyPrice: 40, // 6 months - prelaunch price
-    yearlyPrice: 36,  // 12 months - prelaunch price
+    monthlyPrice: 39.5, // 6 months - prelaunch price (€79 * 0.5)
+    yearlyPrice: 35.5,  // 12 months - prelaunch price (€71 * 0.5)
     lifetimePrice: null // Not applicable
   },
   'lifetime': {
     name: 'Lifetime Access',
-    monthlyPrice: 998, // One-time payment - prelaunch price
-    yearlyPrice: 998,  // One-time payment - prelaunch price
-    lifetimePrice: 998 // One-time payment - prelaunch price
+    monthlyPrice: 997.5, // One-time payment - prelaunch price (€1995 * 0.5)
+    yearlyPrice: 997.5,  // One-time payment - prelaunch price (€1995 * 0.5)
+    lifetimePrice: 997.5 // One-time payment - prelaunch price (€1995 * 0.5)
   }
 };
 

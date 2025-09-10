@@ -212,8 +212,8 @@ export default function BasicTierPage() {
       description: 'Toegang tot alle basis content en community features',
       originalMonthlyPrice: 49, // Originele 6 maanden prijs
       originalYearlyPrice: 44, // Originele 12 maanden prijs (10% korting)
-      monthlyPrice: 25, // Prijs na 50% korting voor weergave
-      yearlyPrice: 22, // Prijs na 50% korting voor weergave
+      monthlyPrice: 24.5, // Prijs na 50% korting voor weergave (€49 * 0.5)
+      yearlyPrice: 22, // Prijs na 50% korting voor weergave (€44 * 0.5)
       features: [
         'TTM Academy',
         'Financiële tools & gidsen',
@@ -231,8 +231,8 @@ export default function BasicTierPage() {
       description: 'Alles van Basic + custom plannen',
       originalMonthlyPrice: 79, // Originele 6 maanden prijs
       originalYearlyPrice: 71, // Originele 12 maanden prijs (10% korting)
-      monthlyPrice: 40, // Prijs na 50% korting voor weergave
-      yearlyPrice: 36, // Prijs na 50% korting voor weergave
+      monthlyPrice: 39.5, // Prijs na 50% korting voor weergave (€79 * 0.5)
+      yearlyPrice: 35.5, // Prijs na 50% korting voor weergave (€71 * 0.5)
       features: [
         'Alles uit Basic',
         'Custom voedingsplannen',
@@ -246,8 +246,8 @@ export default function BasicTierPage() {
       description: 'Lifetime toegang tot alle content',
       originalMonthlyPrice: 1995, // Originele eenmalige betaling
       originalYearlyPrice: 1995, // Originele eenmalige betaling
-      monthlyPrice: 998, // Prijs na 50% korting voor weergave
-      yearlyPrice: 998, // Prijs na 50% korting voor weergave
+      monthlyPrice: 997.5, // Prijs na 50% korting voor weergave (€1995 * 0.5)
+      yearlyPrice: 997.5, // Prijs na 50% korting voor weergave (€1995 * 0.5)
       features: [
         'Alles uit Premium',
         'Levenslang'
