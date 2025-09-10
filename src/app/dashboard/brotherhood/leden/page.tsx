@@ -559,24 +559,7 @@ export default function LedenOverzicht() {
                 <div className="text-xs text-[#FFD700] font-semibold text-center">
                   {displayXP} XP • {displayBadges} badges
                 </div>
-                <div className="text-xs text-[#8BAE5A] text-center">
-                  {mutualConnections} mutuals
-                </div>
               </Link>
-              <div className="w-full mt-auto">
-                {isCurrentUser ? (
-                  <button className="w-full px-3 sm:px-4 py-2 rounded-xl bg-[#3A4D23]/60 text-[#8BAE5A] font-bold shadow cursor-default text-sm sm:text-base" disabled>Jij bent dit</button>
-                ) : connectionStatus[m.id] === 'verzoek' ? (
-                  <button className="w-full px-3 sm:px-4 py-2 rounded-xl bg-[#8BAE5A]/30 text-[#8BAE5A] font-bold shadow cursor-default text-sm sm:text-base" disabled>✓ Verzoek Verzonden</button>
-                ) : (
-                  <button
-                    className="w-full px-3 sm:px-4 py-2 rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-bold shadow hover:from-[#B6C948] hover:to-[#8BAE5A] transition-all text-sm sm:text-base"
-                    onClick={() => handleConnect(m.id)}
-                  >
-                    + Maak Connectie
-                  </button>
-                )}
-              </div>
             </div>
           );
         })}

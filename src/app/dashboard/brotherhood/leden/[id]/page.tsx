@@ -228,20 +228,6 @@ export default function ProfielDetail() {
               ))}
             </div>
           )}
-          <div className="mt-4">
-            {connectionStatus === 'verzoek' ? (
-              <button className="px-5 py-2 rounded-xl bg-[#8BAE5A]/30 text-[#8BAE5A] font-bold shadow cursor-default" disabled>✓ Verzoek Verzonden</button>
-            ) : connectionStatus === 'connectie' ? (
-              <button className="px-5 py-2 rounded-xl bg-[#FFD700]/30 text-[#FFD700] font-bold shadow cursor-default" disabled>✓ Connectie</button>
-            ) : (
-              <button
-                className="px-5 py-2 rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-bold shadow hover:from-[#B6C948] hover:to-[#8BAE5A] transition-all"
-                onClick={handleConnect}
-              >
-                + Maak Connectie
-              </button>
-            )}
-          </div>
         </div>
       </div>
 
