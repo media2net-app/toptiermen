@@ -216,6 +216,7 @@ export default function BasicTierPage() {
                 Exclusieve prelaunch aanbieding
               </p>
             </div>
+
           </div>
         </div>
       </section>
@@ -333,6 +334,32 @@ export default function BasicTierPage() {
                     <span className="text-white">{feature}</span>
                   </div>
                 ))}
+              </div>
+            </div>
+
+            {/* Sneak Preview Video */}
+            <div className="bg-gradient-to-r from-[#181F17] to-[#1A1F2E] border border-[#3A4D23] rounded-xl p-6 mb-16">
+              <h3 className="text-lg sm:text-xl font-bold text-white mb-4 text-center">
+                🎬 Sneak Preview - Wat krijg je?
+              </h3>
+              <div className="relative w-full max-w-4xl mx-auto">
+                <div className="relative aspect-video bg-black rounded-lg overflow-hidden">
+                  <video
+                    src="/platform-preview.mp4"
+                    title="Top Tier Men Platform Sneak Preview"
+                    className="w-full h-full rounded-lg"
+                    controls
+                    preload="metadata"
+                    poster="/platform-preview.png"
+                  >
+                    Je browser ondersteunt het video element niet.
+                  </video>
+                </div>
+                <div className="mt-4 text-center">
+                  <p className="text-[#8BAE5A] text-sm">
+                    Bekijk wat je krijgt met je Top Tier Men lidmaatschap
+                  </p>
+                </div>
               </div>
             </div>
 
