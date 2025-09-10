@@ -257,6 +257,7 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
                         <Link
                           key={sub.label}
                           href={sub.href}
+                          onClick={onLinkClick}
                           className={`block px-4 py-2 rounded-lg text-sm transition-all duration-150 ${
                             isSubActive 
                               ? 'bg-[#8BAE5A] text-black font-semibold' 
@@ -315,9 +316,13 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
               }}
             >
               <Link
-                href={item.href}
+                href={item.disabled ? '#' : item.href}
+                onClick={item.disabled ? (e) => e.preventDefault() : onLinkClick}
+                title={item.disabled ? "Binnenkort online" : undefined}
                 className={`grid grid-cols-[auto_1fr] items-center gap-4 px-4 py-3 rounded-xl font-bold uppercase text-sm tracking-wide transition-all duration-500 font-figtree ${
-                  isActive 
+                  item.disabled
+                    ? 'text-gray-500 cursor-not-allowed opacity-50'
+                    : isActive 
                     ? 'bg-[#8BAE5A] text-black shadow-lg' 
                     : shouldBeYellow
                       ? 'bg-[#FFD700]/20 text-[#FFD700] border border-[#FFD700]/30 shadow-lg'
@@ -326,7 +331,7 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
                         : 'text-white hover:text-[#8BAE5A] hover:bg-[#3A4D23]/50'
                 } ${collapsed ? 'justify-center px-2' : ''}`}
               >
-              <item.icon className={`w-6 h-6 ${isActive ? 'text-white' : shouldBeYellow ? 'text-[#FFD700]' : shouldBeGreen ? 'text-[#8BAE5A]' : 'text-[#8BAE5A]'}`} />
+              <item.icon className={`w-6 h-6 ${item.disabled ? 'text-gray-500' : isActive ? 'text-white' : shouldBeYellow ? 'text-[#FFD700]' : shouldBeGreen ? 'text-[#8BAE5A]' : 'text-[#8BAE5A]'}`} />
               {!collapsed && (
                 <div className="flex items-center justify-between w-full">
                   <span className="truncate">{item.label}</span>
