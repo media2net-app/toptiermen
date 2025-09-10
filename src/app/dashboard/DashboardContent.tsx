@@ -57,6 +57,256 @@ const menu = [
 ];
 
 // 2.0.1: Sidebar component with enhanced monitoring
+// Mobile-specific sidebar content with working submenu functionality
+const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: { 
+  onLinkClick?: () => void, 
+  onboardingStatus?: any 
+}) => {
+  const pathname = usePathname();
+  const [openBrotherhood, setOpenBrotherhood] = useState(false);
+  const [openDashboard, setOpenDashboard] = useState(false);
+  const [showOnboardingCompletion, setShowOnboardingCompletion] = useState(false);
+  const { isOnboarding, highlightedMenu, currentStep } = useOnboarding();
+  
+  // Use onboardingStatus from props if available, otherwise fallback to context
+  const actualOnboardingStatus = onboardingStatus || { current_step: currentStep, onboarding_completed: !isOnboarding };
+  const { user } = useSupabaseAuth();
+  const { hasAccess } = useSubscription();
+  
+  const safePathname = pathname || '';
+  
+  // Use currentStep from actualOnboardingStatus if available, otherwise fallback to useOnboarding hook
+  const actualCurrentStep = actualOnboardingStatus?.current_step ?? currentStep;
+
+  // Handle onboarding completion animation
+  useEffect(() => {
+    if (actualOnboardingStatus?.onboarding_completed && !showOnboardingCompletion) {
+      setShowOnboardingCompletion(true);
+      
+      // Hide onboarding item after 5 seconds
+      setTimeout(() => {
+        setShowOnboardingCompletion(false);
+      }, 5000);
+    }
+  }, [actualOnboardingStatus?.onboarding_completed, showOnboardingCompletion]);
+
+  // Function to check if a menu item should be visible based on subscription tier
+  const isMenuItemVisible = (item: any) => {
+    // Check subscription-based access for specific features
+    if (item.href === '/dashboard/voedingsplannen') {
+      return hasAccess('nutrition');
+    }
+    if (item.href === '/dashboard/trainingsschemas') {
+      return hasAccess('training');
+    }
+    
+    // All other items are visible by default
+    return true;
+  };
+
+  // Function to check if a menu item should be disabled during onboarding
+  const isMenuItemDisabled = (item: any) => {
+    // Check if item is explicitly disabled (e.g., "binnenkort online")
+    if (item.disabled) return true;
+    
+    // If onboarding is completed, no items should be disabled (except explicitly disabled ones)
+    if (actualOnboardingStatus?.onboarding_completed) return false;
+    
+    if (!isOnboarding || !actualOnboardingStatus) return false;
+    
+    // If item has onboardingStep defined, check if current step allows access
+    if (item.onboardingStep !== undefined) {
+      // During onboarding, only allow access to the current step and earlier completed steps
+      // But disable future steps and past steps that are not the current step
+      const isDisabled = actualCurrentStep !== item.onboardingStep;
+      
+      // Force console log to be visible
+      if (typeof window !== 'undefined') {
+        console.log(`🔍 [NAV] ${item.label}: currentStep=${actualCurrentStep}, requiredStep=${item.onboardingStep}, disabled=${isDisabled}`);
+      }
+      return isDisabled;
+    }
+    
+    return false;
+  };
+
+  // Auto-open submenu if current page is a submenu item
+  useEffect(() => {
+    const currentItem = menu.find(item => item.href === safePathname);
+    if (currentItem?.parent === 'Dashboard') {
+      setOpenDashboard(true);
+    } else if (currentItem?.parent === 'Brotherhood') {
+      setOpenBrotherhood(true);
+    }
+    
+    // Auto-open Brotherhood submenu during onboarding step 6 (forum introduction)
+    if (isOnboarding && actualCurrentStep === 6) {
+      setOpenBrotherhood(true);
+    }
+  }, [safePathname, isOnboarding, actualCurrentStep]);
+
+  return (
+    <nav className="flex flex-col gap-2">
+      {menu.map((item) => {
+        // Skip onboarding menu item if onboarding is completed and animation is done, or user is not in onboarding mode
+        if (item.isOnboardingItem && (actualOnboardingStatus?.onboarding_completed && !showOnboardingCompletion || !isOnboarding)) {
+          return null;
+        }
+        
+        // Skip menu items that are not visible based on subscription tier
+        if (!isMenuItemVisible(item)) {
+          return null;
+        }
+        
+        if (!item.parent) {
+          // During onboarding, only the current step should be active
+          const isActive = isOnboarding 
+            ? (safePathname === item.href && item.onboardingStep === actualCurrentStep)
+            : safePathname === item.href;
+          const hasSubmenu = menu.some(sub => sub.parent === item.label);
+
+          if (hasSubmenu) {
+            const isOpen = item.label === 'Dashboard' ? openDashboard : openBrotherhood;
+            const setIsOpen = item.label === 'Dashboard' ? setOpenDashboard : setOpenBrotherhood;
+            const subItems = menu.filter(sub => sub.parent === item.label);
+            const hasActiveSubItem = subItems.some(sub => 
+              isOnboarding 
+                ? (sub.href === safePathname && sub.onboardingStep === actualCurrentStep)
+                : sub.href === safePathname
+            );
+            const allSubItemsDisabled = subItems.every(sub => isMenuItemDisabled(sub));
+            
+            return (
+              <div key={item.label} className="group">
+                <button
+                  className={`grid grid-cols-[auto_1fr_auto] items-center gap-4 px-4 py-3 rounded-xl font-bold uppercase text-sm tracking-wide transition-all duration-150 font-figtree w-full text-left ${
+                    allSubItemsDisabled
+                      ? 'text-gray-500 cursor-not-allowed opacity-50'
+                      : isActive || hasActiveSubItem 
+                        ? 'bg-[#8BAE5A] text-black shadow-lg' 
+                        : 'text-white hover:text-[#8BAE5A] hover:bg-[#3A4D23]/50'
+                  }`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (!allSubItemsDisabled) {
+                      setIsOpen(v => !v);
+                    }
+                  }}
+                  disabled={allSubItemsDisabled}
+                  title={allSubItemsDisabled ? (subItems.some(sub => sub.disabled) ? "Binnenkort online" : "Nog niet beschikbaar tijdens onboarding") : undefined}
+                >
+                  <item.icon className={`w-6 h-6 ${allSubItemsDisabled ? 'text-gray-500' : isActive || hasActiveSubItem ? 'text-white' : 'text-[#8BAE5A]'}`} />
+                  <span className="truncate col-start-2">{item.label}</span>
+                  <ChevronDownIcon 
+                    className={`w-4 h-4 transition-transform duration-200 ${allSubItemsDisabled ? 'text-gray-500' : ''} ${isOpen ? 'rotate-180' : ''}`} 
+                  />
+                </button>
+                {isOpen && (
+                  <motion.div 
+                    className="ml-4 mt-2 space-y-1"
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    {subItems.map(sub => {
+                      const isSubActive = isOnboarding 
+                        ? (safePathname === sub.href && sub.onboardingStep === actualCurrentStep)
+                        : safePathname === sub.href;
+                      const isHighlighted = isOnboarding && highlightedMenu === sub.label;
+                      const isDisabled = isMenuItemDisabled(sub);
+                      
+                      if (isDisabled) {
+                        return (
+                          <div
+                            key={sub.label}
+                            className="block px-4 py-2 rounded-lg text-sm text-gray-500 cursor-not-allowed opacity-50"
+                            title={sub.disabled ? "Binnenkort online" : "Nog niet beschikbaar tijdens onboarding"}
+                          >
+                            {sub.label}
+                          </div>
+                        );
+                      }
+                      
+                      return (
+                        <Link
+                          key={sub.label}
+                          href={sub.href || '#'}
+                          onClick={sub.disabled ? (e) => e.preventDefault() : onLinkClick}
+                          title={sub.disabled ? "Binnenkort online" : undefined}
+                          className={`block px-4 py-2 rounded-lg text-sm transition-all duration-150 ${
+                            sub.disabled
+                              ? 'text-gray-500 cursor-not-allowed opacity-50'
+                              : isSubActive 
+                              ? 'bg-[#8BAE5A] text-black font-semibold' 
+                              : isHighlighted
+                              ? 'bg-[#FFD700]/20 text-[#FFD700] border border-[#FFD700]/30'
+                              : 'text-gray-300 hover:text-[#8BAE5A] hover:bg-[#8BAE5A]/10'
+                          }`}
+                        >
+                          {sub.label}
+                        </Link>
+                      );
+                    })}
+                  </motion.div>
+                )}
+              </div>
+            );
+          }
+
+          const isHighlighted = isOnboarding && highlightedMenu === item.label;
+          const isDisabled = isMenuItemDisabled(item);
+          const isOnboardingItem = item.isOnboardingItem;
+          
+          // Only the onboarding menu item should be yellow during onboarding, green when completed
+          const shouldBeYellow = isOnboardingItem && isOnboarding && !actualOnboardingStatus?.onboarding_completed;
+          const shouldBeGreen = isOnboardingItem && actualOnboardingStatus?.onboarding_completed && showOnboardingCompletion;
+          
+          // Special case: Onboarding menu item should always be yellow during onboarding, never disabled
+          if (isDisabled && !isOnboardingItem) {
+            return (
+              <div
+                key={item.label}
+                className={`grid grid-cols-[auto_1fr] items-center gap-4 px-4 py-3 rounded-xl font-bold uppercase text-sm tracking-wide font-figtree text-gray-500 cursor-not-allowed opacity-50`}
+                title={item.disabled ? "Binnenkort online" : "Nog niet beschikbaar tijdens onboarding"}
+              >
+                <item.icon className="w-6 h-6 text-gray-500" />
+                <span className="truncate">{item.label}</span>
+              </div>
+            );
+          }
+          
+          return (
+            <Link
+              key={item.label}
+              href={item.disabled ? '#' : (item.href || '#')}
+              onClick={item.disabled ? (e) => e.preventDefault() : onLinkClick}
+              title={item.disabled ? "Binnenkort online" : undefined}
+              className={`grid grid-cols-[auto_1fr] items-center gap-4 px-4 py-3 rounded-xl font-bold uppercase text-sm tracking-wide transition-all duration-500 font-figtree ${
+                item.disabled
+                  ? 'text-gray-500 cursor-not-allowed opacity-50'
+                  : isActive
+                  ? 'bg-[#8BAE5A] text-black shadow-lg'
+                  : shouldBeYellow
+                    ? 'bg-[#FFD700]/20 text-[#FFD700] border border-[#FFD700]/30 shadow-lg'
+                    : shouldBeGreen
+                      ? 'bg-[#8BAE5A]/20 text-[#8BAE5A] border border-[#8BAE5A]/30 shadow-lg animate-pulse'
+                      : 'text-white hover:text-[#8BAE5A] hover:bg-[#3A4D23]/50'
+              }`}
+            >
+              <item.icon className={`w-6 h-6 ${item.disabled ? 'text-gray-500' : isActive ? 'text-white' : shouldBeYellow ? 'text-[#FFD700]' : shouldBeGreen ? 'text-[#8BAE5A]' : 'text-[#8BAE5A]'}`} />
+              <span className="truncate">{item.label}</span>
+            </Link>
+          );
+        }
+        
+        return null;
+      })}
+    </nav>
+  );
+};
+
 const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: { 
   collapsed: boolean, 
   onLinkClick?: () => void, 
@@ -809,8 +1059,7 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
                   {/* Scrollable Content */}
                   <div className="flex-1 overflow-y-auto overflow-x-hidden sidebar-scrollbar" style={{ height: 'calc(100vh - 80px)', maxHeight: 'calc(100vh - 80px)' }}>
                     <div className="p-4 pb-8">
-                      <SidebarContent 
-                        collapsed={false} 
+                      <MobileSidebarContent 
                         onLinkClick={() => setIsMobileMenuOpen(false)}
                         onboardingStatus={onboardingStatus}
                       />
