@@ -268,7 +268,8 @@ export default function CheckoutSection({
                 <div className="flex items-center justify-between">
                   {/* Left Arrow */}
                   <button
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.preventDefault();
                       if (availablePackages.length > 0 && onPackageChange) {
                         const currentIndex = availablePackages.findIndex(pkg => pkg.id === packageId);
                         const prevIndex = currentIndex > 0 ? currentIndex - 1 : availablePackages.length - 1;
@@ -296,7 +297,8 @@ export default function CheckoutSection({
 
                   {/* Right Arrow */}
                   <button
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.preventDefault();
                       if (availablePackages.length > 0 && onPackageChange) {
                         const currentIndex = availablePackages.findIndex(pkg => pkg.id === packageId);
                         const nextIndex = currentIndex < availablePackages.length - 1 ? currentIndex + 1 : 0;
