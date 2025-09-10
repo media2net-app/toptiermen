@@ -367,14 +367,14 @@ export default function MijnMissiesPage() {
           setSummary(data.summary);
         }
         
-        toast.success(`Missie "${suggestedMission.title}" toegevoegd!`);
+        toast.success(`Uitdaging "${suggestedMission.title}" toegevoegd!`);
         setShowMissionLibrary(false);
       } else {
         throw new Error('Failed to add mission');
       }
     } catch (error) {
       console.error('Error adding suggested mission:', error);
-      toast.error('Er is een fout opgetreden bij het toevoegen van de missie.');
+      toast.error('Er is een fout opgetreden bij het toevoegen van de uitdaging.');
     }
   };
 
@@ -469,7 +469,7 @@ export default function MijnMissiesPage() {
 
       // Show toast notification when all missions are completed
       if (allDailyCompleted && !wasCompletedBefore && !loading) {
-        toast.success('🏆 Alle dagelijkse missies volbracht! Je bent een echte Top Tier Man! Morgen staan er weer nieuwe uitdagingen klaar! 💪', {
+        toast.success('🏆 Alle dagelijkse uitdagingen volbracht! Je bent een echte Top Tier Man! Morgen staan er weer nieuwe uitdagingen klaar! 💪', {
           duration: 6000,
           position: "top-center",
           style: {
@@ -486,7 +486,7 @@ export default function MijnMissiesPage() {
 
       // Show encouragement when almost completed
       if (almostCompleted && !allDailyCompleted && !wasAlmostCompletedBefore && !loading) {
-        toast('🔥 Bijna alle missies volbracht! Nog even doorzetten voor de perfecte dag! 💪', {
+        toast('🔥 Bijna alle uitdagingen volbracht! Nog even doorzetten voor de perfecte dag! 💪', {
           duration: 4000,
           position: "top-center",
           style: {
@@ -600,14 +600,14 @@ export default function MijnMissiesPage() {
 
         // Show success message
         if (data.xpEarned > 0) {
-          toast.success(`🎉 ${data.message || `Missie voltooid! +${data.xpEarned} XP verdiend!`}`);
+          toast.success(`🎉 ${data.message || `Uitdaging voltooid! +${data.xpEarned} XP verdiend!`}`);
         } else if (data.xpEarned < 0) {
-          toast(`Missie ongedaan gemaakt. ${Math.abs(data.xpEarned)} XP afgetrokken.`);
+          toast(`Uitdaging ongedaan gemaakt. ${Math.abs(data.xpEarned)} XP afgetrokken.`);
         }
       }
     } catch (err) {
       console.error('Error toggling mission:', err);
-      toast.error('Fout bij het voltooien van de missie');
+      toast.error('Fout bij het voltooien van de uitdaging');
     }
   };
 
@@ -648,11 +648,11 @@ export default function MijnMissiesPage() {
         }
         
         setNewMission({ title: '', type: 'Dagelijks' });
-        toast.success(data.message || 'Missie toegevoegd!');
+        toast.success(data.message || 'Uitdaging toegevoegd!');
       }
     } catch (err) {
       console.error('Error creating mission:', err);
-      toast.error('Fout bij het toevoegen van de missie');
+      toast.error('Fout bij het toevoegen van de uitdaging');
     }
   };
 
@@ -692,11 +692,11 @@ export default function MijnMissiesPage() {
         
         setShowDeleteConfirm(false);
         setMissionToDelete(null);
-        toast.success(data.message || 'Missie succesvol verwijderd! 💪');
+        toast.success(data.message || 'Uitdaging succesvol verwijderd! 💪');
       }
     } catch (err) {
       console.error('Error deleting mission:', err);
-      toast.error('Fout bij het verwijderen van de missie');
+      toast.error('Fout bij het verwijderen van de uitdaging');
     }
   };
 
@@ -767,8 +767,8 @@ export default function MijnMissiesPage() {
   return (
     <ClientLayout>
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-2 drop-shadow-lg">Mijn Missies</h1>
-        <p className="text-[#8BAE5A] text-sm sm:text-lg mb-6 sm:mb-8">Voltooi dagelijkse missies en verdien XP</p>
+        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-2 drop-shadow-lg">Mijn Uitdagingen</h1>
+        <p className="text-[#8BAE5A] text-sm sm:text-lg mb-6 sm:mb-8">Voltooi dagelijkse uitdagingen en verdien XP</p>
 
         {/* Summary Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-8">
@@ -794,29 +794,29 @@ export default function MijnMissiesPage() {
               <div className="flex items-center gap-3">
                 <span className="text-2xl sm:text-3xl">🔥</span>
                 <div>
-                  <h2 className="text-lg sm:text-xl font-bold text-white">Onboarding Stap 3: Missies Selecteren</h2>
-                  <p className="text-[#8BAE5A] text-xs sm:text-sm">Selecteer minimaal 3 missies om door te gaan</p>
+                  <h2 className="text-lg sm:text-xl font-bold text-white">Onboarding Stap 3: Uitdagingen Selecteren</h2>
+                  <p className="text-[#8BAE5A] text-xs sm:text-sm">Selecteer minimaal 3 uitdagingen om door te gaan</p>
                 </div>
               </div>
               <div className="text-right">
                 <div className="text-xl sm:text-2xl font-bold text-[#FFD700]">{missions.length}/3</div>
-                <div className="text-[#8BAE5A] text-xs sm:text-sm">Missies geselecteerd</div>
+                <div className="text-[#8BAE5A] text-xs sm:text-sm">Uitdagingen geselecteerd</div>
               </div>
             </div>
             
             {missions.length < 3 ? (
               <div className="bg-[#181F17]/80 rounded-xl p-3 sm:p-4 border border-[#3A4D23]">
                 <p className="text-[#f0a14f] text-xs sm:text-sm font-semibold mb-2">
-                  ⚠️ Je hebt nog {3 - missions.length} missie{3 - missions.length !== 1 ? 's' : ''} nodig
+                  ⚠️ Je hebt nog {3 - missions.length} uitdaging{3 - missions.length !== 1 ? 'en' : ''} nodig
                 </p>
                 <p className="text-gray-300 text-xs sm:text-sm">
-                  Voeg nog {3 - missions.length} missie{3 - missions.length !== 1 ? 's' : ''} toe om door te gaan naar de volgende stap van de onboarding.
+                  Voeg nog {3 - missions.length} uitdaging{3 - missions.length !== 1 ? 'en' : ''} toe om door te gaan naar de volgende stap van de onboarding.
                 </p>
               </div>
             ) : (
               <div className="bg-[#8BAE5A]/20 rounded-xl p-3 sm:p-4 border border-[#8BAE5A]">
                 <p className="text-[#8BAE5A] text-xs sm:text-sm font-semibold mb-2">
-                  ✅ Perfect! Je hebt {missions.length} missies geselecteerd
+                  ✅ Perfect! Je hebt {missions.length} uitdagingen geselecteerd
                 </p>
                 <p className="text-gray-300 text-xs sm:text-sm mb-4">
                   Je kunt nu door naar de volgende stap van de onboarding.

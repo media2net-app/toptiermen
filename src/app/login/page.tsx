@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { EnvelopeIcon, LockClosedIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import LoginDebugger from '@/components/LoginDebugger';
+import PrelaunchCountdown from '@/components/PrelaunchCountdown';
 // import { useCacheBuster } from '@/components/CacheBuster'; - DISABLED TO PREVENT LOGOUT
 
 // Auth configuration constants
@@ -482,9 +483,28 @@ function LoginPageContent() {
   if (!loginState.isClient) {
     return (
       <div className="min-h-screen flex items-center justify-center relative px-4 py-6" style={{ backgroundColor: '#181F17' }}>
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#B6C948] mx-auto mb-4"></div>
-          <p className="text-[#B6C948] text-lg">Laden...</p>
+        <img src="/pattern.png" alt="pattern" className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none z-0" />
+        <div className="w-full max-w-md p-6 sm:p-8 rounded-3xl shadow-2xl bg-[#232D1A]/95 border border-[#3A4D23] backdrop-blur-lg relative z-10">
+          <div className="flex justify-center mb-4">
+            <img 
+              src="/logo_white-full.svg" 
+              alt="Top Tier Men Logo" 
+              className="h-16 sm:h-20 md:h-24 w-auto"
+            />
+          </div>
+          
+          {/* Platform Live Timer */}
+          <div className="flex justify-center mb-4">
+            <div className="text-center">
+              <p className="text-[#8BAE5A] text-sm mb-2 font-figtree">Platform gaat live om 20:00:</p>
+              <PrelaunchCountdown className="text-sm" />
+            </div>
+          </div>
+          
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#B6C948] mx-auto mb-4"></div>
+            <p className="text-[#B6C948] text-lg">Laden...</p>
+          </div>
         </div>
       </div>
     );
@@ -548,6 +568,14 @@ function LoginPageContent() {
             alt="Top Tier Men Logo" 
             className="h-16 sm:h-20 md:h-24 w-auto"
           />
+        </div>
+
+        {/* Platform Live Timer */}
+        <div className="flex justify-center mb-4">
+          <div className="text-center">
+            <p className="text-[#8BAE5A] text-sm mb-2 font-figtree">Platform gaat live om 20:00:</p>
+            <PrelaunchCountdown className="text-sm" />
+          </div>
         </div>
 
         <p className="text-[#B6C948] text-center mb-6 sm:mb-8 text-base sm:text-lg font-figtree">Log in op je dashboard</p>
@@ -795,6 +823,22 @@ export default function LoginPage() {
       <div className="min-h-screen flex items-center justify-center relative px-4 py-6" style={{ backgroundColor: '#181F17' }}>
         <img src="/pattern.png" alt="pattern" className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none z-0" />
         <div className="w-full max-w-md p-6 sm:p-8 rounded-3xl shadow-2xl bg-[#232D1A]/95 border border-[#3A4D23] backdrop-blur-lg relative z-10">
+          <div className="flex justify-center mb-4">
+            <img 
+              src="/logo_white-full.svg" 
+              alt="Top Tier Men Logo" 
+              className="h-16 sm:h-20 md:h-24 w-auto"
+            />
+          </div>
+          
+          {/* Platform Live Timer */}
+          <div className="flex justify-center mb-4">
+            <div className="text-center">
+              <p className="text-[#8BAE5A] text-sm mb-2 font-figtree">Platform gaat live om 20:00:</p>
+              <PrelaunchCountdown className="text-sm" />
+            </div>
+          </div>
+          
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#8BAE5A] mx-auto"></div>
             <p className="text-[#8BAE5A] mt-4">Laden...</p>

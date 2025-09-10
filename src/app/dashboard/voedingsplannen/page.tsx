@@ -14,6 +14,7 @@ import PageLayout from '@/components/PageLayout';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { useOnboarding } from "@/contexts/OnboardingContext";
 import { useRouter } from 'next/navigation';
+import { useSubscription } from '@/hooks/useSubscription';
 import DynamicPlanViewNew from './components/DynamicPlanViewNew';
 
 // Function to map activity level to Dutch display text
@@ -89,6 +90,7 @@ const dietTypes = [
 export default function VoedingsplannenPage() {
   const { user, loading: authLoading } = useSupabaseAuth();
   const { isOnboarding, currentStep: onboardingStep, completeStep } = useOnboarding();
+  const { hasAccess, loading: subscriptionLoading } = useSubscription();
   const router = useRouter();
 
   // Nutrition plans state
@@ -661,6 +663,72 @@ export default function VoedingsplannenPage() {
     );
   }
 
+  // Check access permissions for nutrition plans
+  if (!hasAccess('nutrition')) {
+    return (
+      <PageLayout 
+        title="Voedingsplannen" 
+        subtitle="Beheer je voedingsplannen en bereken je dagelijkse behoeften"
+      >
+        <div className="w-full">
+          <div className="text-center py-16">
+            <div className="mb-8">
+              <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] rounded-full flex items-center justify-center">
+                <BookOpenIcon className="w-12 h-12 text-[#0A0F0A]" />
+              </div>
+              <h1 className="text-3xl font-bold text-white mb-4">Voedingsplannen</h1>
+              <p className="text-xl text-gray-300 mb-8">
+                Upgrade naar Premium of Lifetime voor toegang tot voedingsplannen
+              </p>
+            </div>
+            
+            <div className="bg-[#232D1A] border border-[#3A4D23] rounded-xl p-8 max-w-2xl mx-auto">
+              <h2 className="text-2xl font-bold text-white mb-4">🚀 Upgrade je Account</h2>
+              <p className="text-gray-300 mb-6">
+                Voedingsplannen zijn alleen beschikbaar voor Premium en Lifetime leden. 
+                Upgrade nu om toegang te krijgen tot:
+              </p>
+              
+              <div className="grid md:grid-cols-2 gap-4 mb-8">
+                <div className="flex items-center space-x-3">
+                  <CheckIcon className="w-5 h-5 text-[#8BAE5A]" />
+                  <span className="text-white">Persoonlijke voedingsplannen</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <CheckIcon className="w-5 h-5 text-[#8BAE5A]" />
+                  <span className="text-white">Macro berekeningen</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <CheckIcon className="w-5 h-5 text-[#8BAE5A]" />
+                  <span className="text-white">Dieet-specifieke plannen</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <CheckIcon className="w-5 h-5 text-[#8BAE5A]" />
+                  <span className="text-white">Voedingsadvies</span>
+                </div>
+              </div>
+              
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <button
+                  onClick={() => router.push('/pakketten/premium-tier')}
+                  className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#0A0F0A] font-bold px-8 py-3 rounded-lg hover:from-[#A6C97B] hover:to-[#FFE55C] transition-all duration-200"
+                >
+                  Upgrade naar Premium
+                </button>
+                <button
+                  onClick={() => router.push('/pakketten/lifetime-tier')}
+                  className="bg-gradient-to-r from-[#FFD700] to-[#8BAE5A] text-[#0A0F0A] font-bold px-8 py-3 rounded-lg hover:from-[#FFE55C] hover:to-[#A6C97B] transition-all duration-200"
+                >
+                  Upgrade naar Lifetime
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </PageLayout>
+    );
+  }
+
   return (
     <PageLayout 
       title="Voedingsplannen" 
@@ -944,14 +1012,14 @@ export default function VoedingsplannenPage() {
                     </div>
                   )}
                 </div>
-                <div className="grid md:grid-cols-4 gap-4">
-                  <div className="bg-[#181F17] rounded-lg p-4 text-center">
-                    <h4 className="text-[#8BAE5A] font-semibold mb-1 text-sm">Calorieën</h4>
-                    <p className="text-2xl font-bold text-white">{userNutritionProfile.dailyCalories}</p>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+                  <div className="bg-[#181F17] rounded-lg p-3 md:p-4 text-center">
+                    <h4 className="text-[#8BAE5A] font-semibold mb-1 text-xs md:text-sm">Calorieën</h4>
+                    <p className="text-lg md:text-2xl font-bold text-white">{userNutritionProfile.dailyCalories}</p>
                     <p className="text-xs text-gray-400">per dag</p>
                   </div>
-                  <div className="bg-[#181F17] rounded-lg p-4 text-center">
-                    <h4 className="text-[#8BAE5A] font-semibold mb-1 text-sm">Eiwitten</h4>
+                  <div className="bg-[#181F17] rounded-lg p-3 md:p-4 text-center">
+                    <h4 className="text-[#8BAE5A] font-semibold mb-1 text-xs md:text-sm">Eiwitten</h4>
                     {selectedNutritionPlan ? (() => {
                       const selectedPlan = nutritionPlans.find(p => p.plan_id === selectedNutritionPlan);
                       if (selectedPlan) {
@@ -969,8 +1037,8 @@ export default function VoedingsplannenPage() {
                     )}
                     <p className="text-xs text-gray-400">per dag</p>
                   </div>
-                  <div className="bg-[#181F17] rounded-lg p-4 text-center">
-                    <h4 className="text-[#8BAE5A] font-semibold mb-1 text-sm">Koolhydraten</h4>
+                  <div className="bg-[#181F17] rounded-lg p-3 md:p-4 text-center">
+                    <h4 className="text-[#8BAE5A] font-semibold mb-1 text-xs md:text-sm">Koolhydraten</h4>
                     {selectedNutritionPlan ? (() => {
                       const selectedPlan = nutritionPlans.find(p => p.plan_id === selectedNutritionPlan);
                       if (selectedPlan) {
@@ -988,8 +1056,8 @@ export default function VoedingsplannenPage() {
                     )}
                     <p className="text-xs text-gray-400">per dag</p>
                   </div>
-                  <div className="bg-[#181F17] rounded-lg p-4 text-center">
-                    <h4 className="text-[#8BAE5A] font-semibold mb-1 text-sm">Vetten</h4>
+                  <div className="bg-[#181F17] rounded-lg p-3 md:p-4 text-center">
+                    <h4 className="text-[#8BAE5A] font-semibold mb-1 text-xs md:text-sm">Vetten</h4>
                     {selectedNutritionPlan ? (() => {
                       const selectedPlan = nutritionPlans.find(p => p.plan_id === selectedNutritionPlan);
                       if (selectedPlan) {
@@ -1068,14 +1136,14 @@ export default function VoedingsplannenPage() {
                     </button>
                   </div>
                 ) : (
-                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                     {nutritionPlans.map((plan) => (
                       <motion.div
                         key={plan.id}
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={() => handleNutritionPlanClick(plan.plan_id)}
-                        className={`cursor-pointer rounded-2xl p-6 border-2 transition-all duration-300 relative ${
+                        className={`cursor-pointer rounded-2xl p-4 md:p-6 border-2 transition-all duration-300 relative ${
                           selectedNutritionPlan === plan.plan_id
                             ? 'border-[#8BAE5A] bg-[#8BAE5A]/10'
                             : 'border-[#3A4D23] bg-[#232D1A] hover:border-[#8BAE5A]/50'
@@ -1100,7 +1168,7 @@ export default function VoedingsplannenPage() {
                           </div>
                         )}
                         
-                        <h3 className="text-xl font-bold text-white mb-2 text-center">{plan.name}</h3>
+                        <h3 className="text-lg md:text-xl font-bold text-white mb-2 text-center">{plan.name}</h3>
                         {plan.subtitle && (
                           <p className="text-[#8BAE5A] text-sm text-center mb-3">{plan.subtitle}</p>
                         )}
@@ -1177,7 +1245,7 @@ export default function VoedingsplannenPage() {
                           console.log('🔍 Clicking plan:', plan.plan_id, plan.name);
                           handleViewDynamicPlan(plan.plan_id, plan.name);
                         }}
-                        className="w-full px-4 py-2 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold flex items-center justify-center gap-2"
+                        className="w-full px-4 py-3 md:py-2 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold flex items-center justify-center gap-2 text-sm md:text-base"
                       >
                         <EyeIcon className="w-4 h-4" />
                         Bekijk Gepersonaliseerd Plan
@@ -1189,7 +1257,7 @@ export default function VoedingsplannenPage() {
                           e.stopPropagation();
                           handleNutritionPlanClick(plan.plan_id);
                         }}
-                        className={`w-full px-4 py-2 rounded-lg transition-colors font-semibold flex items-center justify-center gap-2 ${
+                        className={`w-full px-4 py-3 md:py-2 rounded-lg transition-colors font-semibold flex items-center justify-center gap-2 text-sm md:text-base ${
                           selectedNutritionPlan === plan.plan_id
                             ? 'bg-[#8BAE5A] text-[#232D1A]'
                             : 'bg-[#3A4D23] text-white hover:bg-[#4A5D33]'

@@ -202,70 +202,72 @@ export default function DynamicTrainingPlanView({ schemaId, schemaName, userId, 
       exit={{ opacity: 0, y: -20 }}
       className="min-h-screen bg-[#0A0A0A] text-white"
     >
-      <div className="max-w-6xl mx-auto p-6">
+      <div className="max-w-6xl mx-auto p-4 md:p-6">
         {/* Header with Back Button */}
-        <div className="flex items-center gap-4 mb-8">
+        <div className="flex items-center gap-4 mb-6 md:mb-8">
           <button
             onClick={onBack}
-            className="flex items-center gap-2 text-[#8BAE5A] hover:text-[#B6C948] transition-colors"
+            className="flex items-center gap-2 text-[#8BAE5A] hover:text-[#B6C948] transition-colors text-sm md:text-base"
           >
-            <ArrowLeftIcon className="w-5 h-5" />
-            <span>Terug naar overzicht</span>
+            <ArrowLeftIcon className="w-4 h-4 md:w-5 md:h-5" />
+            <span className="hidden sm:inline">Terug naar overzicht</span>
+            <span className="sm:hidden">Terug</span>
           </button>
         </div>
 
         {/* Schema Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">{schemaData.name}</h1>
+        <div className="mb-6 md:mb-8">
+          <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">{schemaData.name}</h1>
           {schemaData.description && (
-            <p className="text-gray-300 mb-4">{schemaData.description}</p>
+            <p className="text-gray-300 mb-4 text-sm md:text-base">{schemaData.description}</p>
           )}
           
           {/* Schema Info Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <div className="bg-[#1A1A1A] rounded-lg p-4 border border-gray-800">
-              <h3 className="text-sm font-medium text-gray-400 mb-2">Doel</h3>
-              <p className="text-white capitalize">{schemaData.training_goal || 'Niet gespecificeerd'}</p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-4 md:mb-6">
+            <div className="bg-[#1A1A1A] rounded-lg p-3 md:p-4 border border-gray-800">
+              <h3 className="text-xs md:text-sm font-medium text-gray-400 mb-1 md:mb-2">Doel</h3>
+              <p className="text-white capitalize text-sm md:text-base">{schemaData.training_goal || 'Niet gespecificeerd'}</p>
             </div>
-            <div className="bg-[#1A1A1A] rounded-lg p-4 border border-gray-800">
-              <h3 className="text-sm font-medium text-gray-400 mb-2">Equipment</h3>
-              <p className="text-white capitalize">{schemaData.category || 'Niet gespecificeerd'}</p>
+            <div className="bg-[#1A1A1A] rounded-lg p-3 md:p-4 border border-gray-800">
+              <h3 className="text-xs md:text-sm font-medium text-gray-400 mb-1 md:mb-2">Equipment</h3>
+              <p className="text-white capitalize text-sm md:text-base">{schemaData.category || 'Niet gespecificeerd'}</p>
             </div>
-            <div className="bg-[#1A1A1A] rounded-lg p-4 border border-gray-800">
-              <h3 className="text-sm font-medium text-gray-400 mb-2">Frequentie</h3>
-              <p className="text-white">{totalDays} dagen per week</p>
+            <div className="bg-[#1A1A1A] rounded-lg p-3 md:p-4 border border-gray-800">
+              <h3 className="text-xs md:text-sm font-medium text-gray-400 mb-1 md:mb-2">Frequentie</h3>
+              <p className="text-white text-sm md:text-base">{totalDays} dagen per week</p>
             </div>
-            <div className="bg-[#1A1A1A] rounded-lg p-4 border border-gray-800">
-              <h3 className="text-sm font-medium text-gray-400 mb-2">Status</h3>
-              <p className="text-white">Gereed</p>
+            <div className="bg-[#1A1A1A] rounded-lg p-3 md:p-4 border border-gray-800">
+              <h3 className="text-xs md:text-sm font-medium text-gray-400 mb-1 md:mb-2">Status</h3>
+              <p className="text-white text-sm md:text-base">Gereed</p>
             </div>
           </div>
 
           {/* Select Plan Button */}
-          <div className="flex justify-end">
+          <div className="flex justify-center md:justify-end">
             <button
               onClick={handleSelectPlan}
-              className="flex items-center gap-2 px-6 py-3 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold"
+              className="flex items-center gap-2 px-4 md:px-6 py-3 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold text-sm md:text-base"
             >
-              <CheckIcon className="w-5 h-5" />
-              Selecteer dit schema
+              <CheckIcon className="w-4 h-4 md:w-5 md:h-5" />
+              <span className="hidden sm:inline">Selecteer dit schema</span>
+              <span className="sm:hidden">Selecteer</span>
             </button>
           </div>
         </div>
 
         {/* Day Selector */}
         {totalDays > 1 && (
-          <div className="mb-8">
-            <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
-              <CalendarDaysIcon className="w-5 h-5" />
-              Kies een dag
+          <div className="mb-6 md:mb-8">
+            <h2 className="text-lg md:text-xl font-semibold text-white mb-3 md:mb-4 flex items-center gap-2">
+              <CalendarDaysIcon className="w-4 h-4 md:w-5 md:h-5" />
+              <span className="text-sm md:text-base">Kies een dag</span>
             </h2>
-            <div className="flex flex-wrap gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
               {schemaData.training_schema_days?.map((day) => (
                 <button
                   key={day.id}
                   onClick={() => setSelectedDay(day.day_number)}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  className={`px-3 py-2 rounded-lg font-medium transition-colors text-sm md:text-base ${
                     selectedDay === day.day_number
                       ? 'bg-[#8BAE5A] text-[#232D1A]'
                       : 'bg-[#3A4D23] text-white hover:bg-[#4A5D33]'
@@ -280,21 +282,21 @@ export default function DynamicTrainingPlanView({ schemaId, schemaName, userId, 
 
         {/* Current Day Exercises */}
         {currentDay && (
-          <div className="mb-8">
-            <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
-              <FireIcon className="w-5 h-5" />
-              {currentDay.name} - Oefeningen
+          <div className="mb-6 md:mb-8">
+            <h2 className="text-lg md:text-xl font-semibold text-white mb-3 md:mb-4 flex items-center gap-2">
+              <FireIcon className="w-4 h-4 md:w-5 md:h-5" />
+              <span className="text-sm md:text-base">{currentDay.name} - Oefeningen</span>
             </h2>
             
             {currentDay.training_schema_exercises && currentDay.training_schema_exercises.length > 0 ? (
-              <div className="space-y-4">
+              <div className="space-y-3 md:space-y-4">
                 {currentDay.training_schema_exercises.map((exercise, index) => (
-                  <div key={exercise.id} className="bg-[#1A1A1A] rounded-lg p-4 border border-gray-800">
-                    <div className="flex items-center justify-between mb-3">
+                  <div key={exercise.id} className="bg-[#1A1A1A] rounded-lg p-3 md:p-4 border border-gray-800">
+                    <div className="flex items-center justify-between mb-2 md:mb-3">
                       <div className="flex-1">
-                        <h3 className="text-lg font-medium text-white">{exercise.exercise_name}</h3>
+                        <h3 className="text-base md:text-lg font-medium text-white">{exercise.exercise_name}</h3>
                         {exercise.notes && (
-                          <p className="text-sm text-gray-400 mt-1">{exercise.notes}</p>
+                          <p className="text-xs md:text-sm text-gray-400 mt-1">{exercise.notes}</p>
                         )}
                       </div>
                       <div className="text-right">

@@ -51,6 +51,7 @@ export default function VercelAnalyticsWidget({ period, type = 'analytics' }: Ve
   const [data, setData] = useState<VercelAnalyticsData | VercelSpeedInsightsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isMockData, setIsMockData] = useState(false);
 
   useEffect(() => {
     fetchVercelData();
@@ -66,11 +67,14 @@ export default function VercelAnalyticsWidget({ period, type = 'analytics' }: Ve
 
       if (result.success) {
         setData(result.data);
+        setIsMockData(result.mock || false);
       } else {
         setError(result.error || 'Failed to fetch Vercel data');
+        setIsMockData(true);
       }
     } catch (err) {
       setError('Failed to fetch Vercel data');
+      setIsMockData(true);
       console.error('Error fetching Vercel data:', err);
     } finally {
       setLoading(false);
@@ -264,7 +268,15 @@ export default function VercelAnalyticsWidget({ period, type = 'analytics' }: Ve
   if (type === 'speed-insights') {
     const speedData = data as VercelSpeedInsightsData;
     return (
-      <AdminCard title="Vercel Speed Insights" icon={<ChartBarIcon className="w-6 h-6" />}>
+      <AdminCard title={`Vercel Speed Insights${isMockData ? ' (Mock Data)' : ''}`} icon={<ChartBarIcon className="w-6 h-6" />}>
+        {isMockData && (
+          <div className="mb-4 p-3 bg-yellow-100 border border-yellow-300 rounded-lg">
+            <div className="flex items-center gap-2 text-yellow-800 text-sm">
+              <span className="text-lg">⚠️</span>
+              <span className="font-medium">Mock Data - Voeg VERCEL_TOKEN en VERCEL_PROJECT_ID toe aan je .env.local voor live data</span>
+            </div>
+          </div>
+        )}
         <div className="space-y-6">
           {/* Real Experience Score */}
           <div className="text-center">
@@ -340,7 +352,15 @@ export default function VercelAnalyticsWidget({ period, type = 'analytics' }: Ve
     // Analytics view
   const analyticsData = data as VercelAnalyticsData;
   return (
-    <AdminCard title="Vercel Analytics" icon={<ChartBarIcon className="w-6 h-6" />}>
+    <AdminCard title={`Vercel Analytics${isMockData ? ' (Mock Data)' : ''}`} icon={<ChartBarIcon className="w-6 h-6" />}>
+      {isMockData && (
+        <div className="mb-4 p-3 bg-yellow-100 border border-yellow-300 rounded-lg">
+          <div className="flex items-center gap-2 text-yellow-800 text-sm">
+            <span className="text-lg">⚠️</span>
+            <span className="font-medium">Mock Data - Voeg VERCEL_TOKEN en VERCEL_PROJECT_ID toe aan je .env.local voor live data</span>
+          </div>
+        </div>
+      )}
       <div className="space-y-6">
         {/* Key Metrics */}
         <div className="grid grid-cols-3 gap-4">

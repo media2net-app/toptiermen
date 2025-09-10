@@ -274,21 +274,21 @@ export default function ChallengesPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#181F17] p-6">
+      <div className="min-h-screen bg-[#181F17] p-4 md:p-6">
         <div className="max-w-7xl mx-auto">
           <div className="animate-pulse">
-            <div className="h-8 bg-[#3A4D23] rounded w-64 mb-6"></div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="h-6 md:h-8 bg-[#3A4D23] rounded w-48 md:w-64 mb-4 md:mb-6"></div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {[1, 2, 3, 4, 5, 6].map((i) => (
-                <div key={i} className="bg-[#232D1A] rounded-lg p-6">
-                  <div className="h-6 bg-[#3A4D23] rounded w-3/4 mb-4"></div>
-                  <div className="h-4 bg-[#3A4D23] rounded w-full mb-2"></div>
-                  <div className="h-4 bg-[#3A4D23] rounded w-2/3 mb-4"></div>
-                  <div className="flex gap-2 mb-4">
-                    <div className="h-6 bg-[#3A4D23] rounded w-16"></div>
-                    <div className="h-6 bg-[#3A4D23] rounded w-20"></div>
+                <div key={i} className="bg-[#232D1A] rounded-lg p-4 md:p-6">
+                  <div className="h-5 md:h-6 bg-[#3A4D23] rounded w-3/4 mb-3 md:mb-4"></div>
+                  <div className="h-3 md:h-4 bg-[#3A4D23] rounded w-full mb-2"></div>
+                  <div className="h-3 md:h-4 bg-[#3A4D23] rounded w-2/3 mb-3 md:mb-4"></div>
+                  <div className="flex gap-1 md:gap-2 mb-3 md:mb-4">
+                    <div className="h-5 md:h-6 bg-[#3A4D23] rounded w-12 md:w-16"></div>
+                    <div className="h-5 md:h-6 bg-[#3A4D23] rounded w-16 md:w-20"></div>
                   </div>
-                  <div className="h-10 bg-[#3A4D23] rounded w-full"></div>
+                  <div className="h-8 md:h-10 bg-[#3A4D23] rounded w-full"></div>
                 </div>
               ))}
             </div>
@@ -299,56 +299,56 @@ export default function ChallengesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#181F17] p-6">
+    <div className="min-h-screen bg-[#181F17] p-4 md:p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-6 md:mb-8">
           <Breadcrumb items={createBreadcrumbs('Challenges', BREADCRUMB_CONFIGS.challenges.parent, BREADCRUMB_CONFIGS.challenges.parentHref)} />
           
-          <div className="flex items-center gap-4 mt-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-[#8BAE5A] to-[#B6C948] rounded-xl flex items-center justify-center">
-              <TrophyIcon className="w-6 h-6 text-[#181F17]" />
+          <div className="flex items-center gap-3 md:gap-4 mt-4">
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-[#8BAE5A] to-[#B6C948] rounded-xl flex items-center justify-center">
+              <TrophyIcon className="w-5 h-5 md:w-6 md:h-6 text-[#181F17]" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-white">Challenges</h1>
-              <p className="text-[#8BAE5A] mt-1">Test jezelf en verdien punten met uitdagende missies</p>
+              <h1 className="text-2xl md:text-3xl font-bold text-white">Challenges</h1>
+              <p className="text-[#8BAE5A] mt-1 text-sm md:text-base">Test jezelf en verdien punten met uitdagende uitdagingen</p>
             </div>
           </div>
         </div>
 
         {/* Onboarding Progress - Step 5: Challenges */}
         {showOnboardingStep5 && (
-          <div className="mb-8">
-            <div className="bg-gradient-to-br from-[#8BAE5A]/10 to-[#FFD700]/10 border-2 border-[#8BAE5A] rounded-2xl p-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl sm:text-3xl">🏆</span>
+          <div className="mb-6 md:mb-8">
+            <div className="bg-gradient-to-br from-[#8BAE5A]/10 to-[#FFD700]/10 border-2 border-[#8BAE5A] rounded-2xl p-4 md:p-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 md:mb-4 gap-3">
+                <div className="flex items-center gap-2 md:gap-3">
+                  <span className="text-xl md:text-2xl sm:text-3xl">🏆</span>
                   <div>
-                    <h2 className="text-lg sm:text-xl font-bold text-white">Onboarding Stap 5: Challenge Selecteren</h2>
-                    <p className="text-[#8BAE5A] text-xs sm:text-sm">Kies een challenge om jezelf uit te dagen en punten te verdienen</p>
+                    <h2 className="text-base md:text-lg sm:text-xl font-bold text-white">Onboarding Stap 5: Challenge Selecteren</h2>
+                    <p className="text-[#8BAE5A] text-xs md:text-sm">Kies een challenge om jezelf uit te dagen en punten te verdienen</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-xl sm:text-2xl font-bold text-[#FFD700]">5/6</div>
-                  <div className="text-[#8BAE5A] text-xs sm:text-sm">Stappen voltooid</div>
+                  <div className="text-lg md:text-xl sm:text-2xl font-bold text-[#FFD700]">5/6</div>
+                  <div className="text-[#8BAE5A] text-xs md:text-sm">Stappen voltooid</div>
                 </div>
               </div>
               
               {!selectedChallengeId ? (
-                <div className="bg-[#181F17]/80 rounded-xl p-4 border border-[#3A4D23]">
-                  <p className="text-[#f0a14f] text-sm font-semibold mb-2">
+                <div className="bg-[#181F17]/80 rounded-xl p-3 md:p-4 border border-[#3A4D23]">
+                  <p className="text-[#f0a14f] text-xs md:text-sm font-semibold mb-2">
                     ⚠️ Selecteer een challenge om door te gaan
                   </p>
-                  <p className="text-gray-300 text-sm">
+                  <p className="text-gray-300 text-xs md:text-sm">
                     Kies een challenge die past bij je doelen en voorkeuren. Je kunt later altijd andere challenges proberen.
                   </p>
                 </div>
               ) : (
-                <div className="bg-[#8BAE5A]/20 rounded-xl p-4 border border-[#8BAE5A]">
-                  <p className="text-[#8BAE5A] text-sm font-semibold mb-2">
+                <div className="bg-[#8BAE5A]/20 rounded-xl p-3 md:p-4 border border-[#8BAE5A]">
+                  <p className="text-[#8BAE5A] text-xs md:text-sm font-semibold mb-2">
                     ✅ Perfect! Je hebt een challenge geselecteerd
                   </p>
-                  <p className="text-gray-300 text-sm mb-4">
+                  <p className="text-gray-300 text-xs md:text-sm mb-3 md:mb-4">
                     Je kunt nu door naar de laatste stap van de onboarding.
                   </p>
                   <button
@@ -382,10 +382,11 @@ export default function ChallengesPage() {
                         toast.error('Er is een fout opgetreden');
                       }
                     }}
-                    className="bg-[#8BAE5A] hover:bg-[#B6C948] text-[#181F17] px-6 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center gap-2"
+                    className="bg-[#8BAE5A] hover:bg-[#B6C948] text-[#181F17] px-4 md:px-6 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center gap-2 text-sm md:text-base"
                   >
-                    Volgende Stap
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <span className="hidden sm:inline">Volgende Stap</span>
+                    <span className="sm:hidden">Volgende</span>
+                    <svg className="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
                   </button>
@@ -396,86 +397,87 @@ export default function ChallengesPage() {
         )}
 
         {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mb-6 md:mb-8">
           <AdminCard>
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-blue-600/20 rounded-lg flex items-center justify-center">
-                <CalendarIcon className="w-6 h-6 text-blue-400" />
+            <div className="flex items-center gap-2 md:gap-4">
+              <div className="w-8 h-8 md:w-12 md:h-12 bg-blue-600/20 rounded-lg flex items-center justify-center">
+                <CalendarIcon className="w-4 h-4 md:w-6 md:h-6 text-blue-400" />
               </div>
               <div>
-                <div className="text-2xl font-bold text-white">{challenges.filter(c => c.type === 'weekly').length}</div>
-                <div className="text-sm text-[#8BAE5A]">Wekelijkse Challenges</div>
+                <div className="text-lg md:text-2xl font-bold text-white">{challenges.filter(c => c.type === 'weekly').length}</div>
+                <div className="text-xs md:text-sm text-[#8BAE5A]">Wekelijkse Challenges</div>
               </div>
             </div>
           </AdminCard>
 
           <AdminCard>
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-purple-600/20 rounded-lg flex items-center justify-center">
-                <ClockIcon className="w-6 h-6 text-purple-400" />
+            <div className="flex items-center gap-2 md:gap-4">
+              <div className="w-8 h-8 md:w-12 md:h-12 bg-purple-600/20 rounded-lg flex items-center justify-center">
+                <ClockIcon className="w-4 h-4 md:w-6 md:h-6 text-purple-400" />
               </div>
               <div>
-                <div className="text-2xl font-bold text-white">{challenges.filter(c => c.type === 'monthly').length}</div>
-                <div className="text-sm text-[#8BAE5A]">Maandelijkse Challenges</div>
+                <div className="text-lg md:text-2xl font-bold text-white">{challenges.filter(c => c.type === 'monthly').length}</div>
+                <div className="text-xs md:text-sm text-[#8BAE5A]">Maandelijkse Challenges</div>
               </div>
             </div>
           </AdminCard>
 
           <AdminCard>
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-orange-600/20 rounded-lg flex items-center justify-center">
-                <StarIcon className="w-6 h-6 text-orange-400" />
+            <div className="flex items-center gap-2 md:gap-4">
+              <div className="w-8 h-8 md:w-12 md:h-12 bg-orange-600/20 rounded-lg flex items-center justify-center">
+                <StarIcon className="w-4 h-4 md:w-6 md:h-6 text-orange-400" />
               </div>
               <div>
-                <div className="text-2xl font-bold text-white">{challenges.filter(c => c.type === 'special').length}</div>
-                <div className="text-sm text-[#8BAE5A]">Speciale Challenges</div>
+                <div className="text-lg md:text-2xl font-bold text-white">{challenges.filter(c => c.type === 'special').length}</div>
+                <div className="text-xs md:text-sm text-[#8BAE5A]">Speciale Challenges</div>
               </div>
             </div>
           </AdminCard>
 
           <AdminCard>
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-green-600/20 rounded-lg flex items-center justify-center">
-                <FireIcon className="w-6 h-6 text-green-400" />
+            <div className="flex items-center gap-2 md:gap-4">
+              <div className="w-8 h-8 md:w-12 md:h-12 bg-green-600/20 rounded-lg flex items-center justify-center">
+                <FireIcon className="w-4 h-4 md:w-6 md:h-6 text-green-400" />
               </div>
               <div>
-                <div className="text-2xl font-bold text-white">
+                <div className="text-lg md:text-2xl font-bold text-white">
                   {challenges.reduce((sum, c) => sum + c.participants_count, 0).toLocaleString()}
                 </div>
-                <div className="text-sm text-[#8BAE5A]">Totaal Deelnemers</div>
+                <div className="text-xs md:text-sm text-[#8BAE5A]">Totaal Deelnemers</div>
               </div>
             </div>
           </AdminCard>
         </div>
 
         {/* Filter Tabs */}
-        <div className="flex gap-2 mb-8">
+        <div className="flex flex-wrap gap-2 mb-6 md:mb-8">
           {[
-            { key: 'all', label: 'Alle Challenges', icon: TrophyIcon },
-            { key: 'weekly', label: 'Wekelijks', icon: CalendarIcon },
-            { key: 'monthly', label: 'Maandelijks', icon: ClockIcon },
-            { key: 'special', label: 'Speciaal', icon: StarIcon }
+            { key: 'all', label: 'Alle Challenges', icon: TrophyIcon, shortLabel: 'Alle' },
+            { key: 'weekly', label: 'Wekelijks', icon: CalendarIcon, shortLabel: 'Week' },
+            { key: 'monthly', label: 'Maandelijks', icon: ClockIcon, shortLabel: 'Maand' },
+            { key: 'special', label: 'Speciaal', icon: StarIcon, shortLabel: 'Speciaal' }
           ].map((tab) => {
             const Icon = tab.icon;
             return (
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key as any)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+                className={`flex items-center gap-1 md:gap-2 px-3 md:px-4 py-2 rounded-lg font-medium transition-colors text-xs md:text-sm ${
                   activeTab === tab.key
                     ? 'bg-[#8BAE5A] text-[#181F17]'
                     : 'bg-[#232D1A] text-[#8BAE5A] hover:bg-[#3A4D23]'
                 }`}
               >
-                <Icon className="w-4 h-4" />
-                {tab.label}
+                <Icon className="w-3 h-3 md:w-4 md:h-4" />
+                <span className="hidden sm:inline">{tab.label}</span>
+                <span className="sm:hidden">{tab.shortLabel}</span>
               </button>
             );
           })}
         </div>
 
         {/* Challenges Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
           {filteredChallenges.map((challenge) => {
             const TypeIcon = getTypeIcon(challenge.type);
             return (
@@ -489,20 +491,20 @@ export default function ChallengesPage() {
                     : ''
                 }`}
               >
-                <div className="space-y-4">
+                <div className="space-y-3 md:space-y-4">
                   {/* Header */}
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <h3 className="text-xl font-bold text-white mb-2">{challenge.title}</h3>
-                      <p className="text-[#8BAE5A] text-sm leading-relaxed">{challenge.description}</p>
+                      <h3 className="text-lg md:text-xl font-bold text-white mb-1 md:mb-2">{challenge.title}</h3>
+                      <p className="text-[#8BAE5A] text-xs md:text-sm leading-relaxed">{challenge.description}</p>
                     </div>
-                    <div className="w-10 h-10 bg-gradient-to-br from-[#8BAE5A] to-[#B6C948] rounded-lg flex items-center justify-center ml-4">
-                      <TypeIcon className="w-5 h-5 text-[#181F17]" />
+                    <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-[#8BAE5A] to-[#B6C948] rounded-lg flex items-center justify-center ml-2 md:ml-4">
+                      <TypeIcon className="w-4 h-4 md:w-5 md:h-5 text-[#181F17]" />
                     </div>
                   </div>
 
                   {/* Badges */}
-                  <div className="flex gap-2 flex-wrap">
+                  <div className="flex gap-1 md:gap-2 flex-wrap">
                     <span className={`text-xs px-2 py-1 rounded-full font-medium border ${getTypeColor(challenge.type)}`}>
                       {challenge.type === 'weekly' ? 'Wekelijks' : 
                        challenge.type === 'monthly' ? 'Maandelijks' : 'Speciaal'}
@@ -514,13 +516,13 @@ export default function ChallengesPage() {
                   </div>
 
                   {/* Duration & Points */}
-                  <div className="flex items-center justify-between text-sm">
+                  <div className="flex items-center justify-between text-xs md:text-sm">
                     <div className="flex items-center gap-1 text-[#8BAE5A]">
-                      <ClockIcon className="w-4 h-4" />
+                      <ClockIcon className="w-3 h-3 md:w-4 md:h-4" />
                       {challenge.duration_days} dagen
                     </div>
                     <div className="flex items-center gap-1 text-[#B6C948] font-semibold">
-                      <TrophyIcon className="w-4 h-4" />
+                      <TrophyIcon className="w-3 h-3 md:w-4 md:h-4" />
                       {challenge.points_reward} punten
                     </div>
                   </div>
@@ -532,7 +534,7 @@ export default function ChallengesPage() {
                   </div>
 
                   {/* Stats */}
-                  <div className="flex items-center justify-between text-sm">
+                  <div className="flex items-center justify-between text-xs md:text-sm">
                     <div className="text-[#8BAE5A]">
                       {challenge.participants_count.toLocaleString()} deelnemers
                     </div>
@@ -543,7 +545,7 @@ export default function ChallengesPage() {
 
                   {/* Requirements Preview */}
                   <div>
-                    <div className="text-sm font-medium text-white mb-2">Vereisten:</div>
+                    <div className="text-xs md:text-sm font-medium text-white mb-1 md:mb-2">Vereisten:</div>
                     <div className="space-y-1">
                       {challenge.requirements.slice(0, 2).map((req, index) => (
                         <div key={index} className="flex items-center gap-2 text-xs text-[#8BAE5A]">
@@ -562,7 +564,7 @@ export default function ChallengesPage() {
                   {/* Action Button */}
                   {showOnboardingStep5 ? (
                     <button
-                      className={`w-full px-4 py-2 rounded-lg transition-colors font-semibold flex items-center justify-center gap-2 ${
+                      className={`w-full px-3 md:px-4 py-2 rounded-lg transition-colors font-semibold flex items-center justify-center gap-2 text-xs md:text-sm ${
                         selectedChallengeId === challenge.id
                           ? 'bg-[#8BAE5A] text-[#232D1A]'
                           : 'bg-[#3A4D23] text-white hover:bg-[#4A5D33]'
@@ -574,21 +576,26 @@ export default function ChallengesPage() {
                     >
                       {selectedChallengeId === challenge.id ? (
                         <>
-                          <CheckCircleIcon className="w-4 h-4" />
-                          Geselecteerd
+                          <CheckCircleIcon className="w-3 h-3 md:w-4 md:h-4" />
+                          <span className="hidden sm:inline">Geselecteerd</span>
+                          <span className="sm:hidden">Geselecteerd</span>
                         </>
                       ) : (
-                        'Selecteer deze challenge'
+                        <>
+                          <span className="hidden sm:inline">Selecteer deze challenge</span>
+                          <span className="sm:hidden">Selecteer</span>
+                        </>
                       )}
                     </button>
                   ) : (
                     <AdminButton
                       className="w-full"
                       variant="primary"
-                      icon={<PlayIcon className="w-4 h-4" />}
+                      icon={<PlayIcon className="w-3 h-3 md:w-4 md:h-4" />}
                       onClick={() => handleChallengeClick(challenge)}
                     >
-                      Bekijk Details
+                      <span className="hidden sm:inline">Bekijk Details</span>
+                      <span className="sm:hidden">Bekijk</span>
                     </AdminButton>
                   )}
                 </div>

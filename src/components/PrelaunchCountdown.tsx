@@ -9,7 +9,11 @@ interface PrelaunchCountdownProps {
 }
 
 export default function PrelaunchCountdown({ 
-  endDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // Default: 7 days from now
+  endDate = (() => {
+    const today = new Date();
+    today.setHours(20, 0, 0, 0); // Set to 20:00 today
+    return today;
+  })(),
   className = ''
 }: PrelaunchCountdownProps) {
   const [timeLeft, setTimeLeft] = useState({
@@ -50,9 +54,9 @@ export default function PrelaunchCountdown({
 
   if (isExpired) {
     return (
-      <div className={`inline-flex items-center px-4 py-2 bg-red-500/20 border border-red-500/30 rounded-full text-red-400 text-sm font-medium ${className}`}>
+      <div className={`inline-flex items-center px-4 py-2 bg-green-500/20 border border-green-500/30 rounded-full text-green-400 text-sm font-medium ${className}`}>
         <FaClock className="w-4 h-4 mr-2" />
-        Aanbieding verlopen
+        Platform is live! 🚀
       </div>
     );
   }
@@ -67,14 +71,18 @@ export default function PrelaunchCountdown({
         {timeLeft.minutes > 0 && `${timeLeft.minutes}m `}
         {timeLeft.seconds}s
       </span>
-      <span className="text-red-400 ml-2">resterend</span>
+      <span className="text-red-400 ml-2">tot 20:00</span>
     </div>
   );
 }
 
 // Compact version for smaller spaces
 export function CompactCountdown({ 
-  endDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+  endDate = (() => {
+    const today = new Date();
+    today.setHours(20, 0, 0, 0); // Set to 20:00 today
+    return today;
+  })(),
   className = ''
 }: PrelaunchCountdownProps) {
   const [timeLeft, setTimeLeft] = useState({
@@ -112,9 +120,9 @@ export function CompactCountdown({
 
   if (isExpired) {
     return (
-      <div className={`inline-flex items-center px-2 py-1 bg-red-500/20 border border-red-500/30 rounded text-red-400 text-xs font-medium ${className}`}>
+      <div className={`inline-flex items-center px-2 py-1 bg-green-500/20 border border-green-500/30 rounded text-green-400 text-xs font-medium ${className}`}>
         <FaClock className="w-3 h-3 mr-1" />
-        Verlopen
+        Live! 🚀
       </div>
     );
   }

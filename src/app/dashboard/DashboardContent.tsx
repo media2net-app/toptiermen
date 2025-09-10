@@ -9,6 +9,7 @@ import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { OnboardingProvider, useOnboarding } from '@/contexts/OnboardingContext';
 import { useDebug } from '@/contexts/DebugContext';
 import { useTestUser } from '@/hooks/useTestUser';
+import { useSubscription } from '@/hooks/useSubscription';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -38,7 +39,7 @@ const menu = [
   { label: 'Mijn Profiel', icon: UserCircleIcon, parent: 'Dashboard', href: '/dashboard/mijn-profiel', isSub: true, onboardingStep: 0 },
   { label: 'Inbox', icon: EnvelopeIcon, parent: 'Dashboard', href: '/dashboard/inbox', isSub: true, onboardingStep: 0 },
   { label: 'Notificaties', icon: BellIcon, parent: 'Dashboard', href: '/dashboard/notificaties', isSub: true, onboardingStep: 0 },
-  { label: 'Mijn Missies', icon: FireIcon, parent: 'Dashboard', href: '/dashboard/mijn-missies', isSub: true, onboardingStep: 2 },
+  { label: 'Mijn Uitdagingen', icon: FireIcon, parent: 'Dashboard', href: '/dashboard/mijn-missies', isSub: true, onboardingStep: 2 },
   { label: 'Mijn Trainingen', icon: AcademicCapIcon, parent: 'Dashboard', href: '/dashboard/mijn-trainingen', isSub: true, onboardingStep: 0 },
   { label: 'Voedingsplannen', icon: BookOpenIcon, href: '/dashboard/voedingsplannen', onboardingStep: 4 },
   { label: 'Challenges', icon: TrophyIcon, href: '/dashboard/challenges', onboardingStep: 5 },
@@ -73,6 +74,7 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
   const actualOnboardingStatus = onboardingStatus || { current_step: currentStep, onboarding_completed: !isOnboarding };
   // const { trackFeatureUsage } = useV2Monitoring();
   const { user } = useSupabaseAuth();
+  const { hasAccess } = useSubscription();
   
   const safePathname = pathname || '';
   
@@ -90,6 +92,20 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
       }, 5000);
     }
   }, [actualOnboardingStatus?.onboarding_completed, showOnboardingCompletion]);
+
+  // Function to check if a menu item should be visible based on subscription tier
+  const isMenuItemVisible = (item: any) => {
+    // Check subscription-based access for specific features
+    if (item.href === '/dashboard/voedingsplannen') {
+      return hasAccess('nutrition');
+    }
+    if (item.href === '/dashboard/trainingsschemas') {
+      return hasAccess('training');
+    }
+    
+    // All other items are visible by default
+    return true;
+  };
 
   // Function to check if a menu item should be disabled during onboarding
   const isMenuItemDisabled = (item: any) => {
@@ -152,6 +168,11 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
       {menu.map((item) => {
         // Skip onboarding menu item if onboarding is completed and animation is done, or user is not in onboarding mode
         if (item.isOnboardingItem && (actualOnboardingStatus?.onboarding_completed && !showOnboardingCompletion || !isOnboarding)) {
+          return null;
+        }
+        
+        // Skip menu items that are not visible based on subscription tier
+        if (!isMenuItemVisible(item)) {
           return null;
         }
         

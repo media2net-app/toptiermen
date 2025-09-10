@@ -18,6 +18,7 @@ import PageLayout from '@/components/PageLayout';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { useOnboarding } from "@/contexts/OnboardingContext";
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useSubscription } from '@/hooks/useSubscription';
 import { supabase } from '@/lib/supabase';
 import DynamicTrainingPlanView from './components/DynamicTrainingPlanView';
 
@@ -125,6 +126,7 @@ const trainingFrequencies = [
 function TrainingschemasContent() {
   const { user, loading: authLoading } = useSupabaseAuth();
   const { isOnboarding, currentStep: onboardingStep, completeStep } = useOnboarding();
+  const { hasAccess, loading: subscriptionLoading } = useSubscription();
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -608,11 +610,74 @@ function TrainingschemasContent() {
     checkOnboardingStatus();
   }, [user?.id]);
 
-  if (authLoading) {
+  if (authLoading || subscriptionLoading) {
     return (
       <PageLayout title="Training Schemas">
         <div className="flex items-center justify-center min-h-screen">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#8BAE5A]"></div>
+        </div>
+      </PageLayout>
+    );
+  }
+
+  // Check access permissions for training schemas
+  if (!hasAccess('training')) {
+    return (
+      <PageLayout title="Training Schemas">
+        <div className="max-w-6xl mx-auto p-6">
+          <div className="text-center py-16">
+            <div className="mb-8">
+              <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] rounded-full flex items-center justify-center">
+                <AcademicCapIcon className="w-12 h-12 text-[#0A0F0A]" />
+              </div>
+              <h1 className="text-3xl font-bold text-white mb-4">Trainingsschemas</h1>
+              <p className="text-xl text-gray-300 mb-8">
+                Upgrade naar Premium of Lifetime voor toegang tot trainingsschemas
+              </p>
+            </div>
+            
+            <div className="bg-[#232D1A] border border-[#3A4D23] rounded-xl p-8 max-w-2xl mx-auto">
+              <h2 className="text-2xl font-bold text-white mb-4">🚀 Upgrade je Account</h2>
+              <p className="text-gray-300 mb-6">
+                Trainingsschemas zijn alleen beschikbaar voor Premium en Lifetime leden. 
+                Upgrade nu om toegang te krijgen tot:
+              </p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 mb-8">
+                <div className="flex items-center space-x-3">
+                  <CheckIcon className="w-4 h-4 md:w-5 md:h-5 text-[#8BAE5A]" />
+                  <span className="text-white text-sm md:text-base">Persoonlijke trainingsschemas</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <CheckIcon className="w-4 h-4 md:w-5 md:h-5 text-[#8BAE5A]" />
+                  <span className="text-white text-sm md:text-base">Oefening video's</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <CheckIcon className="w-4 h-4 md:w-5 md:h-5 text-[#8BAE5A]" />
+                  <span className="text-white text-sm md:text-base">Progressie tracking</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <CheckIcon className="w-4 h-4 md:w-5 md:h-5 text-[#8BAE5A]" />
+                  <span className="text-white text-sm md:text-base">Trainingsadvies</span>
+                </div>
+              </div>
+              
+              <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center">
+                <button
+                  onClick={() => router.push('/pakketten/premium-tier')}
+                  className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#0A0F0A] font-bold px-6 md:px-8 py-3 rounded-lg hover:from-[#A6C97B] hover:to-[#FFE55C] transition-all duration-200 text-sm md:text-base"
+                >
+                  Upgrade naar Premium
+                </button>
+                <button
+                  onClick={() => router.push('/pakketten/lifetime-tier')}
+                  className="bg-gradient-to-r from-[#FFD700] to-[#8BAE5A] text-[#0A0F0A] font-bold px-6 md:px-8 py-3 rounded-lg hover:from-[#FFE55C] hover:to-[#A6C97B] transition-all duration-200 text-sm md:text-base"
+                >
+                  Upgrade naar Lifetime
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </PageLayout>
     );
@@ -769,39 +834,39 @@ function TrainingschemasContent() {
                 </button>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-[#1A1A1A]/50 rounded-lg p-4 border border-gray-800">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
+                <div className="bg-[#1A1A1A]/50 rounded-lg p-3 md:p-4 border border-gray-800">
                   <div className="flex items-center gap-3 mb-2">
-                    <span className="text-2xl">
+                    <span className="text-xl md:text-2xl">
                       {trainingGoals.find(g => g.id === userTrainingProfile.training_goal)?.icon}
                     </span>
                     <div>
-                      <h4 className="text-sm font-medium text-gray-400">Doel</h4>
-                      <p className="text-white font-semibold">
+                      <h4 className="text-xs md:text-sm font-medium text-gray-400">Doel</h4>
+                      <p className="text-white font-semibold text-sm md:text-base">
                         {trainingGoals.find(g => g.id === userTrainingProfile.training_goal)?.name}
                       </p>
                     </div>
                   </div>
                 </div>
                 
-                <div className="bg-[#1A1A1A]/50 rounded-lg p-4 border border-gray-800">
+                <div className="bg-[#1A1A1A]/50 rounded-lg p-3 md:p-4 border border-gray-800">
                   <div className="flex items-center gap-3 mb-2">
-                    <CalendarDaysIcon className="h-6 w-6 text-[#8BAE5A]" />
+                    <CalendarDaysIcon className="h-5 w-5 md:h-6 md:w-6 text-[#8BAE5A]" />
                     <div>
-                      <h4 className="text-sm font-medium text-gray-400">Frequentie</h4>
-                      <p className="text-white font-semibold">{userTrainingProfile.training_frequency}x per week</p>
+                      <h4 className="text-xs md:text-sm font-medium text-gray-400">Frequentie</h4>
+                      <p className="text-white font-semibold text-sm md:text-base">{userTrainingProfile.training_frequency}x per week</p>
                     </div>
                   </div>
                 </div>
                 
-                <div className="bg-[#1A1A1A]/50 rounded-lg p-4 border border-gray-800">
+                <div className="bg-[#1A1A1A]/50 rounded-lg p-3 md:p-4 border border-gray-800">
                   <div className="flex items-center gap-3 mb-2">
-                    <span className="text-2xl">
+                    <span className="text-xl md:text-2xl">
                       {equipmentTypes.find(t => t.id === userTrainingProfile.equipment_type)?.icon}
                     </span>
                     <div>
-                      <h4 className="text-sm font-medium text-gray-400">Equipment</h4>
-                      <p className="text-white font-semibold">
+                      <h4 className="text-xs md:text-sm font-medium text-gray-400">Equipment</h4>
+                      <p className="text-white font-semibold text-sm md:text-base">
                         {equipmentTypes.find(t => t.id === userTrainingProfile.equipment_type)?.name}
                       </p>
                     </div>
@@ -845,16 +910,16 @@ function TrainingschemasContent() {
                   </button>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
                   {/* Training Goal */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-4 flex items-center gap-2">
-                      <span className="text-lg">🎯</span>
-                      Wat is je trainingsdoel?
+                    <label className="block text-sm font-medium text-gray-300 mb-3 md:mb-4 flex items-center gap-2">
+                      <span className="text-base md:text-lg">🎯</span>
+                      <span className="text-sm md:text-base">Wat is je trainingsdoel?</span>
                     </label>
-                    <div className="space-y-3">
+                    <div className="space-y-2 md:space-y-3">
                       {trainingGoals.map((goal) => (
-                        <label key={goal.id} className={`flex items-start p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ${
+                        <label key={goal.id} className={`flex items-start p-3 md:p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ${
                           calculatorData.training_goal === goal.id 
                             ? 'border-[#8BAE5A] bg-[#8BAE5A]/10 shadow-lg shadow-[#8BAE5A]/20' 
                             : 'border-gray-700 hover:border-[#8BAE5A]/50 hover:bg-gray-800/50'
@@ -868,11 +933,11 @@ function TrainingschemasContent() {
                             className="mt-1 mr-4 h-4 w-4 text-[#8BAE5A] border-gray-300 focus:ring-[#8BAE5A]"
                           />
                           <div className="flex-1">
-                            <div className="flex items-center gap-3 mb-2">
-                              <span className="text-2xl">{goal.icon}</span>
-                              <div className="text-white font-semibold">{goal.name}</div>
+                            <div className="flex items-center gap-2 md:gap-3 mb-2">
+                              <span className="text-xl md:text-2xl">{goal.icon}</span>
+                              <div className="text-white font-semibold text-sm md:text-base">{goal.name}</div>
                             </div>
-                            <div className="text-sm text-gray-300 mb-1">{goal.subtitle}</div>
+                            <div className="text-xs md:text-sm text-gray-300 mb-1">{goal.subtitle}</div>
                             <div className="text-xs text-gray-500">{goal.description}</div>
                           </div>
                         </label>
@@ -882,13 +947,13 @@ function TrainingschemasContent() {
 
                   {/* Training Frequency */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-4 flex items-center gap-2">
-                      <CalendarDaysIcon className="h-5 w-5 text-[#8BAE5A]" />
-                      Hoe vaak wil je per week trainen?
+                    <label className="block text-sm font-medium text-gray-300 mb-3 md:mb-4 flex items-center gap-2">
+                      <CalendarDaysIcon className="h-4 w-4 md:h-5 md:w-5 text-[#8BAE5A]" />
+                      <span className="text-sm md:text-base">Hoe vaak wil je per week trainen?</span>
                     </label>
-                    <div className="space-y-3">
+                    <div className="space-y-2 md:space-y-3">
                       {trainingFrequencies.map((freq) => (
-                        <label key={freq.id} className={`flex items-start p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ${
+                        <label key={freq.id} className={`flex items-start p-3 md:p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ${
                           calculatorData.training_frequency === freq.id.toString() 
                             ? 'border-[#8BAE5A] bg-[#8BAE5A]/10 shadow-lg shadow-[#8BAE5A]/20' 
                             : 'border-gray-700 hover:border-[#8BAE5A]/50 hover:bg-gray-800/50'
@@ -902,11 +967,11 @@ function TrainingschemasContent() {
                             className="mt-1 mr-4 h-4 w-4 text-[#8BAE5A] border-gray-300 focus:ring-[#8BAE5A]"
                           />
                           <div className="flex-1">
-                            <div className="flex items-center gap-3 mb-2">
-                              <CalendarDaysIcon className="h-5 w-5 text-[#8BAE5A]" />
-                              <div className="text-white font-semibold">{freq.name}</div>
+                            <div className="flex items-center gap-2 md:gap-3 mb-2">
+                              <CalendarDaysIcon className="h-4 w-4 md:h-5 md:w-5 text-[#8BAE5A]" />
+                              <div className="text-white font-semibold text-sm md:text-base">{freq.name}</div>
                             </div>
-                            <div className="text-sm text-gray-300">{freq.description}</div>
+                            <div className="text-xs md:text-sm text-gray-300">{freq.description}</div>
                           </div>
                         </label>
                       ))}
@@ -916,13 +981,13 @@ function TrainingschemasContent() {
 
                   {/* Equipment Type */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-4 flex items-center gap-2">
-                      <span className="text-lg">🏋️</span>
-                      Waar ga je trainen?
+                    <label className="block text-sm font-medium text-gray-300 mb-3 md:mb-4 flex items-center gap-2">
+                      <span className="text-base md:text-lg">🏋️</span>
+                      <span className="text-sm md:text-base">Waar ga je trainen?</span>
                     </label>
-                    <div className="space-y-3">
+                    <div className="space-y-2 md:space-y-3">
                       {equipmentTypes.map((type) => (
-                        <label key={type.id} className={`flex items-start p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ${
+                        <label key={type.id} className={`flex items-start p-3 md:p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ${
                           calculatorData.equipment_type === type.id 
                             ? 'border-[#8BAE5A] bg-[#8BAE5A]/10 shadow-lg shadow-[#8BAE5A]/20' 
                             : 'border-gray-700 hover:border-[#8BAE5A]/50 hover:bg-gray-800/50'
@@ -936,11 +1001,11 @@ function TrainingschemasContent() {
                             className="mt-1 mr-4 h-4 w-4 text-[#8BAE5A] border-gray-300 focus:ring-[#8BAE5A]"
                           />
                           <div className="flex-1">
-                            <div className="flex items-center gap-3 mb-2">
-                              <span className="text-2xl">{type.icon}</span>
-                              <div className="text-white font-semibold">{type.name}</div>
+                            <div className="flex items-center gap-2 md:gap-3 mb-2">
+                              <span className="text-xl md:text-2xl">{type.icon}</span>
+                              <div className="text-white font-semibold text-sm md:text-base">{type.name}</div>
                             </div>
-                            <div className="text-sm text-gray-300 mb-1">{type.subtitle}</div>
+                            <div className="text-xs md:text-sm text-gray-300 mb-1">{type.subtitle}</div>
                             <div className="text-xs text-gray-500">{type.description}</div>
                           </div>
                         </label>
@@ -949,12 +1014,12 @@ function TrainingschemasContent() {
                   </div>
                 </div>
 
-                <div className="mt-8 flex justify-end">
+                <div className="mt-6 md:mt-8 flex justify-center md:justify-end">
                   <button
                     onClick={calculateTrainingProfile}
-                    className="flex items-center gap-2 px-8 py-3 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold shadow-lg shadow-[#8BAE5A]/20"
+                    className="flex items-center gap-2 px-6 md:px-8 py-3 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold shadow-lg shadow-[#8BAE5A]/20 text-sm md:text-base"
                   >
-                    <CheckIcon className="w-5 h-5" />
+                    <CheckIcon className="w-4 h-4 md:w-5 md:h-5" />
                     Profiel Opslaan
                   </button>
                 </div>
@@ -1051,64 +1116,65 @@ function TrainingschemasContent() {
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 {trainingSchemas.map((schema) => (
                   <motion.div
                     key={schema.id}
                     whileHover={{ scale: 1.02, y: -5 }}
-                    className={`p-6 rounded-2xl border-2 transition-all duration-300 shadow-lg ${
+                    className={`p-4 md:p-6 rounded-2xl border-2 transition-all duration-300 shadow-lg ${
                       selectedTrainingSchema === schema.id
                         ? 'border-[#8BAE5A] bg-[#8BAE5A]/10 shadow-[#8BAE5A]/20'
                         : 'border-gray-700 bg-[#1A1A1A]/50 hover:border-[#8BAE5A]/50 hover:shadow-[#8BAE5A]/10'
                     }`}
                   >
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-center space-x-3">
-                        <div className="p-3 bg-[#8BAE5A]/20 rounded-xl">
-                          <AcademicCapIcon className="h-6 w-6 text-[#8BAE5A]" />
+                    <div className="flex items-start justify-between mb-3 md:mb-4">
+                      <div className="flex items-center space-x-2 md:space-x-3">
+                        <div className="p-2 md:p-3 bg-[#8BAE5A]/20 rounded-xl">
+                          <AcademicCapIcon className="h-5 w-5 md:h-6 md:w-6 text-[#8BAE5A]" />
                         </div>
                         <div>
-                          <h3 className="text-lg font-semibold text-white">{schema.name}</h3>
-                          <p className="text-sm text-gray-400">{schema.difficulty}</p>
+                          <h3 className="text-base md:text-lg font-semibold text-white">{schema.name}</h3>
+                          <p className="text-xs md:text-sm text-gray-400">{schema.difficulty}</p>
                         </div>
                       </div>
                       {selectedTrainingSchema === schema.id && (
                         <div className="p-2 bg-[#8BAE5A] rounded-full">
-                          <CheckIcon className="h-5 w-5 text-[#232D1A]" />
+                          <CheckIcon className="h-4 w-4 md:h-5 md:w-5 text-[#232D1A]" />
                         </div>
                       )}
                     </div>
 
-                    <p className="text-gray-300 text-sm mb-4 line-clamp-3">
+                    <p className="text-gray-300 text-xs md:text-sm mb-3 md:mb-4 line-clamp-3">
                       {schema.description}
                     </p>
 
-                    <div className="flex items-center justify-between text-sm text-gray-400 mb-6">
-                      <div className="flex items-center space-x-4">
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between text-xs md:text-sm text-gray-400 mb-4 md:mb-6 gap-2 md:gap-0">
+                      <div className="flex items-center space-x-3 md:space-x-4">
                         <div className="flex items-center space-x-1">
-                          <ClockIcon className="h-4 w-4 text-[#8BAE5A]" />
+                          <ClockIcon className="h-3 w-3 md:h-4 md:w-4 text-[#8BAE5A]" />
                           <span>{schema.estimated_duration}</span>
                         </div>
                         <div className="flex items-center space-x-1">
-                          <FireIcon className="h-4 w-4 text-[#8BAE5A]" />
+                          <FireIcon className="h-3 w-3 md:h-4 md:w-4 text-[#8BAE5A]" />
                           <span>{schema.rep_range}</span>
                         </div>
                       </div>
-                      <span className="px-3 py-1 bg-[#3A4D23] rounded-full text-xs font-medium">
+                      <span className="px-2 md:px-3 py-1 bg-[#3A4D23] rounded-full text-xs font-medium self-start md:self-auto">
                         {schema.category}
                       </span>
                     </div>
 
-                    <div className="flex gap-3">
+                    <div className="flex flex-col sm:flex-row gap-2 md:gap-3">
                       <button
                         onClick={() => handleViewDynamicPlan(schema.id, schema.name)}
-                        className="flex-1 py-3 px-4 rounded-lg font-medium transition-colors bg-[#8BAE5A] text-[#232D1A] hover:bg-[#7A9D4A] shadow-lg shadow-[#8BAE5A]/20"
+                        className="flex-1 py-2 md:py-3 px-3 md:px-4 rounded-lg font-medium transition-colors bg-[#8BAE5A] text-[#232D1A] hover:bg-[#7A9D4A] shadow-lg shadow-[#8BAE5A]/20 text-xs md:text-sm"
                       >
-                        Bekijk schema
+                        <span className="hidden sm:inline">Bekijk schema</span>
+                        <span className="sm:hidden">Bekijk</span>
                       </button>
                       <button
                         onClick={() => selectTrainingSchema(schema.id)}
-                        className={`flex-1 py-3 px-4 rounded-lg font-medium transition-colors ${
+                        className={`flex-1 py-2 md:py-3 px-3 md:px-4 rounded-lg font-medium transition-colors text-xs md:text-sm ${
                           selectedTrainingSchema === schema.id
                             ? 'bg-[#8BAE5A] text-[#232D1A] shadow-lg shadow-[#8BAE5A]/20'
                             : 'bg-[#3A4D23] text-white hover:bg-[#4A5D33]'

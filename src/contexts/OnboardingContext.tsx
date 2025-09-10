@@ -60,13 +60,13 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
     },
     {
       id: 2,
-      title: 'Missies selecteren',
+      title: 'Uitdagingen selecteren',
       description: 'Kies je dagelijkse uitdagingen',
       targetPage: '/dashboard/mijn-missies',
-      targetMenuLabel: 'Mijn Missies',
+      targetMenuLabel: 'Mijn Uitdagingen',
       completed: false,
       icon: '🔥',
-      instructions: 'Voeg je eerste missies toe door op "Nieuwe Missie Toevoegen" te klikken of gebruik de "Missie Bibliotheek"'
+      instructions: 'Voeg je eerste uitdagingen toe door op "Nieuwe Uitdaging Toevoegen" te klikken of gebruik de "Uitdaging Bibliotheek"'
     },
     {
       id: 3,
@@ -278,7 +278,7 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
     // Return page-specific instructions if available
     switch (currentPage) {
       case '/dashboard/mijn-missies':
-        return 'Voeg je eerste missies toe door op "Nieuwe Missie Toevoegen" te klikken of gebruik de "Missie Bibliotheek"';
+        return 'Voeg je eerste uitdagingen toe door op "Nieuwe Uitdaging Toevoegen" te klikken of gebruik de "Uitdaging Bibliotheek"';
       case '/dashboard/trainingsschemas':
         return 'Bekijk de beschikbare trainingsschema\'s en selecteer er één die bij je past';
       case '/dashboard/voedingsplannen':

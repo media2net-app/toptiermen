@@ -730,22 +730,23 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
   return (
     <div className="min-h-screen bg-[#0F1419] text-white">
       {/* Header */}
-      <div className="bg-[#181F17] border-b border-[#3A4D23] p-6">
+      <div className="bg-[#181F17] border-b border-[#3A4D23] p-4 md:p-6">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div className="flex flex-col md:flex-row md:items-center gap-4">
               <button
                 onClick={onBack}
-                className="flex items-center gap-2 px-4 py-2 bg-[#3A4D23] text-white rounded-lg hover:bg-[#4A5D33] transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-[#3A4D23] text-white rounded-lg hover:bg-[#4A5D33] transition-colors text-sm md:text-base"
               >
                 <ArrowLeftIcon className="w-4 h-4" />
-                Terug naar overzicht
+                <span className="hidden sm:inline">Terug naar overzicht</span>
+                <span className="sm:hidden">Terug</span>
               </button>
               <div>
-                <h1 className="text-2xl font-bold text-white">
+                <h1 className="text-xl md:text-2xl font-bold text-white">
                   {planData.planName}
                   {customPlanData && (
-                    <span className="ml-3 px-2 py-1 bg-[#8BAE5A] text-[#232D1A] text-sm rounded-full font-medium">
+                    <span className="ml-2 md:ml-3 px-2 py-1 bg-[#8BAE5A] text-[#232D1A] text-xs md:text-sm rounded-full font-medium">
                       Aangepast
                     </span>
                   )}
@@ -754,19 +755,21 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                   <div className="mt-2">
                     <button
                       onClick={resetToOriginalPlan}
-                      className="inline-flex items-center px-3 py-1 bg-red-600/20 border border-red-500/30 text-red-400 text-sm rounded-lg hover:bg-red-600/30 transition-colors"
+                      className="inline-flex items-center px-3 py-1 bg-red-600/20 border border-red-500/30 text-red-400 text-xs md:text-sm rounded-lg hover:bg-red-600/30 transition-colors"
                     >
                       <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                       </svg>
-                      Reset naar origineel
+                      <span className="hidden sm:inline">Reset naar origineel</span>
+                      <span className="sm:hidden">Reset</span>
                     </button>
                   </div>
                 )}
-                <p className="text-gray-300">
-                  Gepersonaliseerd voor {planData.userProfile.weight}kg, {planData.userProfile.age} jaar, {planData.userProfile.height}cm, {getActivityLevelDisplay(planData.userProfile.activityLevel || 'moderate')} - {planData.userProfile.goal}
+                <p className="text-gray-300 text-sm md:text-base">
+                  <span className="hidden md:inline">Gepersonaliseerd voor {planData.userProfile.weight}kg, {planData.userProfile.age} jaar, {planData.userProfile.height}cm, {getActivityLevelDisplay(planData.userProfile.activityLevel || 'moderate')} - {planData.userProfile.goal}</span>
+                  <span className="md:hidden">{planData.userProfile.weight}kg • {planData.userProfile.age}j • {planData.userProfile.goal}</span>
                 </p>
-                <div className="mt-2 flex items-center gap-4 text-sm">
+                <div className="mt-2 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs md:text-sm">
                   <div className="flex items-center gap-2">
                     <span className="text-[#8BAE5A] font-semibold">Factor:</span>
                     <span className="text-white font-bold">{planData.scalingInfo?.scaleFactor?.toFixed(2) || '1.00'}</span>
@@ -782,20 +785,20 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
               {/* Debug Toggle for Admin */}
               {isAdmin && (
                 <button
                   onClick={() => setShowDebugPanel(!showDebugPanel)}
-                  className="flex items-center gap-2 px-3 py-2 bg-[#3A4D23] hover:bg-[#4A5D33] text-white rounded-lg transition-colors text-sm font-medium"
+                  className="flex items-center justify-center gap-2 px-3 py-2 bg-[#3A4D23] hover:bg-[#4A5D33] text-white rounded-lg transition-colors text-sm font-medium"
                 >
                   <BugAntIcon className="w-4 h-4" />
-                  Debug
+                  <span className="hidden sm:inline">Debug</span>
                 </button>
               )}
             <button 
               onClick={selectThisPlan}
-              className="px-6 py-3 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold"
+              className="px-4 md:px-6 py-3 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold text-sm md:text-base"
             >
               Selecteer dit plan
             </button>
@@ -1260,20 +1263,21 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
         )}
 
         {/* Day Selection */}
-        <div className="bg-[#181F17] border border-[#3A4D23] rounded-xl p-6">
-          <h3 className="text-xl font-bold text-white mb-4">Kies een dag</h3>
-          <div className="flex flex-wrap gap-2">
+        <div className="bg-[#181F17] border border-[#3A4D23] rounded-xl p-4 md:p-6">
+          <h3 className="text-lg md:text-xl font-bold text-white mb-4">Kies een dag</h3>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-7 gap-2">
             {Object.entries(DAYS_NL).map(([dayKey, dayName]) => (
               <button
                 key={dayKey}
                 onClick={() => setSelectedDay(dayKey)}
-                className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
+                className={`px-3 py-2 rounded-lg font-semibold transition-colors text-sm md:text-base ${
                   selectedDay === dayKey
                     ? 'bg-[#8BAE5A] text-[#232D1A]'
                     : 'bg-[#3A4D23] text-white hover:bg-[#4A5D33]'
                 }`}
               >
-                {dayName}
+                <span className="hidden sm:inline">{dayName}</span>
+                <span className="sm:hidden">{dayName.substring(0, 3)}</span>
               </button>
             ))}
           </div>
@@ -1617,7 +1621,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
             const isModified = modifiedMeals.has(mealKey);
 
             return (
-              <div key={mealType} className="bg-[#181F17] border border-[#3A4D23] rounded-xl p-6 relative">
+              <div key={mealType} className="bg-[#181F17] border border-[#3A4D23] rounded-xl p-4 md:p-6 relative">
                 {/* Modified Label */}
                 {isModified && (
                   <div className="absolute -top-2 -left-2 transform -rotate-12">
@@ -1628,41 +1632,46 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                 )}
                 
                 {/* Meal Header */}
-                <div className="flex items-center justify-between mb-4">
-                  <h4 className="text-lg font-bold text-white flex items-center">
-                    <ClockIcon className="w-5 h-5 text-[#8BAE5A] mr-2" />
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-3">
+                  <h4 className="text-base md:text-lg font-bold text-white flex items-center">
+                    <ClockIcon className="w-4 h-4 md:w-5 md:h-5 text-[#8BAE5A] mr-2" />
                     {MEAL_TYPES_NL[mealType as keyof typeof MEAL_TYPES_NL]}
                     {isAdmin && showDebugPanel && isMealModified(selectedDay, mealType) && (
                       <span className="ml-2 px-2 py-1 text-xs bg-orange-500 text-white rounded-full">
                         AANGEPAST
                       </span>
                     )}
-                    <span className="ml-4 text-sm text-gray-400">
+                    <span className="ml-2 md:ml-4 text-sm text-gray-400">
                       {meal.nutrition?.calories || 0} kcal
                     </span>
                   </h4>
                   <button
                     onClick={() => handleEditMeal(selectedDay, mealType)}
-                    className="flex items-center gap-2 px-3 py-2 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors text-sm font-semibold"
+                    className="flex items-center justify-center gap-2 px-3 py-2 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors text-sm font-semibold"
                   >
                     <PencilIcon className="w-4 h-4" />
-                    Bewerken
+                    <span className="hidden sm:inline">Bewerken</span>
+                    <span className="sm:hidden">Edit</span>
                   </button>
                 </div>
 
                 {/* Meal Nutrition */}
-                <div className="grid grid-cols-4 gap-4 mb-4">
-                  <div className="text-center">
-                    <div className="text-lg font-semibold text-white">Kcal {Math.round((meal.nutrition?.calories || 0) * 10) / 10}</div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-4">
+                  <div className="text-center p-2 bg-[#232D1A] rounded-lg">
+                    <div className="text-sm md:text-lg font-semibold text-white">Kcal</div>
+                    <div className="text-xs md:text-sm text-[#8BAE5A]">{Math.round((meal.nutrition?.calories || 0) * 10) / 10}</div>
                   </div>
-                  <div className="text-center">
-                    <div className="text-lg font-semibold text-white">Eiwit {Math.round((meal.nutrition?.protein || 0) * 10) / 10}g</div>
+                  <div className="text-center p-2 bg-[#232D1A] rounded-lg">
+                    <div className="text-sm md:text-lg font-semibold text-white">Eiwit</div>
+                    <div className="text-xs md:text-sm text-[#8BAE5A]">{Math.round((meal.nutrition?.protein || 0) * 10) / 10}g</div>
                   </div>
-                  <div className="text-center">
-                    <div className="text-lg font-semibold text-white">Koolhydraten {Math.round((meal.nutrition?.carbs || 0) * 10) / 10}g</div>
+                  <div className="text-center p-2 bg-[#232D1A] rounded-lg">
+                    <div className="text-sm md:text-lg font-semibold text-white">Koolhydraten</div>
+                    <div className="text-xs md:text-sm text-[#8BAE5A]">{Math.round((meal.nutrition?.carbs || 0) * 10) / 10}g</div>
                   </div>
-                  <div className="text-center">
-                    <div className="text-lg font-semibold text-white">Vet {Math.round((meal.nutrition?.fat || 0) * 10) / 10}g</div>
+                  <div className="text-center p-2 bg-[#232D1A] rounded-lg">
+                    <div className="text-sm md:text-lg font-semibold text-white">Vet</div>
+                    <div className="text-xs md:text-sm text-[#8BAE5A]">{Math.round((meal.nutrition?.fat || 0) * 10) / 10}g</div>
                   </div>
                 </div>
 
@@ -1670,7 +1679,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                 {'ingredients' in meal && meal.ingredients && meal.ingredients.length > 0 && (
                   <div className="mb-4">
                     <div className="overflow-x-auto">
-                      <table className="w-full text-sm">
+                      <table className="w-full text-xs md:text-sm">
                         <thead>
                           <tr className="border-b border-[#3A4D23]">
                             <th className="text-left py-2 text-gray-300">Ingrediënt</th>
@@ -1691,7 +1700,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                                   type="number"
                                   value={ingredient.amount || 0}
                                   onChange={(e) => handleIngredientChange(selectedDay, mealType, index, 'amount', parseFloat(e.target.value) || 0)}
-                                  className="w-20 px-2 py-1 bg-[#181F17] border border-[#3A4D23] rounded text-white text-center focus:outline-none focus:border-[#8BAE5A]"
+                                  className="w-16 md:w-20 px-2 py-1 bg-[#181F17] border border-[#3A4D23] rounded text-white text-center focus:outline-none focus:border-[#8BAE5A] text-xs md:text-sm"
                                   min="0"
                                   step="1"
                                 />

@@ -9,9 +9,9 @@ const supabase = createClient(
 
 export async function POST(request: NextRequest) {
   try {
-    const { userIds, testMode = false } = await request.json();
+    const { userIds, email, password, testMode = false } = await request.json();
 
-    console.log('📧 Sending account credentials:', { userIds, testMode });
+    console.log('📧 Sending account credentials:', { userIds, email, password, testMode });
 
     // If test mode, only send to Chiel and Rick
     const allowedTestEmails = ['chiel@media2net.nl', 'rick@toptiermen.eu'];
@@ -21,7 +21,11 @@ export async function POST(request: NextRequest) {
       .from('profiles')
       .select('id, email, full_name, display_name, package_type, created_at');
 
-    if (userIds && userIds.length > 0) {
+    if (email) {
+      // If specific email is provided, filter by that email
+      query = query.eq('email', email);
+    } else if (userIds && userIds.length > 0) {
+      // Otherwise, filter by user IDs
       query = query.in('id', userIds);
     }
 
@@ -65,8 +69,8 @@ export async function POST(request: NextRequest) {
       try {
         console.log(`📧 Sending credentials to: ${user.email}`);
 
-        // Generate temporary password (in real scenario, this would be set by admin)
-        const tempPassword = generateTempPassword();
+        // Use the provided password or default
+        const tempPassword = password || "W4t3rk0k3r^";
         
         // Create login URL
         const loginUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://platform.toptiermen.eu'}/login`;
