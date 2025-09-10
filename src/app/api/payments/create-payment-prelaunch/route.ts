@@ -7,25 +7,25 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-// Package pricing configuration with 50% prelaunch discount
+// Package pricing configuration - these are the FINAL prices that customers pay (already discounted)
 const PACKAGE_PRICING = {
   'basic': {
     name: 'Basic Tier',
-    monthlyPrice: 49, // 6 months
-    yearlyPrice: 44,  // 12 months (10% discount)
+    monthlyPrice: 25, // 6 months - prelaunch price
+    yearlyPrice: 22,  // 12 months - prelaunch price
     lifetimePrice: null // Not applicable
   },
   'premium': {
     name: 'Premium Tier', 
-    monthlyPrice: 79, // 6 months
-    yearlyPrice: 71,  // 12 months (10% discount)
+    monthlyPrice: 40, // 6 months - prelaunch price
+    yearlyPrice: 36,  // 12 months - prelaunch price
     lifetimePrice: null // Not applicable
   },
   'lifetime': {
     name: 'Lifetime Access',
-    monthlyPrice: 1995, // One-time payment
-    yearlyPrice: 1995,  // One-time payment
-    lifetimePrice: 1995 // One-time payment
+    monthlyPrice: 998, // One-time payment - prelaunch price
+    yearlyPrice: 998,  // One-time payment - prelaunch price
+    lifetimePrice: 998 // One-time payment - prelaunch price
   }
 };
 
@@ -64,54 +64,50 @@ export async function POST(request: NextRequest) {
     }
 
     // Calculate pricing based on package and billing period
-    let originalPrice: number;
+    let finalPrice: number;
     let periodDescription: string;
     let paymentDescription: string;
 
     if (packageId === 'lifetime') {
       // Lifetime package - always one-time payment
-      originalPrice = packageInfo.lifetimePrice!;
+      finalPrice = packageInfo.lifetimePrice!;
       periodDescription = 'Levenslang';
-      paymentDescription = `${packageInfo.name} - Levenslang - Eenmalig - 50% Prelaunch Korting`;
+      paymentDescription = `${packageInfo.name} - Levenslang - Eenmalig - Prelaunch Prijs`;
     } else {
       // Basic or Premium packages
       if (billingPeriod === '6months') {
         if (paymentFrequency === 'monthly') {
-          originalPrice = packageInfo.monthlyPrice;
+          finalPrice = packageInfo.monthlyPrice;
           periodDescription = '6 maanden (maandelijks)';
-          paymentDescription = `${packageInfo.name} - 6 maanden - Maandelijks - 50% Prelaunch Korting`;
+          paymentDescription = `${packageInfo.name} - 6 maanden - Maandelijks - Prelaunch Prijs`;
         } else { // once
-          originalPrice = packageInfo.monthlyPrice * 6;
+          finalPrice = packageInfo.monthlyPrice * 6;
           periodDescription = '6 maanden (eenmalig)';
-          paymentDescription = `${packageInfo.name} - 6 maanden - Eenmalig - 50% Prelaunch Korting`;
+          paymentDescription = `${packageInfo.name} - 6 maanden - Eenmalig - Prelaunch Prijs`;
         }
       } else { // 12months
         if (paymentFrequency === 'monthly') {
-          originalPrice = packageInfo.yearlyPrice;
+          finalPrice = packageInfo.yearlyPrice;
           periodDescription = '12 maanden (maandelijks)';
-          paymentDescription = `${packageInfo.name} - 12 maanden - Maandelijks - 50% Prelaunch Korting`;
+          paymentDescription = `${packageInfo.name} - 12 maanden - Maandelijks - Prelaunch Prijs`;
         } else { // once
-          originalPrice = packageInfo.yearlyPrice * 12;
+          finalPrice = packageInfo.yearlyPrice * 12;
           periodDescription = '12 maanden (eenmalig)';
-          paymentDescription = `${packageInfo.name} - 12 maanden - Eenmalig - 50% Prelaunch Korting`;
+          paymentDescription = `${packageInfo.name} - 12 maanden - Eenmalig - Prelaunch Prijs`;
         }
       }
     }
 
-    // Apply 50% prelaunch discount
-    const discountedPrice = Math.round(originalPrice * 0.5);
-
     console.log('💰 Pricing calculation:', {
       packageId,
-      originalPrice,
-      discountedPrice,
+      finalPrice,
       periodDescription,
       paymentDescription
     });
 
     // Create payment using Mollie library
     const payment = await createPayment({
-      amount: discountedPrice,
+      amount: finalPrice,
       currency: 'EUR',
       description: paymentDescription,
       redirectUrl: `https://platform.toptiermen.eu/payment/success?package=${packageId}&period=${billingPeriod}&frequency=${paymentFrequency}`,
@@ -121,9 +117,7 @@ export async function POST(request: NextRequest) {
         packageName: packageInfo.name,
         billingPeriod,
         paymentFrequency,
-        originalPrice,
-        discountedPrice,
-        discountPercentage: 50,
+        finalPrice,
         customerName,
         customerEmail,
         timestamp: new Date().toISOString()
@@ -140,8 +134,8 @@ export async function POST(request: NextRequest) {
         package_id: packageId,
         package_name: packageInfo.name,
         payment_period: `${billingPeriod}_${paymentFrequency}`,
-        original_price: originalPrice,
-        discounted_price: discountedPrice,
+        original_price: finalPrice, // This is now the final price customers pay
+        discounted_price: finalPrice, // Same as original since it's already discounted
         discount_percentage: 50,
         payment_method: paymentFrequency,
         full_name: customerName,
@@ -166,8 +160,7 @@ export async function POST(request: NextRequest) {
       status: payment.status,
       packageInfo: {
         name: packageInfo.name,
-        originalPrice,
-        discountedPrice,
+        finalPrice,
         periodDescription,
         paymentDescription
       }
