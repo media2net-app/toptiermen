@@ -141,6 +141,11 @@ export default function BasicTierPage() {
   const router = useRouter();
   const [isHovered, setIsHovered] = useState(false);
   const [selectedTier, setSelectedTier] = useState('basic');
+
+  // Format price with comma as decimal separator
+  const formatPrice = (price: number) => {
+    return price.toFixed(2).replace('.', ',');
+  };
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
     hours: 0,
@@ -212,8 +217,8 @@ export default function BasicTierPage() {
       description: 'Toegang tot alle basis content en community features',
       originalMonthlyPrice: 49, // Originele 6 maanden prijs
       originalYearlyPrice: 44, // Originele 12 maanden prijs (10% korting)
-      monthlyPrice: 24.5, // Prijs na 50% korting voor weergave (€49 * 0.5)
-      yearlyPrice: 22, // Prijs na 50% korting voor weergave (€44 * 0.5)
+      monthlyPrice: 24.50, // Prijs na 50% korting voor weergave (€49 * 0.5)
+      yearlyPrice: 22.00, // Prijs na 50% korting voor weergave (€44 * 0.5)
       features: [
         'TTM Academy',
         'Financiële tools & gidsen',
@@ -231,8 +236,8 @@ export default function BasicTierPage() {
       description: 'Alles van Basic + custom plannen',
       originalMonthlyPrice: 79, // Originele 6 maanden prijs
       originalYearlyPrice: 71, // Originele 12 maanden prijs (10% korting)
-      monthlyPrice: 39.5, // Prijs na 50% korting voor weergave (€79 * 0.5)
-      yearlyPrice: 35.5, // Prijs na 50% korting voor weergave (€71 * 0.5)
+      monthlyPrice: 39.50, // Prijs na 50% korting voor weergave (€79 * 0.5)
+      yearlyPrice: 35.50, // Prijs na 50% korting voor weergave (€71 * 0.5)
       features: [
         'Alles uit Basic',
         'Custom voedingsplannen',
@@ -246,8 +251,8 @@ export default function BasicTierPage() {
       description: 'Lifetime toegang tot alle content',
       originalMonthlyPrice: 1995, // Originele eenmalige betaling
       originalYearlyPrice: 1995, // Originele eenmalige betaling
-      monthlyPrice: 997.5, // Prijs na 50% korting voor weergave (€1995 * 0.5)
-      yearlyPrice: 997.5, // Prijs na 50% korting voor weergave (€1995 * 0.5)
+      monthlyPrice: 997.50, // Prijs na 50% korting voor weergave (€1995 * 0.5)
+      yearlyPrice: 997.50, // Prijs na 50% korting voor weergave (€1995 * 0.5)
       features: [
         'Alles uit Premium',
         'Levenslang'
@@ -380,10 +385,10 @@ export default function BasicTierPage() {
                   <span className="block truncate">{packageData.name.toUpperCase()}</span>
                   <div className="flex items-center justify-center space-x-3 mt-2">
                     <span className="text-gray-400 line-through text-lg sm:text-xl md:text-2xl lg:text-3xl">
-                      €{packageData.originalMonthlyPrice},-
+                      €{formatPrice(packageData.originalMonthlyPrice)}
                     </span>
                     <span className="text-[#8BAE5A] text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold">
-                      €{packageData.monthlyPrice},-
+                      €{formatPrice(packageData.monthlyPrice)}
                     </span>
                   </div>
                   <div className="mt-2">
@@ -490,12 +495,12 @@ export default function BasicTierPage() {
               <div className="mb-4">
                 <div className="flex items-center justify-center space-x-4 mb-2">
                   <span className="text-lg text-gray-400 line-through">
-                    €{packageData.originalMonthlyPrice},-
+                    €{formatPrice(packageData.originalMonthlyPrice)}
                   </span>
                   <span className="text-2xl font-bold text-white">
                     {selectedTier === 'lifetime' 
-                      ? `€${packageData.monthlyPrice},- eenmalig`
-                      : `€${packageData.monthlyPrice},- per maand`
+                      ? `€${formatPrice(packageData.monthlyPrice)} eenmalig`
+                      : `€${formatPrice(packageData.monthlyPrice)} per maand`
                     }
                   </span>
                 </div>

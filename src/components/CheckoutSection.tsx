@@ -39,6 +39,10 @@ export default function CheckoutSection({
   onPackageChange,
   availablePackages = []
 }: CheckoutSectionProps) {
+  // Format price with comma as decimal separator
+  const formatPrice = (price: number) => {
+    return price.toFixed(2).replace('.', ',');
+  };
   const [billingPeriod, setBillingPeriod] = useState<'6months' | '12months'>(selectedPeriod);
   const [paymentFrequency, setPaymentFrequency] = useState<'monthly' | 'once'>(selectedPayment === 'yearly' ? 'once' : 'monthly');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -326,9 +330,9 @@ export default function CheckoutSection({
                     }`}
                   >
                     <div className="text-center">
-                      <div className="text-2xl sm:text-3xl font-bold text-white mb-2">€{originalMonthlyPrice || monthlyPrice}</div>
+                      <div className="text-2xl sm:text-3xl font-bold text-white mb-2">€{formatPrice(originalMonthlyPrice || monthlyPrice)}</div>
                       <div className="text-[#8BAE5A] mb-2 text-sm sm:text-base">6 maanden</div>
-                      <div className="text-xs sm:text-sm text-[#8BAE5A]/70">€{(originalMonthlyPrice || monthlyPrice) * 6} totaal</div>
+                      <div className="text-xs sm:text-sm text-[#8BAE5A]/70">€{formatPrice((originalMonthlyPrice || monthlyPrice) * 6)} totaal</div>
                     </div>
                   </button>
 
@@ -348,9 +352,9 @@ export default function CheckoutSection({
                       -10%
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl sm:text-3xl font-bold text-white mb-2">€{originalYearlyPrice || yearlyPrice}</div>
+                      <div className="text-2xl sm:text-3xl font-bold text-white mb-2">€{formatPrice(originalYearlyPrice || yearlyPrice)}</div>
                       <div className="text-[#8BAE5A] mb-2 text-sm sm:text-base">12 maanden</div>
-                      <div className="text-xs sm:text-sm text-[#8BAE5A]/70">Populair - €{(originalYearlyPrice || yearlyPrice) * 12} totaal</div>
+                      <div className="text-xs sm:text-sm text-[#8BAE5A]/70">Populair - €{formatPrice((originalYearlyPrice || yearlyPrice) * 12)} totaal</div>
                     </div>
                   </button>
                 </div>
@@ -374,7 +378,7 @@ export default function CheckoutSection({
                       <div className="text-center">
                         <div className="text-base sm:text-lg font-bold text-white mb-1">Maandelijks</div>
                         <div className="text-xs sm:text-sm text-[#8BAE5A]">
-                          {billingPeriod === '12months' ? 'Niet beschikbaar' : `€${pricing.monthlyPrice} per maand`}
+                          {billingPeriod === '12months' ? 'Niet beschikbaar' : `€${formatPrice(pricing.monthlyPrice)} per maand`}
                         </div>
                       </div>
                     </button>
@@ -390,7 +394,7 @@ export default function CheckoutSection({
                     >
                       <div className="text-center">
                         <div className="text-base sm:text-lg font-bold text-white mb-1">In één keer</div>
-                        <div className="text-xs sm:text-sm text-[#8BAE5A]">€{pricing.monthlyPrice * (billingPeriod === '6months' ? 6 : 12)} totaal</div>
+                        <div className="text-xs sm:text-sm text-[#8BAE5A]">€{formatPrice(pricing.monthlyPrice * (billingPeriod === '6months' ? 6 : 12))} totaal</div>
                       </div>
                     </button>
                   </div>
@@ -408,21 +412,21 @@ export default function CheckoutSection({
                   </span>
                   <div className="flex items-center space-x-2">
                     {originalMonthlyPrice && (
-                      <span className="text-gray-400 line-through text-sm">€{originalMonthlyPrice}</span>
+                      <span className="text-gray-400 line-through text-sm">€{formatPrice(originalMonthlyPrice)}</span>
                     )}
-                    <span className="text-white font-semibold">€{pricing.periodPrice}</span>
+                    <span className="text-white font-semibold">€{formatPrice(pricing.periodPrice)}</span>
                   </div>
                 </div>
                 {originalMonthlyPrice && (
                   <div className="flex justify-between">
                     <span className="text-[#8BAE5A]">Normale prijs ({pricing.period})</span>
-                    <span className="text-gray-400 line-through">€{originalMonthlyPrice * (billingPeriod === '6months' ? 6 : 12)}</span>
+                    <span className="text-gray-400 line-through">€{formatPrice(isLifetime ? originalMonthlyPrice : originalMonthlyPrice * (billingPeriod === '6months' ? 6 : 12))}</span>
                   </div>
                 )}
                 {originalMonthlyPrice && (
                   <div className="flex justify-between">
                     <span className="text-[#8BAE5A]">Prelaunch prijs ({pricing.period})</span>
-                    <span className="text-white font-semibold">€{pricing.periodPrice * (billingPeriod === '6months' ? 6 : 12)}</span>
+                    <span className="text-white font-semibold">€{formatPrice(isLifetime ? pricing.periodPrice : pricing.periodPrice * (billingPeriod === '6months' ? 6 : 12))}</span>
                   </div>
                 )}
                 {pricing.discount > 0 && (
@@ -438,7 +442,7 @@ export default function CheckoutSection({
                       <div className="w-3 h-3 bg-orange-500 rounded-full animate-pulse"></div>
                       <span className="text-orange-400 font-bold text-lg">🔥 50% PRELAUNCH KORTING</span>
                     </div>
-                    <span className="text-orange-400 font-bold text-xl">-€{originalMonthlyPrice ? Math.round((originalMonthlyPrice * (billingPeriod === '6months' ? 6 : 12)) - (pricing.periodPrice * (billingPeriod === '6months' ? 6 : 12))) : Math.round(currentPrice)}</span>
+                    <span className="text-orange-400 font-bold text-xl">-€{formatPrice(originalMonthlyPrice ? (isLifetime ? originalMonthlyPrice : originalMonthlyPrice * (billingPeriod === '6months' ? 6 : 12)) - (isLifetime ? pricing.periodPrice : pricing.periodPrice * (billingPeriod === '6months' ? 6 : 12)) : currentPrice)}</span>
                   </div>
                   <div className="relative mt-2">
                     <span className="text-orange-300 text-sm">⚡ Exclusieve prelaunch korting - beperkte tijd!</span>
@@ -447,7 +451,7 @@ export default function CheckoutSection({
                 <div className="border-t border-[#3A4D23] pt-3">
                   <div className="flex justify-between">
                     <span className="text-white font-semibold text-lg">Totaal</span>
-                    <span className="text-white font-bold text-xl">€{pricing.periodPrice * (billingPeriod === '6months' ? 6 : 12)}</span>
+                    <span className="text-white font-bold text-xl">€{formatPrice(isLifetime ? pricing.periodPrice : pricing.periodPrice * (billingPeriod === '6months' ? 6 : 12))}</span>
                   </div>
                   <div className="text-sm text-[#8BAE5A]/70 mt-2">
                     Prelaunch prijs (50% korting al toegepast)

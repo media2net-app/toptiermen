@@ -33,6 +33,7 @@ import { supabase } from '@/lib/supabase';
 const ranks = ['Rookie', 'Warrior', 'Elite', 'Legend'];
 const statuses = ['active', 'inactive', 'suspended'];
 const userTypes = ['Gebruiker', 'Admin', 'Test'];
+const packages = ['Basic Tier', 'Premium Tier', 'Lifetime Tier'];
 
 // Helper function to determine user type (moved outside component to prevent re-renders)
 const getUserType = (user: any) => {
@@ -54,6 +55,7 @@ export default function Ledenbeheer() {
   const [selectedRank, setSelectedRank] = useState('Alle Rangen');
   const [selectedStatus, setSelectedStatus] = useState('Alle Statussen');
   const [selectedUserType, setSelectedUserType] = useState('Alle Types');
+  const [selectedPackage, setSelectedPackage] = useState('Alle Pakketten');
   const [selectedMember, setSelectedMember] = useState<number | string | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingMember, setEditingMember] = useState<any>(null);
@@ -90,10 +92,11 @@ export default function Ledenbeheer() {
     try {
       console.log('🔄 Fetching members from database...');
       
-      // Fetch users and profiles separately since there's no foreign key relationship
-      const [usersResult, profilesResult] = await Promise.all([
+      // Fetch users, profiles, and payment data
+      const [usersResult, profilesResult, paymentsResult] = await Promise.all([
         supabase.from('profiles').select('*').order('created_at', { ascending: false }),
-        supabase.from('profiles').select('*')
+        supabase.from('profiles').select('*'),
+        supabase.from('prelaunch_packages').select('*').eq('payment_status', 'paid')
       ]);
       
       if (usersResult.error) {
@@ -112,8 +115,9 @@ export default function Ledenbeheer() {
       
       const users = usersResult.data || [];
       const profiles = profilesResult.data || [];
+      const payments = paymentsResult.data || [];
       
-      console.log('📊 Fetched users:', users.length, 'profiles:', profiles.length);
+      console.log('📊 Fetched users:', users.length, 'profiles:', profiles.length, 'payments:', payments.length);
       
       // Create a map of profiles by user ID for quick lookup
       const profilesMap = new Map();
@@ -121,9 +125,16 @@ export default function Ledenbeheer() {
         profilesMap.set(profile.id, profile);
       });
       
-      // Combine user and profile data
+      // Create a map of payments by email for quick lookup
+      const paymentsMap = new Map();
+      payments.forEach(payment => {
+        paymentsMap.set(payment.email, payment);
+      });
+      
+      // Combine user, profile, and payment data
       const combinedData = users.map(user => {
         const profile = profilesMap.get(user.id);
+        const payment = paymentsMap.get(user.email);
         const combined = {
           ...user,
           ...(profile || {}),
@@ -137,7 +148,16 @@ export default function Ledenbeheer() {
           points: profile?.points || 0,
           missions_completed: profile?.missions_completed || 0,
           posts: profile?.posts || 0,
-          badges: profile?.badges || 0
+          badges: profile?.badges || 0,
+          // Payment data
+          payment_status: payment ? 'paid' : 'unpaid',
+          payment_data: payment ? {
+            amount: payment.discounted_price,
+            package_name: payment.package_name,
+            payment_period: payment.payment_period,
+            payment_date: payment.created_at,
+            mollie_payment_id: payment.mollie_payment_id
+          } : null
         };
         
         // Debug log for specific users
@@ -190,9 +210,10 @@ export default function Ledenbeheer() {
       const matchesStatus = selectedStatus === 'Alle Statussen' || member.status === selectedStatus;
       const userType = getUserType(member);
       const matchesUserType = selectedUserType === 'Alle Types' || userType.type === selectedUserType;
-      return matchesSearch && matchesRank && matchesStatus && matchesUserType;
+      const matchesPackage = selectedPackage === 'Alle Pakketten' || member.package_type === selectedPackage;
+      return matchesSearch && matchesRank && matchesStatus && matchesUserType && matchesPackage;
     });
-  }, [allMembers, searchTerm, selectedRank, selectedStatus, selectedUserType]);
+  }, [allMembers, searchTerm, selectedRank, selectedStatus, selectedUserType, selectedPackage]);
 
   // Calculate statistics
   const totalMembers = allMembers.length;
@@ -214,7 +235,7 @@ export default function Ledenbeheer() {
   // Reset to first page when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, selectedRank, selectedStatus, selectedUserType]);
+  }, [searchTerm, selectedRank, selectedStatus, selectedUserType, selectedPackage]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -495,10 +516,64 @@ export default function Ledenbeheer() {
     }
   };
 
+  // Helper function to get package display
+  const getPackageDisplay = (member: any) => {
+    // Check if package_type exists in the member data
+    if (member.package_type) {
+      const packageColors = {
+        'Basic Tier': 'text-green-400',
+        'Premium Tier': 'text-blue-400', 
+        'Lifetime Tier': 'text-purple-400'
+      };
+      const packageIcons = {
+        'Basic Tier': '🥉',
+        'Premium Tier': '🥈',
+        'Lifetime Tier': '🥇'
+      };
+      return {
+        text: member.package_type,
+        color: packageColors[member.package_type as keyof typeof packageColors] || 'text-gray-400',
+        icon: packageIcons[member.package_type as keyof typeof packageIcons] || '📦'
+      };
+    }
+    
+    // Fallback for users without package info
+    return {
+      text: 'Geen pakket',
+      color: 'text-gray-500',
+      icon: '❓'
+    };
+  };
+
+  // Helper function to get payment status display
+  const getPaymentStatusDisplay = (member: any) => {
+    if (member.payment_status === 'paid' && member.payment_data) {
+      const paymentDate = new Date(member.payment_data.payment_date);
+      const formattedDate = paymentDate.toLocaleDateString('nl-NL');
+      const formattedTime = paymentDate.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
+      
+      return {
+        text: 'Betaald',
+        color: 'text-green-400',
+        icon: '✅',
+        tooltip: `Betaald op ${formattedDate} om ${formattedTime}\\nPakket: ${member.payment_data.package_name}\\nBedrag: €${member.payment_data.amount}\\nPeriode: ${member.payment_data.payment_period}`
+      };
+    }
+    
+    return {
+      text: 'Niet betaald',
+      color: 'text-gray-500',
+      icon: '❌',
+      tooltip: 'Geen betaling ontvangen'
+    };
+  };
+
   // Prepare table data for AdminTable
   const tableData = useMemo(() => {
     return currentMembers.map(member => {
       const userType = getUserType(member);
+      const packageInfo = getPackageDisplay(member);
+      const paymentInfo = getPaymentStatusDisplay(member);
       return [
         member.full_name || 'Onbekend',
         member.email || 'Geen e-mail',
@@ -507,13 +582,21 @@ export default function Ledenbeheer() {
         getStatusText(member.status),
         member.points || 0,
         member.missions_completed || 0,
+        `${packageInfo.icon} ${packageInfo.text}`,
+        // Payment status with tooltip
+        <span 
+          className={`${paymentInfo.color} cursor-help`}
+          title={paymentInfo.tooltip}
+        >
+          {paymentInfo.icon} {paymentInfo.text}
+        </span>,
         new Date(member.created_at).toLocaleDateString('nl-NL'),
         member.last_login ? new Date(member.last_login).toLocaleDateString('nl-NL') : 'Niet beschikbaar'
       ];
     });
   }, [currentMembers]);
 
-  const tableHeaders = ['Lid', 'Email', 'Type', 'Rang', 'Status', 'Punten', 'Missies', 'Lid sinds', 'Laatste activiteit'];
+  const tableHeaders = ['Lid', 'Email', 'Type', 'Rang', 'Status', 'Punten', 'Missies', 'Pakket', 'Betalingsstatus', 'Lid sinds', 'Laatste activiteit'];
 
   const renderActions = (item: any) => {
     // Find member by email (item[1] is the email)
@@ -693,6 +776,20 @@ export default function Ledenbeheer() {
             >
               {['Alle Types', ...userTypes].map(type => (
                 <option key={type} value={type}>{type}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Package Filter */}
+          <div className="relative">
+            <FunnelIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <select
+              value={selectedPackage}
+              onChange={(e) => setSelectedPackage(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 rounded-xl bg-[#181F17] text-white border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] appearance-none"
+            >
+              {['Alle Pakketten', ...packages].map(pkg => (
+                <option key={pkg} value={pkg}>{pkg}</option>
               ))}
             </select>
           </div>
