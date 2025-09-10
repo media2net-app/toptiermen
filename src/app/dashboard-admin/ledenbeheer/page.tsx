@@ -905,7 +905,7 @@ export default function Ledenbeheer() {
 
       {/* Search and Filters */}
       <AdminCard title="Filters & Zoeken" icon={<FunnelIcon className="w-6 h-6" />}>
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
           {/* Search */}
           <div className="relative">
             <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />

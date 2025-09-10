@@ -338,12 +338,14 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
         console.log('Admin: User is not admin, redirecting to dashboard');
         console.log('User role:', profile?.role);
         console.log('Is admin:', isAdmin);
+        console.log('User email:', user.email);
         // Use setTimeout to prevent immediate redirect loops
         setTimeout(() => {
           router.push('/dashboard');
         }, 100);
       } else {
         console.log('Admin: Known admin email detected, allowing access despite metadata issues');
+        console.log('Admin email:', user.email, 'Profile role:', profile?.role);
       }
     }
   }, [loading, user, profile, isAdmin, router]);
@@ -650,7 +652,7 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
         {isMobileMenuOpen && (
           <div className="lg:hidden fixed inset-0 z-40 flex">
              <div className="fixed inset-0 bg-black/60" onClick={() => setIsMobileMenuOpen(false)}></div>
-             <div className="relative flex-1 flex flex-col max-w-sm w-full bg-[#232D1A] border-r border-[#3A4D23] p-6 h-full overflow-y-auto"
+             <div className="relative flex-1 flex flex-col max-w-xs w-full bg-[#232D1A] border-r border-[#3A4D23] p-4 h-full overflow-y-auto"
                   style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}>
                 <button
                     onClick={() => setIsMobileMenuOpen(false)}
@@ -664,7 +666,7 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
         )}
         
         {/* Desktop Sidebar */}
-        <aside className="hidden lg:block w-72 bg-[#232D1A] border-r border-[#3A4D23] min-h-screen p-6">
+        <aside className="hidden lg:block w-64 bg-[#232D1A] border-r border-[#3A4D23] min-h-screen p-4">
           <SidebarContent pathname={pathname ?? ''} />
         </aside>
 

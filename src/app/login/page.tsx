@@ -45,12 +45,25 @@ function LoginPageContent() {
     setLoginState(prev => ({ ...prev, ...updates }));
   };
 
-  // Helper function to get redirect path
+  // Helper function to get redirect path - IMPROVED WITH ADMIN EMAIL CHECK
   const getRedirectPath = (user: any, profile: any, redirectTo?: string) => {
     if (redirectTo && redirectTo !== '/login') return redirectTo;
     
-    const role = profile?.role || (user as any)?.user_metadata?.role || '';
-    return role.toLowerCase() === 'admin' ? '/dashboard-admin' : AUTH_CONFIG.defaultRedirect;
+    // Check if user is admin by role or known admin email
+    const knownAdminEmails = ['chiel@media2net.nl', 'rick@toptiermen.eu', 'admin@toptiermen.com'];
+    const isAdminByRole = profile?.role?.toLowerCase() === 'admin';
+    const isAdminByEmail = user?.email && knownAdminEmails.includes(user.email);
+    const isAdmin = isAdminByRole || isAdminByEmail;
+    
+    console.log('🔍 Admin check:', { 
+      role: profile?.role, 
+      email: user?.email, 
+      isAdminByRole, 
+      isAdminByEmail, 
+      isAdmin 
+    });
+    
+    return isAdmin ? '/dashboard-admin' : AUTH_CONFIG.defaultRedirect;
   };
 
   // IMMEDIATE: Initialize Supabase connection for faster login with fallbacks
@@ -351,11 +364,11 @@ function LoginPageContent() {
     }
   }, []);
 
-  // Check if user is already authenticated - Redirect immediately when user exists
+  // Check if user is already authenticated - IMPROVED REDIRECT LOGIC
   useEffect(() => {
     if (loading) return;
 
-    // Redirect as soon as we have a user (don't wait for profile)
+    // Only redirect if we have a user and we're not already redirecting
     if (user && !loginState.redirecting) {
       console.log('🔄 User detected, initiating redirect...');
       console.log('👤 User object:', user);
@@ -368,10 +381,11 @@ function LoginPageContent() {
 
       console.log('🎯 Redirecting to:', targetPath);
       
-      // Use a small delay to ensure state updates
+      // Wait a bit longer to ensure profile is loaded if available
+      const delay = profile ? 100 : 500; // Longer delay if profile is missing
       setTimeout(() => {
         router.replace(targetPath);
-      }, 100);
+      }, delay);
     }
   }, [loading, user, profile, router, searchParams, loginState.redirecting]);
 

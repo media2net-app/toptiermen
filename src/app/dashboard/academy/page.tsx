@@ -296,7 +296,7 @@ export default function AcademyPage() {
       </div>
 
       {/* Modules Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
         {modules.map((module) => {
           const moduleLessons = lessons.filter(l => l.module_id === module.id);
           const completedLessons = moduleLessons.filter(l => 

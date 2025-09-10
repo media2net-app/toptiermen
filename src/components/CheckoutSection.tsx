@@ -206,7 +206,7 @@ export default function CheckoutSection({
           </div>
 
           {/* Checkout Form */}
-          <div className="bg-[#1A2313] rounded-2xl p-8 border border-[#3A4D23]/30 sticky top-8">
+          <div className="bg-[#1A2313] rounded-2xl p-4 sm:p-8 border border-[#3A4D23]/30 sticky top-4 sm:top-8">
             
             <h3 className="text-2xl font-bold text-white mb-8 text-center">Vul je gegevens in</h3>
 

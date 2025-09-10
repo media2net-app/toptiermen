@@ -45,14 +45,30 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch user profile
-  const fetchProfile = async (userId: string): Promise<Profile | null> => {
+  // Fetch user profile - IMPROVED WITH EMAIL FALLBACK
+  const fetchProfile = async (userId: string, email?: string): Promise<Profile | null> => {
     try {
-      const { data, error } = await supabase
+      // First try to fetch by ID
+      let { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .single();
+
+      // If not found by ID and we have email, try by email
+      if (error && email) {
+        console.log('Profile not found by ID, trying by email:', email);
+        const emailResult = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('email', email)
+          .single();
+        
+        if (!emailResult.error) {
+          data = emailResult.data;
+          error = null;
+        }
+      }
 
       if (error) {
         console.error('Profile fetch error:', error);
@@ -80,7 +96,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
         } else if (session?.user) {
           console.log('✅ Found existing session for user:', session.user.email);
           setUser(session.user);
-          const userProfile = await fetchProfile(session.user.id);
+          const userProfile = await fetchProfile(session.user.id, session.user.email);
           setProfile(userProfile);
         } else {
           console.log('ℹ️ No existing session found');
@@ -117,7 +133,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
         
         if (event === 'SIGNED_IN' && session?.user) {
           setUser(session.user);
-          const userProfile = await fetchProfile(session.user.id);
+          const userProfile = await fetchProfile(session.user.id, session.user.email);
           setProfile(userProfile);
           setError(null);
         } else if (event === 'SIGNED_OUT') {
@@ -135,30 +151,42 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     };
   }, []);
 
-  // Sign in method
+  // Sign in method - IMPROVED WITH BETTER ERROR HANDLING
   const signIn = async (email: string, password: string) => {
     try {
       setLoading(true);
       setError(null);
 
+      console.log('🔐 Attempting login for:', email);
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
+        console.error('❌ Login error:', error.message);
         setError(error.message);
         return { success: false, error: error.message };
       }
 
       if (data.user) {
+        console.log('✅ Login successful for:', data.user.email);
         setUser(data.user);
-        const userProfile = await fetchProfile(data.user.id);
-        setProfile(userProfile);
+        
+        // Fetch profile with email fallback
+        const userProfile = await fetchProfile(data.user.id, data.user.email);
+        if (userProfile) {
+          console.log('✅ Profile loaded:', userProfile.role);
+          setProfile(userProfile);
+        } else {
+          console.warn('⚠️ Profile not found, but login successful');
+          // Don't fail login if profile is missing - let admin check handle it
+        }
       }
 
       return { success: true };
     } catch (err) {
+      console.error('❌ Login exception:', err);
       const errorMessage = err instanceof Error ? err.message : 'Login failed';
       setError(errorMessage);
       return { success: false, error: errorMessage };
@@ -220,10 +248,10 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
   // Computed properties
   const isAuthenticated = !!user;
   
-  // Enhanced admin check that ignores suspension metadata for known admin emails
+  // Enhanced admin check that works even when profile is missing
   const knownAdminEmails = ['chiel@media2net.nl', 'rick@toptiermen.eu', 'admin@toptiermen.com'];
   const isAdmin = !!(profile?.role === 'admin' || 
-    (user?.email && knownAdminEmails.includes(user.email) && profile?.role !== 'user'));
+    (user?.email && knownAdminEmails.includes(user.email)));
   
   const isLid = profile?.role === 'lid';
 

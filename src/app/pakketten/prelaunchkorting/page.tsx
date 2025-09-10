@@ -360,7 +360,7 @@ export default function BasicTierPage() {
             </div>
 
             {/* Features Grid */}
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mb-16">
               {benefits.map((benefit, index) => (
                 <div key={index} className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6 hover:bg-white/10 transition-all duration-300">
                   <div className="w-12 h-12 bg-gradient-to-br from-[#8BAE5A] to-[#B6C948] rounded-lg flex items-center justify-center mb-4">
