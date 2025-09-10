@@ -213,55 +213,57 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
                     className={`w-4 h-4 transition-transform duration-200 ${allSubItemsDisabled ? 'text-gray-500' : ''} ${isOpen ? 'rotate-180' : ''}`} 
                   />
                 </button>
-                {isOpen && (
-                  <motion.div 
-                    className="ml-4 mt-2 space-y-1"
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    {subItems.map(sub => {
-                      const isSubActive = isOnboarding 
-                        ? (safePathname === sub.href && sub.onboardingStep === actualCurrentStep)
-                        : safePathname === sub.href;
-                      const isHighlighted = isOnboarding && highlightedMenu === sub.label;
-                      const isDisabled = isMenuItemDisabled(sub);
-                      
-                      if (isDisabled) {
+                <AnimatePresence>
+                  {isOpen && (
+                    <motion.div 
+                      className="ml-4 mt-2 space-y-1"
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      {subItems.map(sub => {
+                        const isSubActive = isOnboarding 
+                          ? (safePathname === sub.href && sub.onboardingStep === actualCurrentStep)
+                          : safePathname === sub.href;
+                        const isHighlighted = isOnboarding && highlightedMenu === sub.label;
+                        const isDisabled = isMenuItemDisabled(sub);
+                        
+                        if (isDisabled) {
+                          return (
+                            <div
+                              key={sub.label}
+                              className="block px-4 py-2 rounded-lg text-sm text-gray-500 cursor-not-allowed opacity-50"
+                              title={sub.disabled ? "Binnenkort online" : "Nog niet beschikbaar tijdens onboarding"}
+                            >
+                              {sub.label}
+                            </div>
+                          );
+                        }
+                        
                         return (
-                          <div
+                          <Link
                             key={sub.label}
-                            className="block px-4 py-2 rounded-lg text-sm text-gray-500 cursor-not-allowed opacity-50"
-                            title={sub.disabled ? "Binnenkort online" : "Nog niet beschikbaar tijdens onboarding"}
+                            href={sub.href || '#'}
+                            onClick={sub.disabled ? (e) => e.preventDefault() : onLinkClick}
+                            title={sub.disabled ? "Binnenkort online" : undefined}
+                            className={`block px-4 py-2 rounded-lg text-sm transition-all duration-150 ${
+                              sub.disabled
+                                ? 'text-gray-500 cursor-not-allowed opacity-50'
+                                : isSubActive 
+                                ? 'bg-[#8BAE5A] text-black font-semibold' 
+                                : isHighlighted
+                                ? 'bg-[#FFD700]/20 text-[#FFD700] border border-[#FFD700]/30'
+                                : 'text-gray-300 hover:text-[#8BAE5A] hover:bg-[#8BAE5A]/10'
+                            }`}
                           >
                             {sub.label}
-                          </div>
+                          </Link>
                         );
-                      }
-                      
-                      return (
-                        <Link
-                          key={sub.label}
-                          href={sub.href || '#'}
-                          onClick={sub.disabled ? (e) => e.preventDefault() : onLinkClick}
-                          title={sub.disabled ? "Binnenkort online" : undefined}
-                          className={`block px-4 py-2 rounded-lg text-sm transition-all duration-150 ${
-                            sub.disabled
-                              ? 'text-gray-500 cursor-not-allowed opacity-50'
-                              : isSubActive 
-                              ? 'bg-[#8BAE5A] text-black font-semibold' 
-                              : isHighlighted
-                              ? 'bg-[#FFD700]/20 text-[#FFD700] border border-[#FFD700]/30'
-                              : 'text-gray-300 hover:text-[#8BAE5A] hover:bg-[#8BAE5A]/10'
-                          }`}
-                        >
-                          {sub.label}
-                        </Link>
-                      );
-                    })}
-                  </motion.div>
-                )}
+                      })}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             );
           }
@@ -487,55 +489,57 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
                     />
                   )}
                 </button>
-                {isOpen && !collapsed && (
-                  <motion.div 
-                    className="ml-4 mt-2 space-y-1"
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    {subItems.map(sub => {
-                      const isSubActive = isOnboarding 
-                        ? (safePathname === sub.href && sub.onboardingStep === actualCurrentStep)
-                        : safePathname === sub.href;
-                      const isHighlighted = isOnboarding && highlightedMenu === sub.label;
-                      const isDisabled = isMenuItemDisabled(sub);
-                      
-                      if (isDisabled) {
+                <AnimatePresence>
+                  {isOpen && !collapsed && (
+                    <motion.div 
+                      className="ml-4 mt-2 space-y-1"
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      {subItems.map(sub => {
+                        const isSubActive = isOnboarding 
+                          ? (safePathname === sub.href && sub.onboardingStep === actualCurrentStep)
+                          : safePathname === sub.href;
+                        const isHighlighted = isOnboarding && highlightedMenu === sub.label;
+                        const isDisabled = isMenuItemDisabled(sub);
+                        
+                        if (isDisabled) {
+                          return (
+                            <div
+                              key={sub.label}
+                              className="block px-4 py-2 rounded-lg text-sm text-gray-500 cursor-not-allowed opacity-50"
+                              title={sub.disabled ? "Binnenkort online" : "Nog niet beschikbaar tijdens onboarding"}
+                            >
+                              {sub.label}
+                            </div>
+                          );
+                        }
+                        
                         return (
-                          <div
+                          <Link
                             key={sub.label}
-                            className="block px-4 py-2 rounded-lg text-sm text-gray-500 cursor-not-allowed opacity-50"
-                            title={sub.disabled ? "Binnenkort online" : "Nog niet beschikbaar tijdens onboarding"}
+                            href={sub.href || '#'}
+                            onClick={sub.disabled ? (e) => e.preventDefault() : onLinkClick}
+                            title={sub.disabled ? "Binnenkort online" : undefined}
+                            className={`block px-4 py-2 rounded-lg text-sm transition-all duration-150 ${
+                              sub.disabled
+                                ? 'text-gray-500 cursor-not-allowed opacity-50'
+                                : isSubActive 
+                                ? 'bg-[#8BAE5A] text-black font-semibold' 
+                                : isHighlighted
+                                ? 'bg-[#FFD700]/20 text-[#FFD700] border border-[#FFD700]/30'
+                                : 'text-gray-300 hover:text-[#8BAE5A] hover:bg-[#8BAE5A]/10'
+                            }`}
                           >
                             {sub.label}
-                          </div>
+                          </Link>
                         );
-                      }
-                      
-                      return (
-                        <Link
-                          key={sub.label}
-                          href={sub.href || '#'}
-                          onClick={sub.disabled ? (e) => e.preventDefault() : onLinkClick}
-                          title={sub.disabled ? "Binnenkort online" : undefined}
-                          className={`block px-4 py-2 rounded-lg text-sm transition-all duration-150 ${
-                            sub.disabled
-                              ? 'text-gray-500 cursor-not-allowed opacity-50'
-                              : isSubActive 
-                              ? 'bg-[#8BAE5A] text-black font-semibold' 
-                              : isHighlighted
-                              ? 'bg-[#FFD700]/20 text-[#FFD700] border border-[#FFD700]/30'
-                              : 'text-gray-300 hover:text-[#8BAE5A] hover:bg-[#8BAE5A]/10'
-                          }`}
-                        >
-                          {sub.label}
-                        </Link>
-                      );
-                    })}
-                  </motion.div>
-                )}
+                      })}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             );
           }
