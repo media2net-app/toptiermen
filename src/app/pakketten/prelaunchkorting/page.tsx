@@ -3,7 +3,139 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { FaCheck, FaArrowRight, FaUsers, FaDumbbell, FaBrain, FaChartLine, FaCrown, FaStar, FaGift, FaBook, FaTools, FaComments, FaBullseye, FaTrophy, FaBookOpen, FaChevronLeft, FaChevronRight, FaClock } from 'react-icons/fa';
+import { PlayIcon } from '@heroicons/react/24/outline';
 import CheckoutSection from '@/components/CheckoutSection';
+
+interface VideoPlayerProps {
+  src: string;
+  poster?: string;
+}
+
+function VideoPlayer({ src, poster }: VideoPlayerProps) {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [hasError, setHasError] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [currentSrc, setCurrentSrc] = useState(src);
+  const [retryCount, setRetryCount] = useState(0);
+
+  const handlePlay = () => {
+    setIsLoading(true);
+    setIsPlaying(true);
+  };
+
+  const handleVideoError = (e: React.SyntheticEvent<HTMLVideoElement, Event>) => {
+    const video = e.currentTarget;
+    const error = video.error;
+    
+    console.error('Video error:', {
+      code: error?.code,
+      message: error?.message,
+      src: currentSrc,
+      retryCount
+    });
+    
+    if (retryCount < 2) {
+      // Try alternative video sources
+      const alternatives = [
+        '/platform-preview.mp4',
+        '/welkom-v2.MP4',
+        '/welkom.MP4'
+      ];
+      
+      const nextSrc = alternatives[retryCount + 1];
+      if (nextSrc) {
+        console.log('Trying alternative video:', nextSrc);
+        setCurrentSrc(nextSrc);
+        setRetryCount(prev => prev + 1);
+        setIsLoading(false);
+        return;
+      }
+    }
+    
+    setHasError(true);
+    setIsLoading(false);
+    setIsPlaying(false);
+  };
+
+  const handleVideoLoad = () => {
+    setIsLoading(false);
+  };
+
+  if (hasError) {
+    return (
+      <div className="relative w-full max-w-4xl mx-auto">
+        <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-8 text-center">
+          <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+          </div>
+          <h3 className="text-xl font-bold text-white mb-2">Video niet beschikbaar</h3>
+          <p className="text-[#D1D5DB] mb-4">
+            Er is een probleem met het laden van de video. Probeer de pagina te verversen.
+          </p>
+          <button 
+            onClick={() => {
+              setHasError(false);
+              setIsLoading(false);
+              setIsPlaying(false);
+              setRetryCount(0);
+              setCurrentSrc(src);
+            }}
+            className="px-6 py-2 bg-gradient-to-r from-[#8BAE5A] to-[#B6C948] text-white rounded-lg font-medium hover:opacity-90 transition-opacity"
+          >
+            Opnieuw proberen
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative w-full max-w-4xl mx-auto group">
+      {!isPlaying && (
+        <div className="relative cursor-pointer" onClick={handlePlay}>
+          <img 
+            src={poster} 
+            alt="Video Preview" 
+            className="w-full h-auto rounded-xl shadow-2xl"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.src = '/video-placeholder.svg';
+            }}
+          />
+          <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 rounded-xl group-hover:bg-opacity-40 transition-all duration-300">
+            <div className="w-20 h-20 bg-gradient-to-br from-[#8BAE5A] to-[#B6C948] rounded-full flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform duration-300">
+              {isLoading ? (
+                <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              ) : (
+                <PlayIcon className="w-8 h-8 text-white ml-1" />
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {isPlaying && (
+        <video
+          controls
+          autoPlay
+          playsInline
+          muted
+          className="w-full h-auto rounded-xl shadow-2xl"
+          poster={poster}
+          preload="metadata"
+          onError={handleVideoError}
+          onLoadedData={handleVideoLoad}
+          onCanPlay={handleVideoLoad}
+        >
+          <source src={currentSrc} type="video/mp4" />
+          Je browser ondersteunt het video element niet.
+        </video>
+      )}
+    </div>
+  );
+}
 
 export default function BasicTierPage() {
   const router = useRouter();
@@ -342,24 +474,14 @@ export default function BasicTierPage() {
               <h3 className="text-lg sm:text-xl font-bold text-white mb-4 text-center">
                 🎬 Sneak Preview - Wat krijg je?
               </h3>
-              <div className="relative w-full max-w-4xl mx-auto">
-                <div className="relative aspect-video bg-black rounded-lg overflow-hidden">
-                  <video
-                    src="/platform-preview.mp4"
-                    title="Top Tier Men Platform Sneak Preview"
-                    className="w-full h-full rounded-lg"
-                    controls
-                    preload="metadata"
-                    poster="/platform-preview.png"
-                  >
-                    Je browser ondersteunt het video element niet.
-                  </video>
-                </div>
-                <div className="mt-4 text-center">
-                  <p className="text-[#8BAE5A] text-sm">
-                    Bekijk wat je krijgt met je Top Tier Men lidmaatschap
-                  </p>
-                </div>
+              <VideoPlayer 
+                src="/platform-preview.mp4"
+                poster="/platform-preview.png"
+              />
+              <div className="mt-4 text-center">
+                <p className="text-[#8BAE5A] text-sm">
+                  Bekijk wat je krijgt met je Top Tier Men lidmaatschap
+                </p>
               </div>
             </div>
 
