@@ -413,35 +413,7 @@ export default function CheckoutSection({
                     {packageName} - {pricing.period}
                   </span>
                   <div className="flex items-center space-x-2">
-                    {originalMonthlyPrice && (
-                      <span className="text-gray-400 line-through text-sm">€{formatPrice(originalMonthlyPrice)}</span>
-                    )}
                     <span className="text-white font-semibold">€{formatPrice(pricing.periodPrice)}</span>
-                  </div>
-                </div>
-                {originalMonthlyPrice && (
-                  <div className="flex justify-between">
-                    <span className="text-[#8BAE5A]">Normale prijs ({pricing.period})</span>
-                    <span className="text-gray-400 line-through">€{formatPrice(isLifetime ? originalMonthlyPrice : originalMonthlyPrice * (billingPeriod === '6months' ? 6 : 12))}</span>
-                  </div>
-                )}
-                {originalMonthlyPrice && (
-                  <div className="flex justify-between">
-                    <span className="text-[#8BAE5A]">Prelaunch prijs ({pricing.period})</span>
-                    <span className="text-white font-semibold">€{formatPrice(isLifetime ? pricing.periodPrice : pricing.periodPrice * (billingPeriod === '6months' ? 6 : 12))}</span>
-                  </div>
-                )}
-                <div className="relative bg-gradient-to-r from-orange-500/20 to-orange-600/20 border border-orange-500/50 rounded-lg p-4 mb-4 animate-pulse">
-                  <div className="absolute inset-0 bg-gradient-to-r from-orange-500/10 to-orange-600/10 rounded-lg animate-ping"></div>
-                  <div className="relative flex justify-between items-center">
-                    <div className="flex items-center space-x-2">
-                      <div className="w-3 h-3 bg-orange-500 rounded-full animate-pulse"></div>
-                      <span className="text-orange-400 font-bold text-lg">🔥 NORMALE PRIJZEN</span>
-                    </div>
-                    <span className="text-orange-400 font-bold text-xl">-€{formatPrice(originalMonthlyPrice ? (isLifetime ? originalMonthlyPrice : originalMonthlyPrice * (billingPeriod === '6months' ? 6 : 12)) - (isLifetime ? pricing.periodPrice : pricing.periodPrice * (billingPeriod === '6months' ? 6 : 12)) : currentPrice)}</span>
-                  </div>
-                  <div className="relative mt-2">
-                    <span className="text-orange-300 text-sm">⚡ Exclusieve prelaunch korting - beperkte tijd!</span>
                   </div>
                 </div>
                 <div className="border-t border-[#3A4D23] pt-3">
@@ -450,7 +422,7 @@ export default function CheckoutSection({
                     <span className="text-white font-bold text-xl">€{formatPrice(isLifetime ? pricing.periodPrice : pricing.periodPrice * (billingPeriod === '6months' ? 6 : 12))}</span>
                   </div>
                   <div className="text-sm text-[#8BAE5A]/70 mt-2">
-                    Prelaunch prijs (normale prijzen al toegepast)
+                    Normale prijzen
                   </div>
                 </div>
               </div>

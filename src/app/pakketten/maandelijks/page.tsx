@@ -296,9 +296,6 @@ export default function MaandelijksPage() {
                 <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-bold text-white">
                   <span className="block truncate">{packageData.name.toUpperCase()}</span>
                   <div className="flex items-center justify-center space-x-3 mt-2">
-                    <span className="text-gray-400 line-through text-lg sm:text-xl md:text-2xl lg:text-3xl">
-                      €{formatPrice(packageData.originalMonthlyPrice)}
-                    </span>
                     <span className="text-[#8BAE5A] text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold">
                       €{formatPrice(packageData.monthlyPrice)}
                     </span>
@@ -405,9 +402,6 @@ export default function MaandelijksPage() {
             <div className="bg-gradient-to-r from-[#8BAE5A]/10 to-[#B6C948]/10 border border-[#8BAE5A]/20 rounded-2xl p-8 text-center mb-16">
               <div className="mb-4">
                 <div className="flex items-center justify-center space-x-4 mb-2">
-                  <span className="text-lg text-gray-400 line-through">
-                    €{formatPrice(packageData.originalMonthlyPrice)}
-                  </span>
                   <span className="text-2xl font-bold text-white">
                     €{formatPrice(packageData.monthlyPrice)} per maand
                   </span>
