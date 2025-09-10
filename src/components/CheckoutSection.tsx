@@ -406,9 +406,6 @@ export default function CheckoutSection({
                     <span className="text-white font-semibold text-lg">Totaal</span>
                     <span className="text-white font-bold text-xl">€{formatPrice(isLifetime ? pricing.periodPrice : pricing.periodPrice * (billingPeriod === '6months' ? 6 : 12))}</span>
                   </div>
-                  <div className="text-sm text-[#8BAE5A]/70 mt-2">
-                    Normale prijzen
-                  </div>
                 </div>
               </div>
             </div>
@@ -429,7 +426,7 @@ export default function CheckoutSection({
                 ) : (
                   <>
                     <span className="text-xl">🔥</span>
-                    {isLifetime ? 'Word Lifetime Founder' : 'Start je transformatie - normale prijzen!'}
+                    {isLifetime ? 'Word Lifetime Founder' : 'Start je transformatie!'}
                   </>
                 )}
               </div>
