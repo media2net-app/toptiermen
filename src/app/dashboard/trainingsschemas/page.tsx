@@ -97,20 +97,6 @@ const equipmentTypes = [
     subtitle: 'Volledige gym met alle apparaten',
     description: 'Toegang tot alle gewichten en machines',
     icon: '🏋️',
-  },
-  {
-    id: 'home',
-    name: 'Thuis',
-    subtitle: 'Beperkte apparaten of bodyweight',
-    description: 'Dumbbells, resistance bands, bodyweight',
-    icon: '🏠',
-  },
-  {
-    id: 'outdoor',
-    name: 'Buiten',
-    subtitle: 'Outdoor training en bootcamp',
-    description: 'Park training, bootcamp, outdoor fitness',
-    icon: '🌳',
   }
 ];
 
@@ -156,7 +142,7 @@ function TrainingschemasContent() {
   const [calculatorData, setCalculatorData] = useState({
     training_goal: '',
     training_frequency: '',
-    equipment_type: ''
+    equipment_type: 'gym'
   });
 
   // Training functions - using same method as admin dashboard
@@ -979,37 +965,20 @@ function TrainingschemasContent() {
                   </div>
 
 
-                  {/* Equipment Type */}
+                  {/* Equipment Type - Only Gym Available */}
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-3 md:mb-4 flex items-center gap-2">
                       <span className="text-base md:text-lg">🏋️</span>
                       <span className="text-sm md:text-base">Waar ga je trainen?</span>
                     </label>
-                    <div className="space-y-2 md:space-y-3">
-                      {equipmentTypes.map((type) => (
-                        <label key={type.id} className={`flex items-start p-3 md:p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ${
-                          calculatorData.equipment_type === type.id 
-                            ? 'border-[#8BAE5A] bg-[#8BAE5A]/10 shadow-lg shadow-[#8BAE5A]/20' 
-                            : 'border-gray-700 hover:border-[#8BAE5A]/50 hover:bg-gray-800/50'
-                        }`}>
-                          <input
-                            type="radio"
-                            name="equipment_type"
-                            value={type.id}
-                            checked={calculatorData.equipment_type === type.id}
-                            onChange={(e) => setCalculatorData(prev => ({ ...prev, equipment_type: e.target.value }))}
-                            className="mt-1 mr-4 h-4 w-4 text-[#8BAE5A] border-gray-300 focus:ring-[#8BAE5A]"
-                          />
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 md:gap-3 mb-2">
-                              <span className="text-xl md:text-2xl">{type.icon}</span>
-                              <div className="text-white font-semibold text-sm md:text-base">{type.name}</div>
-                            </div>
-                            <div className="text-xs md:text-sm text-gray-300 mb-1">{type.subtitle}</div>
-                            <div className="text-xs text-gray-500">{type.description}</div>
-                          </div>
-                        </label>
-                      ))}
+                    <div className="bg-[#8BAE5A]/10 border border-[#8BAE5A]/30 rounded-xl p-3 md:p-4">
+                      <div className="flex items-center gap-2 md:gap-3">
+                        <span className="text-xl md:text-2xl">🏋️</span>
+                        <div>
+                          <div className="text-white font-semibold text-sm md:text-base">Gym</div>
+                          <div className="text-xs md:text-sm text-gray-300">Volledige gym met alle apparaten</div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
