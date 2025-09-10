@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { useSubscription } from '@/hooks/useSubscription';
 
 interface OnboardingStep {
   id: number;
@@ -32,12 +33,14 @@ const OnboardingContext = createContext<OnboardingContextType | undefined>(undef
 
 export function OnboardingProvider({ children }: { children: React.ReactNode }) {
   const { user } = useSupabaseAuth();
+  const { hasAccess } = useSubscription();
   const [isOnboarding, setIsOnboarding] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [onboardingStatus, setOnboardingStatus] = useState<any>(null);
 
-  const steps: OnboardingStep[] = [
+  // Define all possible steps
+  const allSteps: OnboardingStep[] = [
     {
       id: 0,
       title: 'Welkomstvideo bekijken',
@@ -110,6 +113,18 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
     }
   ];
 
+  // Filter steps based on subscription tier
+  const steps: OnboardingStep[] = allSteps.filter(step => {
+    // Basic tier users skip training and nutrition steps
+    if (!hasAccess('training') && (step.id === 3)) {
+      return false; // Skip training schema step
+    }
+    if (!hasAccess('nutrition') && (step.id === 4)) {
+      return false; // Skip nutrition plan step
+    }
+    return true;
+  });
+
   // Fetch onboarding status on mount
   useEffect(() => {
     if (user) {
@@ -123,36 +138,43 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
       const currentPage = window.location.pathname;
       let pageBasedStep = currentStep;
       
-      switch (currentPage) {
-        case '/dashboard/onboarding':
-          pageBasedStep = 1; // Step 1: Main goal
-          break;
-        case '/dashboard/mijn-missies':
-          pageBasedStep = 2; // Step 2: Add missions
-          break;
-        case '/dashboard/trainingsschemas':
-          pageBasedStep = 3; // Step 3: Select training schema
-          break;
-        case '/dashboard/voedingsplannen':
-          pageBasedStep = 4; // Step 4: Select nutrition plan
-          break;
-        case '/dashboard/challenges':
-          pageBasedStep = 5; // Step 5: Challenge selection
-          break;
-        case '/dashboard/brotherhood/forum':
-        case '/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden':
-          pageBasedStep = 6; // Step 6: Forum introduction
-          break;
-        default:
-          pageBasedStep = currentStep; // Keep current step if page doesn't match
+      // Find the step index based on the current page
+      const stepIndex = steps.findIndex(step => step.targetPage === currentPage);
+      if (stepIndex !== -1) {
+        pageBasedStep = stepIndex;
+      } else {
+        // Fallback to original logic for specific pages
+        switch (currentPage) {
+          case '/dashboard/onboarding':
+            pageBasedStep = steps.findIndex(step => step.id === 1); // Main goal step
+            break;
+          case '/dashboard/mijn-missies':
+            pageBasedStep = steps.findIndex(step => step.id === 2); // Missions step
+            break;
+          case '/dashboard/trainingsschemas':
+            pageBasedStep = steps.findIndex(step => step.id === 3); // Training schema step
+            break;
+          case '/dashboard/voedingsplannen':
+            pageBasedStep = steps.findIndex(step => step.id === 4); // Nutrition plan step
+            break;
+          case '/dashboard/challenges':
+            pageBasedStep = steps.findIndex(step => step.id === 5); // Challenge step
+            break;
+          case '/dashboard/brotherhood/forum':
+          case '/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden':
+            pageBasedStep = steps.findIndex(step => step.id === 6); // Forum step
+            break;
+          default:
+            pageBasedStep = currentStep; // Keep current step if page doesn't match
+        }
       }
       
-      if (pageBasedStep !== currentStep) {
+      if (pageBasedStep !== currentStep && pageBasedStep !== -1) {
         console.log('🔄 Updating current step based on page:', pageBasedStep);
         setCurrentStep(pageBasedStep);
       }
     }
-  }, [isOnboarding]); // Removed currentStep from dependencies to avoid infinite loop
+  }, [isOnboarding, steps]); // Added steps to dependencies
 
   const fetchOnboardingStatus = async () => {
     if (!user) return;
