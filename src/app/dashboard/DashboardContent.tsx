@@ -52,7 +52,7 @@ const menu = [
   { label: 'Forum', icon: FireIcon, parent: 'Brotherhood', href: '/dashboard/brotherhood/forum', isSub: true, onboardingStep: 6 },
   { label: 'Leden', icon: UsersIcon, parent: 'Brotherhood', href: '/dashboard/brotherhood/leden', isSub: true, onboardingStep: 7 },
   { label: 'Mijn Groepen & Evenementen', icon: StarIcon, parent: 'Brotherhood', href: '/dashboard/brotherhood/mijn-groepen', isSub: true, onboardingStep: 7 },
-  { label: 'Boekenkamer', icon: BookOpenIcon, href: '/dashboard/boekenkamer', onboardingStep: 7 },
+  { label: 'Boekenkamer (binnenkort online)', icon: BookOpenIcon, href: null, onboardingStep: 7, disabled: true },
   { label: 'Badges & Rangen', icon: StarIcon, href: '/dashboard/badges-en-rangen', onboardingStep: 7 },
   { label: 'Producten', icon: ShoppingBagIcon, href: '/dashboard/producten', onboardingStep: 7 },
   { label: 'Mentorship & Coaching', icon: ChatBubbleLeftRightIcon, href: '/dashboard/mentorship-en-coaching', onboardingStep: 7 },
@@ -109,7 +109,10 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
 
   // Function to check if a menu item should be disabled during onboarding
   const isMenuItemDisabled = (item: any) => {
-    // If onboarding is completed, no items should be disabled
+    // Check if item is explicitly disabled (e.g., "binnenkort online")
+    if (item.disabled) return true;
+    
+    // If onboarding is completed, no items should be disabled (except explicitly disabled ones)
     if (actualOnboardingStatus?.onboarding_completed) return false;
     
     if (!isOnboarding || !actualOnboardingStatus) return false;
@@ -213,7 +216,7 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
                     }
                   }}
                   disabled={allSubItemsDisabled}
-                  title={allSubItemsDisabled ? "Nog niet beschikbaar tijdens onboarding" : undefined}
+                  title={allSubItemsDisabled ? (subItems.some(sub => sub.disabled) ? "Binnenkort online" : "Nog niet beschikbaar tijdens onboarding") : undefined}
                 >
                   <item.icon className={`w-6 h-6 ${allSubItemsDisabled ? 'text-gray-500' : isActive || hasActiveSubItem ? 'text-white' : 'text-[#8BAE5A]'}`} />
                   {!collapsed && (
@@ -245,7 +248,7 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
                           <div
                             key={sub.label}
                             className="block px-4 py-2 rounded-lg text-sm text-gray-500 cursor-not-allowed opacity-50"
-                            title="Nog niet beschikbaar tijdens onboarding"
+                            title={sub.disabled ? "Binnenkort online" : "Nog niet beschikbaar tijdens onboarding"}
                           >
                             {sub.label}
                           </div>
@@ -288,7 +291,7 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
               <div
                 key={item.label}
                 className={`grid grid-cols-[auto_1fr] items-center gap-4 px-4 py-3 rounded-xl font-bold uppercase text-sm tracking-wide font-figtree text-gray-500 cursor-not-allowed opacity-50 ${collapsed ? 'justify-center px-2' : ''}`}
-                title="Nog niet beschikbaar tijdens onboarding"
+                title={item.disabled ? "Binnenkort online" : "Nog niet beschikbaar tijdens onboarding"}
               >
                 <item.icon className="w-6 h-6 text-gray-500" />
                 {!collapsed && (
