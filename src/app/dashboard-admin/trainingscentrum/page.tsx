@@ -249,6 +249,51 @@ const mapDbSchemaToForm = (dbSchema: any) => ({
     })),
 });
 
+// Function to generate a unique copy name
+const generateCopyName = (originalName: string, allSchemas: any[]) => {
+  console.log('🔍 Generating copy name for:', originalName);
+  console.log('📊 Total schemas available:', allSchemas.length);
+  
+  // Remove existing "(Kopie)" or "(Kopie X)" suffixes
+  const baseName = originalName.replace(/\s*\(Kopie(?:\s+\d+)?\)$/, '');
+  console.log('📝 Base name:', baseName);
+  
+  // Find all existing copies of this schema (including the original)
+  const existingCopies = allSchemas.filter(schema => {
+    const schemaName = schema.name;
+    const isOriginal = schemaName === baseName;
+    const isCopy = schemaName.match(new RegExp(`^${baseName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*\\(Kopie(?:\\s+\\d+)?\\)$`));
+    return isOriginal || isCopy;
+  });
+  
+  console.log('📋 Found existing copies:', existingCopies.map(s => s.name));
+  
+  // Generate next copy number
+  const copyNumber = existingCopies.length;
+  
+  if (copyNumber === 0) {
+    return `${baseName} (Kopie)`;
+  } else {
+    return `${baseName} (Kopie ${copyNumber + 1})`;
+  }
+};
+
+// Function to insert copy after original schema
+const insertCopyAfterOriginal = (schemas: any[], originalSchema: any, copySchema: any) => {
+  const originalIndex = schemas.findIndex(schema => schema.id === originalSchema.id);
+  
+  if (originalIndex === -1) {
+    // If original not found, add to end
+    return [...schemas, copySchema];
+  }
+  
+  // Insert copy right after the original
+  const newSchemas = [...schemas];
+  newSchemas.splice(originalIndex + 1, 0, copySchema);
+  
+  return newSchemas;
+};
+
 export default function TrainingscentrumBeheer() {
   const [mounted, setMounted] = useState(false);
   const [activeTab, setActiveTab] = useState('schemas');
@@ -367,7 +412,7 @@ export default function TrainingscentrumBeheer() {
           )
         `)
         .order('created_at', { ascending: false })
-        .limit(50); // Limit to prevent overwhelming queries
+        .limit(100); // Increased limit to see all schemas
         
       if (error) {
         console.error('❌ Error fetching schemas:', error);
@@ -377,7 +422,8 @@ export default function TrainingscentrumBeheer() {
       console.log(`✅ Successfully fetched ${data?.length || 0} training schemas`);
       
       // Sort schemas by number of days (ascending) and then by creation date
-      const sortedSchemas = (data || [])
+      // But group copies with their originals
+      const processedSchemas = (data || [])
         .map(schema => ({
           ...schema,
           training_schema_days: (schema.training_schema_days || []).sort((a, b) => (a.day_number || 0) - (b.day_number || 0))
@@ -394,6 +440,37 @@ export default function TrainingscentrumBeheer() {
           // If same number of days, sort by creation date (newest first)
           return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
         });
+
+      // Group copies with their originals
+      const groupedSchemas: any[] = [];
+      const processedIds = new Set();
+      
+      for (const schema of processedSchemas) {
+        if (processedIds.has(schema.id)) continue;
+        
+        // Add the original schema
+        groupedSchemas.push(schema);
+        processedIds.add(schema.id);
+        
+        // Find and add all copies of this schema
+        const baseName = schema.name.replace(/\s*\(Kopie(?:\s+\d+)?\)$/, '');
+        const copies = processedSchemas.filter(s => 
+          s.id !== schema.id && 
+          !processedIds.has(s.id) &&
+          (s.name === baseName || s.name.match(new RegExp(`^${baseName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*\\(Kopie(?:\\s+\\d+)?\\)$`)))
+        );
+        
+        // Sort copies by name to maintain order
+        copies.sort((a, b) => a.name.localeCompare(b.name));
+        
+        // Add copies right after the original
+        for (const copy of copies) {
+          groupedSchemas.push(copy);
+          processedIds.add(copy.id);
+        }
+      }
+      
+      const sortedSchemas = groupedSchemas;
       
       setSchemas(sortedSchemas);
       setErrorSchemas(null);
@@ -1102,6 +1179,7 @@ export default function TrainingscentrumBeheer() {
                 <table className="w-full">
                   <thead className="bg-[#181F17]">
                     <tr>
+                      <th className="px-6 py-4 text-center text-sm font-medium text-[#8BAE5A] w-16">#</th>
                       <th className="px-6 py-4 text-left text-sm font-medium text-[#8BAE5A] w-1/3">Schema</th>
                       <th className="px-6 py-4 text-left text-sm font-medium text-[#8BAE5A] w-1/12">Categorie</th>
                       <th className="px-6 py-4 text-center text-sm font-medium text-[#8BAE5A] w-1/12">Dagen</th>
@@ -1111,8 +1189,11 @@ export default function TrainingscentrumBeheer() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#3A4D23]">
-                    {filteredSchemas.map((schema) => (
+                    {filteredSchemas.map((schema, index) => (
                       <tr key={schema.id} className="hover:bg-[#181F17] transition-colors duration-200">
+                        <td className="px-6 py-4 text-center">
+                          <span className="text-[#8BAE5A] font-semibold text-lg">{index + 1}</span>
+                        </td>
                         <td className="px-6 py-4">
                           <div className="flex items-start gap-3">
                             <div className="w-12 h-12 rounded-xl bg-[#8BAE5A]/20 flex items-center justify-center flex-shrink-0">
@@ -1157,13 +1238,17 @@ export default function TrainingscentrumBeheer() {
                             </AdminButton>
                             <AdminButton 
                               onClick={() => {
-                                // Duplicate schema functionality
+                                // Duplicate schema functionality with smart naming and positioning
                                 const duplicatedSchema = {
                                   ...mapDbSchemaToForm(schema),
                                   id: undefined,
-                                  name: `${schema.name} (Kopie)`,
+                                  name: generateCopyName(schema.name, schemas),
                                   status: 'draft'
                                 };
+                                
+                                console.log('📋 Creating copy of schema:', schema.name);
+                                console.log('📋 Copy will be named:', duplicatedSchema.name);
+                                
                                 setEditingSchema(duplicatedSchema);
                                 setShowNewSchemaModal(true);
                               }}

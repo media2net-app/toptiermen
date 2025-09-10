@@ -143,7 +143,7 @@ const MEAL_NAMES = {
   avondsnack: 'Avond Snack'
 };
 
-const MEAL_ORDER = ['ontbijt', 'lunch', 'diner'];
+const MEAL_ORDER = ['ontbijt', 'snack1', 'lunch', 'snack2', 'diner', 'avondsnack'];
 
 export default function DynamicPlanViewNew({ planId, planName, userId, onBack }: DynamicPlanViewProps) {
   const [planData, setPlanData] = useState<PlanData | null>(null);
