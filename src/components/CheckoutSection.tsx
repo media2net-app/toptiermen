@@ -207,21 +207,6 @@ export default function CheckoutSection({
 
           {/* Checkout Form */}
           <div className="bg-[#1A2313] rounded-2xl p-8 border border-[#3A4D23]/30 sticky top-8">
-            {/* Prelaunch Banner */}
-            <div className="relative bg-gradient-to-r from-orange-600 to-orange-500 rounded-lg p-4 mb-8 overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-orange-400/20 to-orange-500/20 animate-pulse"></div>
-              <div className="absolute -top-2 -right-2 w-20 h-20 bg-orange-400/10 rounded-full animate-ping"></div>
-              <div className="absolute -bottom-2 -left-2 w-16 h-16 bg-orange-500/10 rounded-full animate-ping" style={{animationDelay: '1s'}}></div>
-              <div className="relative text-center">
-                <div className="flex items-center justify-center space-x-2 mb-2">
-                  <span className="text-2xl">🔥</span>
-                  <span className="text-white font-bold text-xl">PRELAUNCH ACTIE</span>
-                  <span className="text-2xl">⚡</span>
-                </div>
-                <p className="text-orange-100 text-lg font-semibold">NORMALE PRIJZEN - Beperkte tijd!</p>
-                <p className="text-orange-200 text-sm mt-1">Exclusieve prelaunch aanbieding</p>
-              </div>
-            </div>
             
             <h3 className="text-2xl font-bold text-white mb-8 text-center">Vul je gegevens in</h3>
 
