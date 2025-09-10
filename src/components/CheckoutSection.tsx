@@ -429,12 +429,6 @@ export default function CheckoutSection({
                     <span className="text-white font-semibold">€{formatPrice(isLifetime ? pricing.periodPrice : pricing.periodPrice * (billingPeriod === '6months' ? 6 : 12))}</span>
                   </div>
                 )}
-                {pricing.discount > 0 && (
-                  <div className="flex justify-between">
-                    <span className="text-[#8BAE5A]">Korting ({pricing.discount}%)</span>
-                    <span className="text-[#8BAE5A]">-€{Math.round((monthlyPrice - yearlyPrice) * 12)}</span>
-                  </div>
-                )}
                 <div className="relative bg-gradient-to-r from-orange-500/20 to-orange-600/20 border border-orange-500/50 rounded-lg p-4 mb-4 animate-pulse">
                   <div className="absolute inset-0 bg-gradient-to-r from-orange-500/10 to-orange-600/10 rounded-lg animate-ping"></div>
                   <div className="relative flex justify-between items-center">

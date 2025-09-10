@@ -140,7 +140,7 @@ function VideoPlayer({ src, poster }: VideoPlayerProps) {
 export default function MaandelijksPage() {
   const router = useRouter();
   const [isHovered, setIsHovered] = useState(false);
-  const [selectedTier, setSelectedTier] = useState('basic');
+  const [selectedTier, setSelectedTier] = useState('premium');
 
   // Format price with comma as decimal separator
   const formatPrice = (price: number) => {
@@ -209,7 +209,7 @@ export default function MaandelijksPage() {
     }
   };
 
-  const packageData = monthlyPackages[selectedTier as keyof typeof monthlyPackages] || monthlyPackages.basic;
+  const packageData = monthlyPackages[selectedTier as keyof typeof monthlyPackages] || monthlyPackages.premium;
 
   const benefits = [
     {
@@ -245,7 +245,7 @@ export default function MaandelijksPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0F1419] via-[#1A1F2E] to-[#0F1419]">
+    <div className="min-h-screen bg-gradient-to-br from-[#0F1419] via-[#1A2313] to-[#232D1A]">
       {/* Header */}
       <header className="relative z-10">
         <div className="w-full px-4 sm:px-8 md:px-12 lg:px-20 py-4 sm:py-6">

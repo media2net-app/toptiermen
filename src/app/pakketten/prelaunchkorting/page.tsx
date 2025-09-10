@@ -140,7 +140,7 @@ function VideoPlayer({ src, poster }: VideoPlayerProps) {
 export default function BasicTierPage() {
   const router = useRouter();
   const [isHovered, setIsHovered] = useState(false);
-  const [selectedTier, setSelectedTier] = useState('basic');
+  const [selectedTier, setSelectedTier] = useState('premium');
 
   // Format price with comma as decimal separator
   const formatPrice = (price: number) => {
@@ -261,7 +261,7 @@ export default function BasicTierPage() {
     }
   };
 
-  const packageData = allPackages[selectedTier as keyof typeof allPackages] || allPackages.basic;
+  const packageData = allPackages[selectedTier as keyof typeof allPackages] || allPackages.premium;
 
   const benefits = [
     {
@@ -297,7 +297,7 @@ export default function BasicTierPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0F1419] via-[#1A1F2E] to-[#0F1419]">
+    <div className="min-h-screen bg-gradient-to-br from-[#0F1419] via-[#1A2313] to-[#232D1A]">
       {/* Header */}
       <header className="relative z-10">
         <div className="w-full px-4 sm:px-8 md:px-12 lg:px-20 py-4 sm:py-6">
@@ -411,13 +411,13 @@ export default function BasicTierPage() {
 
             {/* Tier Navigation Indicator */}
             <div className="flex items-center justify-center space-x-2 sm:space-x-4 mb-6">
-              <span className="text-xs sm:text-sm text-[#8BAE5A] font-medium hidden sm:block">Lifetime</span>
+              <span className="text-xs sm:text-sm text-[#8BAE5A] font-medium hidden sm:block">Basic</span>
               <div className="flex space-x-1 sm:space-x-2">
-                <div className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full ${selectedTier === 'lifetime' ? 'bg-[#8BAE5A]' : 'bg-[#8BAE5A]/30'}`}></div>
                 <div className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full ${selectedTier === 'basic' ? 'bg-[#8BAE5A]' : 'bg-[#8BAE5A]/30'}`}></div>
                 <div className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full ${selectedTier === 'premium' ? 'bg-[#8BAE5A]' : 'bg-[#8BAE5A]/30'}`}></div>
+                <div className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full ${selectedTier === 'lifetime' ? 'bg-[#8BAE5A]' : 'bg-[#8BAE5A]/30'}`}></div>
               </div>
-              <span className="text-xs sm:text-sm text-[#8BAE5A] font-medium hidden sm:block">Premium</span>
+              <span className="text-xs sm:text-sm text-[#8BAE5A] font-medium hidden sm:block">Lifetime</span>
             </div>
 
             {/* Subtitle */}

@@ -235,7 +235,7 @@ export default function LifetimeTierPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0F1419] via-[#1A1F2E] to-[#0F1419]">
+    <div className="min-h-screen bg-gradient-to-br from-[#0F1419] via-[#1A2313] to-[#232D1A]">
       {/* Header */}
       <header className="relative z-10">
         <div className="w-full px-4 sm:px-8 md:px-12 lg:px-20 py-4 sm:py-6">
