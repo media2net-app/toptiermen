@@ -113,7 +113,15 @@ export default function DatabaseViewPage() {
   }, []);
 
   const formatPrice = (price: number) => `€${price.toFixed(2)}`;
-  const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('nl-NL');
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleString('nl-NL', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-6">
