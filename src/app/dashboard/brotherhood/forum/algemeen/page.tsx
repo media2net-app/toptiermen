@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
-import { useSupabaseAuth } from '@/hooks/useSupabaseAuth';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { Breadcrumb } from '@/components/Breadcrumb';
 
 // Force dynamic rendering to prevent navigator errors
