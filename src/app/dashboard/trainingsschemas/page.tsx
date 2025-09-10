@@ -276,11 +276,10 @@ function TrainingschemasContent() {
                         !schemaEquipment; // Allow schemas without specific equipment
       }
       
-      // Filter by training frequency - FLEXIBLE matching (±1 day tolerance)
+      // Filter by training frequency - EXACT matching
       const schemaDays = schema.training_schema_days?.length || 0;
       const userFrequency = profile.training_frequency;
-      const frequencyMatch = Math.abs(schemaDays - userFrequency) <= 1 || 
-                            schemaDays === userFrequency;
+      const frequencyMatch = schemaDays === userFrequency;
       
       console.log(`📅 Schema "${schema.name}": ${schemaDays} days vs user frequency ${userFrequency} (${frequencyMatch})`);
       
@@ -292,8 +291,11 @@ function TrainingschemasContent() {
     
     console.log('✅ Filtered schemas:', filtered.length);
     
+    // Limit to 3 schemas maximum
+    const limitedSchemas = filtered.slice(0, 3);
+    
     // If no schemas match the strict criteria, show some general schemas as fallback
-    if (filtered.length === 0) {
+    if (limitedSchemas.length === 0) {
       console.log('⚠️ No schemas match strict criteria, showing fallback schemas');
       const fallbackSchemas = schemas.filter(schema => {
         const schemaEquipment = schema.category?.toLowerCase();
@@ -309,13 +311,13 @@ function TrainingschemasContent() {
         }
         
         return true; // Show all if equipment type is unknown
-      }).slice(0, 5); // Limit to 5 fallback schemas
+      }).slice(0, 3); // Limit to 3 fallback schemas
       
       console.log('🔄 Showing fallback schemas:', fallbackSchemas.length);
       return fallbackSchemas;
     }
     
-    return filtered;
+    return limitedSchemas; // Return limited schemas (max 3)
   };
 
   const fetchUserTrainingProfile = async () => {
@@ -1049,7 +1051,10 @@ function TrainingschemasContent() {
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="text-sm text-gray-400">
-                    {trainingSchemas.length} schema{trainingSchemas.length !== 1 ? "'s" : ""} beschikbaar
+                    {userTrainingProfile ? 
+                      `${filterSchemasByProfile(trainingSchemas, userTrainingProfile).length} schema${filterSchemasByProfile(trainingSchemas, userTrainingProfile).length !== 1 ? "'s" : ""} beschikbaar` :
+                      `${trainingSchemas.length} schema${trainingSchemas.length !== 1 ? "'s" : ""} beschikbaar`
+                    }
                     {showAllSchemas && (
                       <span className="ml-2 text-[#8BAE5A]">(alle schemas)</span>
                     )}
