@@ -673,7 +673,7 @@ function TrainingschemasContent() {
 
   return (
     <PageLayout title="Training Schemas">
-      <div className="max-w-6xl mx-auto p-6">
+      <div className="max-w-6xl mx-auto p-3 sm:p-4 md:p-6">
         {/* Dynamic Training Plan View */}
         <AnimatePresence mode="wait">
           {viewingDynamicPlan ? (
@@ -686,9 +686,9 @@ function TrainingschemasContent() {
           ) : (
             <>
               {/* Header */}
-              <div className="mb-8">
-                <h1 className="text-3xl font-bold text-white mb-2">Trainingsschemas</h1>
-                <p className="text-gray-300">
+              <div className="mb-4 sm:mb-6 md:mb-8">
+                <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">Trainingsschemas</h1>
+                <p className="text-sm sm:text-base text-gray-300">
                   Kies en beheer je trainingsschemas voor optimale resultaten
                 </p>
               </div>
@@ -700,17 +700,17 @@ function TrainingschemasContent() {
             animate={{ opacity: 1, y: 0 }}
             className="mb-8"
           >
-            <div className="bg-gradient-to-br from-[#8BAE5A]/10 to-[#FFD700]/10 border-2 border-[#8BAE5A] rounded-2xl p-6">
+            <div className="bg-gradient-to-br from-[#8BAE5A]/10 to-[#FFD700]/10 border-2 border-[#8BAE5A] rounded-2xl p-4 sm:p-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl sm:text-3xl">💪</span>
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <span className="text-xl sm:text-2xl md:text-3xl">💪</span>
                   <div>
-                    <h2 className="text-lg sm:text-xl font-bold text-white">Onboarding Stap 3: Trainingsschema Selecteren</h2>
+                    <h2 className="text-base sm:text-lg md:text-xl font-bold text-white">Onboarding Stap 3: Trainingsschema Selecteren</h2>
                     <p className="text-[#8BAE5A] text-xs sm:text-sm">Vul je trainingsprofiel in en selecteer een trainingsschema</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-xl sm:text-2xl font-bold text-[#FFD700]">3/6</div>
+                  <div className="text-lg sm:text-xl md:text-2xl font-bold text-[#FFD700]">3/6</div>
                   <div className="text-[#8BAE5A] text-xs sm:text-sm">Stappen voltooid</div>
                 </div>
               </div>
@@ -792,15 +792,15 @@ function TrainingschemasContent() {
             animate={{ opacity: 1, y: 0 }}
             className="mb-8"
           >
-            <div className="bg-gradient-to-r from-[#8BAE5A]/10 to-[#8BAE5A]/5 border border-[#8BAE5A]/30 rounded-2xl p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
+            <div className="bg-gradient-to-r from-[#8BAE5A]/10 to-[#8BAE5A]/5 border border-[#8BAE5A]/30 rounded-2xl p-4 sm:p-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
+                <div className="flex items-center gap-2 sm:gap-3">
                   <div className="p-2 bg-[#8BAE5A]/20 rounded-lg">
-                    <ChartBarIcon className="h-6 w-6 text-[#8BAE5A]" />
+                    <ChartBarIcon className="h-5 w-5 sm:h-6 sm:w-6 text-[#8BAE5A]" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-semibold text-white">Jouw Trainingsprofiel</h3>
-                    <p className="text-sm text-gray-400">Gepersonaliseerd voor jouw doelen</p>
+                    <h3 className="text-lg sm:text-xl font-semibold text-white">Jouw Trainingsprofiel</h3>
+                    <p className="text-xs sm:text-sm text-gray-400">Gepersonaliseerd voor jouw doelen</p>
                   </div>
                 </div>
                 <button
@@ -813,48 +813,48 @@ function TrainingschemasContent() {
                       equipment_type: userTrainingProfile.equipment_type
                     });
                   }}
-                  className="flex items-center gap-2 px-4 py-2 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors text-sm font-medium"
+                  className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors text-xs sm:text-sm font-medium"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                   </svg>
                   Bewerken
                 </button>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
-                <div className="bg-[#1A1A1A]/50 rounded-lg p-3 md:p-4 border border-gray-800">
-                  <div className="flex items-center gap-3 mb-2">
-                    <span className="text-xl md:text-2xl">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                <div className="bg-[#1A1A1A]/50 rounded-lg p-3 sm:p-4 border border-gray-800">
+                  <div className="flex items-center gap-2 sm:gap-3 mb-2">
+                    <span className="text-lg sm:text-xl md:text-2xl">
                       {trainingGoals.find(g => g.id === userTrainingProfile.training_goal)?.icon}
                     </span>
                     <div>
-                      <h4 className="text-xs md:text-sm font-medium text-gray-400">Doel</h4>
-                      <p className="text-white font-semibold text-sm md:text-base">
+                      <h4 className="text-xs sm:text-sm font-medium text-gray-400">Doel</h4>
+                      <p className="text-white font-semibold text-sm sm:text-base">
                         {trainingGoals.find(g => g.id === userTrainingProfile.training_goal)?.name}
                       </p>
                     </div>
                   </div>
                 </div>
                 
-                <div className="bg-[#1A1A1A]/50 rounded-lg p-3 md:p-4 border border-gray-800">
-                  <div className="flex items-center gap-3 mb-2">
-                    <CalendarDaysIcon className="h-5 w-5 md:h-6 md:w-6 text-[#8BAE5A]" />
+                <div className="bg-[#1A1A1A]/50 rounded-lg p-3 sm:p-4 border border-gray-800">
+                  <div className="flex items-center gap-2 sm:gap-3 mb-2">
+                    <CalendarDaysIcon className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-[#8BAE5A]" />
                     <div>
-                      <h4 className="text-xs md:text-sm font-medium text-gray-400">Frequentie</h4>
-                      <p className="text-white font-semibold text-sm md:text-base">{userTrainingProfile.training_frequency}x per week</p>
+                      <h4 className="text-xs sm:text-sm font-medium text-gray-400">Frequentie</h4>
+                      <p className="text-white font-semibold text-sm sm:text-base">{userTrainingProfile.training_frequency}x per week</p>
                     </div>
                   </div>
                 </div>
                 
-                <div className="bg-[#1A1A1A]/50 rounded-lg p-3 md:p-4 border border-gray-800">
-                  <div className="flex items-center gap-3 mb-2">
-                    <span className="text-xl md:text-2xl">
+                <div className="bg-[#1A1A1A]/50 rounded-lg p-3 sm:p-4 border border-gray-800 sm:col-span-2 lg:col-span-1">
+                  <div className="flex items-center gap-2 sm:gap-3 mb-2">
+                    <span className="text-lg sm:text-xl md:text-2xl">
                       {equipmentTypes.find(t => t.id === userTrainingProfile.equipment_type)?.icon}
                     </span>
                     <div>
-                      <h4 className="text-xs md:text-sm font-medium text-gray-400">Equipment</h4>
-                      <p className="text-white font-semibold text-sm md:text-base">
+                      <h4 className="text-xs sm:text-sm font-medium text-gray-400">Equipment</h4>
+                      <p className="text-white font-semibold text-sm sm:text-base">
                         {equipmentTypes.find(t => t.id === userTrainingProfile.equipment_type)?.name}
                       </p>
                     </div>
@@ -874,15 +874,15 @@ function TrainingschemasContent() {
               exit={{ opacity: 0, y: -20 }}
               className="mb-8"
             >
-              <div className="bg-gradient-to-r from-[#8BAE5A]/10 to-[#8BAE5A]/5 border border-[#8BAE5A]/30 rounded-2xl p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-3">
+              <div className="bg-gradient-to-r from-[#8BAE5A]/10 to-[#8BAE5A]/5 border border-[#8BAE5A]/30 rounded-2xl p-4 sm:p-6">
+                <div className="flex items-center justify-between mb-4 sm:mb-6">
+                  <div className="flex items-center gap-2 sm:gap-3">
                     <div className="p-2 bg-[#8BAE5A]/20 rounded-lg">
-                      <CalculatorIcon className="h-6 w-6 text-[#8BAE5A]" />
+                      <CalculatorIcon className="h-5 w-5 sm:h-6 sm:w-6 text-[#8BAE5A]" />
                     </div>
                     <div>
-                      <h3 className="text-xl font-semibold text-white">Trainingsprofiel Calculator</h3>
-                      <p className="text-sm text-gray-400">Stel je persoonlijke trainingsvoorkeuren in</p>
+                      <h3 className="text-lg sm:text-xl font-semibold text-white">Trainingsprofiel Calculator</h3>
+                      <p className="text-xs sm:text-sm text-gray-400">Stel je persoonlijke trainingsvoorkeuren in</p>
                     </div>
                   </div>
                   <button
@@ -892,13 +892,13 @@ function TrainingschemasContent() {
                     }}
                     className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </button>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
                   {/* Training Goal */}
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-3 md:mb-4 flex items-center gap-2">
@@ -985,12 +985,12 @@ function TrainingschemasContent() {
                   </div>
                 </div>
 
-                <div className="mt-6 md:mt-8 flex justify-center md:justify-end">
+                <div className="mt-4 sm:mt-6 md:mt-8 flex justify-center md:justify-end">
                   <button
                     onClick={calculateTrainingProfile}
-                    className="flex items-center gap-2 px-6 md:px-8 py-3 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold shadow-lg shadow-[#8BAE5A]/20 text-sm md:text-base"
+                    className="flex items-center gap-2 px-4 sm:px-6 md:px-8 py-2 sm:py-3 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold shadow-lg shadow-[#8BAE5A]/20 text-sm sm:text-base"
                   >
-                    <CheckIcon className="w-4 h-4 md:w-5 md:h-5" />
+                    <CheckIcon className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5" />
                     Profiel Opslaan
                   </button>
                 </div>
@@ -1014,17 +1014,17 @@ function TrainingschemasContent() {
 
         {/* No Profile - Show Calculator Button */}
         {!profileLoading && !userTrainingProfile && !showRequiredProfile && (
-          <div className="text-center py-12 mb-8">
-            <CalculatorIcon className="mx-auto h-16 w-16 text-[#8BAE5A] mb-4" />
-            <h3 className="text-xl font-semibold text-white mb-2">
+          <div className="text-center py-8 sm:py-12 mb-6 sm:mb-8">
+            <CalculatorIcon className="mx-auto h-12 w-12 sm:h-16 sm:w-16 text-[#8BAE5A] mb-3 sm:mb-4" />
+            <h3 className="text-lg sm:text-xl font-semibold text-white mb-2">
               Vul je trainingsprofiel in
             </h3>
-            <p className="text-gray-300 mb-6">
+            <p className="text-sm sm:text-base text-gray-300 mb-4 sm:mb-6 px-4">
               Vul je trainingsvoorkeuren in om gepersonaliseerde trainingsschemas te krijgen die perfect bij jou passen.
             </p>
             <button
               onClick={() => setShowRequiredProfile(true)}
-              className="px-8 py-3 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold"
+              className="px-6 sm:px-8 py-2 sm:py-3 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold text-sm sm:text-base"
             >
               Start Trainingsprofiel
             </button>
@@ -1038,19 +1038,19 @@ function TrainingschemasContent() {
             animate={{ opacity: 1, y: 0 }}
             className="mb-8"
           >
-            <div className="bg-gradient-to-r from-[#8BAE5A]/10 to-[#8BAE5A]/5 border border-[#8BAE5A]/30 rounded-2xl p-6">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
+            <div className="bg-gradient-to-r from-[#8BAE5A]/10 to-[#8BAE5A]/5 border border-[#8BAE5A]/30 rounded-2xl p-4 sm:p-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 gap-3">
+                <div className="flex items-center gap-2 sm:gap-3">
                   <div className="p-2 bg-[#8BAE5A]/20 rounded-lg">
-                    <AcademicCapIcon className="h-6 w-6 text-[#8BAE5A]" />
+                    <AcademicCapIcon className="h-5 w-5 sm:h-6 sm:w-6 text-[#8BAE5A]" />
                   </div>
                   <div>
-                    <h2 className="text-2xl font-semibold text-white">Beschikbare Trainingsschemas</h2>
-                    <p className="text-sm text-gray-400">Gepersonaliseerd voor jouw profiel</p>
+                    <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-white">Beschikbare Trainingsschemas</h2>
+                    <p className="text-xs sm:text-sm text-gray-400">Gepersonaliseerd voor jouw profiel</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-4">
-                  <div className="text-sm text-gray-400">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+                  <div className="text-xs sm:text-sm text-gray-400">
                     {userTrainingProfile ? 
                       `${filterSchemasByProfile(trainingSchemas, userTrainingProfile).length} schema${filterSchemasByProfile(trainingSchemas, userTrainingProfile).length !== 1 ? "'s" : ""} beschikbaar` :
                       `${trainingSchemas.length} schema${trainingSchemas.length !== 1 ? "'s" : ""} beschikbaar`
@@ -1061,14 +1061,15 @@ function TrainingschemasContent() {
                   </div>
                   <button
                     onClick={() => setShowAllSchemas(!showAllSchemas)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors text-sm ${
+                    className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors text-xs sm:text-sm ${
                       showAllSchemas
                         ? 'bg-[#8BAE5A] text-[#232D1A]'
                         : 'bg-[#3A4D23] text-white hover:bg-[#4A5D33]'
                     }`}
                   >
-                    <EyeIcon className="w-4 h-4" />
-                    {showAllSchemas ? 'Toon gefilterde' : 'Bekijk alle schemas'}
+                    <EyeIcon className="w-3 h-3 sm:w-4 sm:h-4" />
+                    <span className="hidden sm:inline">{showAllSchemas ? 'Toon gefilterde' : 'Bekijk alle schemas'}</span>
+                    <span className="sm:hidden">{showAllSchemas ? 'Gefilterd' : 'Alle'}</span>
                   </button>
                 </div>
               </div>
@@ -1090,65 +1091,64 @@ function TrainingschemasContent() {
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
                 {trainingSchemas.map((schema) => (
                   <motion.div
                     key={schema.id}
                     whileHover={{ scale: 1.02, y: -5 }}
-                    className={`p-4 md:p-6 rounded-2xl border-2 transition-all duration-300 shadow-lg ${
+                    className={`p-3 sm:p-4 md:p-6 rounded-2xl border-2 transition-all duration-300 shadow-lg ${
                       selectedTrainingSchema === schema.id
                         ? 'border-[#8BAE5A] bg-[#8BAE5A]/10 shadow-[#8BAE5A]/20'
                         : 'border-gray-700 bg-[#1A1A1A]/50 hover:border-[#8BAE5A]/50 hover:shadow-[#8BAE5A]/10'
                     }`}
                   >
-                    <div className="flex items-start justify-between mb-3 md:mb-4">
-                      <div className="flex items-center space-x-2 md:space-x-3">
-                        <div className="p-2 md:p-3 bg-[#8BAE5A]/20 rounded-xl">
-                          <AcademicCapIcon className="h-5 w-5 md:h-6 md:w-6 text-[#8BAE5A]" />
+                    <div className="flex items-start justify-between mb-3 sm:mb-4">
+                      <div className="flex items-center space-x-2 sm:space-x-3">
+                        <div className="p-2 sm:p-3 bg-[#8BAE5A]/20 rounded-xl">
+                          <AcademicCapIcon className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-[#8BAE5A]" />
                         </div>
                         <div>
-                          <h3 className="text-base md:text-lg font-semibold text-white">{schema.name}</h3>
-                          <p className="text-xs md:text-sm text-gray-400">{schema.difficulty}</p>
+                          <h3 className="text-sm sm:text-base md:text-lg font-semibold text-white">{schema.name}</h3>
+                          <p className="text-xs sm:text-sm text-gray-400">{schema.difficulty}</p>
                         </div>
                       </div>
                       {selectedTrainingSchema === schema.id && (
-                        <div className="p-2 bg-[#8BAE5A] rounded-full">
-                          <CheckIcon className="h-4 w-4 md:h-5 md:w-5 text-[#232D1A]" />
+                        <div className="p-1.5 sm:p-2 bg-[#8BAE5A] rounded-full">
+                          <CheckIcon className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5 text-[#232D1A]" />
                         </div>
                       )}
                     </div>
 
-                    <p className="text-gray-300 text-xs md:text-sm mb-3 md:mb-4 line-clamp-3">
+                    <p className="text-gray-300 text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-3">
                       {schema.description}
                     </p>
 
-                    <div className="flex flex-col md:flex-row md:items-center md:justify-between text-xs md:text-sm text-gray-400 mb-4 md:mb-6 gap-2 md:gap-0">
-                      <div className="flex items-center space-x-3 md:space-x-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between text-xs sm:text-sm text-gray-400 mb-3 sm:mb-4 md:mb-6 gap-2 sm:gap-0">
+                      <div className="flex items-center space-x-2 sm:space-x-3 md:space-x-4">
                         <div className="flex items-center space-x-1">
-                          <ClockIcon className="h-3 w-3 md:h-4 md:w-4 text-[#8BAE5A]" />
-                          <span>{schema.estimated_duration}</span>
+                          <ClockIcon className="h-3 w-3 sm:h-4 sm:w-4 text-[#8BAE5A]" />
+                          <span className="text-xs sm:text-sm">{schema.estimated_duration}</span>
                         </div>
                         <div className="flex items-center space-x-1">
-                          <FireIcon className="h-3 w-3 md:h-4 md:w-4 text-[#8BAE5A]" />
-                          <span>{schema.rep_range}</span>
+                          <FireIcon className="h-3 w-3 sm:h-4 sm:w-4 text-[#8BAE5A]" />
+                          <span className="text-xs sm:text-sm">{schema.rep_range}</span>
                         </div>
                       </div>
-                      <span className="px-2 md:px-3 py-1 bg-[#3A4D23] rounded-full text-xs font-medium self-start md:self-auto">
+                      <span className="px-2 sm:px-3 py-1 bg-[#3A4D23] rounded-full text-xs font-medium self-start sm:self-auto">
                         {schema.category}
                       </span>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row gap-2 md:gap-3">
+                    <div className="flex flex-col gap-2 sm:gap-3">
                       <button
                         onClick={() => handleViewDynamicPlan(schema.id, schema.name)}
-                        className="flex-1 py-2 md:py-3 px-3 md:px-4 rounded-lg font-medium transition-colors bg-[#8BAE5A] text-[#232D1A] hover:bg-[#7A9D4A] shadow-lg shadow-[#8BAE5A]/20 text-xs md:text-sm"
+                        className="w-full py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium transition-colors bg-[#8BAE5A] text-[#232D1A] hover:bg-[#7A9D4A] shadow-lg shadow-[#8BAE5A]/20 text-xs sm:text-sm"
                       >
-                        <span className="hidden sm:inline">Bekijk schema</span>
-                        <span className="sm:hidden">Bekijk</span>
+                        Bekijk schema
                       </button>
                       <button
                         onClick={() => selectTrainingSchema(schema.id)}
-                        className={`flex-1 py-2 md:py-3 px-3 md:px-4 rounded-lg font-medium transition-colors text-xs md:text-sm ${
+                        className={`w-full py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium transition-colors text-xs sm:text-sm ${
                           selectedTrainingSchema === schema.id
                             ? 'bg-[#8BAE5A] text-[#232D1A] shadow-lg shadow-[#8BAE5A]/20'
                             : 'bg-[#3A4D23] text-white hover:bg-[#4A5D33]'
@@ -1173,14 +1173,14 @@ function TrainingschemasContent() {
             animate={{ opacity: 1, y: 0 }}
             className="mt-8 text-center"
           >
-            <div className="bg-gradient-to-r from-[#8BAE5A]/10 to-[#8BAE5A]/5 border border-[#8BAE5A]/30 rounded-2xl p-6">
-              <div className="flex items-center justify-center gap-3 mb-4">
+            <div className="bg-gradient-to-r from-[#8BAE5A]/10 to-[#8BAE5A]/5 border border-[#8BAE5A]/30 rounded-2xl p-4 sm:p-6">
+              <div className="flex items-center justify-center gap-2 sm:gap-3 mb-4">
                 <div className="p-2 bg-[#8BAE5A]/20 rounded-lg">
-                  <CheckIcon className="h-6 w-6 text-[#8BAE5A]" />
+                  <CheckIcon className="h-5 w-5 sm:h-6 sm:w-6 text-[#8BAE5A]" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-white">Trainingsschema Geselecteerd!</h3>
-                  <p className="text-sm text-gray-400">Je bent klaar voor de volgende stap</p>
+                  <h3 className="text-base sm:text-lg font-semibold text-white">Trainingsschema Geselecteerd!</h3>
+                  <p className="text-xs sm:text-sm text-gray-400">Je bent klaar voor de volgende stap</p>
                 </div>
               </div>
               
@@ -1189,15 +1189,16 @@ function TrainingschemasContent() {
                   completeStep(3);
                   window.location.href = '/dashboard/voedingsplannen';
                 }}
-                className="flex items-center gap-2 px-8 py-3 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold shadow-lg shadow-[#8BAE5A]/20 mx-auto"
+                className="flex items-center gap-2 px-6 sm:px-8 py-2 sm:py-3 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold shadow-lg shadow-[#8BAE5A]/20 mx-auto text-sm sm:text-base"
               >
-                Doorgaan naar Voedingsplannen
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <span className="hidden sm:inline">Doorgaan naar Voedingsplannen</span>
+                <span className="sm:hidden">Volgende Stap</span>
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </button>
               
-              <p className="mt-4 text-sm text-gray-400">
+              <p className="mt-3 sm:mt-4 text-xs sm:text-sm text-gray-400 px-4">
                 Je kunt later altijd terugkomen om je trainingsschema te wijzigen
               </p>
             </div>
@@ -1206,28 +1207,28 @@ function TrainingschemasContent() {
 
         {/* Video Modal */}
         {videoModal.isOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4">
+          <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-2 sm:p-4">
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="bg-[#1A1A1A] rounded-2xl p-6 border border-gray-800 max-w-5xl w-full max-h-[90vh] overflow-hidden shadow-2xl"
+              className="bg-[#1A1A1A] rounded-2xl p-3 sm:p-6 border border-gray-800 max-w-5xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-hidden shadow-2xl"
             >
               {/* Modal Header */}
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
+              <div className="flex items-center justify-between mb-3 sm:mb-6">
+                <div className="flex items-center gap-2 sm:gap-3">
                   <div className="p-2 bg-[#8BAE5A]/20 rounded-lg">
-                    <svg className="w-6 h-6 text-[#8BAE5A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 sm:w-6 sm:h-6 text-[#8BAE5A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                     </svg>
                   </div>
-                  <h3 className="text-xl font-semibold text-white">{videoModal.exerciseName}</h3>
+                  <h3 className="text-sm sm:text-xl font-semibold text-white">{videoModal.exerciseName}</h3>
                 </div>
                 <button
                   onClick={closeVideoModal}
                   className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
                 >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
@@ -1251,10 +1252,10 @@ function TrainingschemasContent() {
               </div>
               
               {/* Modal Footer */}
-              <div className="mt-6 flex justify-end">
+              <div className="mt-3 sm:mt-6 flex justify-end">
                 <button
                   onClick={closeVideoModal}
-                  className="px-6 py-3 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-medium shadow-lg shadow-[#8BAE5A]/20"
+                  className="px-4 sm:px-6 py-2 sm:py-3 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-medium shadow-lg shadow-[#8BAE5A]/20 text-sm sm:text-base"
                 >
                   Sluiten
                 </button>
