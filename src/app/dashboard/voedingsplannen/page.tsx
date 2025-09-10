@@ -734,21 +734,21 @@ export default function VoedingsplannenPage() {
       title="Voedingsplannen" 
       subtitle="Beheer je voedingsplannen en bereken je dagelijkse behoeften"
     >
-      <div className="w-full">
+      <div className="w-full p-3 sm:p-4 md:p-6">
         {/* Onboarding Progress - Step 4: Nutrition Plans */}
         {showOnboardingStep4 && (
-          <div className="mb-8">
-            <div className="bg-gradient-to-br from-[#8BAE5A]/10 to-[#FFD700]/10 border-2 border-[#8BAE5A] rounded-2xl p-6">
+          <div className="mb-4 sm:mb-6 md:mb-8">
+            <div className="bg-gradient-to-br from-[#8BAE5A]/10 to-[#FFD700]/10 border-2 border-[#8BAE5A] rounded-2xl p-4 sm:p-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl sm:text-3xl">🍽️</span>
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <span className="text-xl sm:text-2xl md:text-3xl">🍽️</span>
                   <div>
-                    <h2 className="text-lg sm:text-xl font-bold text-white">Onboarding Stap 4: Voedingsplan Selecteren</h2>
+                    <h2 className="text-base sm:text-lg md:text-xl font-bold text-white">Onboarding Stap 4: Voedingsplan Selecteren</h2>
                     <p className="text-[#8BAE5A] text-xs sm:text-sm">Vul je voedingsprofiel in en selecteer een voedingsplan</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-xl sm:text-2xl font-bold text-[#FFD700]">4/6</div>
+                  <div className="text-lg sm:text-xl md:text-2xl font-bold text-[#FFD700]">4/6</div>
                   <div className="text-[#8BAE5A] text-xs sm:text-sm">Stappen voltooid</div>
                 </div>
               </div>
@@ -847,11 +847,11 @@ export default function VoedingsplannenPage() {
               exit={{ opacity: 0, y: -20 }}
               className="w-full max-w-2xl mx-auto"
             >
-              <div className="text-center mb-8">
-                <h2 className="text-3xl font-bold text-white mb-4">
+              <div className="text-center mb-4 sm:mb-6 md:mb-8">
+                <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3 sm:mb-4">
                   {userNutritionProfile ? 'Update je Dagelijkse Behoefte' : 'Bereken je Dagelijkse Behoefte'}
                 </h2>
-                <p className="text-gray-300 text-lg">
+                <p className="text-gray-300 text-sm sm:text-base md:text-lg px-4">
                   {userNutritionProfile 
                     ? 'Pas je gegevens aan om je dagelijkse voedingsbehoeften opnieuw te berekenen.'
                     : 'Voor we je voedingsplannen kunnen tonen, moeten we eerst je dagelijkse voedingsbehoeften berekenen.'
@@ -859,10 +859,10 @@ export default function VoedingsplannenPage() {
                 </p>
               </div>
 
-              <div className="bg-[#232D1A] rounded-2xl p-8 border border-[#3A4D23]">
-                <div className="grid md:grid-cols-2 gap-6 mb-6">
+              <div className="bg-[#232D1A] rounded-2xl p-4 sm:p-6 md:p-8 border border-[#3A4D23]">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6">
                   <div>
-                    <label className="block text-white font-semibold mb-2">
+                    <label className="block text-white font-semibold mb-2 text-sm sm:text-base">
                       Leeftijd <span className="text-red-400">*</span>
                     </label>
                     <input
@@ -870,12 +870,12 @@ export default function VoedingsplannenPage() {
                       placeholder="bijv. 30"
                       value={calculatorData.age}
                       onChange={(e) => setCalculatorData(prev => ({ ...prev, age: e.target.value }))}
-                      className="w-full px-4 py-3 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-[#8BAE5A]"
+                      className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-[#8BAE5A] text-sm sm:text-base"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-white font-semibold mb-2">
+                    <label className="block text-white font-semibold mb-2 text-sm sm:text-base">
                       Gewicht (kg) <span className="text-red-400">*</span>
                     </label>
                     <input
@@ -883,12 +883,12 @@ export default function VoedingsplannenPage() {
                       placeholder="bijv. 80"
                       value={calculatorData.weight}
                       onChange={(e) => setCalculatorData(prev => ({ ...prev, weight: e.target.value }))}
-                      className="w-full px-4 py-3 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-[#8BAE5A]"
+                      className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-[#8BAE5A] text-sm sm:text-base"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-white font-semibold mb-2">
+                    <label className="block text-white font-semibold mb-2 text-sm sm:text-base">
                       Lengte (cm) <span className="text-red-400">*</span>
                     </label>
                     <input
@@ -896,18 +896,18 @@ export default function VoedingsplannenPage() {
                       placeholder="bijv. 180"
                       value={calculatorData.height}
                       onChange={(e) => setCalculatorData(prev => ({ ...prev, height: e.target.value }))}
-                      className="w-full px-4 py-3 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-[#8BAE5A]"
+                      className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-[#8BAE5A] text-sm sm:text-base"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-white font-semibold mb-2">
+                    <label className="block text-white font-semibold mb-2 text-sm sm:text-base">
                       Dagelijkse Activiteit <span className="text-red-400">*</span>
                     </label>
                     <select
                       value={calculatorData.activityLevel}
                       onChange={(e) => setCalculatorData(prev => ({ ...prev, activityLevel: e.target.value }))}
-                      className="w-full px-4 py-3 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:border-[#8BAE5A]"
+                      className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:border-[#8BAE5A] text-sm sm:text-base"
                       required
                     >
                       <option value="">Selecteer je activiteitsniveau</option>
@@ -917,13 +917,13 @@ export default function VoedingsplannenPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-white font-semibold mb-2">
+                    <label className="block text-white font-semibold mb-2 text-sm sm:text-base">
                       Doel <span className="text-red-400">*</span>
                     </label>
                     <select
                       value={calculatorData.goal}
                       onChange={(e) => setCalculatorData(prev => ({ ...prev, goal: e.target.value }))}
-                      className="w-full px-4 py-3 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:border-[#8BAE5A]"
+                      className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:border-[#8BAE5A] text-sm sm:text-base"
                       required
                     >
                       <option value="">Selecteer je doel</option>
@@ -937,7 +937,7 @@ export default function VoedingsplannenPage() {
       <div className="text-center">
                   <button
                     onClick={calculateNutrition}
-                    className="px-8 py-4 bg-[#8BAE5A] text-[#232D1A] rounded-xl hover:bg-[#B6C948] transition-colors font-bold text-lg"
+                    className="px-6 sm:px-8 py-3 sm:py-4 bg-[#8BAE5A] text-[#232D1A] rounded-xl hover:bg-[#B6C948] transition-colors font-bold text-sm sm:text-base md:text-lg"
                   >
 {(() => {
                       // Check if we have filled form data that differs from existing profile  
@@ -975,23 +975,23 @@ export default function VoedingsplannenPage() {
 
             {/* Nutrition Profile Notice */}
             {userNutritionProfile && (
-              <div className="bg-[#232D1A] rounded-2xl p-6 border border-[#3A4D23] mb-8">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xl font-bold text-white flex items-center">
-                    <ChartBarIcon className="w-6 h-6 text-[#8BAE5A] mr-2" />
+              <div className="bg-[#232D1A] rounded-2xl p-4 sm:p-6 border border-[#3A4D23] mb-4 sm:mb-6 md:mb-8">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
+                  <h3 className="text-lg sm:text-xl font-bold text-white flex items-center">
+                    <ChartBarIcon className="w-5 h-5 sm:w-6 sm:h-6 text-[#8BAE5A] mr-2" />
                     Jouw Dagelijkse Behoefte
                   </h3>
                   {!showOnboardingStep4 && (
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 sm:gap-3">
                       <button
                         onClick={checkUserNutritionProfile}
-                        className="flex items-center gap-2 px-3 py-1.5 bg-[#3A4D23] text-white rounded-lg hover:bg-[#4A5D33] transition-colors text-sm"
+                        className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 bg-[#3A4D23] text-white rounded-lg hover:bg-[#4A5D33] transition-colors text-xs sm:text-sm"
                         title="Ververs profiel data"
                       >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                         </svg>
-                        Ververs
+                        <span className="hidden sm:inline">Ververs</span>
                       </button>
                       <button
                         onClick={() => {
@@ -1005,73 +1005,73 @@ export default function VoedingsplannenPage() {
                           });
                           setShowRequiredIntake(true);
                         }}
-                        className="text-[#8BAE5A] hover:text-[#B6C948] text-sm font-semibold transition-colors"
+                        className="text-[#8BAE5A] hover:text-[#B6C948] text-xs sm:text-sm font-semibold transition-colors"
                       >
                         ✏️ Bewerken
                       </button>
                     </div>
                   )}
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-                  <div className="bg-[#181F17] rounded-lg p-3 md:p-4 text-center">
-                    <h4 className="text-[#8BAE5A] font-semibold mb-1 text-xs md:text-sm">Calorieën</h4>
-                    <p className="text-lg md:text-2xl font-bold text-white">{userNutritionProfile.dailyCalories}</p>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+                  <div className="bg-[#181F17] rounded-lg p-3 sm:p-4 text-center">
+                    <h4 className="text-[#8BAE5A] font-semibold mb-1 text-xs sm:text-sm">Calorieën</h4>
+                    <p className="text-base sm:text-lg md:text-2xl font-bold text-white">{userNutritionProfile.dailyCalories}</p>
                     <p className="text-xs text-gray-400">per dag</p>
                   </div>
-                  <div className="bg-[#181F17] rounded-lg p-3 md:p-4 text-center">
-                    <h4 className="text-[#8BAE5A] font-semibold mb-1 text-xs md:text-sm">Eiwitten</h4>
+                  <div className="bg-[#181F17] rounded-lg p-3 sm:p-4 text-center">
+                    <h4 className="text-[#8BAE5A] font-semibold mb-1 text-xs sm:text-sm">Eiwitten</h4>
                     {selectedNutritionPlan ? (() => {
                       const selectedPlan = nutritionPlans.find(p => p.plan_id === selectedNutritionPlan);
                       if (selectedPlan) {
                         // Use direct target values if available, otherwise calculate from percentages
                         if (selectedPlan.target_protein) {
-                          return <p className="text-2xl font-bold text-white">{selectedPlan.target_protein}g</p>;
+                          return <p className="text-base sm:text-lg md:text-2xl font-bold text-white">{selectedPlan.target_protein}g</p>;
                         } else {
                           const macroValues = calculateMacroValues(selectedPlan, userNutritionProfile.dailyCalories);
-                          return <p className="text-2xl font-bold text-white">{macroValues.protein}g</p>;
+                          return <p className="text-base sm:text-lg md:text-2xl font-bold text-white">{macroValues.protein}g</p>;
                         }
                       }
-                      return <p className="text-sm text-gray-500">Plan niet gevonden</p>;
+                      return <p className="text-xs sm:text-sm text-gray-500">Plan niet gevonden</p>;
                     })() : (
-                      <p className="text-sm text-gray-500">Selecteer eerst plan</p>
+                      <p className="text-xs sm:text-sm text-gray-500">Selecteer eerst plan</p>
                     )}
                     <p className="text-xs text-gray-400">per dag</p>
                   </div>
-                  <div className="bg-[#181F17] rounded-lg p-3 md:p-4 text-center">
-                    <h4 className="text-[#8BAE5A] font-semibold mb-1 text-xs md:text-sm">Koolhydraten</h4>
+                  <div className="bg-[#181F17] rounded-lg p-3 sm:p-4 text-center">
+                    <h4 className="text-[#8BAE5A] font-semibold mb-1 text-xs sm:text-sm">Koolhydraten</h4>
                     {selectedNutritionPlan ? (() => {
                       const selectedPlan = nutritionPlans.find(p => p.plan_id === selectedNutritionPlan);
                       if (selectedPlan) {
                         // Use direct target values if available, otherwise calculate from percentages
                         if (selectedPlan.target_carbs) {
-                          return <p className="text-2xl font-bold text-white">{selectedPlan.target_carbs}g</p>;
+                          return <p className="text-base sm:text-lg md:text-2xl font-bold text-white">{selectedPlan.target_carbs}g</p>;
                         } else {
                           const macroValues = calculateMacroValues(selectedPlan, userNutritionProfile.dailyCalories);
-                          return <p className="text-2xl font-bold text-white">{macroValues.carbs}g</p>;
+                          return <p className="text-base sm:text-lg md:text-2xl font-bold text-white">{macroValues.carbs}g</p>;
                         }
                       }
-                      return <p className="text-sm text-gray-500">Plan niet gevonden</p>;
+                      return <p className="text-xs sm:text-sm text-gray-500">Plan niet gevonden</p>;
                     })() : (
-                      <p className="text-sm text-gray-500">Selecteer eerst plan</p>
+                      <p className="text-xs sm:text-sm text-gray-500">Selecteer eerst plan</p>
                     )}
                     <p className="text-xs text-gray-400">per dag</p>
                   </div>
-                  <div className="bg-[#181F17] rounded-lg p-3 md:p-4 text-center">
-                    <h4 className="text-[#8BAE5A] font-semibold mb-1 text-xs md:text-sm">Vetten</h4>
+                  <div className="bg-[#181F17] rounded-lg p-3 sm:p-4 text-center">
+                    <h4 className="text-[#8BAE5A] font-semibold mb-1 text-xs sm:text-sm">Vetten</h4>
                     {selectedNutritionPlan ? (() => {
                       const selectedPlan = nutritionPlans.find(p => p.plan_id === selectedNutritionPlan);
                       if (selectedPlan) {
                         // Use direct target values if available, otherwise calculate from percentages
                         if (selectedPlan.target_fat) {
-                          return <p className="text-2xl font-bold text-white">{selectedPlan.target_fat}g</p>;
+                          return <p className="text-base sm:text-lg md:text-2xl font-bold text-white">{selectedPlan.target_fat}g</p>;
                         } else {
                           const macroValues = calculateMacroValues(selectedPlan, userNutritionProfile.dailyCalories);
-                          return <p className="text-2xl font-bold text-white">{macroValues.fats}g</p>;
+                          return <p className="text-base sm:text-lg md:text-2xl font-bold text-white">{macroValues.fats}g</p>;
                         }
                       }
-                      return <p className="text-sm text-gray-500">Plan niet gevonden</p>;
+                      return <p className="text-xs sm:text-sm text-gray-500">Plan niet gevonden</p>;
                     })() : (
-                      <p className="text-sm text-gray-500">Selecteer eerst plan</p>
+                      <p className="text-xs sm:text-sm text-gray-500">Selecteer eerst plan</p>
                     )}
                     <p className="text-xs text-gray-400">per dag</p>
                   </div>
@@ -1136,14 +1136,14 @@ export default function VoedingsplannenPage() {
                     </button>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
                     {nutritionPlans.map((plan) => (
                       <motion.div
                         key={plan.id}
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={() => handleNutritionPlanClick(plan.plan_id)}
-                        className={`cursor-pointer rounded-2xl p-4 md:p-6 border-2 transition-all duration-300 relative ${
+                        className={`cursor-pointer rounded-2xl p-3 sm:p-4 md:p-6 border-2 transition-all duration-300 relative ${
                           selectedNutritionPlan === plan.plan_id
                             ? 'border-[#8BAE5A] bg-[#8BAE5A]/10'
                             : 'border-[#3A4D23] bg-[#232D1A] hover:border-[#8BAE5A]/50'
@@ -1160,7 +1160,7 @@ export default function VoedingsplannenPage() {
                         
                         {/* Active Badge */}
                         {selectedNutritionPlan === plan.plan_id && (
-                          <div className="absolute top-4 left-4">
+                          <div className="absolute top-3 sm:top-4 left-3 sm:left-4">
                             <div className="inline-flex items-center px-2 py-1 bg-[#8BAE5A]/20 border border-[#8BAE5A] text-[#8BAE5A] rounded-md text-xs font-semibold">
                               <CheckIcon className="w-3 h-3 mr-1" />
                               Actief
@@ -1168,15 +1168,15 @@ export default function VoedingsplannenPage() {
                           </div>
                         )}
                         
-                        <h3 className="text-lg md:text-xl font-bold text-white mb-2 text-center">{plan.name}</h3>
+                        <h3 className="text-base sm:text-lg md:text-xl font-bold text-white mb-2 text-center">{plan.name}</h3>
                         {plan.subtitle && (
-                          <p className="text-[#8BAE5A] text-sm text-center mb-3">{plan.subtitle}</p>
+                          <p className="text-[#8BAE5A] text-xs sm:text-sm text-center mb-3">{plan.subtitle}</p>
                         )}
-                        <p className="text-gray-300 text-center text-sm mb-4">{plan.description}</p>
+                        <p className="text-gray-300 text-center text-xs sm:text-sm mb-4">{plan.description}</p>
                         
                         {/* Macro Percentages */}
                         {(plan.protein_percentage || plan.carbs_percentage || plan.fat_percentage) && (
-                          <div className="mb-4 p-3 bg-[#1a1f17] border border-[#3a4d23] rounded-lg">
+                          <div className="mb-3 sm:mb-4 p-2 sm:p-3 bg-[#1a1f17] border border-[#3a4d23] rounded-lg">
                             <div className="text-xs text-[#8bae5a] font-semibold mb-2 text-center">Macro Verdeling</div>
                             <div className="flex justify-between text-xs">
                               <div className="text-center">
@@ -1197,7 +1197,7 @@ export default function VoedingsplannenPage() {
                         
                         {/* Target Values - Calculated based on user's daily needs and plan percentages */}
                         {userNutritionProfile && (
-                          <div className="mb-4 p-3 bg-[#1a1f17] border border-[#3a4d23] rounded-lg">
+                          <div className="mb-3 sm:mb-4 p-2 sm:p-3 bg-[#1a1f17] border border-[#3a4d23] rounded-lg">
                             <div className="text-xs text-[#8bae5a] font-semibold mb-2 text-center">Doelwaarden</div>
                             <div className="grid grid-cols-2 gap-2 text-xs">
                               <div className="text-center">
