@@ -153,7 +153,7 @@ function getMockAnalyticsData() {
 
 function generateTrendData(baseVisitors: number, baseConversions: number) {
   const days = 7;
-  const trendData = [];
+  const trendData: Array<{ date: string; visitors: number; conversions: number }> = [];
   
   for (let i = 0; i < days; i++) {
     const date = new Date();

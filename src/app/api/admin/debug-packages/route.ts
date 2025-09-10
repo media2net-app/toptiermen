@@ -24,7 +24,7 @@ export async function GET() {
         success: false, 
         error: `Count error: ${countError.message}`,
         step: 'count_check',
-        tableExists: tableInfo?.length > 0
+        tableExists: false
       });
     }
 
@@ -42,7 +42,7 @@ export async function GET() {
         success: false, 
         error: `Data fetch error: ${dataError.message}`,
         step: 'data_fetch',
-        tableExists: tableInfo?.length > 0,
+        tableExists: true,
         count: count
       });
     }
