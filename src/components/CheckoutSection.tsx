@@ -78,7 +78,7 @@ export default function CheckoutSection({
 
   const pricing = getPricing();
   const currentPrice = paymentFrequency === 'once' ? pricing.totalPrice : pricing.monthlyPrice;
-  const finalPrice = Math.round(currentPrice * 0.5); // 50% prelaunch korting
+  const finalPrice = currentPrice; // Mollie prijzen zijn al de juiste prelaunch prijzen
 
   const handlePayment = async () => {
     // Validate form data
@@ -417,7 +417,7 @@ export default function CheckoutSection({
                       <div className="w-3 h-3 bg-orange-500 rounded-full animate-pulse"></div>
                       <span className="text-orange-400 font-bold text-lg">🔥 50% PRELAUNCH KORTING</span>
                     </div>
-                    <span className="text-orange-400 font-bold text-xl">-€{Math.round(currentPrice * 0.5)}</span>
+                    <span className="text-orange-400 font-bold text-xl">-€{Math.round(currentPrice)}</span>
                   </div>
                   <div className="relative mt-2">
                     <span className="text-orange-300 text-sm">⚡ Exclusieve prelaunch korting - beperkte tijd!</span>
@@ -426,10 +426,10 @@ export default function CheckoutSection({
                 <div className="border-t border-[#3A4D23] pt-3">
                   <div className="flex justify-between">
                     <span className="text-white font-semibold text-lg">Totaal</span>
-                    <span className="text-white font-bold text-xl">€{Math.round(currentPrice * 0.5)}</span>
+                    <span className="text-white font-bold text-xl">€{finalPrice}</span>
                   </div>
                   <div className="text-sm text-[#8BAE5A]/70 mt-2">
-                    50% prelaunch korting toegepast
+                    Prelaunch prijs (50% korting al toegepast)
                   </div>
                 </div>
               </div>
