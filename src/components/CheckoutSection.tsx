@@ -218,7 +218,7 @@ export default function CheckoutSection({
                   <span className="text-white font-bold text-xl">PRELAUNCH ACTIE</span>
                   <span className="text-2xl">⚡</span>
                 </div>
-                <p className="text-orange-100 text-lg font-semibold">50% PRELAUNCH KORTING - Beperkte tijd!</p>
+                <p className="text-orange-100 text-lg font-semibold">NORMALE PRIJZEN - Beperkte tijd!</p>
                 <p className="text-orange-200 text-sm mt-1">Exclusieve prelaunch aanbieding</p>
               </div>
             </div>
@@ -436,7 +436,7 @@ export default function CheckoutSection({
                   <div className="relative flex justify-between items-center">
                     <div className="flex items-center space-x-2">
                       <div className="w-3 h-3 bg-orange-500 rounded-full animate-pulse"></div>
-                      <span className="text-orange-400 font-bold text-lg">🔥 50% PRELAUNCH KORTING</span>
+                      <span className="text-orange-400 font-bold text-lg">🔥 NORMALE PRIJZEN</span>
                     </div>
                     <span className="text-orange-400 font-bold text-xl">-€{formatPrice(originalMonthlyPrice ? (isLifetime ? originalMonthlyPrice : originalMonthlyPrice * (billingPeriod === '6months' ? 6 : 12)) - (isLifetime ? pricing.periodPrice : pricing.periodPrice * (billingPeriod === '6months' ? 6 : 12)) : currentPrice)}</span>
                   </div>
@@ -450,7 +450,7 @@ export default function CheckoutSection({
                     <span className="text-white font-bold text-xl">€{formatPrice(isLifetime ? pricing.periodPrice : pricing.periodPrice * (billingPeriod === '6months' ? 6 : 12))}</span>
                   </div>
                   <div className="text-sm text-[#8BAE5A]/70 mt-2">
-                    Prelaunch prijs (50% korting al toegepast)
+                    Prelaunch prijs (normale prijzen al toegepast)
                   </div>
                 </div>
               </div>
@@ -472,7 +472,7 @@ export default function CheckoutSection({
                 ) : (
                   <>
                     <span className="text-xl">🔥</span>
-                    {isLifetime ? 'Word Lifetime Founder' : 'Start je transformatie - 50% korting!'}
+                    {isLifetime ? 'Word Lifetime Founder' : 'Start je transformatie - normale prijzen!'}
                   </>
                 )}
               </div>

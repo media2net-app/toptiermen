@@ -11,21 +11,21 @@ const supabase = createClient(
 const PACKAGE_PRICING = {
   'basic': {
     name: 'Basic Tier',
-    monthlyPrice: 24.50, // 6 months - prelaunch price (€49 * 0.5)
-    yearlyPrice: 22.00,  // 12 months - prelaunch price (€44 * 0.5)
+    monthlyPrice: 49, // 6 months - normal price
+    yearlyPrice: 44,  // 12 months - normal price
     lifetimePrice: null // Not applicable
   },
   'premium': {
     name: 'Premium Tier', 
-    monthlyPrice: 39.50, // 6 months - prelaunch price (€79 * 0.5)
-    yearlyPrice: 35.50,  // 12 months - prelaunch price (€71 * 0.5)
+    monthlyPrice: 79, // 6 months - normal price
+    yearlyPrice: 71,  // 12 months - normal price
     lifetimePrice: null // Not applicable
   },
   'lifetime': {
     name: 'Lifetime Access',
-    monthlyPrice: 997.50, // One-time payment - prelaunch price (€1995 * 0.5)
-    yearlyPrice: 997.50,  // One-time payment - prelaunch price (€1995 * 0.5)
-    lifetimePrice: 997.50 // One-time payment - prelaunch price (€1995 * 0.5)
+    monthlyPrice: 1995, // One-time payment - normal price
+    yearlyPrice: 1995,  // One-time payment - normal price
+    lifetimePrice: 997.50 // One-time payment - normal price
   }
 };
 
@@ -136,7 +136,7 @@ export async function POST(request: NextRequest) {
         payment_period: `${billingPeriod}_${paymentFrequency}`,
         original_price: finalPrice, // This is now the final price customers pay
         discounted_price: finalPrice, // Same as original since it's already discounted
-        discount_percentage: 50,
+        discount_percentage: 0,
         payment_method: paymentFrequency,
         full_name: customerName,
         email: customerEmail,

@@ -180,8 +180,8 @@ export default function MaandelijksPage() {
       description: 'Toegang tot alle basis content en community features',
       originalMonthlyPrice: 49, // Originele 6 maanden prijs
       originalYearlyPrice: 44, // Originele 12 maanden prijs (10% korting)
-      monthlyPrice: 24.50, // Prijs na 50% korting voor weergave (€49 * 0.5)
-      yearlyPrice: 22.00, // Prijs na 50% korting voor weergave (€44 * 0.5)
+      monthlyPrice: 49, // Prijs na normale prijzen voor weergave (€49 * 0.5)
+      yearlyPrice: 44, // Prijs na normale prijzen voor weergave (€44 * 0.5)
       features: [
         'TTM Academy',
         'Financiële tools & gidsen',
@@ -199,8 +199,8 @@ export default function MaandelijksPage() {
       description: 'Alles van Basic + custom plannen',
       originalMonthlyPrice: 79, // Originele 6 maanden prijs
       originalYearlyPrice: 71, // Originele 12 maanden prijs (10% korting)
-      monthlyPrice: 39.50, // Prijs na 50% korting voor weergave (€79 * 0.5)
-      yearlyPrice: 35.50, // Prijs na 50% korting voor weergave (€71 * 0.5)
+      monthlyPrice: 79, // Prijs na normale prijzen voor weergave (€79 * 0.5)
+      yearlyPrice: 71, // Prijs na normale prijzen voor weergave (€71 * 0.5)
       features: [
         'Alles uit Basic',
         'Custom voedingsplannen',
@@ -305,7 +305,7 @@ export default function MaandelijksPage() {
                   </div>
                   <div className="mt-2">
                     <span className="inline-flex items-center px-2 py-1 bg-red-500/20 border border-red-500/30 rounded-full text-red-400 text-xs font-medium">
-                      🔥 50% KORTING
+                      🔥 NORMALE PRIJZEN
                     </span>
                   </div>
                 </h1>
@@ -414,7 +414,7 @@ export default function MaandelijksPage() {
                 </div>
                 <div className="flex flex-col items-center space-y-3 mb-4">
                   <div className="inline-flex items-center px-3 py-1 bg-red-500/20 border border-red-500/30 rounded-full text-red-400 text-sm font-medium">
-                    🔥 50% PRELAUNCH KORTING
+                    🔥 NORMALE PRIJZEN
                   </div>
                   <PrelaunchCountdown 
                     endDate={new Date(Date.now() + 5 * 24 * 60 * 60 * 1000)} // 5 days from now
