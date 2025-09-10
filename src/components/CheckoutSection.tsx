@@ -413,6 +413,18 @@ export default function CheckoutSection({
                     <span className="text-white font-semibold">€{pricing.periodPrice}</span>
                   </div>
                 </div>
+                {originalMonthlyPrice && (
+                  <div className="flex justify-between">
+                    <span className="text-[#8BAE5A]">Normale prijs ({pricing.period})</span>
+                    <span className="text-gray-400 line-through">€{originalMonthlyPrice * (billingPeriod === '6months' ? 6 : 12)}</span>
+                  </div>
+                )}
+                {originalMonthlyPrice && (
+                  <div className="flex justify-between">
+                    <span className="text-[#8BAE5A]">Prelaunch prijs ({pricing.period})</span>
+                    <span className="text-white font-semibold">€{pricing.periodPrice * (billingPeriod === '6months' ? 6 : 12)}</span>
+                  </div>
+                )}
                 {pricing.discount > 0 && (
                   <div className="flex justify-between">
                     <span className="text-[#8BAE5A]">Korting ({pricing.discount}%)</span>
@@ -426,7 +438,7 @@ export default function CheckoutSection({
                       <div className="w-3 h-3 bg-orange-500 rounded-full animate-pulse"></div>
                       <span className="text-orange-400 font-bold text-lg">🔥 50% PRELAUNCH KORTING</span>
                     </div>
-                    <span className="text-orange-400 font-bold text-xl">-€{originalMonthlyPrice ? Math.round(originalMonthlyPrice - currentPrice) : Math.round(currentPrice)}</span>
+                    <span className="text-orange-400 font-bold text-xl">-€{originalMonthlyPrice ? Math.round((originalMonthlyPrice * (billingPeriod === '6months' ? 6 : 12)) - (pricing.periodPrice * (billingPeriod === '6months' ? 6 : 12))) : Math.round(currentPrice)}</span>
                   </div>
                   <div className="relative mt-2">
                     <span className="text-orange-300 text-sm">⚡ Exclusieve prelaunch korting - beperkte tijd!</span>
@@ -435,7 +447,7 @@ export default function CheckoutSection({
                 <div className="border-t border-[#3A4D23] pt-3">
                   <div className="flex justify-between">
                     <span className="text-white font-semibold text-lg">Totaal</span>
-                    <span className="text-white font-bold text-xl">€{finalPrice}</span>
+                    <span className="text-white font-bold text-xl">€{pricing.periodPrice * (billingPeriod === '6months' ? 6 : 12)}</span>
                   </div>
                   <div className="text-sm text-[#8BAE5A]/70 mt-2">
                     Prelaunch prijs (50% korting al toegepast)
