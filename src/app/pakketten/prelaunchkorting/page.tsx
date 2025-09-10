@@ -523,6 +523,8 @@ export default function BasicTierPage() {
         packageDescription={packageData.description}
         monthlyPrice={packageData.monthlyPrice}
         yearlyPrice={packageData.yearlyPrice}
+        originalMonthlyPrice={packageData.originalMonthlyPrice}
+        originalYearlyPrice={packageData.originalYearlyPrice}
         features={packageData.features}
         onPackageChange={selectTier}
         availablePackages={Object.values(allPackages)}

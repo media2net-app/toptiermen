@@ -9,6 +9,8 @@ interface CheckoutSectionProps {
   packageDescription: string;
   monthlyPrice: number;
   yearlyPrice: number;
+  originalMonthlyPrice?: number;
+  originalYearlyPrice?: number;
   features?: string[];
   selectedPeriod?: '6months' | '12months';
   selectedPayment?: 'monthly' | 'yearly';
@@ -29,6 +31,8 @@ export default function CheckoutSection({
   packageDescription, 
   monthlyPrice, 
   yearlyPrice, 
+  originalMonthlyPrice,
+  originalYearlyPrice,
   features = [],
   selectedPeriod = '12months',
   selectedPayment = 'monthly',
@@ -402,7 +406,12 @@ export default function CheckoutSection({
                   <span className="text-[#8BAE5A]">
                     {packageName} - {pricing.period}
                   </span>
-                  <span className="text-white font-semibold">€{pricing.periodPrice}</span>
+                  <div className="flex items-center space-x-2">
+                    {originalMonthlyPrice && (
+                      <span className="text-gray-400 line-through text-sm">€{originalMonthlyPrice}</span>
+                    )}
+                    <span className="text-white font-semibold">€{pricing.periodPrice}</span>
+                  </div>
                 </div>
                 {pricing.discount > 0 && (
                   <div className="flex justify-between">
@@ -417,7 +426,7 @@ export default function CheckoutSection({
                       <div className="w-3 h-3 bg-orange-500 rounded-full animate-pulse"></div>
                       <span className="text-orange-400 font-bold text-lg">🔥 50% PRELAUNCH KORTING</span>
                     </div>
-                    <span className="text-orange-400 font-bold text-xl">-€{Math.round(currentPrice)}</span>
+                    <span className="text-orange-400 font-bold text-xl">-€{originalMonthlyPrice ? Math.round(originalMonthlyPrice - currentPrice) : Math.round(currentPrice)}</span>
                   </div>
                   <div className="relative mt-2">
                     <span className="text-orange-300 text-sm">⚡ Exclusieve prelaunch korting - beperkte tijd!</span>
