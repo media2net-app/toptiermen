@@ -70,6 +70,7 @@ export default function Ledenbeheer() {
     mainGoal: '',
     rank: '',
     status: '',
+    packageType: '',
     adminNotes: ''
   });
   const [allMembers, setAllMembers] = useState<any[]>([]);
@@ -454,6 +455,7 @@ export default function Ledenbeheer() {
       mainGoal: member.main_goal || '',
       rank: member.rank || '',
       status: member.status || '',
+      packageType: member.package_type || '',
       adminNotes: member.admin_notes || ''
     });
     setShowEditModal(true);
@@ -469,6 +471,7 @@ export default function Ledenbeheer() {
         full_name: formData.name,
         username: formData.username,
         status: formData.status,
+        package_type: formData.packageType,
         admin_notes: formData.adminNotes
       };
       
@@ -478,7 +481,8 @@ export default function Ledenbeheer() {
         display_name: formData.username,
         bio: formData.bio,
         main_goal: formData.mainGoal,
-        rank: formData.rank
+        rank: formData.rank,
+        package_type: formData.packageType
       };
       
       // Update both tables
@@ -508,6 +512,7 @@ export default function Ledenbeheer() {
                 username: formData.username,
                 display_name: formData.username, // Also update display_name for consistency
                 status: formData.status,
+                package_type: formData.packageType,
                 admin_notes: formData.adminNotes,
                 bio: formData.bio,
                 main_goal: formData.mainGoal,
@@ -1199,6 +1204,23 @@ export default function Ledenbeheer() {
                   </div>
 
 
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Pakket Type
+                    </label>
+                    <select
+                      value={formData.packageType}
+                      onChange={(e) => setFormData({ ...formData, packageType: e.target.value })}
+                      className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+                    >
+                      <option value="">Geen pakket</option>
+                      <option value="Basic Tier">Basic Tier</option>
+                      <option value="Premium Tier">Premium Tier</option>
+                      <option value="Lifetime Access">Lifetime Access</option>
+                    </select>
+                    <p className="text-xs text-gray-500 mt-1">Admin Actie: Wijzig het pakket type om toegang tot features te beheren. Basic Tier heeft geen toegang tot trainingsschemas en voedingsplannen.</p>
+                  </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">
