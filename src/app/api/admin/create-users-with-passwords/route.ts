@@ -13,8 +13,8 @@ export async function POST(request: NextRequest) {
 
     console.log('🔐 Creating users with passwords:', { userIds, testMode });
 
-    // If test mode, only process Chiel and Rick
-    const allowedTestEmails = ['chiel@media2net.nl', 'rick@toptiermen.eu'];
+    // Test mode restrictions removed - allow all users
+    // const allowedTestEmails = ['chiel@media2net.nl', 'rick@toptiermen.eu'];
     
     // Get users from database
     let query = supabase
@@ -41,14 +41,12 @@ export async function POST(request: NextRequest) {
       }, { status: 404 });
     }
 
-    // Filter for test mode
-    const targetUsers = testMode 
-      ? users.filter(user => allowedTestEmails.includes(user.email))
-      : users;
+    // Use all users (test mode filtering removed)
+    const targetUsers = users;
 
     if (targetUsers.length === 0) {
       return NextResponse.json({ 
-        error: 'No eligible users found for test mode' 
+        error: 'No users found' 
       }, { status: 404 });
     }
 

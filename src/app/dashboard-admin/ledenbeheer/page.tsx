@@ -111,7 +111,7 @@ export default function Ledenbeheer() {
         },
         body: JSON.stringify({
           email: email,
-          testMode: true // Always use test mode for now
+          testMode: false // Allow all users to receive password reset
         }),
       });
 
@@ -154,7 +154,7 @@ export default function Ledenbeheer() {
         '- Nieuwe Supabase auth accounts aanmaken\n' +
         '- Wachtwoorden genereren en instellen\n' +
         '- Accountgegevens emails versturen\n\n' +
-        'In test mode worden alleen Chiel en Rick verwerkt.'
+        'Alle gebruikers in de database worden verwerkt.'
       );
       
       if (!confirmed) {
@@ -170,7 +170,7 @@ export default function Ledenbeheer() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          testMode: true // Always use test mode for now
+          testMode: false // Allow all users to be processed
         }),
       });
 
@@ -213,7 +213,7 @@ export default function Ledenbeheer() {
       const confirmed = window.confirm(
         'Weet je zeker dat je accountgegevens wilt versturen naar alle actieve leden?\n\n' +
         'Dit zal een email versturen met login gegevens naar alle gebruikers.\n' +
-        'In test mode worden alleen emails verstuurd naar Chiel en Rick.'
+        'Alle gebruikers in de database ontvangen een email.'
       );
       
       if (!confirmed) {
@@ -229,7 +229,7 @@ export default function Ledenbeheer() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          testMode: true // Always use test mode for now
+          testMode: false // Allow all users to receive account credentials
         }),
       });
 

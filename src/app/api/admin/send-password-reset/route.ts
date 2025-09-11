@@ -12,14 +12,14 @@ export async function POST(request: NextRequest) {
 
     console.log('🔐 Admin password reset requested for:', { email, testMode });
 
-    // If test mode, only allow specific emails
-    const allowedTestEmails = ['chiel@media2net.nl', 'rick@toptiermen.eu'];
+    // Test mode restriction removed - allow all users to receive password reset
+    // const allowedTestEmails = ['chiel@media2net.nl', 'rick@toptiermen.eu'];
     
-    if (testMode && !allowedTestEmails.includes(email)) {
-      return NextResponse.json({ 
-        error: 'Test mode: Only allowed emails are chiel@media2net.nl and rick@toptiermen.eu' 
-      }, { status: 403 });
-    }
+    // if (testMode && !allowedTestEmails.includes(email)) {
+    //   return NextResponse.json({ 
+    //     error: 'Test mode: Only allowed emails are chiel@media2net.nl and rick@toptiermen.eu' 
+    //   }, { status: 403 });
+    // }
 
     if (!email) {
       return NextResponse.json({ 
