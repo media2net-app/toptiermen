@@ -116,12 +116,22 @@ function TrainingschemasContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Debug logging
+  // DEBUG: Enhanced logging
   console.log('🔍 TrainingschemasContent render:', {
     user: user ? { id: user.id, email: user.email } : null,
     authLoading,
     subscriptionLoading,
-    hasAccessTraining: hasAccess('training')
+    hasAccessTraining: hasAccess('training'),
+    profileLoading,
+    trainingLoading,
+    userTrainingProfile: userTrainingProfile ? {
+      training_goal: userTrainingProfile.training_goal,
+      training_frequency: userTrainingProfile.training_frequency,
+      equipment_type: userTrainingProfile.equipment_type
+    } : null,
+    trainingSchemasCount: trainingSchemas.length,
+    showOnboardingStep3,
+    onboardingStatus
   });
 
   // Training schemas state
@@ -206,14 +216,27 @@ function TrainingschemasContent() {
     }
   };
 
-  // OPTIMIZED: Parallel data loading function
+  // OPTIMIZED: Parallel data loading function with enhanced debugging
   const loadAllData = async () => {
-    if (!user?.id) return;
+    if (!user?.id) {
+      console.log('❌ loadAllData: No user ID available');
+      return;
+    }
     
     console.log('🚀 Starting parallel data loading for user:', user.email);
+    console.log('🔍 Current state before loading:', {
+      profileLoading,
+      trainingLoading,
+      userTrainingProfile: userTrainingProfile ? 'exists' : 'null',
+      trainingSchemasCount: trainingSchemas.length
+    });
     
     try {
+      setTrainingLoading(true);
+      setProfileLoading(true);
+      
       // Start all API calls in parallel
+      console.log('📡 Starting parallel API calls...');
       const [schemasResult, profileResult] = await Promise.allSettled([
         // Load training schemas
         supabase
@@ -233,6 +256,11 @@ function TrainingschemasContent() {
         fetch(`/api/training-profile?userId=${user.email}`)
       ]);
       
+      console.log('📡 API calls completed:', {
+        schemasStatus: schemasResult.status,
+        profileStatus: profileResult.status
+      });
+      
       // Process training schemas
       if (schemasResult.status === 'fulfilled') {
         const { data, error } = schemasResult.value;
@@ -240,16 +268,23 @@ function TrainingschemasContent() {
           console.error('❌ Error fetching training schemas:', error);
           setTrainingError(`Failed to load training schemas: ${error.message}`);
         } else {
-          console.log('✅ Training schemas loaded:', data?.length || 0);
+          console.log('✅ Training schemas loaded:', data?.length || 0, 'schemas');
           setTrainingSchemas(data || []);
         }
+      } else {
+        console.error('❌ Training schemas promise rejected:', schemasResult.reason);
+        setTrainingError('Failed to load training schemas');
       }
       
       // Process training profile
       if (profileResult.status === 'fulfilled') {
         const response = profileResult.value;
+        console.log('📡 Profile API response status:', response.status);
+        
         if (response.ok) {
           const data = await response.json();
+          console.log('📡 Profile API response data:', data);
+          
           if (data.success && data.profile) {
             setUserTrainingProfile(data.profile);
             console.log('✅ Training profile loaded:', data.profile);
@@ -264,10 +299,21 @@ function TrainingschemasContent() {
             console.log('ℹ️ No training profile found, creating basic profile');
             await createBasicProfile();
           }
+        } else {
+          console.error('❌ Profile API error:', response.status, response.statusText);
+          await createBasicProfile();
         }
+      } else {
+        console.error('❌ Training profile promise rejected:', profileResult.reason);
+        await createBasicProfile();
       }
       
       // Apply filtering after both data sources are loaded
+      console.log('🎯 Applying filtering...', {
+        hasProfile: !!userTrainingProfile,
+        schemasCount: trainingSchemas.length
+      });
+      
       if (userTrainingProfile && trainingSchemas.length > 0) {
         const filtered = filterSchemasByProfile(trainingSchemas, userTrainingProfile);
         setTrainingSchemas(filtered);
@@ -278,6 +324,7 @@ function TrainingschemasContent() {
       console.error('❌ Parallel loading error:', error);
       setTrainingError('Failed to load data');
     } finally {
+      console.log('🏁 Loading completed, setting loading states to false');
       setTrainingLoading(false);
       setProfileLoading(false);
     }
@@ -352,17 +399,20 @@ function TrainingschemasContent() {
     return limitedSchemas; // Return limited schemas (max 3)
   };
 
-  // OPTIMIZED: Create basic profile function
+  // OPTIMIZED: Create basic profile function with enhanced debugging
   const createBasicProfile = async () => {
     try {
       console.log('🔧 Creating basic training profile for user:', user?.email);
       
       // Get main_goal from user profile
+      console.log('📡 Fetching main_goal from profiles table...');
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('main_goal')
         .eq('email', user?.email)
         .single();
+      
+      console.log('📡 Profile data result:', { profileData, profileError });
       
       if (profileData?.main_goal && !profileError) {
         console.log('🎯 Found main_goal from onboarding:', profileData.main_goal);
@@ -379,21 +429,26 @@ function TrainingschemasContent() {
           trainingGoal = 'spiermassa';
         }
         
+        console.log('🎯 Mapped training goal:', { mainGoal, trainingGoal });
+        
         // Try to get training frequency from onboarding data
         let trainingFrequency = 3; // default
         try {
-          const { data: onboardingData } = await supabase
+          console.log('📡 Fetching training frequency from onboarding_status...');
+          const { data: onboardingData, error: onboardingError } = await supabase
             .from('onboarding_status')
             .select('training_frequency')
             .eq('user_id', user?.id)
             .single();
+          
+          console.log('📡 Onboarding data result:', { onboardingData, onboardingError });
           
           if (onboardingData?.training_frequency) {
             trainingFrequency = onboardingData.training_frequency;
             console.log('🎯 Found training frequency from onboarding:', trainingFrequency);
           }
         } catch (e) {
-          console.log('ℹ️ No onboarding training frequency found, using default 3');
+          console.log('ℹ️ No onboarding training frequency found, using default 3:', e);
         }
         
         const basicProfile = {
@@ -413,10 +468,11 @@ function TrainingschemasContent() {
           equipment_type: 'gym'
         });
       } else {
+        console.log('❌ No main_goal found or error:', { profileData, profileError });
         setUserTrainingProfile(null);
       }
     } catch (error) {
-      console.error('Error creating basic profile:', error);
+      console.error('❌ Error creating basic profile:', error);
       setUserTrainingProfile(null);
     }
   };
@@ -648,13 +704,27 @@ function TrainingschemasContent() {
     setViewingDynamicPlan(null);
   };
 
-  // Effects - OPTIMIZED: Use parallel loading
+  // Effects - OPTIMIZED: Use parallel loading with enhanced debugging
   useEffect(() => {
+    console.log('🔄 useEffect triggered:', {
+      hasUser: !!user?.id,
+      userEmail: user?.email,
+      authLoading,
+      subscriptionLoading,
+      shouldLoad: user?.id && !authLoading && !subscriptionLoading
+    });
+    
     if (user?.id && !authLoading && !subscriptionLoading) {
       console.log('🚀 User authenticated, starting parallel data loading for:', user.email);
       loadAllData();
     } else {
-      console.log('⏳ Waiting for authentication to complete...');
+      console.log('⏳ Waiting for authentication to complete...', {
+        waitingFor: {
+          user: !user?.id ? 'user' : null,
+          auth: authLoading ? 'auth' : null,
+          subscription: subscriptionLoading ? 'subscription' : null
+        }
+      });
     }
   }, [user?.id, authLoading, subscriptionLoading]);
 
@@ -679,22 +749,29 @@ function TrainingschemasContent() {
 
   // CRITICAL: Safety mechanism to prevent stuck loading states
   useEffect(() => {
-    if (trainingLoading) {
+    if (trainingLoading || profileLoading) {
       // Shorter timeout for quicker recovery
       const timeoutId = setTimeout(() => {
-        console.log('⚠️ Training loading timeout reached (5s), forcing reset');
+        console.log('⚠️ Loading timeout reached (8s), forcing reset');
         if (trainingSchemas.length > 0) {
           console.log('🔄 FORCE: We have training schemas data, resetting loading state');
           setTrainingLoading(false);
         } else {
-          console.log('🔄 FORCE: No training schemas data, retrying fetch');
+          console.log('🔄 FORCE: No training schemas data, retrying with fallback');
+          // Fallback to sequential loading if parallel loading failed
           fetchTrainingSchemas();
+          fetchUserTrainingProfile();
         }
-      }, 5000); // 5 second timeout
+        
+        if (userTrainingProfile) {
+          console.log('🔄 FORCE: We have training profile data, resetting loading state');
+          setProfileLoading(false);
+        }
+      }, 8000); // 8 second timeout
 
       return () => clearTimeout(timeoutId);
     }
-  }, [trainingLoading, trainingSchemas.length]);
+  }, [trainingLoading, profileLoading, trainingSchemas.length, userTrainingProfile]);
 
   // Re-apply filtering when showAllSchemas changes
   useEffect(() => {
