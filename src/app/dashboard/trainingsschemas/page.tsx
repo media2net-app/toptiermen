@@ -210,8 +210,8 @@ function TrainingschemasContent() {
       console.log('✅ Training schemas loaded:', filteredSchemas.length, 'from', data?.length || 0, 'total');
       
     } catch (error) {
-      console.error('Error fetching training schemas:', error);
-      setTrainingError('Failed to load training schemas');
+      console.error('❌ Training schemas fetch error:', error);
+      setTrainingError(error instanceof Error ? error.message : 'Failed to load training schemas');
     } finally {
       setTrainingLoading(false);
     }
@@ -228,98 +228,38 @@ function TrainingschemasContent() {
     console.log('📊 Total schemas before filtering:', schemas.length);
     
     const filtered = schemas.filter(schema => {
-      // Map user profile to database fields
-      const goalMapping = {
-        'spiermassa': ['spiermassa'],
-        'kracht_uithouding': ['kracht', 'uithouding', 'spiermassa'], // Show multiple goal types
-        'power_kracht': ['kracht', 'spiermassa'] // Show power and strength related
-      };
+      // EXACT matching on training_goal field from database
+      const goalMatch = schema.training_goal === profile.training_goal;
       
-      const equipmentMapping = {
-        'gym': 'Gym',
-        'home': 'Gym', // Home users can also use gym schemas
-        'outdoor': 'Outdoor'
-      };
+      // EXACT matching on equipment_type field from database
+      const equipmentMatch = schema.equipment_type === profile.equipment_type;
       
-      // Filter by training goal based on schema name - FLEXIBLE matching
-      let goalMatch = false;
-      const schemaName = schema.name.toLowerCase();
-      
-      if (profile.training_goal === 'spiermassa') {
-        // Show schemas with 'spiermassa', 'split', or general gym schemas
-        goalMatch = schemaName.includes('spiermassa') || 
-                   schemaName.includes('split') || 
-                   schemaName.includes('gym') ||
-                   schemaName.includes('training');
-      } else if (profile.training_goal === 'kracht_uithouding') {
-        // Show schemas with 'conditie', 'uithouding', or general fitness
-        goalMatch = schemaName.includes('conditie') || 
-                   schemaName.includes('uithouding') ||
-                   schemaName.includes('fitness') ||
-                   schemaName.includes('cardio');
-      } else if (profile.training_goal === 'power_kracht') {
-        // Show schemas with 'kracht', 'power', or strength-related
-        goalMatch = schemaName.includes('kracht') || 
-                   schemaName.includes('power') ||
-                   schemaName.includes('strength') ||
-                   schemaName.includes('maximale');
-      }
-      
-      // Filter by equipment type - FLEXIBLE matching
-      let equipmentMatch = false;
-      const schemaEquipment = schema.category?.toLowerCase();
-      const userEquipment = profile.equipment_type?.toLowerCase();
-      
-      if (userEquipment === 'gym') {
-        // Gym users can use gym schemas and most general schemas
-        equipmentMatch = schemaEquipment === 'gym' || 
-                        schemaEquipment === 'home' || 
-                        !schemaEquipment; // Allow schemas without specific equipment
-      } else if (userEquipment === 'home') {
-        // Home users can use home, bodyweight, and gym schemas
-        equipmentMatch = ['home', 'bodyweight', 'gym'].includes(schemaEquipment || '') ||
-                        !schemaEquipment; // Allow schemas without specific equipment
-      } else if (userEquipment === 'outdoor') {
-        // Outdoor users can use outdoor, bodyweight, and home schemas
-        equipmentMatch = ['outdoor', 'bodyweight', 'home'].includes(schemaEquipment || '') ||
-                        !schemaEquipment; // Allow schemas without specific equipment
-      }
-      
-      // Filter by training frequency - EXACT matching
+      // EXACT matching on training frequency (number of days)
       const schemaDays = schema.training_schema_days?.length || 0;
-      const userFrequency = profile.training_frequency;
-      const frequencyMatch = schemaDays === userFrequency;
+      const frequencyMatch = schemaDays === profile.training_frequency;
       
-      console.log(`📅 Schema "${schema.name}": ${schemaDays} days vs user frequency ${userFrequency} (${frequencyMatch})`);
-      
-      console.log(`📋 Schema "${schema.name}": goal=${schema.training_goal} (${goalMatch}), category=${schema.category} (${equipmentMatch}), frequency=${schemaDays} days (${frequencyMatch})`);
+      console.log(`📋 Schema "${schema.name}": goal=${schema.training_goal} (${goalMatch}), equipment=${schema.equipment_type} (${equipmentMatch}), frequency=${schemaDays} days (${frequencyMatch})`);
       console.log(`   User profile: goal=${profile.training_goal}, equipment=${profile.equipment_type}, frequency=${profile.training_frequency}`);
       
       return goalMatch && equipmentMatch && frequencyMatch;
     });
     
-    console.log('✅ Filtered schemas:', filtered.length);
+    console.log('✅ Filtered schemas with exact matching:', filtered.length);
     
     // Limit to 3 schemas maximum
     const limitedSchemas = filtered.slice(0, 3);
     
-    // If no schemas match the strict criteria, show some general schemas as fallback
+    // If no schemas match the exact criteria, show fallback with relaxed matching
     if (limitedSchemas.length === 0) {
-      console.log('⚠️ No schemas match strict criteria, showing fallback schemas');
+      console.log('⚠️ No schemas match exact criteria, showing fallback schemas');
       const fallbackSchemas = schemas.filter(schema => {
-        const schemaEquipment = schema.category?.toLowerCase();
-        const userEquipment = profile.equipment_type?.toLowerCase();
+        // Relaxed matching: only match on training_goal and equipment_type
+        const goalMatch = schema.training_goal === profile.training_goal;
+        const equipmentMatch = schema.equipment_type === profile.equipment_type;
         
-        // Show schemas that match equipment type at least
-        if (userEquipment === 'gym') {
-          return schemaEquipment === 'gym' || !schemaEquipment;
-        } else if (userEquipment === 'home') {
-          return ['home', 'bodyweight', 'gym'].includes(schemaEquipment || '') || !schemaEquipment;
-        } else if (userEquipment === 'outdoor') {
-          return ['outdoor', 'bodyweight', 'home'].includes(schemaEquipment || '') || !schemaEquipment;
-        }
+        console.log(`🔄 Fallback Schema "${schema.name}": goal=${schema.training_goal} (${goalMatch}), equipment=${schema.equipment_type} (${equipmentMatch})`);
         
-        return true; // Show all if equipment type is unknown
+        return goalMatch && equipmentMatch;
       }).slice(0, 3); // Limit to 3 fallback schemas
       
       console.log('🔄 Showing fallback schemas:', fallbackSchemas.length);
@@ -380,7 +320,7 @@ function TrainingschemasContent() {
               user_id: user.email || user.id,
               training_goal: trainingGoal as 'spiermassa' | 'kracht_uithouding' | 'power_kracht',
               training_frequency: 3 as 1 | 2 | 3 | 4 | 5 | 6, // Default to 3x per week
-              equipment_type: 'gym' as 'gym' | 'home' | 'outdoor'
+              equipment_type: 'gym' as 'gym' | 'home' | 'outdoor' // Use lowercase to match database
             };
             
             setUserTrainingProfile(basicProfile);
@@ -648,15 +588,15 @@ function TrainingschemasContent() {
     checkOnboardingStatus();
   }, [user?.id]);
 
-  // Show loading state while authentication is being checked
-  if (authLoading || subscriptionLoading) {
+  // Progressieve loading states
+  if (authLoading) {
     return (
       <PageLayout title="Training Schemas">
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
             <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
-            <h3 className="text-xl font-semibold text-white mb-2">Trainingsschemas laden...</h3>
-            <p className="text-gray-300">Even geduld, we controleren je toegang</p>
+            <h3 className="text-xl font-semibold text-white mb-2">Authenticatie controleren...</h3>
+            <p className="text-gray-300">Even geduld, we controleren je inloggegevens</p>
           </div>
         </div>
       </PageLayout>
@@ -682,6 +622,21 @@ function TrainingschemasContent() {
             >
               Inloggen
             </button>
+          </div>
+        </div>
+      </PageLayout>
+    );
+  }
+
+  // Check subscription loading
+  if (subscriptionLoading) {
+    return (
+      <PageLayout title="Training Schemas">
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
+            <h3 className="text-xl font-semibold text-white mb-2">Toegang controleren...</h3>
+            <p className="text-gray-300">We controleren je abonnement</p>
           </div>
         </div>
       </PageLayout>

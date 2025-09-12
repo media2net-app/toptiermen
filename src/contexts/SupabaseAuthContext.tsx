@@ -18,8 +18,14 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 interface Profile {
   id: string;
   full_name?: string;
+  display_name?: string;
   email: string;
   role: 'admin' | 'lid' | 'user';
+  bio?: string;
+  location?: string;
+  website?: string;
+  interests?: string[];
+  main_goal?: string;
   created_at: string;
   updated_at: string;
 }
