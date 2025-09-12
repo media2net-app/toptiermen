@@ -264,7 +264,8 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
       let currentCustomData = { ...customPlanData };
       
       // Update the specific meal with new ingredients
-      if (!currentCustomData.weekPlan[editingMeal.day]) {
+      if (!currentCustomData.weekPlan?.[editingMeal.day]) {
+        if (!currentCustomData.weekPlan) currentCustomData.weekPlan = {};
         currentCustomData.weekPlan[editingMeal.day] = {
           ontbijt: { name: 'Ontbijt', ingredients: [], nutrition: { calories: 0, protein: 0, carbs: 0, fat: 0 } },
           snack1: { name: 'Ochtend Snack', ingredients: [], nutrition: { calories: 0, protein: 0, carbs: 0, fat: 0 } },
@@ -280,6 +281,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
       const nutrition = calculateMealNutrition(ingredients);
       
       // Update the meal
+      if (!currentCustomData.weekPlan) currentCustomData.weekPlan = {};
       currentCustomData.weekPlan[editingMeal.day][editingMeal.meal as keyof DayPlan] = {
         name: MEAL_TYPES_NL[editingMeal.meal as keyof typeof MEAL_TYPES_NL],
         ingredients,
@@ -288,6 +290,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
       };
 
       // Recalculate daily totals
+      if (!currentCustomData.weekPlan) currentCustomData.weekPlan = {};
       currentCustomData.weekPlan[editingMeal.day].dailyTotals = calculateDailyTotals(currentCustomData.weekPlan[editingMeal.day]);
 
       // Update state
@@ -330,8 +333,8 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
   const checkIfMealIsBackToOriginal = (day: string, mealType: string, currentPlanData: PlanData) => {
     if (!planData) return false;
     
-    const currentMeal = currentPlanData.weekPlan[day][mealType];
-    const originalMeal = planData.weekPlan[day][mealType];
+    const currentMeal = currentPlanData.weekPlan?.[day]?.[mealType];
+    const originalMeal = planData.weekPlan?.[day]?.[mealType];
     
     if (!currentMeal || !originalMeal || !currentMeal.ingredients || !originalMeal.ingredients) {
       return false;
@@ -626,7 +629,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
     if (!planData) return;
 
     const updatedPlanData = { ...planData };
-    const meal = updatedPlanData.weekPlan[day][mealType];
+    const meal = updatedPlanData.weekPlan?.[day]?.[mealType];
     
     if (meal && meal.ingredients && meal.ingredients[ingredientIndex]) {
       meal.ingredients[ingredientIndex][field] = value;
@@ -658,7 +661,8 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
       let dailyCarbs = 0;
       let dailyFat = 0;
 
-      Object.values(updatedPlanData.weekPlan[day]).forEach((mealData: any) => {
+      if (updatedPlanData.weekPlan?.[day]) {
+        Object.values(updatedPlanData.weekPlan[day]).forEach((mealData: any) => {
         if (mealData && typeof mealData === 'object' && 'nutrition' in mealData && mealData.nutrition) {
           dailyCalories += mealData.nutrition.calories;
           dailyProtein += mealData.nutrition.protein;
@@ -666,13 +670,16 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
           dailyFat += mealData.nutrition.fat;
         }
       });
+      }
 
-      updatedPlanData.weekPlan[day].dailyTotals = {
+      if (updatedPlanData.weekPlan?.[day]) {
+        updatedPlanData.weekPlan[day].dailyTotals = {
         calories: Math.round(dailyCalories),
         protein: Math.round(dailyProtein * 10) / 10,
         carbs: Math.round(dailyCarbs * 10) / 10,
         fat: Math.round(dailyFat * 10) / 10
       };
+      }
 
       setPlanData(updatedPlanData);
       
@@ -697,7 +704,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
   const getDayTotal = (day: string) => {
     // Use custom data if available, otherwise use original plan data
     const dataSource = customPlanData || planData;
-    if (!dataSource?.weekPlan[day]) return { calories: 0, protein: 0, carbs: 0, fat: 0 };
+    if (!dataSource?.weekPlan?.[day]) return { calories: 0, protein: 0, carbs: 0, fat: 0 };
     return dataSource.weekPlan[day].dailyTotals;
   };
 
@@ -709,7 +716,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
       return null;
     }
     
-    const mealData = dataSource.weekPlan[day][mealType as keyof DayPlan];
+    const mealData = dataSource.weekPlan?.[day]?.[mealType as keyof DayPlan];
     
     // Return null if it's dailyTotals (MealNutrition) instead of a Meal
     if (mealType === 'dailyTotals' || !mealData) {
@@ -767,7 +774,26 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
     );
   }
 
-  const currentDayData = planData.weekPlan[selectedDay];
+  const currentDayData = planData.weekPlan?.[selectedDay];
+
+  // If no data for selected day, show error
+  if (!currentDayData) {
+    return (
+      <div className="min-h-screen bg-[#0F1419] flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-500 text-6xl mb-4">⚠️</div>
+          <h2 className="text-2xl font-bold text-white mb-2">Geen data voor deze dag</h2>
+          <p className="text-gray-300 mb-4">Er zijn geen voedingsgegevens beschikbaar voor {DAYS_NL[selectedDay as keyof typeof DAYS_NL]}.</p>
+          <button
+            onClick={() => setSelectedDay('maandag')}
+            className="px-6 py-3 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold"
+          >
+            Ga naar Maandag
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#0F1419] text-white">
