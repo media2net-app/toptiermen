@@ -65,7 +65,7 @@ const SubscriptionTier = () => {
 
 // 2.0.1: Dashboard menu configuration
 const menu = [
-  { label: 'Onboarding', icon: CheckCircleIcon, href: '/dashboard/onboarding', onboardingStep: 0, isOnboardingItem: true },
+  { label: 'Onboarding', icon: CheckCircleIcon, href: null, onboardingStep: 0, isOnboardingItem: true, isDynamic: true },
   { label: 'Dashboard', icon: HomeIcon, href: '/dashboard', onboardingStep: 0 },
   { label: 'Mijn Profiel', icon: UserCircleIcon, parent: 'Dashboard', href: '/dashboard/mijn-profiel', isSub: true, onboardingStep: 0 },
   { label: 'Notificaties', icon: BellIcon, parent: 'Dashboard', href: '/dashboard/notificaties', isSub: true, onboardingStep: 0 },
@@ -324,7 +324,15 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
           return (
             <Link
               key={item.label}
-              href={item.disabled ? '#' : (item.href || '#')}
+              href={item.disabled ? '#' : (item.isDynamic && item.isOnboardingItem && isOnboarding ? 
+                (actualCurrentStep === 0 ? '/dashboard/welcome-video' :
+                 actualCurrentStep === 1 ? '/dashboard/profiel' :
+                 actualCurrentStep === 2 ? '/dashboard/mijn-uitdagingen' :
+                 actualCurrentStep === 3 ? '/dashboard/trainingsschemas' :
+                 actualCurrentStep === 4 ? '/dashboard/voedingsplannen' :
+                 actualCurrentStep === 5 ? '/dashboard/challenges' :
+                 actualCurrentStep === 6 ? '/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden' :
+                 '/dashboard/welcome-video') : (item.href || '#'))}
               onClick={item.disabled ? (e) => e.preventDefault() : onLinkClick}
               title={item.disabled ? "Binnenkort online" : undefined}
               className={`grid grid-cols-[auto_1fr] items-center gap-4 px-4 py-3 rounded-xl font-bold uppercase text-sm tracking-wide transition-all duration-500 font-figtree ${
@@ -615,7 +623,15 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
               }}
             >
               <Link
-                href={item.disabled ? '#' : (item.href || '#')}
+                href={item.disabled ? '#' : (item.isDynamic && item.isOnboardingItem && isOnboarding ? 
+                  (actualCurrentStep === 0 ? '/dashboard/welcome-video' :
+                   actualCurrentStep === 1 ? '/dashboard/profiel' :
+                   actualCurrentStep === 2 ? '/dashboard/mijn-uitdagingen' :
+                   actualCurrentStep === 3 ? '/dashboard/trainingsschemas' :
+                   actualCurrentStep === 4 ? '/dashboard/voedingsplannen' :
+                   actualCurrentStep === 5 ? '/dashboard/challenges' :
+                   actualCurrentStep === 6 ? '/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden' :
+                   '/dashboard/welcome-video') : (item.href || '#'))}
                 onClick={item.disabled ? (e) => e.preventDefault() : onLinkClick}
                 title={item.disabled ? "Binnenkort online" : undefined}
                 className={`grid grid-cols-[auto_1fr] items-center gap-4 px-4 py-3 rounded-xl font-bold uppercase text-sm tracking-wide transition-all duration-500 font-figtree ${

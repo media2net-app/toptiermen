@@ -36,16 +36,38 @@ export async function middleware(req: NextRequest) {
         const currentPath = req.nextUrl.pathname;
         
         // Define allowed paths for each onboarding step
-        // Users can access their current step and all previous steps
+        // Users can only access their current step and onboarding pages, NOT the main dashboard
         const allowedPaths = {
-          0: ['/dashboard', '/dashboard/welcome-video'],
-          1: ['/dashboard', '/dashboard/welcome-video', '/dashboard/profiel'],
-          2: ['/dashboard', '/dashboard/welcome-video', '/dashboard/profiel', '/dashboard/mijn-uitdagingen'],
-          3: ['/dashboard', '/dashboard/welcome-video', '/dashboard/profiel', '/dashboard/mijn-uitdagingen', '/dashboard/trainingsschemas'],
-          4: ['/dashboard', '/dashboard/welcome-video', '/dashboard/profiel', '/dashboard/mijn-uitdagingen', '/dashboard/trainingsschemas', '/dashboard/voedingsplannen'],
-          5: ['/dashboard', '/dashboard/welcome-video', '/dashboard/profiel', '/dashboard/mijn-uitdagingen', '/dashboard/trainingsschemas', '/dashboard/voedingsplannen', '/dashboard/challenges'],
-          6: ['/dashboard', '/dashboard/welcome-video', '/dashboard/profiel', '/dashboard/mijn-uitdagingen', '/dashboard/trainingsschemas', '/dashboard/voedingsplannen', '/dashboard/challenges', '/dashboard/brotherhood/forum', '/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden']
+          0: ['/dashboard/welcome-video'],
+          1: ['/dashboard/welcome-video', '/dashboard/profiel'],
+          2: ['/dashboard/welcome-video', '/dashboard/profiel', '/dashboard/mijn-uitdagingen'],
+          3: ['/dashboard/welcome-video', '/dashboard/profiel', '/dashboard/mijn-uitdagingen', '/dashboard/trainingsschemas'],
+          4: ['/dashboard/welcome-video', '/dashboard/profiel', '/dashboard/mijn-uitdagingen', '/dashboard/trainingsschemas', '/dashboard/voedingsplannen'],
+          5: ['/dashboard/welcome-video', '/dashboard/profiel', '/dashboard/mijn-uitdagingen', '/dashboard/trainingsschemas', '/dashboard/voedingsplannen', '/dashboard/challenges'],
+          6: ['/dashboard/welcome-video', '/dashboard/profiel', '/dashboard/mijn-uitdagingen', '/dashboard/trainingsschemas', '/dashboard/voedingsplannen', '/dashboard/challenges', '/dashboard/brotherhood/forum', '/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden']
         };
+
+        // Special case: If user tries to access main dashboard during onboarding, redirect to current step
+        if (currentPath === '/dashboard') {
+          let redirectPath = '/dashboard/welcome-video';
+          
+          if (currentStep === 1) {
+            redirectPath = '/dashboard/profiel';
+          } else if (currentStep === 2) {
+            redirectPath = '/dashboard/mijn-uitdagingen';
+          } else if (currentStep === 3) {
+            redirectPath = '/dashboard/trainingsschemas';
+          } else if (currentStep === 4) {
+            redirectPath = '/dashboard/voedingsplannen';
+          } else if (currentStep === 5) {
+            redirectPath = '/dashboard/challenges';
+          } else if (currentStep === 6) {
+            redirectPath = '/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden';
+          }
+          
+          console.log(`🚫 Dashboard access blocked during onboarding: ${currentPath} -> ${redirectPath} (step ${currentStep})`);
+          return NextResponse.redirect(new URL(redirectPath, req.url));
+        }
 
         // Check if current path is allowed for this step
         const isAllowedPath = allowedPaths[currentStep]?.some(allowedPath => 

@@ -148,7 +148,7 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
           case '/dashboard/onboarding':
             pageBasedStep = steps.findIndex(step => step.id === 1); // Main goal step
             break;
-          case '/dashboard/mijn-missies':
+          case '/dashboard/mijn-uitdagingen':
             pageBasedStep = steps.findIndex(step => step.id === 2); // Missions step
             break;
           case '/dashboard/trainingsschemas':
