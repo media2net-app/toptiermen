@@ -397,7 +397,7 @@ function TrainingschemasContent() {
         }
         
         const basicProfile = {
-          user_id: user?.email || user?.id,
+          user_id: (user?.email || user?.id) as string,
           training_goal: trainingGoal as 'spiermassa' | 'kracht_uithouding' | 'power_kracht',
           training_frequency: trainingFrequency as 1 | 2 | 3 | 4 | 5 | 6,
           equipment_type: 'gym' as 'gym' | 'home' | 'outdoor'
