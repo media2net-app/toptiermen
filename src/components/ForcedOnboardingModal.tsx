@@ -188,17 +188,17 @@ export default function ForcedOnboardingModal({ isOpen, onComplete }: ForcedOnbo
       onComplete();
       // Then navigate to missions page
       setTimeout(() => {
-        router.push('/dashboard/mijn-missies');
+        router.push('/dashboard/mijn-uitdagingen');
       }, 100);
     }
   };
 
   const handleMissionsComplete = async () => {
     if (selectedMissions.length < 3) {
-      toast.error('Selecteer minimaal 3 missies');
+      toast.error('Selecteer minimaal 3 uitdagingen');
       return;
     }
-
+    
     const updatedStatus = await updateOnboardingStatus(2, 'complete_step', { selectedMissions });
     if (updatedStatus) {
       setCurrentStep(3); // Update step before closing modal
@@ -277,7 +277,7 @@ export default function ForcedOnboardingModal({ isOpen, onComplete }: ForcedOnbo
   };
 
   const toggleChallenge = (challengeId: string) => {
-    setSelectedChallenges(prev => 
+    setSelectedMissions(prev => 
       prev.includes(challengeId) 
         ? prev.filter(id => id !== challengeId)
         : [...prev, challengeId]
@@ -333,7 +333,7 @@ export default function ForcedOnboardingModal({ isOpen, onComplete }: ForcedOnbo
                   onPlay={() => setShowVideoOverlay(false)}
                 >
                   <source src="/welkom-v2.MP4" type="video/mp4" />
-                  <source src="/welkom.MP4" type="video/mp4" />
+                  <source src="/welkom-v2.MP4" type="video/mp4" />
                   Je browser ondersteunt geen video afspelen.
                 </video>
                 
@@ -385,7 +385,7 @@ export default function ForcedOnboardingModal({ isOpen, onComplete }: ForcedOnbo
                   Wat is je hoofddoel? 🎯
                 </h3>
                 <p className="text-[#8BAE5A]">
-                  Beschrijf je belangrijkste doel voor de komende 90 dagen. Dit helpt ons je de juiste content en missies te geven.
+                  Beschrijf je belangrijkste doel voor de komende 90 dagen. Dit helpt ons je de juiste content en uitdagingen te geven.
                 </p>
               </div>
 
@@ -423,10 +423,10 @@ export default function ForcedOnboardingModal({ isOpen, onComplete }: ForcedOnbo
             <div className="space-y-6">
               <div className="text-center mb-6">
                 <h3 className="text-2xl font-bold text-white mb-4">
-                  Kies je missies 🔥
+                  Kies je uitdagingen 🔥
                 </h3>
                 <p className="text-[#8BAE5A]">
-                  Selecteer minimaal 3 missies die je deze week wilt voltooien.
+                  Selecteer minimaal 3 uitdagingen die je deze week wilt voltooien.
                 </p>
                 <p className="text-[#FFD700] text-sm mt-2">
                   {selectedMissions.length}/3 geselecteerd
@@ -464,7 +464,7 @@ export default function ForcedOnboardingModal({ isOpen, onComplete }: ForcedOnbo
                   disabled={loading || selectedMissions.length < 3}
                   className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] px-8 py-3 rounded-lg hover:from-[#A6C97B] hover:to-[#FFE55C] disabled:opacity-50 font-semibold transition-all duration-200 flex items-center gap-2"
                 >
-                  {loading ? 'Bezig...' : 'Missies opslaan'}
+                  {loading ? 'Bezig...' : 'Uitdagingen opslaan'}
                   <ArrowRightIcon className="w-5 h-5" />
                 </button>
               </div>

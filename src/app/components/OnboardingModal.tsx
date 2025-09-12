@@ -239,9 +239,9 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
         additionalData = { mainGoal };
         break;
       case 3:
-        // Step 3: Select missions
+        // Step 3: Select missions (uitdagingen)
         if (selectedMissions.length < 3) {
-          toast.error('Selecteer minimaal 3 missies');
+          toast.error('Selecteer minimaal 3 uitdagingen');
           return;
         }
         additionalData = { selectedMissions };
@@ -364,7 +364,7 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
                   onPlay={() => setShowVideoOverlay(false)}
                 >
                   <source src="/welkom-v2.MP4" type="video/mp4" />
-                  <source src="/welkom.MP4" type="video/mp4" />
+                  <source src="/welkom-v2.MP4" type="video/mp4" />
                   Je browser ondersteunt geen video afspelen.
                 </video>
                 
@@ -417,14 +417,14 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
                         <h4 className="font-medium text-white">Dashboard</h4>
                       </div>
                       <p className="text-[#E1CBB3] text-sm">
-                        Overzicht van je voortgang, missies en dagelijkse statistieken
+                        Overzicht van je voortgang, uitdagingen en dagelijkse statistieken
                       </p>
                     </div>
 
                     <div className="bg-[#181F17] border border-[#3A4D23] rounded-lg p-4">
                       <div className="flex items-center space-x-3 mb-3">
                         <FireIcon className="h-6 w-6 text-[#FF6B35]" />
-                        <h4 className="font-medium text-white">Missies</h4>
+                        <h4 className="font-medium text-white">Uitdagingen</h4>
                       </div>
                       <p className="text-[#E1CBB3] text-sm">
                         Dagelijkse uitdagingen om je doelen te bereiken
@@ -494,10 +494,10 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
                 <div className="space-y-6">
                   <div>
                     <h3 className="text-xl font-semibold text-white mb-4">
-                      Kies je Dagelijkse Missies 📋
+                      Kies je Dagelijkse Uitdagingen 📋
                     </h3>
                     <p className="text-[#8BAE5A] mb-6">
-                      Selecteer minimaal 3 missies die je dagelijks wilt uitvoeren om je doelen te bereiken.
+                      Selecteer minimaal 3 uitdagingen die je dagelijks wilt uitvoeren om je doelen te bereiken.
                     </p>
                   </div>
 
@@ -531,7 +531,7 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
 
                   <div className="text-center">
                     <p className="text-[#8BAE5A] text-sm">
-                      {selectedMissions.length}/3 missies geselecteerd
+                      {selectedMissions.length}/3 uitdagingen geselecteerd
                     </p>
                   </div>
                 </div>

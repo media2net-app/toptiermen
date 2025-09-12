@@ -6,7 +6,7 @@ import { useOnboarding } from '@/contexts/OnboardingContext';
 import { toast } from 'react-hot-toast';
 import ClientLayout from '@/app/components/ClientLayout';
 
-interface Mission {
+interface Challenge {
   id: string;
   title: string;
   type: string;
@@ -22,7 +22,7 @@ interface Mission {
   created_at?: string | null;
 }
 
-interface SuggestedMission {
+interface SuggestedChallenge {
   id: string;
   title: string;
   category: string;
@@ -38,8 +38,8 @@ interface Summary {
   dailyStreak: number;
 }
 
-// Mission Library with suggested missions
-const MISSION_LIBRARY: SuggestedMission[] = [
+// Challenge Library with suggested challenges
+const CHALLENGE_LIBRARY: SuggestedChallenge[] = [
   // Fitness & Health
   {
     id: 'fitness-1',
@@ -276,24 +276,24 @@ const MISSION_LIBRARY: SuggestedMission[] = [
   }
 ];
 
-export default function MijnMissiesPage() {
+export default function MijnUitdagingenPage() {
   const { user } = useSupabaseAuth();
   const { isOnboarding, currentStep, completeCurrentStep } = useOnboarding();
-  const [missions, setMissions] = useState<Mission[]>([]);
+  const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [summary, setSummary] = useState<Summary>({ completedToday: 0, totalToday: 0, dailyStreak: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [newMission, setNewMission] = useState({ title: '', type: 'Dagelijks' });
+  const [newChallenge, setNewChallenge] = useState({ title: '', type: 'Dagelijks' });
   const [showDailyCompletion, setShowDailyCompletion] = useState(false);
   const [showAlmostCompleted, setShowAlmostCompleted] = useState(false);
   const [hasDismissedDaily, setHasDismissedDaily] = useState(false);
   const [hasDismissedAlmost, setHasDismissedAlmost] = useState(false);
   const [preferencesLoaded, setPreferencesLoaded] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [missionToDelete, setMissionToDelete] = useState<Mission | null>(null);
+  const [missionToDelete, setChallengeToDelete] = useState<Challenge | null>(null);
   
-  // Mission Library state
-  const [showMissionLibrary, setShowMissionLibrary] = useState(false);
+  // Challenge Library state
+  const [showChallengeLibrary, setShowChallengeLibrary] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
@@ -303,19 +303,19 @@ export default function MijnMissiesPage() {
   const [showOnboardingStep3, setShowOnboardingStep3] = useState(false);
 
   // Helper function to check if mission was completed today
-  const isMissionCompletedToday = (completionDate: string | null | undefined): boolean => {
+  const isChallengeCompletedToday = (completionDate: string | null | undefined): boolean => {
     if (!completionDate) return false;
     const today = new Date().toISOString().split('T')[0];
     return completionDate === today;
   };
 
-  // Filter suggested missions based on selected criteria
-  const getFilteredSuggestedMissions = () => {
-    return MISSION_LIBRARY.filter(mission => {
-      const matchesCategory = selectedCategory === 'all' || mission.category === selectedCategory;
-      const matchesDifficulty = selectedDifficulty === 'all' || mission.difficulty === selectedDifficulty;
-      const matchesSearch = mission.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           mission.description.toLowerCase().includes(searchTerm.toLowerCase());
+  // Filter suggested challenges based on selected criteria
+  const getFilteredSuggestedChallenges = () => {
+    return CHALLENGE_LIBRARY.filter(challenge => {
+      const matchesCategory = selectedCategory === 'all' || challenge.category === selectedCategory;
+      const matchesDifficulty = selectedDifficulty === 'all' || challenge.difficulty === selectedDifficulty;
+      const matchesSearch = challenge.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           challenge.description.toLowerCase().includes(searchTerm.toLowerCase());
       
       return matchesCategory && matchesDifficulty && matchesSearch;
     });
@@ -323,24 +323,24 @@ export default function MijnMissiesPage() {
 
   // Get unique categories for filter
   const getCategories = () => {
-    const categories = [...new Set(MISSION_LIBRARY.map(mission => mission.category))];
+    const categories = [...new Set(CHALLENGE_LIBRARY.map(challenge => challenge.category))];
     return categories.sort();
   };
 
-  // Add suggested mission to user's missions
-  const addSuggestedMission = async (suggestedMission: SuggestedMission) => {
+  // Add suggested mission to user's challenges
+  const addSuggestedChallenge = async (suggestedChallenge: SuggestedChallenge) => {
     if (!user?.id) return;
 
-    const newMission = {
-      title: suggestedMission.title,
+    const newChallenge = {
+      title: suggestedChallenge.title,
       type: 'Dagelijks',
-      category: suggestedMission.category,
-      icon: suggestedMission.icon,
-      xp_reward: suggestedMission.xp_reward
+      category: suggestedChallenge.category,
+      icon: suggestedChallenge.icon,
+      xp_reward: suggestedChallenge.xp_reward
     };
 
     try {
-      const response = await fetch('/api/missions-simple', {
+      const response = await fetch('/api/challenges-simple', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -348,27 +348,27 @@ export default function MijnMissiesPage() {
         body: JSON.stringify({
           userId: user.id,
           action: 'create',
-          mission: newMission
+          mission: newChallenge
         }),
       });
 
       if (response.ok) {
-        // Reload missions to show the new one
-        const updatedResponse = await fetch(`/api/missions-simple?userId=${user.id}`);
+        // Reload challenges to show the new one
+        const updatedResponse = await fetch(`/api/challenges-simple?userId=${user.id}`);
         if (updatedResponse.ok) {
           const data = await updatedResponse.json();
-          const updatedMissions = data.missions.map((mission: Mission) => ({
+          const updatedChallenges = data.challenges.map((mission: Challenge) => ({
             ...mission,
             done: mission.type === 'Dagelijks' 
-              ? isMissionCompletedToday(mission.last_completion_date)
+              ? isChallengeCompletedToday(mission.last_completion_date)
               : mission.done
           }));
-          setMissions(updatedMissions);
+          setChallenges(updatedChallenges);
           setSummary(data.summary);
         }
         
-        toast.success(`Uitdaging "${suggestedMission.title}" toegevoegd!`);
-        setShowMissionLibrary(false);
+        toast.success(`Uitdaging "${suggestedChallenge.title}" toegevoegd!`);
+        setShowChallengeLibrary(false);
       } else {
         throw new Error('Failed to add mission');
       }
@@ -389,7 +389,7 @@ export default function MijnMissiesPage() {
           const data = await response.json();
           setOnboardingStatus(data);
           
-          // Only show onboarding step 3 if onboarding is not completed and user is on step 2 (missions step)
+          // Only show onboarding step 3 if onboarding is not completed and user is on step 2 (challenges step)
           setShowOnboardingStep3(!data.onboarding_completed && data.current_step === 2);
         }
       } catch (error) {
@@ -400,33 +400,33 @@ export default function MijnMissiesPage() {
     checkOnboardingStatus();
   }, [user?.id]);
 
-  // Load missions
+  // Load challenges
   useEffect(() => {
     if (!user?.id) return;
 
-    async function loadMissions() {
+    async function loadChallenges() {
       if (!user?.id) return;
       
       try {
         setLoading(true);
         setError(null);
 
-        const response = await fetch(`/api/missions-simple?userId=${user.id}`);
+        const response = await fetch(`/api/challenges-simple?userId=${user.id}`);
         if (!response.ok) {
-          throw new Error('Failed to load missions');
+          throw new Error('Failed to load challenges');
         }
 
         const data = await response.json();
         
-        // Add created_at to missions that don't have it and update daily tracking
-        const updatedMissions = data.missions.map((mission: Mission, index: number) => {
+        // Add created_at to challenges that don't have it and update daily tracking
+        const updatedChallenges = data.challenges.map((mission: Challenge, index: number) => {
           let missionWithDate = mission;
           
           // Add created_at if missing
           if (!mission.created_at) {
-            // For existing missions without created_at, use a default date
-            // Most missions were added yesterday, some today
-            const isRecent = index < 2; // First 2 missions are from today
+            // For existing challenges without created_at, use a default date
+            // Most challenges were added yesterday, some today
+            const isRecent = index < 2; // First 2 challenges are from today
             const defaultDate = isRecent ? new Date() : new Date(Date.now() - 24 * 60 * 60 * 1000); // Yesterday
             missionWithDate = {
               ...mission,
@@ -438,22 +438,22 @@ export default function MijnMissiesPage() {
           return {
             ...missionWithDate,
             done: mission.type === 'Dagelijks' 
-              ? isMissionCompletedToday(mission.last_completion_date)
+              ? isChallengeCompletedToday(mission.last_completion_date)
               : mission.done
           };
         });
 
-        setMissions(updatedMissions);
+        setChallenges(updatedChallenges);
         setSummary(data.summary);
       } catch (err) {
-        console.error('Error loading missions:', err);
-        setError(err instanceof Error ? err.message : 'Failed to load missions');
+        console.error('Error loading challenges:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load challenges');
       } finally {
         setLoading(false);
       }
     }
 
-    loadMissions();
+    loadChallenges();
   }, [user?.id]);
 
   // Check for daily completion notifications
@@ -467,7 +467,7 @@ export default function MijnMissiesPage() {
       setShowDailyCompletion(allDailyCompleted && !hasDismissedDaily);
       setShowAlmostCompleted(almostCompleted && !allDailyCompleted && !hasDismissedAlmost);
 
-      // Show toast notification when all missions are completed
+      // Show toast notification when all challenges are completed
       if (allDailyCompleted && !wasCompletedBefore && !loading) {
         toast.success('🏆 Alle dagelijkse uitdagingen volbracht! Je bent een echte Top Tier Man! Morgen staan er weer nieuwe uitdagingen klaar! 💪', {
           duration: 6000,
@@ -549,11 +549,11 @@ export default function MijnMissiesPage() {
   }, [user?.id]);
 
   // Toggle mission completion
-  const toggleMission = async (missionId: string) => {
+  const toggleChallenge = async (missionId: string) => {
     if (!user?.id) return;
 
     try {
-      const response = await fetch('/api/missions-simple', {
+      const response = await fetch('/api/challenges-simple', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -570,9 +570,9 @@ export default function MijnMissiesPage() {
       const data = await response.json();
 
       if (data.success) {
-        // Update missions state
-        setMissions(prevMissions => 
-          prevMissions.map(mission => {
+        // Update challenges state
+        setChallenges(prevChallenges => 
+          prevChallenges.map(mission => {
             if (mission.id === missionId) {
               const isCompleted = data.completed;
               return {
@@ -612,19 +612,19 @@ export default function MijnMissiesPage() {
   };
 
   // Add new mission
-  const addMission = async (e: React.FormEvent) => {
+  const addChallenge = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user?.id || !newMission.title.trim()) return;
+    if (!user?.id || !newChallenge.title.trim()) return;
 
     try {
-      const response = await fetch('/api/missions-simple', {
+      const response = await fetch('/api/challenges-simple', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'create',
           userId: user.id,
-          title: newMission.title,
-          type: newMission.type
+          title: newChallenge.title,
+          type: newChallenge.type
         })
       });
 
@@ -636,18 +636,18 @@ export default function MijnMissiesPage() {
 
       if (data.success) {
                 // Add the new mission to the list
-        const newMissionData = data.mission;
-        setMissions(prev => [...prev, newMissionData]);
+        const newChallengeData = data.mission;
+        setChallenges(prev => [...prev, newChallengeData]);
 
         // Update summary to include the new daily mission
-        if (newMissionData.type === 'Dagelijks') {
+        if (newChallengeData.type === 'Dagelijks') {
           setSummary(prev => ({
             ...prev,
             totalToday: prev.totalToday + 1
           }));
         }
         
-        setNewMission({ title: '', type: 'Dagelijks' });
+        setNewChallenge({ title: '', type: 'Dagelijks' });
         toast.success(data.message || 'Uitdaging toegevoegd!');
       }
     } catch (err) {
@@ -657,11 +657,11 @@ export default function MijnMissiesPage() {
   };
 
   // Delete mission
-  const deleteMission = async (missionId: string) => {
+  const deleteChallenge = async (missionId: string) => {
     if (!user?.id) return;
 
     try {
-      const response = await fetch('/api/missions-simple', {
+      const response = await fetch('/api/challenges-simple', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -679,7 +679,7 @@ export default function MijnMissiesPage() {
 
       if (data.success) {
         // Remove mission from state
-        setMissions(prev => prev.filter(mission => mission.id !== missionId));
+        setChallenges(prev => prev.filter(mission => mission.id !== missionId));
         
         // Update summary if it was a daily mission
         if (missionToDelete?.type === 'Dagelijks') {
@@ -691,7 +691,7 @@ export default function MijnMissiesPage() {
         }
         
         setShowDeleteConfirm(false);
-        setMissionToDelete(null);
+        setChallengeToDelete(null);
         toast.success(data.message || 'Uitdaging succesvol verwijderd! 💪');
       }
     } catch (err) {
@@ -701,8 +701,8 @@ export default function MijnMissiesPage() {
   };
 
   // Handle delete confirmation
-  const handleDeleteClick = (mission: Mission) => {
-    setMissionToDelete(mission);
+  const handleDeleteClick = (mission: Challenge) => {
+    setChallengeToDelete(mission);
     setShowDeleteConfirm(true);
   };
 
@@ -711,7 +711,7 @@ export default function MijnMissiesPage() {
     const handleEscKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && showDeleteConfirm) {
         setShowDeleteConfirm(false);
-        setMissionToDelete(null);
+        setChallengeToDelete(null);
       }
     };
 
@@ -726,9 +726,9 @@ export default function MijnMissiesPage() {
     };
   }, [showDeleteConfirm]);
 
-  // Filter missions
-  const pendingMissions = missions.filter(m => !m.done);
-  const completedMissions = missions.filter(m => m.done);
+  // Filter challenges
+  const pendingChallenges = challenges.filter(m => !m.done);
+  const completedChallenges = challenges.filter(m => m.done);
 
   if (loading) {
     return (
@@ -786,7 +786,7 @@ export default function MijnMissiesPage() {
           </div>
         </div>
 
-        {/* Onboarding Progress - Step 3: Missions */}
+        {/* Onboarding Progress - Step 3: Challenges */}
         {showOnboardingStep3 && (
           <div className="mb-6 sm:mb-8">
             <div className="bg-gradient-to-br from-[#8BAE5A]/10 to-[#FFD700]/10 border-2 border-[#8BAE5A] rounded-2xl p-4 sm:p-6">
@@ -799,24 +799,24 @@ export default function MijnMissiesPage() {
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-xl sm:text-2xl font-bold text-[#FFD700]">{missions.length}/3</div>
+                <div className="text-xl sm:text-2xl font-bold text-[#FFD700]">{challenges.length}/3</div>
                 <div className="text-[#8BAE5A] text-xs sm:text-sm">Uitdagingen geselecteerd</div>
               </div>
             </div>
             
-            {missions.length < 3 ? (
+            {challenges.length < 3 ? (
               <div className="bg-[#181F17]/80 rounded-xl p-3 sm:p-4 border border-[#3A4D23]">
                 <p className="text-[#f0a14f] text-xs sm:text-sm font-semibold mb-2">
-                  ⚠️ Je hebt nog {3 - missions.length} uitdaging{3 - missions.length !== 1 ? 'en' : ''} nodig
+                  ⚠️ Je hebt nog {3 - challenges.length} uitdaging{3 - challenges.length !== 1 ? 'en' : ''} nodig
                 </p>
                 <p className="text-gray-300 text-xs sm:text-sm">
-                  Voeg nog {3 - missions.length} uitdaging{3 - missions.length !== 1 ? 'en' : ''} toe om door te gaan naar de volgende stap van de onboarding.
+                  Voeg nog {3 - challenges.length} uitdaging{3 - challenges.length !== 1 ? 'en' : ''} toe om door te gaan naar de volgende stap van de onboarding.
                 </p>
               </div>
             ) : (
               <div className="bg-[#8BAE5A]/20 rounded-xl p-3 sm:p-4 border border-[#8BAE5A]">
                 <p className="text-[#8BAE5A] text-xs sm:text-sm font-semibold mb-2">
-                  ✅ Perfect! Je hebt {missions.length} uitdagingen geselecteerd
+                  ✅ Perfect! Je hebt {challenges.length} uitdagingen geselecteerd
                 </p>
                 <p className="text-gray-300 text-xs sm:text-sm mb-4">
                   Je kunt nu door naar de volgende stap van de onboarding.
@@ -834,12 +834,12 @@ export default function MijnMissiesPage() {
                           userId: user?.id,
                           step: 2,
                           action: 'complete_step',
-                          selectedMissions: missions.map(m => m.id)
+                          selectedChallenges: challenges.map(m => m.id)
                         }),
                       });
 
                       if (response.ok) {
-                        toast.success('Missies opgeslagen! Doorsturen naar trainingsschemas...');
+                        toast.success('Uitdagings opgeslagen! Doorsturen naar trainingsschemas...');
                         // Navigate directly to training schemas
                         setTimeout(() => {
                           window.location.href = '/dashboard/trainingsschemas';
@@ -848,7 +848,7 @@ export default function MijnMissiesPage() {
                         toast.error('Er is een fout opgetreden');
                       }
                     } catch (error) {
-                      console.error('Error completing missions step:', error);
+                      console.error('Error completing challenges step:', error);
                       toast.error('Er is een fout opgetreden');
                     }
                   }}
@@ -870,7 +870,7 @@ export default function MijnMissiesPage() {
               <div className="flex items-center justify-center mb-4">
                 <span className="text-4xl mr-3">🏆</span>
                 <h2 className="text-2xl md:text-3xl font-bold text-white">
-                  Alle Dagelijkse Missies Volbracht!
+                  Alle Dagelijkse Uitdagings Volbracht!
                 </h2>
                 <span className="text-4xl ml-3">🏆</span>
               </div>
@@ -879,7 +879,7 @@ export default function MijnMissiesPage() {
               </p>
               <div className="bg-[#181F17]/80 rounded-xl p-4 mb-4">
                 <p className="text-white text-sm leading-relaxed">
-                  <strong>Gefeliciteerd!</strong> Je hebt vandaag alle dagelijkse missies succesvol afgerond. 
+                  <strong>Gefeliciteerd!</strong> Je hebt vandaag alle dagelijkse uitdagings succesvol afgerond. 
                   Dit toont aan dat je de discipline en doorzettingsvermogen hebt van een echte leider. 
                   Blijf deze momentum vasthouden en blijf jezelf elke dag uitdagen.
                 </p>
@@ -927,7 +927,7 @@ export default function MijnMissiesPage() {
               <div className="flex items-center justify-center mb-4">
                 <span className="text-4xl mr-3">🔥</span>
                 <h2 className="text-2xl md:text-3xl font-bold text-white">
-                  Bijna Alle Missies Volbracht!
+                  Bijna Alle Uitdagings Volbracht!
                 </h2>
                 <span className="text-4xl ml-3">🔥</span>
               </div>
@@ -936,13 +936,13 @@ export default function MijnMissiesPage() {
               </p>
               <div className="bg-[#181F17]/80 rounded-xl p-4 mb-4">
                 <p className="text-white text-sm leading-relaxed">
-                  <strong>Fantastisch werk!</strong> Je hebt al {summary.completedToday} van de {summary.totalToday} dagelijkse missies volbracht. 
-                  Je bent zo dichtbij een perfecte dag! Blijf gefocust en voltooi die laatste missie om jezelf te bewijzen dat je een echte Top Tier Man bent.
+                  <strong>Fantastisch werk!</strong> Je hebt al {summary.completedToday} van de {summary.totalToday} dagelijkse uitdagings volbracht. 
+                  Je bent zo dichtbij een perfecte dag! Blijf gefocust en voltooi die laatste uitdaging om jezelf te bewijzen dat je een echte Top Tier Man bent.
                 </p>
               </div>
               <div className="bg-[#232D1A]/80 rounded-xl p-4 border border-[#3A4D23]">
                 <p className="text-[#f0a14f] text-sm font-semibold">
-                  ⚡ <strong>Die laatste missie maakt het verschil!</strong> 
+                  ⚡ <strong>Die laatste uitdaging maakt het verschil!</strong> 
                   Het is de discipline in de moeilijke momenten die echte leiders onderscheidt van de rest.
                 </p>
               </div>
@@ -976,30 +976,30 @@ export default function MijnMissiesPage() {
           </div>
         )}
 
-        {/* Add New Mission */}
+        {/* Add New Challenge */}
         <div className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-6 mb-8">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-white">Nieuwe Missie Toevoegen</h2>
+            <h2 className="text-xl font-semibold text-white">Nieuwe Uitdaging Toevoegen</h2>
             <button
-              onClick={() => setShowMissionLibrary(!showMissionLibrary)}
+              onClick={() => setShowChallengeLibrary(!showChallengeLibrary)}
               className="bg-gradient-to-r from-[#f0a14f] to-[#e0903f] hover:from-[#e0903f] hover:to-[#d0802f] text-white font-semibold px-4 py-2 rounded-lg transition-all duration-200 flex items-center gap-2"
             >
               <span className="text-lg">📚</span>
-              {showMissionLibrary ? 'Sluit Bibliotheek' : 'Missie Bibliotheek'}
+              {showChallengeLibrary ? 'Sluit Bibliotheek' : 'Uitdaging Bibliotheek'}
             </button>
           </div>
           
-          <form onSubmit={addMission} className="flex flex-col sm:flex-row gap-4">
+          <form onSubmit={addChallenge} className="flex flex-col sm:flex-row gap-4">
             <input
               type="text"
-              value={newMission.title}
-              onChange={(e) => setNewMission(prev => ({ ...prev, title: e.target.value }))}
-              placeholder="Missie titel..."
+              value={newChallenge.title}
+              onChange={(e) => setNewChallenge(prev => ({ ...prev, title: e.target.value }))}
+              placeholder="Uitdaging titel..."
               className="flex-1 bg-[#0F1419] border border-[#3A4D23]/30 rounded-lg px-4 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-[#8BAE5A]"
             />
             <select
-              value={newMission.type}
-              onChange={(e) => setNewMission(prev => ({ ...prev, type: e.target.value }))}
+              value={newChallenge.type}
+              onChange={(e) => setNewChallenge(prev => ({ ...prev, type: e.target.value }))}
               className="bg-[#0F1419] border border-[#3A4D23]/30 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#8BAE5A]"
             >
               <option value="Dagelijks">Dagelijks</option>
@@ -1013,11 +1013,11 @@ export default function MijnMissiesPage() {
           </form>
         </div>
 
-        {/* Mission Library */}
-        {showMissionLibrary && (
+        {/* Challenge Library */}
+        {showChallengeLibrary && (
           <div className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-6 mb-8">
-            <h2 className="text-xl font-bold text-white mb-4">📚 Missie Bibliotheek</h2>
-            <p className="text-gray-400 mb-6">Kies uit voorgestelde missies van verschillende categorieën</p>
+            <h2 className="text-xl font-bold text-white mb-4">📚 Uitdaging Bibliotheek</h2>
+            <p className="text-gray-400 mb-6">Kies uit voorgestelde uitdagings van verschillende categorieën</p>
             
             {/* Filters */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
@@ -1027,7 +1027,7 @@ export default function MijnMissiesPage() {
                   type="text"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Zoek missies..."
+                  placeholder="Zoek uitdagings..."
                   className="w-full bg-[#0F1419] border border-[#3A4D23]/30 rounded-lg px-4 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-[#8BAE5A]"
                 />
               </div>
@@ -1071,9 +1071,9 @@ export default function MijnMissiesPage() {
               </div>
             </div>
 
-            {/* Mission Grid */}
+            {/* Challenge Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {getFilteredSuggestedMissions().map((mission) => (
+              {getFilteredSuggestedChallenges().map((mission) => (
                 <div
                   key={mission.id}
                   className="bg-[#0F1419] border border-[#3A4D23]/30 rounded-xl p-4 hover:border-[#8BAE5A]/50 transition-all duration-200"
@@ -1099,7 +1099,7 @@ export default function MijnMissiesPage() {
                       {mission.category}
                     </span>
                     <button
-                      onClick={() => addSuggestedMission(mission)}
+                      onClick={() => addSuggestedChallenge(mission)}
                       className="bg-gradient-to-r from-[#8BAE5A] to-[#6B8E3A] hover:from-[#7A9D4A] hover:to-[#5A7D2A] text-white font-semibold px-3 py-1 rounded-lg transition-all duration-200 text-sm"
                     >
                       Toevoegen
@@ -1109,10 +1109,10 @@ export default function MijnMissiesPage() {
               ))}
             </div>
 
-            {getFilteredSuggestedMissions().length === 0 && (
+            {getFilteredSuggestedChallenges().length === 0 && (
               <div className="text-center py-8">
                 <span className="text-4xl mb-4 block">🔍</span>
-                <p className="text-gray-400">Geen missies gevonden met de huidige filters</p>
+                <p className="text-gray-400">Geen uitdagings gevonden met de huidige filters</p>
                 <button
                   onClick={() => {
                     setSearchTerm('');
@@ -1128,12 +1128,12 @@ export default function MijnMissiesPage() {
           </div>
         )}
 
-        {/* TO DO Missions */}
-        {pendingMissions.length > 0 && (
+        {/* TO DO Challenges */}
+        {pendingChallenges.length > 0 && (
           <div className="mb-6 sm:mb-8">
             <h2 className="text-xl sm:text-2xl font-bold text-white mb-3 sm:mb-4">Te Doen</h2>
             <div className="space-y-3 sm:space-y-4">
-              {pendingMissions.map((mission) => (
+              {pendingChallenges.map((mission) => (
                 <div
                   key={mission.id}
                   className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-4 sm:p-6 hover:border-[#8BAE5A]/50 transition-all duration-200"
@@ -1169,7 +1169,7 @@ export default function MijnMissiesPage() {
                       </div>
                       <div className="flex gap-2">
                         <button
-                          onClick={() => toggleMission(mission.id)}
+                          onClick={() => toggleChallenge(mission.id)}
                           className="bg-gradient-to-r from-[#8BAE5A] to-[#6B8E3A] hover:from-[#7A9D4A] hover:to-[#5A7D2A] text-white font-semibold px-3 sm:px-4 py-2 rounded-lg transition-all duration-200 text-xs sm:text-sm"
                         >
                           Voltooien
@@ -1177,7 +1177,7 @@ export default function MijnMissiesPage() {
                         <button
                           onClick={() => handleDeleteClick(mission)}
                           className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold px-2 sm:px-3 py-2 rounded-lg transition-all duration-200 text-xs sm:text-sm"
-                          title="Verwijder missie"
+                          title="Verwijder uitdaging"
                         >
                           🗑️
                         </button>
@@ -1190,12 +1190,12 @@ export default function MijnMissiesPage() {
           </div>
         )}
 
-        {/* Completed Missions */}
-        {completedMissions.length > 0 && (
+        {/* Completed Challenges */}
+        {completedChallenges.length > 0 && (
           <div>
             <h2 className="text-xl sm:text-2xl font-bold text-white mb-3 sm:mb-4">Voltooid</h2>
             <div className="space-y-3 sm:space-y-4">
-              {completedMissions.map((mission) => (
+              {completedChallenges.map((mission) => (
                 <div
                   key={mission.id}
                   className="bg-gradient-to-br from-[#1A1F2E] to-[#232D1A] border border-[#3A4D23]/50 rounded-xl p-4 sm:p-6 opacity-75"
@@ -1231,7 +1231,7 @@ export default function MijnMissiesPage() {
                       </div>
                       <div className="flex gap-2">
                         <button
-                          onClick={() => toggleMission(mission.id)}
+                          onClick={() => toggleChallenge(mission.id)}
                           className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white font-semibold px-3 sm:px-4 py-2 rounded-lg transition-all duration-200 text-xs sm:text-sm"
                         >
                           Ongedaan
@@ -1239,7 +1239,7 @@ export default function MijnMissiesPage() {
                         <button
                           onClick={() => handleDeleteClick(mission)}
                           className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold px-2 sm:px-3 py-2 rounded-lg transition-all duration-200 text-xs sm:text-sm"
-                          title="Verwijder missie"
+                          title="Verwijder uitdaging"
                         >
                           🗑️
                         </button>
@@ -1253,11 +1253,11 @@ export default function MijnMissiesPage() {
         )}
 
         {/* Empty State */}
-        {missions.length === 0 && (
+        {challenges.length === 0 && (
           <div className="text-center py-12">
             <div className="text-6xl mb-4">🎯</div>
-            <h3 className="text-xl font-semibold text-white mb-2">Geen missies gevonden</h3>
-            <p className="text-gray-400">Voeg je eerste missie toe om te beginnen!</p>
+            <h3 className="text-xl font-semibold text-white mb-2">Geen uitdagings gevonden</h3>
+            <p className="text-gray-400">Voeg je eerste uitdaging toe om te beginnen!</p>
           </div>
         )}
 
@@ -1268,7 +1268,7 @@ export default function MijnMissiesPage() {
             style={{ backdropFilter: 'blur(4px)' }}
             onClick={() => {
               setShowDeleteConfirm(false);
-              setMissionToDelete(null);
+              setChallengeToDelete(null);
             }}
           >
             <div 
@@ -1278,11 +1278,11 @@ export default function MijnMissiesPage() {
               <div className="text-center">
                 <div className="text-4xl mb-4">⚔️</div>
                 <h2 className="text-2xl font-bold text-white mb-4">
-                  Missie Verwijderen
+                  Uitdaging Verwijderen
                 </h2>
                 <div className="bg-[#0F1419]/80 rounded-xl p-4 mb-6 border border-[#3A4D23]">
                   <p className="text-white text-sm leading-relaxed mb-3">
-                    <strong>Top Tier Man,</strong> ben je zeker dat je deze missie wilt verwijderen?
+                    <strong>Top Tier Man,</strong> ben je zeker dat je deze uitdaging wilt verwijderen?
                   </p>
                   <div className="bg-[#232D1A]/80 rounded-lg p-3 border border-red-600/30">
                     <p className="text-red-400 text-sm font-semibold">
@@ -1293,21 +1293,21 @@ export default function MijnMissiesPage() {
                 <div className="bg-[#232D1A]/80 rounded-xl p-4 border border-[#3A4D23] mb-6">
                   <p className="text-[#8BAE5A] text-sm font-semibold">
                     💪 <strong>Herinnering:</strong> Echte leiders maken bewuste keuzes. 
-                    Zorg ervoor dat je deze missie niet meer nodig hebt voor je groei.
+                    Zorg ervoor dat je deze uitdaging niet meer nodig hebt voor je groei.
                   </p>
                 </div>
                 <div className="flex gap-4">
                   <button
                     onClick={() => {
                       setShowDeleteConfirm(false);
-                      setMissionToDelete(null);
+                      setChallengeToDelete(null);
                     }}
                     className="flex-1 bg-[#3A4D23] text-[#8BAE5A] px-6 py-3 rounded-lg hover:bg-[#8BAE5A] hover:text-white transition-colors duration-300 font-semibold"
                   >
                     Annuleren
                   </button>
                   <button
-                    onClick={() => deleteMission(missionToDelete.id)}
+                    onClick={() => deleteChallenge(missionToDelete.id)}
                     className="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-6 py-3 rounded-lg transition-all duration-300 font-semibold"
                   >
                     Verwijderen

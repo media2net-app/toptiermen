@@ -16,6 +16,11 @@ export async function middleware(req: NextRequest) {
     data: { session },
   } = await supabase.auth.getSession();
 
+  // Redirect old mijn-missies URL to nieuwe mijn-uitdagingen URL
+  if (req.nextUrl.pathname === '/dashboard/mijn-missies') {
+    return NextResponse.redirect(new URL('/dashboard/mijn-uitdagingen', req.url));
+  }
+
   // Only check onboarding redirects for authenticated users on dashboard routes
   if (session?.user && req.nextUrl.pathname.startsWith('/dashboard')) {
     try {
@@ -35,11 +40,11 @@ export async function middleware(req: NextRequest) {
         const allowedPaths = {
           0: ['/dashboard', '/dashboard/welcome-video'],
           1: ['/dashboard', '/dashboard/welcome-video', '/dashboard/profiel'],
-          2: ['/dashboard', '/dashboard/welcome-video', '/dashboard/profiel', '/dashboard/mijn-missies'],
-          3: ['/dashboard', '/dashboard/welcome-video', '/dashboard/profiel', '/dashboard/mijn-missies', '/dashboard/trainingsschemas'],
-          4: ['/dashboard', '/dashboard/welcome-video', '/dashboard/profiel', '/dashboard/mijn-missies', '/dashboard/trainingsschemas', '/dashboard/voedingsplannen'],
-          5: ['/dashboard', '/dashboard/welcome-video', '/dashboard/profiel', '/dashboard/mijn-missies', '/dashboard/trainingsschemas', '/dashboard/voedingsplannen', '/dashboard/challenges'],
-          6: ['/dashboard', '/dashboard/welcome-video', '/dashboard/profiel', '/dashboard/mijn-missies', '/dashboard/trainingsschemas', '/dashboard/voedingsplannen', '/dashboard/challenges', '/dashboard/brotherhood/forum', '/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden']
+          2: ['/dashboard', '/dashboard/welcome-video', '/dashboard/profiel', '/dashboard/mijn-uitdagingen'],
+          3: ['/dashboard', '/dashboard/welcome-video', '/dashboard/profiel', '/dashboard/mijn-uitdagingen', '/dashboard/trainingsschemas'],
+          4: ['/dashboard', '/dashboard/welcome-video', '/dashboard/profiel', '/dashboard/mijn-uitdagingen', '/dashboard/trainingsschemas', '/dashboard/voedingsplannen'],
+          5: ['/dashboard', '/dashboard/welcome-video', '/dashboard/profiel', '/dashboard/mijn-uitdagingen', '/dashboard/trainingsschemas', '/dashboard/voedingsplannen', '/dashboard/challenges'],
+          6: ['/dashboard', '/dashboard/welcome-video', '/dashboard/profiel', '/dashboard/mijn-uitdagingen', '/dashboard/trainingsschemas', '/dashboard/voedingsplannen', '/dashboard/challenges', '/dashboard/brotherhood/forum', '/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden']
         };
 
         // Check if current path is allowed for this step
@@ -56,7 +61,7 @@ export async function middleware(req: NextRequest) {
           } else if (currentStep === 1) {
             redirectPath = '/dashboard/profiel';
           } else if (currentStep === 2) {
-            redirectPath = '/dashboard/mijn-missies';
+            redirectPath = '/dashboard/mijn-uitdagingen';
           } else if (currentStep === 3) {
             redirectPath = '/dashboard/trainingsschemas';
           } else if (currentStep === 4) {

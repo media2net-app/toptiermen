@@ -70,7 +70,7 @@ export default function OnboardingBanner() {
     switch (step) {
       case 0: return 'Bekijk de welkomstvideo om het platform te leren kennen';
       case 1: return 'Beschrijf je hoofddoel - wat wil je bereiken?';
-      case 2: return 'Selecteer 3-5 missies die je dagelijks wilt voltooien';
+      case 2: return 'Selecteer 3-5 uitdagingen die je dagelijks wilt voltooien';
       case 3: return 'Kies een trainingsschema dat bij je past';
       case 4: return 'Selecteer je voedingsplan en een challenge';
       case 5: return 'Stel je voor aan de community in het forum';

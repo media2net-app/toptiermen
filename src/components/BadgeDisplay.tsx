@@ -97,7 +97,7 @@ export default function BadgeDisplay({
       {displayBadges.length === 0 ? (
         <div className="text-center py-4">
           <p className="text-gray-400 text-sm">Nog geen badges behaald</p>
-          <p className="text-gray-500 text-xs mt-1">Voltooi missies en challenges om badges te verdienen!</p>
+          <p className="text-gray-500 text-xs mt-1">Voltooi uitdagingen en challenges om badges te verdienen!</p>
         </div>
       ) : (
         <div className="flex flex-wrap gap-2">

@@ -471,12 +471,21 @@ export default function Ledenbeheer() {
     setIsLoading(true);
     try {
       console.log('🔄 Saving member updates...', { editingMember, formData });
+      // Map package_type to subscription_tier for consistency
+      let subscriptionTier = 'basic';
+      if (formData.packageType === 'Premium Tier') {
+        subscriptionTier = 'premium';
+      } else if (formData.packageType === 'Lifetime Tier') {
+        subscriptionTier = 'lifetime';
+      }
+
       // Update profiles table
       const userUpdates: any = {
         full_name: formData.name,
         username: formData.username,
         status: formData.status,
         package_type: formData.packageType,
+        subscription_tier: subscriptionTier, // Add subscription_tier for onboarding consistency
         admin_notes: formData.adminNotes
       };
       
@@ -487,7 +496,8 @@ export default function Ledenbeheer() {
         bio: formData.bio,
         main_goal: formData.mainGoal,
         rank: formData.rank,
-        package_type: formData.packageType
+        package_type: formData.packageType,
+        subscription_tier: subscriptionTier // Add subscription_tier for onboarding consistency
       };
       
       // Update both tables
@@ -518,6 +528,7 @@ export default function Ledenbeheer() {
                 display_name: formData.username, // Also update display_name for consistency
                 status: formData.status,
                 package_type: formData.packageType,
+                subscription_tier: subscriptionTier, // Update subscription_tier in local state
                 admin_notes: formData.adminNotes,
                 bio: formData.bio,
                 main_goal: formData.mainGoal,

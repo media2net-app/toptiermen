@@ -32,8 +32,8 @@ export default function OnboardingWidget({ isVisible, onComplete }: OnboardingWi
     },
     {
       id: 'missions',
-      title: 'Kies je Eerste 3 Missies',
-      description: 'Selecteer 3 missies die je deze week wilt voltooien',
+      title: 'Kies je Eerste 3 Uitdagingen',
+      description: 'Selecteer 3 uitdagingen die je deze week wilt voltooien',
       completed: false,
       action: () => setShowMissionsModal(true),
     },
@@ -431,11 +431,11 @@ export default function OnboardingWidget({ isVisible, onComplete }: OnboardingWi
                   <span className="text-[#181F17] font-bold">4</span>
                 </div>
                 <h3 className="text-xl font-bold text-white">
-                  Kies je Eerste 3 Missies
+                  Kies je Eerste 3 Uitdagingen
                 </h3>
               </div>
               <p className="text-[#8BAE5A] mb-4">
-                Selecteer 3 missies die je deze week wilt voltooien:
+                Selecteer 3 uitdagingen die je deze week wilt voltooien:
               </p>
               <div className="space-y-3 mb-4">
                 {availableMissions.map((mission) => (
@@ -471,7 +471,7 @@ export default function OnboardingWidget({ isVisible, onComplete }: OnboardingWi
                   disabled={selectedMissions.length !== 3}
                   className="flex-1 px-4 py-2 bg-[#8BAE5A] text-[#181F17] rounded-xl font-semibold hover:bg-[#B6C948] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Toevoegen aan mijn missies
+                  Toevoegen aan mijn uitdagingen
                 </button>
               </div>
             </motion.div>

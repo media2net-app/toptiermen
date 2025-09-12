@@ -76,6 +76,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Map package_type to subscription_tier for consistency
+    let subscriptionTier = 'basic';
+    if (package_type === 'Premium Tier') {
+      subscriptionTier = 'premium';
+    } else if (package_type === 'Lifetime Tier') {
+      subscriptionTier = 'lifetime';
+    }
+
     // Create profile record
     const { error: profileError } = await supabaseAdmin
       .from('profiles')
@@ -84,7 +92,8 @@ export async function POST(request: NextRequest) {
         email: email,
         full_name: full_name,
         display_name: username || full_name,
-        package_type: package_type || 'Basic Tier'
+        package_type: package_type || 'Basic Tier',
+        subscription_tier: subscriptionTier // Add subscription_tier for onboarding consistency
       });
 
     if (profileError) {

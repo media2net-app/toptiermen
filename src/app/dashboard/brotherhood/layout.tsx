@@ -45,7 +45,7 @@ export default function BrotherhoodLayout({ children }: { children: React.ReactN
         </div>
         
         {/* Content Area */}
-        <div className="mt-2 md:mt-4 w-full max-w-7xl mx-auto">
+        <div className="mt-2 md:mt-4 w-full">
           {children}
         </div>
       </div>

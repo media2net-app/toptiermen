@@ -122,9 +122,9 @@ export const BREADCRUMB_CONFIGS = {
     parent: 'Boekenkamer',
     parentHref: '/dashboard/boekenkamer',
   },
-  mijnMissies: {
-    parent: 'Mijn Missies',
-    parentHref: '/dashboard/mijn-missies',
+  mijnUitdagingen: {
+    parent: 'Mijn Uitdagingen',
+    parentHref: '/dashboard/mijn-uitdagingen',
   },
   challenges: {
     parent: 'Challenges',

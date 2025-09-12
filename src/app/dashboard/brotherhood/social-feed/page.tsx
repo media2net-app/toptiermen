@@ -88,6 +88,7 @@ const SocialFeedPage = () => {
   const fetchPosts = async () => {
     try {
       setLoading(true);
+      console.log('🔍 Fetching social posts...');
       
       // Get posts with user info, likes count, and comments count
       const { data: postsData, error: postsError } = await supabase
@@ -95,7 +96,12 @@ const SocialFeedPage = () => {
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (postsError) throw postsError;
+      if (postsError) {
+        console.error('❌ Error fetching posts:', postsError);
+        throw postsError;
+      }
+
+      console.log('✅ Posts fetched:', postsData?.length || 0);
 
       // Get user data for all posts
       const userIds = Array.from(new Set(postsData.map(post => post.user_id)));
@@ -150,9 +156,11 @@ const SocialFeedPage = () => {
       );
 
       setPosts(postsWithStats);
+      console.log('✅ Posts processed and set:', postsWithStats.length);
     } catch (error) {
-      console.error('Error fetching posts:', error);
+      console.error('❌ Error fetching posts:', error);
       toast.error('Fout bij het laden van posts');
+      setPosts([]); // Set empty array on error
     } finally {
       setLoading(false);
     }
@@ -356,12 +364,35 @@ const SocialFeedPage = () => {
     return date.toLocaleDateString('nl-NL');
   };
 
+  // Add test post function for debugging
+  const addTestPost = async () => {
+    if (!user) return;
+    
+    try {
+      const { error } = await supabase
+        .from('social_posts')
+        .insert({
+          user_id: user.id,
+          content: 'Dit is een test post voor de Brotherhood! 🔥',
+          post_type: 'text'
+        });
+
+      if (error) throw error;
+      
+      toast.success('Test post toegevoegd!');
+      fetchPosts(); // Refresh posts
+    } catch (error) {
+      console.error('Error adding test post:', error);
+      toast.error('Fout bij het toevoegen van test post');
+    }
+  };
+
   useEffect(() => {
     fetchPosts();
   }, []);
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+    <div className="w-full px-4 sm:px-6 md:px-8">
       {/* Create Post Composer */}
       <section className="mb-4 sm:mb-6">
         <div className="bg-[#232D1A]/80 rounded-xl shadow-xl border border-[#3A4D23]/40 p-3 sm:p-4 md:p-6">
@@ -476,16 +507,33 @@ const SocialFeedPage = () => {
       </section>
 
       {/* Feed List */}
-      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+      <section className="space-y-4 sm:space-y-6">
         {loading ? (
-          <div className="col-span-full bg-[#232D1A]/80 rounded-xl shadow-xl border border-[#3A4D23]/40 p-8 text-center">
+          <div className="bg-[#232D1A]/80 rounded-xl shadow-xl border border-[#3A4D23]/40 p-8 text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
             <p className="text-[#8BAE5A]">Posts laden...</p>
           </div>
         ) : posts.length === 0 ? (
-          <div className="col-span-full bg-[#232D1A]/80 rounded-xl shadow-xl border border-[#3A4D23]/40 p-8 text-center">
+          <div className="bg-[#232D1A]/80 rounded-xl shadow-xl border border-[#3A4D23]/40 p-8 text-center">
+            <div className="text-6xl mb-4">🔥</div>
             <p className="text-[#8BAE5A] text-lg mb-2">Nog geen posts</p>
             <p className="text-[#8BAE5A]/70 text-sm">Wees de eerste om iets te delen met de Brotherhood!</p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <button 
+                onClick={() => setNewPost('Hallo Brotherhood! 👋')}
+                className="px-6 py-2 bg-[#8BAE5A] text-[#181F17] rounded-lg hover:bg-[#B6C948] transition-colors font-semibold"
+              >
+                Eerste post plaatsen
+              </button>
+              {profile?.role === 'admin' && (
+                <button 
+                  onClick={addTestPost}
+                  className="px-6 py-2 bg-[#FFD700] text-[#181F17] rounded-lg hover:bg-[#FFE55C] transition-colors font-semibold"
+                >
+                  Test Post (Admin)
+                </button>
+              )}
+            </div>
           </div>
         ) : (
           posts.map((post) => (

@@ -302,14 +302,14 @@ export default function Dashboard() {
 
           {/* Dashboard Content */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8 animate-fade-in-up">
-            {/* Mijn Missies */}
-            <Link href="/dashboard/mijn-missies" className={`bg-gradient-to-br from-[#181F17] to-[#232D1A] border rounded-xl p-4 sm:p-6 text-center transition-transform duration-300 cursor-pointer block ${
+            {/* Mijn Uitdagingen */}
+            <Link href="/dashboard/mijn-uitdagingen" className={`bg-gradient-to-br from-[#181F17] to-[#232D1A] border rounded-xl p-4 sm:p-6 text-center transition-transform duration-300 cursor-pointer block ${
               stats?.missions.completedThisWeek === stats?.missions.total && (stats?.missions.total || 0) > 0
                 ? 'border-[#8BAE5A] shadow-2xl shadow-[#8BAE5A]/20 hover:scale-105 hover:shadow-[#8BAE5A]/40'
                 : 'border-[#3A4D23]/30 hover:scale-105 hover:shadow-2xl hover:border-[#8BAE5A]/50'
             }`}>
               <div className="flex items-center justify-between mb-3 sm:mb-4">
-                <h3 className="text-lg sm:text-xl font-bold text-white">Mijn Missies</h3>
+                <h3 className="text-lg sm:text-xl font-bold text-white">Mijn Uitdagingen</h3>
                 <span className={`text-xl sm:text-2xl ${
                   stats?.missions.completedThisWeek === stats?.missions.total && (stats?.missions.total || 0) > 0
                     ? 'text-[#FFD700]'

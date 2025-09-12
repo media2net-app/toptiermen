@@ -65,7 +65,7 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
       id: 2,
       title: 'Uitdagingen selecteren',
       description: 'Kies je dagelijkse uitdagingen',
-      targetPage: '/dashboard/mijn-missies',
+      targetPage: '/dashboard/mijn-uitdagingen',
       targetMenuLabel: 'Mijn Uitdagingen',
       completed: false,
       icon: '🔥',

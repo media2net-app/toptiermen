@@ -116,6 +116,14 @@ function TrainingschemasContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  // Debug logging
+  console.log('🔍 TrainingschemasContent render:', {
+    user: user ? { id: user.id, email: user.email } : null,
+    authLoading,
+    subscriptionLoading,
+    hasAccessTraining: hasAccess('training')
+  });
+
   // Training schemas state
   const [trainingSchemas, setTrainingSchemas] = useState<TrainingSchema[]>([]);
   const [trainingLoading, setTrainingLoading] = useState(true);
@@ -149,8 +157,9 @@ function TrainingschemasContent() {
   const fetchTrainingSchemas = async () => {
     try {
       setTrainingLoading(true);
+      setTrainingError(null);
       
-      console.log('🔍 Fetching training schemas directly from database (same as admin)...');
+      console.log('🔍 Fetching training schemas for user:', user?.email);
       
       // Use the same direct Supabase query as the admin dashboard, including days
       const { data, error } = await supabase
@@ -168,7 +177,7 @@ function TrainingschemasContent() {
       
       if (error) {
         console.error('❌ Error fetching training schemas:', error);
-        setTrainingError('Failed to load training schemas');
+        setTrainingError(`Failed to load training schemas: ${error.message}`);
         return;
       }
       
@@ -322,7 +331,10 @@ function TrainingschemasContent() {
 
   const fetchUserTrainingProfile = async () => {
     try {
-      if (!user?.id) return;
+      if (!user?.id) {
+        console.log('❌ No user ID available for training profile fetch');
+        return;
+      }
       
       setProfileLoading(true);
       console.log('🔍 Fetching training profile for user:', user.email);
@@ -579,7 +591,10 @@ function TrainingschemasContent() {
   useEffect(() => {
     if (user?.id) {
       console.log('🔄 User changed, fetching training profile for:', user.email);
+      console.log('🔄 User details:', { id: user.id, email: user.email });
       fetchUserTrainingProfile();
+    } else {
+      console.log('❌ No user ID available in useEffect');
     }
   }, [user?.id]);
 
@@ -633,11 +648,41 @@ function TrainingschemasContent() {
     checkOnboardingStatus();
   }, [user?.id]);
 
+  // Show loading state while authentication is being checked
   if (authLoading || subscriptionLoading) {
     return (
       <PageLayout title="Training Schemas">
         <div className="flex items-center justify-center min-h-screen">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#8BAE5A]"></div>
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
+            <h3 className="text-xl font-semibold text-white mb-2">Trainingsschemas laden...</h3>
+            <p className="text-gray-300">Even geduld, we controleren je toegang</p>
+          </div>
+        </div>
+      </PageLayout>
+    );
+  }
+
+  // Check if user is authenticated
+  if (!user) {
+    return (
+      <PageLayout title="Training Schemas">
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] rounded-full flex items-center justify-center">
+              <AcademicCapIcon className="w-12 h-12 text-[#0A0F0A]" />
+            </div>
+            <h1 className="text-3xl font-bold text-white mb-4">Authenticatie Vereist</h1>
+            <p className="text-xl text-gray-300 mb-8">
+              Je moet ingelogd zijn om trainingsschemas te bekijken
+            </p>
+            <button
+              onClick={() => router.push('/login')}
+              className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#0A0F0A] font-bold px-8 py-3 rounded-lg hover:from-[#A6C97B] hover:to-[#FFE55C] transition-all duration-200"
+            >
+              Inloggen
+            </button>
+          </div>
         </div>
       </PageLayout>
     );
@@ -1115,7 +1160,24 @@ function TrainingschemasContent() {
               </div>
             ) : trainingError ? (
               <div className="text-center py-12">
-                <p className="text-red-400">{trainingError}</p>
+                <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-6 max-w-md mx-auto">
+                  <div className="w-12 h-12 mx-auto mb-4 bg-red-500/20 rounded-full flex items-center justify-center">
+                    <svg className="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-lg font-semibold text-white mb-2">Fout bij laden</h3>
+                  <p className="text-red-400 text-sm mb-4">{trainingError}</p>
+                  <button
+                    onClick={() => {
+                      setTrainingError(null);
+                      fetchTrainingSchemas();
+                    }}
+                    className="px-4 py-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors text-sm font-medium"
+                  >
+                    Opnieuw proberen
+                  </button>
+                </div>
               </div>
             ) : trainingSchemas.length === 0 ? (
               <div className="text-center py-12">

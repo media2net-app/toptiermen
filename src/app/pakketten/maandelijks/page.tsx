@@ -40,7 +40,7 @@ function VideoPlayer({ src, poster }: VideoPlayerProps) {
       const alternatives = [
         '/platform-preview.mp4',
         '/welkom-v2.MP4',
-        '/welkom.MP4'
+        '/welkom-v2.MP4'
       ];
       
       const nextSrc = alternatives[retryCount + 1];

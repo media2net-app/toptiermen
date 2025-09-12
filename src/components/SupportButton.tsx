@@ -126,7 +126,7 @@ const supportCategories: SupportCategory[] = [
   },
   {
     id: 'challenges',
-    title: 'Challenges & Missies',
+    title: 'Challenges & Uitdagingen',
     icon: FireIcon,
     faqs: [
       {
@@ -498,7 +498,7 @@ export default function SupportButton({ className = '' }: SupportButtonProps) {
                           <option value="billing">Facturatie & Betalingen</option>
                           <option value="account">Account & Profiel</option>
                           <option value="training">Training & Voeding</option>
-                          <option value="challenges">Challenges & Missies</option>
+                          <option value="challenges">Challenges & Uitdagingen</option>
                           <option value="academy">Academy & Content</option>
                           <option value="other">Anders</option>
                         </select>

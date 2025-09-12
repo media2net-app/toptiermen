@@ -279,22 +279,22 @@ export async function POST(request: Request) {
       }
       
       if (step === 2 && selectedMissions && selectedMissions.length > 0) {
-        // Create user missions
-        const missionData = selectedMissions.map((missionId: string) => ({
+        // Create user challenges (missions)
+        const challengeData = selectedMissions.map((challengeId: string) => ({
           user_id: actualUserId,
-          mission_id: missionId,
+          mission_id: challengeId,
           is_active: true,
           created_at: new Date().toISOString()
         }));
         
-        const { error: missionError } = await supabase
+        const { error: challengeError } = await supabase
           .from('user_missions')
-          .insert(missionData);
+          .insert(challengeData);
           
-        if (missionError) {
-          console.log('⚠️ Error creating missions:', missionError.message);
+        if (challengeError) {
+          console.log('⚠️ Error creating challenges:', challengeError.message);
         } else {
-          console.log('✅ User missions created:', selectedMissions);
+          console.log('✅ User challenges created:', selectedMissions);
         }
       }
       
