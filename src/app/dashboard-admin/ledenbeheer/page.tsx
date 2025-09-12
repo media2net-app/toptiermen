@@ -468,6 +468,7 @@ export default function Ledenbeheer() {
   };
 
   const handleSave = async () => {
+    console.log('🔍 handleSave called with:', { editingMember, formData });
     setIsLoading(true);
     try {
       console.log('🔄 Saving member updates...', { editingMember, formData });
@@ -1309,7 +1310,7 @@ export default function Ledenbeheer() {
                       <option value="">Geen pakket</option>
                       <option value="Basic Tier">Basic Tier</option>
                       <option value="Premium Tier">Premium Tier</option>
-                      <option value="Lifetime Access">Lifetime Access</option>
+                      <option value="Lifetime Tier">Lifetime Tier</option>
                     </select>
                     <p className="text-xs text-gray-500 mt-1">Admin Actie: Wijzig het pakket type om toegang tot features te beheren. Basic Tier heeft geen toegang tot trainingsschemas en voedingsplannen.</p>
                   </div>
