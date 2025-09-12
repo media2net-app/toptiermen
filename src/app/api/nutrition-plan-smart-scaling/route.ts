@@ -78,6 +78,7 @@ function calculateMealNutrition(ingredients: any[], ingredientDatabase: any): an
     }
     
     if (!nutritionData) {
+      console.log('❌ Ingredient not found in calculateMealNutrition:', ingredient.name, 'Available:', Object.keys(ingredientDatabase).slice(0, 5));
       return;
     }
     
@@ -325,42 +326,65 @@ function smartScaleIngredients(
       amount: newAmount,
       originalAmount: ingredient.amount,
       adjustmentFactor: adjustmentFactor,
-      adjustmentReason: adjustmentReason
+      adjustmentReason: adjustmentReason,
+      unit: nutritionData.unit_type // Ensure unit type is passed through
     };
   });
 }
 
 function calculateMacroAdjustments(originalTotals: any, targetTotals: any): any {
+  // Calculate overall scale factor to get calories close to target
+  const targetCalories = targetTotals.calories;
+  const originalCalories = originalTotals.calories;
+  
+  // Calculate base scale factor to get calories within 95-105% range
+  const targetCalorieRange = { min: targetCalories * 0.95, max: targetCalories * 1.05 };
+  let baseScaleFactor = 1;
+  
+  if (originalCalories < targetCalorieRange.min) {
+    baseScaleFactor = targetCalorieRange.min / originalCalories;
+  } else if (originalCalories > targetCalorieRange.max) {
+    baseScaleFactor = targetCalorieRange.max / originalCalories;
+  }
+  
+  // Apply base scaling to get close to target calories
+  const scaledTotals = {
+    protein: originalTotals.protein * baseScaleFactor,
+    carbs: originalTotals.carbs * baseScaleFactor,
+    fat: originalTotals.fat * baseScaleFactor
+  };
+  
+  // Now calculate fine-tuning adjustments for each macro
   const adjustments = {
     protein: 1,
     carbs: 1,
     fat: 1
   };
   
-  // Calculate adjustment factors to get within 95-105% range
+  // Target ranges for individual macros (95-105%)
   const targetRanges = {
     protein: { min: targetTotals.protein * 0.95, max: targetTotals.protein * 1.05 },
     carbs: { min: targetTotals.carbs * 0.95, max: targetTotals.carbs * 1.05 },
     fat: { min: targetTotals.fat * 0.95, max: targetTotals.fat * 1.05 }
   };
   
-  // Check if we need adjustments
-  if (originalTotals.protein < targetRanges.protein.min) {
-    adjustments.protein = targetRanges.protein.min / originalTotals.protein;
-  } else if (originalTotals.protein > targetRanges.protein.max) {
-    adjustments.protein = targetRanges.protein.max / originalTotals.protein;
+  // Calculate adjustments to bring each macro into range (target 100% for each macro)
+  if (scaledTotals.protein < targetRanges.protein.min) {
+    adjustments.protein = targetTotals.protein / scaledTotals.protein; // Target exact amount
+  } else if (scaledTotals.protein > targetRanges.protein.max) {
+    adjustments.protein = targetTotals.protein / scaledTotals.protein; // Target exact amount
   }
   
-  if (originalTotals.carbs < targetRanges.carbs.min) {
-    adjustments.carbs = targetRanges.carbs.min / originalTotals.carbs;
-  } else if (originalTotals.carbs > targetRanges.carbs.max) {
-    adjustments.carbs = targetRanges.carbs.max / originalTotals.carbs;
+  if (scaledTotals.carbs < targetRanges.carbs.min) {
+    adjustments.carbs = targetTotals.carbs / scaledTotals.carbs; // Target exact amount
+  } else if (scaledTotals.carbs > targetRanges.carbs.max) {
+    adjustments.carbs = targetTotals.carbs / scaledTotals.carbs; // Target exact amount
   }
   
-  if (originalTotals.fat < targetRanges.fat.min) {
-    adjustments.fat = targetRanges.fat.min / originalTotals.fat;
-  } else if (originalTotals.fat > targetRanges.fat.max) {
-    adjustments.fat = targetRanges.fat.max / originalTotals.fat;
+  if (scaledTotals.fat < targetRanges.fat.min) {
+    adjustments.fat = targetTotals.fat / scaledTotals.fat; // Target exact amount
+  } else if (scaledTotals.fat > targetRanges.fat.max) {
+    adjustments.fat = targetTotals.fat / scaledTotals.fat; // Target exact amount
   }
   
   return adjustments;
@@ -470,7 +494,21 @@ export async function GET(request: NextRequest) {
     };
     console.log('🎯 Target totals:', targetTotals);
     
-    // Calculate macro adjustments needed
+    // Calculate base scaling factor to get calories in range
+    const targetCalories = targetTotals.calories;
+    const originalCalories = originalTotals.calories;
+    const targetCalorieRange = { min: targetCalories * 0.95, max: targetCalories * 1.05 };
+    let baseScaleFactor = 1;
+    
+    if (originalCalories < targetCalorieRange.min) {
+      baseScaleFactor = targetCalorieRange.min / originalCalories;
+    } else if (originalCalories > targetCalorieRange.max) {
+      baseScaleFactor = targetCalorieRange.max / originalCalories;
+    }
+    
+    console.log('📊 Base scale factor:', baseScaleFactor);
+    
+    // Calculate macro adjustments needed (on top of base scaling)
     const macroAdjustments = calculateMacroAdjustments(originalTotals, targetTotals);
     console.log('⚖️ Macro adjustments:', macroAdjustments);
     
@@ -502,8 +540,15 @@ export async function GET(request: NextRequest) {
       
       mealTypes.forEach(mealType => {
         if (dayData[mealType] && dayData[mealType].ingredients && Array.isArray(dayData[mealType].ingredients)) {
+          // First apply base scaling to all ingredients
+          const baseScaledIngredients = dayData[mealType].ingredients.map(ingredient => ({
+            ...ingredient,
+            amount: ingredient.amount * baseScaleFactor
+          }));
+          
+          // Then apply macro-specific adjustments
           const smartScaledIngredients = smartScaleIngredients(
-            dayData[mealType].ingredients, 
+            baseScaledIngredients, 
             macroAdjustments, 
             INGREDIENT_DATABASE,
             debugInfo
