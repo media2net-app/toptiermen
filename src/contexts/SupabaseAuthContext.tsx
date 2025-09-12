@@ -172,16 +172,27 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
         login_method: 'email_password'
       };
 
+      console.log('📝 Attempting to log login attempt:', { email, success, errorMessage });
+
       // Log to API endpoint
-      await fetch('/api/admin/login-logs', {
+      const response = await fetch('/api/admin/login-logs', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(logData),
       });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('❌ Login logging API error:', response.status, errorData);
+        throw new Error(`API error: ${response.status} - ${errorData.error || 'Unknown error'}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ Login attempt logged successfully:', result);
     } catch (logError) {
-      console.error('Failed to log login attempt:', logError);
+      console.error('❌ Failed to log login attempt:', logError);
       // Don't fail login if logging fails
     }
   };
