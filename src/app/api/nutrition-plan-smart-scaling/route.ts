@@ -560,6 +560,14 @@ export async function GET(request: NextRequest) {
     // Calculate final scale factor (for compatibility)
     const scaleFactor = finalTotals.calories / originalTotals.calories;
     
+    // Calculate plan percentages from original totals
+    const totalMacroCalories = originalTotals.protein * 4 + originalTotals.carbs * 4 + originalTotals.fat * 9;
+    const planPercentages = {
+      protein: totalMacroCalories > 0 ? Math.round(((originalTotals.protein * 4) / totalMacroCalories) * 100) : 0,
+      carbs: totalMacroCalories > 0 ? Math.round(((originalTotals.carbs * 4) / totalMacroCalories) * 100) : 0,
+      fat: totalMacroCalories > 0 ? Math.round(((originalTotals.fat * 9) / totalMacroCalories) * 100) : 0
+    };
+
     const scalingInfo = {
       scaleFactor: Math.round(weightScaleFactor * 100) / 100, // Use weight-based factor
       originalTotals,
@@ -567,6 +575,11 @@ export async function GET(request: NextRequest) {
       macroAdjustments,
       userWeight,
       planBaseWeight,
+      targetCalories: targetTotals.calories,
+      targetProtein: targetTotals.protein,
+      targetCarbs: targetTotals.carbs,
+      targetFat: targetTotals.fat,
+      planPercentages,
       debugInfo
     };
     
