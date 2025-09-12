@@ -340,7 +340,7 @@ export default function MijnUitdagingenPage() {
     };
 
     try {
-      const response = await fetch('/api/challenges-simple', {
+      const response = await fetch('/api/missions-simple', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -354,10 +354,10 @@ export default function MijnUitdagingenPage() {
 
       if (response.ok) {
         // Reload challenges to show the new one
-        const updatedResponse = await fetch(`/api/challenges-simple?userId=${user.id}`);
+        const updatedResponse = await fetch(`/api/missions-simple?userId=${user.id}`);
         if (updatedResponse.ok) {
           const data = await updatedResponse.json();
-          const updatedChallenges = data.challenges.map((mission: Challenge) => ({
+          const updatedChallenges = data.missions.map((mission: Challenge) => ({
             ...mission,
             done: mission.type === 'Dagelijks' 
               ? isChallengeCompletedToday(mission.last_completion_date)
@@ -411,7 +411,7 @@ export default function MijnUitdagingenPage() {
         setLoading(true);
         setError(null);
 
-        const response = await fetch(`/api/challenges-simple?userId=${user.id}`);
+        const response = await fetch(`/api/missions-simple?userId=${user.id}`);
         if (!response.ok) {
           throw new Error('Failed to load challenges');
         }
@@ -419,7 +419,7 @@ export default function MijnUitdagingenPage() {
         const data = await response.json();
         
         // Add created_at to challenges that don't have it and update daily tracking
-        const updatedChallenges = data.challenges.map((mission: Challenge, index: number) => {
+        const updatedChallenges = data.missions.map((mission: Challenge, index: number) => {
           let missionWithDate = mission;
           
           // Add created_at if missing
@@ -553,7 +553,7 @@ export default function MijnUitdagingenPage() {
     if (!user?.id) return;
 
     try {
-      const response = await fetch('/api/challenges-simple', {
+      const response = await fetch('/api/missions-simple', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -617,7 +617,7 @@ export default function MijnUitdagingenPage() {
     if (!user?.id || !newChallenge.title.trim()) return;
 
     try {
-      const response = await fetch('/api/challenges-simple', {
+      const response = await fetch('/api/missions-simple', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -661,7 +661,7 @@ export default function MijnUitdagingenPage() {
     if (!user?.id) return;
 
     try {
-      const response = await fetch('/api/challenges-simple', {
+      const response = await fetch('/api/missions-simple', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
