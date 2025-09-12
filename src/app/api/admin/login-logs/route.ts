@@ -39,21 +39,10 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Fetch login logs with user profile information
+    // Fetch login logs first
     const { data: logs, error: logsError } = await supabase
       .from('login_logs')
-      .select(`
-        *,
-        profiles!login_logs_user_id_fkey(
-          id,
-          full_name,
-          first_name,
-          last_name,
-          username,
-          email,
-          role
-        )
-      `)
+      .select('*')
       .gte('created_at', `${startDate}T00:00:00.000Z`)
       .lte('created_at', `${endDate}T23:59:59.999Z`)
       .order('created_at', { ascending: false })
@@ -66,6 +55,30 @@ export async function GET(request: NextRequest) {
         { status: 500 }
       );
     }
+
+    // Fetch user profiles for the logs
+    const userIds = logs?.map(log => log.user_id).filter(Boolean) || [];
+    let profiles: any = {};
+    
+    if (userIds.length > 0) {
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('id, full_name, first_name, last_name, username, email, role')
+        .in('id', userIds);
+      
+      if (!profileError && profileData) {
+        profiles = profileData.reduce((acc, profile) => {
+          acc[profile.id] = profile;
+          return acc;
+        }, {} as any);
+      }
+    }
+
+    // Add profile data to logs
+    const logsWithProfiles = logs?.map(log => ({
+      ...log,
+      profiles: log.user_id ? profiles[log.user_id] : null
+    })) || [];
 
     // Get statistics
     const { data: statsData, error: statsError } = await supabase
@@ -90,7 +103,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      logs: logs || [],
+      logs: logsWithProfiles,
       stats,
       pagination: {
         limit,
