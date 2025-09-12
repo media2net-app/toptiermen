@@ -20,6 +20,14 @@ interface ForumPost {
   content: string;
   created_at: string;
   author_id: string;
+  profiles?: {
+    id: string;
+    full_name: string;
+    first_name: string;
+    last_name: string;
+    username: string;
+    email: string;
+  };
 }
 
 interface ForumTopic {
@@ -214,7 +222,19 @@ const VoorstellenTopicPage = () => {
   };
 
   const getAuthorName = (post: ForumPost) => {
-    // For now, just show a generic name since we can't access user data due to RLS
+    // Use real user data from profiles
+    if (post.profiles) {
+      if (post.profiles.full_name) {
+        return post.profiles.full_name;
+      } else if (post.profiles.first_name && post.profiles.last_name) {
+        return `${post.profiles.first_name} ${post.profiles.last_name}`;
+      } else if (post.profiles.username) {
+        return post.profiles.username;
+      } else if (post.profiles.email) {
+        return post.profiles.email.split('@')[0]; // Use email prefix as fallback
+      }
+    }
+    // Fallback to generic name if no profile data
     return `Gebruiker ${post.author_id.substring(0, 8)}`;
   };
 
@@ -429,7 +449,7 @@ const VoorstellenTopicPage = () => {
             {posts.slice(0, 5).map((post) => (
               <li key={post.id}>
                 <span className="inline-block w-2 h-2 bg-[#FFD700] rounded-full mr-2 align-middle"></span>
-                {post.content.substring(0, 50)}... <span className="text-[#FFD700]">{getAuthorName(post)}</span>
+                {post.content.substring(0, 50)}... <span className="text-[#FFD700]">- {getAuthorName(post)}</span>
               </li>
             ))}
           </ul>

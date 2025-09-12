@@ -84,10 +84,20 @@ export async function GET(request: NextRequest) {
 
     console.log('📝 API: Fetching forum posts for topic:', topic_id);
 
-    // Fetch posts using service role key (bypasses RLS)
+    // Fetch posts with author profile information using service role key (bypasses RLS)
     const { data, error } = await supabase
       .from('forum_posts')
-      .select('*')
+      .select(`
+        *,
+        profiles!forum_posts_author_id_fkey(
+          id,
+          full_name,
+          first_name,
+          last_name,
+          username,
+          email
+        )
+      `)
       .eq('topic_id', topic_id)
       .order('created_at', { ascending: true });
 
