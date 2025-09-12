@@ -37,7 +37,7 @@ interface ForumTopic {
 }
 
 const VoorstellenTopicPage = () => {
-  const { user } = useSupabaseAuth();
+  const { user, loading: authLoading } = useSupabaseAuth();
   const { completeStep } = useOnboarding();
   const [topic, setTopic] = useState<ForumTopic | null>(null);
   const [posts, setPosts] = useState<ForumPost[]>([]);
@@ -48,10 +48,10 @@ const VoorstellenTopicPage = () => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   useEffect(() => {
-    if (user) {
+    if (user && !authLoading) {
       fetchTopicAndPosts();
     }
-  }, [user]);
+  }, [user, authLoading]);
 
   useEffect(() => {
     if (topic && user && !hasPosted) {
@@ -218,7 +218,8 @@ const VoorstellenTopicPage = () => {
     return `Gebruiker ${post.author_id.substring(0, 8)}`;
   };
 
-  if (loading) {
+  // Show loading state while authenticating or fetching data
+  if (authLoading || loading) {
     return (
       <div className="flex flex-col md:flex-row gap-8 md:gap-12 max-w-7xl mx-auto w-full px-2 sm:px-4 md:px-0">
         <div className="flex-1">
@@ -229,6 +230,26 @@ const VoorstellenTopicPage = () => {
               <div className="h-4 bg-gray-700 rounded mb-2"></div>
               <div className="h-4 bg-gray-700 rounded w-2/3"></div>
             </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error if no user after auth loading is complete
+  if (!user && !authLoading) {
+    return (
+      <div className="flex flex-col md:flex-row gap-8 md:gap-12 max-w-7xl mx-auto w-full px-2 sm:px-4 md:px-0">
+        <div className="flex-1">
+          <div className="bg-[#232D1A]/90 rounded-2xl shadow-xl border border-[#3A4D23]/40 p-8 text-center">
+            <h1 className="text-2xl font-bold text-white mb-4">Authenticatie vereist</h1>
+            <p className="text-[#8BAE5A] mb-6">Je moet ingelogd zijn om deze pagina te bekijken.</p>
+            <Link 
+              href="/login"
+              className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-bold rounded-xl hover:from-[#B6C948] hover:to-[#8BAE5A] transition-all"
+            >
+              Inloggen
+            </Link>
           </div>
         </div>
       </div>

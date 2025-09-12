@@ -10,6 +10,8 @@ export async function GET(request: NextRequest) {
         id,
         email,
         role,
+        subscription_tier,
+        subscription_status,
         created_at
       `)
       .order('created_at', { ascending: false });
@@ -82,6 +84,8 @@ export async function GET(request: NextRequest) {
         id: user.id,
         email: user.email,
         role: user.role || 'member',
+        subscriptionTier: user.subscription_tier || 'basic',
+        subscriptionStatus: user.subscription_status || 'active',
         createdAt: user.created_at,
         onboardingCompleted: onboarding?.onboarding_completed || false,
         currentStep: actualCurrentStep,

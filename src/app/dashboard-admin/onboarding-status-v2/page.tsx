@@ -8,6 +8,8 @@ interface UserOnboarding {
   id: string;
   email: string;
   role: string;
+  subscriptionTier: string;
+  subscriptionStatus: string;
   createdAt: string;
   onboardingCompleted: boolean;
   currentStep: number;
@@ -242,6 +244,9 @@ export default function OnboardingStatusV2Page() {
                     Rol
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                    Pakket
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                     Status
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
@@ -278,6 +283,18 @@ export default function OnboardingStatusV2Page() {
                           : 'bg-[#8BAE5A]/20 text-[#8BAE5A]'
                       }`}>
                         {user.role?.toLowerCase() === 'admin' ? 'Admin' : 'Lid'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                        user.subscriptionTier === 'premium' 
+                          ? 'bg-purple-100 text-purple-800' 
+                          : user.subscriptionTier === 'lifetime'
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : 'bg-gray-100 text-gray-800'
+                      }`}>
+                        {user.subscriptionTier === 'premium' ? 'Premium' : 
+                         user.subscriptionTier === 'lifetime' ? 'Lifetime' : 'Basic'}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">

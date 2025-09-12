@@ -40,10 +40,10 @@ export function useSubscription(): UseSubscriptionReturn {
         setLoading(true);
         setError(null);
 
-        // Get subscription data directly from profiles table using package_type
+        // Get subscription data directly from profiles table using subscription_tier
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
-          .select('package_type, role')
+          .select('subscription_tier, subscription_status, role')
           .eq('id', user.id)
           .single();
 
@@ -53,20 +53,12 @@ export function useSubscription(): UseSubscriptionReturn {
           return;
         }
 
-        // Map profile data to subscription format using package_type
-        const packageType = profile.package_type || 'Basic Tier';
-        let tier = 'basic';
-        
-        if (packageType === 'Premium Tier') {
-          tier = 'premium';
-        } else if (packageType === 'Lifetime Tier') {
-          tier = 'lifetime';
-        } else {
-          tier = 'basic'; // Default for 'Basic Tier' or null
-        }
+        // Use subscription_tier directly
+        const tier = profile.subscription_tier || 'basic';
 
         console.log('🔍 Subscription data loaded:', {
-          packageType,
+          subscription_tier: profile.subscription_tier,
+          subscription_status: profile.subscription_status,
           tier,
           role: profile.role
         });

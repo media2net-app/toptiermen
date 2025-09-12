@@ -372,8 +372,9 @@ export default function ChallengesPage() {
                           toast.success('Challenge opgeslagen! Doorsturen naar forum...');
                           // Navigate to specific forum topic for step 6 (forum introduction)
                           setTimeout(() => {
+                            // Use router.push instead of window.location.href for better navigation
                             window.location.href = '/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden';
-                          }, 1500);
+                          }, 2000); // Increased timeout to give more time for the API call to complete
                         } else {
                           toast.error('Er is een fout opgetreden');
                         }
