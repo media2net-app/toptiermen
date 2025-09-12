@@ -9,6 +9,7 @@ function generateTempPassword(): string {
   const numbers = '0123456789';
   const symbols = '!@#$%^&*()_+-=[]{}|;:,.<>?';
   
+  // Create a password with guaranteed 12+ characters
   let password = '';
   
   // Ensure at least one character from each category
@@ -17,25 +18,23 @@ function generateTempPassword(): string {
   password += numbers[Math.floor(Math.random() * numbers.length)];
   password += symbols[Math.floor(Math.random() * symbols.length)];
   
-  // Fill the rest with random characters (ensure minimum 12 characters)
+  // Add 8 more random characters to ensure 12+ total
   const allChars = uppercase + lowercase + numbers + symbols;
-  for (let i = 4; i < 12; i++) {
+  for (let i = 0; i < 8; i++) {
     password += allChars[Math.floor(Math.random() * allChars.length)];
   }
   
-  // Shuffle the password
-  let shuffled = password.split('').sort(() => Math.random() - 0.5).join('');
-  
-  // Ensure minimum length of 12 characters
-  if (shuffled.length < 12) {
-    const additionalChars = allChars;
-    for (let i = shuffled.length; i < 12; i++) {
-      shuffled += additionalChars[Math.floor(Math.random() * additionalChars.length)];
-    }
+  // Shuffle the password array
+  const passwordArray = password.split('');
+  for (let i = passwordArray.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [passwordArray[i], passwordArray[j]] = [passwordArray[j], passwordArray[i]];
   }
   
-  console.log(`🔑 Generated password: ${shuffled} (length: ${shuffled.length})`);
-  return shuffled;
+  const finalPassword = passwordArray.join('');
+  
+  console.log(`🔑 Generated password: ${finalPassword} (length: ${finalPassword.length})`);
+  return finalPassword;
 }
 
 export async function POST(request: NextRequest) {
@@ -117,7 +116,9 @@ export async function POST(request: NextRequest) {
             const existingUser = authUsers?.users?.find(u => u.email === email);
             
             if (existingUser) {
-              console.log('✅ Found existing auth user, updating password...');
+              console.log(`✅ Found existing auth user ${existingUser.id}, updating password...`);
+              console.log(`🔄 Setting password: ${newTempPassword} (length: ${newTempPassword.length})`);
+              
               const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
                 existingUser.id,
                 { password: newTempPassword }
@@ -126,7 +127,7 @@ export async function POST(request: NextRequest) {
               if (updateError) {
                 console.error('❌ Error updating existing user password:', updateError);
               } else {
-                console.log('✅ Successfully updated existing user password');
+                console.log(`✅ Successfully updated existing user password for ${existingUser.id}`);
               }
             } else {
               console.log('⚠️ Could not find existing auth user to update password');
@@ -198,6 +199,8 @@ export async function POST(request: NextRequest) {
     const newTempPassword = generateTempPassword();
     
     // Update user password in Supabase Auth
+    console.log(`🔄 Updating password for user ${user.id} with password: ${newTempPassword} (length: ${newTempPassword.length})`);
+    
     const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
       user.id,
       { password: newTempPassword }
@@ -210,6 +213,8 @@ export async function POST(request: NextRequest) {
         error: 'Fout bij het resetten van wachtwoord'
       }, { status: 500 });
     }
+    
+    console.log(`✅ Password successfully updated for user ${user.id}`);
 
     // Send account credentials email with new password
     try {
