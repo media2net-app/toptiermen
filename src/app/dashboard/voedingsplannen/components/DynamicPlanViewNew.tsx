@@ -1575,28 +1575,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
             })()}
           </div>
 
-          {/* Personalization Explanation */}
-          <div className="mt-6 p-4 bg-[#8BAE5A]/10 border border-[#8BAE5A]/30 rounded-lg">
-            <div className="flex items-start gap-3">
-              <div className="flex-shrink-0">
-                <svg className="w-5 h-5 text-[#8BAE5A] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <div>
-                <h4 className="text-[#8BAE5A] font-semibold mb-1">Hoe werkt de personalisatie?</h4>
-                <p className="text-gray-300 text-sm mb-2">
-                  Dit plan is automatisch aangepast voor jouw gewicht van <span className="font-semibold text-white">{planData.userProfile?.weight}kg</span>. 
-                  Alle ingrediënten zijn geschaald met factor <span className="font-semibold text-white">{planData.scalingInfo?.scaleFactor?.toFixed(2) || '1.00'}</span>.
-                </p>
-                <div className="text-xs text-gray-400">
-                  <div className="mb-1">• <span className="text-[#8BAE5A]">Standaard plan:</span> Voor 100kg matig actief ({planData.scalingInfo?.planTargetCalories || 0} kcal)</div>
-                  <div className="mb-1">• <span className="text-[#8BAE5A]">Jouw plan:</span> Voor {planData.userProfile?.weight}kg matig actief ({planData.userProfile?.targetCalories || 0} kcal)</div>
-                  <div>• <span className="text-[#8BAE5A]">Factor:</span> {planData.scalingInfo?.scaleFactor?.toFixed(2) || '1.00'} (alle ingrediënten worden automatisch aangepast)</div>
-                </div>
-              </div>
-            </div>
-          </div>
+          {/* Personalization explanation removed */}
 
           {/* Safety Margin Notice */}
           <div className="mt-4 p-4 bg-blue-900/20 border border-blue-500/30 rounded-lg">
