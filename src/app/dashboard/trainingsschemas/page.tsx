@@ -227,9 +227,23 @@ function TrainingschemasContent() {
     console.log('🔍 Filtering schemas for profile:', profile);
     console.log('📊 Total schemas before filtering:', schemas.length);
     
+    // Map frontend training goals to database values
+    const goalMapping: { [key: string]: string } = {
+      'spiermassa': 'spiermassa',
+      'kracht': 'power_kracht', 
+      'conditie': 'kracht_uithouding',
+      'kracht/conditie': 'kracht_uithouding',
+      'kracht/power': 'power_kracht'
+    };
+    
+    // Get the correct database goal value
+    const dbGoal = goalMapping[profile.training_goal] || profile.training_goal;
+    
+    console.log(`🎯 Mapping frontend goal "${profile.training_goal}" to database goal "${dbGoal}"`);
+    
     const filtered = schemas.filter(schema => {
       // EXACT matching on training_goal field from database
-      const goalMatch = schema.training_goal === profile.training_goal;
+      const goalMatch = schema.training_goal === dbGoal;
       
       // EXACT matching on equipment_type field from database
       const equipmentMatch = schema.equipment_type === profile.equipment_type;
@@ -239,7 +253,7 @@ function TrainingschemasContent() {
       const frequencyMatch = schemaDays === profile.training_frequency;
       
       console.log(`📋 Schema "${schema.name}": goal=${schema.training_goal} (${goalMatch}), equipment=${schema.equipment_type} (${equipmentMatch}), frequency=${schemaDays} days (${frequencyMatch})`);
-      console.log(`   User profile: goal=${profile.training_goal}, equipment=${profile.equipment_type}, frequency=${profile.training_frequency}`);
+      console.log(`   User profile: goal=${profile.training_goal}->${dbGoal}, equipment=${profile.equipment_type}, frequency=${profile.training_frequency}`);
       
       return goalMatch && equipmentMatch && frequencyMatch;
     });
@@ -254,7 +268,7 @@ function TrainingschemasContent() {
       console.log('⚠️ No schemas match exact criteria, showing fallback schemas');
       const fallbackSchemas = schemas.filter(schema => {
         // Relaxed matching: only match on training_goal and equipment_type
-        const goalMatch = schema.training_goal === profile.training_goal;
+        const goalMatch = schema.training_goal === dbGoal;
         const equipmentMatch = schema.equipment_type === profile.equipment_type;
         
         console.log(`🔄 Fallback Schema "${schema.name}": goal=${schema.training_goal} (${goalMatch}), equipment=${schema.equipment_type} (${equipmentMatch})`);
