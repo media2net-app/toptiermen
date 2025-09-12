@@ -1197,11 +1197,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
         </div>
 
         {/* Debug indicator */}
-        {isAdmin && (
-          <div className="fixed top-20 right-4 z-50 bg-red-500 text-white p-2 rounded">
-            Sticky Active: {isStickyActive ? 'YES' : 'NO'}
-          </div>
-        )}
+        {/* Debug indicator removed - sticky functionality preserved */}
 
         {/* Sticky Huidige Plan Data - Only shows when scrolled past original */}
         {isStickyActive && (
