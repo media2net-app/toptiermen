@@ -53,11 +53,11 @@ export async function POST(request: NextRequest) {
 
     // Activity multipliers (TTM formule: Gewicht x 22 x activiteitniveau)
     const activityMultipliers = {
-      sedentary: 1.0,  // Zittend (Licht actief)
+      sedentary: 1.1,  // Zittend (Licht actief) - corrected to 1.1
       light: 1.1,      // Licht actief
       moderate: 1.3,   // Matig actief  
       active: 1.5,     // Actief
-      very_active: 1.7 // Zeer actief
+      very_active: 1.6 // Zeer actief
     };
     
     // Calculate TDEE using TTM formula

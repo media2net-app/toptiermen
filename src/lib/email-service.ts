@@ -527,6 +527,190 @@ Het Top Tier Men Team
 Dit is een automatisch gegenereerde email. Reageer niet op dit bericht.
 Voor vragen kun je contact opnemen via het platform.
         `
+      },
+      
+      'password-reset': {
+        subject: '🔐 Je Nieuwe Top Tier Men Wachtwoord - Wachtwoord Reset',
+        html: `
+          <div style="background: linear-gradient(135deg, #0F1419 0%, #1F2D17 100%); min-height: 100vh; padding: 40px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+            <div style="max-width: 600px; margin: 0 auto; background: #0F1419; border-radius: 16px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.3);">
+              
+              <!-- Header -->
+              <div style="background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%); padding: 40px 30px; text-align: center;">
+                <img src="https://platform.toptiermen.eu/logo_white-full.svg" alt="Top Tier Men Logo" style="width: 200px; height: auto; margin-bottom: 20px;">
+                <h1 style="color: white; font-size: 32px; font-weight: 700; margin: 0; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+                  🔐 WACHTWOORD RESET
+                </h1>
+                <p style="color: rgba(255,255,255,0.95); font-size: 18px; margin: 12px 0 0 0; font-weight: 500;">
+                  Je nieuwe wachtwoord is hier
+                </p>
+              </div>
+
+              <!-- Content -->
+              <div style="padding: 40px 30px; color: #E5E7EB;">
+                <p style="font-size: 18px; color: #8BAE5A; font-weight: 600; margin: 0 0 24px 0;">
+                  Beste \${name},
+                </p>
+                
+                <p style="font-size: 16px; line-height: 1.6; margin: 0 0 24px 0;">
+                  Je hebt een wachtwoord reset aangevraagd voor je Top Tier Men account. Hier zijn je nieuwe accountgegevens:
+                </p>
+
+                <!-- Account Details -->
+                <div style="background: rgba(139, 174, 90, 0.1); border: 2px solid #8BAE5A; padding: 30px; margin: 24px 0; border-radius: 12px;">
+                  <h3 style="color: #8BAE5A; font-size: 20px; font-weight: 700; margin: 0 0 20px 0; text-align: center;">
+                    🔐 JE NIEUWE ACCOUNTGEGEVENS
+                  </h3>
+                  
+                  <div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 8px; margin: 16px 0;">
+                    <div style="margin-bottom: 16px;">
+                      <strong style="color: #8BAE5A; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Platform URL:</strong>
+                      <div style="color: #B6C948; font-size: 16px; font-weight: 600; margin-top: 4px;">
+                        \${platformUrl}
+                      </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 16px;">
+                      <strong style="color: #8BAE5A; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">E-mailadres:</strong>
+                      <div style="color: #FFFFFF; font-size: 16px; font-weight: 600; margin-top: 4px;">
+                        \${email}
+                      </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 16px;">
+                      <strong style="color: #8BAE5A; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Gebruikersnaam:</strong>
+                      <div style="color: #FFFFFF; font-size: 16px; font-weight: 600; margin-top: 4px;">
+                        \${username}
+                      </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 16px;">
+                      <strong style="color: #8BAE5A; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Nieuw Wachtwoord:</strong>
+                      <div style="color: #FFFFFF; font-size: 16px; font-weight: 600; margin-top: 4px; background: rgba(255,255,255,0.1); padding: 8px 12px; border-radius: 6px; font-family: monospace;">
+                        \${tempPassword}
+                      </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 16px;">
+                      <strong style="color: #8BAE5A; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Pakket:</strong>
+                      <div style="color: #B6C948; font-size: 16px; font-weight: 600; margin-top: 4px;">
+                        \${packageType}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div style="text-align: center; margin-top: 20px;">
+                    <a href="\${loginUrl}" style="display: inline-block; background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%); color: white; text-decoration: none; padding: 16px 32px; border-radius: 8px; font-weight: 700; font-size: 16px; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 4px 12px rgba(139, 174, 90, 0.3);">
+                      🔐 LOGIN MET NIEUW WACHTWOORD
+                    </a>
+                  </div>
+                </div>
+
+                <!-- Important Notes -->
+                <div style="background: rgba(255, 193, 7, 0.1); border-left: 4px solid #FFC107; padding: 20px; margin: 24px 0; border-radius: 0 8px 8px 0;">
+                  <h3 style="color: #FFC107; font-size: 18px; font-weight: 700; margin: 0 0 12px 0;">
+                    ⚠️ BELANGRIJKE INFORMATIE
+                  </h3>
+                  <ul style="color: #D1D5DB; font-size: 15px; line-height: 1.6; margin: 0; padding-left: 20px;">
+                    <li style="margin-bottom: 8px;">Wijzig je wachtwoord direct na je eerste login voor extra beveiliging</li>
+                    <li style="margin-bottom: 8px;">Je oude wachtwoord is niet meer geldig</li>
+                    <li style="margin-bottom: 8px;">Alle content en features blijven beschikbaar</li>
+                    <li>Bij vragen kun je altijd contact opnemen via het platform</li>
+                  </ul>
+                </div>
+
+                <h3 style="color: #8BAE5A; font-size: 20px; font-weight: 700; margin: 32px 0 16px 0;">
+                  🎯 WAT KUN JE NU DOEN:
+                </h3>
+                
+                <div style="display: grid; grid-template-columns: 1fr; gap: 16px; margin: 20px 0;">
+                  <div style="background: rgba(139, 174, 90, 0.1); padding: 20px; border-radius: 8px; border-left: 4px solid #8BAE5A;">
+                    <h4 style="color: #8BAE5A; font-size: 16px; font-weight: 700; margin: 0 0 8px 0;">
+                      🔐 Veilig Inloggen
+                    </h4>
+                    <p style="color: #D1D5DB; font-size: 14px; margin: 0; line-height: 1.5;">
+                      Log in met je nieuwe wachtwoord en wijzig het direct voor extra beveiliging
+                    </p>
+                  </div>
+                  
+                  <div style="background: rgba(139, 174, 90, 0.1); padding: 20px; border-radius: 8px; border-left: 4px solid #8BAE5A;">
+                    <h4 style="color: #8BAE5A; font-size: 16px; font-weight: 700; margin: 0 0 8px 0;">
+                      🏃‍♂️ Verder met je Training
+                    </h4>
+                    <p style="color: #D1D5DB; font-size: 14px; margin: 0; line-height: 1.5;">
+                      Ga verder waar je was gebleven met je persoonlijke trainings- en voedingsplannen
+                    </p>
+                  </div>
+                  
+                  <div style="background: rgba(139, 174, 90, 0.1); padding: 20px; border-radius: 8px; border-left: 4px solid #8BAE5A;">
+                    <h4 style="color: #8BAE5A; font-size: 16px; font-weight: 700; margin: 0 0 8px 0;">
+                      🤝 Brotherhood Community
+                    </h4>
+                    <p style="color: #D1D5DB; font-size: 14px; margin: 0; line-height: 1.5;">
+                      Blijf verbonden met je broeders in de exclusieve community
+                    </p>
+                  </div>
+                </div>
+
+                <div style="text-align: center; margin: 40px 0 20px 0; padding: 30px; background: rgba(139, 174, 90, 0.05); border-radius: 12px; border: 1px solid rgba(139, 174, 90, 0.2);">
+                  <h3 style="color: #8BAE5A; font-size: 18px; font-weight: 700; margin: 0 0 12px 0;">
+                    🚀 Welkom terug in de broederschap!
+                  </h3>
+                  <p style="color: #D1D5DB; font-size: 16px; margin: 0; line-height: 1.6;">
+                    Je account is veilig en klaar voor gebruik. Log in en ga verder met je reis naar excellentie.
+                  </p>
+                </div>
+
+                <div style="text-align: center; margin-top: 40px; padding-top: 30px; border-top: 1px solid rgba(139, 174, 90, 0.2);">
+                  <p style="color: #8BAE5A; font-size: 16px; font-weight: 600; margin: 0 0 8px 0;">
+                    Met vriendelijke groet,
+                  </p>
+                  <p style="color: #B6C948; font-size: 18px; font-weight: 700; margin: 0;">
+                    Het Top Tier Men Team
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        `,
+        text: `
+WACHTWOORD RESET - Top Tier Men
+===============================
+
+Beste \${name},
+
+Je hebt een wachtwoord reset aangevraagd voor je Top Tier Men account. Hier zijn je nieuwe accountgegevens:
+
+JE NIEUWE ACCOUNTGEGEVENS:
+==========================
+
+Platform URL: \${platformUrl}
+E-mailadres: \${email}
+Gebruikersnaam: \${username}
+Nieuw Wachtwoord: \${tempPassword}
+Pakket: \${packageType}
+
+LOGIN MET NIEUW WACHTWOORD: \${loginUrl}
+
+BELANGRIJKE INFORMATIE:
+- Wijzig je wachtwoord direct na je eerste login voor extra beveiliging
+- Je oude wachtwoord is niet meer geldig
+- Alle content en features blijven beschikbaar
+- Bij vragen kun je altijd contact opnemen via het platform
+
+WAT KUN JE NU DOEN:
+- Veilig Inloggen: Log in met je nieuwe wachtwoord en wijzig het direct
+- Verder met je Training: Ga verder waar je was gebleven
+- Brotherhood Community: Blijf verbonden met je broeders
+
+Welkom terug in de broederschap!
+
+Het Top Tier Men Team
+
+---
+Dit is een automatisch gegenereerde email. Reageer niet op dit bericht.
+Voor vragen kun je contact opnemen via het platform.
+        `
       }
     };
 

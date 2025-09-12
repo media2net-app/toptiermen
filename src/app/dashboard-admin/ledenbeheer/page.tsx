@@ -83,9 +83,14 @@ export default function Ledenbeheer() {
     username: '',
     rank: 'Rookie',
     status: 'active',
+    package_type: 'Basic Tier',
     password: '',
     confirmPassword: ''
   });
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<any>(null);
+  const [deleteConfirmation, setDeleteConfirmation] = useState('');
+  const [deletingUser, setDeletingUser] = useState(false);
 
   // Handle password reset function
   const handlePasswordReset = async (email: string) => {
@@ -541,28 +546,31 @@ export default function Ledenbeheer() {
 
   const handleAddNewUser = async () => {
     // Validate form data
-    if (!newUserData.email || !newUserData.full_name || !newUserData.password) {
-      toast.error('Vul alle verplichte velden in', {
+    if (!newUserData.email || !newUserData.full_name) {
+      toast.error('E-mail en volledige naam zijn verplicht', {
         position: "top-right",
         duration: 3000,
       });
       return;
     }
 
-    if (newUserData.password !== newUserData.confirmPassword) {
-      toast.error('Wachtwoorden komen niet overeen', {
-        position: "top-right",
-        duration: 3000,
-      });
-      return;
-    }
+    // Only validate password if provided
+    if (newUserData.password) {
+      if (newUserData.password !== newUserData.confirmPassword) {
+        toast.error('Wachtwoorden komen niet overeen', {
+          position: "top-right",
+          duration: 3000,
+        });
+        return;
+      }
 
-    if (newUserData.password.length < 6) {
-      toast.error('Wachtwoord moet minimaal 6 karakters bevatten', {
-        position: "top-right",
-        duration: 3000,
-      });
-      return;
+      if (newUserData.password.length < 6) {
+        toast.error('Wachtwoord moet minimaal 6 karakters bevatten', {
+          position: "top-right",
+          duration: 3000,
+        });
+        return;
+      }
     }
 
     setAddingUser(true);
@@ -579,7 +587,8 @@ export default function Ledenbeheer() {
           username: newUserData.username,
           rank: newUserData.rank,
           status: newUserData.status,
-          password: newUserData.password
+          package_type: newUserData.package_type,
+          password: newUserData.password || undefined // Only send password if provided
         }),
       });
 
@@ -598,6 +607,7 @@ export default function Ledenbeheer() {
           username: '',
           rank: 'Rookie',
           status: 'active',
+          package_type: 'Basic Tier',
           password: '',
           confirmPassword: ''
         });
@@ -665,6 +675,69 @@ export default function Ledenbeheer() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Handle delete user function
+  const handleDeleteUser = async () => {
+    if (!userToDelete?.id) return;
+    
+    // Check if confirmation text is correct
+    if (deleteConfirmation !== 'VERWIJDER') {
+      toast.error('Je moet "VERWIJDER" typen om de gebruiker te verwijderen', {
+        position: "top-right",
+        duration: 3000,
+      });
+      return;
+    }
+
+    try {
+      setDeletingUser(true);
+      
+      const response = await fetch('/api/admin/delete-user', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: userToDelete.id
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success(`✅ Gebruiker ${userToDelete.full_name || userToDelete.email} is permanent verwijderd uit het systeem`, {
+          position: "top-right",
+          duration: 5000,
+        });
+        
+        // Refresh members list
+        fetchMembers();
+        setShowDeleteModal(false);
+        setUserToDelete(null);
+        setDeleteConfirmation('');
+      } else {
+        toast.error(data.error || 'Er is een fout opgetreden bij het verwijderen', {
+          position: "top-right",
+          duration: 3000,
+        });
+      }
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      toast.error('Er is een fout opgetreden bij het verwijderen', {
+        position: "top-right",
+        duration: 3000,
+      });
+    } finally {
+      setDeletingUser(false);
+    }
+  };
+
+  // Open delete modal
+  const openDeleteModal = (member: any) => {
+    setUserToDelete(member);
+    setDeleteConfirmation('');
+    setShowDeleteModal(true);
   };
 
   const getActivityIcon = (type: string) => {
@@ -817,6 +890,14 @@ export default function Ledenbeheer() {
           icon={<ExclamationTriangleIcon className="w-4 h-4" />}
         >
           Reset
+        </AdminButton>
+        <AdminButton
+          variant="danger"
+          size="sm"
+          onClick={() => openDeleteModal(member)}
+          icon={<NoSymbolIcon className="w-4 h-4" />}
+        >
+          Verwijder
         </AdminButton>
       </div>
     );
@@ -1261,6 +1342,21 @@ export default function Ledenbeheer() {
                     <p className="text-xs text-red-400">
                       ⚠️ Dit wist ALLE data: missies, training, voeding, challenges, XP, badges, voortgang, etc. Gebruiker start vanaf stap 0.
                     </p>
+                    
+                    <AdminButton
+                      variant="danger"
+                      onClick={() => {
+                        setShowEditModal(false);
+                        openDeleteModal(editingMember);
+                      }}
+                      disabled={isLoading}
+                      icon={<NoSymbolIcon className="w-4 h-4" />}
+                    >
+                      PERMANENT VERWIJDEREN
+                    </AdminButton>
+                    <p className="text-xs text-red-400">
+                      ⚠️ Dit verwijdert de gebruiker PERMANENT uit het systeem. Deze actie kan NIET ongedaan worden gemaakt.
+                    </p>
                   </div>
                 </div>
               )}
@@ -1328,6 +1424,131 @@ export default function Ledenbeheer() {
                 icon={<CheckIcon className="w-4 h-4" />}
               >
                 Opslaan
+              </AdminButton>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete User Confirmation Modal */}
+      {showDeleteModal && userToDelete && (
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+          <div className="bg-[#232D1A] border border-red-500 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="p-6 border-b border-red-500">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-bold text-red-400 flex items-center gap-2">
+                  <NoSymbolIcon className="w-6 h-6" />
+                  Gebruiker Permanent Verwijderen
+                </h2>
+                <button
+                  onClick={() => {
+                    setShowDeleteModal(false);
+                    setUserToDelete(null);
+                    setDeleteConfirmation('');
+                  }}
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  <XMarkIcon className="w-6 h-6" />
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-6 space-y-6">
+              {/* Warning Box */}
+              <div className="bg-red-900/20 border border-red-500 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <ExclamationTriangleIcon className="w-6 h-6 text-red-400 mt-0.5" />
+                  <div>
+                    <h3 className="text-red-400 font-semibold mb-2">⚠️ WAARSCHUWING: Onomkeerbare Actie</h3>
+                    <p className="text-gray-300 text-sm mb-3">
+                      Je staat op het punt om <strong>{userToDelete.full_name || userToDelete.email}</strong> permanent te verwijderen uit het Top Tier Men platform.
+                    </p>
+                    <div className="text-gray-300 text-sm space-y-1">
+                      <p><strong>Dit zal alle volgende data PERMANENT verwijderen:</strong></p>
+                      <ul className="list-disc list-inside ml-4 space-y-1">
+                        <li>Gebruikersaccount en authenticatie</li>
+                        <li>Alle profielgegevens</li>
+                        <li>Training schemas en voortgang</li>
+                        <li>Voedingsplannen en voortgang</li>
+                        <li>Missies en achievements</li>
+                        <li>Forum posts en reacties</li>
+                        <li>XP punten en badges</li>
+                        <li>Onboarding voortgang</li>
+                        <li>Alle gebruikersstatistieken</li>
+                        <li>Betaling gegevens en abonnementen</li>
+                        <li>Alle gerelateerde database records</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Confirmation Input */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Bevestiging Vereist
+                </label>
+                <p className="text-gray-400 text-sm mb-3">
+                  Type <strong className="text-red-400">VERWIJDER</strong> in het onderstaande veld om deze actie te bevestigen:
+                </p>
+                <input
+                  type="text"
+                  value={deleteConfirmation}
+                  onChange={(e) => setDeleteConfirmation(e.target.value)}
+                  className="w-full bg-[#181F17] border border-red-500 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-red-400"
+                  placeholder="Type VERWIJDER om te bevestigen"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Dit veld is hoofdlettergevoelig en moet exact "VERWIJDER" bevatten.
+                </p>
+              </div>
+
+              {/* User Info */}
+              <div className="bg-[#181F17] border border-[#3A4D23] rounded-lg p-4">
+                <h4 className="text-[#8BAE5A] font-medium mb-2">Gebruiker Informatie</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="text-gray-400">Naam:</span>
+                    <span className="text-white ml-2">{userToDelete.full_name || 'Onbekend'}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-400">Email:</span>
+                    <span className="text-white ml-2">{userToDelete.email || 'Onbekend'}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-400">Rang:</span>
+                    <span className="text-white ml-2">{userToDelete.rank || 'Onbekend'}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-400">Status:</span>
+                    <span className="text-white ml-2">{getStatusText(userToDelete.status) || 'Onbekend'}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-6 border-t border-red-500 flex justify-between">
+              <AdminButton
+                variant="secondary"
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setUserToDelete(null);
+                  setDeleteConfirmation('');
+                }}
+              >
+                Annuleren
+              </AdminButton>
+              <AdminButton
+                variant="danger"
+                onClick={handleDeleteUser}
+                disabled={deletingUser || deleteConfirmation !== 'VERWIJDER'}
+                loading={deletingUser}
+                icon={<NoSymbolIcon className="w-4 h-4" />}
+              >
+                {deleteConfirmation === 'VERWIJDER' ? 'PERMANENT VERWIJDEREN' : 'Type VERWIJDER om te bevestigen'}
               </AdminButton>
             </div>
           </div>
@@ -1431,33 +1652,57 @@ export default function Ledenbeheer() {
                 </select>
               </div>
 
+              {/* Package Type */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Pakket Type
+                </label>
+                <select
+                  value={newUserData.package_type}
+                  onChange={(e) => setNewUserData({ ...newUserData, package_type: e.target.value })}
+                  className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+                >
+                  {packages.map(packageType => (
+                    <option key={packageType} value={packageType}>
+                      {packageType}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+
               {/* Password */}
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Wachtwoord *
+                  Wachtwoord (optioneel)
                 </label>
                 <input
                   type="password"
                   value={newUserData.password}
                   onChange={(e) => setNewUserData({ ...newUserData, password: e.target.value })}
                   className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                  placeholder="Minimaal 6 karakters"
+                  placeholder="Laat leeg voor automatisch wachtwoord"
                 />
+                <p className="text-xs text-gray-500 mt-1">
+                  Als je dit veld leeg laat, wordt automatisch een veilig tijdelijk wachtwoord gegenereerd en verzonden via email.
+                </p>
               </div>
 
-              {/* Confirm Password */}
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Bevestig Wachtwoord *
-                </label>
-                <input
-                  type="password"
-                  value={newUserData.confirmPassword}
-                  onChange={(e) => setNewUserData({ ...newUserData, confirmPassword: e.target.value })}
-                  className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                  placeholder="Herhaal wachtwoord"
-                />
-              </div>
+              {/* Confirm Password - only show if password is provided */}
+              {newUserData.password && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Bevestig Wachtwoord
+                  </label>
+                  <input
+                    type="password"
+                    value={newUserData.confirmPassword}
+                    onChange={(e) => setNewUserData({ ...newUserData, confirmPassword: e.target.value })}
+                    className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+                    placeholder="Herhaal wachtwoord"
+                  />
+                </div>
+              )}
 
               {/* Info Box */}
               <div className="bg-[#181F17] border border-[#3A4D23] rounded-lg p-4">
@@ -1468,11 +1713,12 @@ export default function Ledenbeheer() {
                   <div>
                     <h4 className="text-[#8BAE5A] font-medium mb-2">Wat gebeurt er na aanmaken?</h4>
                     <ul className="text-gray-300 text-sm space-y-1">
-                      <li>• Gebruiker ontvangt een welkomst e-mail</li>
+                      <li>• Gebruiker ontvangt automatisch een email met accountgegevens</li>
+                      <li>• Tijdelijk wachtwoord wordt gegenereerd (als niet opgegeven)</li>
                       <li>• Account wordt automatisch geactiveerd</li>
                       <li>• Gebruiker start met onboarding stap 0</li>
                       <li>• Alle basis profielgegevens worden ingesteld</li>
-                      <li>• Gebruiker kan direct inloggen met het wachtwoord</li>
+                      <li>• Gebruiker kan direct inloggen met de ontvangen gegevens</li>
                     </ul>
                   </div>
                 </div>

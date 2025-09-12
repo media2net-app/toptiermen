@@ -327,7 +327,7 @@ function TrainingschemasContent() {
       setProfileLoading(true);
       console.log('🔍 Fetching training profile for user:', user.email);
       
-      // Use user.email directly since our API now handles email as user_id
+      // First try to get existing training profile
       const response = await fetch(`/api/training-profile?userId=${user.email}`);
       
       if (response.ok) {
@@ -343,8 +343,39 @@ function TrainingschemasContent() {
             equipment_type: data.profile.equipment_type
           });
         } else {
-          console.log('ℹ️ No training profile found');
-          setUserTrainingProfile(null);
+          console.log('ℹ️ No training profile found, checking main_goal from onboarding');
+          
+          // If no training profile exists, try to get main_goal from user profile
+          const { data: profileData, error: profileError } = await supabase
+            .from('profiles')
+            .select('main_goal')
+            .eq('email', user.email)
+            .single();
+          
+          if (profileData?.main_goal && !profileError) {
+            console.log('🎯 Found main_goal from onboarding:', profileData.main_goal);
+            
+            // Create a basic training profile based on main_goal
+            let trainingGoal = 'spiermassa'; // default
+            if (profileData.main_goal.toLowerCase().includes('kracht')) {
+              trainingGoal = 'power_kracht';
+            } else if (profileData.main_goal.toLowerCase().includes('conditie') || 
+                      profileData.main_goal.toLowerCase().includes('uithouding')) {
+              trainingGoal = 'kracht_uithouding';
+            }
+            
+            const basicProfile = {
+              user_id: user.email || user.id,
+              training_goal: trainingGoal as 'spiermassa' | 'kracht_uithouding' | 'power_kracht',
+              training_frequency: 3 as 1 | 2 | 3 | 4 | 5 | 6, // Default to 3x per week
+              equipment_type: 'gym' as 'gym' | 'home' | 'outdoor'
+            };
+            
+            setUserTrainingProfile(basicProfile);
+            console.log('🔧 Created basic training profile from main_goal:', basicProfile);
+          } else {
+            setUserTrainingProfile(null);
+          }
         }
       } else {
         console.log('❌ Failed to fetch training profile:', response.status);
@@ -468,7 +499,11 @@ function TrainingschemasContent() {
         
         // Complete onboarding step if needed
         if (isOnboarding && onboardingStep === 3) {
+          console.log('🎯 Completing onboarding step 3 after schema selection');
           await completeStep(3);
+        } else if (showOnboardingStep3) {
+          console.log('🎯 Schema selected during onboarding step 3');
+          // Don't auto-complete, let user click "Volgende Stap" button
         }
       } else {
         toast.error(data.error || 'Failed to select training schema');

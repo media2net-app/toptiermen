@@ -48,38 +48,67 @@ export default function CheckoutSection({
   const [isProcessing, setIsProcessing] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
-    email: ''
+    email: '',
+    discountCode: ''
   });
+  const [discountApplied, setDiscountApplied] = useState(false);
+  const [discountError, setDiscountError] = useState('');
 
   const isLifetime = packageId === 'lifetime';
   
-  // Calculate pricing based on new structure
+  // Apply discount code logic
+  const applyDiscountCode = () => {
+    const code = formData.discountCode.trim().toUpperCase();
+    if (code === 'TTMPRELAUNCH50') {
+      setDiscountApplied(true);
+      setDiscountError('');
+    } else if (code === '') {
+      setDiscountApplied(false);
+      setDiscountError('');
+    } else {
+      setDiscountApplied(false);
+      setDiscountError('Ongeldige kortingscode');
+    }
+  };
+
+  // Calculate pricing based on original prices with optional discount
   const getPricing = () => {
+    const discountMultiplier = discountApplied ? 0.5 : 1; // 50% discount when code applied
+    
     if (isLifetime) {
+      // Use original full price for lifetime
+      const originalPrice = 1995; // Original lifetime price
       return {
-        periodPrice: monthlyPrice,
-        totalPrice: monthlyPrice,
-        monthlyPrice: monthlyPrice,
+        periodPrice: originalPrice * discountMultiplier,
+        totalPrice: originalPrice * discountMultiplier,
+        monthlyPrice: originalPrice * discountMultiplier,
         period: 'Levenslang',
-        discount: 0
+        discount: discountApplied ? 50 : 0,
+        originalPrice: originalPrice
       };
     }
     
     if (billingPeriod === '6months') {
+      // Use original monthly prices (no yearly discount)
+      const originalMonthlyPrice = packageId === 'basic' ? 49 : 79;
       return {
-        periodPrice: monthlyPrice, // €49
-        totalPrice: monthlyPrice * 6, // €294
-        monthlyPrice: monthlyPrice, // €49
+        periodPrice: originalMonthlyPrice * discountMultiplier,
+        totalPrice: originalMonthlyPrice * 6 * discountMultiplier,
+        monthlyPrice: originalMonthlyPrice * discountMultiplier,
         period: '6 maanden',
-        discount: 0
+        discount: discountApplied ? 50 : 0,
+        originalPrice: originalMonthlyPrice
       };
     } else { // 12months
+      // Use yearly prices (already have 10% discount built in)
+      const originalYearlyPrice = packageId === 'basic' ? 44 : 71;
       return {
-        periodPrice: yearlyPrice, // €44
-        totalPrice: yearlyPrice * 12, // €528
-        monthlyPrice: yearlyPrice, // €44
+        periodPrice: originalYearlyPrice * discountMultiplier,
+        totalPrice: originalYearlyPrice * 12 * discountMultiplier,
+        monthlyPrice: originalYearlyPrice * discountMultiplier,
         period: '12 maanden',
-        discount: 10
+        discount: discountApplied ? 50 : 10, // 10% yearly discount, plus 50% if code applied
+        originalPrice: originalYearlyPrice
       };
     }
   };
@@ -121,7 +150,8 @@ export default function CheckoutSection({
           billingPeriod: billingPeriod,
           paymentFrequency: paymentFrequency,
           customerName: formData.name,
-          customerEmail: formData.email
+          customerEmail: formData.email,
+          discountCode: discountApplied ? formData.discountCode.trim().toUpperCase() : null
         }),
       });
 
@@ -243,6 +273,47 @@ export default function CheckoutSection({
                 <p className="text-sm text-[#8BAE5A]/70 mt-2">
                   Dit is het email waar je je login gegevens voor het platform op ontvangt
                 </p>
+              </div>
+              
+              {/* Discount Code */}
+              <div>
+                <label htmlFor="discountCode" className="block text-sm font-medium text-white mb-2">
+                  Kortingscode (optioneel)
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    id="discountCode"
+                    value={formData.discountCode}
+                    onChange={(e) => {
+                      setFormData(prev => ({ ...prev, discountCode: e.target.value }));
+                      if (discountError) setDiscountError('');
+                    }}
+                    onBlur={applyDiscountCode}
+                    className="flex-1 px-4 py-3 bg-[#232D1A] border border-[#3A4D23] rounded-lg text-white placeholder-[#8BAE5A]/50 focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] focus:border-transparent"
+                    placeholder="Voer kortingscode in"
+                  />
+                  <button
+                    type="button"
+                    onClick={applyDiscountCode}
+                    className="px-4 py-3 bg-[#8BAE5A] text-[#181F17] rounded-lg font-medium hover:bg-[#B6C948] transition-colors"
+                  >
+                    Toepassen
+                  </button>
+                </div>
+                {discountApplied && (
+                  <p className="text-sm text-green-400 mt-2 flex items-center gap-2">
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    Kortingscode toegepast! 50% korting
+                  </p>
+                )}
+                {discountError && (
+                  <p className="text-sm text-red-400 mt-2">
+                    {discountError}
+                  </p>
+                )}
               </div>
             </div>
 
@@ -398,13 +469,29 @@ export default function CheckoutSection({
                     {packageName} - {pricing.period}
                   </span>
                   <div className="flex items-center space-x-2">
+                    {discountApplied && (
+                      <span className="text-gray-400 line-through text-sm">€{formatPrice(pricing.originalPrice)}</span>
+                    )}
                     <span className="text-white font-semibold">€{formatPrice(pricing.periodPrice)}</span>
                   </div>
                 </div>
+                {discountApplied && (
+                  <div className="flex justify-between">
+                    <span className="text-green-400 text-sm">
+                      Kortingscode (TTMPrelaunch50)
+                    </span>
+                    <span className="text-green-400 text-sm font-semibold">-50%</span>
+                  </div>
+                )}
                 <div className="border-t border-[#3A4D23] pt-3">
                   <div className="flex justify-between">
                     <span className="text-white font-semibold text-lg">Totaal</span>
-                    <span className="text-white font-bold text-xl">€{formatPrice(isLifetime ? pricing.periodPrice : pricing.periodPrice * (billingPeriod === '6months' ? 6 : 12))}</span>
+                    <div className="text-right">
+                      {discountApplied && (
+                        <div className="text-gray-400 line-through text-sm">€{formatPrice(paymentFrequency === 'once' ? (isLifetime ? pricing.originalPrice : pricing.originalPrice * (billingPeriod === '6months' ? 6 : 12)) : pricing.originalPrice)}</div>
+                      )}
+                      <span className="text-white font-bold text-xl">€{formatPrice(paymentFrequency === 'once' ? (isLifetime ? pricing.periodPrice : pricing.periodPrice * (billingPeriod === '6months' ? 6 : 12)) : pricing.periodPrice)}</span>
+                    </div>
                   </div>
                 </div>
               </div>

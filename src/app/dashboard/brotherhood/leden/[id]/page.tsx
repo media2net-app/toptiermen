@@ -21,11 +21,6 @@ const ranks = [
 ];
 
 const interests = ['Finance', 'Fitness', 'Mindset', 'Vaderschap', 'Digitale Nomaden', 'Ondernemerschap'];
-const badges = [
-  { name: 'Discipline', img: '/badge1.png' },
-  { name: 'Brotherhood', img: '/badge2.png' },
-  { name: 'Mindset', img: '/badge3.png' },
-];
 
 export default function ProfielDetail() {
   const params = useParams();
@@ -39,11 +34,13 @@ export default function ProfielDetail() {
   const [notification, setNotification] = useState<string | null>(null);
   const [currentMemberRank, setCurrentMemberRank] = useState<any>(null);
   const [currentMemberXP, setCurrentMemberXP] = useState(0);
+  const [memberBadges, setMemberBadges] = useState<any[]>([]);
 
   useEffect(() => {
     if (id) {
       fetchMember();
       fetchMemberRank();
+      fetchMemberBadges();
     }
   }, [id]);
 
@@ -102,6 +99,46 @@ export default function ProfielDetail() {
       }
     } catch (error) {
       console.error('Error fetching member rank:', error);
+    }
+  };
+
+  const fetchMemberBadges = async () => {
+    try {
+      // Fetch user badges from user_badges table
+      const { data: userBadges, error: badgesError } = await supabase
+        .from('user_badges')
+        .select(`
+          badge_id,
+          earned_at,
+          badges (
+            id,
+            title,
+            description,
+            icon_name,
+            image_url,
+            rarity_level
+          )
+        `)
+        .eq('user_id', id)
+        .order('earned_at', { ascending: false });
+
+      if (!badgesError && userBadges) {
+        const formattedBadges = userBadges.map(ub => {
+          const badge = Array.isArray(ub.badges) ? ub.badges[0] : ub.badges;
+          return {
+            id: badge?.id,
+            name: badge?.title,
+            description: badge?.description,
+            icon: badge?.icon_name,
+            img: badge?.image_url || '/badge-no-excuses.png',
+            rarity: badge?.rarity_level,
+            earned_at: ub.earned_at
+          };
+        });
+        setMemberBadges(formattedBadges);
+      }
+    } catch (error) {
+      console.error('Error fetching member badges:', error);
     }
   };
 
@@ -170,8 +207,17 @@ export default function ProfielDetail() {
   const memberInterests = getMemberInterests(member.interests);
   const displayRank = currentMemberRank ? currentMemberRank.name : 'Member';
   const rankIcon = getRankIcon(displayRank);
-  const avatarUrl = member.avatar_url || '/profielfoto.png';
-  const memberBadges = badges.slice(0, Math.min(3, Math.floor((member.points || 0) / 100) + 1));
+  const displayBadges = memberBadges.slice(0, 6); // Show max 6 badges
+  
+  // Generate initials for default avatar
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(word => word.charAt(0))
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
 
   return (
     <div className="px-4 sm:px-6 md:px-12 py-6 sm:py-8">
@@ -187,13 +233,21 @@ export default function ProfielDetail() {
 
       <div className="flex flex-col sm:flex-col md:flex-row gap-4 sm:gap-6 md:gap-8 items-start mb-6 sm:mb-8">
         <div className="relative mx-auto sm:mx-0">
-          <Image 
-            src={avatarUrl} 
-            alt={member.full_name || 'Lid profiel'} 
-            width={120} 
-            height={120} 
-            className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-full border-2 sm:border-4 border-[#8BAE5A] object-cover" 
-          />
+          {member.avatar_url ? (
+            <Image 
+              src={member.avatar_url} 
+              alt={member.full_name || 'Lid profiel'} 
+              width={120} 
+              height={120} 
+              className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-full border-2 sm:border-4 border-[#8BAE5A] object-cover" 
+            />
+          ) : (
+            <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-full border-2 sm:border-4 border-[#8BAE5A] bg-gradient-to-br from-[#3A4D23] to-[#232D1A] flex items-center justify-center">
+              <span className="text-[#8BAE5A] font-bold text-lg sm:text-xl md:text-2xl">
+                {getInitials(member.full_name || 'Onbekende gebruiker')}
+              </span>
+            </div>
+          )}
         </div>
         <div className="flex-1 flex flex-col gap-2 text-center sm:text-left">
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-2 sm:gap-3">
@@ -218,11 +272,11 @@ export default function ProfielDetail() {
               {member.points} punten • {member.missions_completed || 0} missies voltooid
             </div>
           )}
-          {memberBadges.length > 0 && (
+          {displayBadges.length > 0 && (
             <div className="flex gap-2 mt-3 justify-center sm:justify-start">
-              {memberBadges.map(b => (
-                <div key={b.name} className="flex flex-col items-center">
-                  <Image src={b.img} alt={b.name} width={32} height={32} className="rounded-full" />
+              {displayBadges.map(b => (
+                <div key={b.id || b.name} className="flex flex-col items-center">
+                  <Image src={b.img} alt={b.name || 'Badge'} width={32} height={32} className="rounded-full" />
                   <span className="text-xs text-[#FFD700] mt-1">{b.name}</span>
                 </div>
               ))}

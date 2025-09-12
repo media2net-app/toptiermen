@@ -73,16 +73,80 @@ export default function MealEditModal({
     }
   }, [isOpen, currentIngredients]);
 
+  // Enrich ingredients with database data when both are available
+  useEffect(() => {
+    if (isOpen && isDatabaseLoaded && ingredients.length > 0) {
+      console.log('🔍 Checking ingredients for enrichment:', ingredients);
+      console.log('🔍 Ingredient database keys:', Object.keys(ingredientDatabase));
+      
+      const enrichedIngredients = ingredients.map(ingredient => {
+        console.log(`🔍 Processing ingredient: "${ingredient.name}" with unit: "${ingredient.unit}"`);
+        const data = ingredientDatabase[ingredient.name];
+        console.log(`🔍 Database data for "${ingredient.name}":`, data);
+        
+        if (data) {
+          // Calculate new amount based on unit change
+          let newAmount = ingredient.amount;
+          
+          // If unit changed from per_piece to per_100g, adjust amount
+          if (ingredient.unit === 'per_piece' && data.unit_type === 'per_100g') {
+            // Convert from pieces to grams (assuming 1 piece = 100g for banana)
+            newAmount = Number(ingredient.amount) * 100;
+            console.log(`🔄 Converting "${ingredient.name}" from ${ingredient.amount} pieces to ${newAmount}g`);
+          }
+          // If unit changed from per_100g to per_piece, adjust amount
+          else if (ingredient.unit === 'per_100g' && data.unit_type === 'per_piece') {
+            // Convert from grams to pieces (assuming 1 piece = 100g for banana)
+            newAmount = Number(ingredient.amount) / 100;
+            console.log(`🔄 Converting "${ingredient.name}" from ${ingredient.amount}g to ${newAmount} pieces`);
+          }
+          
+          const enriched = {
+            ...ingredient,
+            unit: data.unit_type, // Use database unit_type as source of truth
+            name: data.name, // Use database name as source of truth
+            amount: newAmount // Use calculated amount
+          };
+          console.log(`✅ Enriched "${ingredient.name}": unit "${ingredient.unit}" → "${data.unit_type}", amount ${ingredient.amount} → ${newAmount}`);
+          return enriched;
+        } else {
+          console.log(`❌ No database data found for "${ingredient.name}"`);
+          return ingredient;
+        }
+      });
+      
+      // Only update if there are actual changes
+      const hasChanges = enrichedIngredients.some((enriched, index) => 
+        enriched.unit !== ingredients[index].unit || 
+        enriched.name !== ingredients[index].name ||
+        enriched.amount !== ingredients[index].amount
+      );
+      
+      console.log('🔍 Has changes:', hasChanges);
+      
+      if (hasChanges) {
+        console.log('🔄 Enriching ingredients with database data:', enrichedIngredients);
+        setIngredients(enrichedIngredients);
+      } else {
+        console.log('ℹ️ No changes needed, ingredients already enriched');
+      }
+    }
+  }, [isOpen, isDatabaseLoaded, ingredientDatabase, currentIngredients]);
+
   // Load ingredient database from API
   useEffect(() => {
     const loadIngredientDatabase = async () => {
       try {
-        const response = await fetch('/api/nutrition-ingredients');
+        // Add cache-busting parameter with random number
+        const response = await fetch(`/api/nutrition-ingredients?t=${Date.now()}&r=${Math.random()}`);
         const data = await response.json();
         if (data.success && data.ingredients) {
           setIngredientDatabase(data.ingredients);
           setIsDatabaseLoaded(true);
           console.log('✅ MealEditModal loaded ingredient database:', Object.keys(data.ingredients).length, 'ingredients');
+          if (data.lastUpdated) {
+            console.log('📅 Ingredients last updated:', new Date(data.lastUpdated).toISOString());
+          }
         }
       } catch (error) {
         console.error('❌ Error loading ingredient database in MealEditModal:', error);
@@ -103,25 +167,61 @@ export default function MealEditModal({
     const amount = typeof ingredient.amount === 'string' ? parseFloat(ingredient.amount) || 0 : ingredient.amount;
     if (amount <= 0) return { calories: 0, protein: 0, carbs: 0, fat: 0 };
 
+    // Use database unit_type as source of truth
+    const unit = data.unit_type || ingredient.unit || 'per_100g';
+
     let multiplier = 1;
-    if (ingredient.unit === 'per_100g' && data.unit_type === 'per_100g') {
-      multiplier = amount / 100;
-    } else if (ingredient.unit === 'per_piece' && data.unit_type === 'per_piece') {
-      multiplier = amount;
-    } else if (ingredient.unit === 'per_100g' && data.unit_type === 'per_piece') {
-      // Convert piece to 100g equivalent (assuming average piece weight)
-      multiplier = (amount * 50) / 100; // Average piece = 50g
-    } else if (ingredient.unit === 'per_piece' && data.unit_type === 'per_100g') {
-      // Convert 100g to piece equivalent
-      multiplier = amount / 50; // Average piece = 50g
+    switch (unit) {
+      case 'per_100g':
+        multiplier = amount / 100;
+        break;
+      case 'per_piece':
+      case 'stuk':
+        multiplier = amount; // For pieces, use amount directly
+        break;
+      case 'per_ml':
+        multiplier = amount / 100; // Assuming 1ml = 1g for liquids
+        break;
+      case 'per_tbsp':
+        multiplier = (amount * 15) / 100; // 1 tbsp = 15ml
+        break;
+      case 'per_tsp':
+        multiplier = (amount * 5) / 100; // 1 tsp = 5ml
+        break;
+      case 'per_cup':
+        multiplier = (amount * 240) / 100; // 1 cup = 240ml
+        break;
+      case 'per_plakje':
+        multiplier = amount; // For slices, use amount directly
+        break;
+      default:
+        multiplier = amount / 100;
     }
 
-    return {
-      calories: Math.round(data.calories_per_100g * multiplier * 10) / 10,
-      protein: Math.round(data.protein_per_100g * multiplier * 10) / 10,
-      carbs: Math.round(data.carbs_per_100g * multiplier * 10) / 10,
-      fat: Math.round(data.fat_per_100g * multiplier * 10) / 10
-    };
+    const calories = Math.round(data.calories_per_100g * multiplier * 10) / 10;
+    const protein = Math.round(data.protein_per_100g * multiplier * 10) / 10;
+    const carbs = Math.round(data.carbs_per_100g * multiplier * 10) / 10;
+    const fat = Math.round(data.fat_per_100g * multiplier * 10) / 10;
+
+    // Debug logging for Kaas 30+
+    if (ingredient.name === 'Kaas 30+') {
+      console.log(`🧀 Kaas 30+ calculation:`, {
+        name: ingredient.name,
+        amount: amount,
+        unit: unit,
+        multiplier: multiplier,
+        calories_per_100g: data.calories_per_100g,
+        protein_per_100g: data.protein_per_100g,
+        carbs_per_100g: data.carbs_per_100g,
+        fat_per_100g: data.fat_per_100g,
+        calculated_calories: calories,
+        calculated_protein: protein,
+        calculated_carbs: carbs,
+        calculated_fat: fat
+      });
+    }
+
+    return { calories, protein, carbs, fat };
   };
 
   const calculateTotalNutrition = () => {
@@ -182,6 +282,7 @@ export default function MealEditModal({
       case 'per_tbsp': return 'eetlepel';
       case 'per_tsp': return 'theelepel';
       case 'per_cup': return 'kop';
+      case 'per_plakje': return 'plakje';
       default: return unit;
     }
   };
@@ -281,7 +382,7 @@ export default function MealEditModal({
                         <div className="col-span-2">
                           <input
                             type="number"
-                            value={ingredient.amount || ''}
+                            value={parseFloat(ingredient.amount.toString()) || ''}
                             onChange={(e) => {
                               const value = e.target.value;
                               if (value === '') {
@@ -307,7 +408,10 @@ export default function MealEditModal({
                         </div>
                         <div className="col-span-2">
                           <select
-                            value={ingredient.unit}
+                            value={(() => {
+                              const data = ingredientDatabase[ingredient.name];
+                              return data?.unit_type || ingredient.unit || 'per_100g';
+                            })()}
                             onChange={(e) => handleIngredientChange(index, 'unit', e.target.value)}
                             className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white focus:border-[#8BAE5A] focus:ring-1 focus:ring-[#8BAE5A] transition-colors"
                           >
@@ -317,6 +421,7 @@ export default function MealEditModal({
                             <option value="per_tbsp">{formatUnitDisplay('per_tbsp')}</option>
                             <option value="per_tsp">{formatUnitDisplay('per_tsp')}</option>
                             <option value="per_cup">{formatUnitDisplay('per_cup')}</option>
+                            <option value="per_plakje">{formatUnitDisplay('per_plakje')}</option>
                           </select>
                         </div>
                         <div className="col-span-4 text-sm text-gray-300">

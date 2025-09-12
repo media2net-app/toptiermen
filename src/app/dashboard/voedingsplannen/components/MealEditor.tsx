@@ -179,11 +179,15 @@ export default function MealEditor({
   useEffect(() => {
     const loadIngredientDatabase = async () => {
       try {
-        const response = await fetch('/api/nutrition-ingredients');
+        // Add cache-busting parameter
+        const response = await fetch(`/api/nutrition-ingredients?t=${Date.now()}`);
         const data = await response.json();
         if (data.success && data.ingredients) {
           setIngredientDatabase(data.ingredients);
           console.log('✅ Loaded ingredient database in MealEditor:', Object.keys(data.ingredients).length, 'ingredients');
+          if (data.lastUpdated) {
+            console.log('📅 Ingredients last updated:', new Date(data.lastUpdated).toISOString());
+          }
         }
       } catch (error) {
         console.error('❌ Error loading ingredient database in MealEditor:', error);

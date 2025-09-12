@@ -145,7 +145,7 @@ export default function VoedingsplannenPage() {
       
       const data = await response.json();
       
-              if (data.success) {
+      if (data.success) {
         // Filter plans based on user's goal if they have a nutrition profile
         let filteredPlans = data.plans;
         
@@ -735,6 +735,21 @@ export default function VoedingsplannenPage() {
       subtitle="Beheer je voedingsplannen en bereken je dagelijkse behoeften"
     >
       <div className="w-full p-3 sm:p-4 md:p-6">
+        {/* Mobile-only message advising PC usage */}
+        <div className="block md:hidden mb-4 sm:mb-6">
+          <div className="bg-gradient-to-r from-blue-500/10 to-blue-600/10 border border-blue-500/30 rounded-xl p-4">
+            <div className="flex items-start gap-3">
+              <div className="text-blue-400 text-xl">💻</div>
+              <div>
+                <h3 className="text-blue-400 font-semibold text-sm mb-1">Tip voor betere weergave</h3>
+                <p className="text-gray-300 text-xs leading-relaxed">
+                  Voor een meer overzichtelijke weergave adviseren wij deze pagina via een PC of laptop te bekijken.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Onboarding Progress - Step 4: Nutrition Plans */}
         {showOnboardingStep4 && (
           <div className="mb-4 sm:mb-6 md:mb-8">
@@ -965,9 +980,21 @@ export default function VoedingsplannenPage() {
               className="w-full"
             >
             <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold text-white mb-4">
-                Voedingsplannen
-              </h2>
+              <div className="flex items-center justify-center gap-4 mb-4">
+                <h2 className="text-3xl font-bold text-white">
+                  Voedingsplannen
+                </h2>
+                <button
+                  onClick={() => {
+                    // Force refresh by clearing cache and reloading
+                    window.location.reload();
+                  }}
+                  className="bg-[#8BAE5A] hover:bg-[#7A9D4A] text-white px-3 py-1 rounded-lg text-sm font-semibold transition-colors flex items-center gap-1"
+                  title="Ververs ingrediënten database"
+                >
+                  🔄 Ververs
+                </button>
+              </div>
               <p className="text-gray-300 text-lg">
                 Beheer je voedingsplannen en bereken je dagelijkse behoeften.
               </p>
@@ -1022,14 +1049,21 @@ export default function VoedingsplannenPage() {
                     <h4 className="text-[#8BAE5A] font-semibold mb-1 text-xs sm:text-sm">Eiwitten</h4>
                     {selectedNutritionPlan ? (() => {
                       const selectedPlan = nutritionPlans.find(p => p.plan_id === selectedNutritionPlan);
+                      console.log('🔍 Debug protein calculation:', {
+                        selectedNutritionPlan,
+                        selectedPlan: selectedPlan ? {
+                          plan_id: selectedPlan.plan_id,
+                          protein_percentage: selectedPlan.protein_percentage,
+                          carbs_percentage: selectedPlan.carbs_percentage,
+                          fat_percentage: selectedPlan.fat_percentage
+                        } : null,
+                        dailyCalories: userNutritionProfile.dailyCalories
+                      });
                       if (selectedPlan) {
-                        // Use direct target values if available, otherwise calculate from percentages
-                        if (selectedPlan.target_protein) {
-                          return <p className="text-base sm:text-lg md:text-2xl font-bold text-white">{selectedPlan.target_protein}g</p>;
-                        } else {
-                          const macroValues = calculateMacroValues(selectedPlan, userNutritionProfile.dailyCalories);
-                          return <p className="text-base sm:text-lg md:text-2xl font-bold text-white">{macroValues.protein}g</p>;
-                        }
+                        // Always calculate user-specific values based on their daily calories
+                        const macroValues = calculateMacroValues(selectedPlan, userNutritionProfile.dailyCalories);
+                        console.log('🧮 Calculated macro values:', macroValues);
+                        return <p className="text-base sm:text-lg md:text-2xl font-bold text-white">{macroValues.protein}g</p>;
                       }
                       return <p className="text-xs sm:text-sm text-gray-500">Plan niet gevonden</p>;
                     })() : (
@@ -1042,13 +1076,9 @@ export default function VoedingsplannenPage() {
                     {selectedNutritionPlan ? (() => {
                       const selectedPlan = nutritionPlans.find(p => p.plan_id === selectedNutritionPlan);
                       if (selectedPlan) {
-                        // Use direct target values if available, otherwise calculate from percentages
-                        if (selectedPlan.target_carbs) {
-                          return <p className="text-base sm:text-lg md:text-2xl font-bold text-white">{selectedPlan.target_carbs}g</p>;
-                        } else {
-                          const macroValues = calculateMacroValues(selectedPlan, userNutritionProfile.dailyCalories);
-                          return <p className="text-base sm:text-lg md:text-2xl font-bold text-white">{macroValues.carbs}g</p>;
-                        }
+                        // Always calculate user-specific values based on their daily calories
+                        const macroValues = calculateMacroValues(selectedPlan, userNutritionProfile.dailyCalories);
+                        return <p className="text-base sm:text-lg md:text-2xl font-bold text-white">{macroValues.carbs}g</p>;
                       }
                       return <p className="text-xs sm:text-sm text-gray-500">Plan niet gevonden</p>;
                     })() : (
@@ -1061,13 +1091,9 @@ export default function VoedingsplannenPage() {
                     {selectedNutritionPlan ? (() => {
                       const selectedPlan = nutritionPlans.find(p => p.plan_id === selectedNutritionPlan);
                       if (selectedPlan) {
-                        // Use direct target values if available, otherwise calculate from percentages
-                        if (selectedPlan.target_fat) {
-                          return <p className="text-base sm:text-lg md:text-2xl font-bold text-white">{selectedPlan.target_fat}g</p>;
-                        } else {
-                          const macroValues = calculateMacroValues(selectedPlan, userNutritionProfile.dailyCalories);
-                          return <p className="text-base sm:text-lg md:text-2xl font-bold text-white">{macroValues.fats}g</p>;
-                        }
+                        // Always calculate user-specific values based on their daily calories
+                        const macroValues = calculateMacroValues(selectedPlan, userNutritionProfile.dailyCalories);
+                        return <p className="text-base sm:text-lg md:text-2xl font-bold text-white">{macroValues.fats}g</p>;
                       }
                       return <p className="text-xs sm:text-sm text-gray-500">Plan niet gevonden</p>;
                     })() : (
@@ -1145,8 +1171,8 @@ export default function VoedingsplannenPage() {
                         onClick={() => handleNutritionPlanClick(plan.plan_id)}
                         className={`cursor-pointer rounded-2xl p-3 sm:p-4 md:p-6 border-2 transition-all duration-300 relative ${
                           selectedNutritionPlan === plan.plan_id
-                            ? 'border-[#8BAE5A] bg-[#8BAE5A]/10'
-                            : 'border-[#3A4D23] bg-[#232D1A] hover:border-[#8BAE5A]/50'
+                            ? 'border-[#8BAE5A] bg-gradient-to-br from-[#8BAE5A]/20 to-[#7A9D4A]/15 shadow-lg shadow-[#8BAE5A]/20'
+                            : 'border-[#3A4D23] bg-[#232D1A]/60 opacity-70 hover:opacity-90 hover:border-[#8BAE5A]/50'
                         }`}
                       >
                         {/* Popular Badge - Top Right Corner */}
@@ -1158,26 +1184,29 @@ export default function VoedingsplannenPage() {
                           </div>
                         )}
                         
-                        {/* Active Badge */}
-                        {selectedNutritionPlan === plan.plan_id && (
-                          <div className="absolute top-3 sm:top-4 left-3 sm:left-4">
-                            <div className="inline-flex items-center px-2 py-1 bg-[#8BAE5A]/20 border border-[#8BAE5A] text-[#8BAE5A] rounded-md text-xs font-semibold">
-                              <CheckIcon className="w-3 h-3 mr-1" />
-                              Actief
-                            </div>
-                          </div>
-                        )}
                         
-                        <h3 className="text-base sm:text-lg md:text-xl font-bold text-white mb-2 text-center">{plan.name}</h3>
+                        <h3 className={`text-base sm:text-lg md:text-xl font-bold mb-2 text-center ${
+                          selectedNutritionPlan === plan.plan_id ? 'text-[#8BAE5A]' : 'text-white'
+                        }`}>{plan.name}</h3>
                         {plan.subtitle && (
-                          <p className="text-[#8BAE5A] text-xs sm:text-sm text-center mb-3">{plan.subtitle}</p>
+                          <p className={`text-xs sm:text-sm text-center mb-3 ${
+                            selectedNutritionPlan === plan.plan_id ? 'text-[#7A9D4A]' : 'text-[#8BAE5A]'
+                          }`}>{plan.subtitle}</p>
                         )}
-                        <p className="text-gray-300 text-center text-xs sm:text-sm mb-4">{plan.description}</p>
+                        <p className={`text-center text-xs sm:text-sm mb-4 ${
+                          selectedNutritionPlan === plan.plan_id ? 'text-gray-200' : 'text-gray-300'
+                        }`}>{plan.description}</p>
                         
                         {/* Macro Percentages */}
                         {(plan.protein_percentage || plan.carbs_percentage || plan.fat_percentage) && (
-                          <div className="mb-3 sm:mb-4 p-2 sm:p-3 bg-[#1a1f17] border border-[#3a4d23] rounded-lg">
-                            <div className="text-xs text-[#8bae5a] font-semibold mb-2 text-center">Macro Verdeling</div>
+                          <div className={`mb-3 sm:mb-4 p-2 sm:p-3 rounded-lg ${
+                            selectedNutritionPlan === plan.plan_id 
+                              ? 'bg-[#8BAE5A]/10 border border-[#8BAE5A]/30' 
+                              : 'bg-[#1a1f17] border border-[#3a4d23]'
+                          }`}>
+                            <div className={`text-xs font-semibold mb-2 text-center ${
+                              selectedNutritionPlan === plan.plan_id ? 'text-[#8BAE5A]' : 'text-[#8bae5a]'
+                            }`}>Macro Verdeling</div>
                             <div className="flex justify-between text-xs">
                               <div className="text-center">
                                 <div className="text-white font-bold">{plan.protein_percentage || 0}%</div>
@@ -1197,8 +1226,14 @@ export default function VoedingsplannenPage() {
                         
                         {/* Target Values - Calculated based on user's daily needs and plan percentages */}
                         {userNutritionProfile && (
-                          <div className="mb-3 sm:mb-4 p-2 sm:p-3 bg-[#1a1f17] border border-[#3a4d23] rounded-lg">
-                            <div className="text-xs text-[#8bae5a] font-semibold mb-2 text-center">Doelwaarden</div>
+                          <div className={`mb-3 sm:mb-4 p-2 sm:p-3 rounded-lg ${
+                            selectedNutritionPlan === plan.plan_id 
+                              ? 'bg-[#8BAE5A]/10 border border-[#8BAE5A]/30' 
+                              : 'bg-[#1a1f17] border border-[#3a4d23]'
+                          }`}>
+                            <div className={`text-xs font-semibold mb-2 text-center ${
+                              selectedNutritionPlan === plan.plan_id ? 'text-[#8BAE5A]' : 'text-[#8bae5a]'
+                            }`}>Doelwaarden</div>
                             <div className="grid grid-cols-2 gap-2 text-xs">
                               <div className="text-center">
                                 <div className="text-white font-bold">{userNutritionProfile.dailyCalories}</div>
@@ -1208,7 +1243,8 @@ export default function VoedingsplannenPage() {
                                 <div className="text-white font-bold">
                                   {(() => {
                                     const calculated = calculateMacroValues(plan, userNutritionProfile.dailyCalories);
-                                    return calculated.protein > 0 ? calculated.protein : (plan.target_protein || 0);
+                                    // Always use calculated values, same as detail page
+                                    return calculated.protein > 0 ? calculated.protein : 0;
                                   })()}g
                                 </div>
                                 <div className="text-gray-400">Eiwit</div>
@@ -1217,7 +1253,8 @@ export default function VoedingsplannenPage() {
                                 <div className="text-white font-bold">
                                   {(() => {
                                     const calculated = calculateMacroValues(plan, userNutritionProfile.dailyCalories);
-                                    return calculated.carbs > 0 ? calculated.carbs : (plan.target_carbs || 0);
+                                    // Always use calculated values, same as detail page
+                                    return calculated.carbs > 0 ? calculated.carbs : 0;
                                   })()}g
                                 </div>
                                 <div className="text-gray-400">Koolhydraten</div>
@@ -1226,7 +1263,8 @@ export default function VoedingsplannenPage() {
                                 <div className="text-white font-bold">
                                   {(() => {
                                     const calculated = calculateMacroValues(plan, userNutritionProfile.dailyCalories);
-                                    return calculated.fats > 0 ? calculated.fats : (plan.target_fat || 0);
+                                    // Always use calculated values, same as detail page
+                                    return calculated.fats > 0 ? calculated.fats : 0;
                                   })()}g
                                 </div>
                                 <div className="text-gray-400">Vet</div>

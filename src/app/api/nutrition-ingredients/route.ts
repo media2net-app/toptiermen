@@ -34,7 +34,17 @@ export async function GET(request: NextRequest) {
     });
 
     console.log('✅ Successfully fetched nutrition ingredients:', Object.keys(ingredientLookup).length);
-    return NextResponse.json({ success: true, ingredients: ingredientLookup });
+    
+    // Add cache-busting timestamp
+    const lastUpdated = ingredients?.length > 0 ? 
+      Math.max(...ingredients.map(ing => new Date(ing.updated_at).getTime())) : 
+      Date.now();
+    
+    return NextResponse.json({ 
+      success: true, 
+      ingredients: ingredientLookup,
+      lastUpdated: lastUpdated
+    });
     
   } catch (error) {
     console.error('❌ Unexpected error in GET /api/nutrition-ingredients:', error);

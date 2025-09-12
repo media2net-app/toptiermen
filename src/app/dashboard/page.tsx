@@ -6,7 +6,6 @@ import { BeakerIcon as DumbbellIcon, LightBulbIcon as BrainIcon } from '@heroico
 import { toast } from 'react-hot-toast';
 import Link from 'next/link';
 import BadgeDisplay from '@/components/BadgeDisplay';
-import UserTasksWidget from '@/components/UserTasksWidget';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { useOnboarding } from '@/contexts/OnboardingContext';
 import DashboardLoadingModal from '@/components/ui/DashboardLoadingModal';
@@ -300,12 +299,6 @@ export default function Dashboard() {
             />
           </div>
 
-          {/* User Tasks Widget */}
-          {!loading && (
-            <div className="mb-6 sm:mb-8">
-              <UserTasksWidget userName={profile?.full_name || ''} />
-            </div>
-          )}
 
           {/* Dashboard Content */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8 animate-fade-in-up">

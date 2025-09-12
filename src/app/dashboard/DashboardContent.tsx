@@ -32,6 +32,37 @@ import NotificationBell from '@/components/NotificationBell';
 import InboxIcon from '@/components/InboxIcon';
 import SupportButton from '@/components/SupportButton';
 
+// Subscription Tier Display Component
+const SubscriptionTier = () => {
+  const { subscription, loading, error } = useSubscription();
+  
+  console.log('🔍 SubscriptionTier render:', { subscription, loading, error });
+  
+  if (loading) return <span className="text-gray-400 text-xs">Loading...</span>;
+  if (error) return <span className="text-red-400 text-xs">Error</span>;
+  
+  const tier = subscription?.subscription_tier || 'basic';
+  let displayTier = 'Basic Tier';
+  let colorClass = 'text-gray-400';
+  
+  if (tier === 'premium') {
+    displayTier = 'Premium Tier';
+    colorClass = 'text-[#B6C948]';
+  } else if (tier === 'lifetime') {
+    displayTier = 'Lifetime Tier';
+    colorClass = 'text-[#FFD700]';
+  } else {
+    displayTier = 'Basic Tier';
+    colorClass = 'text-gray-400';
+  }
+  
+  return (
+    <p className={`${colorClass} text-xs font-medium`}>
+      {displayTier}
+    </p>
+  );
+};
+
 // 2.0.1: Dashboard menu configuration
 const menu = [
   { label: 'Onboarding', icon: CheckCircleIcon, href: '/dashboard/onboarding', onboardingStep: 0, isOnboardingItem: true },
@@ -902,17 +933,21 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
                   <p className="text-white text-sm font-medium truncate">
                     {user?.email}
                   </p>
-                  <p className="text-[#8BAE5A] text-xs">
-                    {(() => {
-                      const metadataRole = ((user as any)?.user_metadata?.role as string | undefined) || undefined;
-                      const effectiveRole = (profile?.role || metadataRole || '').toLowerCase();
-                      
-                      if (effectiveRole === 'admin') return 'Admin';
-                      if (effectiveRole === 'test') return 'Test';
-                      if (user?.email?.toLowerCase().includes('test')) return 'Test';
-                      return 'Lid';
-                    })()}
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-[#8BAE5A] text-xs">
+                      {(() => {
+                        const metadataRole = ((user as any)?.user_metadata?.role as string | undefined) || undefined;
+                        const effectiveRole = (profile?.role || metadataRole || '').toLowerCase();
+                        
+                        if (effectiveRole === 'admin') return 'Admin';
+                        if (effectiveRole === 'test') return 'Test';
+                        if (user?.email?.toLowerCase().includes('test')) return 'Test';
+                        return 'Lid';
+                      })()} 
+                    </p>
+                    <span className="text-gray-400 text-xs">•</span>
+                    <SubscriptionTier />
+                  </div>
                 </div>
               )}
             </div>

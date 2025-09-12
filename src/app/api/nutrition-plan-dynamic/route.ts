@@ -6,6 +6,28 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+// Function to check if ingredients have been updated since a given timestamp
+async function checkIngredientsUpdatedSince(timestamp: string) {
+  try {
+    const { data: ingredients, error } = await supabase
+      .from('nutrition_ingredients')
+      .select('updated_at')
+      .eq('is_active', true)
+      .gt('updated_at', timestamp)
+      .limit(1);
+    
+    if (error) {
+      console.error('❌ Error checking ingredient updates:', error);
+      return false; // Assume no updates if we can't check
+    }
+    
+    return ingredients && ingredients.length > 0;
+  } catch (error) {
+    console.error('❌ Error in checkIngredientsUpdatedSince:', error);
+    return false;
+  }
+}
+
 // Function to fetch ingredients from database
 async function getIngredientsFromDatabase() {
   try {
@@ -19,23 +41,37 @@ async function getIngredientsFromDatabase() {
       return {};
     }
     
-    // Convert database format to lookup object
+    // Convert database format to lookup object by both name and ID
     const ingredientLookup = {};
+    const ingredientByIdLookup = {};
+    
     ingredients?.forEach(ingredient => {
-      ingredientLookup[ingredient.name] = {
+      const nutritionData = {
+        id: ingredient.id,
+        name: ingredient.name,
         calories: ingredient.calories_per_100g,
         protein: ingredient.protein_per_100g,
         carbs: ingredient.carbs_per_100g,
         fat: ingredient.fat_per_100g,
-        unit_type: ingredient.unit_type
+        unit_type: ingredient.unit_type,
+        updated_at: ingredient.updated_at
       };
+      
+      // Lookup by name (for backward compatibility)
+      ingredientLookup[ingredient.name] = nutritionData;
+      
+      // Lookup by ID (preferred method)
+      ingredientByIdLookup[ingredient.id] = nutritionData;
     });
     
     console.log('✅ Loaded', Object.keys(ingredientLookup).length, 'ingredients from database');
-    return ingredientLookup;
+    return {
+      byName: ingredientLookup,
+      byId: ingredientByIdLookup
+    };
   } catch (error) {
     console.error('❌ Error in getIngredientsFromDatabase:', error);
-    return {};
+    return { byName: {}, byId: {} };
   }
 }
 
@@ -181,6 +217,47 @@ function calculateBasePlanCalories(ingredientDatabase = {}) {
 }
 
 
+// Function to get ingredient nutrition data from database (preferred method)
+function getIngredientNutritionData(ingredient, ingredientDatabase) {
+  // First try to get by ID (preferred method)
+  if (ingredient.id && ingredientDatabase.byId && ingredientDatabase.byId[ingredient.id]) {
+    return ingredientDatabase.byId[ingredient.id];
+  }
+  
+  // Fallback to name lookup (for backward compatibility)
+  if (ingredientDatabase.byName && ingredientDatabase.byName[ingredient.name]) {
+    return ingredientDatabase.byName[ingredient.name];
+  }
+  
+  console.warn(`⚠️ Nutrition data not found for ingredient: ${ingredient.name} (ID: ${ingredient.id})`);
+  return null;
+}
+
+// Function to enrich ingredient with fresh data from database
+function enrichIngredientWithDatabaseData(ingredient, ingredientDatabase) {
+  const nutritionData = getIngredientNutritionData(ingredient, ingredientDatabase);
+  
+  if (nutritionData) {
+    return {
+      ...ingredient,
+      // Override stored nutrition data with fresh database data
+      calories_per_100g: nutritionData.calories,
+      protein_per_100g: nutritionData.protein,
+      carbs_per_100g: nutritionData.carbs,
+      fat_per_100g: nutritionData.fat,
+      unit: nutritionData.unit_type, // Use database unit_type as source of truth
+      name: nutritionData.name, // Use database name as source of truth
+      // Keep original amount and other properties
+      amount: ingredient.amount,
+      id: ingredient.id
+    };
+  }
+  
+  // If no database data found, return original ingredient with warning
+  console.warn(`⚠️ Using stored data for ingredient: ${ingredient.name} (ID: ${ingredient.id})`);
+  return ingredient;
+}
+
 // Bereken nutritionele waarden voor een maaltijd
 function calculateMealNutrition(ingredients, ingredientDatabase) {
   let totalCalories = 0;
@@ -189,18 +266,18 @@ function calculateMealNutrition(ingredients, ingredientDatabase) {
   let totalFat = 0;
   
   ingredients.forEach(ingredient => {
-    const nutritionData = ingredientDatabase[ingredient.name];
+    const nutritionData = getIngredientNutritionData(ingredient, ingredientDatabase);
     if (nutritionData) {
       let multiplier = 0;
       
-      // Handle different unit types based on database unit_type
-      if (ingredient.unit === 'per_piece' || ingredient.unit === 'stuk') {
+      // Handle different unit types based on database unit_type (not ingredient.unit)
+      if (nutritionData.unit_type === 'per_piece' || nutritionData.unit_type === 'per_plakje' || nutritionData.unit_type === 'stuk') {
         multiplier = ingredient.amount;
-      } else if (ingredient.unit === 'per_100g' || ingredient.unit === 'g') {
+      } else if (nutritionData.unit_type === 'per_100g' || nutritionData.unit_type === 'g') {
         multiplier = ingredient.amount / 100;
-      } else if (ingredient.unit === 'per_ml') {
+      } else if (nutritionData.unit_type === 'per_ml') {
         multiplier = ingredient.amount / 100; // Assuming 1ml = 1g for liquids
-      } else if (ingredient.unit === 'handje') {
+      } else if (nutritionData.unit_type === 'handje') {
         multiplier = ingredient.amount;
       } else {
         // Default to per 100g calculation
@@ -211,8 +288,6 @@ function calculateMealNutrition(ingredients, ingredientDatabase) {
       totalProtein += nutritionData.protein * multiplier;
       totalCarbs += nutritionData.carbs * multiplier;
       totalFat += nutritionData.fat * multiplier;
-    } else {
-      console.warn(`⚠️ Nutrition data not found for ingredient: ${ingredient.name}`);
     }
   });
   
@@ -308,9 +383,13 @@ export async function GET(request: NextRequest) {
         const customPlanWeekData = customPlan.week_plan;
         
         // Check if the custom plan's user profile matches current profile
+        // Also check if ingredients have been updated since plan creation
+        const ingredientsUpdated = await checkIngredientsUpdatedSince(customPlan.created_at);
+        
         if (customPlanWeekData.userProfile && 
             customPlanWeekData.userProfile.weight === currentProfile.weight &&
-            customPlanWeekData.userProfile.targetCalories === currentProfile.target_calories) {
+            customPlanWeekData.userProfile.targetCalories === currentProfile.target_calories &&
+            !ingredientsUpdated) {
           console.log('✅ Custom plan is up to date, returning custom data');
           return NextResponse.json({
             success: true,
@@ -319,7 +398,11 @@ export async function GET(request: NextRequest) {
             lastUpdated: customPlan.updated_at
           });
         } else {
-          console.log('🔄 Custom plan is outdated, will regenerate with current profile');
+          if (ingredientsUpdated) {
+            console.log('🔄 Custom plan is outdated due to ingredient updates, will regenerate');
+          } else {
+            console.log('🔄 Custom plan is outdated due to profile changes, will regenerate');
+          }
         }
       } else {
         console.log('⚠️ Could not fetch current profile, proceeding with custom plan');
@@ -607,16 +690,16 @@ function calculateIngredientNutrition(ingredients, ingredientDatabase) {
   let totalFat = 0;
   
   ingredients.forEach(ingredient => {
-    const nutritionData = ingredientDatabase[ingredient.name];
+    const nutritionData = getIngredientNutritionData(ingredient, ingredientDatabase);
     if (nutritionData) {
       let multiplier = 0;
       
-      // Handle different unit types
-      if (ingredient.unit === 'per_piece' || ingredient.unit === 'stuk') {
+      // Handle different unit types based on database unit_type (not ingredient.unit)
+      if (nutritionData.unit_type === 'per_piece' || nutritionData.unit_type === 'per_plakje' || nutritionData.unit_type === 'stuk') {
         multiplier = ingredient.amount;
-      } else if (ingredient.unit === 'per_100g' || ingredient.unit === 'g') {
+      } else if (nutritionData.unit_type === 'per_100g' || nutritionData.unit_type === 'g') {
         multiplier = ingredient.amount / 100;
-      } else if (ingredient.unit === 'per_ml') {
+      } else if (nutritionData.unit_type === 'per_ml') {
         multiplier = ingredient.amount / 100;
       } else {
         multiplier = ingredient.amount / 100;
@@ -632,6 +715,13 @@ function calculateIngredientNutrition(ingredients, ingredientDatabase) {
   return { calories: totalCalories, protein: totalProtein, carbs: totalCarbs, fat: totalFat };
 }
 
+// Function to enrich all ingredients with fresh database data
+function enrichIngredientsWithDatabaseData(ingredients, ingredientDatabase) {
+  if (!ingredients) return ingredients;
+  
+  return ingredients.map(ingredient => enrichIngredientWithDatabaseData(ingredient, ingredientDatabase));
+}
+
 // Function to intelligently scale ingredient amounts with macro optimization
 function scaleIngredientAmounts(ingredients, scaleFactor, targetNutrition: any = null, ingredientDatabase = {}) {
   if (!ingredients || scaleFactor === 1) return ingredients;
@@ -641,41 +731,78 @@ function scaleIngredientAmounts(ingredients, scaleFactor, targetNutrition: any =
     if (ingredient.amount) {
       const originalAmount = ingredient.amount; // Store original amount
       
-      // Handle piece-based ingredients (stuk, per_piece) with smart scaling
-      if (ingredient.unit === 'per_piece' || ingredient.unit === 'stuk') {
-        // Only scale if factor is significant enough
-        if (scaleFactor >= 1.2) {
-          // Round up for significant scaling (e.g., 1.4 -> 2 pieces)
-          const scaledAmount = Math.ceil(ingredient.amount * scaleFactor);
-          return {
-            ...ingredient,
-            amount: scaledAmount,
-            originalAmount: originalAmount // Store original for debug
-          };
-        } else if (scaleFactor <= 0.8) {
-          // Round down for significant reduction (e.g., 0.7 -> 1 piece, but could be 0)
-          const scaledAmount = Math.max(1, Math.floor(ingredient.amount * scaleFactor));
-          return {
-            ...ingredient,
-            amount: scaledAmount,
-            originalAmount: originalAmount // Store original for debug
-          };
+      // Get nutrition data to determine unit type
+      const nutritionData = getIngredientNutritionData(ingredient, ingredientDatabase);
+      
+      // Handle piece-based ingredients (stuk, per_piece, per_plakje) with smart scaling
+      if (nutritionData && (nutritionData.unit_type === 'per_piece' || nutritionData.unit_type === 'per_plakje' || nutritionData.unit_type === 'stuk')) {
+        // For plakjes, be more conservative with scaling to avoid showing 1 instead of 2
+        if (nutritionData.unit_type === 'per_plakje') {
+          // Only scale plakjes if factor is very significant
+          if (scaleFactor >= 1.5) {
+            // Round up for significant scaling (e.g., 1.6 -> 3 plakjes)
+            const scaledAmount = Math.ceil(ingredient.amount * scaleFactor);
+            return {
+              ...ingredient,
+              amount: scaledAmount,
+              unit: nutritionData ? nutritionData.unit_type : ingredient.unit, // Use database unit_type
+              originalAmount: originalAmount // Store original for debug
+            };
+          } else if (scaleFactor <= 0.6) {
+            // Round down for significant reduction (e.g., 0.5 -> 1 plakje)
+            const scaledAmount = Math.max(1, Math.floor(ingredient.amount * scaleFactor));
+            return {
+              ...ingredient,
+              amount: scaledAmount,
+              unit: nutritionData ? nutritionData.unit_type : ingredient.unit, // Use database unit_type
+              originalAmount: originalAmount // Store original for debug
+            };
+          } else {
+            // Keep original for moderate scaling (0.6 < factor < 1.5)
+            return {
+              ...ingredient,
+              unit: nutritionData ? nutritionData.unit_type : ingredient.unit, // Use database unit_type
+              originalAmount: originalAmount // Store original for debug
+            };
+          }
         } else {
-          // Keep original for moderate scaling (0.8 < factor < 1.2)
-          return {
-            ...ingredient,
-            originalAmount: originalAmount // Store original for debug
-          };
+          // Original logic for other piece-based ingredients
+          if (scaleFactor >= 1.2) {
+            // Round up for significant scaling (e.g., 1.4 -> 2 pieces)
+            const scaledAmount = Math.ceil(ingredient.amount * scaleFactor);
+            return {
+              ...ingredient,
+              amount: scaledAmount,
+              unit: nutritionData ? nutritionData.unit_type : ingredient.unit, // Use database unit_type
+              originalAmount: originalAmount // Store original for debug
+            };
+          } else if (scaleFactor <= 0.8) {
+            // Round down for significant reduction (e.g., 0.7 -> 1 piece, but could be 0)
+            const scaledAmount = Math.max(1, Math.floor(ingredient.amount * scaleFactor));
+            return {
+              ...ingredient,
+              amount: scaledAmount,
+              unit: nutritionData ? nutritionData.unit_type : ingredient.unit, // Use database unit_type
+              originalAmount: originalAmount // Store original for debug
+            };
+          } else {
+            // Keep original for moderate scaling (0.8 < factor < 1.2)
+            return {
+              ...ingredient,
+              unit: nutritionData ? nutritionData.unit_type : ingredient.unit, // Use database unit_type
+              originalAmount: originalAmount // Store original for debug
+            };
+          }
         }
       }
 
       let scaledAmount = ingredient.amount * scaleFactor;
 
-      // Round to reasonable values based on unit type
-      if (ingredient.unit === 'per_100g' || ingredient.unit === 'g') {
+      // Round to reasonable values based on unit type from database
+      if (nutritionData && (nutritionData.unit_type === 'per_100g' || nutritionData.unit_type === 'g')) {
         scaledAmount = Math.round(scaledAmount / 5) * 5;
         scaledAmount = Math.max(5, scaledAmount);
-      } else if (ingredient.unit === 'per_ml') {
+      } else if (nutritionData && nutritionData.unit_type === 'per_ml') {
         scaledAmount = Math.round(scaledAmount / 10) * 10;
         scaledAmount = Math.max(10, scaledAmount);
       } else {
@@ -686,6 +813,7 @@ function scaleIngredientAmounts(ingredients, scaleFactor, targetNutrition: any =
       return {
         ...ingredient,
         amount: scaledAmount,
+        unit: nutritionData ? nutritionData.unit_type : ingredient.unit, // Use database unit_type
         originalAmount: originalAmount // Store original for debug
       };
     }
@@ -781,7 +909,8 @@ function scaleIngredientAmounts(ingredients, scaleFactor, targetNutrition: any =
     });
   }
   
-  return scaledIngredients;
+  // Enrich with fresh database data before returning
+  return enrichIngredientsWithDatabaseData(scaledIngredients, ingredientDatabase);
 }
 
 // Function to calculate base plan calories from database

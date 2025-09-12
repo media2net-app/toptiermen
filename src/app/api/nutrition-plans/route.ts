@@ -55,6 +55,10 @@ export async function GET(request: NextRequest) {
       target_protein: plan.meals?.target_protein || plan.target_protein,
       target_carbs: plan.meals?.target_carbs || plan.target_carbs,
       target_fat: plan.meals?.target_fat || plan.target_fat,
+      // Add macro percentages for frontend calculation
+      protein_percentage: plan.protein_percentage,
+      carbs_percentage: plan.carbs_percentage,
+      fat_percentage: plan.fat_percentage,
       created_at: plan.created_at,
       updated_at: plan.updated_at
     }));

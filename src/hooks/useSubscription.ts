@@ -40,41 +40,45 @@ export function useSubscription(): UseSubscriptionReturn {
         setLoading(true);
         setError(null);
 
-        // First try to get from user_subscriptions table
-        const { data: userSub, error: userSubError } = await supabase
-          .from('user_subscriptions')
-          .select('subscription_tier, subscription_status, billing_period, start_date, end_date, status')
-          .eq('user_id', user.id)
+        // Get subscription data directly from profiles table using package_type
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('package_type, role')
+          .eq('id', user.id)
           .single();
 
-        if (userSubError && userSubError.code !== 'PGRST116') {
-          console.error('Error fetching user subscription:', userSubError);
-          
-          // Fallback to profiles table
-          const { data: profile, error: profileError } = await supabase
-            .from('profiles')
-            .select('subscription_tier, subscription_status, subscription_plan')
-            .eq('id', user.id)
-            .single();
-
-          if (profileError) {
-            console.error('Error fetching profile subscription:', profileError);
-            setError('Failed to fetch subscription data');
-            return;
-          }
-
-          // Map profile data to subscription format
-          setSubscription({
-            subscription_tier: profile.subscription_tier || 'basic',
-            subscription_status: profile.subscription_status || 'active',
-            billing_period: 'monthly',
-            start_date: new Date().toISOString(),
-            end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-            status: profile.subscription_status || 'active'
-          });
-        } else {
-          setSubscription(userSub);
+        if (profileError) {
+          console.error('Error fetching profile subscription:', profileError);
+          setError('Failed to fetch subscription data');
+          return;
         }
+
+        // Map profile data to subscription format using package_type
+        const packageType = profile.package_type || 'Basic Tier';
+        let tier = 'basic';
+        
+        if (packageType === 'Premium Tier') {
+          tier = 'premium';
+        } else if (packageType === 'Lifetime Tier') {
+          tier = 'lifetime';
+        } else {
+          tier = 'basic'; // Default for 'Basic Tier' or null
+        }
+
+        console.log('🔍 Subscription data loaded:', {
+          packageType,
+          tier,
+          role: profile.role
+        });
+
+        setSubscription({
+          subscription_tier: tier,
+          subscription_status: 'active', // Default to active for all users
+          billing_period: 'monthly',
+          start_date: new Date().toISOString(),
+          end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+          status: 'active' // Default to active
+        });
       } catch (err) {
         console.error('Subscription fetch error:', err);
         setError('Failed to fetch subscription data');

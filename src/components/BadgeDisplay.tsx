@@ -79,39 +79,8 @@ export default function BadgeDisplay({
     );
   }
 
-  // Show demo badges if no real badges exist (only when not loading)
-  const displayBadges = badges.length === 0 ? [
-    {
-      id: 'demo-1',
-      title: 'Vroege Vogel',
-      description: '5 dagen vroeg op',
-      icon_name: '🌅',
-      image_url: '/badge-no-excuses.png',
-      rarity_level: 'common' as const,
-      xp_reward: 100,
-      unlocked_at: new Date().toISOString()
-    },
-    {
-      id: 'demo-2',
-      title: 'Workout King',
-      description: '30 workouts voltooid',
-      icon_name: '💪',
-      image_url: '/badge-no-excuses.png',
-      rarity_level: 'epic' as const,
-      xp_reward: 500,
-      unlocked_at: new Date().toISOString()
-    },
-    {
-      id: 'demo-3',
-      title: 'Academy Master',
-      description: 'Je hebt alle Academy modules voltooid!',
-      icon_name: '🎓',
-      image_url: '/badge-no-excuses.png',
-      rarity_level: 'legendary' as const,
-      xp_reward: 1000,
-      unlocked_at: new Date().toISOString()
-    }
-  ] : badges;
+  // Only show real badges - no demo badges
+  const displayBadges = badges;
 
   const displayedBadges = displayBadges.slice(0, maxDisplay);
   const remainingCount = displayBadges.length - maxDisplay;
@@ -122,16 +91,17 @@ export default function BadgeDisplay({
         <div className="flex items-center gap-2 mb-3">
           <h3 className="text-lg font-semibold text-[#8BAE5A]">Behaalde Badges</h3>
           <span className="text-sm text-[#A6C97B]">({displayBadges.length})</span>
-          {badges.length === 0 && (
-            <span className="text-xs text-yellow-400 bg-yellow-400/10 px-2 py-1 rounded">
-              Demo
-            </span>
-          )}
         </div>
       )}
       
-      <div className="flex flex-wrap gap-2">
-        {displayedBadges.map((badge) => (
+      {displayBadges.length === 0 ? (
+        <div className="text-center py-4">
+          <p className="text-gray-400 text-sm">Nog geen badges behaald</p>
+          <p className="text-gray-500 text-xs mt-1">Voltooi missies en challenges om badges te verdienen!</p>
+        </div>
+      ) : (
+        <div className="flex flex-wrap gap-2">
+          {displayedBadges.map((badge) => (
           <div
             key={badge.id}
             className="relative"
@@ -227,15 +197,16 @@ export default function BadgeDisplay({
           </div>
         ))}
 
-        {/* Show remaining count if there are more badges */}
-        {remainingCount > 0 && (
-          <div className="flex items-center justify-center">
-            <div className="w-12 h-12 bg-[#232D1A] rounded-full flex items-center justify-center">
-              <span className="text-[#8BAE5A] text-sm font-semibold">+{remainingCount}</span>
+          {/* Show remaining count if there are more badges */}
+          {remainingCount > 0 && (
+            <div className="flex items-center justify-center">
+              <div className="w-12 h-12 bg-[#232D1A] rounded-full flex items-center justify-center">
+                <span className="text-[#8BAE5A] text-sm font-semibold">+{remainingCount}</span>
+              </div>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      )}
 
       {/* Badge Stats Summary */}
       {showTitle && displayBadges.length > 0 && (

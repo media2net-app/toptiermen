@@ -7,25 +7,25 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-// Package pricing configuration - these are the FINAL prices that customers pay (50% discounted)
+// Package pricing configuration - ORIGINAL FULL PRICES (before any discounts)
 const PACKAGE_PRICING = {
   'basic': {
     name: 'Basic Tier',
-    monthlyPrice: 49, // 6 months - original price
-    yearlyPrice: 22,  // 12 months - 50% discount (€44 * 0.5)
+    monthlyPrice: 49, // 6 months - per month
+    yearlyPrice: 44,  // 12 months - per month (10% yearly discount)
     lifetimePrice: null // Not applicable
   },
   'premium': {
     name: 'Premium Tier', 
-    monthlyPrice: 79, // 6 months - original price
-    yearlyPrice: 35.50,  // 12 months - 50% discount (€71 * 0.5)
+    monthlyPrice: 79, // 6 months - per month
+    yearlyPrice: 71,  // 12 months - per month (10% yearly discount)
     lifetimePrice: null // Not applicable
   },
   'lifetime': {
     name: 'Lifetime Access',
-    monthlyPrice: 1995, // One-time payment - original price
-    yearlyPrice: 997.50,  // One-time payment - 50% discount (€1995 * 0.5)
-    lifetimePrice: 1995 // One-time payment - original price
+    monthlyPrice: null, // Not applicable
+    yearlyPrice: null,  // Not applicable
+    lifetimePrice: 1995 // One-time payment - full price
   }
 };
 
@@ -37,7 +37,8 @@ export async function POST(request: NextRequest) {
       billingPeriod, 
       paymentFrequency, 
       customerName, 
-      customerEmail 
+      customerEmail,
+      discountCode 
     } = body;
 
     console.log('💳 Creating prelaunch Mollie payment:', { 
@@ -45,7 +46,8 @@ export async function POST(request: NextRequest) {
       billingPeriod, 
       paymentFrequency, 
       customerName, 
-      customerEmail 
+      customerEmail,
+      discountCode 
     });
 
     // Validate required fields
@@ -63,44 +65,73 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
+    // Check discount code
+    const isDiscountValid = discountCode && discountCode.toUpperCase() === 'TTMPRELAUNCH50';
+    const discountMultiplier = isDiscountValid ? 0.5 : 1;
+    const discountPercentage = isDiscountValid ? 50 : 0;
+
     // Calculate pricing based on package and billing period
+    let basePrice: number;
     let finalPrice: number;
     let periodDescription: string;
     let paymentDescription: string;
 
     if (packageId === 'lifetime') {
       // Lifetime package - always one-time payment
-      finalPrice = packageInfo.lifetimePrice!;
+      if (!packageInfo.lifetimePrice) {
+        return NextResponse.json({ 
+          error: `Lifetime price not available for package: ${packageId}` 
+        }, { status: 400 });
+      }
+      basePrice = packageInfo.lifetimePrice;
+      finalPrice = basePrice * discountMultiplier;
       periodDescription = 'Levenslang';
-      paymentDescription = `${packageInfo.name} - Levenslang - Eenmalig - Prelaunch Prijs`;
+      paymentDescription = `${packageInfo.name} - Levenslang - Eenmalig${isDiscountValid ? ' - TTMPrelaunch50' : ' - Prelaunch Prijs'}`;
     } else {
       // Basic or Premium packages
       if (billingPeriod === '6months') {
+        if (!packageInfo.monthlyPrice) {
+          return NextResponse.json({ 
+            error: `Monthly price not available for package: ${packageId}` 
+          }, { status: 400 });
+        }
         if (paymentFrequency === 'monthly') {
-          finalPrice = packageInfo.monthlyPrice;
+          basePrice = packageInfo.monthlyPrice;
+          finalPrice = basePrice * discountMultiplier;
           periodDescription = '6 maanden (maandelijks)';
-          paymentDescription = `${packageInfo.name} - 6 maanden - Maandelijks - Prelaunch Prijs`;
+          paymentDescription = `${packageInfo.name} - 6 maanden - Maandelijks${isDiscountValid ? ' - TTMPrelaunch50' : ' - Prelaunch Prijs'}`;
         } else { // once
-          finalPrice = packageInfo.monthlyPrice * 6;
+          basePrice = packageInfo.monthlyPrice * 6;
+          finalPrice = basePrice * discountMultiplier;
           periodDescription = '6 maanden (eenmalig)';
-          paymentDescription = `${packageInfo.name} - 6 maanden - Eenmalig - Prelaunch Prijs`;
+          paymentDescription = `${packageInfo.name} - 6 maanden - Eenmalig${isDiscountValid ? ' - TTMPrelaunch50' : ' - Prelaunch Prijs'}`;
         }
       } else { // 12months
+        if (!packageInfo.yearlyPrice) {
+          return NextResponse.json({ 
+            error: `Yearly price not available for package: ${packageId}` 
+          }, { status: 400 });
+        }
         if (paymentFrequency === 'monthly') {
-          finalPrice = packageInfo.yearlyPrice;
+          basePrice = packageInfo.yearlyPrice;
+          finalPrice = basePrice * discountMultiplier;
           periodDescription = '12 maanden (maandelijks)';
-          paymentDescription = `${packageInfo.name} - 12 maanden - Maandelijks - Prelaunch Prijs`;
+          paymentDescription = `${packageInfo.name} - 12 maanden - Maandelijks${isDiscountValid ? ' - TTMPrelaunch50' : ' - Prelaunch Prijs'}`;
         } else { // once
-          finalPrice = packageInfo.yearlyPrice * 12;
+          basePrice = packageInfo.yearlyPrice * 12;
+          finalPrice = basePrice * discountMultiplier;
           periodDescription = '12 maanden (eenmalig)';
-          paymentDescription = `${packageInfo.name} - 12 maanden - Eenmalig - Prelaunch Prijs`;
+          paymentDescription = `${packageInfo.name} - 12 maanden - Eenmalig${isDiscountValid ? ' - TTMPrelaunch50' : ' - Prelaunch Prijs'}`;
         }
       }
     }
 
     console.log('💰 Pricing calculation:', {
       packageId,
+      basePrice,
       finalPrice,
+      discountCode,
+      discountPercentage,
       periodDescription,
       paymentDescription
     });
@@ -117,7 +148,10 @@ export async function POST(request: NextRequest) {
         packageName: packageInfo.name,
         billingPeriod,
         paymentFrequency,
+        basePrice,
         finalPrice,
+        discountCode: discountCode || null,
+        discountPercentage,
         customerName,
         customerEmail,
         timestamp: new Date().toISOString()
@@ -134,9 +168,10 @@ export async function POST(request: NextRequest) {
         package_id: packageId,
         package_name: packageInfo.name,
         payment_period: `${billingPeriod}_${paymentFrequency}`,
-        original_price: finalPrice, // Original price
-        discounted_price: finalPrice, // Final price (same as original)
-        discount_percentage: 0,
+        original_price: basePrice, // Original price before discount
+        discounted_price: finalPrice, // Final price after discount
+        discount_percentage: discountPercentage,
+        discount_code: discountCode || null,
         payment_method: paymentFrequency,
         full_name: customerName,
         email: customerEmail,
@@ -160,7 +195,10 @@ export async function POST(request: NextRequest) {
       status: payment.status,
       packageInfo: {
         name: packageInfo.name,
+        basePrice,
         finalPrice,
+        discountApplied: isDiscountValid,
+        discountPercentage,
         periodDescription,
         paymentDescription
       }

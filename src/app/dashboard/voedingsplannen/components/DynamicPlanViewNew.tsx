@@ -468,11 +468,15 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
   useEffect(() => {
     const loadIngredientDatabase = async () => {
       try {
-        const response = await fetch('/api/nutrition-ingredients');
+        // Add cache-busting parameter
+        const response = await fetch(`/api/nutrition-ingredients?t=${Date.now()}`);
         const data = await response.json();
         if (data.success && data.ingredients) {
           setIngredientDatabase(data.ingredients);
           console.log('✅ Loaded ingredient database:', Object.keys(data.ingredients).length, 'ingredients');
+          if (data.lastUpdated) {
+            console.log('📅 Ingredients last updated:', new Date(data.lastUpdated).toISOString());
+          }
         }
       } catch (error) {
         console.error('❌ Error loading ingredient database:', error);
@@ -485,7 +489,6 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
   // Calculate nutrition for a single ingredient based on amount and unit
   const calculateIngredientNutrition = (ingredient: any) => {
     const amount = ingredient.amount || 0;
-    const unit = ingredient.unit || 'per_100g';
     const name = ingredient.name || '';
     
     // Get nutrition data from database
@@ -494,6 +497,9 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
       console.warn(`⚠️ Nutrition data not found for ingredient: ${name}`);
       return { calories: 0, protein: 0, carbs: 0, fat: 0 };
     }
+
+    // Use database unit_type as source of truth
+    const unit = nutritionData.unit_type || ingredient.unit || 'per_100g';
 
     // Convert based on unit type
     let multiplier = 1;
@@ -504,6 +510,9 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
       case 'per_piece':
       case 'stuk':
         multiplier = amount; // For pieces, use amount directly
+        break;
+      case 'per_plakje':
+        multiplier = amount; // For slices, use amount directly
         break;
       case 'per_ml':
         multiplier = amount / 100; // Assuming 1ml = 1g for liquids
@@ -532,7 +541,6 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
   // Calculate original ingredient values before scaling (for debug mode)
   const calculateOriginalIngredientNutrition = (ingredient: any) => {
     const amount = ingredient.amount || 0;
-    const unit = ingredient.unit || 'per_100g';
     const name = ingredient.name || '';
     const scaleFactor = planData?.scalingInfo?.scaleFactor || 1;
     
@@ -541,6 +549,9 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
     if (!nutritionData) {
       return { calories: 0, protein: 0, carbs: 0, fat: 0 };
     }
+
+    // Use database unit_type as source of truth
+    const unit = nutritionData.unit_type || ingredient.unit || 'per_100g';
 
     // Use originalAmount if available, otherwise calculate from scaled amount
     const originalAmount = ingredient.originalAmount || (scaleFactor !== 1 ? amount / scaleFactor : amount);
@@ -554,6 +565,9 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
       case 'per_piece':
       case 'stuk':
         multiplier = originalAmount; // For pieces, use amount directly
+        break;
+      case 'per_plakje':
+        multiplier = originalAmount; // For slices, use amount directly
         break;
       case 'per_ml':
         multiplier = originalAmount / 100; // Assuming 1ml = 1g for liquids
@@ -1698,7 +1712,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                               <td className="py-3 text-center">
                                 <input
                                   type="number"
-                                  value={ingredient.amount || 0}
+                                  value={parseFloat(ingredient.amount.toString()) || 0}
                                   onChange={(e) => handleIngredientChange(selectedDay, mealType, index, 'amount', parseFloat(e.target.value) || 0)}
                                   className="w-16 md:w-20 px-2 py-1 bg-[#181F17] border border-[#3A4D23] rounded text-white text-center focus:outline-none focus:border-[#8BAE5A] text-xs md:text-sm"
                                   min="0"
@@ -1747,13 +1761,18 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                                 )}
                               </td>
                               <td className="py-3 text-center text-gray-300">
-                                {ingredient.unit === 'per_100g' ? 'g' :
-                                 ingredient.unit === 'per_piece' ? 'stuk' :
-                                 ingredient.unit === 'per_ml' ? 'ml' :
-                                 ingredient.unit === 'per_tbsp' ? 'eetlepel' :
-                                 ingredient.unit === 'per_tsp' ? 'theelepel' :
-                                 ingredient.unit === 'per_cup' ? 'kop' :
-                                 'g'}
+                                {(() => {
+                                  const nutritionData = ingredientDatabase[ingredient.name];
+                                  const unit = nutritionData?.unit_type || ingredient.unit || 'per_100g';
+                                  return unit === 'per_100g' ? 'g' :
+                                         unit === 'per_piece' ? 'stuk' :
+                                         unit === 'per_ml' ? 'ml' :
+                                         unit === 'per_tbsp' ? 'eetlepel' :
+                                         unit === 'per_tsp' ? 'theelepel' :
+                                         unit === 'per_cup' ? 'kop' :
+                                         unit === 'per_plakje' ? 'plakje' :
+                                         'g';
+                                })()}
                               </td>
                               <td className="py-3 text-center text-white">
                                 {calculateIngredientNutrition(ingredient).calories.toFixed(1)}
