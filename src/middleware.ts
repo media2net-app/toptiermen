@@ -12,6 +12,11 @@ export async function middleware(req: NextRequest) {
   // }
 
   // Refresh session if expired - required for Server Components
+  // Skip session refresh for logout-related requests to prevent conflicts
+  const isLogoutRequest = req.nextUrl.pathname === '/login' && 
+    (req.nextUrl.searchParams.get('logout') === 'success' || 
+     req.nextUrl.searchParams.get('logout') === 'error');
+  
   const {
     data: { session },
   } = await supabase.auth.getSession();

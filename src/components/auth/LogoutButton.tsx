@@ -21,8 +21,7 @@ export function LogoutButton({
   showConfirm = true
 }: LogoutButtonProps) {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const { signOut } = useSupabaseAuth();
-  const router = useRouter();
+  const { logoutAndRedirect } = useSupabaseAuth();
 
   const handleLogout = async () => {
     if (showConfirm) {
@@ -33,28 +32,18 @@ export function LogoutButton({
     setIsLoggingOut(true);
     
     try {
-      console.log('🚪 Starting logout process...');
-      const result = await signOut();
-      
-      if (result.success) {
-        console.log('✅ Logout successful, redirecting...');
-        // Simple redirect without cache busting timestamp to prevent login issues
-        const finalUrl = redirectTo.includes('?') 
-          ? `${redirectTo}&logout=success` 
-          : `${redirectTo}?logout=success`;
-        
-        router.push(finalUrl);
-      } else {
-        console.error('❌ Logout failed:', result.error);
-        // Still redirect on failure to prevent stuck state
-        router.push(`${redirectTo}?logout=error`);
-      }
+      console.log('🚪 LogoutButton: Starting logout process...');
+      // Use the enhanced logoutAndRedirect function
+      await logoutAndRedirect(redirectTo);
     } catch (error) {
-      console.error('❌ Logout exception:', error);
-      // Emergency redirect
-      router.push(`${redirectTo}?logout=error`);
+      console.error('❌ LogoutButton: Logout exception:', error);
+      // Emergency fallback - force redirect
+      if (typeof window !== 'undefined') {
+        window.location.href = `${redirectTo}?logout=error&t=${Date.now()}`;
+      }
     } finally {
-      setIsLoggingOut(false);
+      // Note: setIsLoggingOut(false) is not needed here since we're redirecting
+      // The component will be unmounted during redirect
     }
   };
 

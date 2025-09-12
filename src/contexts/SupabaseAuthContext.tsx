@@ -32,6 +32,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   signUp: (email: string, password: string, fullName?: string) => Promise<{ success: boolean; error?: string }>;
   signOut: () => Promise<{ success: boolean; error?: string }>;
+  logoutAndRedirect: (redirectUrl?: string) => Promise<void>;
   isAuthenticated: boolean;
   isAdmin: boolean;
   isLid: boolean;
@@ -260,27 +261,134 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     }
   };
 
-  // Sign out method
+  // Enhanced sign out method with complete cleanup
   const signOut = async () => {
     try {
+      console.log('🚪 Starting enhanced logout process...');
       setLoading(true);
+      
+      // 1. Clear all browser storage first
+      if (typeof window !== 'undefined') {
+        console.log('🧹 Clearing browser storage...');
+        localStorage.clear();
+        sessionStorage.clear();
+        
+        // Remove specific auth-related items
+        localStorage.removeItem('toptiermen-v2-auth');
+        localStorage.removeItem('sb-wkjvstuttbeyqzyjayxj-auth-token');
+        sessionStorage.removeItem('sb-wkjvstuttbeyqzyjayxj-auth-token');
+        
+        // Clear any other potential auth storage
+        const keysToRemove: string[] = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && (key.includes('supabase') || key.includes('auth') || key.includes('toptiermen'))) {
+            keysToRemove.push(key);
+          }
+        }
+        keysToRemove.forEach(key => localStorage.removeItem(key));
+        
+        console.log('✅ Browser storage cleared');
+      }
+      
+      // 2. Sign out from Supabase
+      console.log('🔐 Signing out from Supabase...');
       const { error } = await supabase.auth.signOut();
       
       if (error) {
-        setError(error.message);
-        return { success: false, error: error.message };
+        console.error('❌ Supabase signOut error:', error);
+        // Continue with cleanup even if Supabase signOut fails
+      } else {
+        console.log('✅ Supabase signOut successful');
       }
 
+      // 3. Reset React state
+      console.log('🔄 Resetting React state...');
       setUser(null);
       setProfile(null);
       setError(null);
+      
+      // 4. Clear browser cache if possible
+      if (typeof window !== 'undefined' && 'caches' in window) {
+        try {
+          console.log('🗑️ Clearing browser cache...');
+          const cacheNames = await caches.keys();
+          await Promise.all(cacheNames.map(name => caches.delete(name)));
+          console.log('✅ Browser cache cleared');
+        } catch (cacheError) {
+          console.warn('⚠️ Could not clear browser cache:', cacheError);
+        }
+      }
+      
+      console.log('✅ Enhanced logout completed successfully');
       return { success: true };
     } catch (err) {
+      console.error('❌ Enhanced logout error:', err);
       const errorMessage = err instanceof Error ? err.message : 'Logout failed';
       setError(errorMessage);
+      
+      // Force state reset even on error
+      setUser(null);
+      setProfile(null);
+      
       return { success: false, error: errorMessage };
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Enhanced logout with redirect function
+  const logoutAndRedirect = async (redirectUrl: string = '/login') => {
+    try {
+      console.log('🚪 Starting logout and redirect process...');
+      
+      // Perform enhanced logout
+      const result = await signOut();
+      
+      if (result.success) {
+        console.log('✅ Logout successful, preparing redirect...');
+        
+        // Use window.location.href for hard redirect to prevent any React state issues
+        if (typeof window !== 'undefined') {
+          // Add a small delay to ensure cleanup is complete
+          setTimeout(() => {
+            const finalUrl = redirectUrl.includes('?') 
+              ? `${redirectUrl}&logout=success&t=${Date.now()}` 
+              : `${redirectUrl}?logout=success&t=${Date.now()}`;
+            
+            console.log(`🔄 Redirecting to: ${finalUrl}`);
+            window.location.href = finalUrl;
+          }, 100);
+        }
+      } else {
+        console.error('❌ Logout failed, forcing redirect anyway...');
+        
+        // Force redirect even on logout failure to prevent stuck state
+        if (typeof window !== 'undefined') {
+          setTimeout(() => {
+            const finalUrl = redirectUrl.includes('?') 
+              ? `${redirectUrl}&logout=error&t=${Date.now()}` 
+              : `${redirectUrl}?logout=error&t=${Date.now()}`;
+            
+            console.log(`🔄 Emergency redirect to: ${finalUrl}`);
+            window.location.href = finalUrl;
+          }, 100);
+        }
+      }
+    } catch (error) {
+      console.error('❌ Logout and redirect error:', error);
+      
+      // Emergency fallback - force redirect
+      if (typeof window !== 'undefined') {
+        setTimeout(() => {
+          const finalUrl = redirectUrl.includes('?') 
+            ? `${redirectUrl}&logout=error&t=${Date.now()}` 
+            : `${redirectUrl}?logout=error&t=${Date.now()}`;
+          
+          console.log(`🔄 Emergency fallback redirect to: ${finalUrl}`);
+          window.location.href = finalUrl;
+        }, 100);
+      }
     }
   };
 
@@ -302,6 +410,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     signIn,
     signUp,
     signOut,
+    logoutAndRedirect,
     isAuthenticated,
     isAdmin,
     isLid,

@@ -666,7 +666,7 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
 function DashboardContentInner({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, profile, isAdmin, signOut } = useSupabaseAuth();
+  const { user, profile, isAdmin, logoutAndRedirect } = useSupabaseAuth();
   const { showDebug, toggleDebug } = useDebug();
   const { isOnboarding, isTransitioning } = useOnboarding();
   const isTestUser = useTestUser();
@@ -810,12 +810,12 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
     }
   }, [onboardingStatus, profile?.role]);
 
-  // 2.0.3: Enhanced logout with proper redirect to prevent loops
+  // Enhanced logout using the new logoutAndRedirect function
   const handleLogout = async () => {
     if (isLoggingOut) return; // Prevent double click
     
     try {
-      console.log('2.0.3: Dashboard logout initiated...');
+      console.log('🚪 Dashboard: Logout initiated...');
       setIsLoggingOut(true);
       
       // Show loading state
@@ -824,29 +824,19 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
         logoutButton.setAttribute('disabled', 'true');
       }
       
-      // Use the optimized signOut function (it clears storage internally)
-      const result = await signOut();
-      
-      if (result.success) {
-        console.log('✅ Dashboard logout successful');
-        // Force redirect without cache busting to prevent login issues
-        if (typeof window !== 'undefined') {
-          window.location.href = `/login?logout=success`;
-        }
-      } else {
-        throw new Error(result.error || 'Logout failed');
-      }
+      // Use the enhanced logoutAndRedirect function
+      await logoutAndRedirect('/login');
       
     } catch (error) {
-      console.error('2.0.3: Dashboard logout error:', error);
+      console.error('❌ Dashboard: Logout error:', error);
       
       // Emergency fallback - force redirect
       if (typeof window !== 'undefined') {
-        window.location.href = `/login?t=${Date.now()}&logout=error`;
+        window.location.href = `/login?logout=error&t=${Date.now()}`;
       }
     } finally {
-      // Always reset loading state
-      setIsLoggingOut(false);
+      // Note: setIsLoggingOut(false) is not needed here since we're redirecting
+      // The component will be unmounted during redirect
     }
   };
 

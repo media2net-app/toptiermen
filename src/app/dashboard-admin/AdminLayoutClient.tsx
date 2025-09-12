@@ -314,7 +314,7 @@ const SidebarContent = ({ pathname }: { pathname: string }) => {
 export default function AdminLayoutClient({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, profile, loading, signOut, isAdmin } = useSupabaseAuth();
+  const { user, profile, loading, logoutAndRedirect, isAdmin } = useSupabaseAuth();
   const isAuthenticated = !!user;
   const { showDebug, setShowDebug } = useDebug();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -373,29 +373,19 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
         logoutButton.setAttribute('disabled', 'true');
       }
       
-      // Use the optimized signOut function (it clears storage internally)
-      const result = await signOut();
-      
-      if (result.success) {
-        console.log('✅ Admin logout successful');
-        // Force redirect without cache busting to prevent login issues
-        if (typeof window !== 'undefined') {
-          window.location.href = `/login?logout=success`;
-        }
-      } else {
-        throw new Error(result.error || 'Admin logout failed');
-      }
+      // Use the enhanced logoutAndRedirect function
+      await logoutAndRedirect('/login');
       
     } catch (error) {
-      console.error('2.0.3: Admin logout error:', error);
+      console.error('❌ Admin: Logout error:', error);
       
       // Emergency fallback - force redirect
       if (typeof window !== 'undefined') {
-        window.location.href = `/login?t=${Date.now()}&logout=error`;
+        window.location.href = `/login?logout=error&t=${Date.now()}`;
       }
     } finally {
-      // Always reset loading state
-      setIsLoggingOut(false);
+      // Note: setIsLoggingOut(false) is not needed here since we're redirecting
+      // The component will be unmounted during redirect
     }
   };
 

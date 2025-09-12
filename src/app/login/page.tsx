@@ -48,22 +48,27 @@ function LoginPageContent() {
   useEffect(() => {
     setIsClient(true);
     
-    // Handle logout status
+    // Handle logout status with improved messaging
     const logoutStatus = searchParams?.get('logout');
     if (logoutStatus === 'success') {
       setError('');
+      // Show success message briefly
+      console.log('✅ Logout successful, ready for new login');
       // Clean URL
       if (typeof window !== 'undefined') {
         const url = new URL(window.location.href);
         url.searchParams.delete('logout');
+        url.searchParams.delete('t');
         window.history.replaceState({}, '', url.toString());
       }
     } else if (logoutStatus === 'error') {
-      setError('Er is een fout opgetreden bij het uitloggen. Probeer opnieuw in te loggen.');
+      setError('Er is een fout opgetreden bij het uitloggen. Je sessie is gewist, probeer opnieuw in te loggen.');
+      console.log('⚠️ Logout error occurred, but session should be cleared');
       // Clean URL
       if (typeof window !== 'undefined') {
         const url = new URL(window.location.href);
         url.searchParams.delete('logout');
+        url.searchParams.delete('t');
         window.history.replaceState({}, '', url.toString());
       }
     }
