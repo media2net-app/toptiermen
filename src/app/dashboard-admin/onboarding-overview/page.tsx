@@ -3,16 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { useRouter } from 'next/navigation';
-import { 
-  CheckCircleIcon, 
-  ClockIcon, 
-  UserIcon, 
-  ChartBarIcon,
-  ArrowPathIcon,
-  MagnifyingGlassIcon
-} from '@heroicons/react/24/outline';
 
-interface User {
+interface UserOnboarding {
   id: string;
   email: string;
   role: string;
@@ -31,74 +23,71 @@ interface Statistics {
 }
 
 export default function OnboardingOverviewPage() {
-  const { user, profile } = useSupabaseAuth();
+  const { user, profile, loading } = useSupabaseAuth();
   const router = useRouter();
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<UserOnboarding[]>([]);
   const [statistics, setStatistics] = useState<Statistics | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [pageLoading, setPageLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState<'all' | 'completed' | 'pending'>('all');
 
-  // Check if user is admin
+  // Simple admin check - if user is logged in and has admin role
+  const isAdmin = user && profile && profile.role?.toLowerCase() === 'admin';
+
+  // Redirect if not admin
   useEffect(() => {
-    if (user && profile && profile.role?.toLowerCase() !== 'admin') {
+    if (!loading && user && !isAdmin) {
       router.push('/dashboard');
     }
-  }, [user, profile, router]);
+  }, [loading, user, isAdmin, router]);
 
-  const fetchOnboardingStatus = async () => {
+  // Fetch onboarding data
+  const fetchOnboardingData = async () => {
     try {
-      setLoading(true);
+      setPageLoading(true);
+      setError(null);
+      
       const response = await fetch('/api/admin/onboarding-status');
       const data = await response.json();
 
       if (response.ok) {
-        setUsers(data.users);
-        setStatistics(data.statistics);
+        setUsers(data.users || []);
+        setStatistics(data.statistics || null);
       } else {
-        setError(data.error || 'Failed to fetch onboarding status');
+        setError(data.error || 'Failed to fetch onboarding data');
       }
     } catch (error) {
-      console.error('Error fetching onboarding status:', error);
-      setError('Failed to fetch onboarding status');
+      console.error('Error fetching onboarding data:', error);
+      setError('Failed to fetch onboarding data');
     } finally {
-      setLoading(false);
+      setPageLoading(false);
     }
   };
 
+  // Load data when admin is confirmed
   useEffect(() => {
-    if (user && profile?.role?.toLowerCase() === 'admin') {
-      fetchOnboardingStatus();
+    if (isAdmin) {
+      fetchOnboardingData();
     }
-  }, [user, profile]);
+  }, [isAdmin]);
 
-  const filteredUsers = users.filter(user => {
-    const matchesSearch = user.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filterStatus === 'all' || 
-      (filterStatus === 'completed' && user.onboardingCompleted) ||
-      (filterStatus === 'pending' && !user.onboardingCompleted);
-    
-    return matchesSearch && matchesFilter;
-  });
-
-  const getStepLabel = (step: number, onboardingCompleted: boolean = false) => {
-    if (onboardingCompleted) {
-      return '✅ Voltooid';
-    }
+  // Get step label
+  const getStepLabel = (step: number, completed: boolean) => {
+    if (completed) return '✅ Voltooid';
     
     switch (step) {
-      case 0: return 'Welkom Video';
-      case 1: return 'Doel Omschrijven';
-      case 2: return 'Missies Selecteren';
-      case 3: return 'Trainingsschema';
-      case 4: return 'Voedingsplan';
-      case 5: return 'Forum Introductie';
-      case 6: return 'Forum Introductie'; // Stap 6 is nog steeds Forum Introductie
+      case 0: return '🎬 Welkom Video';
+      case 1: return '🎯 Doel Omschrijven';
+      case 2: return '🎯 Missies Selecteren';
+      case 3: return '💪 Trainingsschema';
+      case 4: return '🍽️ Voedingsplan';
+      case 5: return '💬 Forum Introductie';
+      case 6: return '✅ Voltooid';
       default: return `Stap ${step}`;
     }
   };
 
+  // Format date
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('nl-NL', {
       year: 'numeric',
@@ -109,17 +98,12 @@ export default function OnboardingOverviewPage() {
     });
   };
 
-  if (!user || !profile || profile.role?.toLowerCase() !== 'admin') {
-    return (
-      <div className="min-h-screen bg-[#0A0F0A] flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-red-400 text-xl mb-4">⛔ Toegang Geweigerd</div>
-          <p className="text-gray-400">Je hebt geen toegang tot deze pagina.</p>
-        </div>
-      </div>
-    );
-  }
+  // Filter users based on search
+  const filteredUsers = users.filter(user => 
+    user.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
+  // Show loading while checking auth
   if (loading) {
     return (
       <div className="min-h-screen bg-[#0A0F0A] flex items-center justify-center">
@@ -131,6 +115,33 @@ export default function OnboardingOverviewPage() {
     );
   }
 
+  // Show access denied if not admin
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen bg-[#0A0F0A] flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-400 text-xl mb-4">⛔ Toegang Geweigerd</div>
+          <p className="text-gray-400">Je hebt geen admin rechten voor deze pagina.</p>
+          <p className="text-gray-500 text-sm mt-2">User: {user?.email || 'Niet ingelogd'}</p>
+          <p className="text-gray-500 text-sm">Role: {profile?.role || 'Geen rol'}</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show page loading
+  if (pageLoading) {
+    return (
+      <div className="min-h-screen bg-[#0A0F0A] flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
+          <p className="text-[#8BAE5A]">Onboarding data laden...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error
   if (error) {
     return (
       <div className="min-h-screen bg-[#0A0F0A] flex items-center justify-center">
@@ -138,7 +149,7 @@ export default function OnboardingOverviewPage() {
           <div className="text-red-400 text-xl mb-4">❌ Fout</div>
           <p className="text-gray-400 mb-4">{error}</p>
           <button
-            onClick={fetchOnboardingStatus}
+            onClick={fetchOnboardingData}
             className="px-4 py-2 bg-[#8BAE5A] text-[#0A0F0A] rounded-lg hover:bg-[#7A9D4A] transition-colors"
           >
             Opnieuw Proberen
@@ -154,112 +165,66 @@ export default function OnboardingOverviewPage() {
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
-            <h1 className="text-3xl font-bold text-white">Onboarding Overzicht</h1>
+            <div>
+              <h1 className="text-3xl font-bold text-white">Onboarding Overzicht</h1>
+              <p className="text-gray-400 mt-2">Overzicht van alle gebruikers en hun onboarding status</p>
+            </div>
             <button
-              onClick={fetchOnboardingStatus}
-              className="px-4 py-2 bg-[#8BAE5A] text-[#0A0F0A] rounded-lg hover:bg-[#7A9D4A] transition-colors flex items-center gap-2"
+              onClick={fetchOnboardingData}
+              className="px-4 py-2 bg-[#8BAE5A] text-[#0A0F0A] rounded-lg hover:bg-[#7A9D4A] transition-colors"
             >
-              <ArrowPathIcon className="w-4 h-4" />
-              Vernieuwen
+              🔄 Vernieuwen
             </button>
           </div>
-          <p className="text-gray-400">Overzicht van alle gebruikers en hun onboarding status</p>
         </div>
 
-        {/* Statistics Cards */}
+        {/* Statistics */}
         {statistics && (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <div className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-400 text-sm">Totaal Gebruikers</p>
-                  <p className="text-2xl font-bold text-white">{statistics.total}</p>
-                </div>
-                <UserIcon className="w-8 h-8 text-[#8BAE5A]" />
+              <div className="text-center">
+                <div className="text-3xl font-bold text-white mb-2">{statistics.total}</div>
+                <div className="text-gray-400">Totaal Gebruikers</div>
               </div>
             </div>
-
-            <div className="bg-gradient-to-br from-[#8BAE5A]/10 to-[#FFD700]/10 border border-[#8BAE5A] rounded-xl p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-[#8BAE5A] text-sm">Onboarding Voltooid</p>
-                  <p className="text-2xl font-bold text-[#8BAE5A]">{statistics.completed}</p>
-                </div>
-                <CheckCircleIcon className="w-8 h-8 text-[#8BAE5A]" />
+            
+            <div className="bg-gradient-to-br from-[#8BAE5A]/10 to-[#B6C948]/10 border border-[#8BAE5A] rounded-xl p-6">
+              <div className="text-center">
+                <div className="text-3xl font-bold text-[#8BAE5A] mb-2">{statistics.completed}</div>
+                <div className="text-[#8BAE5A]">Onboarding Voltooid</div>
               </div>
             </div>
-
+            
             <div className="bg-gradient-to-br from-[#f0a14f]/10 to-[#FFD700]/10 border border-[#f0a14f] rounded-xl p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-[#f0a14f] text-sm">In Progress</p>
-                  <p className="text-2xl font-bold text-[#f0a14f]">{statistics.pending}</p>
-                </div>
-                <ClockIcon className="w-8 h-8 text-[#f0a14f]" />
+              <div className="text-center">
+                <div className="text-3xl font-bold text-[#f0a14f] mb-2">{statistics.pending}</div>
+                <div className="text-[#f0a14f]">In Progress</div>
               </div>
             </div>
-
+            
             <div className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-400 text-sm">Voltooiingspercentage</p>
-                  <p className="text-2xl font-bold text-white">{statistics.completionRate}%</p>
-                </div>
-                <ChartBarIcon className="w-8 h-8 text-[#8BAE5A]" />
+              <div className="text-center">
+                <div className="text-3xl font-bold text-white mb-2">{statistics.completionRate}%</div>
+                <div className="text-gray-400">Voltooiingspercentage</div>
               </div>
             </div>
           </div>
         )}
 
-        {/* Filters */}
+        {/* Search */}
         <div className="bg-[#232D1A] border border-[#3A4D23] rounded-xl p-6 mb-8">
-          <div className="flex flex-col md:flex-row gap-4">
-            {/* Search */}
+          <div className="flex items-center gap-4">
             <div className="flex-1">
-              <div className="relative">
-                <MagnifyingGlassIcon className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
-                <input
-                  type="text"
-                  placeholder="Zoek op email..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-[#8BAE5A]"
-                />
-              </div>
+              <input
+                type="text"
+                placeholder="Zoek op email..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full px-4 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-[#8BAE5A]"
+              />
             </div>
-
-            {/* Status Filter */}
-            <div className="flex gap-2">
-              <button
-                onClick={() => setFilterStatus('all')}
-                className={`px-4 py-2 rounded-lg transition-colors ${
-                  filterStatus === 'all' 
-                    ? 'bg-[#8BAE5A] text-[#0A0F0A]' 
-                    : 'bg-[#181F17] text-gray-400 hover:bg-[#3A4D23]'
-                }`}
-              >
-                Alle ({users.length})
-              </button>
-              <button
-                onClick={() => setFilterStatus('completed')}
-                className={`px-4 py-2 rounded-lg transition-colors ${
-                  filterStatus === 'completed' 
-                    ? 'bg-[#8BAE5A] text-[#0A0F0A]' 
-                    : 'bg-[#181F17] text-gray-400 hover:bg-[#3A4D23]'
-                }`}
-              >
-                Voltooid ({users.filter(u => u.onboardingCompleted).length})
-              </button>
-              <button
-                onClick={() => setFilterStatus('pending')}
-                className={`px-4 py-2 rounded-lg transition-colors ${
-                  filterStatus === 'pending' 
-                    ? 'bg-[#8BAE5A] text-[#0A0F0A]' 
-                    : 'bg-[#181F17] text-gray-400 hover:bg-[#3A4D23]'
-                }`}
-              >
-                In Progress ({users.filter(u => !u.onboardingCompleted).length})
-              </button>
+            <div className="text-gray-400">
+              {filteredUsers.length} van {users.length} gebruikers
             </div>
           </div>
         </div>
@@ -321,17 +286,7 @@ export default function OnboardingOverviewPage() {
                           ? 'bg-green-100 text-green-800'
                           : 'bg-yellow-100 text-yellow-800'
                       }`}>
-                        {user.onboardingCompleted ? (
-                          <>
-                            <CheckCircleIcon className="w-3 h-3 mr-1" />
-                            Voltooid
-                          </>
-                        ) : (
-                          <>
-                            <ClockIcon className="w-3 h-3 mr-1" />
-                            In Progress
-                          </>
-                        )}
+                        {user.onboardingCompleted ? '✅ Voltooid' : '⏳ In Progress'}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
@@ -354,11 +309,11 @@ export default function OnboardingOverviewPage() {
           {filteredUsers.length === 0 && (
             <div className="text-center py-12">
               <div className="text-gray-400 text-lg mb-2">Geen gebruikers gevonden</div>
-              <p className="text-gray-500">Probeer andere zoektermen of filters</p>
+              <p className="text-gray-500">Probeer andere zoektermen</p>
             </div>
           )}
         </div>
       </div>
     </div>
   );
-} 
+}
