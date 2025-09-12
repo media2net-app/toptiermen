@@ -1032,9 +1032,13 @@ export default function VoedingsplannenPage() {
                           });
                           setShowRequiredIntake(true);
                         }}
-                        className="text-[#8BAE5A] hover:text-[#B6C948] text-xs sm:text-sm font-semibold transition-colors"
+                        className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 bg-[#8BAE5A] text-white rounded-lg hover:bg-[#B6C948] transition-colors text-xs sm:text-sm font-semibold"
                       >
-                        ✏️ Bewerken
+                        <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                        <span className="hidden sm:inline">Bewerk Profiel</span>
+                        <span className="sm:hidden">Bewerken</span>
                       </button>
                     </div>
                   )}
