@@ -161,6 +161,12 @@ const SidebarContent = ({ pathname }: { pathname: string }) => {
           icon: ClipboardIcon, 
           href: '/dashboard-admin/onboarding-overview'
         },
+        { 
+          label: 'Onboarding Status V2', 
+          icon: CheckCircleIcon, 
+          href: '/dashboard-admin/onboarding-status-v2',
+          badge: 'NEW'
+        },
         { label: 'Taken', icon: ListBulletIcon, href: '/dashboard-admin/taken', badge: 'NEW' }
       ]
     },
