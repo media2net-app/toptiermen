@@ -552,6 +552,44 @@ function TrainingschemasContent() {
     }
   }, [user?.id]);
 
+  // CRITICAL: Emergency reset when user returns from external tab
+  useEffect(() => {
+    const handlePageShow = (event: PageTransitionEvent) => {
+      // This fires when user returns from back/forward or external tab
+      if (event.persisted || performance.navigation?.type === 2) {
+        console.log('🚨 EMERGENCY: Page show event detected - user returned from external source');
+        if (trainingLoading) {
+          console.log('🔄 EMERGENCY: Force resetting stuck loading state');
+          setTrainingLoading(false);
+        }
+      }
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('pageshow', handlePageShow);
+      return () => window.removeEventListener('pageshow', handlePageShow);
+    }
+  }, [trainingLoading]);
+
+  // CRITICAL: Safety mechanism to prevent stuck loading states
+  useEffect(() => {
+    if (trainingLoading) {
+      // Shorter timeout for quicker recovery
+      const timeoutId = setTimeout(() => {
+        console.log('⚠️ Training loading timeout reached (5s), forcing reset');
+        if (trainingSchemas.length > 0) {
+          console.log('🔄 FORCE: We have training schemas data, resetting loading state');
+          setTrainingLoading(false);
+        } else {
+          console.log('🔄 FORCE: No training schemas data, retrying fetch');
+          fetchTrainingSchemas();
+        }
+      }, 5000); // 5 second timeout
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [trainingLoading, trainingSchemas.length]);
+
   // Re-fetch schemas when showAllSchemas changes
   useEffect(() => {
     if (user?.id && userTrainingProfile) {
