@@ -12,7 +12,8 @@ import {
   ClockIcon,
   UserIcon,
   ComputerDesktopIcon,
-  GlobeAltIcon
+  GlobeAltIcon,
+  XMarkIcon
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 
@@ -54,6 +55,8 @@ const LoginLogsPage = () => {
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [startDate, setStartDate] = useState('2024-09-10');
   const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
+  const [selectedLog, setSelectedLog] = useState<LoginLog | null>(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
 
   useEffect(() => {
     if (user && isAdmin) {
@@ -130,6 +133,36 @@ const LoginLogsPage = () => {
     if (userAgent.includes('Mobile')) return 'Mobile';
     if (userAgent.includes('Tablet')) return 'Tablet';
     return 'Desktop';
+  };
+
+  const openLogDetail = (log: LoginLog) => {
+    setSelectedLog(log);
+    setShowDetailModal(true);
+  };
+
+  const closeLogDetail = () => {
+    setSelectedLog(null);
+    setShowDetailModal(false);
+  };
+
+  const parseUserAgent = (userAgent: string | null) => {
+    if (!userAgent) return { browser: 'Unknown', os: 'Unknown', device: 'Unknown' };
+    
+    const browser = userAgent.includes('Chrome') ? 'Chrome' :
+                   userAgent.includes('Firefox') ? 'Firefox' :
+                   userAgent.includes('Safari') ? 'Safari' :
+                   userAgent.includes('Edge') ? 'Edge' : 'Other';
+    
+    const os = userAgent.includes('Windows') ? 'Windows' :
+               userAgent.includes('Mac') ? 'macOS' :
+               userAgent.includes('Linux') ? 'Linux' :
+               userAgent.includes('Android') ? 'Android' :
+               userAgent.includes('iOS') ? 'iOS' : 'Unknown';
+    
+    const device = userAgent.includes('Mobile') ? 'Mobile' :
+                   userAgent.includes('Tablet') ? 'Tablet' : 'Desktop';
+    
+    return { browser, os, device };
   };
 
   if (!user || !isAdmin) {
@@ -307,6 +340,7 @@ const LoginLogsPage = () => {
                     <th className="px-6 py-4 text-left text-[#8BAE5A] font-medium">IP Adres</th>
                     <th className="px-6 py-4 text-left text-[#8BAE5A] font-medium">Browser</th>
                     <th className="px-6 py-4 text-left text-[#8BAE5A] font-medium">Foutmelding</th>
+                    <th className="px-6 py-4 text-left text-[#8BAE5A] font-medium">Acties</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#3A4D23]">
@@ -316,7 +350,8 @@ const LoginLogsPage = () => {
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.05 }}
-                      className="hover:bg-[#181F17]/50 transition-colors"
+                      className="hover:bg-[#181F17]/50 transition-colors cursor-pointer"
+                      onClick={() => openLogDetail(log)}
                     >
                       <td className="px-6 py-4">
                         {log.success ? (
@@ -376,6 +411,9 @@ const LoginLogsPage = () => {
                           <p className="text-[#8BAE5A] text-sm">-</p>
                         )}
                       </td>
+                      <td className="px-6 py-4">
+                        <span className="text-[#8BAE5A] text-xs">👆 Klik voor details</span>
+                      </td>
                     </motion.tr>
                   ))}
                 </tbody>
@@ -383,6 +421,190 @@ const LoginLogsPage = () => {
             </div>
           )}
         </div>
+
+        {/* Login Log Detail Modal */}
+        {showDetailModal && selectedLog && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              className="bg-[#232D1A] rounded-2xl shadow-2xl border border-[#3A4D23]/40 p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-white">Login Log Details</h2>
+                <button
+                  onClick={closeLogDetail}
+                  className="p-2 text-[#8BAE5A] hover:text-white transition-colors"
+                >
+                  <XMarkIcon className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Left Column - Basic Info */}
+                <div className="space-y-6">
+                  <div className="bg-[#181F17] rounded-xl p-6">
+                    <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+                      <UserIcon className="w-5 h-5 mr-2 text-[#8BAE5A]" />
+                      Gebruiker Informatie
+                    </h3>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-[#8BAE5A] text-sm">Email</label>
+                        <p className="text-white font-medium">{selectedLog.email}</p>
+                      </div>
+                      {selectedLog.profiles && (
+                        <>
+                          <div>
+                            <label className="text-[#8BAE5A] text-sm">Naam</label>
+                            <p className="text-white font-medium">
+                              {selectedLog.profiles.full_name || `${selectedLog.profiles.first_name} ${selectedLog.profiles.last_name}` || 'Onbekend'}
+                            </p>
+                          </div>
+                          <div>
+                            <label className="text-[#8BAE5A] text-sm">Rol</label>
+                            <p className="text-white font-medium">{selectedLog.profiles.role || 'Onbekend'}</p>
+                          </div>
+                        </>
+                      )}
+                      <div>
+                        <label className="text-[#8BAE5A] text-sm">User ID</label>
+                        <p className="text-white font-mono text-sm">{selectedLog.user_id || 'N/A'}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-[#181F17] rounded-xl p-6">
+                    <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+                      <ClockIcon className="w-5 h-5 mr-2 text-[#8BAE5A]" />
+                      Timing Informatie
+                    </h3>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-[#8BAE5A] text-sm">Login Tijd</label>
+                        <p className="text-white font-medium">{formatDate(selectedLog.created_at)}</p>
+                      </div>
+                      <div>
+                        <label className="text-[#8BAE5A] text-sm">Login Methode</label>
+                        <p className="text-white font-medium">{selectedLog.login_method || 'email_password'}</p>
+                      </div>
+                      <div>
+                        <label className="text-[#8BAE5A] text-sm">Session ID</label>
+                        <p className="text-white font-mono text-sm">{selectedLog.session_id || 'N/A'}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right Column - Technical Info */}
+                <div className="space-y-6">
+                  <div className="bg-[#181F17] rounded-xl p-6">
+                    <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+                      <ComputerDesktopIcon className="w-5 h-5 mr-2 text-[#8BAE5A]" />
+                      Technische Details
+                    </h3>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-[#8BAE5A] text-sm">IP Adres</label>
+                        <p className="text-white font-mono text-sm">{selectedLog.ip_address || 'N/A'}</p>
+                      </div>
+                      {(() => {
+                        const { browser, os, device } = parseUserAgent(selectedLog.user_agent);
+                        return (
+                          <>
+                            <div>
+                              <label className="text-[#8BAE5A] text-sm">Browser</label>
+                              <p className="text-white font-medium">{browser}</p>
+                            </div>
+                            <div>
+                              <label className="text-[#8BAE5A] text-sm">Besturingssysteem</label>
+                              <p className="text-white font-medium">{os}</p>
+                            </div>
+                            <div>
+                              <label className="text-[#8BAE5A] text-sm">Apparaat Type</label>
+                              <p className="text-white font-medium">{device}</p>
+                            </div>
+                          </>
+                        );
+                      })()}
+                    </div>
+                  </div>
+
+                  <div className="bg-[#181F17] rounded-xl p-6">
+                    <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+                      {selectedLog.success ? (
+                        <CheckCircleIcon className="w-5 h-5 mr-2 text-green-400" />
+                      ) : (
+                        <XCircleIcon className="w-5 h-5 mr-2 text-red-400" />
+                      )}
+                      Login Status
+                    </h3>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-[#8BAE5A] text-sm">Status</label>
+                        <div className="mt-1">
+                          {selectedLog.success ? (
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-500/20 text-green-400 border border-green-500/30">
+                              <CheckCircleIcon className="w-4 h-4 mr-1" />
+                              Succesvol
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-500/20 text-red-400 border border-red-500/30">
+                              <XCircleIcon className="w-4 h-4 mr-1" />
+                              Gefaald
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      {selectedLog.error_message && (
+                        <div>
+                          <label className="text-[#8BAE5A] text-sm">Foutmelding</label>
+                          <div className="mt-1 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
+                            <p className="text-red-400 text-sm font-mono">{selectedLog.error_message}</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Full User Agent */}
+              {selectedLog.user_agent && (
+                <div className="mt-6 bg-[#181F17] rounded-xl p-6">
+                  <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+                    <GlobeAltIcon className="w-5 h-5 mr-2 text-[#8BAE5A]" />
+                    Volledige User Agent
+                  </h3>
+                  <div className="bg-[#0F1411] rounded-lg p-4 border border-[#3A4D23]">
+                    <p className="text-[#8BAE5A] text-sm font-mono break-all">{selectedLog.user_agent}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Actions */}
+              <div className="mt-6 flex justify-end gap-3">
+                <button
+                  onClick={closeLogDetail}
+                  className="px-6 py-3 bg-[#3A4D23] text-[#8BAE5A] rounded-xl font-medium hover:bg-[#4A5D33] transition-colors"
+                >
+                  Sluiten
+                </button>
+                {selectedLog.user_id && (
+                  <button
+                    onClick={() => {
+                      // TODO: Add user management action
+                      console.log('User management for:', selectedLog.user_id);
+                    }}
+                    className="px-6 py-3 bg-[#8BAE5A] text-[#181F17] rounded-xl font-medium hover:bg-[#B6C948] transition-colors"
+                  >
+                    Gebruiker Beheren
+                  </button>
+                )}
+              </div>
+            </motion.div>
+          </div>
+        )}
       </div>
     </div>
   );
