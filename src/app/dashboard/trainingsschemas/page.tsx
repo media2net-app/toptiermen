@@ -206,6 +206,83 @@ function TrainingschemasContent() {
     }
   };
 
+  // OPTIMIZED: Parallel data loading function
+  const loadAllData = async () => {
+    if (!user?.id) return;
+    
+    console.log('🚀 Starting parallel data loading for user:', user.email);
+    
+    try {
+      // Start all API calls in parallel
+      const [schemasResult, profileResult] = await Promise.allSettled([
+        // Load training schemas
+        supabase
+          .from('training_schemas')
+          .select(`
+            *,
+            training_schema_days (
+              id,
+              day_number,
+              name
+            )
+          `)
+          .eq('status', 'published')
+          .order('created_at', { ascending: false }),
+        
+        // Load training profile
+        fetch(`/api/training-profile?userId=${user.email}`)
+      ]);
+      
+      // Process training schemas
+      if (schemasResult.status === 'fulfilled') {
+        const { data, error } = schemasResult.value;
+        if (error) {
+          console.error('❌ Error fetching training schemas:', error);
+          setTrainingError(`Failed to load training schemas: ${error.message}`);
+        } else {
+          console.log('✅ Training schemas loaded:', data?.length || 0);
+          setTrainingSchemas(data || []);
+        }
+      }
+      
+      // Process training profile
+      if (profileResult.status === 'fulfilled') {
+        const response = profileResult.value;
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.profile) {
+            setUserTrainingProfile(data.profile);
+            console.log('✅ Training profile loaded:', data.profile);
+            
+            // Update calculator data
+            setCalculatorData({
+              training_goal: data.profile.training_goal,
+              training_frequency: data.profile.training_frequency.toString(),
+              equipment_type: data.profile.equipment_type
+            });
+          } else {
+            console.log('ℹ️ No training profile found, creating basic profile');
+            await createBasicProfile();
+          }
+        }
+      }
+      
+      // Apply filtering after both data sources are loaded
+      if (userTrainingProfile && trainingSchemas.length > 0) {
+        const filtered = filterSchemasByProfile(trainingSchemas, userTrainingProfile);
+        setTrainingSchemas(filtered);
+        console.log('🎯 Applied filtering:', filtered.length, 'schemas');
+      }
+      
+    } catch (error) {
+      console.error('❌ Parallel loading error:', error);
+      setTrainingError('Failed to load data');
+    } finally {
+      setTrainingLoading(false);
+      setProfileLoading(false);
+    }
+  };
+
   const filterSchemasByProfile = (schemas: TrainingSchema[], profile: TrainingProfile) => {
     // If showAllSchemas is true, return all schemas without filtering
     if (showAllSchemas) {
@@ -275,6 +352,75 @@ function TrainingschemasContent() {
     return limitedSchemas; // Return limited schemas (max 3)
   };
 
+  // OPTIMIZED: Create basic profile function
+  const createBasicProfile = async () => {
+    try {
+      console.log('🔧 Creating basic training profile for user:', user?.email);
+      
+      // Get main_goal from user profile
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('main_goal')
+        .eq('email', user?.email)
+        .single();
+      
+      if (profileData?.main_goal && !profileError) {
+        console.log('🎯 Found main_goal from onboarding:', profileData.main_goal);
+        
+        // Create a basic training profile based on main_goal
+        let trainingGoal = 'spiermassa'; // default
+        const mainGoal = profileData.main_goal.toLowerCase();
+        
+        if (mainGoal.includes('power') || mainGoal.includes('kracht')) {
+          trainingGoal = 'power_kracht';
+        } else if (mainGoal.includes('conditie') || mainGoal.includes('uithouding')) {
+          trainingGoal = 'kracht_uithouding';
+        } else if (mainGoal.includes('spiermassa')) {
+          trainingGoal = 'spiermassa';
+        }
+        
+        // Try to get training frequency from onboarding data
+        let trainingFrequency = 3; // default
+        try {
+          const { data: onboardingData } = await supabase
+            .from('onboarding_status')
+            .select('training_frequency')
+            .eq('user_id', user?.id)
+            .single();
+          
+          if (onboardingData?.training_frequency) {
+            trainingFrequency = onboardingData.training_frequency;
+            console.log('🎯 Found training frequency from onboarding:', trainingFrequency);
+          }
+        } catch (e) {
+          console.log('ℹ️ No onboarding training frequency found, using default 3');
+        }
+        
+        const basicProfile = {
+          user_id: user?.email || user?.id,
+          training_goal: trainingGoal as 'spiermassa' | 'kracht_uithouding' | 'power_kracht',
+          training_frequency: trainingFrequency as 1 | 2 | 3 | 4 | 5 | 6,
+          equipment_type: 'gym' as 'gym' | 'home' | 'outdoor'
+        };
+        
+        setUserTrainingProfile(basicProfile);
+        console.log('🔧 Created basic training profile from main_goal:', basicProfile);
+        
+        // Update calculator data
+        setCalculatorData({
+          training_goal: trainingGoal,
+          training_frequency: trainingFrequency.toString(),
+          equipment_type: 'gym'
+        });
+      } else {
+        setUserTrainingProfile(null);
+      }
+    } catch (error) {
+      console.error('Error creating basic profile:', error);
+      setUserTrainingProfile(null);
+    }
+  };
+
   const fetchUserTrainingProfile = async () => {
     try {
       if (!user?.id) {
@@ -301,59 +447,8 @@ function TrainingschemasContent() {
             equipment_type: data.profile.equipment_type
           });
         } else {
-          console.log('ℹ️ No training profile found, checking main_goal from onboarding');
-          
-          // If no training profile exists, try to get main_goal from user profile
-          const { data: profileData, error: profileError } = await supabase
-            .from('profiles')
-            .select('main_goal')
-            .eq('email', user.email)
-            .single();
-          
-          if (profileData?.main_goal && !profileError) {
-            console.log('🎯 Found main_goal from onboarding:', profileData.main_goal);
-            
-            // Create a basic training profile based on main_goal
-            let trainingGoal = 'spiermassa'; // default
-            const mainGoal = profileData.main_goal.toLowerCase();
-            
-            if (mainGoal.includes('power') || mainGoal.includes('kracht')) {
-              trainingGoal = 'power_kracht';
-            } else if (mainGoal.includes('conditie') || mainGoal.includes('uithouding')) {
-              trainingGoal = 'kracht_uithouding';
-            } else if (mainGoal.includes('spiermassa')) {
-              trainingGoal = 'spiermassa';
-            }
-            
-            // Try to get training frequency from onboarding data
-            let trainingFrequency = 3; // default
-            try {
-              const { data: onboardingData } = await supabase
-                .from('onboarding_status')
-                .select('training_frequency')
-                .eq('user_id', user.id)
-                .single();
-              
-              if (onboardingData?.training_frequency) {
-                trainingFrequency = onboardingData.training_frequency;
-                console.log('🎯 Found training frequency from onboarding:', trainingFrequency);
-              }
-            } catch (e) {
-              console.log('ℹ️ No onboarding training frequency found, using default 3');
-            }
-            
-            const basicProfile = {
-              user_id: user.email || user.id,
-              training_goal: trainingGoal as 'spiermassa' | 'kracht_uithouding' | 'power_kracht',
-              training_frequency: trainingFrequency as 1 | 2 | 3 | 4 | 5 | 6,
-              equipment_type: 'gym' as 'gym' | 'home' | 'outdoor' // Use lowercase to match database
-            };
-            
-            setUserTrainingProfile(basicProfile);
-            console.log('🔧 Created basic training profile from main_goal:', basicProfile);
-          } else {
-            setUserTrainingProfile(null);
-          }
+          console.log('ℹ️ No training profile found, creating basic profile');
+          await createBasicProfile();
         }
       } else {
         console.log('❌ Failed to fetch training profile:', response.status);
@@ -553,16 +648,15 @@ function TrainingschemasContent() {
     setViewingDynamicPlan(null);
   };
 
-  // Effects
+  // Effects - OPTIMIZED: Use parallel loading
   useEffect(() => {
-    if (user?.id) {
-      console.log('🔄 User changed, fetching training profile for:', user.email);
-      console.log('🔄 User details:', { id: user.id, email: user.email });
-      fetchUserTrainingProfile();
+    if (user?.id && !authLoading && !subscriptionLoading) {
+      console.log('🚀 User authenticated, starting parallel data loading for:', user.email);
+      loadAllData();
     } else {
-      console.log('❌ No user ID available in useEffect');
+      console.log('⏳ Waiting for authentication to complete...');
     }
-  }, [user?.id]);
+  }, [user?.id, authLoading, subscriptionLoading]);
 
   // CRITICAL: Emergency reset when user returns from external tab
   useEffect(() => {
@@ -602,17 +696,24 @@ function TrainingschemasContent() {
     }
   }, [trainingLoading, trainingSchemas.length]);
 
-  // Re-fetch schemas when showAllSchemas changes
+  // Re-apply filtering when showAllSchemas changes
   useEffect(() => {
-    if (user?.id && userTrainingProfile) {
-      console.log('🔄 showAllSchemas changed, re-fetching schemas...');
-      fetchTrainingSchemas();
+    if (user?.id && userTrainingProfile && trainingSchemas.length > 0) {
+      console.log('🔄 showAllSchemas changed, re-applying filtering...');
+      const filtered = filterSchemasByProfile(trainingSchemas, userTrainingProfile);
+      setTrainingSchemas(filtered);
+      console.log('🎯 Re-applied filtering after showAllSchemas change:', filtered.length, 'schemas');
     }
   }, [showAllSchemas]);
 
   useEffect(() => {
     console.log('🔄 UserTrainingProfile changed:', userTrainingProfile);
-    fetchTrainingSchemas();
+    // Only re-fetch if we have both profile and schemas data
+    if (userTrainingProfile && trainingSchemas.length > 0) {
+      const filtered = filterSchemasByProfile(trainingSchemas, userTrainingProfile);
+      setTrainingSchemas(filtered);
+      console.log('🎯 Re-applied filtering after profile change:', filtered.length, 'schemas');
+    }
   }, [userTrainingProfile]);
 
   // Handle schema selection from URL parameter
@@ -1098,15 +1199,21 @@ function TrainingschemasContent() {
           )}
         </AnimatePresence>
 
-        {/* Loading State */}
-        {profileLoading && (
+        {/* Loading State - OPTIMIZED */}
+        {(profileLoading || trainingLoading) && (
           <div className="text-center py-12 mb-8">
             <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
             <h3 className="text-xl font-semibold text-white mb-2">
-              Laden...
+              {authLoading ? 'Authenticatie controleren...' : 
+               subscriptionLoading ? 'Pakket controleren...' :
+               profileLoading ? 'Trainingsprofiel laden...' :
+               trainingLoading ? 'Trainingsschemas laden...' : 'Laden...'}
             </h3>
             <p className="text-gray-300">
-              Je trainingsprofiel wordt geladen...
+              {authLoading ? 'Even geduld, we controleren je inloggegevens' :
+               subscriptionLoading ? 'We controleren je pakket toegang' :
+               profileLoading ? 'Je trainingsprofiel wordt geladen' :
+               trainingLoading ? 'Trainingsschemas worden geladen' : 'Even geduld...'}
             </p>
           </div>
         )}
