@@ -111,6 +111,7 @@ export default function VoedingsplannenPage() {
     age: '',
     weight: '',
     height: '',
+    gender: 'male', // male, female
     activityLevel: '', // sedentary, light, moderate, active
     goal: '' // droogtrainen, behoud, spiermassa
   });
@@ -245,6 +246,7 @@ export default function VoedingsplannenPage() {
           age: data.profile.age,
           weight: data.profile.weight,
           height: data.profile.height,
+          gender: data.profile.gender,
           goal: data.profile.goal === 'cut' ? 'droogtrainen' : data.profile.goal === 'bulk' ? 'spiermassa' : 'behoud',
           activityLevel: data.profile.activity_level
         };
@@ -265,6 +267,7 @@ export default function VoedingsplannenPage() {
             age: data.profile.age?.toString() || '',
             weight: data.profile.weight?.toString() || '',
             height: data.profile.height?.toString() || '',
+            gender: data.profile.gender || 'male',
             activityLevel: data.profile.activity_level || 'moderate', // Default to moderate if not set
             goal: data.profile.goal === 'cut' ? 'droogtrainen' : 
                   data.profile.goal === 'bulk' ? 'spiermassa' : 
@@ -390,11 +393,11 @@ export default function VoedingsplannenPage() {
   };
 
   const calculateNutrition = async () => {
-    const { age, weight, height, activityLevel, goal } = calculatorData;
+    const { age, weight, height, gender, activityLevel, goal } = calculatorData;
     
     console.log('🧮 Calculating nutrition with data:', calculatorData);
     
-    if (!age || !weight || !height || !activityLevel || !goal) {
+    if (!age || !weight || !height || !gender || !activityLevel || !goal) {
       toast.error('Vul alle velden in om je dagelijkse behoefte te berekenen');
       return;
     }
@@ -415,7 +418,7 @@ export default function VoedingsplannenPage() {
           age: parseInt(age),
           height: parseInt(height),
           weight: parseFloat(weight),
-          gender: 'male', // Assuming male for now, could be added to form
+          gender,
           activityLevel,
           goal: apiGoal
         }),
@@ -439,6 +442,7 @@ export default function VoedingsplannenPage() {
         age: parseInt(age),
         weight: parseFloat(weight),
         height: parseFloat(height),
+        gender,
         goal,
         activityLevel,
         bmr: data.calculations.bmr,
@@ -457,9 +461,9 @@ export default function VoedingsplannenPage() {
       }
       
       // Reset calculator data
-      setCalculatorData({ age: '', weight: '', height: '', activityLevel: '', goal: '' });
+      setCalculatorData({ age: '', weight: '', height: '', gender: 'male', activityLevel: '', goal: '' });
       
-      toast.success('Dagelijkse behoefte berekend! 📊');
+      toast.success('Profiel succesvol bijgewerkt! Je dagelijkse behoeften zijn opnieuw berekend. 📊');
       
     } catch (error) {
       console.error('Error calculating nutrition:', error);
@@ -917,6 +921,21 @@ export default function VoedingsplannenPage() {
                   </div>
                   <div>
                     <label className="block text-white font-semibold mb-2 text-sm sm:text-base">
+                      Geslacht <span className="text-red-400">*</span>
+                    </label>
+                    <select
+                      value={calculatorData.gender}
+                      onChange={(e) => setCalculatorData(prev => ({ ...prev, gender: e.target.value }))}
+                      className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:border-[#8BAE5A] text-sm sm:text-base"
+                      required
+                    >
+                      <option value="">Selecteer geslacht</option>
+                      <option value="male">Man</option>
+                      <option value="female">Vrouw</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-white font-semibold mb-2 text-sm sm:text-base">
                       Dagelijkse Activiteit <span className="text-red-400">*</span>
                     </label>
                     <select
@@ -1027,6 +1046,7 @@ export default function VoedingsplannenPage() {
                             age: userNutritionProfile.age?.toString() || '',
                             weight: userNutritionProfile.weight?.toString() || '',
                             height: userNutritionProfile.height?.toString() || '',
+                            gender: userNutritionProfile.gender || 'male',
                             activityLevel: userNutritionProfile.activity_level || 'moderate',
                             goal: userNutritionProfile.goal || ''
                           });
