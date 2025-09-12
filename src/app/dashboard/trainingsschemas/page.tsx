@@ -116,23 +116,7 @@ function TrainingschemasContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // DEBUG: Enhanced logging
-  console.log('🔍 TrainingschemasContent render:', {
-    user: user ? { id: user.id, email: user.email } : null,
-    authLoading,
-    subscriptionLoading,
-    hasAccessTraining: hasAccess('training'),
-    profileLoading,
-    trainingLoading,
-    userTrainingProfile: userTrainingProfile ? {
-      training_goal: userTrainingProfile.training_goal,
-      training_frequency: userTrainingProfile.training_frequency,
-      equipment_type: userTrainingProfile.equipment_type
-    } : null,
-    trainingSchemasCount: trainingSchemas.length,
-    showOnboardingStep3,
-    onboardingStatus
-  });
+  // DEBUG: Enhanced logging (moved after state declarations)
 
   // Training schemas state
   const [trainingSchemas, setTrainingSchemas] = useState<TrainingSchema[]>([]);
@@ -161,6 +145,24 @@ function TrainingschemasContent() {
     training_goal: '',
     training_frequency: '',
     equipment_type: 'gym'
+  });
+
+  // DEBUG: Enhanced logging (after all state declarations)
+  console.log('🔍 TrainingschemasContent render:', {
+    user: user ? { id: user.id, email: user.email } : null,
+    authLoading,
+    subscriptionLoading,
+    hasAccessTraining: hasAccess('training'),
+    profileLoading,
+    trainingLoading,
+    userTrainingProfile: userTrainingProfile ? {
+      training_goal: userTrainingProfile.training_goal,
+      training_frequency: userTrainingProfile.training_frequency,
+      equipment_type: userTrainingProfile.equipment_type
+    } : null,
+    trainingSchemasCount: trainingSchemas.length,
+    showOnboardingStep3,
+    onboardingStatus
   });
 
   // Training functions - using same method as admin dashboard
