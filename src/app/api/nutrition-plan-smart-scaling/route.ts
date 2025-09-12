@@ -56,8 +56,30 @@ function calculateMealNutrition(ingredients: any[], ingredientDatabase: any): an
   let totalFat = 0;
   
   ingredients.forEach(ingredient => {
-    const nutritionData = ingredientDatabase[ingredient.name];
-    if (!nutritionData) return;
+    
+    // Try exact match first
+    let nutritionData = ingredientDatabase[ingredient.name];
+    
+    // If not found, try trimmed version
+    if (!nutritionData) {
+      const trimmedName = ingredient.name.trim();
+      nutritionData = ingredientDatabase[trimmedName];
+    }
+    
+    // If still not found, try case-insensitive match
+    if (!nutritionData) {
+      const lowerName = ingredient.name.toLowerCase().trim();
+      for (const [dbName, dbData] of Object.entries(ingredientDatabase)) {
+        if (dbName.toLowerCase() === lowerName) {
+          nutritionData = dbData;
+          break;
+        }
+      }
+    }
+    
+    if (!nutritionData) {
+      return;
+    }
     
     let multiplier = 1;
     const amount = ingredient.amount || 0;
@@ -106,11 +128,10 @@ function calculateMealNutrition(ingredients: any[], ingredientDatabase: any): an
 function getMealName(mealType: string): string {
   const mealNames: Record<string, string> = {
     ontbijt: 'Ontbijt',
-    snack1: 'Ochtend Snack',
+    ochtend_snack: 'Ochtend Snack',
     lunch: 'Lunch',
-    snack2: 'Lunch Snack',
-    diner: 'Diner',
-    avondsnack: 'Avond Snack'
+    lunch_snack: 'Lunch Snack',
+    diner: 'Diner'
   };
   return mealNames[mealType] || mealType;
 }
@@ -126,10 +147,10 @@ function calculatePlanTotals(plan: any, ingredientDatabase: any): any {
     const dayData = plan[day];
     if (!dayData) return;
     
-    const mealTypes = ['ontbijt', 'snack1', 'lunch', 'snack2', 'diner', 'avondsnack'];
+    const mealTypes = ['ontbijt', 'ochtend_snack', 'lunch', 'lunch_snack', 'diner'];
     mealTypes.forEach(mealType => {
-      if (dayData[mealType] && Array.isArray(dayData[mealType])) {
-        const mealNutrition = calculateMealNutrition(dayData[mealType], ingredientDatabase);
+      if (dayData[mealType] && dayData[mealType].ingredients && Array.isArray(dayData[mealType].ingredients)) {
+        const mealNutrition = calculateMealNutrition(dayData[mealType].ingredients, ingredientDatabase);
         totalCalories += mealNutrition.calories;
         totalProtein += mealNutrition.protein;
         totalCarbs += mealNutrition.carbs;
@@ -206,7 +227,26 @@ function smartScaleIngredients(
   const categorized = categorizeIngredientsByMacro(ingredients, ingredientDatabase);
   
   return ingredients.map(ingredient => {
-    const nutritionData = ingredientDatabase[ingredient.name];
+    // Try exact match first
+    let nutritionData = ingredientDatabase[ingredient.name];
+    
+    // If not found, try trimmed version
+    if (!nutritionData) {
+      const trimmedName = ingredient.name.trim();
+      nutritionData = ingredientDatabase[trimmedName];
+    }
+    
+    // If still not found, try case-insensitive match
+    if (!nutritionData) {
+      const lowerName = ingredient.name.toLowerCase().trim();
+      for (const [dbName, dbData] of Object.entries(ingredientDatabase)) {
+        if (dbName.toLowerCase() === lowerName) {
+          nutritionData = dbData;
+          break;
+        }
+      }
+    }
+    
     if (!nutritionData) return ingredient;
     
     let adjustmentFactor = 1;
@@ -379,16 +419,54 @@ export async function GET(request: NextRequest) {
       basePlan = planData.meals.weekly_plan;
     }
     
+    console.log('🔍 Base plan structure:', Object.keys(basePlan));
+    console.log('🔍 Maandag structure:', basePlan.maandag ? Object.keys(basePlan.maandag) : 'No maandag');
+    console.log('🔍 Maandag ontbijt:', basePlan.maandag?.ontbijt ? 'Found' : 'Not found');
+    
     // Calculate original plan totals
     const originalTotals = calculatePlanTotals(basePlan, INGREDIENT_DATABASE);
     console.log('📊 Original plan totals:', originalTotals);
     
+    // Calculate macro targets if not set in user profile
+    let targetProtein = userProfile.target_protein;
+    let targetCarbs = userProfile.target_carbs;
+    let targetFat = userProfile.target_fat;
+    
+    // If macro targets are not set, calculate them based on goal and weight
+    if (!targetProtein || targetProtein === 0) {
+      if (userProfile.goal === 'cut') {
+        targetProtein = Math.round(userProfile.weight * 2.2); // 2.2g per kg for cutting
+      } else if (userProfile.goal === 'bulk') {
+        targetProtein = Math.round(userProfile.weight * 2.0); // 2.0g per kg for bulking
+      } else {
+        targetProtein = Math.round(userProfile.weight * 2.1); // 2.1g per kg for maintenance
+      }
+    }
+    
+    if (!targetCarbs || targetCarbs === 0) {
+      if (userProfile.goal === 'cut') {
+        targetCarbs = Math.round(userProfile.weight * 0.3); // Low carb for cutting
+      } else if (userProfile.goal === 'bulk') {
+        targetCarbs = Math.round(userProfile.weight * 3.0); // High carb for bulking
+      } else {
+        targetCarbs = Math.round(userProfile.weight * 2.0); // Moderate carb for maintenance
+      }
+    }
+    
+    if (!targetFat || targetFat === 0) {
+      // Calculate fat based on remaining calories
+      const proteinCalories = targetProtein * 4;
+      const carbCalories = targetCarbs * 4;
+      const remainingCalories = userProfile.target_calories - proteinCalories - carbCalories;
+      targetFat = Math.round(remainingCalories / 9); // 9 calories per gram of fat
+    }
+    
     // Target totals from user profile
     const targetTotals = {
       calories: userProfile.target_calories,
-      protein: userProfile.target_protein,
-      carbs: userProfile.target_carbs,
-      fat: userProfile.target_fat
+      protein: targetProtein,
+      carbs: targetCarbs,
+      fat: targetFat
     };
     console.log('🎯 Target totals:', targetTotals);
     
@@ -413,12 +491,19 @@ export async function GET(request: NextRequest) {
       if (!dayData) return;
       
       scaledPlan[day] = {};
-      const mealTypes = ['ontbijt', 'snack1', 'lunch', 'snack2', 'diner', 'avondsnack'];
+      const mealTypes = ['ontbijt', 'ochtend_snack', 'lunch', 'lunch_snack', 'diner'];
+      const mealTypeMapping = {
+        'ontbijt': 'ontbijt',
+        'ochtend_snack': 'snack1',
+        'lunch': 'lunch',
+        'lunch_snack': 'snack2',
+        'diner': 'diner'
+      };
       
       mealTypes.forEach(mealType => {
-        if (dayData[mealType] && Array.isArray(dayData[mealType])) {
+        if (dayData[mealType] && dayData[mealType].ingredients && Array.isArray(dayData[mealType].ingredients)) {
           const smartScaledIngredients = smartScaleIngredients(
-            dayData[mealType], 
+            dayData[mealType].ingredients, 
             macroAdjustments, 
             INGREDIENT_DATABASE,
             debugInfo
@@ -427,8 +512,9 @@ export async function GET(request: NextRequest) {
           // Calculate meal nutrition
           const mealNutrition = calculateMealNutrition(smartScaledIngredients, INGREDIENT_DATABASE);
           
-          // Create complete meal structure
-          scaledPlan[day][mealType] = {
+          // Create complete meal structure with mapped meal type
+          const mappedMealType = mealTypeMapping[mealType] || mealType;
+          scaledPlan[day][mappedMealType] = {
             name: getMealName(mealType),
             ingredients: smartScaledIngredients,
             nutrition: mealNutrition,
@@ -444,11 +530,12 @@ export async function GET(request: NextRequest) {
       let dailyFat = 0;
       
       mealTypes.forEach(mealType => {
-        if (scaledPlan[day][mealType] && scaledPlan[day][mealType].nutrition) {
-          dailyCalories += scaledPlan[day][mealType].nutrition.calories;
-          dailyProtein += scaledPlan[day][mealType].nutrition.protein;
-          dailyCarbs += scaledPlan[day][mealType].nutrition.carbs;
-          dailyFat += scaledPlan[day][mealType].nutrition.fat;
+        const mappedMealType = mealTypeMapping[mealType] || mealType;
+        if (scaledPlan[day][mappedMealType] && scaledPlan[day][mappedMealType].nutrition) {
+          dailyCalories += scaledPlan[day][mappedMealType].nutrition.calories;
+          dailyProtein += scaledPlan[day][mappedMealType].nutrition.protein;
+          dailyCarbs += scaledPlan[day][mappedMealType].nutrition.carbs;
+          dailyFat += scaledPlan[day][mappedMealType].nutrition.fat;
         }
       });
       
@@ -465,14 +552,21 @@ export async function GET(request: NextRequest) {
     const finalTotals = calculatePlanTotals(scaledPlan, INGREDIENT_DATABASE);
     console.log('✅ Final totals:', finalTotals);
     
+    // Calculate weight-based scale factor
+    const planBaseWeight = 100; // Plans are based on 100kg
+    const userWeight = userProfile.weight;
+    const weightScaleFactor = userWeight / planBaseWeight;
+    
     // Calculate final scale factor (for compatibility)
     const scaleFactor = finalTotals.calories / originalTotals.calories;
     
     const scalingInfo = {
-      scaleFactor: Math.round(scaleFactor * 100) / 100,
+      scaleFactor: Math.round(weightScaleFactor * 100) / 100, // Use weight-based factor
       originalTotals,
       finalTotals,
       macroAdjustments,
+      userWeight,
+      planBaseWeight,
       debugInfo
     };
     
