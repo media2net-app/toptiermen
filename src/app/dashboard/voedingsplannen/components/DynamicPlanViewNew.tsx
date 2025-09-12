@@ -86,6 +86,12 @@ interface ScalingInfo {
   scaleFactor: number;
   targetCalories: number;
   planTargetCalories: number;
+  debugInfo?: {
+    originalTotals: any;
+    targetTotals: any;
+    macroAdjustments: any;
+    ingredientAdjustments: any[];
+  };
 }
 
 interface WeeklyAverages {
