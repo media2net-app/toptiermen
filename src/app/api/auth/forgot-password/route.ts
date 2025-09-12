@@ -92,31 +92,34 @@ export async function POST(request: NextRequest) {
         if (createError.message.includes('already been registered') || createError.message.includes('email_exists')) {
           console.log('🔄 User exists but not visible, proceeding with email...');
           
-          // Send email with instructions to contact admin
+          // Send email with new password (since user exists but auth account creation failed)
           try {
             const emailService = new EmailService();
             const loginUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://platform.toptiermen.eu'}/login`;
+            const newTempPassword = generateTempPassword();
             
             const emailSuccess = await emailService.sendEmail(
               email,
-              '🔐 Top Tier Men - Wachtwoord Reset Hulp',
-              'password-reset-help',
+              '🔐 Je Nieuwe Top Tier Men Wachtwoord - Wachtwoord Reset',
+              'password-reset',
               {
                 name: profile?.full_name || profile?.display_name || 'Gebruiker',
                 email: email,
                 username: profile?.display_name || email.split('@')[0],
+                tempPassword: newTempPassword,
                 loginUrl: loginUrl,
                 packageType: profile?.package_type || 'Basic Tier',
+                isTestUser: 'false',
                 platformUrl: process.env.NEXT_PUBLIC_SITE_URL || 'https://platform.toptiermen.eu'
               },
               { tracking: true }
             );
 
             if (emailSuccess) {
-              console.log(`✅ Help email sent to: ${email}`);
+              console.log(`✅ Password reset email sent to: ${email}`);
               return NextResponse.json({
                 success: true,
-                message: 'Er is een e-mail verzonden met instructies voor wachtwoord reset'
+                message: 'Nieuw wachtwoord is gegenereerd en per e-mail verzonden'
               });
             }
           } catch (emailError) {
