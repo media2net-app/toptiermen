@@ -151,7 +151,35 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     };
   }, []);
 
-  // Sign in method - IMPROVED WITH BETTER ERROR HANDLING
+  // Helper function to log login attempts
+  const logLoginAttempt = async (email: string, success: boolean, errorMessage?: string, userId?: string) => {
+    try {
+      const logData = {
+        user_id: userId || null,
+        email,
+        success,
+        error_message: errorMessage || null,
+        ip_address: null, // Will be handled by server-side
+        user_agent: typeof window !== 'undefined' ? window.navigator.userAgent : null,
+        session_id: null,
+        login_method: 'email_password'
+      };
+
+      // Log to API endpoint
+      await fetch('/api/admin/login-logs', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(logData),
+      });
+    } catch (logError) {
+      console.error('Failed to log login attempt:', logError);
+      // Don't fail login if logging fails
+    }
+  };
+
+  // Sign in method - IMPROVED WITH BETTER ERROR HANDLING AND LOGGING
   const signIn = async (email: string, password: string) => {
     try {
       setLoading(true);
@@ -166,12 +194,19 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
       if (error) {
         console.error('❌ Login error:', error.message);
         setError(error.message);
+        
+        // Log failed login attempt
+        await logLoginAttempt(email, false, error.message);
+        
         return { success: false, error: error.message };
       }
 
       if (data.user) {
         console.log('✅ Login successful for:', data.user.email);
         setUser(data.user);
+        
+        // Log successful login attempt
+        await logLoginAttempt(email, true, undefined, data.user.id);
         
         // Fetch profile with email fallback
         const userProfile = await fetchProfile(data.user.id, data.user.email);
@@ -189,6 +224,10 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
       console.error('❌ Login exception:', err);
       const errorMessage = err instanceof Error ? err.message : 'Login failed';
       setError(errorMessage);
+      
+      // Log failed login attempt
+      await logLoginAttempt(email, false, errorMessage);
+      
       return { success: false, error: errorMessage };
     } finally {
       setLoading(false);

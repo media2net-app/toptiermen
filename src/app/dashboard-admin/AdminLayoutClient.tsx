@@ -38,7 +38,8 @@ import {
   TagIcon,
   SparklesIcon,
   StarIcon as CrownIcon,
-  CheckCircleIcon
+  CheckCircleIcon,
+  KeyIcon
 } from '@heroicons/react/24/outline';
 import { SwipeIndicator } from '@/components/ui';
 import SessionMonitor from '@/components/SessionMonitor';
@@ -211,6 +212,7 @@ const SidebarContent = ({ pathname }: { pathname: string }) => {
         { label: 'Instellingen', icon: Cog6ToothIcon, href: '/dashboard-admin/instellingen' },
         { label: 'Aankondigingen', icon: MegaphoneIcon, href: '/dashboard-admin/aankondigingen' },
         { label: 'Push Notificatie Tests', icon: BellIcon, href: '/dashboard-admin/push-test' },
+        { label: 'Login Logs', icon: KeyIcon, href: '/dashboard-admin/login-logs', badge: 'NEW' },
         { label: 'Systeem Updates', icon: ArrowPathIcon, href: '/systeem-status', badge: 'V1.2' }
       ]
     },
