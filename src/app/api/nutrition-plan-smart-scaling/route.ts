@@ -137,7 +137,12 @@ function calculatePlanTotals(plan: any, ingredientDatabase: any): any {
 }
 
 function categorizeIngredientsByMacro(ingredients: any[], ingredientDatabase: any): any {
-  const categories = {
+  const categories: {
+    proteinRich: any[];
+    carbRich: any[];
+    fatRich: any[];
+    balanced: any[];
+  } = {
     proteinRich: [],
     carbRich: [],
     fatRich: [],
@@ -256,9 +261,9 @@ function smartScaleIngredients(
         adjustmentFactor: adjustmentFactor,
         reason: adjustmentReason,
         macroPercentages: {
-          protein: proteinPercent,
-          carbs: carbPercent,
-          fat: fatPercent
+          protein: totalMacroCalories > 0 ? (proteinCalories / totalMacroCalories) * 100 : 0,
+          carbs: totalMacroCalories > 0 ? (carbCalories / totalMacroCalories) * 100 : 0,
+          fat: totalMacroCalories > 0 ? (fatCalories / totalMacroCalories) * 100 : 0
         }
       });
     }
