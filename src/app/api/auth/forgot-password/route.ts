@@ -96,6 +96,15 @@ export async function POST(request: NextRequest) {
     try {
       console.log(`📧 Sending password reset email to: ${email}`);
       
+      // Check if SMTP configuration is available
+      if (!process.env.SMTP_PASSWORD) {
+        console.error('❌ SMTP_PASSWORD environment variable is not set on live server');
+        return NextResponse.json({
+          success: false,
+          error: 'E-mail service is momenteel niet beschikbaar. Neem contact op met de beheerder.'
+        }, { status: 503 });
+      }
+      
       const emailService = new EmailService();
       const loginUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://platform.toptiermen.eu'}/login`;
       
@@ -122,15 +131,15 @@ export async function POST(request: NextRequest) {
         console.error(`❌ Failed to send password reset email to: ${email}`);
         return NextResponse.json({
           success: false,
-          error: 'Fout bij het versturen van e-mail'
+          error: 'Fout bij het versturen van e-mail. Probeer het later opnieuw.'
         }, { status: 500 });
       }
     } catch (emailError) {
       console.error('❌ Error sending password reset email:', emailError);
       return NextResponse.json({
         success: false,
-        error: 'Fout bij het versturen van e-mail'
-      }, { status: 500 });
+        error: 'E-mail service is momenteel niet beschikbaar. Neem contact op met de beheerder.'
+      }, { status: 503 });
     }
 
     console.log('✅ Password reset completed successfully for:', email);

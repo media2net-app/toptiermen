@@ -22,6 +22,11 @@ export class EmailService {
     
     console.log('📧 Using direct email configuration...');
     
+    // Check if required SMTP configuration is available
+    if (!process.env.SMTP_PASSWORD) {
+      throw new Error('SMTP_PASSWORD environment variable is not set');
+    }
+    
     // Use direct configuration instead of database lookup
     this.config = {
       provider: 'smtp',
