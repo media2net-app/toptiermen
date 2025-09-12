@@ -869,10 +869,37 @@ function TrainingschemasContent() {
     return (
       <PageLayout title="Training Schemas">
         <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
+          <div className="text-center max-w-md mx-auto px-4">
             <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
             <h3 className="text-xl font-semibold text-white mb-2">Toegang controleren...</h3>
-            <p className="text-gray-300">We controleren je abonnement</p>
+            <p className="text-gray-300 mb-6">We controleren je abonnement</p>
+            
+            {/* Hard Refresh Button */}
+            <div className="bg-[#232D1A] border border-[#3A4D23] rounded-xl p-6">
+              <div className="flex items-center justify-center mb-4">
+                <div className="w-12 h-12 bg-[#8BAE5A]/20 rounded-full flex items-center justify-center">
+                  <svg className="w-6 h-6 text-[#8BAE5A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                </div>
+              </div>
+              <h4 className="text-lg font-semibold text-white mb-2">Pagina laadt niet?</h4>
+              <p className="text-gray-300 text-sm mb-4">
+                Klik op onderstaande button als de pagina niet laadt, en dat hij daarna sowieso laadt
+              </p>
+              <button
+                onClick={() => {
+                  console.log('🔄 Hard refresh button clicked - forcing page reload');
+                  window.location.reload();
+                }}
+                className="w-full bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#0A0F0A] font-bold px-6 py-3 rounded-lg hover:from-[#A6C97B] hover:to-[#FFE55C] transition-all duration-200 flex items-center justify-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Harde Refresh
+              </button>
+            </div>
           </div>
         </div>
       </PageLayout>
@@ -1280,12 +1307,39 @@ function TrainingschemasContent() {
                profileLoading ? 'Trainingsprofiel laden...' :
                trainingLoading ? 'Trainingsschemas laden...' : 'Laden...'}
             </h3>
-            <p className="text-gray-300">
+            <p className="text-gray-300 mb-6">
               {authLoading ? 'Even geduld, we controleren je inloggegevens' :
                subscriptionLoading ? 'We controleren je pakket toegang' :
                profileLoading ? 'Je trainingsprofiel wordt geladen' :
                trainingLoading ? 'Trainingsschemas worden geladen' : 'Even geduld...'}
             </p>
+            
+            {/* Hard Refresh Button for Loading States */}
+            <div className="bg-[#232D1A] border border-[#3A4D23] rounded-xl p-6 max-w-md mx-auto">
+              <div className="flex items-center justify-center mb-4">
+                <div className="w-10 h-10 bg-[#8BAE5A]/20 rounded-full flex items-center justify-center">
+                  <svg className="w-5 h-5 text-[#8BAE5A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                </div>
+              </div>
+              <h4 className="text-base font-semibold text-white mb-2">Pagina laadt niet?</h4>
+              <p className="text-gray-300 text-sm mb-4">
+                Klik op onderstaande button als de pagina niet laadt, en dat hij daarna sowieso laadt
+              </p>
+              <button
+                onClick={() => {
+                  console.log('🔄 Hard refresh button clicked during loading - forcing page reload');
+                  window.location.reload();
+                }}
+                className="w-full bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#0A0F0A] font-bold px-4 py-2 rounded-lg hover:from-[#A6C97B] hover:to-[#FFE55C] transition-all duration-200 flex items-center justify-center gap-2 text-sm"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Harde Refresh
+              </button>
+            </div>
           </div>
         )}
 
