@@ -31,7 +31,7 @@ interface Statistics {
 }
 
 export default function OnboardingOverviewPage() {
-  const { user } = useSupabaseAuth();
+  const { user, profile } = useSupabaseAuth();
   const router = useRouter();
   const [users, setUsers] = useState<User[]>([]);
   const [statistics, setStatistics] = useState<Statistics | null>(null);
@@ -42,10 +42,10 @@ export default function OnboardingOverviewPage() {
 
   // Check if user is admin
   useEffect(() => {
-            if (user && user.role?.toLowerCase() !== 'admin') {
+    if (user && profile && profile.role?.toLowerCase() !== 'admin') {
       router.push('/dashboard');
     }
-  }, [user, router]);
+  }, [user, profile, router]);
 
   const fetchOnboardingStatus = async () => {
     try {
@@ -68,10 +68,10 @@ export default function OnboardingOverviewPage() {
   };
 
   useEffect(() => {
-            if (user?.role?.toLowerCase() === 'admin') {
+    if (user && profile?.role?.toLowerCase() === 'admin') {
       fetchOnboardingStatus();
     }
-  }, [user]);
+  }, [user, profile]);
 
   const filteredUsers = users.filter(user => {
     const matchesSearch = user.email.toLowerCase().includes(searchTerm.toLowerCase());
@@ -109,7 +109,7 @@ export default function OnboardingOverviewPage() {
     });
   };
 
-          if (!user || user.role?.toLowerCase() !== 'admin') {
+  if (!user || !profile || profile.role?.toLowerCase() !== 'admin') {
     return (
       <div className="min-h-screen bg-[#0A0F0A] flex items-center justify-center">
         <div className="text-center">
