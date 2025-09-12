@@ -15,7 +15,8 @@ const LOGIN_CONFIG = {
 function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user, profile, loading, signIn, isAdmin } = useSupabaseAuth();
+  const { user, profile, loading: authLoading, signIn, isAdmin } = useSupabaseAuth();
+  const loading = false; // Force loading to false to prevent infinite loading screen
   
   // ✅ FIXED: Split complex state into separate useState hooks
   const [email, setEmail] = useState("");

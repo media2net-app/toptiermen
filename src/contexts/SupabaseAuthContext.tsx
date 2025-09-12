@@ -49,7 +49,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // Start with false to prevent loading screen
   const [error, setError] = useState<string | null>(null);
 
   // Fetch user profile - IMPROVED WITH EMAIL FALLBACK
@@ -95,7 +95,17 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     const getInitialSession = async () => {
       try {
         console.log('🔍 Initializing auth session...');
-        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        // Add a race condition with timeout
+        const sessionPromise = supabase.auth.getSession();
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Session timeout')), 500)
+        );
+        
+        const { data: { session }, error } = await Promise.race([
+          sessionPromise,
+          timeoutPromise
+        ]) as any;
         
         if (error) {
           console.error('Session error:', error);
@@ -113,7 +123,15 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
         }
       } catch (err) {
         console.error('Initial session error:', err);
-        setError('Failed to initialize auth');
+        
+        // Handle timeout specifically
+        if (err instanceof Error && err.message === 'Session timeout') {
+          console.log('⚠️ Session timeout - proceeding without auth');
+          setError(null); // Don't set error for timeout
+        } else {
+          setError('Failed to initialize auth');
+        }
+        
         // Still clear user state on error
         setUser(null);
         setProfile(null);
@@ -127,7 +145,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     const initTimeout = setTimeout(() => {
       console.log('⚠️ Auth initialization timeout - forcing completion');
       setLoading(false);
-    }, 5000);
+    }, 1000);
 
     getInitialSession().then(() => {
       clearTimeout(initTimeout);

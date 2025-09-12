@@ -89,9 +89,9 @@ export default function RootLayout({
           {/* <MaintenanceBanner /> - Removed - no longer needed */}
           {/* <CacheBuster version="3.0.0" forceRefresh={true} /> - DISABLED TO PREVENT LOGOUT */}
           {/* <V2StateProvider> */}
-            <SupabaseAuthProvider>
-              {children}
-            </SupabaseAuthProvider>
+          <SupabaseAuthProvider>
+            {children}
+          </SupabaseAuthProvider>
           {/* </V2StateProvider> */}
           <SpeedInsights />
           <Analytics />
