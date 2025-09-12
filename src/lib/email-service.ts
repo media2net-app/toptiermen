@@ -44,7 +44,49 @@ export class EmailService {
     return this.config;
   }
 
+  async isTemplateEnabled(templateId: string): Promise<boolean> {
+    try {
+      // Default template status (all enabled by default)
+      const defaultStatus = {
+        'welcome': true,
+        'password-reset': true,
+        'account-credentials': true,
+        'sneak-preview': true,
+        'onboarding-welcome': true,
+        'challenge-reminder': true,
+        'badge-earned': true,
+        'newsletter': true
+      };
+
+      // Get template status from database
+      const { data: settings, error } = await supabaseAdmin
+        .from('platform_settings')
+        .select('email_template_status')
+        .eq('key', 'email_template_status')
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        console.error('❌ Error fetching template status:', error);
+        return defaultStatus[templateId] !== false; // Default to enabled if error
+      }
+
+      const templateStatus = settings?.email_template_status || defaultStatus;
+      return templateStatus[templateId] !== false; // Default to enabled if not set
+      
+    } catch (error) {
+      console.error('❌ Error checking template status:', error);
+      return true; // Default to enabled if error
+    }
+  }
+
   async sendEmail(to: string, subject: string, template: string, variables: Record<string, string>, options: { tracking?: boolean } = {}): Promise<boolean> {
+    // Check if template is enabled
+    const isTemplateEnabled = await this.isTemplateEnabled(template);
+    if (!isTemplateEnabled) {
+      console.log(`📧 Template ${template} is disabled, skipping email to ${to}`);
+      return true; // Return true to not break the calling process
+    }
+
     const config = await this.getConfig();
     
     const emailTemplate = this.getTemplate(template, variables);
@@ -74,7 +116,7 @@ export class EmailService {
     }
   }
 
-  private getTemplate(template: string, variables: Record<string, string>): { subject: string; html: string; text: string } {
+  getTemplate(template: string, variables: Record<string, string>): { subject: string; html: string; text: string } {
     const templates = {
       welcome: {
         subject: '🎯 Welkom in de Top Tier Men Broederschap!',

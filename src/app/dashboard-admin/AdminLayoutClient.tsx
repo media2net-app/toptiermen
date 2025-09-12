@@ -210,6 +210,7 @@ const SidebarContent = ({ pathname }: { pathname: string }) => {
       type: 'section',
       items: [
         { label: 'Instellingen', icon: Cog6ToothIcon, href: '/dashboard-admin/instellingen' },
+        { label: 'Email Sjablonen', icon: EnvelopeIcon, href: '/dashboard-admin/email-sjablonen', badge: 'NEW' },
         { label: 'Aankondigingen', icon: MegaphoneIcon, href: '/dashboard-admin/aankondigingen' },
         { label: 'Push Notificatie Tests', icon: BellIcon, href: '/dashboard-admin/push-test' },
         { label: 'Login Logs', icon: KeyIcon, href: '/dashboard-admin/login-logs', badge: 'NEW' },

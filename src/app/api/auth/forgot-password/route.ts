@@ -98,6 +98,29 @@ export async function POST(request: NextRequest) {
             const loginUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://platform.toptiermen.eu'}/login`;
             const newTempPassword = generateTempPassword();
             
+            // Try to update the existing auth user's password
+            console.log('🔄 Attempting to update existing auth user password...');
+            
+            // First, try to find the user by email using a different method
+            const { data: authUsers, error: listError } = await supabaseAdmin.auth.admin.listUsers();
+            const existingUser = authUsers?.users?.find(u => u.email === email);
+            
+            if (existingUser) {
+              console.log('✅ Found existing auth user, updating password...');
+              const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
+                existingUser.id,
+                { password: newTempPassword }
+              );
+              
+              if (updateError) {
+                console.error('❌ Error updating existing user password:', updateError);
+              } else {
+                console.log('✅ Successfully updated existing user password');
+              }
+            } else {
+              console.log('⚠️ Could not find existing auth user to update password');
+            }
+            
             const emailSuccess = await emailService.sendEmail(
               email,
               '🔐 Je Nieuwe Top Tier Men Wachtwoord - Wachtwoord Reset',
