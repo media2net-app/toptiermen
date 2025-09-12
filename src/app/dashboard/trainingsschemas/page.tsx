@@ -333,11 +333,8 @@ function TrainingschemasContent() {
   };
 
   const filterSchemasByProfile = (schemas: TrainingSchema[], profile: TrainingProfile) => {
-    // If showAllSchemas is true, return all schemas without filtering
-    if (showAllSchemas) {
-      console.log('🔍 Showing all schemas (filtering disabled)');
-      return schemas;
-    }
+    // Always apply filtering - showAllSchemas functionality removed
+    console.log('🔍 Applying filtering (showAllSchemas disabled)');
     
     console.log('🔍 Filtering schemas for profile:', profile);
     console.log('📊 Total schemas before filtering:', schemas.length);
@@ -433,24 +430,27 @@ function TrainingschemasContent() {
         
         console.log('🎯 Mapped training goal:', { mainGoal, trainingGoal });
         
-        // Try to get training frequency from onboarding data
+        // Try to get training frequency from onboarding data (if column exists)
         let trainingFrequency = 3; // default
         try {
           console.log('📡 Fetching training frequency from onboarding_status...');
           const { data: onboardingData, error: onboardingError } = await supabase
             .from('onboarding_status')
-            .select('training_frequency')
+            .select('*')
             .eq('user_id', user?.id)
             .single();
           
           console.log('📡 Onboarding data result:', { onboardingData, onboardingError });
           
-          if (onboardingData?.training_frequency) {
+          // Check if training_frequency column exists and has data
+          if (onboardingData && !onboardingError && onboardingData.training_frequency) {
             trainingFrequency = onboardingData.training_frequency;
             console.log('🎯 Found training frequency from onboarding:', trainingFrequency);
+          } else {
+            console.log('ℹ️ No training_frequency column or data found, using default 3');
           }
         } catch (e) {
-          console.log('ℹ️ No onboarding training frequency found, using default 3:', e);
+          console.log('ℹ️ Onboarding query failed (column may not exist), using default 3:', e.message);
         }
         
         const basicProfile = {
@@ -775,15 +775,7 @@ function TrainingschemasContent() {
     }
   }, [trainingLoading, profileLoading, trainingSchemas.length, userTrainingProfile]);
 
-  // Re-apply filtering when showAllSchemas changes
-  useEffect(() => {
-    if (user?.id && userTrainingProfile && trainingSchemas.length > 0) {
-      console.log('🔄 showAllSchemas changed, re-applying filtering...');
-      const filtered = filterSchemasByProfile(trainingSchemas, userTrainingProfile);
-      setTrainingSchemas(filtered);
-      console.log('🎯 Re-applied filtering after showAllSchemas change:', filtered.length, 'schemas');
-    }
-  }, [showAllSchemas]);
+  // showAllSchemas functionality removed - no longer needed
 
   useEffect(() => {
     console.log('🔄 UserTrainingProfile changed:', userTrainingProfile);
@@ -1334,29 +1326,7 @@ function TrainingschemasContent() {
                     <p className="text-xs sm:text-sm text-gray-400">Gepersonaliseerd voor jouw profiel</p>
                   </div>
                 </div>
-                <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
-                  <div className="text-xs sm:text-sm text-gray-400">
-                    {userTrainingProfile ? 
-                      `${filterSchemasByProfile(trainingSchemas, userTrainingProfile).length} schema${filterSchemasByProfile(trainingSchemas, userTrainingProfile).length !== 1 ? "'s" : ""} beschikbaar` :
-                      `${trainingSchemas.length} schema${trainingSchemas.length !== 1 ? "'s" : ""} beschikbaar`
-                    }
-                    {showAllSchemas && (
-                      <span className="ml-2 text-[#8BAE5A]">(alle schemas)</span>
-                    )}
-                  </div>
-                  <button
-                    onClick={() => setShowAllSchemas(!showAllSchemas)}
-                    className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors text-xs sm:text-sm ${
-                      showAllSchemas
-                        ? 'bg-[#8BAE5A] text-[#232D1A]'
-                        : 'bg-[#3A4D23] text-white hover:bg-[#4A5D33]'
-                    }`}
-                  >
-                    <EyeIcon className="w-3 h-3 sm:w-4 sm:h-4" />
-                    <span className="hidden sm:inline">{showAllSchemas ? 'Toon gefilterde' : 'Bekijk alle schemas'}</span>
-                    <span className="sm:hidden">{showAllSchemas ? 'Gefilterd' : 'Alle'}</span>
-                  </button>
-                </div>
+                {/* Schema count and view toggle removed - user only sees filtered schemas */}
               </div>
 
             {trainingLoading ? (
