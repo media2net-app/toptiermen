@@ -4,14 +4,11 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { EnvelopeIcon, LockClosedIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
-import LoginDebugger from '@/components/LoginDebugger';
-// import { useCacheBuster } from '@/components/CacheBuster'; - DISABLED TO PREVENT LOGOUT
 
-// Auth configuration constants
-const AUTH_CONFIG = {
-  redirectTimeout: 5000,
-  checkInterval: 500,
-  maxRedirectAttempts: 10,
+// Simplified configuration
+const LOGIN_CONFIG = {
+  redirectTimeout: 3000, // Reduced from 5000
+  maxRetries: 2,
   defaultRedirect: '/dashboard'
 };
 
@@ -19,481 +16,150 @@ function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, profile, loading, signIn, isAdmin } = useSupabaseAuth();
-  // const { bustCache } = useCacheBuster(); - DISABLED TO PREVENT LOGOUT
   
-  // Consolidated state management
-  const [loginState, setLoginState] = useState({
-    email: "",
-    password: "",
-    rememberMe: false,
-    error: "",
-    isLoading: false,
-    redirecting: false,
-    isClient: false,
-    showPassword: false,
-    // Forgot password states
-    showForgotPassword: false,
-    forgotPasswordEmail: "",
-    isSendingReset: false,
-    resetMessage: "",
-    // Debug state
-    showDebugger: false
-  });
+  // ✅ FIXED: Split complex state into separate useState hooks
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+  
+  // Forgot password states
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
+  const [isSendingReset, setIsSendingReset] = useState(false);
+  const [resetMessage, setResetMessage] = useState("");
 
-  // Helper function to update specific state properties
-  const updateLoginState = (updates: Partial<typeof loginState>) => {
-    setLoginState(prev => ({ ...prev, ...updates }));
-  };
-
-  // Helper function to get redirect path - IMPROVED WITH ADMIN EMAIL CHECK
+  // ✅ FIXED: Simplified admin detection
   const getRedirectPath = (user: any, profile: any, redirectTo?: string) => {
     if (redirectTo && redirectTo !== '/login') return redirectTo;
     
-    // Check if user is admin by role or known admin email
-    const knownAdminEmails = ['chiel@media2net.nl', 'rick@toptiermen.eu', 'admin@toptiermen.com'];
+    const knownAdminEmails = ['chiel@media2net.nl', 'rick@toptiermen.eu', 'admin@toptiermen.com', 'chiel@toptiermen.eu'];
     const isAdminByRole = profile?.role?.toLowerCase() === 'admin';
     const isAdminByEmail = user?.email && knownAdminEmails.includes(user.email);
     const isAdmin = isAdminByRole || isAdminByEmail;
     
-    console.log('🔍 Admin check:', { 
-      role: profile?.role, 
-      email: user?.email, 
-      isAdminByRole, 
-      isAdminByEmail, 
-      isAdmin 
-    });
-    
-    return isAdmin ? '/dashboard-admin' : AUTH_CONFIG.defaultRedirect;
+    return isAdmin ? '/dashboard-admin' : LOGIN_CONFIG.defaultRedirect;
   };
 
-  // IMMEDIATE: Initialize Supabase connection for faster login with fallbacks
-  const initializeSupabaseConnection = async () => {
-    try {
-      console.log('🚀 Initializing Supabase connection...');
-      
-      // Check environment variables
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-      
-      if (!supabaseUrl || !supabaseKey) {
-        console.error('❌ Missing Supabase environment variables');
-        return;
-      }
-      
-      console.log('🔍 Supabase URL:', supabaseUrl);
-      console.log('🔑 Supabase Key present:', !!supabaseKey);
-      
-      // Create Supabase client
-      const { createClient } = await import('@supabase/supabase-js');
-      const supabase = createClient(supabaseUrl, supabaseKey);
-      
-      // Try multiple connection methods
-      let connectionSuccessful = false;
-      
-      // Method 1: Health check via modules table
-      try {
-        const { data, error } = await supabase
-          .from('academy_modules')
-          .select('id')
-          .limit(1);
-        
-        if (!error && data) {
-          connectionSuccessful = true;
-          console.log('✅ Supabase connection successful via modules table');
-        } else {
-          console.warn('⚠️ Modules table query failed:', error?.message);
-        }
-      } catch (err) {
-        console.warn('⚠️ Modules table query error:', err);
-      }
-      
-      // Method 2: Auth status check
-      if (!connectionSuccessful) {
-        try {
-          const { data, error } = await supabase.auth.getSession();
-          if (!error) {
-            connectionSuccessful = true;
-            console.log('✅ Supabase connection successful via auth check');
-          } else {
-            console.warn('⚠️ Auth check failed:', error.message);
-          }
-        } catch (err) {
-          console.warn('⚠️ Auth check error:', err);
-        }
-      }
-      
-      // Method 3: Direct REST API check
-      if (!connectionSuccessful) {
-        try {
-          const response = await fetch(`${supabaseUrl}/rest/v1/`, {
-            method: 'GET',
-            headers: {
-              'apikey': supabaseKey,
-              'Authorization': `Bearer ${supabaseKey}`
-            }
-          });
-          
-          if (response.ok) {
-            connectionSuccessful = true;
-            console.log('✅ Supabase connection successful via direct REST API');
-          } else {
-            console.warn('⚠️ REST API check failed:', response.status, response.statusText);
-          }
-        } catch (err) {
-          console.warn('⚠️ REST API check error:', err);
-        }
-      }
-      
-      if (connectionSuccessful) {
-        console.log('✅ Supabase connection initialized successfully');
-        
-        // Store connection status for faster subsequent access
-        if (typeof window !== 'undefined') {
-          sessionStorage.setItem('supabase_connection_status', 'warmed');
-          sessionStorage.setItem('supabase_connection_time', Date.now().toString());
-        }
-      } else {
-        console.error('❌ All Supabase connection methods failed');
-      }
-      
-    } catch (error) {
-      console.error('❌ Supabase connection initialization failed:', error);
-    }
-  };
-
-  // PRELOAD: Preload Supabase connection in background
+  // ✅ FIXED: Single useEffect for client-side initialization
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      // Preload Supabase connection immediately
-      initializeSupabaseConnection();
-      
-      // Also preload on page focus for better UX
-      const handleFocus = () => {
-        const cachedStatus = sessionStorage.getItem('supabase_connection_status');
-        if (cachedStatus !== 'warmed') {
-          console.log('🔄 Page focused, reinitializing Supabase connection...');
-          initializeSupabaseConnection();
-        }
-      };
-      
-      window.addEventListener('focus', handleFocus);
-      return () => window.removeEventListener('focus', handleFocus);
-    }
-  }, []);
-
-  useEffect(() => { 
-    // 2.0.3: Client-side hydration safety
-    updateLoginState({ isClient: true });
+    setIsClient(true);
     
-    // 2.0.1: Simplified initialization
-    console.log('🔍 Login page initialized');
-    console.log('🌐 Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL);
-    console.log('🔑 Supabase Key present:', !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
-    
-    // IMMEDIATE: Initialize Supabase connection for faster login
-    initializeSupabaseConnection();
-    
-    // Check for logout status and reset loading state
+    // Handle logout status
     const logoutStatus = searchParams?.get('logout');
     if (logoutStatus === 'success') {
-      console.log('✅ Logout successful, resetting login state');
-      updateLoginState({ isLoading: false, error: '' });
-      
-      // Clean up URL parameters after processing logout status
+      setError('');
+      // Clean URL
       if (typeof window !== 'undefined') {
         const url = new URL(window.location.href);
         url.searchParams.delete('logout');
-        url.searchParams.delete('t'); // Remove any remaining cache-busting timestamp
         window.history.replaceState({}, '', url.toString());
       }
     } else if (logoutStatus === 'error') {
-      console.log('❌ Logout had errors, resetting login state');
-      updateLoginState({ isLoading: false, error: 'Er is een fout opgetreden bij het uitloggen. Probeer opnieuw in te loggen.' });
-      
-      // Clean up URL parameters after processing logout status
+      setError('Er is een fout opgetreden bij het uitloggen. Probeer opnieuw in te loggen.');
+      // Clean URL
       if (typeof window !== 'undefined') {
         const url = new URL(window.location.href);
         url.searchParams.delete('logout');
-        url.searchParams.delete('t'); // Remove any remaining cache-busting timestamp
         window.history.replaceState({}, '', url.toString());
       }
     }
-    
-    // Check Supabase status on page load
-    checkSupabaseStatus();
   }, [searchParams]);
 
-  // AGGRESSIVE timeout functie - uitgebreide cache clearing na 10 seconden
+  // ✅ FIXED: Single useEffect for authentication redirect
   useEffect(() => {
-    if (loginState.isLoading || loginState.redirecting) {
-      const timeoutId = setTimeout(() => {
-        console.log('⏰ Login timeout - performing aggressive cache clearing and hard refresh');
-        
-        // AGGRESSIVE: Clear all possible caches and storage
-        if (typeof window !== 'undefined') {
-          try {
-            // Clear all localStorage
-            localStorage.clear();
-            console.log('🧹 localStorage cleared');
-            
-            // Clear all sessionStorage
-            sessionStorage.clear();
-            console.log('🧹 sessionStorage cleared');
-            
-            // Clear all cookies
-            document.cookie.split(";").forEach(function(c) { 
-              document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
-            });
-            console.log('🧹 cookies cleared');
-            
-            // Clear all caches
-            if ('caches' in window) {
-              caches.keys().then(names => {
-                names.forEach(name => {
-                  caches.delete(name);
-                  console.log('🧹 cache deleted:', name);
-                });
-              });
-            }
-            
-            // Clear service worker cache
-            if ('serviceWorker' in navigator) {
-              navigator.serviceWorker.getRegistrations().then(registrations => {
-                registrations.forEach(registration => {
-                  registration.unregister();
-                  console.log('🧹 service worker unregistered');
-                });
-              });
-            }
-            
-            // Clear IndexedDB
-            if ('indexedDB' in window) {
-              indexedDB.databases().then(databases => {
-                databases.forEach(db => {
-                  if (db.name) {
-                    indexedDB.deleteDatabase(db.name);
-                    console.log('🧹 IndexedDB deleted:', db.name);
-                  }
-                });
-              });
-            }
-            
-            // Force clear browser cache headers
-            if ('fetch' in window) {
-              const originalFetch = window.fetch;
-              window.fetch = function(...args) {
-                const [url, options = {}] = args;
-                const newOptions = {
-                  ...options,
-                  headers: {
-                    ...options.headers,
-                    'Cache-Control': 'no-cache, no-store, must-revalidate',
-                    'Pragma': 'no-cache',
-                    'Expires': '0'
-                  }
-                };
-                return originalFetch(url, newOptions);
-              };
-            }
-            
-            console.log('🧹 All caches cleared, performing hard refresh...');
-            
-                  // SMART timeout functie - alleen uitvoeren als automatische cache-bust niet heeft gewerkt
-      const supabaseStatus = sessionStorage.getItem('supabase_connection_status');
-      if (supabaseStatus === 'warmed') {
-        console.log('✅ Supabase already connected via automatic cache-bust, skipping timeout refresh');
-        return;
-      }
-      console.log('⏰ Login timeout - automatic cache-bust failed, performing aggressive cache clearing and hard refresh');
-      
-      // Force hard refresh with cache clearing
-      const currentUrl = window.location.href || '';
-      if (currentUrl) {
-        window.location.href = currentUrl + '?cache-bust=' + Date.now();
-      } else {
-        window.location.reload();
-      }
-            
-          } catch (error) {
-            console.error('❌ Cache clearing error:', error);
-            // Fallback to simple reload
-            window.location.reload();
-          }
-        }
-      }, 10000);
-      
-      return () => clearTimeout(timeoutId);
-    }
-  }, [loginState.isLoading, loginState.redirecting]);
+    if (loading || isLoading) return;
 
-  const checkSupabaseStatus = async () => {
-    try {
-      const response = await fetch('/api/check-supabase-status');
-      const data = await response.json();
-      
-      if (data.status === 'unhealthy') {
-        console.log('2.0.1: Supabase unhealthy, redirecting to maintenance');
-        router.push('/login/maintenance');
-      }
-    } catch (error) {
-      console.log('2.0.1: Could not check Supabase status:', error);
-    }
-  };
-
-  // AUTOMATIC CACHE-BUST: Force cache refresh on every login page visit for 100% Supabase connection
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const currentUrl = new URL(window.location.href);
-      const hasCacheBust = currentUrl.searchParams.has('cache-bust');
-      if (!hasCacheBust) {
-        const timestamp = Date.now();
-        currentUrl.searchParams.set('cache-bust', timestamp.toString());
-        console.log('🔄 Auto cache-bust for guaranteed Supabase connection:', currentUrl.toString());
-        window.history.replaceState({}, '', currentUrl.toString());
-      }
-      initializeSupabaseConnection();
-      const handleFocus = () => {
-        const cachedStatus = sessionStorage.getItem('supabase_connection_status');
-        if (cachedStatus !== 'warmed') {
-          console.log('🔄 Page focused, reinitializing Supabase connection...');
-          initializeSupabaseConnection();
-        }
-      };
-      window.addEventListener('focus', handleFocus);
-      return () => window.removeEventListener('focus', handleFocus);
-    }
-  }, []);
-
-  // Check if user is already authenticated - IMPROVED REDIRECT LOGIC
-  useEffect(() => {
-    if (loading) return;
-
-    // Only redirect if we have a user and we're not already redirecting
-    if (user && !loginState.redirecting) {
-      console.log('🔄 User detected, initiating redirect...');
-      console.log('👤 User object:', user);
-      console.log('📋 Profile object:', profile);
-      
-      updateLoginState({ redirecting: true });
-
+    if (user && !isLoading) {
       const redirectTo = searchParams?.get('redirect') || undefined;
       const targetPath = getRedirectPath(user, profile, redirectTo);
-
-      console.log('🎯 Redirecting to:', targetPath);
       
-      // Wait a bit longer to ensure profile is loaded if available
-      const delay = profile ? 100 : 500; // Longer delay if profile is missing
+      // Quick redirect without complex timeout logic
       setTimeout(() => {
         router.replace(targetPath);
-      }, delay);
+      }, 100);
     }
-  }, [loading, user, profile, router, searchParams, loginState.redirecting]);
+  }, [loading, user, profile, router, searchParams, isLoading]);
 
-  // 2.0.1: Force show login form after 2 seconds if still loading - DISABLED TO FIX FLICKERING
-  // useEffect(() => {
-  //   if (loading) {
-  //     const timer = setTimeout(() => {
-  //       console.log('2.0.1: Force showing login form after timeout');
-  //       updateLoginState({ redirecting: false });
-  //     }, 2000);
-  //     
-  //     return () => clearTimeout(timer);
-  //   }
-  // }, [loading]);
-
+  // ✅ FIXED: Simplified login handler
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
     
-    if (!loginState.email || !loginState.password) {
-      updateLoginState({ error: "Vul alle velden in" });
+    if (!email || !password) {
+      setError("Vul alle velden in");
       return;
     }
 
-    // Prevent multiple submissions
-    if (loginState.isLoading || loginState.redirecting) return;
+    if (isLoading) return;
 
-    updateLoginState({ isLoading: true, error: "", redirecting: false });
+    setIsLoading(true);
+    setError("");
     
     try {
-      console.log('🔐 Starting login process...');
-      const result = await signIn(loginState.email, loginState.password);
+      const result = await signIn(email, password);
 
       if (!result.success) {
-        console.log('❌ Login failed:', result.error);
-        updateLoginState({ 
-          error: result.error || "Ongeldige inloggegevens",
-          isLoading: false,
-          redirecting: false
-        });
+        setError(result.error || "Ongeldige inloggegevens");
+        setIsLoading(false);
         return;
       }
 
-      console.log('✅ Login successful, setting redirect state');
-      updateLoginState({ 
-        redirecting: true, 
-        isLoading: false,
-        error: ""
-      });
-      
-      // Let the useEffect handle the redirect based on auth state change
-      // No manual redirect needed here as useSupabaseAuth will trigger state change
+      // Success - let useEffect handle redirect
+      setIsLoading(false);
       
     } catch (error: any) {
-      console.error('❌ Login exception:', error);
-      updateLoginState({ 
-        error: error.message || "Er is een fout opgetreden bij het inloggen",
-        isLoading: false,
-        redirecting: false
-      });
+      setError(error.message || "Er is een fout opgetreden bij het inloggen");
+      setIsLoading(false);
     }
   }
 
+  // ✅ FIXED: Simplified forgot password handler
   async function handleForgotPassword(e: React.FormEvent) {
     e.preventDefault();
     
-    if (!loginState.forgotPasswordEmail) {
-      updateLoginState({ resetMessage: "Vul een e-mailadres in" });
+    if (!forgotPasswordEmail) {
+      setResetMessage("Vul een e-mailadres in");
       return;
     }
 
-    updateLoginState({ isSendingReset: true });
-    updateLoginState({ resetMessage: "" });
+    setIsSendingReset(true);
+    setResetMessage("");
 
     try {
       const response = await fetch('/api/auth/forgot-password', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email: loginState.forgotPasswordEmail }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: forgotPasswordEmail }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        updateLoginState({ resetMessage: data.error || "Fout bij het versturen van reset e-mail" });
+        setResetMessage(data.error || "Fout bij het versturen van reset e-mail");
         return;
       }
 
-      updateLoginState({ resetMessage: "Wachtwoord reset e-mail is verstuurd! Controleer je inbox." });
-      updateLoginState({ forgotPasswordEmail: "" });
+      setResetMessage("Wachtwoord reset e-mail is verstuurd! Controleer je inbox.");
+      setForgotPasswordEmail("");
       
       // Close modal after 3 seconds
       setTimeout(() => {
-        updateLoginState({ showForgotPassword: false });
-        updateLoginState({ resetMessage: "" });
+        setShowForgotPassword(false);
+        setResetMessage("");
       }, 3000);
 
     } catch (error) {
-      console.error('2.0.1: Forgot password error:', error);
-      updateLoginState({ resetMessage: "Er is een fout opgetreden. Probeer het opnieuw." });
+      setResetMessage("Er is een fout opgetreden. Probeer het opnieuw.");
     } finally {
-      updateLoginState({ isSendingReset: false });
+      setIsSendingReset(false);
     }
   }
 
-  // Hydration safety - prevent hydration errors
-  if (!loginState.isClient) {
+  // Hydration safety
+  if (!isClient) {
     return (
       <div className="min-h-screen flex items-center justify-center relative px-4 py-6" style={{ backgroundColor: '#181F17' }}>
         <img src="/pattern.png" alt="pattern" className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none z-0" />
@@ -505,8 +171,6 @@ function LoginPageContent() {
               className="h-16 sm:h-20 md:h-24 w-auto"
             />
           </div>
-          
-          
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#B6C948] mx-auto mb-4"></div>
             <p className="text-[#B6C948] text-lg">Laden...</p>
@@ -516,53 +180,9 @@ function LoginPageContent() {
     );
   }
 
-  // Show loading state while checking authentication (with timeout) - DISABLED TO FIX FLICKERING
-  // if (loading && !loginState.redirecting) {
-  //   return (
-  //     <div className="min-h-screen flex items-center justify-center relative px-4 py-6" style={{ backgroundColor: '#181F17' }}>
-  //       <img src="/pattern.png" alt="pattern" className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none z-0" />
-  //       <div className="w-full max-w-md p-6 sm:p-8 rounded-3xl shadow-2xl bg-[#232D1A]/95 border border-[#3A4D23] backdrop-blur-lg relative z-10">
-  //         <div className="text-center">
-  //           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#B6C948] mx-auto mb-4"></div>
-  //           <p className="text-[#B6C948] text-lg">Laden...</p>
-  //           <p className="text-[#8BAE5A] text-sm mt-2">Authenticatie wordt gecontroleerd</p>
-  //           <button
-  //             onClick={() => window.location.reload()}
-  //             className="mt-4 text-[#8BAE5A] hover:text-[#B6C948] underline text-sm"
-  //           >
-  //             Handmatig herladen als het te lang duurt
-  //           </button>
-  //         </div>
-  //       </div>
-  //     </div>
-  //   );
-  // }
-
-  // Show redirecting state - DISABLED TO FIX FLICKERING
-  // if (loginState.redirecting) {
-  //   return (
-  //     <div className="min-h-screen flex items-center justify-center relative px-4 py-6" style={{ backgroundColor: '#181F17' }}>
-  //       <img src="/pattern.png" alt="pattern" className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none z-0" />
-  //       <div className="w-full max-w-md p-6 sm:p-8 rounded-3xl shadow-2xl bg-[#232D1A]/95 border border-[#3A4D23] backdrop-blur-lg relative z-10">
-  //         <div className="text-center">
-  //           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#B6C948] mx-auto mb-4"></div>
-  //           <p className="text-[#B6C948] text-lg">Doorsturen naar dashboard...</p>
-  //           <p className="text-[#8BAE5A] text-sm mt-2">Je wordt automatisch doorgestuurd</p>
-  //           <button
-  //             onClick={() => window.location.reload()}
-  //             className="mt-4 text-[#8BAE5A] hover:text-[#B6C948] underline text-sm"
-  //           >
-  //             Handmatig herladen als het te lang duurt
-  //           </button>
-  //         </div>
-  //       </div>
-  //     </div>
-  //   );
-  // }
-
   return (
     <div 
-      className={`min-h-screen flex items-center justify-center relative px-4 py-6 ${loginState.isLoading ? 'login-loading' : ''}`}
+      className={`min-h-screen flex items-center justify-center relative px-4 py-6 ${isLoading ? 'login-loading' : ''}`}
       style={{ backgroundColor: '#181F17' }}
     >
       <img src="/pattern.png" alt="pattern" className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none z-0" />
@@ -576,18 +196,15 @@ function LoginPageContent() {
           />
         </div>
 
-
         <p className="text-[#B6C948] text-center mb-6 sm:mb-8 text-base sm:text-lg font-figtree">Log in op je dashboard</p>
         
-        {/* Debug Panel */}
+        {/* ✅ FIXED: Simplified debug info - only in development */}
         {process.env.NODE_ENV === 'development' && (
           <div className="mb-4 p-3 bg-[#181F17] border border-[#B6C948] rounded-lg text-xs">
             <p className="text-[#B6C948] font-bold mb-2">🔧 Debug Info:</p>
-            <p className="text-[#8BAE5A]">Supabase URL: {process.env.NEXT_PUBLIC_SUPABASE_URL ? '✅' : '❌'}</p>
-            <p className="text-[#8BAE5A]">Supabase Key: {process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? '✅' : '❌'}</p>
             <p className="text-[#8BAE5A]">Loading: {loading ? '✅' : '❌'}</p>
             <p className="text-[#8BAE5A]">User: {user ? '✅' : '❌'}</p>
-            <p className="text-[#8BAE5A]">Error: {loginState.error || 'None'}</p>
+            <p className="text-[#8BAE5A]">Error: {error || 'None'}</p>
           </div>
         )}
         
@@ -596,35 +213,35 @@ function LoginPageContent() {
             <EnvelopeIcon className="w-5 h-5 text-[#B6C948] absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="email"
-              value={loginState.email}
-              onChange={e => updateLoginState({ email: e.target.value })}
-              className={`w-full pl-10 pr-4 py-3 rounded-xl bg-[#181F17] text-[#B6C948] placeholder-[#B6C948] focus:outline-none focus:ring-2 focus:ring-[#B6C948] transition shadow-inner border border-[#3A4D23] font-figtree ${loginState.isLoading ? 'cursor-wait opacity-75' : 'cursor-text'}`}
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              className={`w-full pl-10 pr-4 py-3 rounded-xl bg-[#181F17] text-[#B6C948] placeholder-[#B6C948] focus:outline-none focus:ring-2 focus:ring-[#B6C948] transition shadow-inner border border-[#3A4D23] font-figtree ${isLoading ? 'cursor-wait opacity-75' : 'cursor-text'}`}
               placeholder="E-mailadres"
               autoComplete="email"
               required
-              disabled={loginState.isLoading}
+              disabled={isLoading}
             />
           </div>
           <div className="relative">
             <LockClosedIcon className="w-5 h-5 text-[#B6C948] absolute left-3 top-1/2 -translate-y-1/2" />
             <input
-              type={loginState.showPassword ? "text" : "password"}
-              value={loginState.password}
-              onChange={e => updateLoginState({ password: e.target.value })}
-              className={`w-full pl-10 pr-12 py-3 rounded-xl bg-[#181F17] text-[#B6C948] placeholder-[#B6C948] focus:outline-none focus:ring-2 focus:ring-[#B6C948] transition shadow-inner border border-[#3A4D23] font-figtree ${loginState.isLoading ? 'cursor-wait opacity-75' : 'cursor-text'}`}
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              className={`w-full pl-10 pr-12 py-3 rounded-xl bg-[#181F17] text-[#B6C948] placeholder-[#B6C948] focus:outline-none focus:ring-2 focus:ring-[#B6C948] transition shadow-inner border border-[#3A4D23] font-figtree ${isLoading ? 'cursor-wait opacity-75' : 'cursor-text'}`}
               placeholder="Wachtwoord"
               autoComplete="current-password"
               required
-              disabled={loginState.isLoading}
+              disabled={isLoading}
             />
             <button
               type="button"
-              onClick={() => updateLoginState({ showPassword: !loginState.showPassword })}
+              onClick={() => setShowPassword(!showPassword)}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-[#B6C948] hover:text-white transition-colors focus:outline-none focus:text-white"
-              disabled={loginState.isLoading}
-              aria-label={loginState.showPassword ? "Wachtwoord verbergen" : "Wachtwoord tonen"}
+              disabled={isLoading}
+              aria-label={showPassword ? "Wachtwoord verbergen" : "Wachtwoord tonen"}
             >
-              {loginState.showPassword ? (
+              {showPassword ? (
                 <EyeSlashIcon className="w-5 h-5" />
               ) : (
                 <EyeIcon className="w-5 h-5" />
@@ -637,48 +254,45 @@ function LoginPageContent() {
             <label className="flex items-center cursor-pointer">
               <input
                 type="checkbox"
-                checked={loginState.rememberMe}
-                onChange={e => updateLoginState({ rememberMe: e.target.checked })}
+                checked={rememberMe}
+                onChange={e => setRememberMe(e.target.checked)}
                 className="w-4 h-4 text-[#B6C948] bg-[#181F17] border-[#3A4D23] rounded focus:ring-[#B6C948] focus:ring-2"
-                disabled={loginState.isLoading}
+                disabled={isLoading}
               />
               <span className="ml-2 text-[#B6C948] text-sm font-figtree">Ingelogd blijven</span>
             </label>
             
             <button
               type="button"
-              onClick={() => updateLoginState({ showForgotPassword: true })}
-              className={`text-[#8BAE5A] hover:text-[#B6C948] text-sm underline font-figtree ${loginState.isLoading ? 'cursor-wait opacity-75' : 'cursor-pointer'}`}
-              disabled={loginState.isLoading}
+              onClick={() => setShowForgotPassword(true)}
+              className={`text-[#8BAE5A] hover:text-[#B6C948] text-sm underline font-figtree ${isLoading ? 'cursor-wait opacity-75' : 'cursor-pointer'}`}
+              disabled={isLoading}
             >
               Wachtwoord vergeten?
             </button>
           </div>
-          {loginState.error && (
+          
+          {error && (
             <div className="text-[#B6C948] text-center text-sm -mt-4 border border-[#B6C948] rounded-lg py-2 px-3 bg-[#181F17] font-figtree">
-              {loginState.error}
+              {error}
             </div>
           )}
+          
           <button
             type="submit"
-            disabled={loginState.isLoading || loginState.redirecting || !loginState.email || !loginState.password}
+            disabled={isLoading || !email || !password}
             className={`w-full py-3 sm:py-4 rounded-xl bg-gradient-to-r from-[#B6C948] to-[#3A4D23] text-[#181F17] font-semibold text-base sm:text-lg shadow-lg hover:from-[#B6C948] hover:to-[#B6C948] transition-all duration-200 border border-[#B6C948] font-figtree ${
-              (loginState.isLoading || loginState.redirecting)
+              isLoading
                 ? 'opacity-75 cursor-wait' 
-                : (!loginState.email || !loginState.password) 
+                : (!email || !password) 
                   ? 'opacity-50 cursor-not-allowed' 
                   : 'cursor-pointer'
             }`}
           >
-            {loginState.isLoading ? (
+            {isLoading ? (
               <div className="flex items-center justify-center">
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#181F17] mr-2"></div>
                 <span>Inloggen...</span>
-              </div>
-            ) : loginState.redirecting ? (
-              <div className="flex items-center justify-center">
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#181F17] mr-2"></div>
-                <span>Doorsturen...</span>
               </div>
             ) : (
               "Inloggen"
@@ -686,17 +300,6 @@ function LoginPageContent() {
           </button>
         </form>
 
-        {/* Live Debug Toggle - Always Visible */}
-        <div className="mt-4 text-center">
-          <button
-            type="button"
-            onClick={() => updateLoginState({ showDebugger: !loginState.showDebugger })}
-            className="px-4 py-2 bg-[#3A4D23] text-[#8BAE5A] rounded-lg text-sm hover:bg-[#4A5D33] transition-colors border border-[#8BAE5A]/30"
-          >
-            {loginState.showDebugger ? '🔒 Verberg Debug' : '🔍 Toon Debug'}
-          </button>
-        </div>
-        
         <div className="mt-6 text-center">
           <p className="text-[#B6C948] text-sm font-figtree">
             Nog geen account?{" "}
@@ -705,36 +308,36 @@ function LoginPageContent() {
             </a>
           </p>
           
-          {/* Cache Busting Section */}
+          {/* ✅ FIXED: Simplified cache busting - no aggressive clearing */}
           <div className="mt-4 pt-2 border-t border-[#3A4D23]/30">
             <div className="mb-3 p-3 bg-[#181F17] rounded-lg border border-[#3A4D23]">
               <p className="text-[#8BAE5A] text-xs mb-2 text-center">Problemen met inloggen?</p>
               <button
                 onClick={() => {
-                  console.log('🔄 Manual cache busting: DISABLED to prevent logout issues');
-                  // bustCache(); - DISABLED TO PREVENT LOGOUT
+                  console.log('🔄 Manual refresh');
+                  window.location.reload();
                 }}
-                className={`w-full px-3 py-2 bg-[#3A4D23] text-[#8BAE5A] rounded text-sm font-medium hover:bg-[#4A5D33] transition-colors ${loginState.isLoading ? 'cursor-wait opacity-75' : 'cursor-pointer'}`}
-                disabled={loginState.isLoading}
+                className={`w-full px-3 py-2 bg-[#3A4D23] text-[#8BAE5A] rounded text-sm font-medium hover:bg-[#4A5D33] transition-colors ${isLoading ? 'cursor-wait opacity-75' : 'cursor-pointer'}`}
+                disabled={isLoading}
               >
-                🔄 Cache Verversen & Herladen
+                🔄 Pagina Verversen
               </button>
             </div>
             
-            {/* Version badge - 2.0.1 */}
+            {/* Version badge */}
             <div className="flex items-center justify-center gap-2">
               <span className="text-[#B6C948] text-xs">Platform</span>
               <span className="px-2 py-1 bg-[#B6C948]/20 text-[#B6C948] text-xs font-semibold rounded-full border border-[#B6C948]/30">
-                3.0.0
+                3.0.1
               </span>
-              <span className="text-[#B6C948] text-xs">Stable</span>
+              <span className="text-[#B6C948] text-xs">Improved</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Forgot Password Modal */}
-      {loginState.showForgotPassword && (
+      {/* ✅ FIXED: Simplified forgot password modal */}
+      {showForgotPassword && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-[#232D1A] rounded-2xl p-8 max-w-md w-full mx-4 border border-[#3A4D23]">
             <div className="text-center mb-6">
@@ -750,13 +353,13 @@ function LoginPageContent() {
             </div>
             
             <form onSubmit={handleForgotPassword} className="space-y-4 mb-6">
-              {loginState.resetMessage && (
+              {resetMessage && (
                 <div className={`text-center text-sm rounded-lg py-2 px-3 font-figtree ${
-                  loginState.resetMessage.includes('verstuurd') 
+                  resetMessage.includes('verstuurd') 
                     ? 'text-green-400 border border-green-500/20 bg-green-500/10' 
                     : 'text-[#B6C948] border border-[#B6C948] bg-[#181F17]'
                 }`}>
-                  {loginState.resetMessage}
+                  {resetMessage}
                 </div>
               )}
                 
@@ -766,12 +369,12 @@ function LoginPageContent() {
                 </label>
                 <input
                   type="email"
-                  value={loginState.forgotPasswordEmail}
-                  onChange={e => updateLoginState({ forgotPasswordEmail: e.target.value })}
+                  value={forgotPasswordEmail}
+                  onChange={e => setForgotPasswordEmail(e.target.value)}
                   className="w-full bg-[#181F17] text-white px-3 py-2 rounded-lg border border-[#3A4D23] focus:outline-none focus:border-[#8BAE5A]"
                   placeholder="Voer je e-mailadres in"
                   required
-                  disabled={loginState.isSendingReset}
+                  disabled={isSendingReset}
                 />
               </div>
             </form>
@@ -779,21 +382,21 @@ function LoginPageContent() {
             <div className="flex gap-3">
               <button
                 onClick={() => {
-                  updateLoginState({ showForgotPassword: false });
-                  updateLoginState({ forgotPasswordEmail: "" });
-                  updateLoginState({ resetMessage: "" });
+                  setShowForgotPassword(false);
+                  setForgotPasswordEmail("");
+                  setResetMessage("");
                 }}
-                disabled={loginState.isSendingReset}
+                disabled={isSendingReset}
                 className="flex-1 px-4 py-2 bg-[#3A4D23] text-[#8BAE5A] rounded-lg font-semibold hover:bg-[#4A5D33] transition-colors disabled:opacity-50"
               >
                 Annuleren
               </button>
               <button
                 onClick={handleForgotPassword}
-                disabled={loginState.isSendingReset || !loginState.forgotPasswordEmail}
+                disabled={isSendingReset || !forgotPasswordEmail}
                 className="flex-1 px-4 py-2 bg-[#8BAE5A] text-[#181F17] rounded-lg font-semibold hover:bg-[#A6C97B] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loginState.isSendingReset ? (
+                {isSendingReset ? (
                   <div className="flex items-center justify-center gap-2">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#181F17]"></div>
                     Versturen...
@@ -806,12 +409,6 @@ function LoginPageContent() {
           </div>
         </div>
       )}
-
-      {/* Login Debugger */}
-      <LoginDebugger 
-        isVisible={loginState.showDebugger}
-        onToggle={() => updateLoginState({ showDebugger: !loginState.showDebugger })}
-      />
     </div>
   );
 }
@@ -829,8 +426,6 @@ export default function LoginPage() {
               className="h-16 sm:h-20 md:h-24 w-auto"
             />
           </div>
-          
-          
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#8BAE5A] mx-auto"></div>
             <p className="text-[#8BAE5A] mt-4">Laden...</p>
@@ -841,4 +436,4 @@ export default function LoginPage() {
       <LoginPageContent />
     </Suspense>
   );
-} 
+}
