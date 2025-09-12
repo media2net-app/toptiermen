@@ -190,20 +190,9 @@ function TrainingschemasContent() {
         // Only filter during normal use, not during onboarding
         filteredSchemas = filterSchemasByProfile(filteredSchemas, userTrainingProfile);
       } else if (showOnboardingStep3 && userTrainingProfile) {
-        // During onboarding, show schemas that match the user's training frequency and equipment
-        filteredSchemas = data?.filter(schema => {
-          const schemaDays = schema.training_schema_days?.length || 0;
-          const userFrequency = userTrainingProfile.training_frequency;
-          const frequencyMatch = schemaDays === userFrequency;
-          
-          // Also match equipment type
-          const equipmentMatch = schema.equipment_type === userTrainingProfile.equipment_type;
-          
-          console.log(`🎯 Onboarding Schema "${schema.name}": ${schemaDays} days (${frequencyMatch}), ${schema.equipment_type} equipment (${equipmentMatch})`);
-          
-          return frequencyMatch && equipmentMatch;
-        }) || [];
-        console.log('🎯 Onboarding: Showing schemas for frequency', userTrainingProfile.training_frequency, 'days and equipment', userTrainingProfile.equipment_type, ':', filteredSchemas.length);
+        // During onboarding, show schemas that match the user's training goal, frequency and equipment
+        filteredSchemas = filterSchemasByProfile(data || [], userTrainingProfile);
+        console.log('🎯 Onboarding: Using same filtering logic as normal use');
       }
       
       setTrainingSchemas(filteredSchemas);

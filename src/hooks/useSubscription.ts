@@ -35,6 +35,23 @@ export function useSubscription(): UseSubscriptionReturn {
       return;
     }
 
+    // Check if we have cached subscription data for this user
+    const cacheKey = `subscription_${user.id}`;
+    const cachedData = sessionStorage.getItem(cacheKey);
+    
+    if (cachedData) {
+      try {
+        const parsed = JSON.parse(cachedData);
+        console.log('🚀 Using cached subscription data:', parsed);
+        setSubscription(parsed);
+        setLoading(false);
+        return;
+      } catch (e) {
+        console.log('⚠️ Invalid cached data, fetching fresh data');
+        sessionStorage.removeItem(cacheKey);
+      }
+    }
+
     const fetchSubscription = async () => {
       try {
         setLoading(true);
@@ -63,14 +80,20 @@ export function useSubscription(): UseSubscriptionReturn {
           role: profile.role
         });
 
-        setSubscription({
+        const subscriptionData = {
           subscription_tier: tier,
           subscription_status: 'active', // Default to active for all users
           billing_period: 'monthly',
           start_date: new Date().toISOString(),
           end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
           status: 'active' // Default to active
-        });
+        };
+
+        setSubscription(subscriptionData);
+        
+        // Cache the subscription data for 5 minutes
+        sessionStorage.setItem(cacheKey, JSON.stringify(subscriptionData));
+        
       } catch (err) {
         console.error('Subscription fetch error:', err);
         setError('Failed to fetch subscription data');
