@@ -222,7 +222,10 @@ function TrainingschemasContent() {
       'kracht': 'power_kracht', 
       'conditie': 'kracht_uithouding',
       'kracht/conditie': 'kracht_uithouding',
-      'kracht/power': 'power_kracht'
+      'kracht/power': 'power_kracht',
+      'Power & Kracht': 'power_kracht',
+      'power_kracht': 'power_kracht',
+      'kracht_uithouding': 'kracht_uithouding'
     };
     
     // Get the correct database goal value
@@ -312,17 +315,37 @@ function TrainingschemasContent() {
             
             // Create a basic training profile based on main_goal
             let trainingGoal = 'spiermassa'; // default
-            if (profileData.main_goal.toLowerCase().includes('kracht')) {
+            const mainGoal = profileData.main_goal.toLowerCase();
+            
+            if (mainGoal.includes('power') || mainGoal.includes('kracht')) {
               trainingGoal = 'power_kracht';
-            } else if (profileData.main_goal.toLowerCase().includes('conditie') || 
-                      profileData.main_goal.toLowerCase().includes('uithouding')) {
+            } else if (mainGoal.includes('conditie') || mainGoal.includes('uithouding')) {
               trainingGoal = 'kracht_uithouding';
+            } else if (mainGoal.includes('spiermassa')) {
+              trainingGoal = 'spiermassa';
+            }
+            
+            // Try to get training frequency from onboarding data
+            let trainingFrequency = 3; // default
+            try {
+              const { data: onboardingData } = await supabase
+                .from('onboarding_status')
+                .select('training_frequency')
+                .eq('user_id', user.id)
+                .single();
+              
+              if (onboardingData?.training_frequency) {
+                trainingFrequency = onboardingData.training_frequency;
+                console.log('🎯 Found training frequency from onboarding:', trainingFrequency);
+              }
+            } catch (e) {
+              console.log('ℹ️ No onboarding training frequency found, using default 3');
             }
             
             const basicProfile = {
               user_id: user.email || user.id,
               training_goal: trainingGoal as 'spiermassa' | 'kracht_uithouding' | 'power_kracht',
-              training_frequency: 3 as 1 | 2 | 3 | 4 | 5 | 6, // Default to 3x per week
+              training_frequency: trainingFrequency as 1 | 2 | 3 | 4 | 5 | 6,
               equipment_type: 'gym' as 'gym' | 'home' | 'outdoor' // Use lowercase to match database
             };
             
