@@ -121,7 +121,7 @@ export async function POST(request: NextRequest) {
               console.log(`📊 Found ${authUsers?.users?.length || 0} total auth users`);
             }
             
-            const existingUser = authUsers?.users?.find(u => u.email === email);
+            const existingUser = authUsers?.users?.find((u: any) => u.email === email);
             
             if (existingUser) {
               console.log(`✅ Found existing auth user ${existingUser.id}, updating password...`);
@@ -145,23 +145,24 @@ export async function POST(request: NextRequest) {
               console.log('🔄 Attempting alternative user lookup...');
               try {
                 // Try to get user by email directly
-                const { data: userByEmail, error: emailError } = await supabaseAdmin.auth.admin.getUserByEmail(email);
+                const { data: userByEmail, error: emailError } = await supabaseAdmin.auth.admin.listUsers();
+                const foundUser = userByEmail?.users?.find((u: any) => u.email === email);
                 
-                if (userByEmail && !emailError) {
-                  console.log(`✅ Found user via getUserByEmail: ${userByEmail.user.id}`);
+                if (foundUser && !emailError) {
+                  console.log(`✅ Found user via alternative lookup: ${foundUser.id}`);
                   
                   const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
-                    userByEmail.user.id,
+                    foundUser.id,
                     { password: newTempPassword }
                   );
                   
                   if (updateError) {
-                    console.error('❌ Error updating user password via getUserByEmail:', updateError);
+                    console.error('❌ Error updating user password via alternative lookup:', updateError);
                   } else {
-                    console.log(`✅ Successfully updated user password via getUserByEmail for ${userByEmail.user.id}`);
+                    console.log(`✅ Successfully updated user password via alternative lookup for ${foundUser.id}`);
                   }
                 } else {
-                  console.log('❌ Could not find user via getUserByEmail:', emailError);
+                  console.log('❌ Could not find user via alternative lookup:', emailError);
                 }
               } catch (altError) {
                 console.error('❌ Alternative lookup failed:', altError);
