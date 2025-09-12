@@ -42,6 +42,8 @@ interface MealIngredient {
   unit: string;
   amount: number;
   originalAmount?: number; // Optional original amount for debug purposes
+  adjustmentFactor?: number; // Smart scaling adjustment factor
+  adjustmentReason?: string; // Reason for adjustment
 }
 
 interface MealNutrition {
@@ -155,6 +157,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
   const [modifiedMeals, setModifiedMeals] = useState<Set<string>>(new Set());
   const [showDebugPanel, setShowDebugPanel] = useState(false);
   const [isStickyActive, setIsStickyActive] = useState(false);
+  const [smartScalingEnabled, setSmartScalingEnabled] = useState(true);
   
   const { isAdmin } = useSupabaseAuth();
 
@@ -187,7 +190,14 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
       setLoading(true);
       setError(null);
       
-      const response = await fetch(`/api/nutrition-plan-dynamic?planId=${planId}&userId=${userId}`);
+      // Use smart scaling if enabled, otherwise use regular dynamic plan
+      const apiEndpoint = smartScalingEnabled 
+        ? `/api/nutrition-plan-smart-scaling?planId=${planId}&userId=${userId}`
+        : `/api/nutrition-plan-dynamic?planId=${planId}&userId=${userId}`;
+      
+      console.log('🧠 Using API endpoint:', apiEndpoint);
+      
+      const response = await fetch(apiEndpoint);
       
       if (!response.ok) {
         const errorData = await response.json();
@@ -197,7 +207,19 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
       const data = await response.json();
       
       if (data.success) {
-        setPlanData(data.data);
+        // Handle both smart scaling and regular dynamic plan responses
+        const planData = smartScalingEnabled ? {
+          ...data,
+          plan: data.plan,
+          scalingInfo: data.scalingInfo,
+          userProfile: data.userProfile
+        } : data.data;
+        
+        setPlanData(planData);
+        
+        if (smartScalingEnabled && data.scalingInfo) {
+          console.log('🧠 Smart scaling applied:', data.scalingInfo);
+        }
       } else {
         throw new Error(data.error || 'Failed to load dynamic plan');
       }
@@ -215,7 +237,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
     if (planId && userId && userId !== 'anonymous') {
       fetchDynamicPlan();
     }
-  }, [planId, userId]);
+  }, [planId, userId, smartScalingEnabled]);
 
   const handleEditMeal = (day: string, mealType: string) => {
     // Create custom plan data if it doesn't exist yet
@@ -825,7 +847,20 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
       {isAdmin && showDebugPanel && (
         <div className="bg-[#1A1A1A] border-b border-[#3A4D23] p-6">
           <div className="max-w-7xl mx-auto">
-            <h3 className="text-lg font-bold text-[#8BAE5A] mb-4">🔍 Debug Informatie</h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-[#8BAE5A]">🔍 Debug Informatie</h3>
+              <div className="flex items-center gap-4">
+                <label className="flex items-center gap-2 text-sm text-white">
+                  <input
+                    type="checkbox"
+                    checked={smartScalingEnabled}
+                    onChange={(e) => setSmartScalingEnabled(e.target.checked)}
+                    className="w-4 h-4 text-[#8BAE5A] bg-[#181F17] border-[#3A4D23] rounded focus:ring-[#8BAE5A] focus:ring-2"
+                  />
+                  🧠 Slimme Schaling
+                </label>
+              </div>
+            </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {/* Plan Status */}
@@ -978,6 +1013,89 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                       Totaal geladen: {Object.keys(ingredientDatabase).length} ingrediënten
                     </div>
                   </div>
+
+            {/* Smart Scaling Debug Info */}
+            {smartScalingEnabled && planData?.scalingInfo?.debugInfo && (
+              <div className="mt-6 bg-[#181F17] border border-[#3A4D23] rounded-lg p-4">
+                <h4 className="text-white font-semibold mb-3">🧠 Slimme Schaling Debug</h4>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Macro Adjustments */}
+                  <div>
+                    <h5 className="text-[#8BAE5A] font-medium mb-2">⚖️ Macro Aanpassingen</h5>
+                    <div className="space-y-1 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-300">Eiwit Factor:</span>
+                        <span className="text-white font-mono">
+                          {planData.scalingInfo.debugInfo.macroAdjustments?.protein?.toFixed(3) || '1.000'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-300">Koolhydraten Factor:</span>
+                        <span className="text-white font-mono">
+                          {planData.scalingInfo.debugInfo.macroAdjustments?.carbs?.toFixed(3) || '1.000'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-300">Vet Factor:</span>
+                        <span className="text-white font-mono">
+                          {planData.scalingInfo.debugInfo.macroAdjustments?.fat?.toFixed(3) || '1.000'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Totals Comparison */}
+                  <div>
+                    <h5 className="text-[#8BAE5A] font-medium mb-2">📊 Totaal Vergelijking</h5>
+                    <div className="space-y-1 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-300">Origineel vs Doel:</span>
+                        <span className="text-white font-mono">
+                          {planData.scalingInfo.debugInfo.originalTotals?.calories || 0} → {planData.scalingInfo.debugInfo.targetTotals?.calories || 0} kcal
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-300">Eiwit:</span>
+                        <span className="text-white font-mono">
+                          {planData.scalingInfo.debugInfo.originalTotals?.protein || 0} → {planData.scalingInfo.debugInfo.targetTotals?.protein || 0}g
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-300">Koolhydraten:</span>
+                        <span className="text-white font-mono">
+                          {planData.scalingInfo.debugInfo.originalTotals?.carbs || 0} → {planData.scalingInfo.debugInfo.targetTotals?.carbs || 0}g
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-300">Vet:</span>
+                        <span className="text-white font-mono">
+                          {planData.scalingInfo.debugInfo.originalTotals?.fat || 0} → {planData.scalingInfo.debugInfo.targetTotals?.fat || 0}g
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Ingredient Adjustments */}
+                {planData.scalingInfo.debugInfo.ingredientAdjustments && planData.scalingInfo.debugInfo.ingredientAdjustments.length > 0 && (
+                  <div className="mt-4">
+                    <h5 className="text-[#8BAE5A] font-medium mb-2">🔧 Ingrediënt Aanpassingen</h5>
+                    <div className="max-h-32 overflow-y-auto space-y-1 text-xs">
+                      {planData.scalingInfo.debugInfo.ingredientAdjustments.map((adj: any, index: number) => (
+                        <div key={index} className="flex justify-between items-center bg-[#232D1A] p-2 rounded">
+                          <span className="text-gray-300">{adj.name}</span>
+                          <span className="text-white">
+                            {adj.originalAmount} → {adj.newAmount} ({adj.adjustmentFactor.toFixed(2)}x)
+                          </span>
+                          <span className="text-[#8BAE5A] text-xs">{adj.reason}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Current Day Ingredients */}
             <div className="mt-6 bg-[#181F17] border border-[#3A4D23] rounded-lg p-4">
@@ -1693,45 +1811,54 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                                   min="0"
                                   step="1"
                                 />
-                                {isAdmin && showDebugPanel && (planData?.scalingInfo?.scaleFactor || 1) !== 1 && (
+                                {isAdmin && showDebugPanel && (
                                   <div className="text-green-400 text-xs mt-1">
-                                    {ingredient.unit === 'per_piece' || ingredient.unit === 'stuk' ? (
+                                    {smartScalingEnabled && ingredient.adjustmentFactor && ingredient.adjustmentFactor !== 1 ? (
                                       <div>
-                                        {(() => {
-                                          const scaleFactor = planData?.scalingInfo?.scaleFactor || 1;
-                                          const originalAmount = ingredient.amount || 0;
-                                          let debugText = '';
-                                          let explanation = '';
-                                          
-                                          if (scaleFactor >= 1.2) {
-                                            debugText = `Orig: ${originalAmount} → ${Math.ceil(originalAmount * scaleFactor)} (verhoogd)`;
-                                            explanation = `Factor ${scaleFactor.toFixed(2)} ≥ 1.2: aantal verhoogd`;
-                                          } else if (scaleFactor <= 0.8) {
-                                            debugText = `Orig: ${originalAmount} → ${Math.max(1, Math.floor(originalAmount * scaleFactor))} (verlaagd)`;
-                                            explanation = `Factor ${scaleFactor.toFixed(2)} ≤ 0.8: aantal verlaagd`;
-                                          } else {
-                                            debugText = `Orig: ${originalAmount} (ongeschaald)`;
-                                            explanation = `Factor ${scaleFactor.toFixed(2)} tussen 0.8-1.2: origineel behouden`;
-                                          }
-                                          
-                                          return (
-                                            <div>
-                                              {debugText}
-                                              <div className="text-yellow-400 text-xs">
-                                                ({explanation})
-                                              </div>
+                                        <div>Orig: {ingredient.originalAmount || ingredient.amount} {ingredient.unit}</div>
+                                        <div className="text-[#8BAE5A]">Slim: {ingredient.adjustmentFactor.toFixed(2)}x ({ingredient.adjustmentReason})</div>
+                                      </div>
+                                    ) : (planData?.scalingInfo?.scaleFactor || 1) !== 1 ? (
+                                      <div>
+                                        {ingredient.unit === 'per_piece' || ingredient.unit === 'stuk' ? (
+                                          <div>
+                                            {(() => {
+                                              const scaleFactor = planData?.scalingInfo?.scaleFactor || 1;
+                                              const originalAmount = ingredient.amount || 0;
+                                              let debugText = '';
+                                              let explanation = '';
+                                              
+                                              if (scaleFactor >= 1.2) {
+                                                debugText = `Orig: ${originalAmount} → ${Math.ceil(originalAmount * scaleFactor)} (verhoogd)`;
+                                                explanation = `Factor ${scaleFactor.toFixed(2)} ≥ 1.2: aantal verhoogd`;
+                                              } else if (scaleFactor <= 0.8) {
+                                                debugText = `Orig: ${originalAmount} → ${Math.max(1, Math.floor(originalAmount * scaleFactor))} (verlaagd)`;
+                                                explanation = `Factor ${scaleFactor.toFixed(2)} ≤ 0.8: aantal verlaagd`;
+                                              } else {
+                                                debugText = `Orig: ${originalAmount} (ongeschaald)`;
+                                                explanation = `Factor ${scaleFactor.toFixed(2)} tussen 0.8-1.2: origineel behouden`;
+                                              }
+                                              
+                                              return (
+                                                <div>
+                                                  {debugText}
+                                                  <div className="text-yellow-400 text-xs">
+                                                    ({explanation})
+                                                  </div>
+                                                </div>
+                                              );
+                                            })()}
+                                          </div>
+                                        ) : (
+                                          <div>
+                                            Orig: {ingredient.originalAmount ? ingredient.originalAmount.toFixed(1) : ((ingredient.amount || 0) / (planData?.scalingInfo?.scaleFactor || 1)).toFixed(1)}
+                                            <div className="text-yellow-400 text-xs">
+                                              (Factor: {(planData?.scalingInfo?.scaleFactor || 1).toFixed(2)})
                                             </div>
-                                          );
-                                        })()}
+                                          </div>
+                                        )}
                                       </div>
-                                    ) : (
-                                      <div>
-                                        Orig: {ingredient.originalAmount ? ingredient.originalAmount.toFixed(1) : ((ingredient.amount || 0) / (planData?.scalingInfo?.scaleFactor || 1)).toFixed(1)}
-                                        <div className="text-yellow-400 text-xs">
-                                          (Factor: {(planData?.scalingInfo?.scaleFactor || 1).toFixed(2)})
-                                        </div>
-                                      </div>
-                                    )}
+                                    ) : null}
                                   </div>
                                 )}
                               </td>
