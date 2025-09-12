@@ -17,14 +17,25 @@ function generateTempPassword(): string {
   password += numbers[Math.floor(Math.random() * numbers.length)];
   password += symbols[Math.floor(Math.random() * symbols.length)];
   
-  // Fill the rest with random characters
+  // Fill the rest with random characters (ensure minimum 12 characters)
   const allChars = uppercase + lowercase + numbers + symbols;
   for (let i = 4; i < 12; i++) {
     password += allChars[Math.floor(Math.random() * allChars.length)];
   }
   
   // Shuffle the password
-  return password.split('').sort(() => Math.random() - 0.5).join('');
+  let shuffled = password.split('').sort(() => Math.random() - 0.5).join('');
+  
+  // Ensure minimum length of 12 characters
+  if (shuffled.length < 12) {
+    const additionalChars = allChars;
+    for (let i = shuffled.length; i < 12; i++) {
+      shuffled += additionalChars[Math.floor(Math.random() * additionalChars.length)];
+    }
+  }
+  
+  console.log(`🔑 Generated password: ${shuffled} (length: ${shuffled.length})`);
+  return shuffled;
 }
 
 export async function POST(request: NextRequest) {
@@ -121,20 +132,28 @@ export async function POST(request: NextRequest) {
               console.log('⚠️ Could not find existing auth user to update password');
             }
             
+            // Log the variables being sent to email template (fallback)
+            const fallbackEmailVariables = {
+              name: profile?.full_name || profile?.display_name || 'Gebruiker',
+              email: email,
+              username: profile?.display_name || email.split('@')[0],
+              tempPassword: newTempPassword,
+              loginUrl: loginUrl,
+              packageType: profile?.package_type || 'Basic Tier',
+              isTestUser: 'false',
+              platformUrl: process.env.NEXT_PUBLIC_SITE_URL || 'https://platform.toptiermen.eu'
+            };
+            
+            console.log('📧 Fallback email variables:', {
+              ...fallbackEmailVariables,
+              tempPassword: `[${newTempPassword.length} chars] ${newTempPassword.substring(0, 3)}...`
+            });
+            
             const emailSuccess = await emailService.sendEmail(
               email,
               '🔐 Je Nieuwe Top Tier Men Wachtwoord - Wachtwoord Reset',
               'password-reset',
-              {
-                name: profile?.full_name || profile?.display_name || 'Gebruiker',
-                email: email,
-                username: profile?.display_name || email.split('@')[0],
-                tempPassword: newTempPassword,
-                loginUrl: loginUrl,
-                packageType: profile?.package_type || 'Basic Tier',
-                isTestUser: 'false',
-                platformUrl: process.env.NEXT_PUBLIC_SITE_URL || 'https://platform.toptiermen.eu'
-              },
+              fallbackEmailVariables,
               { tracking: true }
             );
 
@@ -208,20 +227,28 @@ export async function POST(request: NextRequest) {
       const emailService = new EmailService();
       const loginUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://platform.toptiermen.eu'}/login`;
       
+      // Log the variables being sent to email template
+      const emailVariables = {
+        name: profile?.full_name || profile?.display_name || 'Gebruiker',
+        email: email,
+        username: profile?.display_name || email.split('@')[0],
+        tempPassword: newTempPassword,
+        loginUrl: loginUrl,
+        packageType: profile?.package_type || 'Basic Tier',
+        isTestUser: 'false',
+        platformUrl: process.env.NEXT_PUBLIC_SITE_URL || 'https://platform.toptiermen.eu'
+      };
+      
+      console.log('📧 Email variables:', {
+        ...emailVariables,
+        tempPassword: `[${newTempPassword.length} chars] ${newTempPassword.substring(0, 3)}...`
+      });
+      
       const emailSuccess = await emailService.sendEmail(
         email,
         '🔐 Je Nieuwe Top Tier Men Wachtwoord - Wachtwoord Reset',
         'password-reset',
-        {
-          name: profile?.full_name || profile?.display_name || 'Gebruiker',
-          email: email,
-          username: profile?.display_name || email.split('@')[0],
-          tempPassword: newTempPassword,
-          loginUrl: loginUrl,
-          packageType: profile?.package_type || 'Basic Tier',
-          isTestUser: 'false',
-          platformUrl: process.env.NEXT_PUBLIC_SITE_URL || 'https://platform.toptiermen.eu'
-        },
+        emailVariables,
         { tracking: true }
       );
 
