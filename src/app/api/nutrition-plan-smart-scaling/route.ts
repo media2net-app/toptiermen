@@ -103,6 +103,18 @@ function calculateMealNutrition(ingredients: any[], ingredientDatabase: any): an
   };
 }
 
+function getMealName(mealType: string): string {
+  const mealNames: Record<string, string> = {
+    ontbijt: 'Ontbijt',
+    snack1: 'Ochtend Snack',
+    lunch: 'Lunch',
+    snack2: 'Lunch Snack',
+    diner: 'Diner',
+    avondsnack: 'Avond Snack'
+  };
+  return mealNames[mealType] || mealType;
+}
+
 function calculatePlanTotals(plan: any, ingredientDatabase: any): any {
   let totalCalories = 0;
   let totalProtein = 0;
@@ -114,7 +126,7 @@ function calculatePlanTotals(plan: any, ingredientDatabase: any): any {
     const dayData = plan[day];
     if (!dayData) return;
     
-    const mealTypes = ['ontbijt', 'lunch_snack', 'lunch', 'avond_snack', 'diner'];
+    const mealTypes = ['ontbijt', 'snack1', 'lunch', 'snack2', 'diner', 'avondsnack'];
     mealTypes.forEach(mealType => {
       if (dayData[mealType] && Array.isArray(dayData[mealType])) {
         const mealNutrition = calculateMealNutrition(dayData[mealType], ingredientDatabase);
@@ -401,7 +413,7 @@ export async function GET(request: NextRequest) {
       if (!dayData) return;
       
       scaledPlan[day] = {};
-      const mealTypes = ['ontbijt', 'lunch_snack', 'lunch', 'avond_snack', 'diner'];
+      const mealTypes = ['ontbijt', 'snack1', 'lunch', 'snack2', 'diner', 'avondsnack'];
       
       mealTypes.forEach(mealType => {
         if (dayData[mealType] && Array.isArray(dayData[mealType])) {
@@ -412,9 +424,41 @@ export async function GET(request: NextRequest) {
             debugInfo
           );
           
-          scaledPlan[day][mealType] = smartScaledIngredients;
+          // Calculate meal nutrition
+          const mealNutrition = calculateMealNutrition(smartScaledIngredients, INGREDIENT_DATABASE);
+          
+          // Create complete meal structure
+          scaledPlan[day][mealType] = {
+            name: getMealName(mealType),
+            ingredients: smartScaledIngredients,
+            nutrition: mealNutrition,
+            ...mealNutrition
+          };
         }
       });
+      
+      // Calculate daily totals for this day
+      let dailyCalories = 0;
+      let dailyProtein = 0;
+      let dailyCarbs = 0;
+      let dailyFat = 0;
+      
+      mealTypes.forEach(mealType => {
+        if (scaledPlan[day][mealType] && scaledPlan[day][mealType].nutrition) {
+          dailyCalories += scaledPlan[day][mealType].nutrition.calories;
+          dailyProtein += scaledPlan[day][mealType].nutrition.protein;
+          dailyCarbs += scaledPlan[day][mealType].nutrition.carbs;
+          dailyFat += scaledPlan[day][mealType].nutrition.fat;
+        }
+      });
+      
+      // Add daily totals to the day
+      scaledPlan[day].dailyTotals = {
+        calories: Math.round(dailyCalories * 10) / 10,
+        protein: Math.round(dailyProtein * 10) / 10,
+        carbs: Math.round(dailyCarbs * 10) / 10,
+        fat: Math.round(dailyFat * 10) / 10
+      };
     });
     
     // Calculate final totals

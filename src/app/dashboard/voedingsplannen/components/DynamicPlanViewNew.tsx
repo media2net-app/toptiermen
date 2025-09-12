@@ -215,10 +215,18 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
       if (data.success) {
         // Handle both smart scaling and regular dynamic plan responses
         const planData = smartScalingEnabled ? {
-          ...data,
-          plan: data.plan,
+          planId: planId,
+          planName: planName,
+          weekPlan: data.plan, // Smart scaling returns 'plan', component expects 'weekPlan'
           scalingInfo: data.scalingInfo,
-          userProfile: data.userProfile
+          userProfile: data.userProfile,
+          weeklyAverages: {
+            calories: data.scalingInfo?.finalTotals?.calories || 0,
+            protein: data.scalingInfo?.finalTotals?.protein || 0,
+            carbs: data.scalingInfo?.finalTotals?.carbs || 0,
+            fat: data.scalingInfo?.finalTotals?.fat || 0
+          },
+          generatedAt: new Date().toISOString()
         } : data.data;
         
         setPlanData(planData);
@@ -705,7 +713,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
     // Use custom data if available, otherwise use original plan data
     const dataSource = customPlanData || planData;
     if (!dataSource?.weekPlan?.[day]) return { calories: 0, protein: 0, carbs: 0, fat: 0 };
-    return dataSource.weekPlan[day].dailyTotals;
+    return dataSource.weekPlan[day].dailyTotals || { calories: 0, protein: 0, carbs: 0, fat: 0 };
   };
 
   const getMealData = (day: string, mealType: string) => {
