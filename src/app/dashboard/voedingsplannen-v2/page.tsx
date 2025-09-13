@@ -484,15 +484,15 @@ export default function VoedingsplannenV2Page() {
                   <div className="space-y-3">
                     <div className="flex justify-between">
                       <span className="text-[#8BAE5A]">Jouw gewicht:</span>
-                      <span className="text-white font-semibold">{scalingInfo.userWeight}kg</span>
+                      <span className="text-white font-semibold">{scalingInfo.userWeight || 0}kg</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-[#8BAE5A]">Basis gewicht:</span>
-                      <span className="text-white font-semibold">{scalingInfo.baseWeight}kg</span>
+                      <span className="text-white font-semibold">{scalingInfo.baseWeight || 0}kg</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-[#8BAE5A]">Scaling factor:</span>
-                      <span className="text-[#B6C948] font-bold">{scalingInfo.scalingFactor.toFixed(2)}x</span>
+                      <span className="text-[#B6C948] font-bold">{(scalingInfo.scalingFactor || 0).toFixed(2)}x</span>
                     </div>
                   </div>
                 </div>
@@ -502,19 +502,19 @@ export default function VoedingsplannenV2Page() {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <span className="text-[#8BAE5A] text-sm">Calorieën</span>
-                      <p className="text-xl font-bold text-white">{scalingInfo.adjustedCalories}</p>
+                      <p className="text-xl font-bold text-white">{scalingInfo.adjustedCalories || 0}</p>
                     </div>
                     <div>
                       <span className="text-[#8BAE5A] text-sm">Eiwit</span>
-                      <p className="text-xl font-bold text-white">{scalingInfo.adjustedProtein}g</p>
+                      <p className="text-xl font-bold text-white">{scalingInfo.adjustedProtein || 0}g</p>
                     </div>
                     <div>
                       <span className="text-[#8BAE5A] text-sm">Koolhydraten</span>
-                      <p className="text-xl font-bold text-white">{scalingInfo.adjustedCarbs}g</p>
+                      <p className="text-xl font-bold text-white">{scalingInfo.adjustedCarbs || 0}g</p>
                     </div>
                     <div>
                       <span className="text-[#8BAE5A] text-sm">Vet</span>
-                      <p className="text-xl font-bold text-white">{scalingInfo.adjustedFat}g</p>
+                      <p className="text-xl font-bold text-white">{scalingInfo.adjustedFat || 0}g</p>
                     </div>
                   </div>
                 </div>
@@ -1018,15 +1018,15 @@ export default function VoedingsplannenV2Page() {
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <p className="text-[#8BAE5A]">Jouw Gewicht</p>
-                      <p className="text-white font-semibold">{scalingInfo.userWeight}kg</p>
+                      <p className="text-white font-semibold">{scalingInfo.userWeight || 0}kg</p>
                     </div>
                     <div>
                       <p className="text-[#8BAE5A]">Basis Gewicht</p>
-                      <p className="text-white font-semibold">{scalingInfo.baseWeight}kg</p>
+                      <p className="text-white font-semibold">{scalingInfo.baseWeight || 0}kg</p>
                     </div>
                     <div className="col-span-2">
                       <p className="text-[#8BAE5A]">Schalingsfactor</p>
-                      <p className="text-[#B6C948] font-bold text-lg">{scalingInfo.scalingFactor.toFixed(2)}x</p>
+                      <p className="text-[#B6C948] font-bold text-lg">{(scalingInfo.scalingFactor || 0).toFixed(2)}x</p>
                     </div>
                   </div>
                 </div>
@@ -1041,9 +1041,9 @@ export default function VoedingsplannenV2Page() {
                   <div className="flex items-center justify-between bg-[#0A0F0A] rounded-lg p-3">
                     <span className="text-[#8BAE5A]">Calorieën</span>
                     <div className="text-right">
-                      <p className="text-white font-semibold">{scalingInfo.finalTotals.calories}</p>
+                      <p className="text-white font-semibold">{scalingInfo.finalTotals?.calories || 0}</p>
                       <p className="text-xs text-gray-400">
-                        {scalingInfo.originalTotals.calories} → {scalingInfo.finalTotals.calories}
+                        {scalingInfo.originalTotals?.calories || 0} → {scalingInfo.finalTotals?.calories || 0}
                       </p>
                     </div>
                   </div>
@@ -1052,9 +1052,9 @@ export default function VoedingsplannenV2Page() {
                   <div className="flex items-center justify-between bg-[#0A0F0A] rounded-lg p-3">
                     <span className="text-[#8BAE5A]">Eiwit</span>
                     <div className="text-right">
-                      <p className="text-white font-semibold">{scalingInfo.finalTotals.protein}g</p>
+                      <p className="text-white font-semibold">{scalingInfo.finalTotals?.protein || 0}g</p>
                       <p className="text-xs text-gray-400">
-                        {scalingInfo.originalTotals.protein}g → {scalingInfo.finalTotals.protein}g
+                        {scalingInfo.originalTotals?.protein || 0}g → {scalingInfo.finalTotals?.protein || 0}g
                       </p>
                     </div>
                   </div>
@@ -1063,9 +1063,9 @@ export default function VoedingsplannenV2Page() {
                   <div className="flex items-center justify-between bg-[#0A0F0A] rounded-lg p-3">
                     <span className="text-[#8BAE5A]">Koolhydraten</span>
                     <div className="text-right">
-                      <p className="text-white font-semibold">{scalingInfo.finalTotals.carbs}g</p>
+                      <p className="text-white font-semibold">{scalingInfo.finalTotals?.carbs || 0}g</p>
                       <p className="text-xs text-gray-400">
-                        {scalingInfo.originalTotals.carbs}g → {scalingInfo.finalTotals.carbs}g
+                        {scalingInfo.originalTotals?.carbs || 0}g → {scalingInfo.finalTotals?.carbs || 0}g
                       </p>
                     </div>
                   </div>
@@ -1074,9 +1074,9 @@ export default function VoedingsplannenV2Page() {
                   <div className="flex items-center justify-between bg-[#0A0F0A] rounded-lg p-3">
                     <span className="text-[#8BAE5A]">Vet</span>
                     <div className="text-right">
-                      <p className="text-white font-semibold">{scalingInfo.finalTotals.fat}g</p>
+                      <p className="text-white font-semibold">{scalingInfo.finalTotals?.fat || 0}g</p>
                       <p className="text-xs text-gray-400">
-                        {scalingInfo.originalTotals.fat}g → {scalingInfo.finalTotals.fat}g
+                        {scalingInfo.originalTotals?.fat || 0}g → {scalingInfo.finalTotals?.fat || 0}g
                       </p>
                     </div>
                   </div>
