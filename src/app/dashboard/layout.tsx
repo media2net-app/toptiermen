@@ -52,9 +52,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
     // setLoadingState('auth-check', false);
 
-    if (!user && !loading) {
-      // Only redirect if we're sure the user is not authenticated (not loading)
-      console.log('🚫 User not authenticated and not loading, redirecting to login');
+    // Wait for auth to complete before making any decisions
+    if (loading) {
+      console.log('⏳ Auth still loading, waiting...');
+      return;
+    }
+    
+    // Only redirect if we're absolutely sure the user is not authenticated
+    if (!user) {
+      console.log('🚫 User not authenticated after loading complete, redirecting to login');
       
       // Prevent redirect loops by checking current path
       if (window.location.pathname !== '/login') {
@@ -63,11 +69,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       return;
     }
     
-    // If still loading, don't redirect - wait for auth to complete
-    if (loading) {
-      console.log('⏳ Auth still loading, waiting...');
-      return;
-    }
+    console.log('✅ User authenticated:', user.email);
 
     // 2.0.1: Track successful session - DISABLED
     // trackSessionStart(user.id);

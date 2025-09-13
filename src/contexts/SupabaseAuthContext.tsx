@@ -49,7 +49,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [loading, setLoading] = useState(false); // Start with false to prevent loading screen
+  const [loading, setLoading] = useState(true); // Start with true to wait for auth initialization
   const [error, setError] = useState<string | null>(null);
 
   // Fetch user profile - IMPROVED WITH EMAIL FALLBACK
