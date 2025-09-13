@@ -861,22 +861,29 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                     </button>
                   </div>
                 )}
-                <p className="text-gray-300 text-sm md:text-base">
-                  <span className="hidden md:inline">Gepersonaliseerd voor {planData.userProfile.weight}kg, {planData.userProfile.age} jaar, {planData.userProfile.height}cm, {getActivityLevelDisplay(planData.userProfile.activityLevel || 'moderate')} - {planData.userProfile.goal}</span>
-                  <span className="md:hidden">{planData.userProfile.weight}kg • {planData.userProfile.age}j • {planData.userProfile.goal}</span>
-                </p>
+                {planData.userProfile ? (
+                  <p className="text-gray-300 text-sm md:text-base">
+                    <span className="hidden md:inline">Gepersonaliseerd voor {planData.userProfile.weight}kg, {planData.userProfile.age} jaar, {planData.userProfile.height}cm, {getActivityLevelDisplay(planData.userProfile.activityLevel || 'moderate')} - {planData.userProfile.goal}</span>
+                    <span className="md:hidden">{planData.userProfile.weight}kg • {planData.userProfile.age}j • {planData.userProfile.goal}</span>
+                  </p>
+                ) : (
+                  <p className="text-gray-300 text-sm md:text-base">
+                    <span className="hidden md:inline">Origineel plan (100kg basis) - Geen personalisatie toegepast</span>
+                    <span className="md:hidden">Origineel plan (100kg basis)</span>
+                  </p>
+                )}
                 <div className="mt-2 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs md:text-sm">
                   <div className="flex items-center gap-2">
-                    <span className="text-[#8BAE5A] font-semibold">Factor:</span>
-                    <span className="text-white font-bold">{planData.scalingInfo?.scaleFactor?.toFixed(2) || '1.00'}</span>
+                    <span className="text-[#8BAE5A] font-semibold">Status:</span>
+                    <span className="text-white font-bold">{planData.scalingInfo ? `Factor: ${planData.scalingInfo.scaleFactor?.toFixed(2) || '1.00'}` : 'Geen scaling'}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-gray-400">Standaard:</span>
-                    <span className="text-white">{planData.scalingInfo?.planTargetCalories || 0} kcal</span>
+                    <span className="text-gray-400">Origineel:</span>
+                    <span className="text-white">{Math.round(getDayTotal(selectedDay).calories)} kcal</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-gray-400">Jouw doel:</span>
-                    <span className="text-white">{planData.userProfile?.targetCalories || 0} kcal</span>
+                    <span className="text-gray-400">Type:</span>
+                    <span className="text-white">100kg basis plan</span>
                   </div>
                 </div>
               </div>
