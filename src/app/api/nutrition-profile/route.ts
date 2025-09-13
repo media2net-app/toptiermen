@@ -45,9 +45,13 @@ export async function POST(request: NextRequest) {
       goal 
     } = body;
 
+    console.log('📝 Received nutrition profile data:', { userId, age, height, weight, gender, activityLevel, goal });
+
     if (!userId || !age || !height || !weight || !gender || !activityLevel || !goal) {
+      console.error('❌ Missing required fields:', { userId, age, height, weight, gender, activityLevel, goal });
       return NextResponse.json({ 
-        error: 'All fields are required: userId, age, height, weight, gender, activityLevel, goal' 
+        error: 'All fields are required: userId, age, height, weight, gender, activityLevel, goal',
+        received: { userId, age, height, weight, gender, activityLevel, goal }
       }, { status: 400 });
     }
 
@@ -115,6 +119,8 @@ export async function POST(request: NextRequest) {
       tdee: Math.round(tdee)
     };
 
+    console.log('💾 Saving profile data to database:', profileData);
+
     // Insert or update profile
     const { data: profile, error } = await supabaseAdmin
       .from('nutrition_profiles')
@@ -126,13 +132,17 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Error saving nutrition profile:', error);
+      console.error('❌ Error saving nutrition profile:', error);
+      console.error('❌ Profile data that failed:', profileData);
       return NextResponse.json({ 
         error: 'Failed to save nutrition profile', 
         details: error.message,
-        code: error.code
+        code: error.code,
+        profileData: profileData
       }, { status: 500 });
     }
+
+    console.log('✅ Profile saved successfully:', profile);
 
     return NextResponse.json({ 
       success: true, 

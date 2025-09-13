@@ -259,20 +259,31 @@ export default function VoedingsplannenV2Page() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          user_id: user?.id,
-          ...profile
+          userId: user?.id,
+          age: profile.age,
+          height: profile.height,
+          weight: profile.weight,
+          gender: profile.gender,
+          activityLevel: profile.activity_level,
+          goal: profile.fitness_goal
         }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to save profile');
+        const errorData = await response.json();
+        console.error('❌ API Error:', errorData);
+        throw new Error(`${errorData.error || 'Failed to save profile'}${errorData.details ? ` - ${errorData.details}` : ''}`);
       }
 
+      const result = await response.json();
       setUserProfile(profile);
       setShowUserProfileForm(false);
-      console.log('✅ User profile saved:', profile);
+      setError(null); // Clear any previous errors
+      console.log('✅ User profile saved:', result);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save profile');
+      console.error('❌ Save profile error:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to save profile';
+      setError(errorMessage);
     }
   };
 
