@@ -52,25 +52,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
     // setLoadingState('auth-check', false);
 
-    if (!user) {
-      // addNotification({
-      //   type: 'warning',
-      //   message: 'Je bent niet ingelogd. Je wordt doorgestuurd naar de login pagina.',
-      //   read: false
-      // });
-      
-      // handleError(
-      //   () => Promise.resolve(),
-      //   'User not authenticated',
-      //   'auth',
-      //   undefined,
-      //   'dashboard-auth'
-      // );
+    if (!user && !loading) {
+      // Only redirect if we're sure the user is not authenticated (not loading)
+      console.log('🚫 User not authenticated and not loading, redirecting to login');
       
       // Prevent redirect loops by checking current path
       if (window.location.pathname !== '/login') {
         router.push('/login');
       }
+      return;
+    }
+    
+    // If still loading, don't redirect - wait for auth to complete
+    if (loading) {
+      console.log('⏳ Auth still loading, waiting...');
       return;
     }
 

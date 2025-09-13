@@ -325,7 +325,7 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
   // Check authentication with better handling - IMPROVED TO PREVENT LOOPS
   useEffect(() => {
     if (!loading && !isAuthenticated) {
-      console.log('Admin: User not authenticated, redirecting to login');
+      console.log('Admin: User not authenticated and not loading, redirecting to login');
       // Redirect to login with current path preserved
       const currentPath = window.location.pathname;
       if (currentPath !== '/login') {
@@ -334,6 +334,11 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
           router.push(`/login?redirect=${encodeURIComponent(currentPath)}`);
         }, 100);
       }
+    }
+    
+    // If still loading, don't redirect - wait for auth to complete
+    if (loading) {
+      console.log('Admin: Auth still loading, waiting...');
     }
   }, [loading, isAuthenticated, router]);
 
