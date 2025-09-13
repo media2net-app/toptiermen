@@ -10,7 +10,7 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
-    persistSession: true,
+    persistSession: false, // DISABLED: Prevent auto-login on refresh
     detectSessionInUrl: true,
   }
 });
@@ -105,48 +105,21 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
 
   // Initialize auth state
   useEffect(() => {
-    // Get initial session
+    // Get initial session - DISABLED AUTO-SESSION RESTORE
     const getInitialSession = async () => {
       try {
         console.log('🔍 Initializing auth session...');
         
-        // Add a race condition with timeout - increased timeout to prevent premature logout
-        const sessionPromise = supabase.auth.getSession();
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Session timeout')), 3000) // Increased from 500ms to 3s
-        );
+        // DISABLED: Don't automatically restore sessions on page load
+        // This prevents auto-login after hard refresh
+        console.log('ℹ️ Auto-session restore disabled for security');
+        setUser(null);
+        setProfile(null);
+        setError(null);
         
-        const { data: { session }, error } = await Promise.race([
-          sessionPromise,
-          timeoutPromise
-        ]) as any;
-        
-        if (error) {
-          console.error('Session error:', error);
-          setError(error.message);
-        } else if (session?.user) {
-          console.log('✅ Found existing session for user:', session.user.email);
-          setUser(session.user);
-          const userProfile = await fetchProfile(session.user.id, session.user.email);
-          setProfile(userProfile);
-        } else {
-          console.log('ℹ️ No existing session found');
-          // Important: Clear user state when no session exists
-          setUser(null);
-          setProfile(null);
-        }
       } catch (err) {
         console.error('Initial session error:', err);
-        
-        // Handle timeout specifically
-        if (err instanceof Error && err.message === 'Session timeout') {
-          console.log('⚠️ Session timeout - proceeding without auth');
-          setError(null); // Don't set error for timeout
-        } else {
-          setError('Failed to initialize auth');
-        }
-        
-        // Still clear user state on error
+        setError('Failed to initialize auth');
         setUser(null);
         setProfile(null);
       } finally {
@@ -165,13 +138,14 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
       clearTimeout(initTimeout);
     });
 
-    // Listen for auth changes
+    // Listen for auth changes - ONLY for explicit login/logout actions
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('🔔 Auth state change:', event, session?.user?.email);
         
         try {
           if (event === 'SIGNED_IN' && session?.user) {
+            console.log('✅ User explicitly signed in');
             setUser(session.user);
             const userProfile = await fetchProfile(session.user.id, session.user.email);
             setProfile(userProfile);
@@ -184,6 +158,9 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
           } else if (event === 'TOKEN_REFRESHED') {
             console.log('🔄 Token refreshed successfully');
             // Don't clear user state on token refresh
+          } else if (event === 'INITIAL_SESSION') {
+            console.log('⚠️ Initial session event - ignoring to prevent auto-login');
+            // Ignore initial session events to prevent auto-login
           }
         } catch (error) {
           console.error('❌ Auth state change error:', error);
