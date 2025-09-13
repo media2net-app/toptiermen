@@ -136,6 +136,47 @@ export default function VoedingsplannenV2Page() {
   // Get current day totals
   const currentDayTotals = calculateDayTotals(selectedDay);
 
+  // TTM Formula: weight x 22 x activity_level + goal_adjustment
+  const calculatePersonalizedTargets = (basePlan: any) => {
+    // Activity level multipliers
+    const activityMultipliers = {
+      'sedentary': 1.1,    // Zittend (1.1x)
+      'moderate': 1.3,     // Staand (1.3x) - Backend basis
+      'very_active': 1.6   // Lopend (1.6x)
+    };
+
+    // Goal adjustments (kcal)
+    const goalAdjustments = {
+      'droogtrainen': -500,  // -500 kcal
+      'onderhoud': 0,        // Basis plan (0 kcal)
+      'spiermassa': +400     // +400 kcal
+    };
+
+    // Calculate base calories using TTM formula
+    const baseCalories = userProfile.weight * 22 * (activityMultipliers[userProfile.activity_level] || 1.3);
+    const goalAdjustment = goalAdjustments[userProfile.fitness_goal] || 0;
+    const targetCalories = baseCalories + goalAdjustment;
+
+    // Calculate scaling factor compared to backend base (100kg, moderate, onderhoud)
+    const backendBase = 100 * 22 * 1.3; // 2860 kcal
+    const scalingFactor = targetCalories / backendBase;
+
+    // Apply scaling to macros (assuming macro ratios stay the same)
+    const targetProtein = Math.round(basePlan.target_protein * scalingFactor);
+    const targetCarbs = Math.round(basePlan.target_carbs * scalingFactor);
+    const targetFat = Math.round(basePlan.target_fat * scalingFactor);
+
+    return {
+      targetCalories: Math.round(targetCalories),
+      targetProtein,
+      targetCarbs,
+      targetFat,
+      scalingFactor,
+      baseCalories: Math.round(baseCalories),
+      goalAdjustment
+    };
+  };
+
   // Function to calculate progress and color for progress bars
   const getProgressInfo = (current: number, target: number) => {
     const percentage = target > 0 ? (current / target) * 100 : 0;
@@ -916,7 +957,11 @@ export default function VoedingsplannenV2Page() {
           transition={{ delay: 0.2 }}
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8"
         >
-          {plans.map((plan) => (
+          {plans.map((plan) => {
+            // Calculate personalized targets for this plan
+            const personalizedTargets = calculatePersonalizedTargets(plan);
+            
+            return (
             <motion.div
               key={plan.id}
               whileHover={{ scale: 1.02 }}
@@ -952,27 +997,99 @@ export default function VoedingsplannenV2Page() {
               
               <p className="text-[#8BAE5A] text-sm mb-4">{plan.description}</p>
               
+              {/* Personalized targets based on user profile */}
+              <div className="bg-[#0A0F0A] rounded-lg p-3 mb-4">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-[#B6C948] font-semibold text-sm">Gepersonaliseerd voor jou:</p>
+                  <p className="text-gray-400 text-xs">{userProfile.weight}kg • {userProfile.activity_level} • {userProfile.fitness_goal}</p>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Calorieën:</span>
+                    <span className="text-white font-semibold">{personalizedTargets.targetCalories} kcal</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Eiwit:</span>
+                    <span className="text-white font-semibold">{personalizedTargets.targetProtein}g</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Koolhydraten:</span>
+                    <span className="text-white font-semibold">{personalizedTargets.targetCarbs}g</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Vet:</span>
+                    <span className="text-white font-semibold">{personalizedTargets.targetFat}g</span>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Original backend values for reference */}
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <p className="text-[#B6C948] font-semibold">{plan.target_calories} kcal</p>
-                  <p className="text-gray-400">Calorieën</p>
+                  <p className="text-gray-400">Backend (100kg)</p>
                 </div>
                 <div>
                   <p className="text-[#B6C948] font-semibold">{plan.target_protein}g</p>
-                  <p className="text-gray-400">Eiwit</p>
+                  <p className="text-gray-400">Backend (100kg)</p>
                 </div>
                 <div>
                   <p className="text-[#B6C948] font-semibold">{plan.target_carbs}g</p>
-                  <p className="text-gray-400">Koolhydraten</p>
+                  <p className="text-gray-400">Backend (100kg)</p>
                 </div>
                 <div>
                   <p className="text-[#B6C948] font-semibold">{plan.target_fat}g</p>
-                  <p className="text-gray-400">Vet</p>
+                  <p className="text-gray-400">Backend (100kg)</p>
                 </div>
               </div>
             </motion.div>
-          ))}
+            );
+          })}
         </motion.div>
+
+        {/* TTM Formula Info */}
+        <div className="bg-[#0A0F0A] rounded-lg p-6 mb-8">
+          <h3 className="text-[#B6C948] font-bold text-lg mb-4">TTM Formule Uitleg</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <h4 className="text-white font-semibold mb-2">Basis Formule:</h4>
+              <p className="text-gray-300 text-sm mb-3">
+                <span className="text-[#B6C948] font-mono">Gewicht × 22 × Activiteitsniveau</span>
+              </p>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Jouw berekening:</span>
+                  <span className="text-white">{userProfile.weight}kg × 22 × {userProfile.activity_level === 'sedentary' ? '1.1' : userProfile.activity_level === 'moderate' ? '1.3' : '1.6'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Basis calorieën:</span>
+                  <span className="text-white">{calculatePersonalizedTargets(plans[0] || {}).baseCalories} kcal</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h4 className="text-white font-semibold mb-2">Doel Aanpassingen:</h4>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Droogtrainen:</span>
+                  <span className="text-red-400">-500 kcal</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Onderhoud:</span>
+                  <span className="text-green-400">0 kcal</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Spiermassa:</span>
+                  <span className="text-blue-400">+400 kcal</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Jouw aanpassing:</span>
+                  <span className="text-white">{calculatePersonalizedTargets(plans[0] || {}).goalAdjustment} kcal</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Debug Info */}
         {process.env.NODE_ENV === 'development' && (
