@@ -72,6 +72,15 @@ interface SmartScalingInfo {
   };
 }
 
+interface UserProfile {
+  weight: number;
+  height: number;
+  age: number;
+  gender: 'male' | 'female';
+  activity_level: 'sedentary' | 'light' | 'moderate' | 'active' | 'very_active';
+  fitness_goal: 'weight_loss' | 'maintenance' | 'muscle_gain';
+}
+
 export default function VoedingsplannenV2Page() {
   const { user, isAdmin } = useSupabaseAuth();
   const router = useRouter();
@@ -84,6 +93,15 @@ export default function VoedingsplannenV2Page() {
   const [loadingScaling, setLoadingScaling] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showOriginalData, setShowOriginalData] = useState(true);
+  const [userProfile, setUserProfile] = useState<UserProfile>({
+    weight: 80,
+    height: 180,
+    age: 30,
+    gender: 'male',
+    activity_level: 'moderate',
+    fitness_goal: 'maintenance'
+  });
+  const [showUserProfileForm, setShowUserProfileForm] = useState(false);
 
   // Check if user is specifically chiel@media2net.nl
   const isChiel = user?.email === 'chiel@media2net.nl';
@@ -137,12 +155,38 @@ export default function VoedingsplannenV2Page() {
     }
   };
 
+  const saveUserProfile = async (profile: UserProfile) => {
+    try {
+      const response = await fetch('/api/nutrition-profile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          user_id: user?.id,
+          ...profile
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save profile');
+      }
+
+      setUserProfile(profile);
+      setShowUserProfileForm(false);
+      console.log('✅ User profile saved:', profile);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save profile');
+    }
+  };
+
   const applySmartScaling = async (planId: string) => {
     try {
       setLoadingScaling(true);
       setError(null);
       
-      const response = await fetch(`/api/nutrition-plan-smart-scaling?planId=${planId}&userId=${user?.id}`);
+      // Include user profile data in the scaling request
+      const response = await fetch(`/api/nutrition-plan-smart-scaling?planId=${planId}&userId=${user?.id}&weight=${userProfile.weight}&height=${userProfile.height}&age=${userProfile.age}&gender=${userProfile.gender}&activity_level=${userProfile.activity_level}&fitness_goal=${userProfile.fitness_goal}`);
       
       if (!response.ok) {
         throw new Error('Failed to apply smart scaling');
@@ -239,6 +283,165 @@ export default function VoedingsplannenV2Page() {
                 </p>
               </div>
             </div>
+          </div>
+        </motion.div>
+
+        {/* User Profile Section */}
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="mb-8"
+        >
+          <div className="bg-[#181F17] border border-[#3A4D23] rounded-xl p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-r from-[#B6C948] to-[#8BAE5A] rounded-full flex items-center justify-center">
+                  <UserIcon className="w-5 h-5 text-[#181F17]" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-white">Jouw Profiel</h3>
+                  <p className="text-[#8BAE5A]">Voor slimme schalingsfactor</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowUserProfileForm(!showUserProfileForm)}
+                className="px-4 py-2 bg-[#3A4D23] text-[#8BAE5A] rounded-lg hover:bg-[#4A5D33] transition-colors"
+              >
+                {showUserProfileForm ? 'Sluiten' : 'Bewerken'}
+              </button>
+            </div>
+
+            {/* Current Profile Display */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+              <div className="bg-[#0A0F0A] rounded-lg p-3">
+                <p className="text-[#8BAE5A] text-sm">Gewicht</p>
+                <p className="text-white font-semibold">{userProfile.weight} kg</p>
+              </div>
+              <div className="bg-[#0A0F0A] rounded-lg p-3">
+                <p className="text-[#8BAE5A] text-sm">Lengte</p>
+                <p className="text-white font-semibold">{userProfile.height} cm</p>
+              </div>
+              <div className="bg-[#0A0F0A] rounded-lg p-3">
+                <p className="text-[#8BAE5A] text-sm">Leeftijd</p>
+                <p className="text-white font-semibold">{userProfile.age} jaar</p>
+              </div>
+              <div className="bg-[#0A0F0A] rounded-lg p-3">
+                <p className="text-[#8BAE5A] text-sm">Geslacht</p>
+                <p className="text-white font-semibold capitalize">{userProfile.gender === 'male' ? 'Man' : 'Vrouw'}</p>
+              </div>
+            </div>
+
+            {/* Profile Form */}
+            {showUserProfileForm && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                className="border-t border-[#3A4D23] pt-4"
+              >
+                <form onSubmit={(e) => {
+                  e.preventDefault();
+                  const formData = new FormData(e.currentTarget);
+                  saveUserProfile({
+                    weight: Number(formData.get('weight')),
+                    height: Number(formData.get('height')),
+                    age: Number(formData.get('age')),
+                    gender: formData.get('gender') as 'male' | 'female',
+                    activity_level: formData.get('activity_level') as any,
+                    fitness_goal: formData.get('fitness_goal') as any,
+                  });
+                }}>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div>
+                      <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Gewicht (kg)</label>
+                      <input
+                        type="number"
+                        name="weight"
+                        defaultValue={userProfile.weight}
+                        className="w-full px-3 py-2 bg-[#0A0F0A] border border-[#3A4D23] rounded-lg text-white focus:border-[#8BAE5A] focus:outline-none"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Lengte (cm)</label>
+                      <input
+                        type="number"
+                        name="height"
+                        defaultValue={userProfile.height}
+                        className="w-full px-3 py-2 bg-[#0A0F0A] border border-[#3A4D23] rounded-lg text-white focus:border-[#8BAE5A] focus:outline-none"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Leeftijd</label>
+                      <input
+                        type="number"
+                        name="age"
+                        defaultValue={userProfile.age}
+                        className="w-full px-3 py-2 bg-[#0A0F0A] border border-[#3A4D23] rounded-lg text-white focus:border-[#8BAE5A] focus:outline-none"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div>
+                      <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Geslacht</label>
+                      <select
+                        name="gender"
+                        defaultValue={userProfile.gender}
+                        className="w-full px-3 py-2 bg-[#0A0F0A] border border-[#3A4D23] rounded-lg text-white focus:border-[#8BAE5A] focus:outline-none"
+                      >
+                        <option value="male">Man</option>
+                        <option value="female">Vrouw</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Activiteitsniveau</label>
+                      <select
+                        name="activity_level"
+                        defaultValue={userProfile.activity_level}
+                        className="w-full px-3 py-2 bg-[#0A0F0A] border border-[#3A4D23] rounded-lg text-white focus:border-[#8BAE5A] focus:outline-none"
+                      >
+                        <option value="sedentary">Zittend</option>
+                        <option value="light">Licht actief</option>
+                        <option value="moderate">Matig actief</option>
+                        <option value="active">Actief</option>
+                        <option value="very_active">Zeer actief</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Fitness Doel</label>
+                      <select
+                        name="fitness_goal"
+                        defaultValue={userProfile.fitness_goal}
+                        className="w-full px-3 py-2 bg-[#0A0F0A] border border-[#3A4D23] rounded-lg text-white focus:border-[#8BAE5A] focus:outline-none"
+                      >
+                        <option value="weight_loss">Afvallen</option>
+                        <option value="maintenance">Onderhoud</option>
+                        <option value="muscle_gain">Spiermassa</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <button
+                      type="submit"
+                      className="px-6 py-2 bg-gradient-to-r from-[#B6C948] to-[#8BAE5A] text-[#181F17] rounded-lg hover:opacity-90 transition-opacity font-semibold"
+                    >
+                      Profiel Opslaan
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowUserProfileForm(false)}
+                      className="px-6 py-2 bg-[#3A4D23] text-[#8BAE5A] rounded-lg hover:bg-[#4A5D33] transition-colors"
+                    >
+                      Annuleren
+                    </button>
+                  </div>
+                </form>
+              </motion.div>
+            )}
           </div>
         </motion.div>
 
@@ -402,37 +605,67 @@ export default function VoedingsplannenV2Page() {
               </div>
             </div>
 
-            {/* Meal Structure */}
+            {/* Detailed Meal Structure */}
             <div className="mt-6">
-              <h4 className="text-white font-semibold mb-4">Eetmomenten Structuur</h4>
+              <h4 className="text-white font-semibold mb-4">Gedetailleerde Eetmomenten</h4>
               
-              <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                {['ontbijt', 'ochtend_snack', 'lunch', 'lunch_snack', 'diner'].map((mealType) => (
-                  <div key={mealType} className="bg-[#0A0F0A] rounded-lg p-4">
-                    <h5 className="text-[#B6C948] font-semibold mb-2 capitalize">
-                      {mealType === 'ochtend_snack' ? 'Ochtend Snack' :
-                       mealType === 'lunch_snack' ? 'Lunch Snack' :
-                       mealType === 'ontbijt' ? 'Ontbijt' :
-                       mealType === 'lunch' ? 'Lunch' :
-                       mealType === 'diner' ? 'Diner' : mealType}
-                    </h5>
-                    
-                    {/* Show sample data from first day */}
-                    {originalPlanData.meals?.weekly_plan && Object.keys(originalPlanData.meals.weekly_plan).length > 0 && (
-                      <div className="text-sm text-gray-400">
-                        {(() => {
-                          const firstDay = Object.keys(originalPlanData.meals.weekly_plan)[0];
-                          const mealData = originalPlanData.meals.weekly_plan[firstDay]?.[mealType];
-                          if (mealData && mealData.ingredients) {
-                            return `${mealData.ingredients.length} ingrediënten`;
-                          }
-                          return 'Geen data';
-                        })()}
+              {originalPlanData.meals?.weekly_plan && Object.keys(originalPlanData.meals.weekly_plan).length > 0 && (
+                <div className="space-y-6">
+                  {Object.entries(originalPlanData.meals.weekly_plan).map(([day, dayMeals]) => (
+                    <div key={day} className="bg-[#0A0F0A] rounded-lg p-4">
+                      <h5 className="text-[#B6C948] font-semibold mb-4 capitalize">{day}</h5>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                        {['ontbijt', 'ochtend_snack', 'lunch', 'lunch_snack', 'diner'].map((mealType) => {
+                          const mealData = dayMeals[mealType];
+                          const mealTypeLabel = mealType === 'ochtend_snack' ? 'Ochtend Snack' :
+                                               mealType === 'lunch_snack' ? 'Lunch Snack' :
+                                               mealType === 'ontbijt' ? 'Ontbijt' :
+                                               mealType === 'lunch' ? 'Lunch' :
+                                               mealType === 'diner' ? 'Diner' : mealType;
+
+                          return (
+                            <div key={mealType} className="bg-[#181F17] rounded-lg p-3">
+                              <h6 className="text-white font-medium mb-2">{mealTypeLabel}</h6>
+                              
+                              {mealData && mealData.ingredients ? (
+                                <div className="space-y-2">
+                                  <div className="text-xs text-[#8BAE5A] mb-2">
+                                    {mealData.ingredients.length} ingrediënten
+                                  </div>
+                                  
+                                  {/* Show first few ingredients */}
+                                  {mealData.ingredients.slice(0, 3).map((ingredient: any, index: number) => (
+                                    <div key={index} className="text-xs text-gray-400">
+                                      {ingredient.amount} {ingredient.unit} {ingredient.name}
+                                    </div>
+                                  ))}
+                                  
+                                  {mealData.ingredients.length > 3 && (
+                                    <div className="text-xs text-[#8BAE5A]">
+                                      +{mealData.ingredients.length - 3} meer...
+                                    </div>
+                                  )}
+                                  
+                                  {/* Show meal totals if available */}
+                                  {mealData.totals && (
+                                    <div className="text-xs text-[#B6C948] mt-2 pt-2 border-t border-[#3A4D23]">
+                                      <div>{mealData.totals.calories} kcal</div>
+                                      <div>P: {mealData.totals.protein}g</div>
+                                    </div>
+                                  )}
+                                </div>
+                              ) : (
+                                <div className="text-xs text-gray-500">Geen data</div>
+                              )}
+                            </div>
+                          );
+                        })}
                       </div>
-                    )}
-                  </div>
-                ))}
-              </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="mt-6 p-4 bg-gradient-to-r from-[#3A4D23]/20 to-[#8BAE5A]/20 rounded-lg border border-[#3A4D23]/30">
