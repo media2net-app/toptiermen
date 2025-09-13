@@ -122,7 +122,9 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
           const userProfile = await fetchProfile(session.user.id, session.user.email);
           setProfile(userProfile);
         } else {
-          console.log('ℹ️ No existing session found');
+          console.log('ℹ️ No existing session found - user will need to login');
+          // Don't immediately clear user state - wait for auth state change
+          // This prevents premature redirects during hard refresh
           setUser(null);
           setProfile(null);
         }
@@ -168,11 +170,15 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
             console.log('🔄 Token refreshed successfully');
             // Don't clear user state on token refresh
           } else if (event === 'INITIAL_SESSION') {
-            console.log('🔄 Initial session restored after refresh');
+            console.log('🔄 Initial session event received');
             if (session?.user) {
+              console.log('✅ Initial session has user:', session.user.email);
               setUser(session.user);
               const userProfile = await fetchProfile(session.user.id, session.user.email);
               setProfile(userProfile);
+            } else {
+              console.log('⚠️ Initial session has no user - user needs to login');
+              // Don't clear state immediately - let the component handle this
             }
           }
         } catch (error) {
