@@ -25,7 +25,7 @@ function LoginPageContent() {
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const [isClient, setIsClient] = useState(false);
+  const [isClient, setIsClient] = useState(true); // Start with true to prevent loading screen
   
   // Forgot password states
   const [showForgotPassword, setShowForgotPassword] = useState(false);
@@ -45,10 +45,8 @@ function LoginPageContent() {
     return isAdmin ? '/dashboard-admin' : LOGIN_CONFIG.defaultRedirect;
   };
 
-  // ✅ FIXED: Single useEffect for client-side initialization
+  // ✅ FIXED: Single useEffect for logout status handling
   useEffect(() => {
-    setIsClient(true);
-    
     // Handle logout status with improved messaging
     const logoutStatus = searchParams?.get('logout');
     if (logoutStatus === 'success') {
