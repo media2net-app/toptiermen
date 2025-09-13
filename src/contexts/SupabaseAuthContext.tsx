@@ -218,17 +218,28 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
   // Sign in method - IMPROVED WITH BETTER ERROR HANDLING AND LOGGING
   const signIn = async (email: string, password: string) => {
     try {
+      console.log('🔐 SupabaseAuthContext: Starting login process');
+      console.log('📧 Email:', email);
+      console.log('🔑 Password length:', password.length);
+      console.log('🌐 Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? 'Set' : 'Missing');
+      console.log('🔑 Supabase Key:', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'Set' : 'Missing');
+      
       setLoading(true);
       setError(null);
 
-      console.log('🔐 Attempting login for:', email);
+      console.log('🔐 Calling supabase.auth.signInWithPassword...');
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
+      console.log('📋 Supabase response received');
+      console.log('📊 Data:', data ? 'Present' : 'Null');
+      console.log('❌ Error:', error ? error.message : 'None');
+
       if (error) {
         console.error('❌ Login error:', error.message);
+        console.error('❌ Error details:', error);
         setError(error.message);
         
         // Log failed login attempt
@@ -239,12 +250,14 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
 
       if (data.user) {
         console.log('✅ Login successful for:', data.user.email);
+        console.log('👤 User ID:', data.user.id);
         setUser(data.user);
         
         // Log successful login attempt
         await logLoginAttempt(email, true, undefined, data.user.id);
         
         // Fetch profile with email fallback
+        console.log('🔍 Fetching user profile...');
         const userProfile = await fetchProfile(data.user.id, data.user.email);
         if (userProfile) {
           console.log('✅ Profile loaded:', userProfile.role);
@@ -255,9 +268,11 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
         }
       }
 
+      console.log('✅ SignIn process completed successfully');
       return { success: true };
     } catch (err) {
       console.error('❌ Login exception:', err);
+      console.error('❌ Exception details:', err);
       const errorMessage = err instanceof Error ? err.message : 'Login failed';
       setError(errorMessage);
       
@@ -266,6 +281,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
       
       return { success: false, error: errorMessage };
     } finally {
+      console.log('🏁 SignIn process finished, setting loading to false');
       setLoading(false);
     }
   };

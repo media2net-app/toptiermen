@@ -88,23 +88,33 @@ function LoginPageContent() {
     }
   }, [loading, user, profile, router, searchParams, isLoading]);
 
-  // ✅ FIXED: Improved login handler with better error handling
+  // ✅ FIXED: Enhanced login handler with detailed debugging
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
     
+    console.log('🚀 Login form submitted');
+    console.log('📧 Email:', email);
+    console.log('🔑 Password length:', password.length);
+    console.log('⏳ IsLoading:', isLoading);
+    
     if (!email || !password) {
       setError("Vul alle velden in");
+      console.log('❌ Validation failed: missing email or password');
       return;
     }
 
-    if (isLoading) return;
+    if (isLoading) {
+      console.log('❌ Already loading, ignoring request');
+      return;
+    }
 
     setIsLoading(true);
     setError("");
     
     try {
-      console.log('🔐 Login attempt for:', email);
+      console.log('🔐 Calling signIn function...');
       const result = await signIn(email, password);
+      console.log('📋 SignIn result:', result);
 
       if (!result.success) {
         console.error('❌ Login failed:', result.error);
@@ -118,7 +128,7 @@ function LoginPageContent() {
       setIsLoading(false);
       
     } catch (error: any) {
-      console.error('❌ Login error:', error);
+      console.error('❌ Login exception:', error);
       setError(error.message || "Er is een fout opgetreden bij het inloggen");
       setIsLoading(false);
     }
