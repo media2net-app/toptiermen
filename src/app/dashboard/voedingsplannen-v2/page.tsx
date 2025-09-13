@@ -1105,8 +1105,8 @@ export default function VoedingsplannenV2Page() {
                       ></div>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-400">{currentDayTotals.calories} kcal</span>
-                      <span className="text-white">{personalizedTargets?.targetCalories || originalPlanData.target_calories} kcal</span>
+                      <span className="text-gray-400">{currentDayTotals.calories.toFixed(1)} kcal</span>
+                      <span className="text-white">{(personalizedTargets?.targetCalories || originalPlanData.target_calories).toFixed(1)} kcal</span>
                     </div>
                     <div className={`text-xs mt-1 ${caloriesProgress.textColor}`}>
                       {caloriesProgress.difference > 0 ? '+' : ''}{caloriesProgress.difference.toFixed(1)} kcal
@@ -1126,8 +1126,8 @@ export default function VoedingsplannenV2Page() {
                       ></div>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-400">{currentDayTotals.protein}g</span>
-                      <span className="text-white">{personalizedTargets?.targetProtein || originalPlanData.target_protein}g</span>
+                      <span className="text-gray-400">{currentDayTotals.protein.toFixed(1)}g</span>
+                      <span className="text-white">{(personalizedTargets?.targetProtein || originalPlanData.target_protein).toFixed(1)}g</span>
                     </div>
                     <div className={`text-xs mt-1 ${proteinProgress.textColor}`}>
                       {proteinProgress.difference > 0 ? '+' : ''}{proteinProgress.difference.toFixed(1)}g
@@ -1147,8 +1147,8 @@ export default function VoedingsplannenV2Page() {
                       ></div>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-400">{currentDayTotals.carbs}g</span>
-                      <span className="text-white">{personalizedTargets?.targetCarbs || originalPlanData.target_carbs}g</span>
+                      <span className="text-gray-400">{currentDayTotals.carbs.toFixed(1)}g</span>
+                      <span className="text-white">{(personalizedTargets?.targetCarbs || originalPlanData.target_carbs).toFixed(1)}g</span>
                     </div>
                     <div className={`text-xs mt-1 ${carbsProgress.textColor}`}>
                       {carbsProgress.difference > 0 ? '+' : ''}{carbsProgress.difference.toFixed(1)}g
@@ -1168,8 +1168,8 @@ export default function VoedingsplannenV2Page() {
                       ></div>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-400">{currentDayTotals.fat}g</span>
-                      <span className="text-white">{personalizedTargets?.targetFat || originalPlanData.target_fat}g</span>
+                      <span className="text-gray-400">{currentDayTotals.fat.toFixed(1)}g</span>
+                      <span className="text-white">{(personalizedTargets?.targetFat || originalPlanData.target_fat).toFixed(1)}g</span>
                     </div>
                     <div className={`text-xs mt-1 ${fatProgress.textColor}`}>
                       {fatProgress.difference > 0 ? '+' : ''}{fatProgress.difference.toFixed(1)}g
@@ -1209,7 +1209,7 @@ export default function VoedingsplannenV2Page() {
                             </h5>
                             <div className="flex gap-6 text-sm">
                               <div className="text-[#B6C948] font-medium">
-                                {mealTotals.calories.toFixed(0)} kcal
+                                {mealTotals.calories.toFixed(1)} kcal
                               </div>
                               <div className="text-white">
                                 P: {mealTotals.protein.toFixed(1)}g
