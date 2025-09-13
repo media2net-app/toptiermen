@@ -338,17 +338,42 @@ export default function VoedingsplannenV2Page() {
 
   // Function to calculate progress and color for progress bars
   const getProgressInfo = (current: number, target: number) => {
-    const percentage = target > 0 ? (current / target) * 100 : 0;
+    if (!target || target === 0) {
+      return {
+        percentage: 0,
+        difference: 0,
+        isGood: false,
+        color: 'bg-gray-500',
+        textColor: 'text-gray-400'
+      };
+    }
+    
+    const percentage = (current / target) * 100;
     const difference = current - target;
-    const isGood = percentage >= 95 && percentage <= 105; // Green if within 95-105%
-    const color = isGood ? 'bg-green-500' : 'bg-red-500';
+    const deviation = Math.abs(percentage - 100);
+    
+    let color = 'bg-red-500';
+    let textColor = 'text-red-400';
+    let isGood = false;
+    
+    if (deviation <= 5) {
+      color = 'bg-green-500'; // ±5% = Groen
+      textColor = 'text-green-400';
+      isGood = true;
+    } else if (deviation <= 10) {
+      color = 'bg-orange-500'; // ±10% = Oranje
+      textColor = 'text-orange-400';
+    } else {
+      color = 'bg-red-500'; // >10% = Rood
+      textColor = 'text-red-400';
+    }
     
     return {
       percentage: Math.min(percentage, 120), // Cap at 120% for display
       difference,
       isGood,
       color,
-      textColor: isGood ? 'text-green-400' : 'text-red-400'
+      textColor
     };
   };
 
@@ -796,7 +821,7 @@ export default function VoedingsplannenV2Page() {
                   <div className="bg-[#181F17] rounded-lg p-4">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-white font-semibold">Calorieën</span>
-                      <span className="text-[#8BAE5A] text-sm">{caloriesProgress.percentage.toFixed(1)}%</span>
+                      <span className={`text-sm ${caloriesProgress.textColor}`}>{caloriesProgress.percentage.toFixed(1)}%</span>
                     </div>
                     <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
                       <div 
@@ -817,7 +842,7 @@ export default function VoedingsplannenV2Page() {
                   <div className="bg-[#181F17] rounded-lg p-4">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-white font-semibold">Eiwit</span>
-                      <span className="text-[#8BAE5A] text-sm">{proteinProgress.percentage.toFixed(1)}%</span>
+                      <span className={`text-sm ${proteinProgress.textColor}`}>{proteinProgress.percentage.toFixed(1)}%</span>
                     </div>
                     <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
                       <div 
@@ -838,7 +863,7 @@ export default function VoedingsplannenV2Page() {
                   <div className="bg-[#181F17] rounded-lg p-4">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-white font-semibold">Koolhydraten</span>
-                      <span className="text-[#8BAE5A] text-sm">{carbsProgress.percentage.toFixed(1)}%</span>
+                      <span className={`text-sm ${carbsProgress.textColor}`}>{carbsProgress.percentage.toFixed(1)}%</span>
                     </div>
                     <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
                       <div 
@@ -859,7 +884,7 @@ export default function VoedingsplannenV2Page() {
                   <div className="bg-[#181F17] rounded-lg p-4">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-white font-semibold">Vet</span>
-                      <span className="text-[#8BAE5A] text-sm">{fatProgress.percentage.toFixed(1)}%</span>
+                      <span className={`text-sm ${fatProgress.textColor}`}>{fatProgress.percentage.toFixed(1)}%</span>
                     </div>
                     <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
                       <div 
