@@ -39,7 +39,7 @@ const nextConfig = {
   },
   
   // Disable static generation for all pages to prevent navigator errors
-  output: 'standalone',
+  // output: 'standalone', // Disabled for development
   
   // Compiler optimizations
   compiler: {
