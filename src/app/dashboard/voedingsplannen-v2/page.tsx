@@ -273,11 +273,14 @@ export default function VoedingsplannenV2Page() {
     };
   };
 
-  // Get progress info for each macro
-  const caloriesProgress = getProgressInfo(currentDayTotals.calories, originalPlanData?.target_calories || 0);
-  const proteinProgress = getProgressInfo(currentDayTotals.protein, originalPlanData?.target_protein || 0);
-  const carbsProgress = getProgressInfo(currentDayTotals.carbs, originalPlanData?.target_carbs || 0);
-  const fatProgress = getProgressInfo(currentDayTotals.fat, originalPlanData?.target_fat || 0);
+  // Get personalized targets for progress calculations
+  const personalizedTargets = originalPlanData ? calculatePersonalizedTargets(originalPlanData) : null;
+  
+  // Get progress info for each macro using personalized targets
+  const caloriesProgress = getProgressInfo(currentDayTotals.calories, personalizedTargets?.targetCalories || originalPlanData?.target_calories || 0);
+  const proteinProgress = getProgressInfo(currentDayTotals.protein, personalizedTargets?.targetProtein || originalPlanData?.target_protein || 0);
+  const carbsProgress = getProgressInfo(currentDayTotals.carbs, personalizedTargets?.targetCarbs || originalPlanData?.target_carbs || 0);
+  const fatProgress = getProgressInfo(currentDayTotals.fat, personalizedTargets?.targetFat || originalPlanData?.target_fat || 0);
 
   // Check if user is specifically chiel@media2net.nl
   const isChiel = user?.email === 'chiel@media2net.nl';
@@ -614,7 +617,7 @@ export default function VoedingsplannenV2Page() {
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-400">{currentDayTotals.calories} kcal</span>
-                      <span className="text-white">{originalPlanData.target_calories} kcal</span>
+                      <span className="text-white">{personalizedTargets?.targetCalories || originalPlanData.target_calories} kcal</span>
                     </div>
                     <div className={`text-xs mt-1 ${caloriesProgress.textColor}`}>
                       {caloriesProgress.difference > 0 ? '+' : ''}{caloriesProgress.difference.toFixed(1)} kcal
@@ -635,7 +638,7 @@ export default function VoedingsplannenV2Page() {
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-400">{currentDayTotals.protein}g</span>
-                      <span className="text-white">{originalPlanData.target_protein}g</span>
+                      <span className="text-white">{personalizedTargets?.targetProtein || originalPlanData.target_protein}g</span>
                     </div>
                     <div className={`text-xs mt-1 ${proteinProgress.textColor}`}>
                       {proteinProgress.difference > 0 ? '+' : ''}{proteinProgress.difference.toFixed(1)}g
@@ -656,7 +659,7 @@ export default function VoedingsplannenV2Page() {
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-400">{currentDayTotals.carbs}g</span>
-                      <span className="text-white">{originalPlanData.target_carbs}g</span>
+                      <span className="text-white">{personalizedTargets?.targetCarbs || originalPlanData.target_carbs}g</span>
                     </div>
                     <div className={`text-xs mt-1 ${carbsProgress.textColor}`}>
                       {carbsProgress.difference > 0 ? '+' : ''}{carbsProgress.difference.toFixed(1)}g
@@ -677,7 +680,7 @@ export default function VoedingsplannenV2Page() {
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-400">{currentDayTotals.fat}g</span>
-                      <span className="text-white">{originalPlanData.target_fat}g</span>
+                      <span className="text-white">{personalizedTargets?.targetFat || originalPlanData.target_fat}g</span>
                     </div>
                     <div className={`text-xs mt-1 ${fatProgress.textColor}`}>
                       {fatProgress.difference > 0 ? '+' : ''}{fatProgress.difference.toFixed(1)}g
@@ -1261,29 +1264,71 @@ export default function VoedingsplannenV2Page() {
                     <span className="text-[#8BAE5A]">Beschrijving:</span>
                     <span className="text-white text-sm">{originalPlanData.description}</span>
                   </div>
+                  <div className="flex justify-between">
+                    <span className="text-[#8BAE5A]">Plan Doel:</span>
+                    <span className="text-white capitalize">{originalPlanData.goal}</span>
+                  </div>
                 </div>
+                
+                {/* Macro Percentages */}
+                {(originalPlanData.protein_percentage || originalPlanData.carbs_percentage || originalPlanData.fat_percentage) && (
+                  <div className="bg-[#0A0F0A] rounded-lg p-4 mt-4">
+                    <h5 className="text-white font-semibold mb-3">Macro Percentages van dit Plan</h5>
+                    <div className="grid grid-cols-3 gap-4 text-sm">
+                      <div className="text-center">
+                        <p className="text-blue-400 font-semibold">{originalPlanData.protein_percentage || 0}%</p>
+                        <p className="text-gray-400">Eiwit</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-yellow-400 font-semibold">{originalPlanData.carbs_percentage || 0}%</p>
+                        <p className="text-gray-400">Koolhydraten</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-red-400 font-semibold">{originalPlanData.fat_percentage || 0}%</p>
+                        <p className="text-gray-400">Vet</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Macro Targets */}
               <div className="space-y-4">
-                <h4 className="text-white font-semibold mb-3">Macro Doelen</h4>
+                <h4 className="text-white font-semibold mb-3">Gepersonaliseerde Macro Doelen</h4>
                 
                 <div className="bg-[#0A0F0A] rounded-lg p-4 space-y-3">
+                  <div className="mb-3 p-2 bg-[#181F17] rounded">
+                    <p className="text-[#B6C948] text-xs font-semibold">TTM Formule:</p>
+                    <p className="text-gray-400 text-xs">{userProfile.weight}kg × 22 × {userProfile.activity_level === 'sedentary' ? '1.1' : userProfile.activity_level === 'moderate' ? '1.3' : '1.6'} = {Math.round(userProfile.weight * 22 * (userProfile.activity_level === 'sedentary' ? 1.1 : userProfile.activity_level === 'moderate' ? 1.3 : 1.6))} kcal</p>
+                    <p className="text-gray-400 text-xs">Plan doel ({originalPlanData.goal}): {originalPlanData.goal === 'droogtrainen' ? '-500' : originalPlanData.goal === 'spiermassa' ? '+400' : '0'} kcal</p>
+                  </div>
                   <div className="flex justify-between">
                     <span className="text-[#8BAE5A]">Calorieën:</span>
-                    <span className="text-white font-semibold">{originalPlanData.target_calories} kcal</span>
+                    <div className="text-right">
+                      <span className="text-white font-semibold">{calculatePersonalizedTargets(originalPlanData).targetCalories} kcal</span>
+                      <p className="text-gray-500 text-xs">Backend: {originalPlanData.target_calories} kcal</p>
+                    </div>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-[#8BAE5A]">Eiwit:</span>
-                    <span className="text-white font-semibold">{originalPlanData.target_protein}g</span>
+                    <div className="text-right">
+                      <span className="text-white font-semibold">{calculatePersonalizedTargets(originalPlanData).targetProtein}g</span>
+                      <p className="text-gray-500 text-xs">Backend: {originalPlanData.target_protein}g</p>
+                    </div>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-[#8BAE5A]">Koolhydraten:</span>
-                    <span className="text-white font-semibold">{originalPlanData.target_carbs}g</span>
+                    <div className="text-right">
+                      <span className="text-white font-semibold">{calculatePersonalizedTargets(originalPlanData).targetCarbs}g</span>
+                      <p className="text-gray-500 text-xs">Backend: {originalPlanData.target_carbs}g</p>
+                    </div>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-[#8BAE5A]">Vet:</span>
-                    <span className="text-white font-semibold">{originalPlanData.target_fat}g</span>
+                    <div className="text-right">
+                      <span className="text-white font-semibold">{calculatePersonalizedTargets(originalPlanData).targetFat}g</span>
+                      <p className="text-gray-500 text-xs">Backend: {originalPlanData.target_fat}g</p>
+                    </div>
                   </div>
                 </div>
               </div>
