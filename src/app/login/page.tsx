@@ -88,7 +88,7 @@ function LoginPageContent() {
     }
   }, [loading, user, profile, router, searchParams, isLoading]);
 
-  // ✅ FIXED: Simplified login handler
+  // ✅ FIXED: Improved login handler with better error handling
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
     
@@ -103,18 +103,22 @@ function LoginPageContent() {
     setError("");
     
     try {
+      console.log('🔐 Login attempt for:', email);
       const result = await signIn(email, password);
 
       if (!result.success) {
+        console.error('❌ Login failed:', result.error);
         setError(result.error || "Ongeldige inloggegevens");
         setIsLoading(false);
         return;
       }
 
+      console.log('✅ Login successful, redirecting...');
       // Success - let useEffect handle redirect
       setIsLoading(false);
       
     } catch (error: any) {
+      console.error('❌ Login error:', error);
       setError(error.message || "Er is een fout opgetreden bij het inloggen");
       setIsLoading(false);
     }
@@ -202,13 +206,25 @@ function LoginPageContent() {
 
         <p className="text-[#B6C948] text-center mb-6 sm:mb-8 text-base sm:text-lg font-figtree">Log in op je dashboard</p>
         
-        {/* ✅ FIXED: Simplified debug info - only in development */}
+        {/* ✅ FIXED: Enhanced debug info - only in development */}
         {process.env.NODE_ENV === 'development' && (
           <div className="mb-4 p-3 bg-[#181F17] border border-[#B6C948] rounded-lg text-xs">
             <p className="text-[#B6C948] font-bold mb-2">🔧 Debug Info:</p>
             <p className="text-[#8BAE5A]">Loading: {loading ? '✅' : '❌'}</p>
             <p className="text-[#8BAE5A]">User: {user ? '✅' : '❌'}</p>
+            <p className="text-[#8BAE5A]">Email: {email || 'Empty'}</p>
+            <p className="text-[#8BAE5A]">Password Length: {password.length}</p>
             <p className="text-[#8BAE5A]">Error: {error || 'None'}</p>
+            <button
+              type="button"
+              onClick={() => {
+                setEmail('chiel@media2net.nl');
+                setPassword('Test123!');
+              }}
+              className="mt-2 px-2 py-1 bg-[#8BAE5A] text-[#181F17] rounded text-xs"
+            >
+              Fill Test Credentials
+            </button>
           </div>
         )}
         
