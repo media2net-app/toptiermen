@@ -78,7 +78,6 @@ const menu = [
   { label: 'Trainingsschemas', icon: AcademicCapIcon, href: '/dashboard/trainingsschemas', onboardingStep: 3 },
   { label: 'Voedingsplannen', icon: BookOpenIcon, href: '/dashboard/voedingsplannen', onboardingStep: 4 },
   { label: 'Voedingsplannen V2', icon: RocketLaunchIcon, href: '/dashboard/voedingsplannen-v2', onboardingStep: 4, adminOnly: true, badge: 'V2' },
-  { label: 'Voedingsplannen V2', icon: RocketLaunchIcon, href: '/dashboard/voedingsplannen-v2', onboardingStep: 4, adminOnly: true, badge: 'V2' },
   { label: 'Mind & Focus (binnenkort online)', icon: ChartBarIcon, href: null, onboardingStep: 7, disabled: true },
   { label: 'Brotherhood', icon: UsersIcon, href: '/dashboard/brotherhood', onboardingStep: 7 },
   { label: 'Social Feed', icon: ChatBubbleLeftRightIcon, parent: 'Brotherhood', href: '/dashboard/brotherhood/social-feed', isSub: true, onboardingStep: 7 },
