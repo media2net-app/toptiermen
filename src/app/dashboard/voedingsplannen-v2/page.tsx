@@ -353,14 +353,14 @@ export default function VoedingsplannenV2Page() {
     };
   };
 
-  // Smart Scaling Algorithm
+  // Smart Scaling Algorithm with Realistic Constraints
   const applySmartScaling = (planData: any, userProfile: any) => {
     if (!planData || !userProfile || userProfile.weight === 100) {
       // No scaling needed for 100kg users
       return planData;
     }
 
-    console.log('🧠 Applying Smart Scaling for weight:', userProfile.weight);
+    console.log('🧠 Applying Realistic Smart Scaling for weight:', userProfile.weight);
     
     const baseWeight = 100;
     const weightRatio = userProfile.weight / baseWeight;
@@ -377,10 +377,11 @@ export default function VoedingsplannenV2Page() {
       targetCalories,
       targetProtein,
       targetCarbs,
-      targetFat
+      targetFat,
+      weightRatio
     });
 
-    // Scale ingredients for each day and meal
+    // Scale ingredients for each day and meal with realistic constraints
     Object.keys(scaledPlan.meals.weekly_plan).forEach(day => {
       const dayData = scaledPlan.meals.weekly_plan[day];
       
@@ -388,11 +389,40 @@ export default function VoedingsplannenV2Page() {
         const meal = dayData[mealType];
         if (meal && meal.ingredients && Array.isArray(meal.ingredients)) {
           
-          // Apply initial weight-based scaling
+          // Apply realistic scaling based on unit type
           meal.ingredients.forEach((ingredient: any) => {
             if (ingredient.amount && ingredient.unit) {
-              // Apply weight ratio scaling
-              ingredient.amount = Math.round(ingredient.amount * weightRatio * 10) / 10;
+              const originalAmount = ingredient.amount;
+              let newAmount = originalAmount * weightRatio;
+              
+              // Apply realistic scaling rules
+              if (ingredient.unit === 'per_piece' || ingredient.unit === 'per_plakje' || ingredient.unit === 'stuk') {
+                // Whole pieces: round to nearest whole number, minimum 1
+                newAmount = Math.max(1, Math.round(newAmount));
+                console.log(`🧠 ${ingredient.name}: ${originalAmount} → ${newAmount} ${ingredient.unit} (whole piece)`);
+              } else if (ingredient.unit === 'per_100g' || ingredient.unit === 'g') {
+                // 100g items: can be scaled more precisely, round to 5g increments
+                newAmount = Math.round(newAmount / 5) * 5;
+                if (newAmount < 5) newAmount = 5; // Minimum 5g
+                console.log(`🧠 ${ingredient.name}: ${originalAmount} → ${newAmount} ${ingredient.unit} (5g increments)`);
+              } else if (ingredient.unit === 'per_ml') {
+                // Liquid items: round to 10ml increments
+                newAmount = Math.round(newAmount / 10) * 10;
+                if (newAmount < 10) newAmount = 10; // Minimum 10ml
+                console.log(`🧠 ${ingredient.name}: ${originalAmount} → ${newAmount} ${ingredient.unit} (10ml increments)`);
+              } else if (ingredient.unit === 'handje') {
+                // Handful: round to nearest 0.5
+                newAmount = Math.round(newAmount * 2) / 2;
+                if (newAmount < 0.5) newAmount = 0.5; // Minimum 0.5 handful
+                console.log(`🧠 ${ingredient.name}: ${originalAmount} → ${newAmount} ${ingredient.unit} (0.5 increments)`);
+              } else {
+                // Default: round to 1 decimal
+                newAmount = Math.round(newAmount * 10) / 10;
+                if (newAmount < 0.1) newAmount = 0.1; // Minimum 0.1
+                console.log(`🧠 ${ingredient.name}: ${originalAmount} → ${newAmount} ${ingredient.unit} (default)`);
+              }
+              
+              ingredient.amount = newAmount;
             }
           });
           
@@ -407,9 +437,54 @@ export default function VoedingsplannenV2Page() {
       if (scaledPlan.meals.weekly_plan[day]) {
         scaledPlan.meals.weekly_plan[day].dailyTotals = dayTotals;
       }
+      
+      // Fine-tune for better macro balance (focus on fat targets)
+      const currentDayTotals = dayTotals;
+      const fatPercentage = (currentDayTotals.fat / targetFat) * 100;
+      
+      console.log(`🧠 Day ${day} fat percentage: ${fatPercentage.toFixed(1)}% (target: 100%)`);
+      
+      // If fat is too low (< 95%), increase meat/fat-rich ingredients
+      if (fatPercentage < 95) {
+        console.log(`🧠 Fat too low (${fatPercentage.toFixed(1)}%), fine-tuning meat portions...`);
+        
+        ['diner', 'lunch'].forEach(mealType => { // Focus on main meals
+          const meal = dayData[mealType];
+          if (meal && meal.ingredients && Array.isArray(meal.ingredients)) {
+            meal.ingredients.forEach((ingredient: any) => {
+              // Increase meat and fat-rich ingredients by 15-20%
+              if (ingredient.unit === 'per_100g' && 
+                  (ingredient.name.toLowerCase().includes('vlees') || 
+                   ingredient.name.toLowerCase().includes('rund') ||
+                   ingredient.name.toLowerCase().includes('kip') ||
+                   ingredient.name.toLowerCase().includes('zalm') ||
+                   ingredient.name.toLowerCase().includes('olie') ||
+                   ingredient.name.toLowerCase().includes('boter'))) {
+                const currentAmount = ingredient.amount;
+                const increase = Math.max(10, Math.round(currentAmount * 0.15)); // 15% increase, minimum 10g
+                ingredient.amount = currentAmount + increase;
+                console.log(`🧠 Increased ${ingredient.name}: ${currentAmount}g → ${ingredient.amount}g for fat balance`);
+              }
+            });
+            
+            // Recalculate meal totals after fine-tuning
+            const mealTotals = calculateMealTotals(meal);
+            meal.totals = mealTotals;
+          }
+        });
+        
+        // Recalculate day totals after fine-tuning
+        const updatedDayTotals = calculateDayTotals(scaledPlan, day);
+        if (scaledPlan.meals.weekly_plan[day]) {
+          scaledPlan.meals.weekly_plan[day].dailyTotals = updatedDayTotals;
+        }
+        
+        const newFatPercentage = (updatedDayTotals.fat / targetFat) * 100;
+        console.log(`🧠 After fine-tuning: ${newFatPercentage.toFixed(1)}% fat (improvement: ${(newFatPercentage - fatPercentage).toFixed(1)}%)`);
+      }
     });
 
-    console.log('✅ Smart Scaling applied');
+    console.log('✅ Realistic Smart Scaling applied');
     return scaledPlan;
   };
 
