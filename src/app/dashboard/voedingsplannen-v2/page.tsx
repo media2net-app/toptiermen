@@ -185,6 +185,34 @@ export default function VoedingsplannenV2Page() {
   // Get current day totals
   const currentDayTotals = calculateDayTotals(selectedDay);
 
+  // Function to calculate meal totals
+  const calculateMealTotals = (meal: any) => {
+    if (!meal?.ingredients || !Array.isArray(meal.ingredients)) {
+      return { calories: 0, protein: 0, carbs: 0, fat: 0 };
+    }
+
+    let totals = { calories: 0, protein: 0, carbs: 0, fat: 0 };
+    
+    meal.ingredients.forEach((ingredient: any) => {
+      // Calculate macros based on amount and unit
+      let multiplier = 1;
+      if (ingredient.unit === 'g' && ingredient.amount) {
+        multiplier = ingredient.amount / 100;
+      } else if (ingredient.unit === 'plakje' && ingredient.amount) {
+        multiplier = ingredient.amount;
+      } else if (ingredient.unit === 'piece' && ingredient.amount) {
+        multiplier = ingredient.amount;
+      }
+      
+      totals.calories += (ingredient.calories_per_100g || 0) * multiplier;
+      totals.protein += (ingredient.protein_per_100g || 0) * multiplier;
+      totals.carbs += (ingredient.carbs_per_100g || 0) * multiplier;
+      totals.fat += (ingredient.fat_per_100g || 0) * multiplier;
+    });
+
+    return totals;
+  };
+
   // Alternative approach: Use macro percentages from backend
   const calculatePersonalizedTargetsWithPercentages = (basePlan: any, targetCalories: number) => {
     // Use macro percentages from backend if available
@@ -844,61 +872,111 @@ export default function VoedingsplannenV2Page() {
               </div>
             )}
 
-            {/* Selected Day Meals */}
+            {/* Selected Day Meals - Table Layout */}
             {originalPlanData.meals?.weekly_plan && originalPlanData.meals.weekly_plan[selectedDay] && (
               <div className="bg-[#0A0F0A] rounded-lg p-6">
-                <h4 className="text-[#B6C948] font-bold text-lg mb-4 capitalize">{selectedDay}</h4>
+                <h4 className="text-[#B6C948] font-bold text-lg mb-6 capitalize">{selectedDay}</h4>
                     
-                <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                <div className="space-y-6">
                   {['ontbijt', 'ochtend_snack', 'lunch', 'lunch_snack', 'diner'].map((mealType) => {
                     const mealData = originalPlanData.meals.weekly_plan[selectedDay][mealType];
-                        const mealTypeLabel = mealType === 'ochtend_snack' ? 'Ochtend Snack' :
-                                             mealType === 'lunch_snack' ? 'Lunch Snack' :
-                                             mealType === 'ontbijt' ? 'Ontbijt' :
-                                             mealType === 'lunch' ? 'Lunch' :
-                                             mealType === 'diner' ? 'Diner' : mealType;
+                    const mealTypeLabel = mealType === 'ochtend_snack' ? 'Ochtend Snack' :
+                                         mealType === 'lunch_snack' ? 'Lunch Snack' :
+                                         mealType === 'ontbijt' ? 'Ontbijt' :
+                                         mealType === 'lunch' ? 'Lunch' :
+                                         mealType === 'diner' ? 'Diner' : mealType;
 
-                        return (
-                          <div key={mealType} className="bg-[#181F17] rounded-lg p-4 border border-[#3A4D23]">
-                            <h5 className="text-white font-semibold mb-3 flex items-center gap-2">
+                    if (!mealData || !mealData.ingredients) return null;
+
+                    const mealTotals = calculateMealTotals(mealData);
+
+                    return (
+                      <div key={mealType} className="bg-[#181F17] rounded-lg border border-[#3A4D23] overflow-hidden">
+                        {/* Meal Header with Totals */}
+                        <div className="bg-[#2A3A1A] px-6 py-4 border-b border-[#3A4D23]">
+                          <div className="flex items-center justify-between">
+                            <h5 className="text-white font-semibold flex items-center gap-2">
                               <ClockIcon className="w-4 h-4 text-[#8BAE5A]" />
                               {mealTypeLabel}
                             </h5>
-                            
-                            {mealData && mealData.ingredients ? (
-                              <div className="space-y-3">
-                                <div className="text-xs text-[#8BAE5A] mb-2">
-                                  {mealData.ingredients.length} ingrediënten
-                                </div>
-                                
-                                {/* Show all ingredients */}
-                                {mealData.ingredients.map((ingredient: any, index: number) => (
-                                  <div key={index} className="text-sm text-gray-300 bg-[#0A0F0A] rounded p-2">
-                                    <div className="font-medium text-white">
-                                      {ingredient.amount} {ingredient.unit} {ingredient.name}
-                                    </div>
-                                    {ingredient.calories && (
-                                      <div className="text-xs text-[#8BAE5A] mt-1">
-                                        {ingredient.calories} kcal • P: {ingredient.protein}g • K: {ingredient.carbs}g • V: {ingredient.fat}g
-                                      </div>
-                                    )}
-                                  </div>
-                                ))}
-                                
-                                {/* Show meal totals if available */}
-                                {mealData.totals && (
-                                  <div className="text-sm text-[#B6C948] mt-3 pt-3 border-t border-[#3A4D23] font-semibold">
-                                    <div>Totaal: {mealData.totals.calories} kcal</div>
-                                    <div>Eiwit: {mealData.totals.protein}g • Koolhydraten: {mealData.totals.carbs}g • Vet: {mealData.totals.fat}g</div>
-                                  </div>
-                                )}
+                            <div className="flex gap-6 text-sm">
+                              <div className="text-[#B6C948] font-medium">
+                                {mealTotals.calories.toFixed(0)} kcal
                               </div>
-                            ) : (
-                              <div className="text-sm text-gray-500">Geen data beschikbaar</div>
-                            )}
+                              <div className="text-white">
+                                P: {mealTotals.protein.toFixed(1)}g
+                              </div>
+                              <div className="text-white">
+                                K: {mealTotals.carbs.toFixed(1)}g
+                              </div>
+                              <div className="text-white">
+                                V: {mealTotals.fat.toFixed(1)}g
+                              </div>
+                            </div>
                           </div>
-                  );
-                })}
+                        </div>
+
+                        {/* Ingredients Table */}
+                        <div className="p-6">
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-sm">
+                              <thead>
+                                <tr className="border-b border-[#3A4D23]">
+                                  <th className="text-left text-[#8BAE5A] font-medium py-2">Ingrediënt</th>
+                                  <th className="text-left text-[#8BAE5A] font-medium py-2">Hoeveelheid</th>
+                                  <th className="text-right text-[#8BAE5A] font-medium py-2">kcal</th>
+                                  <th className="text-right text-[#8BAE5A] font-medium py-2">Eiwit</th>
+                                  <th className="text-right text-[#8BAE5A] font-medium py-2">Koolhydraten</th>
+                                  <th className="text-right text-[#8BAE5A] font-medium py-2">Vet</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {mealData.ingredients.map((ingredient: any, index: number) => {
+                                  // Calculate individual ingredient totals
+                                  let multiplier = 1;
+                                  if (ingredient.unit === 'g' && ingredient.amount) {
+                                    multiplier = ingredient.amount / 100;
+                                  } else if (ingredient.unit === 'plakje' && ingredient.amount) {
+                                    multiplier = ingredient.amount;
+                                  } else if (ingredient.unit === 'piece' && ingredient.amount) {
+                                    multiplier = ingredient.amount;
+                                  }
+
+                                  const ingredientCalories = (ingredient.calories_per_100g || 0) * multiplier;
+                                  const ingredientProtein = (ingredient.protein_per_100g || 0) * multiplier;
+                                  const ingredientCarbs = (ingredient.carbs_per_100g || 0) * multiplier;
+                                  const ingredientFat = (ingredient.fat_per_100g || 0) * multiplier;
+
+                                  return (
+                                    <tr key={index} className="border-b border-[#2A3A1A] last:border-b-0">
+                                      <td className="py-3 text-white font-medium">
+                                        {ingredient.name}
+                                      </td>
+                                      <td className="py-3 text-gray-300">
+                                        {ingredient.amount} {ingredient.unit}
+                                      </td>
+                                      <td className="py-3 text-right text-white font-medium">
+                                        {ingredientCalories.toFixed(0)}
+                                      </td>
+                                      <td className="py-3 text-right text-white">
+                                        {ingredientProtein.toFixed(1)}g
+                                      </td>
+                                      <td className="py-3 text-right text-white">
+                                        {ingredientCarbs.toFixed(1)}g
+                                      </td>
+                                      <td className="py-3 text-right text-white">
+                                        {ingredientFat.toFixed(1)}g
+                                      </td>
+                                    </tr>
+                                  );
+                                })}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}
