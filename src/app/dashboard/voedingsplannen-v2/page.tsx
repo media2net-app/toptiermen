@@ -1303,6 +1303,46 @@ export default function VoedingsplannenV2Page() {
                   </div>
                 </div>
                 
+                {/* User Profile Data */}
+                <div className="bg-[#0A0F0A] rounded-lg p-4 mt-4">
+                  <h5 className="text-white font-semibold mb-3">Jouw Ingevoerde Gegevens</h5>
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-[#8BAE5A]">Gewicht:</span>
+                      <span className="text-white font-semibold">{userProfile.weight}kg</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-[#8BAE5A]">Lengte:</span>
+                      <span className="text-white font-semibold">{userProfile.height}cm</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-[#8BAE5A]">Leeftijd:</span>
+                      <span className="text-white font-semibold">{userProfile.age} jaar</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-[#8BAE5A]">Geslacht:</span>
+                      <span className="text-white capitalize">{userProfile.gender === 'male' ? 'Man' : 'Vrouw'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-[#8BAE5A]">Activiteit:</span>
+                      <span className="text-white">
+                        {userProfile.activity_level === 'sedentary' ? 'Zittend (1.1x)' : 
+                         userProfile.activity_level === 'moderate' ? 'Matig (1.3x)' : 
+                         'Actief (1.6x)'}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-[#8BAE5A]">Fitness Doel:</span>
+                      <span className="text-white capitalize">
+                        {userProfile.fitness_goal === 'droogtrainen' ? 'Droogtrainen' :
+                         userProfile.fitness_goal === 'onderhoud' ? 'Onderhoud' :
+                         userProfile.fitness_goal === 'spiermassa' ? 'Spiermassa' :
+                         userProfile.fitness_goal}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                
                 {/* Macro Percentages */}
                 {(originalPlanData.protein_percentage || originalPlanData.carbs_percentage || originalPlanData.fat_percentage) && (
                   <div className="bg-[#0A0F0A] rounded-lg p-4 mt-4">
