@@ -1550,26 +1550,32 @@ export default function VoedingsplannenV2Page() {
                 
                 {/* Macro Percentages */}
                 <div className="bg-[#0A0F0A] rounded-lg p-4 mt-4">
-                  <h5 className="text-white font-semibold mb-3">Macro Percentages van dit Plan</h5>
+                  <h5 className="text-white font-semibold mb-3">Macro Percentages van dit Plan (Backend Instellingen)</h5>
                   <div className="grid grid-cols-3 gap-4 text-sm">
-                    <div className="text-center">
-                      <p className="text-blue-400 font-semibold text-lg">{(originalPlanData as any).protein_percentage || 0}%</p>
-                      <p className="text-gray-400">Eiwit</p>
-                      <p className="text-xs text-gray-500 mt-1">{(originalPlanData as any).protein_percentage ? `${Math.round(((originalPlanData as any).protein_percentage / 100) * (personalizedTargets?.targetCalories || originalPlanData.target_calories) / 4)}g` : '0g'}</p>
+                    <div className="text-center bg-[#181F17] rounded-lg p-3">
+                      <p className="text-blue-400 font-bold text-2xl">{(originalPlanData as any).protein_percentage || 0}%</p>
+                      <p className="text-white font-medium">Eiwit</p>
+                      <p className="text-xs text-gray-400 mt-1">4 kcal per gram</p>
                     </div>
-                    <div className="text-center">
-                      <p className="text-yellow-400 font-semibold text-lg">{(originalPlanData as any).carbs_percentage || 0}%</p>
-                      <p className="text-gray-400">Koolhydraten</p>
-                      <p className="text-xs text-gray-500 mt-1">{(originalPlanData as any).carbs_percentage ? `${Math.round(((originalPlanData as any).carbs_percentage / 100) * (personalizedTargets?.targetCalories || originalPlanData.target_calories) / 4)}g` : '0g'}</p>
+                    <div className="text-center bg-[#181F17] rounded-lg p-3">
+                      <p className="text-yellow-400 font-bold text-2xl">{(originalPlanData as any).carbs_percentage || 0}%</p>
+                      <p className="text-white font-medium">Koolhydraten</p>
+                      <p className="text-xs text-gray-400 mt-1">4 kcal per gram</p>
                     </div>
-                    <div className="text-center">
-                      <p className="text-red-400 font-semibold text-lg">{(originalPlanData as any).fat_percentage || 0}%</p>
-                      <p className="text-gray-400">Vet</p>
-                      <p className="text-xs text-gray-500 mt-1">{(originalPlanData as any).fat_percentage ? `${Math.round(((originalPlanData as any).fat_percentage / 100) * (personalizedTargets?.targetCalories || originalPlanData.target_calories) / 9)}g` : '0g'}</p>
+                    <div className="text-center bg-[#181F17] rounded-lg p-3">
+                      <p className="text-red-400 font-bold text-2xl">{(originalPlanData as any).fat_percentage || 0}%</p>
+                      <p className="text-white font-medium">Vet</p>
+                      <p className="text-xs text-gray-400 mt-1">9 kcal per gram</p>
                     </div>
                   </div>
-                  <div className="mt-3 p-2 bg-[#181F17] rounded text-xs text-gray-400">
-                    <p><strong className="text-[#8BAE5A]">Uitleg:</strong> Deze percentages bepalen hoe de totale calorieën verdeeld worden over eiwit, koolhydraten en vet. Eiwit en koolhydraten leveren 4 kcal per gram, vet levert 9 kcal per gram.</p>
+                  <div className="mt-4 p-3 bg-[#181F17] rounded-lg text-sm">
+                    <p className="text-[#8BAE5A] font-semibold mb-2">📊 Macro Verdeling Uitleg:</p>
+                    <p className="text-gray-300 text-xs leading-relaxed">
+                      Deze percentages zijn direct uit de backend gehaald en bepalen hoe de totale calorieën verdeeld worden over de drie macro's. 
+                      Voor jouw plan betekent dit: <span className="text-white font-medium">{(originalPlanData as any).protein_percentage || 0}% eiwit</span>, 
+                      <span className="text-white font-medium"> {(originalPlanData as any).carbs_percentage || 0}% koolhydraten</span>, en 
+                      <span className="text-white font-medium"> {(originalPlanData as any).fat_percentage || 0}% vet</span>.
+                    </p>
                   </div>
                 </div>
               </div>
