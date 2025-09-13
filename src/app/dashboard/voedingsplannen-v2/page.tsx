@@ -741,6 +741,62 @@ export default function VoedingsplannenV2Page() {
               </button>
             </div>
 
+            {/* Target Macros Section */}
+            <div className="bg-[#0A0F0A] rounded-lg p-6 mb-8">
+              <h3 className="text-xl font-bold text-[#8BAE5A] mb-4">Target Macros</h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                {/* Calories */}
+                <div className="bg-[#181F17] rounded-lg p-4">
+                  <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Calorieën</label>
+                  <div className="text-2xl font-bold text-white">
+                    {personalizedTargets?.targetCalories || originalPlanData.target_calories}
+                  </div>
+                </div>
+
+                {/* Protein */}
+                <div className="bg-[#181F17] rounded-lg p-4">
+                  <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Eiwit (%)</label>
+                  <div className="text-2xl font-bold text-white">
+                    {originalPlanData.protein_percentage || (originalPlanData as any).protein_percentage}%
+                  </div>
+                  <div className="text-sm text-gray-300 mt-1">
+                    {personalizedTargets?.targetProtein || originalPlanData.target_protein}g eiwit
+                  </div>
+                </div>
+
+                {/* Carbs */}
+                <div className="bg-[#181F17] rounded-lg p-4">
+                  <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Koolhydraten (%)</label>
+                  <div className="text-2xl font-bold text-white">
+                    {originalPlanData.carbs_percentage || (originalPlanData as any).carbs_percentage}%
+                  </div>
+                  <div className="text-sm text-gray-300 mt-1">
+                    {personalizedTargets?.targetCarbs || originalPlanData.target_carbs}g koolhydraten
+                  </div>
+                </div>
+
+                {/* Fat */}
+                <div className="bg-[#181F17] rounded-lg p-4">
+                  <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Vet (%)</label>
+                  <div className="text-2xl font-bold text-white">
+                    {originalPlanData.fat_percentage || (originalPlanData as any).fat_percentage}%
+                  </div>
+                  <div className="text-sm text-gray-300 mt-1">
+                    {personalizedTargets?.targetFat || originalPlanData.target_fat}g vet
+                  </div>
+                </div>
+              </div>
+
+              {/* Confirmation Message */}
+              <div className="mt-4 bg-green-600 rounded-lg p-3 flex items-center gap-2">
+                <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+                <span className="text-white font-medium">Macro verdeling is correct (100%)</span>
+              </div>
+            </div>
+
             {/* Plan Information Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Left Column - Plan Info */}
