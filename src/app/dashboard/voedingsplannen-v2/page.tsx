@@ -318,7 +318,8 @@ export default function VoedingsplannenV2Page() {
       if (!user?.id) return;
       
       try {
-        const response = await fetch('/api/nutrition-profile');
+        console.log('📊 Fetching user profile for userId:', user.id);
+        const response = await fetch(`/api/nutrition-profile-v2?userId=${user.id}`);
         if (response.ok) {
           const data = await response.json();
           if (data.profile) {
@@ -331,7 +332,11 @@ export default function VoedingsplannenV2Page() {
               activity_level: data.profile.activity_level || 'moderate',
               fitness_goal: data.profile.goal || 'onderhoud'
             });
+          } else {
+            console.log('📊 No profile found, using defaults');
           }
+        } else {
+          console.error('Failed to fetch user profile:', response.status);
         }
       } catch (error) {
         console.error('Error fetching user profile:', error);
@@ -409,7 +414,7 @@ export default function VoedingsplannenV2Page() {
 
       console.log('💾 Saving profile for user:', user.id, profile);
 
-      const response = await fetch('/api/nutrition-profile', {
+      const response = await fetch('/api/nutrition-profile-v2', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
