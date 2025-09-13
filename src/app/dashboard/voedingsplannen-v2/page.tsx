@@ -145,7 +145,7 @@ export default function VoedingsplannenV2Page() {
       'very_active': 1.6   // Lopend (1.6x)
     };
 
-    // Goal adjustments (kcal)
+    // Goal adjustments (kcal) - based on the PLAN's goal, not user's fitness goal
     const goalAdjustments = {
       'droogtrainen': -500,  // -500 kcal
       'onderhoud': 0,        // Basis plan (0 kcal)
@@ -154,7 +154,10 @@ export default function VoedingsplannenV2Page() {
 
     // Calculate base calories using TTM formula
     const baseCalories = userProfile.weight * 22 * (activityMultipliers[userProfile.activity_level] || 1.3);
-    const goalAdjustment = goalAdjustments[userProfile.fitness_goal] || 0;
+    
+    // Use the PLAN's goal for calorie adjustment, not the user's fitness goal
+    const planGoal = basePlan.goal?.toLowerCase() || 'onderhoud';
+    const goalAdjustment = goalAdjustments[planGoal] || 0;
     const targetCalories = baseCalories + goalAdjustment;
 
     // Calculate scaling factor compared to backend base (100kg, moderate, onderhoud)
@@ -173,7 +176,8 @@ export default function VoedingsplannenV2Page() {
       targetFat,
       scalingFactor,
       baseCalories: Math.round(baseCalories),
-      goalAdjustment
+      goalAdjustment,
+      planGoal
     };
   };
 
@@ -1012,7 +1016,7 @@ export default function VoedingsplannenV2Page() {
               <div className="bg-[#0A0F0A] rounded-lg p-3 mb-4">
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-[#B6C948] font-semibold text-sm">Gepersonaliseerd voor jou:</p>
-                  <p className="text-gray-400 text-xs">{userProfile.weight}kg • {userProfile.activity_level} • {userProfile.fitness_goal}</p>
+                  <p className="text-gray-400 text-xs">{userProfile.weight}kg • {userProfile.activity_level} • {plan.goal}</p>
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div className="flex justify-between">
@@ -1095,7 +1099,12 @@ export default function VoedingsplannenV2Page() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-400">Jouw aanpassing:</span>
-                  <span className="text-white">{calculatePersonalizedTargets(plans[0] || {}).goalAdjustment} kcal</span>
+                  <span className="text-white">Afhankelijk van plan doel</span>
+                </div>
+                <div className="text-xs text-gray-400 mt-2">
+                  <div>• Droogtrainen: -500 kcal</div>
+                  <div>• Onderhoud: 0 kcal</div>
+                  <div>• Spiermassa: +400 kcal</div>
                 </div>
               </div>
             </div>
