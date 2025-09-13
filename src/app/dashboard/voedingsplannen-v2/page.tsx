@@ -155,13 +155,22 @@ export default function VoedingsplannenV2Page() {
             fat_per_100g: ingredient.fat_per_100g
           });
           
-          // Calculate macros based on amount and unit
+          // Calculate macros based on amount and unit (matching backend logic exactly)
           let multiplier = 1;
-          if (ingredient.unit === 'g' && ingredient.amount) {
-            multiplier = ingredient.amount / 100;
-          } else if (ingredient.unit === 'plakje' && ingredient.amount) {
-            // For items like cheese slices, use the amount directly
-            multiplier = ingredient.amount;
+          const amount = ingredient.amount || 0;
+          
+          // Handle different unit types based on database unit_type (matching backend exactly)
+          if (ingredient.unit === 'per_piece' || ingredient.unit === 'per_plakje' || ingredient.unit === 'stuk') {
+            multiplier = amount;
+          } else if (ingredient.unit === 'per_100g' || ingredient.unit === 'g') {
+            multiplier = amount / 100;
+          } else if (ingredient.unit === 'per_ml') {
+            multiplier = amount / 100; // Assuming 1ml = 1g for liquids
+          } else if (ingredient.unit === 'handje') {
+            multiplier = amount;
+          } else {
+            // Default to per 100g calculation
+            multiplier = amount / 100;
           }
           
           mealTotals.calories += (ingredient.calories_per_100g || 0) * multiplier;
@@ -194,14 +203,22 @@ export default function VoedingsplannenV2Page() {
     let totals = { calories: 0, protein: 0, carbs: 0, fat: 0 };
     
     meal.ingredients.forEach((ingredient: any) => {
-      // Calculate macros based on amount and unit
+      // Calculate macros based on amount and unit (matching backend logic exactly)
       let multiplier = 1;
-      if (ingredient.unit === 'g' && ingredient.amount) {
-        multiplier = ingredient.amount / 100;
-      } else if (ingredient.unit === 'plakje' && ingredient.amount) {
-        multiplier = ingredient.amount;
-      } else if (ingredient.unit === 'piece' && ingredient.amount) {
-        multiplier = ingredient.amount;
+      const amount = ingredient.amount || 0;
+      
+      // Handle different unit types based on database unit_type (matching backend exactly)
+      if (ingredient.unit === 'per_piece' || ingredient.unit === 'per_plakje' || ingredient.unit === 'stuk') {
+        multiplier = amount;
+      } else if (ingredient.unit === 'per_100g' || ingredient.unit === 'g') {
+        multiplier = amount / 100;
+      } else if (ingredient.unit === 'per_ml') {
+        multiplier = amount / 100; // Assuming 1ml = 1g for liquids
+      } else if (ingredient.unit === 'handje') {
+        multiplier = amount;
+      } else {
+        // Default to per 100g calculation
+        multiplier = amount / 100;
       }
       
       totals.calories += (ingredient.calories_per_100g || 0) * multiplier;
@@ -966,14 +983,22 @@ export default function VoedingsplannenV2Page() {
                               </thead>
                               <tbody>
                                 {mealData.ingredients.map((ingredient: any, index: number) => {
-                                  // Calculate individual ingredient totals
+                                  // Calculate individual ingredient totals (matching backend logic exactly)
                                   let multiplier = 1;
-                                  if (ingredient.unit === 'g' && ingredient.amount) {
-                                    multiplier = ingredient.amount / 100;
-                                  } else if (ingredient.unit === 'plakje' && ingredient.amount) {
-                                    multiplier = ingredient.amount;
-                                  } else if (ingredient.unit === 'piece' && ingredient.amount) {
-                                    multiplier = ingredient.amount;
+                                  const amount = ingredient.amount || 0;
+                                  
+                                  // Handle different unit types based on database unit_type (matching backend exactly)
+                                  if (ingredient.unit === 'per_piece' || ingredient.unit === 'per_plakje' || ingredient.unit === 'stuk') {
+                                    multiplier = amount;
+                                  } else if (ingredient.unit === 'per_100g' || ingredient.unit === 'g') {
+                                    multiplier = amount / 100;
+                                  } else if (ingredient.unit === 'per_ml') {
+                                    multiplier = amount / 100; // Assuming 1ml = 1g for liquids
+                                  } else if (ingredient.unit === 'handje') {
+                                    multiplier = amount;
+                                  } else {
+                                    // Default to per 100g calculation
+                                    multiplier = amount / 100;
                                   }
 
                                   const ingredientCalories = (ingredient.calories_per_100g || 0) * multiplier;
