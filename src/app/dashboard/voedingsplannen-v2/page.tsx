@@ -275,6 +275,12 @@ export default function VoedingsplannenV2Page() {
     };
   };
 
+  // Force re-render when userProfile changes
+  const [forceUpdate, setForceUpdate] = useState(0);
+  useEffect(() => {
+    setForceUpdate(prev => prev + 1);
+  }, [userProfile.weight, userProfile.activity_level]);
+  
   // Get personalized targets for progress calculations
   // Calculate personalized targets when originalPlanData is available
   const personalizedTargets = React.useMemo(() => {
@@ -285,12 +291,6 @@ export default function VoedingsplannenV2Page() {
     console.log('🧮 Calculated personalized targets:', targets);
     return targets;
   }, [originalPlanData, userProfile.weight, userProfile.activity_level, forceUpdate]);
-  
-  // Force re-render when userProfile changes
-  const [forceUpdate, setForceUpdate] = useState(0);
-  useEffect(() => {
-    setForceUpdate(prev => prev + 1);
-  }, [userProfile.weight, userProfile.activity_level]);
   
   // Debug: Log current user profile and personalized targets
   console.log('🔍 Current userProfile:', userProfile);
