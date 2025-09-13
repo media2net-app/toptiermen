@@ -86,7 +86,7 @@ interface UserProfile {
 }
 
 export default function VoedingsplannenV2Page() {
-  const { user, isAdmin } = useSupabaseAuth();
+  const { user, isAdmin, loading: authLoading } = useSupabaseAuth();
   const router = useRouter();
   const [plans, setPlans] = useState<NutritionPlan[]>([]);
   const [selectedPlan, setSelectedPlan] = useState<NutritionPlan | null>(null);
@@ -334,8 +334,11 @@ export default function VoedingsplannenV2Page() {
   }, [user?.id]);
 
   useEffect(() => {
+    console.log('🔍 Access check useEffect triggered:', { authLoading, isChiel, userEmail: user?.email });
+    
     // Wait for auth to load before checking access
-    if (loading) {
+    if (authLoading) {
+      console.log('⏳ Auth still loading, waiting...');
       return;
     }
     
@@ -348,7 +351,7 @@ export default function VoedingsplannenV2Page() {
 
     console.log('✅ Access granted to voedingsplannen-v2 for:', user?.email);
     fetchPlans();
-  }, [isChiel, router, loading, user]);
+  }, [isChiel, router, authLoading, user]);
 
   const fetchPlans = async () => {
     try {
