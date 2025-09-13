@@ -79,6 +79,20 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
 
       if (error) {
         console.error('Profile fetch error:', error);
+        // Don't return null immediately - this might cause logout
+        // Instead, create a minimal profile if we have user data
+        if (email) {
+          console.log('Creating fallback profile for email:', email);
+          return {
+            id: userId,
+            email: email,
+            role: 'lid', // Default role
+            full_name: email.split('@')[0],
+            display_name: email.split('@')[0],
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          } as Profile;
+        }
         return null;
       }
 
@@ -96,10 +110,10 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
       try {
         console.log('🔍 Initializing auth session...');
         
-        // Add a race condition with timeout
+        // Add a race condition with timeout - increased timeout to prevent premature logout
         const sessionPromise = supabase.auth.getSession();
         const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Session timeout')), 500)
+          setTimeout(() => reject(new Error('Session timeout')), 3000) // Increased from 500ms to 3s
         );
         
         const { data: { session }, error } = await Promise.race([
@@ -141,11 +155,11 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
       }
     };
 
-    // Add a timeout to prevent infinite loading
+    // Add a timeout to prevent infinite loading - increased timeout
     const initTimeout = setTimeout(() => {
       console.log('⚠️ Auth initialization timeout - forcing completion');
       setLoading(false);
-    }, 1000);
+    }, 5000); // Increased from 1s to 5s
 
     getInitialSession().then(() => {
       clearTimeout(initTimeout);
@@ -156,17 +170,27 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
       async (event, session) => {
         console.log('🔔 Auth state change:', event, session?.user?.email);
         
-        if (event === 'SIGNED_IN' && session?.user) {
-          setUser(session.user);
-          const userProfile = await fetchProfile(session.user.id, session.user.email);
-          setProfile(userProfile);
-          setError(null);
-        } else if (event === 'SIGNED_OUT') {
-          setUser(null);
-          setProfile(null);
-          setError(null);
+        try {
+          if (event === 'SIGNED_IN' && session?.user) {
+            setUser(session.user);
+            const userProfile = await fetchProfile(session.user.id, session.user.email);
+            setProfile(userProfile);
+            setError(null);
+          } else if (event === 'SIGNED_OUT') {
+            console.log('🚪 User signed out - clearing state');
+            setUser(null);
+            setProfile(null);
+            setError(null);
+          } else if (event === 'TOKEN_REFRESHED') {
+            console.log('🔄 Token refreshed successfully');
+            // Don't clear user state on token refresh
+          }
+        } catch (error) {
+          console.error('❌ Auth state change error:', error);
+          // Don't clear user state on error - this might be temporary
+        } finally {
+          setLoading(false);
         }
-        setLoading(false);
       }
     );
 

@@ -15,7 +15,8 @@ import {
 } from '@heroicons/react/24/solid';
 
 interface NutritionPlan {
-  id: string;
+  id: string | number;
+  plan_id?: string;
   name: string;
   description: string;
   target_calories: number;
@@ -161,7 +162,7 @@ export default function VoedingsplannenV2Page() {
     setSelectedPlan(plan);
     setShowOriginalData(true);
     setScalingInfo(null); // Reset scaling info
-    loadOriginalPlanData(plan.id);
+    loadOriginalPlanData(plan.plan_id || plan.id.toString());
   };
 
   // Show loading state
@@ -322,7 +323,7 @@ export default function VoedingsplannenV2Page() {
                 onClick={() => {
                   setShowOriginalData(false);
                   if (!scalingInfo) {
-                    applySmartScaling(selectedPlan.id);
+                    applySmartScaling(selectedPlan.plan_id || selectedPlan.id.toString());
                   }
                 }}
                 disabled={loadingScaling}
