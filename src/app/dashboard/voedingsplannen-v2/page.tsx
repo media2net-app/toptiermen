@@ -201,6 +201,8 @@ export default function VoedingsplannenV2Page() {
     const targetCalories = baseCalories + goalAdjustment;
 
     console.log('🧮 Calculation details:', {
+      userWeight: userProfile.weight,
+      userActivity: userProfile.activity_level,
       baseCalories,
       planGoal,
       goalAdjustment,
@@ -276,9 +278,22 @@ export default function VoedingsplannenV2Page() {
   // Get personalized targets for progress calculations
   const personalizedTargets = originalPlanData ? calculatePersonalizedTargets(originalPlanData) : null;
   
+  // Force re-render when userProfile changes
+  const [forceUpdate, setForceUpdate] = useState(0);
+  useEffect(() => {
+    setForceUpdate(prev => prev + 1);
+  }, [userProfile.weight, userProfile.activity_level]);
+  
   // Debug: Log current user profile and personalized targets
   console.log('🔍 Current userProfile:', userProfile);
+  console.log('🔍 OriginalPlanData:', originalPlanData);
   console.log('🔍 Personalized targets:', personalizedTargets);
+  console.log('🔍 Personalized targets calculation:', personalizedTargets ? {
+    targetCalories: personalizedTargets.targetCalories,
+    targetProtein: personalizedTargets.targetProtein,
+    targetCarbs: personalizedTargets.targetCarbs,
+    targetFat: personalizedTargets.targetFat
+  } : 'null');
   
   // Get progress info for each macro using personalized targets
   const caloriesProgress = getProgressInfo(currentDayTotals.calories, personalizedTargets?.targetCalories || originalPlanData?.target_calories || 0);
