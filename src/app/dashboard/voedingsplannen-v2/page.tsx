@@ -322,6 +322,7 @@ export default function VoedingsplannenV2Page() {
         const response = await fetch(`/api/nutrition-profile-v2?userId=${user.id}`);
         if (response.ok) {
           const data = await response.json();
+          console.log('📊 V2 API Response:', data);
           if (data.profile) {
             console.log('📊 Fetched user profile:', data.profile);
             setUserProfile({
@@ -339,6 +340,8 @@ export default function VoedingsplannenV2Page() {
           }
         } else {
           console.error('Failed to fetch user profile:', response.status);
+          const errorText = await response.text();
+          console.error('Error response:', errorText);
         }
       } catch (error) {
         console.error('Error fetching user profile:', error);
