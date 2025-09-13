@@ -18,7 +18,8 @@ import {
   UsersIcon, BookOpenIcon, StarIcon, UserCircleIcon, ChatBubbleLeftRightIcon, 
   ChevronUpIcon, ChevronDownIcon, Bars3Icon, XMarkIcon, BellIcon, 
   EnvelopeIcon, CheckCircleIcon, UserGroupIcon, TrophyIcon, 
-  CalendarDaysIcon, ShoppingBagIcon, ChevronLeftIcon, ChevronRightIcon 
+  CalendarDaysIcon, ShoppingBagIcon, ChevronLeftIcon, ChevronRightIcon,
+  RocketLaunchIcon
 } from '@heroicons/react/24/solid';
 import DebugPanel from '@/components/DebugPanel';
 import ForcedOnboardingModal from '@/components/ForcedOnboardingModal';
@@ -76,6 +77,7 @@ const menu = [
   { label: 'Academy', icon: FireIcon, href: '/dashboard/academy', onboardingStep: 7 },
   { label: 'Trainingsschemas', icon: AcademicCapIcon, href: '/dashboard/trainingsschemas', onboardingStep: 3 },
   { label: 'Voedingsplannen', icon: BookOpenIcon, href: '/dashboard/voedingsplannen', onboardingStep: 4 },
+  { label: 'Voedingsplannen V2', icon: RocketLaunchIcon, href: '/dashboard-admin/voedingsplannen-v2', onboardingStep: 4, adminOnly: true, badge: 'V2' },
   { label: 'Mind & Focus (binnenkort online)', icon: ChartBarIcon, href: null, onboardingStep: 7, disabled: true },
   { label: 'Brotherhood', icon: UsersIcon, href: '/dashboard/brotherhood', onboardingStep: 7 },
   { label: 'Social Feed', icon: ChatBubbleLeftRightIcon, parent: 'Brotherhood', href: '/dashboard/brotherhood/social-feed', isSub: true, onboardingStep: 7 },
@@ -102,7 +104,7 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
   
   // Use onboardingStatus from props if available, otherwise fallback to context
   const actualOnboardingStatus = onboardingStatus || { current_step: currentStep, onboarding_completed: !isOnboarding };
-  const { user } = useSupabaseAuth();
+  const { user, isAdmin } = useSupabaseAuth();
   const { hasAccess } = useSubscription();
   
   const safePathname = pathname || '';
@@ -122,8 +124,13 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
     }
   }, [actualOnboardingStatus?.onboarding_completed, showOnboardingCompletion]);
 
-  // Function to check if a menu item should be visible based on subscription tier
+  // Function to check if a menu item should be visible based on subscription tier and admin status
   const isMenuItemVisible = (item: any) => {
+    // Check admin-only items first
+    if (item.adminOnly && !isAdmin) {
+      return false;
+    }
+    
     // Check subscription-based access for specific features
     if (item.href === '/dashboard/voedingsplannen') {
       return hasAccess('nutrition');
@@ -348,7 +355,18 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
               }`}
             >
               <item.icon className={`w-6 h-6 ${item.disabled ? 'text-gray-500' : isActive ? 'text-white' : shouldBeYellow ? 'text-[#FFD700]' : shouldBeGreen ? 'text-[#8BAE5A]' : 'text-[#8BAE5A]'}`} />
-              <span className="truncate">{item.label}</span>
+              <div className="flex items-center justify-between w-full">
+                <span className="truncate">{item.label}</span>
+                {item.badge && (
+                  <span className={`ml-2 px-2 py-1 text-xs font-bold rounded-full ${
+                    item.badge === 'V2' 
+                      ? 'bg-[#B6C948] text-[#181F17]' 
+                      : 'bg-[#8BAE5A] text-[#181F17]'
+                  }`}>
+                    {item.badge}
+                  </span>
+                )}
+              </div>
             </Link>
           );
         }
@@ -373,7 +391,7 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
   // Use onboardingStatus from props if available, otherwise fallback to context
   const actualOnboardingStatus = onboardingStatus || { current_step: currentStep, onboarding_completed: !isOnboarding };
   // const { trackFeatureUsage } = useV2Monitoring();
-  const { user } = useSupabaseAuth();
+  const { user, isAdmin } = useSupabaseAuth();
   const { hasAccess } = useSubscription();
   
   const safePathname = pathname || '';
@@ -393,8 +411,13 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
     }
   }, [actualOnboardingStatus?.onboarding_completed, showOnboardingCompletion]);
 
-  // Function to check if a menu item should be visible based on subscription tier
+  // Function to check if a menu item should be visible based on subscription tier and admin status
   const isMenuItemVisible = (item: any) => {
+    // Check admin-only items first
+    if (item.adminOnly && !isAdmin) {
+      return false;
+    }
+    
     // Check subscription-based access for specific features
     if (item.href === '/dashboard/voedingsplannen') {
       return hasAccess('nutrition');
@@ -650,6 +673,15 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
               {!collapsed && (
                 <div className="flex items-center justify-between w-full">
                   <span className="truncate">{item.label}</span>
+                  {item.badge && (
+                    <span className={`ml-2 px-2 py-1 text-xs font-bold rounded-full ${
+                      item.badge === 'V2' 
+                        ? 'bg-[#B6C948] text-[#181F17]' 
+                        : 'bg-[#8BAE5A] text-[#181F17]'
+                    }`}>
+                      {item.badge}
+                    </span>
+                  )}
                 </div>
               )}
             </Link>
