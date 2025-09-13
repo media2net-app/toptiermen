@@ -106,6 +106,10 @@ export default function VoedingsplannenV2Page() {
     fitness_goal: 'onderhoud'   // Backend basis plan is onderhoud
   });
   const [showUserProfileForm, setShowUserProfileForm] = useState(false);
+  const [selectedDay, setSelectedDay] = useState<string>('maandag');
+
+  // Days of the week
+  const days = ['maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag', 'zondag'];
 
   // Check if user is specifically chiel@media2net.nl
   const isChiel = user?.email === 'chiel@media2net.nl';
@@ -385,15 +389,31 @@ export default function VoedingsplannenV2Page() {
           <div className="bg-[#181F17] border border-[#3A4D23] rounded-xl p-6">
             <h3 className="text-xl font-bold text-white mb-6">Gedetailleerde Eetmomenten</h3>
             
-            {originalPlanData.meals?.weekly_plan && Object.keys(originalPlanData.meals.weekly_plan).length > 0 && (
-              <div className="space-y-8">
-                {Object.entries(originalPlanData.meals.weekly_plan).map(([day, dayMeals]) => (
-                  <div key={day} className="bg-[#0A0F0A] rounded-lg p-6">
-                    <h4 className="text-[#B6C948] font-bold text-lg mb-4 capitalize">{day}</h4>
+            {/* Day Tabs */}
+            <div className="flex flex-wrap gap-2 mb-6">
+              {days.map((day) => (
+                <button
+                  key={day}
+                  onClick={() => setSelectedDay(day)}
+                  className={`px-4 py-2 rounded-lg font-semibold transition-all duration-200 capitalize ${
+                    selectedDay === day
+                      ? 'bg-[#8BAE5A] text-[#181F17]'
+                      : 'bg-[#0A0F0A] text-white hover:bg-[#3A4D23] border border-[#3A4D23]'
+                  }`}
+                >
+                  {day}
+                </button>
+              ))}
+            </div>
+            
+            {/* Selected Day Meals */}
+            {originalPlanData.meals?.weekly_plan && originalPlanData.meals.weekly_plan[selectedDay] && (
+              <div className="bg-[#0A0F0A] rounded-lg p-6">
+                <h4 className="text-[#B6C948] font-bold text-lg mb-4 capitalize">{selectedDay}</h4>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                      {['ontbijt', 'ochtend_snack', 'lunch', 'lunch_snack', 'diner'].map((mealType) => {
-                        const mealData = dayMeals[mealType];
+                <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                  {['ontbijt', 'ochtend_snack', 'lunch', 'lunch_snack', 'diner'].map((mealType) => {
+                    const mealData = originalPlanData.meals.weekly_plan[selectedDay][mealType];
                         const mealTypeLabel = mealType === 'ochtend_snack' ? 'Ochtend Snack' :
                                              mealType === 'lunch_snack' ? 'Lunch Snack' :
                                              mealType === 'ontbijt' ? 'Ontbijt' :
@@ -439,11 +459,9 @@ export default function VoedingsplannenV2Page() {
                               <div className="text-sm text-gray-500">Geen data beschikbaar</div>
                             )}
                           </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
+                </div>
               </div>
             )}
           </div>
@@ -913,15 +931,31 @@ export default function VoedingsplannenV2Page() {
             <div className="mt-6">
               <h4 className="text-white font-semibold mb-4">Gedetailleerde Eetmomenten</h4>
               
-              {originalPlanData.meals?.weekly_plan && Object.keys(originalPlanData.meals.weekly_plan).length > 0 && (
-                <div className="space-y-6">
-                  {Object.entries(originalPlanData.meals.weekly_plan).map(([day, dayMeals]) => (
-                    <div key={day} className="bg-[#0A0F0A] rounded-lg p-4">
-                      <h5 className="text-[#B6C948] font-semibold mb-4 capitalize">{day}</h5>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                        {['ontbijt', 'ochtend_snack', 'lunch', 'lunch_snack', 'diner'].map((mealType) => {
-                          const mealData = dayMeals[mealType];
+              {/* Day Tabs for Smart Scaling */}
+              <div className="flex flex-wrap gap-2 mb-6">
+                {days.map((day) => (
+                  <button
+                    key={day}
+                    onClick={() => setSelectedDay(day)}
+                    className={`px-4 py-2 rounded-lg font-semibold transition-all duration-200 capitalize ${
+                      selectedDay === day
+                        ? 'bg-[#8BAE5A] text-[#181F17]'
+                        : 'bg-[#0A0F0A] text-white hover:bg-[#3A4D23] border border-[#3A4D23]'
+                    }`}
+                  >
+                    {day}
+                  </button>
+                ))}
+              </div>
+              
+              {/* Selected Day Meals for Smart Scaling */}
+              {originalPlanData.meals?.weekly_plan && originalPlanData.meals.weekly_plan[selectedDay] && (
+                <div className="bg-[#0A0F0A] rounded-lg p-4">
+                  <h5 className="text-[#B6C948] font-semibold mb-4 capitalize">{selectedDay}</h5>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                    {['ontbijt', 'ochtend_snack', 'lunch', 'lunch_snack', 'diner'].map((mealType) => {
+                      const mealData = originalPlanData.meals.weekly_plan[selectedDay][mealType];
                           const mealTypeLabel = mealType === 'ochtend_snack' ? 'Ochtend Snack' :
                                                mealType === 'lunch_snack' ? 'Lunch Snack' :
                                                mealType === 'ontbijt' ? 'Ontbijt' :
@@ -963,11 +997,9 @@ export default function VoedingsplannenV2Page() {
                                 <div className="text-xs text-gray-500">Geen data</div>
                               )}
                             </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
+                  </div>
                 </div>
               )}
             </div>
