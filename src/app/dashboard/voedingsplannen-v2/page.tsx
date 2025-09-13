@@ -312,49 +312,50 @@ export default function VoedingsplannenV2Page() {
   // Check if user is specifically chiel@media2net.nl
   const isChiel = user?.email === 'chiel@media2net.nl';
 
+  // Define fetchUserProfile function outside useEffect so it can be reused
+  const fetchUserProfile = async () => {
+    if (!user?.id) {
+      console.log('❌ No user ID available for profile fetch');
+      return;
+    }
+    
+    try {
+      console.log('📊 Fetching user profile for userId:', user.id);
+      const response = await fetch(`/api/nutrition-profile-v2?userId=${user.id}`);
+      console.log('📊 Profile fetch response status:', response.status);
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('📊 V2 API Response:', data);
+        if (data.profile) {
+          console.log('📊 Fetched user profile:', data.profile);
+          const newProfile = {
+            weight: data.profile.weight || 100,
+            height: data.profile.height || 180,
+            age: data.profile.age || 30,
+            gender: data.profile.gender || 'male',
+            activity_level: data.profile.activity_level || 'moderate',
+            fitness_goal: data.profile.goal === 'cut' ? 'droogtrainen' : 
+                         data.profile.goal === 'maintain' ? 'onderhoud' : 
+                         data.profile.goal === 'bulk' ? 'spiermassa' : 'onderhoud'
+          };
+          console.log('📊 Setting user profile to:', newProfile);
+          setUserProfile(newProfile);
+        } else {
+          console.log('📊 No profile found, using defaults');
+        }
+      } else {
+        console.error('Failed to fetch user profile:', response.status);
+        const errorText = await response.text();
+        console.error('Error response:', errorText);
+      }
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+    }
+  };
+
   // Fetch user profile when component loads
   useEffect(() => {
-    const fetchUserProfile = async () => {
-      if (!user?.id) {
-        console.log('❌ No user ID available for profile fetch');
-        return;
-      }
-      
-      try {
-        console.log('📊 Fetching user profile for userId:', user.id);
-        const response = await fetch(`/api/nutrition-profile-v2?userId=${user.id}`);
-        console.log('📊 Profile fetch response status:', response.status);
-        
-        if (response.ok) {
-          const data = await response.json();
-          console.log('📊 V2 API Response:', data);
-          if (data.profile) {
-            console.log('📊 Fetched user profile:', data.profile);
-            const newProfile = {
-              weight: data.profile.weight || 100,
-              height: data.profile.height || 180,
-              age: data.profile.age || 30,
-              gender: data.profile.gender || 'male',
-              activity_level: data.profile.activity_level || 'moderate',
-              fitness_goal: data.profile.goal === 'cut' ? 'droogtrainen' : 
-                           data.profile.goal === 'maintain' ? 'onderhoud' : 
-                           data.profile.goal === 'bulk' ? 'spiermassa' : 'onderhoud'
-            };
-            console.log('📊 Setting user profile to:', newProfile);
-            setUserProfile(newProfile);
-          } else {
-            console.log('📊 No profile found, using defaults');
-          }
-        } else {
-          console.error('Failed to fetch user profile:', response.status);
-          const errorText = await response.text();
-          console.error('Error response:', errorText);
-        }
-      } catch (error) {
-        console.error('Error fetching user profile:', error);
-      }
-    };
-
     fetchUserProfile();
   }, [user?.id]);
 
@@ -629,28 +630,28 @@ export default function VoedingsplannenV2Page() {
                       <FireIcon className="w-5 h-5 text-[#B6C948]" />
                       <span className="text-[#8BAE5A] font-medium">Calorieën</span>
                     </div>
-                    <p className="text-2xl font-bold text-white">{originalPlanData.target_calories} kcal</p>
+                    <p className="text-2xl font-bold text-white">{personalizedTargets?.targetCalories || originalPlanData.target_calories} kcal</p>
                   </div>
                   <div className="bg-[#0A0F0A] rounded-lg p-4">
                     <div className="flex items-center gap-2 mb-2">
                       <ChartBarIcon className="w-5 h-5 text-[#B6C948]" />
                       <span className="text-[#8BAE5A] font-medium">Eiwit</span>
                     </div>
-                    <p className="text-2xl font-bold text-white">{originalPlanData.target_protein}g</p>
+                    <p className="text-2xl font-bold text-white">{personalizedTargets?.targetProtein || originalPlanData.target_protein}g</p>
                   </div>
                   <div className="bg-[#0A0F0A] rounded-lg p-4">
                     <div className="flex items-center gap-2 mb-2">
                       <ClockIcon className="w-5 h-5 text-[#B6C948]" />
                       <span className="text-[#8BAE5A] font-medium">Koolhydraten</span>
                     </div>
-                    <p className="text-2xl font-bold text-white">{originalPlanData.target_carbs}g</p>
+                    <p className="text-2xl font-bold text-white">{personalizedTargets?.targetCarbs || originalPlanData.target_carbs}g</p>
                   </div>
                   <div className="bg-[#0A0F0A] rounded-lg p-4">
                     <div className="flex items-center gap-2 mb-2">
                       <HeartIcon className="w-5 h-5 text-[#B6C948]" />
                       <span className="text-[#8BAE5A] font-medium">Vet</span>
                     </div>
-                    <p className="text-2xl font-bold text-white">{originalPlanData.target_fat}g</p>
+                    <p className="text-2xl font-bold text-white">{personalizedTargets?.targetFat || originalPlanData.target_fat}g</p>
                   </div>
                 </div>
               </div>
