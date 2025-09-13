@@ -333,13 +333,20 @@ export default function VoedingsplannenV2Page() {
 
   const saveUserProfile = async (profile: UserProfile) => {
     try {
+      // Validate user ID before making request
+      if (!user?.id) {
+        throw new Error('No user ID available. Please log in again.');
+      }
+
+      console.log('💾 Saving profile for user:', user.id, profile);
+
       const response = await fetch('/api/nutrition-profile', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          userId: user?.id,
+          userId: user.id,
           age: profile.age,
           height: profile.height,
           weight: profile.weight,
