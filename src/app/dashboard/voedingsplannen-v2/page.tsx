@@ -113,16 +113,26 @@ export default function VoedingsplannenV2Page() {
 
   // Function to calculate daily totals for selected day
   const calculateDayTotals = (day: string) => {
+    console.log('🧮 Calculating day totals for:', day);
+    console.log('🔍 OriginalPlanData available:', !!originalPlanData);
+    console.log('🔍 Meals available:', !!originalPlanData?.meals);
+    console.log('🔍 Weekly plan available:', !!originalPlanData?.meals?.weekly_plan);
+    console.log('🔍 Day data available:', !!originalPlanData?.meals?.weekly_plan?.[day]);
+    
     if (!originalPlanData?.meals?.weekly_plan?.[day]) {
+      console.log('❌ No day data found, returning zeros');
       return { calories: 0, protein: 0, carbs: 0, fat: 0 };
     }
 
     const dayMeals = originalPlanData.meals.weekly_plan[day];
+    console.log('🔍 Day meals structure:', Object.keys(dayMeals));
     let totals = { calories: 0, protein: 0, carbs: 0, fat: 0 };
 
     ['ontbijt', 'ochtend_snack', 'lunch', 'lunch_snack', 'diner'].forEach(mealType => {
       const meal = dayMeals[mealType];
+      console.log(`🔍 ${mealType}:`, meal ? 'exists' : 'missing', meal?.totals ? 'has totals' : 'no totals');
       if (meal?.totals) {
+        console.log(`📊 ${mealType} totals:`, meal.totals);
         totals.calories += meal.totals.calories || 0;
         totals.protein += meal.totals.protein || 0;
         totals.carbs += meal.totals.carbs || 0;
@@ -130,6 +140,7 @@ export default function VoedingsplannenV2Page() {
       }
     });
 
+    console.log('📊 Final day totals:', totals);
     return totals;
   };
 
@@ -411,6 +422,12 @@ export default function VoedingsplannenV2Page() {
       const data = await response.json();
       setOriginalPlanData(data.plan);
       console.log('✅ Original plan data loaded:', data.plan.name);
+      console.log('🔍 Plan data structure:', {
+        hasMeals: !!data.plan.meals,
+        hasWeeklyPlan: !!data.plan.meals?.weekly_plan,
+        maandagExists: !!data.plan.meals?.weekly_plan?.maandag,
+        maandagStructure: data.plan.meals?.weekly_plan?.maandag ? Object.keys(data.plan.meals.weekly_plan.maandag) : 'N/A'
+      });
       
       // Also fetch user profile when loading plan data
       if (user?.id) {
