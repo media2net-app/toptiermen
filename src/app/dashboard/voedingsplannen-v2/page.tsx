@@ -211,6 +211,13 @@ export default function VoedingsplannenV2Page() {
     loadOriginalPlanData(plan.plan_id || plan.id.toString());
   };
 
+  const handleBackToPlans = () => {
+    setSelectedPlan(null);
+    setOriginalPlanData(null);
+    setScalingInfo(null);
+    setShowOriginalData(true);
+  };
+
   // Show loading state
   if ((loading && plans.length === 0) || loadingOriginal) {
     return (
@@ -247,6 +254,271 @@ export default function VoedingsplannenV2Page() {
             Opnieuw Proberen
           </button>
         </div>
+      </div>
+    );
+  }
+
+  // Show detail page when a plan is selected
+  if (selectedPlan && originalPlanData) {
+    return (
+      <div className="min-h-screen bg-[#0A0F0A] p-6">
+        {/* Back Button */}
+        <div className="mb-6">
+          <button
+            onClick={handleBackToPlans}
+            className="flex items-center gap-2 px-4 py-2 bg-[#3A4D23] text-[#8BAE5A] rounded-lg hover:bg-[#4A5D33] transition-colors"
+          >
+            <ArrowLeftIcon className="w-4 h-4" />
+            <span>Terug naar Plannen</span>
+          </button>
+        </div>
+
+        {/* Plan Detail Header */}
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8"
+        >
+          <div className="bg-[#181F17] border border-[#3A4D23] rounded-xl p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-gradient-to-r from-[#B6C948] to-[#8BAE5A] rounded-full flex items-center justify-center">
+                  <BookOpenIcon className="w-6 h-6 text-[#181F17]" />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold text-white">{selectedPlan.name}</h1>
+                  <p className="text-[#8BAE5A]">Originele Backend Data - 1:1 zoals opgeslagen in database</p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setShowOriginalData(false);
+                  if (!scalingInfo) {
+                    applySmartScaling(selectedPlan.plan_id || selectedPlan.id.toString());
+                  }
+                }}
+                disabled={loadingScaling}
+                className="px-6 py-3 bg-gradient-to-r from-[#B6C948] to-[#8BAE5A] text-[#181F17] rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-2 font-semibold"
+              >
+                {loadingScaling ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-[#181F17] border-t-transparent rounded-full animate-spin"></div>
+                    <span>Bezig...</span>
+                  </>
+                ) : (
+                  <>
+                    <RocketLaunchIcon className="w-5 h-5" />
+                    <span>{scalingInfo ? 'Bekijk Smart Scaling' : 'Smart Scaling Toepassen'}</span>
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* Plan Information Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Left Column - Plan Info */}
+              <div>
+                <h3 className="text-xl font-bold text-white mb-4">Plan Informatie</h3>
+                <div className="space-y-3">
+                  <div>
+                    <span className="text-[#8BAE5A] font-medium">Naam:</span>
+                    <span className="text-white ml-2">{originalPlanData.name}</span>
+                  </div>
+                  <div>
+                    <span className="text-[#8BAE5A] font-medium">Plan ID:</span>
+                    <span className="text-white ml-2">{originalPlanData.plan_id}</span>
+                  </div>
+                  <div>
+                    <span className="text-[#8BAE5A] font-medium">Beschrijving:</span>
+                    <p className="text-white mt-1">{selectedPlan.description}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column - Macro Targets */}
+              <div>
+                <h3 className="text-xl font-bold text-white mb-4">Macro Doelen</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-[#0A0F0A] rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <FireIcon className="w-5 h-5 text-[#B6C948]" />
+                      <span className="text-[#8BAE5A] font-medium">Calorieën</span>
+                    </div>
+                    <p className="text-2xl font-bold text-white">{originalPlanData.target_calories} kcal</p>
+                  </div>
+                  <div className="bg-[#0A0F0A] rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <ChartBarIcon className="w-5 h-5 text-[#B6C948]" />
+                      <span className="text-[#8BAE5A] font-medium">Eiwit</span>
+                    </div>
+                    <p className="text-2xl font-bold text-white">{originalPlanData.target_protein}g</p>
+                  </div>
+                  <div className="bg-[#0A0F0A] rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <ClockIcon className="w-5 h-5 text-[#B6C948]" />
+                      <span className="text-[#8BAE5A] font-medium">Koolhydraten</span>
+                    </div>
+                    <p className="text-2xl font-bold text-white">{originalPlanData.target_carbs}g</p>
+                  </div>
+                  <div className="bg-[#0A0F0A] rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <HeartIcon className="w-5 h-5 text-[#B6C948]" />
+                      <span className="text-[#8BAE5A] font-medium">Vet</span>
+                    </div>
+                    <p className="text-2xl font-bold text-white">{originalPlanData.target_fat}g</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Detailed Meal Structure */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+        >
+          <div className="bg-[#181F17] border border-[#3A4D23] rounded-xl p-6">
+            <h3 className="text-xl font-bold text-white mb-6">Gedetailleerde Eetmomenten</h3>
+            
+            {originalPlanData.meals?.weekly_plan && Object.keys(originalPlanData.meals.weekly_plan).length > 0 && (
+              <div className="space-y-8">
+                {Object.entries(originalPlanData.meals.weekly_plan).map(([day, dayMeals]) => (
+                  <div key={day} className="bg-[#0A0F0A] rounded-lg p-6">
+                    <h4 className="text-[#B6C948] font-bold text-lg mb-4 capitalize">{day}</h4>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                      {['ontbijt', 'ochtend_snack', 'lunch', 'lunch_snack', 'diner'].map((mealType) => {
+                        const mealData = dayMeals[mealType];
+                        const mealTypeLabel = mealType === 'ochtend_snack' ? 'Ochtend Snack' :
+                                             mealType === 'lunch_snack' ? 'Lunch Snack' :
+                                             mealType === 'ontbijt' ? 'Ontbijt' :
+                                             mealType === 'lunch' ? 'Lunch' :
+                                             mealType === 'diner' ? 'Diner' : mealType;
+
+                        return (
+                          <div key={mealType} className="bg-[#181F17] rounded-lg p-4 border border-[#3A4D23]">
+                            <h5 className="text-white font-semibold mb-3 flex items-center gap-2">
+                              <ClockIcon className="w-4 h-4 text-[#8BAE5A]" />
+                              {mealTypeLabel}
+                            </h5>
+                            
+                            {mealData && mealData.ingredients ? (
+                              <div className="space-y-3">
+                                <div className="text-xs text-[#8BAE5A] mb-2">
+                                  {mealData.ingredients.length} ingrediënten
+                                </div>
+                                
+                                {/* Show all ingredients */}
+                                {mealData.ingredients.map((ingredient: any, index: number) => (
+                                  <div key={index} className="text-sm text-gray-300 bg-[#0A0F0A] rounded p-2">
+                                    <div className="font-medium text-white">
+                                      {ingredient.amount} {ingredient.unit} {ingredient.name}
+                                    </div>
+                                    {ingredient.calories && (
+                                      <div className="text-xs text-[#8BAE5A] mt-1">
+                                        {ingredient.calories} kcal • P: {ingredient.protein}g • K: {ingredient.carbs}g • V: {ingredient.fat}g
+                                      </div>
+                                    )}
+                                  </div>
+                                ))}
+                                
+                                {/* Show meal totals if available */}
+                                {mealData.totals && (
+                                  <div className="text-sm text-[#B6C948] mt-3 pt-3 border-t border-[#3A4D23] font-semibold">
+                                    <div>Totaal: {mealData.totals.calories} kcal</div>
+                                    <div>Eiwit: {mealData.totals.protein}g • Koolhydraten: {mealData.totals.carbs}g • Vet: {mealData.totals.fat}g</div>
+                                  </div>
+                                )}
+                              </div>
+                            ) : (
+                              <div className="text-sm text-gray-500">Geen data beschikbaar</div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </motion.div>
+
+        {/* Smart Scaling Results */}
+        {scalingInfo && !showOriginalData && (
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="mt-8"
+          >
+            <div className="bg-[#181F17] border border-[#3A4D23] rounded-xl p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-gradient-to-r from-[#B6C948] to-[#8BAE5A] rounded-full flex items-center justify-center">
+                    <RocketLaunchIcon className="w-6 h-6 text-[#181F17]" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-white">Smart Scaling Resultaten</h2>
+                    <p className="text-[#8BAE5A]">Geoptimaliseerd voor jouw profiel ({userProfile.weight}kg, {userProfile.activity_level}, {userProfile.fitness_goal})</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowOriginalData(true)}
+                  className="px-4 py-2 bg-[#3A4D23] text-[#8BAE5A] rounded-lg hover:bg-[#4A5D33] transition-colors flex items-center gap-2"
+                >
+                  <BookOpenIcon className="w-4 h-4" />
+                  <span>Bekijk Originele Data</span>
+                </button>
+              </div>
+
+              {/* Scaling Info Display */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <div className="bg-[#0A0F0A] rounded-lg p-6">
+                  <h3 className="text-lg font-bold text-white mb-4">Scaling Informatie</h3>
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-[#8BAE5A]">Jouw gewicht:</span>
+                      <span className="text-white font-semibold">{scalingInfo.userWeight}kg</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-[#8BAE5A]">Basis gewicht:</span>
+                      <span className="text-white font-semibold">{scalingInfo.baseWeight}kg</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-[#8BAE5A]">Scaling factor:</span>
+                      <span className="text-[#B6C948] font-bold">{scalingInfo.scalingFactor.toFixed(2)}x</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-[#0A0F0A] rounded-lg p-6">
+                  <h3 className="text-lg font-bold text-white mb-4">Aangepaste Macro Doelen</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <span className="text-[#8BAE5A] text-sm">Calorieën</span>
+                      <p className="text-xl font-bold text-white">{scalingInfo.adjustedCalories}</p>
+                    </div>
+                    <div>
+                      <span className="text-[#8BAE5A] text-sm">Eiwit</span>
+                      <p className="text-xl font-bold text-white">{scalingInfo.adjustedProtein}g</p>
+                    </div>
+                    <div>
+                      <span className="text-[#8BAE5A] text-sm">Koolhydraten</span>
+                      <p className="text-xl font-bold text-white">{scalingInfo.adjustedCarbs}g</p>
+                    </div>
+                    <div>
+                      <span className="text-[#8BAE5A] text-sm">Vet</span>
+                      <p className="text-xl font-bold text-white">{scalingInfo.adjustedFat}g</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
       </div>
     );
   }
