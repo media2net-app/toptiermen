@@ -131,12 +131,50 @@ export default function VoedingsplannenV2Page() {
     ['ontbijt', 'ochtend_snack', 'lunch', 'lunch_snack', 'diner'].forEach(mealType => {
       const meal = dayMeals[mealType];
       console.log(`🔍 ${mealType}:`, meal ? 'exists' : 'missing', meal?.totals ? 'has totals' : 'no totals');
+      
       if (meal?.totals) {
+        // Use existing totals if available
         console.log(`📊 ${mealType} totals:`, meal.totals);
         totals.calories += meal.totals.calories || 0;
         totals.protein += meal.totals.protein || 0;
         totals.carbs += meal.totals.carbs || 0;
         totals.fat += meal.totals.fat || 0;
+      } else if (meal?.ingredients && Array.isArray(meal.ingredients)) {
+        // Calculate totals from individual ingredients
+        console.log(`🧮 Calculating ${mealType} from ${meal.ingredients.length} ingredients`);
+        let mealTotals = { calories: 0, protein: 0, carbs: 0, fat: 0 };
+        
+        meal.ingredients.forEach((ingredient: any, index: number) => {
+          console.log(`🔍 Ingredient ${index}:`, {
+            name: ingredient.name,
+            amount: ingredient.amount,
+            unit: ingredient.unit,
+            calories_per_100g: ingredient.calories_per_100g,
+            protein_per_100g: ingredient.protein_per_100g,
+            carbs_per_100g: ingredient.carbs_per_100g,
+            fat_per_100g: ingredient.fat_per_100g
+          });
+          
+          // Calculate macros based on amount and unit
+          let multiplier = 1;
+          if (ingredient.unit === 'g' && ingredient.amount) {
+            multiplier = ingredient.amount / 100;
+          } else if (ingredient.unit === 'plakje' && ingredient.amount) {
+            // For items like cheese slices, use the amount directly
+            multiplier = ingredient.amount;
+          }
+          
+          mealTotals.calories += (ingredient.calories_per_100g || 0) * multiplier;
+          mealTotals.protein += (ingredient.protein_per_100g || 0) * multiplier;
+          mealTotals.carbs += (ingredient.carbs_per_100g || 0) * multiplier;
+          mealTotals.fat += (ingredient.fat_per_100g || 0) * multiplier;
+        });
+        
+        console.log(`📊 ${mealType} calculated totals:`, mealTotals);
+        totals.calories += mealTotals.calories;
+        totals.protein += mealTotals.protein;
+        totals.carbs += mealTotals.carbs;
+        totals.fat += mealTotals.fat;
       }
     });
 
@@ -428,6 +466,15 @@ export default function VoedingsplannenV2Page() {
         maandagExists: !!data.plan.meals?.weekly_plan?.maandag,
         maandagStructure: data.plan.meals?.weekly_plan?.maandag ? Object.keys(data.plan.meals.weekly_plan.maandag) : 'N/A'
       });
+      
+      // Log detailed ingredient structure for first meal
+      if (data.plan.meals?.weekly_plan?.maandag?.ontbijt) {
+        console.log('🔍 Ontbijt ingredient structure:', {
+          ingredients: data.plan.meals.weekly_plan.maandag.ontbijt.ingredients?.length || 0,
+          firstIngredient: data.plan.meals.weekly_plan.maandag.ontbijt.ingredients?.[0],
+          ingredientKeys: data.plan.meals.weekly_plan.maandag.ontbijt.ingredients?.[0] ? Object.keys(data.plan.meals.weekly_plan.maandag.ontbijt.ingredients[0]) : []
+        });
+      }
       
       // Also fetch user profile when loading plan data
       if (user?.id) {
