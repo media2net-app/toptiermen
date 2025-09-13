@@ -17,14 +17,10 @@ export async function middleware(req: NextRequest) {
     (req.nextUrl.searchParams.get('logout') === 'success' || 
      req.nextUrl.searchParams.get('logout') === 'error');
   
-  // Only get session for protected routes, not for public routes
-  let session: any = null;
-  if (req.nextUrl.pathname.startsWith('/dashboard') || req.nextUrl.pathname.startsWith('/api')) {
-    const {
-      data: { session: userSession },
-    } = await supabase.auth.getSession();
-    session = userSession;
-  }
+  // Get session for all routes - this is normal behavior
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
 
   // Redirect old mijn-missies URL to nieuwe mijn-uitdagingen URL
   if (req.nextUrl.pathname === '/dashboard/mijn-missies') {

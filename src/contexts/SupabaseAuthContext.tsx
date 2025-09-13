@@ -10,7 +10,7 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
-    persistSession: false, // DISABLED: Prevent auto-login on refresh
+    persistSession: true, // ENABLED: Keep users logged in after refresh
     detectSessionInUrl: true,
   }
 });
@@ -105,18 +105,27 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
 
   // Initialize auth state
   useEffect(() => {
-    // Get initial session - DISABLED AUTO-SESSION RESTORE
+    // Get initial session - RESTORE SESSIONS AFTER REFRESH
     const getInitialSession = async () => {
       try {
         console.log('🔍 Initializing auth session...');
         
-        // DISABLED: Don't automatically restore sessions on page load
-        // This prevents auto-login after hard refresh
-        console.log('ℹ️ Auto-session restore disabled for security');
-        setUser(null);
-        setProfile(null);
-        setError(null);
+        // Restore session after refresh - this is normal behavior
+        const { data: { session }, error } = await supabase.auth.getSession();
         
+        if (error) {
+          console.error('Session error:', error);
+          setError(error.message);
+        } else if (session?.user) {
+          console.log('✅ Restored session for user:', session.user.email);
+          setUser(session.user);
+          const userProfile = await fetchProfile(session.user.id, session.user.email);
+          setProfile(userProfile);
+        } else {
+          console.log('ℹ️ No existing session found');
+          setUser(null);
+          setProfile(null);
+        }
       } catch (err) {
         console.error('Initial session error:', err);
         setError('Failed to initialize auth');
@@ -159,8 +168,12 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
             console.log('🔄 Token refreshed successfully');
             // Don't clear user state on token refresh
           } else if (event === 'INITIAL_SESSION') {
-            console.log('⚠️ Initial session event - ignoring to prevent auto-login');
-            // Ignore initial session events to prevent auto-login
+            console.log('🔄 Initial session restored after refresh');
+            if (session?.user) {
+              setUser(session.user);
+              const userProfile = await fetchProfile(session.user.id, session.user.email);
+              setProfile(userProfile);
+            }
           }
         } catch (error) {
           console.error('❌ Auth state change error:', error);
