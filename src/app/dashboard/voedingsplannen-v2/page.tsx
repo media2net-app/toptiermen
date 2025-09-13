@@ -330,7 +330,9 @@ export default function VoedingsplannenV2Page() {
               age: data.profile.age || 30,
               gender: data.profile.gender || 'male',
               activity_level: data.profile.activity_level || 'moderate',
-              fitness_goal: data.profile.goal || 'onderhoud'
+              fitness_goal: data.profile.goal === 'cut' ? 'droogtrainen' : 
+                           data.profile.goal === 'maintain' ? 'onderhoud' : 
+                           data.profile.goal === 'bulk' ? 'spiermassa' : 'onderhoud'
             });
           } else {
             console.log('📊 No profile found, using defaults');

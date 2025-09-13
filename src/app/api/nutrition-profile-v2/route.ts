@@ -62,11 +62,11 @@ export async function POST(request: NextRequest) {
       goal
     });
 
-    // Goal mapping from Dutch to English for consistency
+    // Goal mapping from Dutch to English for database consistency
     const goalMapping: { [key: string]: string } = {
-      'droogtrainen': 'droogtrainen',
-      'onderhoud': 'onderhoud', 
-      'spiermassa': 'spiermassa'
+      'droogtrainen': 'cut',
+      'onderhoud': 'maintain', 
+      'spiermassa': 'bulk'
     };
 
     const mappedGoal = goalMapping[goal] || goal;
@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
       age: parseInt(age),
       gender,
       activity_level: activityLevel,
-      fitness_goal: mappedGoal,
+      goal: mappedGoal,
       target_calories: Math.round(tdee),
       target_protein: 0, // Will be calculated based on plan
       target_carbs: 0,   // Will be calculated based on plan
