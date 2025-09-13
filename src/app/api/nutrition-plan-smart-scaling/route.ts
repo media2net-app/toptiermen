@@ -395,6 +395,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const planId = searchParams.get('planId');
     const userId = searchParams.get('userId');
+    const weightParam = searchParams.get('weight');
     
     if (!planId || !userId) {
       return NextResponse.json({
@@ -403,24 +404,45 @@ export async function GET(request: NextRequest) {
       }, { status: 400 });
     }
     
-    console.log('🧠 Smart scaling for plan:', planId, 'user:', userId);
+    console.log('🧠 Smart scaling for plan:', planId, 'user:', userId, 'weight:', weightParam);
     
     // Load ingredient database
     INGREDIENT_DATABASE = await getIngredientsFromDatabase();
     console.log('📊 Loaded', Object.keys(INGREDIENT_DATABASE).length, 'ingredients');
     
-    // Get user's nutrition profile
-    const { data: userProfile, error: profileError } = await supabase
-      .from('nutrition_profiles')
-      .select('*')
-      .eq('user_id', userId)
-      .single();
-    
-    if (profileError || !userProfile) {
-      return NextResponse.json({
-        success: false,
-        error: 'User nutrition profile not found'
-      }, { status: 404 });
+    // Get user's nutrition profile or use default values
+    let userProfile;
+    if (weightParam) {
+      // Use weight parameter for testing/admin purposes
+      const weight = parseFloat(weightParam);
+      userProfile = {
+        user_id: userId,
+        weight: weight,
+        age: 30, // Default age
+        height: 180, // Default height
+        target_calories: 2500, // Default calories
+        target_protein: 0,
+        target_carbs: 0,
+        target_fat: 0,
+        goal: 'cut',
+        activity_level: 'moderate'
+      };
+      console.log('🎯 Using weight parameter for testing:', weight);
+    } else {
+      // Get from database
+      const { data: profileData, error: profileError } = await supabase
+        .from('nutrition_profiles')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
+      
+      if (profileError || !profileData) {
+        return NextResponse.json({
+          success: false,
+          error: 'User nutrition profile not found'
+        }, { status: 404 });
+      }
+      userProfile = profileData;
     }
     
     // Get the plan from database
