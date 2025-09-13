@@ -85,6 +85,9 @@ interface ScalingInfo {
   basePlanCalories: number;
   scaleFactor: number;
   targetCalories: number;
+  targetProtein?: number;
+  targetCarbs?: number;
+  targetFat?: number;
   planTargetCalories: number;
   debugInfo?: {
     originalTotals: any;
@@ -104,8 +107,8 @@ interface WeeklyAverages {
 interface PlanData {
   planId: string;
   planName: string;
-  userProfile: UserProfile;
-  scalingInfo: ScalingInfo;
+  userProfile: UserProfile | null;
+  scalingInfo: ScalingInfo | null;
   weekPlan: Record<string, DayPlan>;
   weeklyAverages: WeeklyAverages;
   generatedAt: string;
