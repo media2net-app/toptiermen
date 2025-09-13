@@ -138,6 +138,14 @@ export default function VoedingsplannenV2Page() {
 
   // TTM Formula: weight x 22 x activity_level + goal_adjustment
   const calculatePersonalizedTargets = (basePlan: any) => {
+    // Debug logging
+    console.log('🔍 Calculating targets for plan:', {
+      name: basePlan.name,
+      goal: basePlan.goal,
+      fitness_goal: basePlan.fitness_goal,
+      userProfile: userProfile
+    });
+
     // Activity level multipliers
     const activityMultipliers = {
       'sedentary': 1.1,    // Zittend (1.1x)
@@ -160,14 +168,36 @@ export default function VoedingsplannenV2Page() {
     const goalAdjustment = goalAdjustments[planGoal] || 0;
     const targetCalories = baseCalories + goalAdjustment;
 
+    console.log('🧮 Calculation details:', {
+      baseCalories,
+      planGoal,
+      goalAdjustment,
+      targetCalories
+    });
+
     // Calculate scaling factor compared to backend base (100kg, moderate, onderhoud)
     const backendBase = 100 * 22 * 1.3; // 2860 kcal
     const scalingFactor = targetCalories / backendBase;
+
+    console.log('📊 Scaling calculation:', {
+      backendBase,
+      scalingFactor,
+      targetCalories
+    });
 
     // Apply scaling to macros (assuming macro ratios stay the same)
     const targetProtein = Math.round(basePlan.target_protein * scalingFactor);
     const targetCarbs = Math.round(basePlan.target_carbs * scalingFactor);
     const targetFat = Math.round(basePlan.target_fat * scalingFactor);
+
+    console.log('🎯 Final macro targets:', {
+      targetProtein,
+      targetCarbs,
+      targetFat,
+      originalProtein: basePlan.target_protein,
+      originalCarbs: basePlan.target_carbs,
+      originalFat: basePlan.target_fat
+    });
 
     return {
       targetCalories: Math.round(targetCalories),
