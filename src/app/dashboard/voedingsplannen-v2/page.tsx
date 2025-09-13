@@ -77,8 +77,8 @@ interface UserProfile {
   height: number;
   age: number;
   gender: 'male' | 'female';
-  activity_level: 'sedentary' | 'light' | 'moderate' | 'active' | 'very_active';
-  fitness_goal: 'weight_loss' | 'maintenance' | 'muscle_gain';
+  activity_level: 'sedentary' | 'moderate' | 'very_active';
+  fitness_goal: 'droogtrainen' | 'onderhoud' | 'spiermassa';
 }
 
 export default function VoedingsplannenV2Page() {
@@ -94,12 +94,12 @@ export default function VoedingsplannenV2Page() {
   const [error, setError] = useState<string | null>(null);
   const [showOriginalData, setShowOriginalData] = useState(true);
   const [userProfile, setUserProfile] = useState<UserProfile>({
-    weight: 80,
+    weight: 100,  // Backend basis plan is 100kg
     height: 180,
     age: 30,
     gender: 'male',
-    activity_level: 'moderate',
-    fitness_goal: 'maintenance'
+    activity_level: 'moderate',  // Backend basis plan is matig actief
+    fitness_goal: 'onderhoud'   // Backend basis plan is onderhoud
   });
   const [showUserProfileForm, setShowUserProfileForm] = useState(false);
 
@@ -313,7 +313,7 @@ export default function VoedingsplannenV2Page() {
             </div>
 
             {/* Current Profile Display */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+            <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-4">
               <div className="bg-[#0A0F0A] rounded-lg p-3">
                 <p className="text-[#8BAE5A] text-sm">Gewicht</p>
                 <p className="text-white font-semibold">{userProfile.weight} kg</p>
@@ -329,6 +329,22 @@ export default function VoedingsplannenV2Page() {
               <div className="bg-[#0A0F0A] rounded-lg p-3">
                 <p className="text-[#8BAE5A] text-sm">Geslacht</p>
                 <p className="text-white font-semibold capitalize">{userProfile.gender === 'male' ? 'Man' : 'Vrouw'}</p>
+              </div>
+              <div className="bg-[#0A0F0A] rounded-lg p-3">
+                <p className="text-[#8BAE5A] text-sm">Activiteit</p>
+                <p className="text-white font-semibold">
+                  {userProfile.activity_level === 'sedentary' ? 'Zittend (1.1x)' :
+                   userProfile.activity_level === 'moderate' ? 'Staand (1.3x)' :
+                   userProfile.activity_level === 'very_active' ? 'Lopend (1.6x)' : userProfile.activity_level}
+                </p>
+              </div>
+              <div className="bg-[#0A0F0A] rounded-lg p-3">
+                <p className="text-[#8BAE5A] text-sm">Doel</p>
+                <p className="text-white font-semibold">
+                  {userProfile.fitness_goal === 'droogtrainen' ? 'Droogtrainen (-500 kcal)' :
+                   userProfile.fitness_goal === 'onderhoud' ? 'Onderhoud (basis)' :
+                   userProfile.fitness_goal === 'spiermassa' ? 'Spiermassa (+400 kcal)' : userProfile.fitness_goal}
+                </p>
               </div>
             </div>
 
@@ -403,11 +419,9 @@ export default function VoedingsplannenV2Page() {
                         defaultValue={userProfile.activity_level}
                         className="w-full px-3 py-2 bg-[#0A0F0A] border border-[#3A4D23] rounded-lg text-white focus:border-[#8BAE5A] focus:outline-none"
                       >
-                        <option value="sedentary">Zittend</option>
-                        <option value="light">Licht actief</option>
-                        <option value="moderate">Matig actief</option>
-                        <option value="active">Actief</option>
-                        <option value="very_active">Zeer actief</option>
+                        <option value="sedentary">Zittend (1.1x) - Licht actief</option>
+                        <option value="moderate">Staand (1.3x) - Matig actief</option>
+                        <option value="very_active">Lopend (1.6x) - Zeer actief</option>
                       </select>
                     </div>
                     <div>
@@ -417,9 +431,9 @@ export default function VoedingsplannenV2Page() {
                         defaultValue={userProfile.fitness_goal}
                         className="w-full px-3 py-2 bg-[#0A0F0A] border border-[#3A4D23] rounded-lg text-white focus:border-[#8BAE5A] focus:outline-none"
                       >
-                        <option value="weight_loss">Afvallen</option>
-                        <option value="maintenance">Onderhoud</option>
-                        <option value="muscle_gain">Spiermassa</option>
+                        <option value="droogtrainen">Droogtrainen (-500 kcal)</option>
+                        <option value="onderhoud">Onderhoud (basis plan)</option>
+                        <option value="spiermassa">Spiermassa (+400 kcal)</option>
                       </select>
                     </div>
                   </div>
@@ -442,6 +456,20 @@ export default function VoedingsplannenV2Page() {
                 </form>
               </motion.div>
             )}
+
+            {/* Backend Formula Information */}
+            <div className="mt-4 p-4 bg-gradient-to-r from-[#3A4D23]/20 to-[#8BAE5A]/20 rounded-lg border border-[#3A4D23]/30">
+              <div className="flex items-center gap-2 mb-2">
+                <InformationCircleIcon className="w-5 h-5 text-[#8BAE5A]" />
+                <h4 className="text-[#8BAE5A] font-semibold">Backend Formules</h4>
+              </div>
+              <div className="text-sm text-gray-300 space-y-1">
+                <p><strong>TTM Formule:</strong> Gewicht × 22 × Activiteitsniveau</p>
+                <p><strong>Basis Plan:</strong> 100kg, Matig actief (1.3x), Onderhoud</p>
+                <p><strong>Activiteit:</strong> Zittend (1.1x) → Staand (1.3x) → Lopend (1.6x)</p>
+                <p><strong>Doelen:</strong> Droogtrainen (-500 kcal) → Onderhoud (basis) → Spiermassa (+400 kcal)</p>
+              </div>
+            </div>
           </div>
         </motion.div>
 
