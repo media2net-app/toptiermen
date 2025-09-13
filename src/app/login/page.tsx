@@ -218,10 +218,13 @@ function LoginPageContent() {
             <button
               type="button"
               onClick={() => {
+                console.log('🔧 Filling test credentials...');
                 setEmail('chiel@media2net.nl');
                 setPassword('Test123!');
+                setError(''); // Clear any existing errors
+                console.log('✅ Test credentials filled');
               }}
-              className="mt-2 px-2 py-1 bg-[#8BAE5A] text-[#181F17] rounded text-xs"
+              className="mt-2 px-2 py-1 bg-[#8BAE5A] text-[#181F17] rounded text-xs cursor-pointer hover:bg-[#7A9E4A] transition-colors"
             >
               Fill Test Credentials
             </button>
@@ -300,13 +303,11 @@ function LoginPageContent() {
           
           <button
             type="submit"
-            disabled={isLoading || !email || !password}
+            disabled={isLoading}
             className={`w-full py-3 sm:py-4 rounded-xl bg-gradient-to-r from-[#B6C948] to-[#3A4D23] text-[#181F17] font-semibold text-base sm:text-lg shadow-lg hover:from-[#B6C948] hover:to-[#B6C948] transition-all duration-200 border border-[#B6C948] font-figtree ${
               isLoading
                 ? 'opacity-75 cursor-wait' 
-                : (!email || !password) 
-                  ? 'opacity-50 cursor-not-allowed' 
-                  : 'cursor-pointer'
+                : 'cursor-pointer hover:opacity-90'
             }`}
           >
             {isLoading ? (

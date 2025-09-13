@@ -10,7 +10,7 @@ export default function MaintenanceBanner() {
 
   return (
     <>
-      <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-[#FF6B35] via-[#F7931E] to-[#FFD700] shadow-lg">
+      <div className="fixed top-0 left-0 right-0 z-[9999] bg-gradient-to-r from-[#FF6B35] via-[#F7931E] to-[#FFD700] shadow-lg">
         <div className="px-4 py-3 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
@@ -31,7 +31,8 @@ export default function MaintenanceBanner() {
             <div className="flex-shrink-0">
               <button
                 onClick={() => setIsVisible(false)}
-                className="bg-white/20 hover:bg-white/30 rounded-full p-1 transition-colors"
+                className="bg-white/20 hover:bg-white/30 rounded-full p-1 transition-colors cursor-pointer"
+                type="button"
               >
                 <XMarkIcon className="h-4 w-4 text-white" />
               </button>
