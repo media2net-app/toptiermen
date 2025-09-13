@@ -276,7 +276,15 @@ export default function VoedingsplannenV2Page() {
   };
 
   // Get personalized targets for progress calculations
-  const personalizedTargets = originalPlanData ? calculatePersonalizedTargets(originalPlanData) : null;
+  // Calculate personalized targets when originalPlanData is available
+  const personalizedTargets = React.useMemo(() => {
+    if (!originalPlanData || !userProfile.weight) {
+      return null;
+    }
+    const targets = calculatePersonalizedTargets(originalPlanData);
+    console.log('🧮 Calculated personalized targets:', targets);
+    return targets;
+  }, [originalPlanData, userProfile.weight, userProfile.activity_level, forceUpdate]);
   
   // Force re-render when userProfile changes
   const [forceUpdate, setForceUpdate] = useState(0);
