@@ -71,17 +71,24 @@ export async function POST(request: NextRequest) {
     // Apply goal-based adjustments
     let targetCalories = tdee;
     
+    // Map Dutch goal values to English database values
+    const goalMapping: { [key: string]: string } = {
+      'droogtrainen': 'cut',
+      'onderhoud': 'maintain', 
+      'spiermassa': 'bulk'
+    };
+
+    const mappedGoal = goalMapping[goal] || goal;
+    console.log(`🎯 Goal mapping: ${goal} -> ${mappedGoal}`);
+
     // Apply goal-based calorie adjustments
-    switch (goal) {
-      case 'droogtrainen':
+    switch (mappedGoal) {
       case 'cut':
         targetCalories = tdee - 500; // -500 kcal van onderhoud
         break;
-      case 'onderhoud':
-      case 'maintenance':
+      case 'maintain':
         targetCalories = tdee; // Geen aanpassing
         break;
-      case 'spiermassa':
       case 'bulk':
         targetCalories = tdee + 400; // +400 kcal van onderhoud
         break;
@@ -110,7 +117,7 @@ export async function POST(request: NextRequest) {
       weight: parseFloat(weight),
       gender,
       activity_level: activityLevel,
-      goal,
+      goal: mappedGoal, // Use mapped goal value for database
       target_calories: Math.round(targetCalories),
       target_protein: targetProtein,
       target_carbs: targetCarbs,
@@ -146,7 +153,10 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ 
       success: true, 
-      profile,
+      profile: {
+        ...profile,
+        goal: goal // Return original Dutch goal value to frontend
+      },
       calculations: {
         bmr: Math.round(bmr),
         tdee: Math.round(tdee),
