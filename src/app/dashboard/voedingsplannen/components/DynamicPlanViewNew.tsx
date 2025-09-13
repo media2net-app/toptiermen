@@ -196,10 +196,8 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
       setLoading(true);
       setError(null);
       
-      // Use smart scaling if enabled, otherwise use regular dynamic plan
-      const apiEndpoint = smartScalingEnabled 
-        ? `/api/nutrition-plan-smart-scaling?planId=${planId}&userId=${userId}`
-        : `/api/nutrition-plan-dynamic?planId=${planId}&userId=${userId}`;
+      // Use original plan (no scaling) to show 1:1 backend data
+      const apiEndpoint = `/api/nutrition-plan-original?planId=${planId}`;
       
       console.log('🧠 Using API endpoint:', apiEndpoint);
       
@@ -213,29 +211,29 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
       const data = await response.json();
       
       if (data.success) {
-        // Handle both smart scaling and regular dynamic plan responses
-        const planData = smartScalingEnabled ? {
+        // Handle original plan data (1:1 from backend, no scaling)
+        const originalPlan = data.plan;
+        
+        // Convert backend structure to frontend expected format
+        const planData = {
           planId: planId,
           planName: planName,
-          weekPlan: data.plan, // Smart scaling returns 'plan', component expects 'weekPlan'
-          scalingInfo: data.scalingInfo,
-          userProfile: data.userProfile,
+          weekPlan: originalPlan.meals.weekly_plan, // Original backend structure
+          scalingInfo: null, // No scaling applied
+          userProfile: null, // No user-specific data
           weeklyAverages: {
-            calories: data.scalingInfo?.finalTotals?.calories || 0,
-            protein: data.scalingInfo?.finalTotals?.protein || 0,
-            carbs: data.scalingInfo?.finalTotals?.carbs || 0,
-            fat: data.scalingInfo?.finalTotals?.fat || 0
+            calories: 0, // Will be calculated from original data
+            protein: 0,
+            carbs: 0,
+            fat: 0
           },
           generatedAt: new Date().toISOString()
-        } : data.data;
+        };
         
+        console.log('📋 Original plan loaded (1:1 from backend):', planData);
         setPlanData(planData);
-        
-        if (smartScalingEnabled && data.scalingInfo) {
-          console.log('🧠 Smart scaling applied:', data.scalingInfo);
-        }
       } else {
-        throw new Error(data.error || 'Failed to load dynamic plan');
+        throw new Error(data.error || 'Failed to load original plan');
       }
       
     } catch (error) {
@@ -713,7 +711,29 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
     // Use custom data if available, otherwise use original plan data
     const dataSource = customPlanData || planData;
     if (!dataSource?.weekPlan?.[day]) return { calories: 0, protein: 0, carbs: 0, fat: 0 };
-    return dataSource.weekPlan[day].dailyTotals || { calories: 0, protein: 0, carbs: 0, fat: 0 };
+    
+    // If dailyTotals exist (from scaling), use them
+    if (dataSource.weekPlan[day].dailyTotals) {
+      return dataSource.weekPlan[day].dailyTotals;
+    }
+    
+    // For original backend data, calculate totals from meals
+    const dayData = dataSource.weekPlan[day];
+    let totalCalories = 0;
+    let totalProtein = 0;
+    let totalCarbs = 0;
+    let totalFat = 0;
+    
+    Object.keys(dayData).forEach(mealType => {
+      if (dayData[mealType] && dayData[mealType].nutrition) {
+        totalCalories += dayData[mealType].nutrition.calories || 0;
+        totalProtein += dayData[mealType].nutrition.protein || 0;
+        totalCarbs += dayData[mealType].nutrition.carbs || 0;
+        totalFat += dayData[mealType].nutrition.fat || 0;
+      }
+    });
+    
+    return { calories: totalCalories, protein: totalProtein, carbs: totalCarbs, fat: totalFat };
   };
 
   const getMealData = (day: string, mealType: string) => {
@@ -1008,25 +1028,19 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
 
               {/* Plan Percentages */}
               <div className="bg-[#181F17] border border-[#3A4D23] rounded-lg p-4">
-                <h4 className="text-white font-semibold mb-3">📊 Plan Macro's</h4>
+                <h4 className="text-white font-semibold mb-3">📊 Origineel Plan Macro's</h4>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-gray-300">Eiwit:</span>
-                    <span className="text-white font-mono">
-                      {planData?.scalingInfo?.planPercentages?.protein || planData?.planPercentages?.protein || 'N/A'}%
-                    </span>
+                    <span className="text-white font-mono">Berekend uit originele data</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-300">Koolhydraten:</span>
-                    <span className="text-white font-mono">
-                      {planData?.scalingInfo?.planPercentages?.carbs || planData?.planPercentages?.carbs || 'N/A'}%
-                    </span>
+                    <span className="text-white font-mono">Berekend uit originele data</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-300">Vet:</span>
-                    <span className="text-white font-mono">
-                      {planData?.scalingInfo?.planPercentages?.fat || planData?.planPercentages?.fat || 'N/A'}%
-                    </span>
+                    <span className="text-white font-mono">Berekend uit originele data</span>
                   </div>
                 </div>
               </div>
@@ -1235,30 +1249,30 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
         <div className="bg-[#181F17] border border-[#3A4D23] rounded-xl p-6">
           <div className="flex items-center gap-3 mb-4">
             <ChartBarIcon className="w-6 h-6 text-[#8BAE5A]" />
-            <h3 className="text-xl font-bold text-white">Jouw Gepersonaliseerde Dagelijkse Behoefte</h3>
+            <h3 className="text-xl font-bold text-white">Origineel Plan (100kg Basis)</h3>
           </div>
           
-          {/* Scaling Information */}
+          {/* Plan Information */}
           <div className="mb-6 p-4 bg-[#232D1A] border border-[#3A4D23] rounded-lg">
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-[#8BAE5A] font-semibold">⚖️ Personalisatie Factor:</span>
+              <span className="text-[#8BAE5A] font-semibold">📋 Plan Status:</span>
               <span className="text-white font-bold text-lg">
-                {planData.scalingInfo?.scaleFactor ? planData.scalingInfo.scaleFactor.toFixed(2) : '1.00'}
+                Origineel (Geen Scaling)
               </span>
             </div>
             <div className="text-sm text-gray-300">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 <div>
-                  <span className="text-gray-400">Standaard plan (100kg):</span>
-                  <span className="text-white ml-2">{planData.scalingInfo?.originalTotals?.calories || 0} kcal</span>
+                  <span className="text-gray-400">Origineel plan (100kg basis):</span>
+                  <span className="text-white ml-2">{Math.round(getDayTotal(selectedDay).calories)} kcal</span>
                 </div>
                 <div>
-                  <span className="text-gray-400">Jouw behoefte ({planData.userProfile?.weight}kg):</span>
-                  <span className="text-white ml-2">{planData.scalingInfo?.targetCalories || 0} kcal</span>
+                  <span className="text-gray-400">Status:</span>
+                  <span className="text-white ml-2">Geen scaling toegepast - 1:1 backend data</span>
                 </div>
               </div>
               <div className="mt-2 text-xs text-gray-500">
-                Alle ingrediënten worden automatisch aangepast met factor {planData.scalingInfo?.scaleFactor ? planData.scalingInfo.scaleFactor.toFixed(2) : '1.00'}
+                Dit is de originele backend data zonder enige aanpassingen
               </div>
             </div>
           </div>
@@ -1298,57 +1312,29 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
             <div className="text-center">
               <div className="text-2xl font-bold text-white">{Math.round(getDayTotal(selectedDay).calories)}</div>
               <div className="text-sm text-gray-400">Calorieën per dag</div>
-              <div className={`text-xs mt-1 ${
-                (() => {
-                  const percentage = Math.round((getDayTotal(selectedDay).calories / (planData.scalingInfo?.targetCalories || planData.userProfile?.targetCalories || 1)) * 100);
-                  if (percentage >= 95 && percentage <= 105) return 'text-green-400';
-                  if (percentage >= 90 && percentage <= 110) return 'text-orange-400';
-                  return 'text-red-400';
-                })()
-              }`}>
-                {Math.round((getDayTotal(selectedDay).calories / (planData.scalingInfo?.targetCalories || planData.userProfile?.targetCalories || 1)) * 100)}% van doel
-              </div>
+                <div className="text-xs mt-1 text-gray-400">
+                  Origineel plan (100kg basis)
+                </div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-white">{getDayTotal(selectedDay).protein.toFixed(1)}g</div>
               <div className="text-sm text-gray-400">Eiwitten per dag</div>
-              <div className={`text-xs mt-1 ${
-                (() => {
-                  const percentage = Math.round((getDayTotal(selectedDay).protein / (planData.scalingInfo?.targetProtein || planData.userProfile?.targetProtein || 1)) * 100);
-                  if (percentage >= 95 && percentage <= 105) return 'text-green-400';
-                  if (percentage >= 90 && percentage <= 110) return 'text-orange-400';
-                  return 'text-red-400';
-                })()
-              }`}>
-                {Math.round((getDayTotal(selectedDay).protein / (planData.scalingInfo?.targetProtein || planData.userProfile?.targetProtein || 1)) * 100)}% van doel
+              <div className="text-xs mt-1 text-gray-400">
+                Origineel plan (100kg basis)
               </div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-white">{getDayTotal(selectedDay).carbs.toFixed(1)}g</div>
               <div className="text-sm text-gray-400">Koolhydraten per dag</div>
-              <div className={`text-xs mt-1 ${
-                (() => {
-                  const percentage = Math.round((getDayTotal(selectedDay).carbs / (planData.scalingInfo?.targetCarbs || planData.userProfile?.targetCarbs || 1)) * 100);
-                  if (percentage >= 95 && percentage <= 105) return 'text-green-400';
-                  if (percentage >= 90 && percentage <= 110) return 'text-orange-400';
-                  return 'text-red-400';
-                })()
-              }`}>
-                {Math.round((getDayTotal(selectedDay).carbs / (planData.scalingInfo?.targetCarbs || planData.userProfile?.targetCarbs || 1)) * 100)}% van doel
+              <div className="text-xs mt-1 text-gray-400">
+                Origineel plan (100kg basis)
               </div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-white">{getDayTotal(selectedDay).fat.toFixed(1)}g</div>
               <div className="text-sm text-gray-400">Vetten per dag</div>
-              <div className={`text-xs mt-1 ${
-                (() => {
-                  const percentage = Math.round((getDayTotal(selectedDay).fat / (planData.scalingInfo?.targetFat || planData.userProfile?.targetFat || 1)) * 100);
-                  if (percentage >= 95 && percentage <= 105) return 'text-green-400';
-                  if (percentage >= 90 && percentage <= 110) return 'text-orange-400';
-                  return 'text-red-400';
-                })()
-              }`}>
-                {Math.round((getDayTotal(selectedDay).fat / (planData.scalingInfo?.targetFat || planData.userProfile?.targetFat || 1)) * 100)}% van doel
+              <div className="text-xs mt-1 text-gray-400">
+                Origineel plan (100kg basis)
               </div>
             </div>
           </div>
@@ -1373,57 +1359,29 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
               <div className="text-center">
                 <div className="text-2xl font-bold text-white">{Math.round(getDayTotal(selectedDay).calories)}</div>
                 <div className="text-sm text-gray-200">Calorieën per dag</div>
-                <div className={`text-xs mt-1 ${
-                  (() => {
-                    const percentage = Math.round((getDayTotal(selectedDay).calories / (planData.scalingInfo?.targetCalories || planData.userProfile?.targetCalories || 1)) * 100);
-                    if (percentage >= 95 && percentage <= 105) return 'text-green-200';
-                    if (percentage >= 90 && percentage <= 110) return 'text-orange-200';
-                    return 'text-red-200';
-                  })()
-                }`}>
-                  {Math.round((getDayTotal(selectedDay).calories / (planData.scalingInfo?.targetCalories || planData.userProfile?.targetCalories || 1)) * 100)}% van doel
+                <div className="text-xs mt-1 text-gray-300">
+                  Origineel plan (100kg basis)
                 </div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-white">{getDayTotal(selectedDay).protein.toFixed(1)}g</div>
                 <div className="text-sm text-gray-200">Eiwitten per dag</div>
-                <div className={`text-xs mt-1 ${
-                  (() => {
-                    const percentage = Math.round((getDayTotal(selectedDay).protein / (planData.scalingInfo?.targetProtein || planData.userProfile?.targetProtein || 1)) * 100);
-                    if (percentage >= 95 && percentage <= 105) return 'text-green-200';
-                    if (percentage >= 90 && percentage <= 110) return 'text-orange-200';
-                    return 'text-red-200';
-                  })()
-                }`}>
-                  {Math.round((getDayTotal(selectedDay).protein / (planData.scalingInfo?.targetProtein || planData.userProfile?.targetProtein || 1)) * 100)}% van doel
+                <div className="text-xs mt-1 text-gray-300">
+                  Origineel plan (100kg basis)
                 </div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-white">{getDayTotal(selectedDay).carbs.toFixed(1)}g</div>
                 <div className="text-sm text-gray-200">Koolhydraten per dag</div>
-                <div className={`text-xs mt-1 ${
-                  (() => {
-                    const percentage = Math.round((getDayTotal(selectedDay).carbs / (planData.scalingInfo?.targetCarbs || planData.userProfile?.targetCarbs || 1)) * 100);
-                    if (percentage >= 95 && percentage <= 105) return 'text-green-200';
-                    if (percentage >= 90 && percentage <= 110) return 'text-orange-200';
-                    return 'text-red-200';
-                  })()
-                }`}>
-                  {Math.round((getDayTotal(selectedDay).carbs / (planData.scalingInfo?.targetCarbs || planData.userProfile?.targetCarbs || 1)) * 100)}% van doel
+                <div className="text-xs mt-1 text-gray-300">
+                  Origineel plan (100kg basis)
                 </div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-white">{getDayTotal(selectedDay).fat.toFixed(1)}g</div>
                 <div className="text-sm text-gray-200">Vetten per dag</div>
-                <div className={`text-xs mt-1 ${
-                  (() => {
-                    const percentage = Math.round((getDayTotal(selectedDay).fat / (planData.scalingInfo?.targetFat || planData.userProfile?.targetFat || 1)) * 100);
-                    if (percentage >= 95 && percentage <= 105) return 'text-green-200';
-                    if (percentage >= 90 && percentage <= 110) return 'text-orange-200';
-                    return 'text-red-200';
-                  })()
-                }`}>
-                  {Math.round((getDayTotal(selectedDay).fat / (planData.scalingInfo?.targetFat || planData.userProfile?.targetFat || 1)) * 100)}% van doel
+                <div className="text-xs mt-1 text-gray-300">
+                  Origineel plan (100kg basis)
                 </div>
               </div>
             </div>
