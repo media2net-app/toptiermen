@@ -136,6 +136,38 @@ export default function VoedingsplannenV2Page() {
   // Get current day totals
   const currentDayTotals = calculateDayTotals(selectedDay);
 
+  // Alternative approach: Use macro percentages from backend
+  const calculatePersonalizedTargetsWithPercentages = (basePlan: any, targetCalories: number) => {
+    // Use macro percentages from backend if available
+    if (basePlan.protein_percentage && basePlan.carbs_percentage && basePlan.fat_percentage) {
+      const proteinCalories = (targetCalories * basePlan.protein_percentage) / 100;
+      const carbsCalories = (targetCalories * basePlan.carbs_percentage) / 100;
+      const fatCalories = (targetCalories * basePlan.fat_percentage) / 100;
+
+      const targetProtein = Math.round(proteinCalories / 4); // 4 kcal per gram protein
+      const targetCarbs = Math.round(carbsCalories / 4);     // 4 kcal per gram carbs
+      const targetFat = Math.round(fatCalories / 9);         // 9 kcal per gram fat
+
+      console.log('🎯 Using macro percentages:', {
+        protein_percentage: basePlan.protein_percentage,
+        carbs_percentage: basePlan.carbs_percentage,
+        fat_percentage: basePlan.fat_percentage,
+        targetProtein,
+        targetCarbs,
+        targetFat
+      });
+
+      return {
+        targetProtein,
+        targetCarbs,
+        targetFat
+      };
+    }
+
+    // Fallback to scaling approach
+    return null;
+  };
+
   // TTM Formula: weight x 22 x activity_level + goal_adjustment
   const calculatePersonalizedTargets = (basePlan: any) => {
     // Debug logging
@@ -185,10 +217,24 @@ export default function VoedingsplannenV2Page() {
       targetCalories
     });
 
-    // Apply scaling to macros (assuming macro ratios stay the same)
-    const targetProtein = Math.round(basePlan.target_protein * scalingFactor);
-    const targetCarbs = Math.round(basePlan.target_carbs * scalingFactor);
-    const targetFat = Math.round(basePlan.target_fat * scalingFactor);
+    // Try macro percentages approach first, fallback to scaling
+    const macroTargetsFromPercentages = calculatePersonalizedTargetsWithPercentages(basePlan, targetCalories);
+    
+    let targetProtein, targetCarbs, targetFat;
+    
+    if (macroTargetsFromPercentages) {
+      // Use macro percentages approach
+      targetProtein = macroTargetsFromPercentages.targetProtein;
+      targetCarbs = macroTargetsFromPercentages.targetCarbs;
+      targetFat = macroTargetsFromPercentages.targetFat;
+      console.log('✅ Using macro percentages approach');
+    } else {
+      // Fallback to scaling approach
+      targetProtein = Math.round(basePlan.target_protein * scalingFactor);
+      targetCarbs = Math.round(basePlan.target_carbs * scalingFactor);
+      targetFat = Math.round(basePlan.target_fat * scalingFactor);
+      console.log('✅ Using scaling approach');
+    }
 
     console.log('🎯 Final macro targets:', {
       targetProtein,
