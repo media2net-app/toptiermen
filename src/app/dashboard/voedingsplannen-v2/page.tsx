@@ -797,6 +797,100 @@ export default function VoedingsplannenV2Page() {
               </div>
             </div>
 
+            {/* Your Profile Data Section */}
+            {userProfile && (
+              <div className="bg-[#0A0F0A] rounded-lg p-6 mb-8">
+                <h3 className="text-xl font-bold text-[#8BAE5A] mb-4">Jouw Ingevoerde Gegevens</h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="bg-[#181F17] rounded-lg p-4">
+                    <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Gewicht</label>
+                    <div className="text-2xl font-bold text-white">
+                      {userProfile.weight} kg
+                    </div>
+                  </div>
+
+                  <div className="bg-[#181F17] rounded-lg p-4">
+                    <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Activiteitsniveau</label>
+                    <div className="text-lg font-bold text-white">
+                      {userProfile.activity_level === 'low' ? 'Laag (1.2)' :
+                       userProfile.activity_level === 'light' ? 'Licht (1.375)' :
+                       userProfile.activity_level === 'moderate' ? 'Matig (1.3)' :
+                       userProfile.activity_level === 'high' ? 'Hoog (1.55)' :
+                       userProfile.activity_level === 'very_high' ? 'Zeer hoog (1.725)' :
+                       userProfile.activity_level}
+                    </div>
+                  </div>
+
+                  <div className="bg-[#181F17] rounded-lg p-4">
+                    <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Fitness Doel</label>
+                    <div className="text-lg font-bold text-white">
+                      {userProfile.goal === 'droogtrainen' ? 'Droogtrainen (-500 kcal)' :
+                       userProfile.goal === 'onderhoud' ? 'Onderhoud (0 kcal)' :
+                       userProfile.goal === 'spiermassa' ? 'Spiermassa (+400 kcal)' :
+                       userProfile.goal}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="bg-[#181F17] rounded-lg p-4">
+                    <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Leeftijd</label>
+                    <div className="text-lg font-bold text-white">
+                      {userProfile.age} jaar
+                    </div>
+                  </div>
+
+                  <div className="bg-[#181F17] rounded-lg p-4">
+                    <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Lengte</label>
+                    <div className="text-lg font-bold text-white">
+                      {userProfile.height} cm
+                    </div>
+                  </div>
+
+                  <div className="bg-[#181F17] rounded-lg p-4">
+                    <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Geslacht</label>
+                    <div className="text-lg font-bold text-white">
+                      {userProfile.gender === 'male' ? 'Man' : 'Vrouw'}
+                    </div>
+                  </div>
+                </div>
+
+                {/* TTM Formula Display */}
+                <div className="mt-6 bg-[#181F17] rounded-lg p-4">
+                  <h4 className="text-[#8BAE5A] font-bold text-lg mb-2">TTM Formule Berekening</h4>
+                  <div className="text-white text-sm">
+                    <div className="mb-2">
+                      <strong>Basis formule:</strong> {userProfile.weight}kg × 22 × {userProfile.activity_level === 'low' ? '1.2' :
+                       userProfile.activity_level === 'light' ? '1.375' :
+                       userProfile.activity_level === 'moderate' ? '1.3' :
+                       userProfile.activity_level === 'high' ? '1.55' :
+                       userProfile.activity_level === 'very_high' ? '1.725' : '1.3'} = {Math.round(userProfile.weight * 22 * (userProfile.activity_level === 'low' ? 1.2 :
+                       userProfile.activity_level === 'light' ? 1.375 :
+                       userProfile.activity_level === 'moderate' ? 1.3 :
+                       userProfile.activity_level === 'high' ? 1.55 :
+                       userProfile.activity_level === 'very_high' ? 1.725 : 1.3))} kcal
+                    </div>
+                    <div>
+                      <strong>Met doel:</strong> {Math.round(userProfile.weight * 22 * (userProfile.activity_level === 'low' ? 1.2 :
+                       userProfile.activity_level === 'light' ? 1.375 :
+                       userProfile.activity_level === 'moderate' ? 1.3 :
+                       userProfile.activity_level === 'high' ? 1.55 :
+                       userProfile.activity_level === 'very_high' ? 1.725 : 1.3))} kcal {userProfile.goal === 'droogtrainen' ? '- 500' :
+                       userProfile.goal === 'onderhoud' ? '+ 0' :
+                       userProfile.goal === 'spiermassa' ? '+ 400' : '+ 0'} = {Math.round(userProfile.weight * 22 * (userProfile.activity_level === 'low' ? 1.2 :
+                       userProfile.activity_level === 'light' ? 1.375 :
+                       userProfile.activity_level === 'moderate' ? 1.3 :
+                       userProfile.activity_level === 'high' ? 1.55 :
+                       userProfile.activity_level === 'very_high' ? 1.725 : 1.3)) + (userProfile.goal === 'droogtrainen' ? -500 :
+                       userProfile.goal === 'onderhoud' ? 0 :
+                       userProfile.goal === 'spiermassa' ? 400 : 0)} kcal
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Plan Information Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Left Column - Plan Info */}
