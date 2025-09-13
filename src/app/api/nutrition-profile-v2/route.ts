@@ -13,9 +13,11 @@ export async function GET(request: NextRequest) {
     console.log('📊 V2 Fetching nutrition profile for userId:', userId);
 
     const { data: profile, error } = await supabaseAdmin
-      .from('nutrition_profiles_v2')
+      .from('nutrition_profiles')
       .select('*')
       .eq('user_id', userId)
+      .order('updated_at', { ascending: false })
+      .limit(1)
       .single();
 
     if (error && error.code !== 'PGRST116') {
@@ -104,7 +106,7 @@ export async function POST(request: NextRequest) {
 
     // Use upsert to either insert or update
     const { data, error } = await supabaseAdmin
-      .from('nutrition_profiles_v2')
+      .from('nutrition_profiles')
       .upsert(profileData, { 
         onConflict: 'user_id',
         ignoreDuplicates: false 
