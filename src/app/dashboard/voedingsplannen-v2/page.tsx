@@ -111,6 +111,53 @@ export default function VoedingsplannenV2Page() {
   // Days of the week
   const days = ['maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag', 'zondag'];
 
+  // Function to calculate daily totals for selected day
+  const calculateDayTotals = (day: string) => {
+    if (!originalPlanData?.meals?.weekly_plan?.[day]) {
+      return { calories: 0, protein: 0, carbs: 0, fat: 0 };
+    }
+
+    const dayMeals = originalPlanData.meals.weekly_plan[day];
+    let totals = { calories: 0, protein: 0, carbs: 0, fat: 0 };
+
+    ['ontbijt', 'ochtend_snack', 'lunch', 'lunch_snack', 'diner'].forEach(mealType => {
+      const meal = dayMeals[mealType];
+      if (meal?.totals) {
+        totals.calories += meal.totals.calories || 0;
+        totals.protein += meal.totals.protein || 0;
+        totals.carbs += meal.totals.carbs || 0;
+        totals.fat += meal.totals.fat || 0;
+      }
+    });
+
+    return totals;
+  };
+
+  // Get current day totals
+  const currentDayTotals = calculateDayTotals(selectedDay);
+
+  // Function to calculate progress and color for progress bars
+  const getProgressInfo = (current: number, target: number) => {
+    const percentage = target > 0 ? (current / target) * 100 : 0;
+    const difference = current - target;
+    const isGood = percentage >= 95 && percentage <= 105; // Green if within 95-105%
+    const color = isGood ? 'bg-green-500' : 'bg-red-500';
+    
+    return {
+      percentage: Math.min(percentage, 120), // Cap at 120% for display
+      difference,
+      isGood,
+      color,
+      textColor: isGood ? 'text-green-400' : 'text-red-400'
+    };
+  };
+
+  // Get progress info for each macro
+  const caloriesProgress = getProgressInfo(currentDayTotals.calories, originalPlanData?.target_calories || 0);
+  const proteinProgress = getProgressInfo(currentDayTotals.protein, originalPlanData?.target_protein || 0);
+  const carbsProgress = getProgressInfo(currentDayTotals.carbs, originalPlanData?.target_carbs || 0);
+  const fatProgress = getProgressInfo(currentDayTotals.fat, originalPlanData?.target_fat || 0);
+
   // Check if user is specifically chiel@media2net.nl
   const isChiel = user?.email === 'chiel@media2net.nl';
 
@@ -406,6 +453,101 @@ export default function VoedingsplannenV2Page() {
               ))}
             </div>
             
+            {/* Daily Totals Progress Bars */}
+            {originalPlanData && (
+              <div className="bg-[#0A0F0A] rounded-lg p-6 mb-6">
+                <h4 className="text-[#B6C948] font-bold text-lg mb-4 capitalize">
+                  {selectedDay} - Dagtotalen
+                </h4>
+                
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  {/* Calories */}
+                  <div className="bg-[#181F17] rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-white font-semibold">Calorieën</span>
+                      <span className="text-[#8BAE5A] text-sm">{caloriesProgress.percentage.toFixed(1)}%</span>
+                    </div>
+                    <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
+                      <div 
+                        className={`h-2 rounded-full ${caloriesProgress.color}`}
+                        style={{ width: `${caloriesProgress.percentage}%` }}
+                      ></div>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-400">{currentDayTotals.calories} kcal</span>
+                      <span className="text-white">{originalPlanData.target_calories} kcal</span>
+                    </div>
+                    <div className={`text-xs mt-1 ${caloriesProgress.textColor}`}>
+                      {caloriesProgress.difference > 0 ? '+' : ''}{caloriesProgress.difference.toFixed(1)} kcal
+                    </div>
+                  </div>
+
+                  {/* Protein */}
+                  <div className="bg-[#181F17] rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-white font-semibold">Eiwit</span>
+                      <span className="text-[#8BAE5A] text-sm">{proteinProgress.percentage.toFixed(1)}%</span>
+                    </div>
+                    <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
+                      <div 
+                        className={`h-2 rounded-full ${proteinProgress.color}`}
+                        style={{ width: `${proteinProgress.percentage}%` }}
+                      ></div>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-400">{currentDayTotals.protein}g</span>
+                      <span className="text-white">{originalPlanData.target_protein}g</span>
+                    </div>
+                    <div className={`text-xs mt-1 ${proteinProgress.textColor}`}>
+                      {proteinProgress.difference > 0 ? '+' : ''}{proteinProgress.difference.toFixed(1)}g
+                    </div>
+                  </div>
+
+                  {/* Carbs */}
+                  <div className="bg-[#181F17] rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-white font-semibold">Koolhydraten</span>
+                      <span className="text-[#8BAE5A] text-sm">{carbsProgress.percentage.toFixed(1)}%</span>
+                    </div>
+                    <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
+                      <div 
+                        className={`h-2 rounded-full ${carbsProgress.color}`}
+                        style={{ width: `${carbsProgress.percentage}%` }}
+                      ></div>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-400">{currentDayTotals.carbs}g</span>
+                      <span className="text-white">{originalPlanData.target_carbs}g</span>
+                    </div>
+                    <div className={`text-xs mt-1 ${carbsProgress.textColor}`}>
+                      {carbsProgress.difference > 0 ? '+' : ''}{carbsProgress.difference.toFixed(1)}g
+                    </div>
+                  </div>
+
+                  {/* Fat */}
+                  <div className="bg-[#181F17] rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-white font-semibold">Vet</span>
+                      <span className="text-[#8BAE5A] text-sm">{fatProgress.percentage.toFixed(1)}%</span>
+                    </div>
+                    <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
+                      <div 
+                        className={`h-2 rounded-full ${fatProgress.color}`}
+                        style={{ width: `${fatProgress.percentage}%` }}
+                      ></div>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-400">{currentDayTotals.fat}g</span>
+                      <span className="text-white">{originalPlanData.target_fat}g</span>
+                    </div>
+                    <div className={`text-xs mt-1 ${fatProgress.textColor}`}>
+                      {fatProgress.difference > 0 ? '+' : ''}{fatProgress.difference.toFixed(1)}g
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Selected Day Meals */}
             {originalPlanData.meals?.weekly_plan && originalPlanData.meals.weekly_plan[selectedDay] && (
               <div className="bg-[#0A0F0A] rounded-lg p-6">
@@ -926,6 +1068,89 @@ export default function VoedingsplannenV2Page() {
                 </div>
               </div>
             </div>
+
+            {/* Smart Scaling Daily Totals Progress Bars */}
+            {scalingInfo && originalPlanData && (
+              <div className="bg-[#0A0F0A] rounded-lg p-6 mb-6">
+                <h4 className="text-[#B6C948] font-bold text-lg mb-4 capitalize">
+                  {selectedDay} - Smart Scaling Dagtotalen
+                </h4>
+                
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  {/* Calories - Smart Scaling */}
+                  <div className="bg-[#181F17] rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-white font-semibold">Calorieën</span>
+                      <span className="text-[#8BAE5A] text-sm">100%</span>
+                    </div>
+                    <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
+                      <div className="h-2 rounded-full bg-green-500" style={{ width: '100%' }}></div>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-400">{scalingInfo.finalTotals?.calories || 0} kcal</span>
+                      <span className="text-white">{scalingInfo.adjustedCalories || 0} kcal</span>
+                    </div>
+                    <div className="text-xs mt-1 text-green-400">
+                      Geoptimaliseerd
+                    </div>
+                  </div>
+
+                  {/* Protein - Smart Scaling */}
+                  <div className="bg-[#181F17] rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-white font-semibold">Eiwit</span>
+                      <span className="text-[#8BAE5A] text-sm">100%</span>
+                    </div>
+                    <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
+                      <div className="h-2 rounded-full bg-green-500" style={{ width: '100%' }}></div>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-400">{scalingInfo.finalTotals?.protein || 0}g</span>
+                      <span className="text-white">{scalingInfo.adjustedProtein || 0}g</span>
+                    </div>
+                    <div className="text-xs mt-1 text-green-400">
+                      Geoptimaliseerd
+                    </div>
+                  </div>
+
+                  {/* Carbs - Smart Scaling */}
+                  <div className="bg-[#181F17] rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-white font-semibold">Koolhydraten</span>
+                      <span className="text-[#8BAE5A] text-sm">100%</span>
+                    </div>
+                    <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
+                      <div className="h-2 rounded-full bg-green-500" style={{ width: '100%' }}></div>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-400">{scalingInfo.finalTotals?.carbs || 0}g</span>
+                      <span className="text-white">{scalingInfo.adjustedCarbs || 0}g</span>
+                    </div>
+                    <div className="text-xs mt-1 text-green-400">
+                      Geoptimaliseerd
+                    </div>
+                  </div>
+
+                  {/* Fat - Smart Scaling */}
+                  <div className="bg-[#181F17] rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-white font-semibold">Vet</span>
+                      <span className="text-[#8BAE5A] text-sm">100%</span>
+                    </div>
+                    <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
+                      <div className="h-2 rounded-full bg-green-500" style={{ width: '100%' }}></div>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-400">{scalingInfo.finalTotals?.fat || 0}g</span>
+                      <span className="text-white">{scalingInfo.adjustedFat || 0}g</span>
+                    </div>
+                    <div className="text-xs mt-1 text-green-400">
+                      Geoptimaliseerd
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Detailed Meal Structure */}
             <div className="mt-6">
