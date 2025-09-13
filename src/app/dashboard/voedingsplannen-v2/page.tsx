@@ -159,6 +159,7 @@ export default function VoedingsplannenV2Page() {
   };
 
   const handlePlanSelect = (plan: NutritionPlan) => {
+    console.log('🎯 Plan selected:', plan.name, 'ID:', plan.plan_id || plan.id);
     setSelectedPlan(plan);
     setShowOriginalData(true);
     setScalingInfo(null); // Reset scaling info
@@ -166,15 +167,19 @@ export default function VoedingsplannenV2Page() {
   };
 
   // Show loading state
-  if (loading && plans.length === 0) {
+  if ((loading && plans.length === 0) || loadingOriginal) {
     return (
       <div className="min-h-screen bg-[#0A0F0A] flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 bg-gradient-to-r from-[#B6C948] to-[#8BAE5A] rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse">
             <RocketLaunchIcon className="w-8 h-8 text-[#181F17]" />
           </div>
-          <h3 className="text-xl font-bold text-white mb-2">Voedingsplannen V2 Laden</h3>
-          <p className="text-[#B6C948]">Slimme schalingsfactor wordt voorbereid...</p>
+          <h3 className="text-xl font-bold text-white mb-2">
+            {loadingOriginal ? 'Originele Plan Data Laden' : 'Voedingsplannen V2 Laden'}
+          </h3>
+          <p className="text-[#B6C948]">
+            {loadingOriginal ? 'Backend data wordt geladen...' : 'Slimme schalingsfactor wordt voorbereid...'}
+          </p>
         </div>
       </div>
     );
@@ -301,6 +306,14 @@ export default function VoedingsplannenV2Page() {
             </motion.div>
           ))}
         </motion.div>
+
+        {/* Debug Info */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="mb-4 p-4 bg-gray-800 text-white text-xs rounded">
+            <p>Debug: selectedPlan={selectedPlan?.name || 'null'}, originalPlanData={originalPlanData?.name || 'null'}, showOriginalData={showOriginalData.toString()}</p>
+            <p>Loading states: loading={loading.toString()}, loadingOriginal={loadingOriginal.toString()}, loadingScaling={loadingScaling.toString()}</p>
+          </div>
+        )}
 
         {/* Original Plan Data */}
         {selectedPlan && originalPlanData && showOriginalData && (
