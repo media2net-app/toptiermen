@@ -13,7 +13,9 @@ import {
   CheckCircleIcon,
   ExclamationTriangleIcon,
   InformationCircleIcon,
-  ArrowLeftIcon
+  ArrowLeftIcon,
+  FireIcon,
+  HeartIcon
 } from '@heroicons/react/24/solid';
 
 interface NutritionPlan {
