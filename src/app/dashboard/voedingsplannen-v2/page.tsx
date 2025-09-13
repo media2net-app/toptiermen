@@ -276,6 +276,10 @@ export default function VoedingsplannenV2Page() {
   // Get personalized targets for progress calculations
   const personalizedTargets = originalPlanData ? calculatePersonalizedTargets(originalPlanData) : null;
   
+  // Debug: Log current user profile and personalized targets
+  console.log('🔍 Current userProfile:', userProfile);
+  console.log('🔍 Personalized targets:', personalizedTargets);
+  
   // Get progress info for each macro using personalized targets
   const caloriesProgress = getProgressInfo(currentDayTotals.calories, personalizedTargets?.targetCalories || originalPlanData?.target_calories || 0);
   const proteinProgress = getProgressInfo(currentDayTotals.protein, personalizedTargets?.targetProtein || originalPlanData?.target_protein || 0);
@@ -284,6 +288,35 @@ export default function VoedingsplannenV2Page() {
 
   // Check if user is specifically chiel@media2net.nl
   const isChiel = user?.email === 'chiel@media2net.nl';
+
+  // Fetch user profile when component loads
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (!user?.id) return;
+      
+      try {
+        const response = await fetch('/api/nutrition-profile');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.profile) {
+            console.log('📊 Fetched user profile:', data.profile);
+            setUserProfile({
+              weight: data.profile.weight || 100,
+              height: data.profile.height || 180,
+              age: data.profile.age || 30,
+              gender: data.profile.gender || 'male',
+              activity_level: data.profile.activity_level || 'moderate',
+              fitness_goal: data.profile.goal || 'onderhoud'
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching user profile:', error);
+      }
+    };
+
+    fetchUserProfile();
+  }, [user?.id]);
 
   useEffect(() => {
     // Only allow chiel@media2net.nl access
@@ -1305,28 +1338,28 @@ export default function VoedingsplannenV2Page() {
                   <div className="flex justify-between">
                     <span className="text-[#8BAE5A]">Calorieën:</span>
                     <div className="text-right">
-                      <span className="text-white font-semibold">{calculatePersonalizedTargets(originalPlanData).targetCalories} kcal</span>
+                      <span className="text-white font-semibold">{personalizedTargets?.targetCalories || originalPlanData.target_calories} kcal</span>
                       <p className="text-gray-500 text-xs">Backend: {originalPlanData.target_calories} kcal</p>
                     </div>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-[#8BAE5A]">Eiwit:</span>
                     <div className="text-right">
-                      <span className="text-white font-semibold">{calculatePersonalizedTargets(originalPlanData).targetProtein}g</span>
+                      <span className="text-white font-semibold">{personalizedTargets?.targetProtein || originalPlanData.target_protein}g</span>
                       <p className="text-gray-500 text-xs">Backend: {originalPlanData.target_protein}g</p>
                     </div>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-[#8BAE5A]">Koolhydraten:</span>
                     <div className="text-right">
-                      <span className="text-white font-semibold">{calculatePersonalizedTargets(originalPlanData).targetCarbs}g</span>
+                      <span className="text-white font-semibold">{personalizedTargets?.targetCarbs || originalPlanData.target_carbs}g</span>
                       <p className="text-gray-500 text-xs">Backend: {originalPlanData.target_carbs}g</p>
                     </div>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-[#8BAE5A]">Vet:</span>
                     <div className="text-right">
-                      <span className="text-white font-semibold">{calculatePersonalizedTargets(originalPlanData).targetFat}g</span>
+                      <span className="text-white font-semibold">{personalizedTargets?.targetFat || originalPlanData.target_fat}g</span>
                       <p className="text-gray-500 text-xs">Backend: {originalPlanData.target_fat}g</p>
                     </div>
                   </div>
