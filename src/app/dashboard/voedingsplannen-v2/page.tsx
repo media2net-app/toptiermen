@@ -315,17 +315,22 @@ export default function VoedingsplannenV2Page() {
   // Fetch user profile when component loads
   useEffect(() => {
     const fetchUserProfile = async () => {
-      if (!user?.id) return;
+      if (!user?.id) {
+        console.log('❌ No user ID available for profile fetch');
+        return;
+      }
       
       try {
         console.log('📊 Fetching user profile for userId:', user.id);
         const response = await fetch(`/api/nutrition-profile-v2?userId=${user.id}`);
+        console.log('📊 Profile fetch response status:', response.status);
+        
         if (response.ok) {
           const data = await response.json();
           console.log('📊 V2 API Response:', data);
           if (data.profile) {
             console.log('📊 Fetched user profile:', data.profile);
-            setUserProfile({
+            const newProfile = {
               weight: data.profile.weight || 100,
               height: data.profile.height || 180,
               age: data.profile.age || 30,
@@ -334,7 +339,9 @@ export default function VoedingsplannenV2Page() {
               fitness_goal: data.profile.goal === 'cut' ? 'droogtrainen' : 
                            data.profile.goal === 'maintain' ? 'onderhoud' : 
                            data.profile.goal === 'bulk' ? 'spiermassa' : 'onderhoud'
-            });
+            };
+            console.log('📊 Setting user profile to:', newProfile);
+            setUserProfile(newProfile);
           } else {
             console.log('📊 No profile found, using defaults');
           }
@@ -403,6 +410,12 @@ export default function VoedingsplannenV2Page() {
       const data = await response.json();
       setOriginalPlanData(data.plan);
       console.log('✅ Original plan data loaded:', data.plan.name);
+      
+      // Also fetch user profile when loading plan data
+      if (user?.id) {
+        console.log('🔄 Fetching user profile after plan load...');
+        await fetchUserProfile();
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load original plan data');
     } finally {
