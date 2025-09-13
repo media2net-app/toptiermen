@@ -412,9 +412,9 @@ export default function VoedingsplannenV2Page() {
             age: data.profile.age || 30,
             gender: data.profile.gender || 'male',
             activity_level: data.profile.activity_level || 'moderate',
-            fitness_goal: data.profile.goal === 'cut' ? 'droogtrainen' : 
+            fitness_goal: (data.profile.goal === 'cut' ? 'droogtrainen' : 
                          data.profile.goal === 'maintain' ? 'onderhoud' : 
-                         data.profile.goal === 'bulk' ? 'spiermassa' : 'onderhoud'
+                         data.profile.goal === 'bulk' ? 'spiermassa' : 'onderhoud') as 'droogtrainen' | 'onderhoud' | 'spiermassa'
           };
           console.log('📊 Setting user profile to:', newProfile);
           setUserProfile(newProfile);
@@ -492,7 +492,13 @@ export default function VoedingsplannenV2Page() {
         hasMeals: !!data.plan.meals,
         hasWeeklyPlan: !!data.plan.meals?.weekly_plan,
         maandagExists: !!data.plan.meals?.weekly_plan?.maandag,
-        maandagStructure: data.plan.meals?.weekly_plan?.maandag ? Object.keys(data.plan.meals.weekly_plan.maandag) : 'N/A'
+        maandagStructure: data.plan.meals?.weekly_plan?.maandag ? Object.keys(data.plan.meals.weekly_plan.maandag) : 'N/A',
+        macroPercentages: {
+          protein: data.plan.protein_percentage,
+          carbs: data.plan.carbs_percentage,
+          fat: data.plan.fat_percentage
+        },
+        allPlanKeys: Object.keys(data.plan)
       });
       
       // Log detailed ingredient structure for first meal
@@ -1498,7 +1504,7 @@ export default function VoedingsplannenV2Page() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-[#8BAE5A]">Plan Doel:</span>
-                    <span className="text-white capitalize">{originalPlanData.goal}</span>
+                    <span className="text-white capitalize">{selectedPlan?.name?.includes('droogtrainen') ? 'Droogtrainen' : selectedPlan?.name?.includes('spiermassa') ? 'Spiermassa' : 'Onderhoud'}</span>
                   </div>
                 </div>
                 
@@ -1543,25 +1549,29 @@ export default function VoedingsplannenV2Page() {
                 </div>
                 
                 {/* Macro Percentages */}
-                {(originalPlanData.protein_percentage || originalPlanData.carbs_percentage || originalPlanData.fat_percentage) && (
-                  <div className="bg-[#0A0F0A] rounded-lg p-4 mt-4">
-                    <h5 className="text-white font-semibold mb-3">Macro Percentages van dit Plan</h5>
-                    <div className="grid grid-cols-3 gap-4 text-sm">
-                      <div className="text-center">
-                        <p className="text-blue-400 font-semibold">{originalPlanData.protein_percentage || 0}%</p>
-                        <p className="text-gray-400">Eiwit</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-yellow-400 font-semibold">{originalPlanData.carbs_percentage || 0}%</p>
-                        <p className="text-gray-400">Koolhydraten</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-red-400 font-semibold">{originalPlanData.fat_percentage || 0}%</p>
-                        <p className="text-gray-400">Vet</p>
-                      </div>
+                <div className="bg-[#0A0F0A] rounded-lg p-4 mt-4">
+                  <h5 className="text-white font-semibold mb-3">Macro Percentages van dit Plan</h5>
+                  <div className="grid grid-cols-3 gap-4 text-sm">
+                    <div className="text-center">
+                      <p className="text-blue-400 font-semibold text-lg">{(originalPlanData as any).protein_percentage || 0}%</p>
+                      <p className="text-gray-400">Eiwit</p>
+                      <p className="text-xs text-gray-500 mt-1">{(originalPlanData as any).protein_percentage ? `${Math.round(((originalPlanData as any).protein_percentage / 100) * (personalizedTargets?.targetCalories || originalPlanData.target_calories) / 4)}g` : '0g'}</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-yellow-400 font-semibold text-lg">{(originalPlanData as any).carbs_percentage || 0}%</p>
+                      <p className="text-gray-400">Koolhydraten</p>
+                      <p className="text-xs text-gray-500 mt-1">{(originalPlanData as any).carbs_percentage ? `${Math.round(((originalPlanData as any).carbs_percentage / 100) * (personalizedTargets?.targetCalories || originalPlanData.target_calories) / 4)}g` : '0g'}</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-red-400 font-semibold text-lg">{(originalPlanData as any).fat_percentage || 0}%</p>
+                      <p className="text-gray-400">Vet</p>
+                      <p className="text-xs text-gray-500 mt-1">{(originalPlanData as any).fat_percentage ? `${Math.round(((originalPlanData as any).fat_percentage / 100) * (personalizedTargets?.targetCalories || originalPlanData.target_calories) / 9)}g` : '0g'}</p>
                     </div>
                   </div>
-                )}
+                  <div className="mt-3 p-2 bg-[#181F17] rounded text-xs text-gray-400">
+                    <p><strong className="text-[#8BAE5A]">Uitleg:</strong> Deze percentages bepalen hoe de totale calorieën verdeeld worden over eiwit, koolhydraten en vet. Eiwit en koolhydraten leveren 4 kcal per gram, vet levert 9 kcal per gram.</p>
+                  </div>
+                </div>
               </div>
 
               {/* Macro Targets */}
@@ -1572,7 +1582,7 @@ export default function VoedingsplannenV2Page() {
                   <div className="mb-3 p-2 bg-[#181F17] rounded">
                     <p className="text-[#B6C948] text-xs font-semibold">TTM Formule:</p>
                     <p className="text-gray-400 text-xs">{userProfile.weight}kg × 22 × {userProfile.activity_level === 'sedentary' ? '1.1' : userProfile.activity_level === 'moderate' ? '1.3' : '1.6'} = {Math.round(userProfile.weight * 22 * (userProfile.activity_level === 'sedentary' ? 1.1 : userProfile.activity_level === 'moderate' ? 1.3 : 1.6))} kcal</p>
-                    <p className="text-gray-400 text-xs">Plan doel ({originalPlanData.goal}): {originalPlanData.goal === 'droogtrainen' ? '-500' : originalPlanData.goal === 'spiermassa' ? '+400' : '0'} kcal</p>
+                     <p className="text-gray-400 text-xs">Plan doel ({selectedPlan?.name?.includes('droogtrainen') ? 'Droogtrainen' : selectedPlan?.name?.includes('spiermassa') ? 'Spiermassa' : 'Onderhoud'}): {selectedPlan?.name?.includes('droogtrainen') ? '-500' : selectedPlan?.name?.includes('spiermassa') ? '+400' : '0'} kcal</p>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-[#8BAE5A]">Calorieën:</span>
