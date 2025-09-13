@@ -400,26 +400,11 @@ export default function VoedingsplannenV2Page() {
                 // Whole pieces: round to nearest whole number, minimum 1
                 newAmount = Math.max(1, Math.round(newAmount));
                 console.log(`🧠 ${ingredient.name}: ${originalAmount} → ${newAmount} ${ingredient.unit} (whole piece)`);
-              } else if (ingredient.unit === 'per_100g' || ingredient.unit === 'g') {
-                // 100g items: can be scaled more precisely, round to 5g increments
-                newAmount = Math.round(newAmount / 5) * 5;
-                if (newAmount < 5) newAmount = 5; // Minimum 5g
-                console.log(`🧠 ${ingredient.name}: ${originalAmount} → ${newAmount} ${ingredient.unit} (5g increments)`);
-              } else if (ingredient.unit === 'per_ml') {
-                // Liquid items: round to 10ml increments
-                newAmount = Math.round(newAmount / 10) * 10;
-                if (newAmount < 10) newAmount = 10; // Minimum 10ml
-                console.log(`🧠 ${ingredient.name}: ${originalAmount} → ${newAmount} ${ingredient.unit} (10ml increments)`);
-              } else if (ingredient.unit === 'handje') {
-                // Handful: round to nearest 0.5
-                newAmount = Math.round(newAmount * 2) / 2;
-                if (newAmount < 0.5) newAmount = 0.5; // Minimum 0.5 handful
-                console.log(`🧠 ${ingredient.name}: ${originalAmount} → ${newAmount} ${ingredient.unit} (0.5 increments)`);
               } else {
-                // Default: round to 1 decimal
+                // All other items: round to 1 decimal place
                 newAmount = Math.round(newAmount * 10) / 10;
                 if (newAmount < 0.1) newAmount = 0.1; // Minimum 0.1
-                console.log(`🧠 ${ingredient.name}: ${originalAmount} → ${newAmount} ${ingredient.unit} (default)`);
+                console.log(`🧠 ${ingredient.name}: ${originalAmount} → ${newAmount} ${ingredient.unit} (1 decimal)`);
               }
               
               ingredient.amount = newAmount;
@@ -448,22 +433,34 @@ export default function VoedingsplannenV2Page() {
       if (fatPercentage < 95) {
         console.log(`🧠 Fat too low (${fatPercentage.toFixed(1)}%), fine-tuning meat portions...`);
         
-        ['diner', 'lunch'].forEach(mealType => { // Focus on main meals
+        // Calculate how much fat we need to add
+        const fatNeeded = targetFat - currentDayTotals.fat;
+        console.log(`🧠 Fat needed: ${fatNeeded.toFixed(1)}g`);
+        
+        ['diner', 'lunch', 'ontbijt', 'ochtend_snack'].forEach(mealType => { // Check all meals
           const meal = dayData[mealType];
           if (meal && meal.ingredients && Array.isArray(meal.ingredients)) {
             meal.ingredients.forEach((ingredient: any) => {
-              // Increase meat and fat-rich ingredients by 15-20%
+              // Increase meat and fat-rich ingredients more aggressively
               if (ingredient.unit === 'per_100g' && 
                   (ingredient.name.toLowerCase().includes('vlees') || 
                    ingredient.name.toLowerCase().includes('rund') ||
                    ingredient.name.toLowerCase().includes('kip') ||
                    ingredient.name.toLowerCase().includes('zalm') ||
                    ingredient.name.toLowerCase().includes('olie') ||
-                   ingredient.name.toLowerCase().includes('boter'))) {
+                   ingredient.name.toLowerCase().includes('boter') ||
+                   ingredient.name.toLowerCase().includes('kaas') ||
+                   ingredient.name.toLowerCase().includes('noten'))) {
                 const currentAmount = ingredient.amount;
-                const increase = Math.max(10, Math.round(currentAmount * 0.15)); // 15% increase, minimum 10g
-                ingredient.amount = currentAmount + increase;
-                console.log(`🧠 Increased ${ingredient.name}: ${currentAmount}g → ${ingredient.amount}g for fat balance`);
+                
+                // More aggressive increase based on fat deficit
+                let increasePercent = 0.20; // 20% base increase
+                if (fatPercentage < 90) increasePercent = 0.30; // 30% if very low
+                if (fatPercentage < 85) increasePercent = 0.40; // 40% if extremely low
+                
+                const increase = Math.max(10, Math.round(currentAmount * increasePercent * 10) / 10); // Round to 1 decimal
+                ingredient.amount = Math.round((currentAmount + increase) * 10) / 10; // Round final to 1 decimal
+                console.log(`🧠 Increased ${ingredient.name}: ${currentAmount}g → ${ingredient.amount}g for fat balance (+${increasePercent * 100}%)`);
               }
             });
             
