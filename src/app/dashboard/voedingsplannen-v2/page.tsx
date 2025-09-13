@@ -929,7 +929,8 @@ export default function VoedingsplannenV2Page() {
                               <thead>
                                 <tr className="border-b border-[#3A4D23]">
                                   <th className="text-left text-[#8BAE5A] font-medium py-2">Ingrediënt</th>
-                                  <th className="text-left text-[#8BAE5A] font-medium py-2">Hoeveelheid</th>
+                                  <th className="text-center text-[#8BAE5A] font-medium py-2">Aantal</th>
+                                  <th className="text-center text-[#8BAE5A] font-medium py-2">Eenheid</th>
                                   <th className="text-right text-[#8BAE5A] font-medium py-2">kcal</th>
                                   <th className="text-right text-[#8BAE5A] font-medium py-2">Eiwit</th>
                                   <th className="text-right text-[#8BAE5A] font-medium py-2">Koolhydraten</th>
@@ -953,13 +954,29 @@ export default function VoedingsplannenV2Page() {
                                   const ingredientCarbs = (ingredient.carbs_per_100g || 0) * multiplier;
                                   const ingredientFat = (ingredient.fat_per_100g || 0) * multiplier;
 
+                                  // Convert database unit names to user-friendly labels
+                                  const getUnitLabel = (unit: string) => {
+                                    switch (unit) {
+                                      case 'g': return 'Per 100g';
+                                      case 'plakje': return 'Per plakje';
+                                      case 'piece': return 'Per stuk';
+                                      case 'per_100g': return 'Per 100g';
+                                      case 'per_plakje': return 'Per plakje';
+                                      case 'per_piece': return 'Per stuk';
+                                      default: return `Per ${unit}`;
+                                    }
+                                  };
+
                                   return (
                                     <tr key={index} className="border-b border-[#2A3A1A] last:border-b-0">
                                       <td className="py-3 text-white font-medium">
                                         {ingredient.name}
                                       </td>
-                                      <td className="py-3 text-gray-300">
-                                        {ingredient.amount} {ingredient.unit}
+                                      <td className="py-3 text-center text-white font-semibold">
+                                        {ingredient.amount}
+                                      </td>
+                                      <td className="py-3 text-center text-gray-300 text-xs">
+                                        {getUnitLabel(ingredient.unit)}
                                       </td>
                                       <td className="py-3 text-right text-white font-medium">
                                         {ingredientCalories.toFixed(0)}
