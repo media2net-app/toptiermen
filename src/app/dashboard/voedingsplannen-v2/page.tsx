@@ -334,14 +334,21 @@ export default function VoedingsplannenV2Page() {
   }, [user?.id]);
 
   useEffect(() => {
+    // Wait for auth to load before checking access
+    if (loading) {
+      return;
+    }
+    
     // Only allow chiel@media2net.nl access
     if (!isChiel) {
+      console.log('🚫 Access denied to voedingsplannen-v2, redirecting to dashboard');
       router.push('/dashboard');
       return;
     }
 
+    console.log('✅ Access granted to voedingsplannen-v2 for:', user?.email);
     fetchPlans();
-  }, [isChiel, router]);
+  }, [isChiel, router, loading, user]);
 
   const fetchPlans = async () => {
     try {
