@@ -128,7 +128,7 @@ export default function VoedingsplannenV2Page() {
     console.log('🔍 Day meals structure:', Object.keys(dayMeals));
     let totals = { calories: 0, protein: 0, carbs: 0, fat: 0 };
 
-    ['ontbijt', 'ochtend_snack', 'lunch', 'lunch_snack', 'diner'].forEach(mealType => {
+    ['ontbijt', 'ochtend_snack', 'lunch', 'lunch_snack', 'diner', 'avond_snack'].forEach(mealType => {
       const meal = dayMeals[mealType];
       console.log(`🔍 ${mealType}:`, meal ? 'exists' : 'missing', meal?.totals ? 'has totals' : 'no totals');
       
@@ -493,6 +493,7 @@ export default function VoedingsplannenV2Page() {
         hasWeeklyPlan: !!data.plan.meals?.weekly_plan,
         maandagExists: !!data.plan.meals?.weekly_plan?.maandag,
         maandagStructure: data.plan.meals?.weekly_plan?.maandag ? Object.keys(data.plan.meals.weekly_plan.maandag) : 'N/A',
+        maandagMeals: data.plan.meals?.weekly_plan?.maandag ? Object.keys(data.plan.meals.weekly_plan.maandag).join(', ') : 'N/A',
         macroPercentages: {
           protein: data.plan.protein_percentage,
           carbs: data.plan.carbs_percentage,
@@ -884,10 +885,11 @@ export default function VoedingsplannenV2Page() {
                 <h4 className="text-[#B6C948] font-bold text-lg mb-6 capitalize">{selectedDay}</h4>
                     
                 <div className="space-y-6">
-                  {['ontbijt', 'ochtend_snack', 'lunch', 'lunch_snack', 'diner'].map((mealType) => {
+                  {['ontbijt', 'ochtend_snack', 'lunch', 'lunch_snack', 'diner', 'avond_snack'].map((mealType) => {
                     const mealData = originalPlanData.meals.weekly_plan[selectedDay][mealType];
                     const mealTypeLabel = mealType === 'ochtend_snack' ? 'Ochtend Snack' :
                                          mealType === 'lunch_snack' ? 'Lunch Snack' :
+                                         mealType === 'avond_snack' ? 'Avond Snack' :
                                          mealType === 'ontbijt' ? 'Ontbijt' :
                                          mealType === 'lunch' ? 'Lunch' :
                                          mealType === 'diner' ? 'Diner' : mealType;
