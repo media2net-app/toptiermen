@@ -353,6 +353,66 @@ export default function VoedingsplannenV2Page() {
     };
   };
 
+  // Smart Scaling Algorithm
+  const applySmartScaling = (planData: any, userProfile: any) => {
+    if (!planData || !userProfile || userProfile.weight === 100) {
+      // No scaling needed for 100kg users
+      return planData;
+    }
+
+    console.log('🧠 Applying Smart Scaling for weight:', userProfile.weight);
+    
+    const baseWeight = 100;
+    const weightRatio = userProfile.weight / baseWeight;
+    const scaledPlan = JSON.parse(JSON.stringify(planData)); // Deep clone
+    
+    // Get personalized targets
+    const personalizedTargets = calculatePersonalizedTargets(userProfile, planData);
+    const targetCalories = personalizedTargets.targetCalories;
+    const targetProtein = personalizedTargets.targetProtein;
+    const targetCarbs = personalizedTargets.targetCarbs;
+    const targetFat = personalizedTargets.targetFat;
+    
+    console.log('🎯 Smart Scaling Targets:', {
+      targetCalories,
+      targetProtein,
+      targetCarbs,
+      targetFat
+    });
+
+    // Scale ingredients for each day and meal
+    Object.keys(scaledPlan.meals.weekly_plan).forEach(day => {
+      const dayData = scaledPlan.meals.weekly_plan[day];
+      
+      ['ontbijt', 'ochtend_snack', 'lunch', 'lunch_snack', 'diner', 'avond_snack'].forEach(mealType => {
+        const meal = dayData[mealType];
+        if (meal && meal.ingredients && Array.isArray(meal.ingredients)) {
+          
+          // Apply initial weight-based scaling
+          meal.ingredients.forEach((ingredient: any) => {
+            if (ingredient.amount && ingredient.unit) {
+              // Apply weight ratio scaling
+              ingredient.amount = Math.round(ingredient.amount * weightRatio * 10) / 10;
+            }
+          });
+          
+          // Recalculate meal totals after scaling
+          const mealTotals = calculateMealTotals(meal);
+          meal.totals = mealTotals;
+        }
+      });
+      
+      // Recalculate day totals
+      const dayTotals = calculateDayTotals(scaledPlan, day);
+      if (scaledPlan.meals.weekly_plan[day]) {
+        scaledPlan.meals.weekly_plan[day].dailyTotals = dayTotals;
+      }
+    });
+
+    console.log('✅ Smart Scaling applied');
+    return scaledPlan;
+  };
+
   // Function to calculate progress and color for progress bars
   const getProgressInfo = (current: number, target: number) => {
     if (!target || target === 0) {
@@ -528,8 +588,16 @@ export default function VoedingsplannenV2Page() {
       }
       
       const data = await response.json();
-      setOriginalPlanData(data.plan);
-      console.log('✅ Original plan data loaded:', data.plan.name);
+      let planData = data.plan;
+      
+      // Apply smart scaling automatically if user weight is not 100kg
+      if (userProfile && userProfile.weight !== 100) {
+        planData = applySmartScaling(data.plan, userProfile);
+        console.log('🧠 Smart scaling applied automatically');
+      }
+      
+      setOriginalPlanData(planData);
+      console.log('✅ Plan data loaded:', planData.name, userProfile?.weight === 100 ? '(original)' : '(smart scaled)');
       console.log('🔍 Plan data structure:', {
         hasMeals: !!data.plan.meals,
         hasWeeklyPlan: !!data.plan.meals?.weekly_plan,
@@ -714,31 +782,20 @@ export default function VoedingsplannenV2Page() {
                 </div>
                 <div>
                   <h1 className="text-2xl font-bold text-white">{selectedPlan.name}</h1>
-                  <p className="text-[#8BAE5A]">Originele Backend Data - 1:1 zoals opgeslagen in database</p>
+                  <p className="text-[#8BAE5A]">
+                    {userProfile && userProfile.weight !== 100 
+                      ? `Smart Scaling Toegepast - Aangepast voor ${userProfile.weight}kg gebruiker`
+                      : 'Originele Backend Data - 1:1 zoals opgeslagen in database'
+                    }
+                  </p>
                 </div>
               </div>
-              <button
-                onClick={() => {
-                  setShowOriginalData(false);
-                  if (!scalingInfo) {
-                    applySmartScaling(selectedPlan.plan_id || selectedPlan.id.toString());
-                  }
-                }}
-                disabled={loadingScaling}
-                className="px-6 py-3 bg-gradient-to-r from-[#B6C948] to-[#8BAE5A] text-[#181F17] rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-2 font-semibold"
-              >
-                {loadingScaling ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-[#181F17] border-t-transparent rounded-full animate-spin"></div>
-                    <span>Bezig...</span>
-                  </>
-                ) : (
-                  <>
-                    <RocketLaunchIcon className="w-5 h-5" />
-                    <span>{scalingInfo ? 'Bekijk Smart Scaling' : 'Smart Scaling Toepassen'}</span>
-                  </>
-                )}
-              </button>
+              {userProfile && userProfile.weight !== 100 && (
+                <div className="px-6 py-3 bg-gradient-to-r from-[#B6C948] to-[#8BAE5A] text-[#181F17] rounded-lg flex items-center gap-2 font-semibold">
+                  <RocketLaunchIcon className="w-5 h-5" />
+                  <span>Smart Scaling Actief ({userProfile.weight}kg)</span>
+                </div>
+              )}
             </div>
 
             {/* Target Macros Section */}
