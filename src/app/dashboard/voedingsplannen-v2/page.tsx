@@ -676,27 +676,6 @@ export default function VoedingsplannenV2Page() {
     }
   };
 
-  const applySmartScaling = async (planId: string) => {
-    try {
-      setLoadingScaling(true);
-      setError(null);
-      
-      // Include user profile data in the scaling request
-      const response = await fetch(`/api/nutrition-plan-smart-scaling?planId=${planId}&userId=${user?.id}&weight=${userProfile.weight}&height=${userProfile.height}&age=${userProfile.age}&gender=${userProfile.gender}&activity_level=${userProfile.activity_level}&fitness_goal=${userProfile.fitness_goal}`);
-      
-      if (!response.ok) {
-        throw new Error('Failed to apply smart scaling');
-      }
-      
-      const data = await response.json();
-      setScalingInfo(data.scalingInfo);
-      console.log('✅ Smart scaling applied:', data.scalingInfo);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Smart scaling failed');
-    } finally {
-      setLoadingScaling(false);
-    }
-  };
 
   const handlePlanSelect = (plan: NutritionPlan) => {
     console.log('🎯 Plan selected:', plan.name, 'ID:', plan.plan_id || plan.id);
