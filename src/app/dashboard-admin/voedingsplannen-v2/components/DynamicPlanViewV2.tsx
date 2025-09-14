@@ -128,10 +128,12 @@ const MEAL_TYPES_NL = {
 export default function DynamicPlanViewV2({ planId, planName, onBack }: DynamicPlanViewV2Props) {
   const { user } = useSupabaseAuth();
   const [planData, setPlanData] = useState<PlanData | null>(null);
+  const [originalPlanData, setOriginalPlanData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedDay, setSelectedDay] = useState('maandag');
   const [showDebugInfo, setShowDebugInfo] = useState(false);
+  const [showOriginalValues, setShowOriginalValues] = useState(false);
   
   // Weight input for testing
   const [testWeight, setTestWeight] = useState(100);
@@ -188,9 +190,27 @@ export default function DynamicPlanViewV2({ planId, planName, onBack }: DynamicP
     }
   };
 
+  const fetchOriginalPlan = async () => {
+    try {
+      console.log('📋 Fetching original plan data for comparison...');
+      const response = await fetch(`/api/nutrition-plan-original?planId=${planId}`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch original plan');
+      }
+      
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('❌ Error fetching original plan:', error);
+      return null;
+    }
+  };
+
   useEffect(() => {
     if (user) {
       fetchDynamicPlan(testWeight);
+      fetchOriginalPlan().then(data => setOriginalPlanData(data));
     }
   }, [user, planId, testWeight]);
 
@@ -199,9 +219,19 @@ export default function DynamicPlanViewV2({ planId, planName, onBack }: DynamicP
     return planData.weekPlan[day].dailyTotals || { calories: 0, protein: 0, carbs: 0, fat: 0 };
   };
 
+  const getOriginalDayTotal = (day: string) => {
+    if (!originalPlanData?.weekPlan?.[day]) return { calories: 0, protein: 0, carbs: 0, fat: 0 };
+    return originalPlanData.weekPlan[day].dailyTotals || { calories: 0, protein: 0, carbs: 0, fat: 0 };
+  };
+
   const getMealData = (day: string, mealType: string) => {
     if (!planData?.weekPlan?.[day]) return null;
     return planData.weekPlan[day][mealType] || null;
+  };
+
+  const getOriginalMealData = (day: string, mealType: string) => {
+    if (!originalPlanData?.weekPlan?.[day]) return null;
+    return originalPlanData.weekPlan[day][mealType] || null;
   };
 
   const handleWeightChange = (newWeight: number) => {
@@ -308,9 +338,25 @@ export default function DynamicPlanViewV2({ planId, planName, onBack }: DynamicP
               {/* Debug Toggle */}
               <button
                 onClick={() => setShowDebugInfo(!showDebugInfo)}
-                className="p-2 bg-[#181F17] border border-[#3A4D23] rounded-lg hover:border-[#8BAE5A] transition-colors"
+                className={`p-2 border rounded-lg transition-colors ${
+                  showDebugInfo 
+                    ? 'bg-[#8BAE5A] border-[#8BAE5A]' 
+                    : 'bg-[#181F17] border-[#3A4D23] hover:border-[#8BAE5A]'
+                }`}
               >
                 <BugAntIcon className="w-5 h-5 text-white" />
+              </button>
+
+              {/* Original Values Toggle */}
+              <button
+                onClick={() => setShowOriginalValues(!showOriginalValues)}
+                className={`px-3 py-2 rounded-lg transition-colors text-sm font-medium ${
+                  showOriginalValues 
+                    ? 'bg-orange-600 text-white' 
+                    : 'bg-gray-600 text-gray-300 hover:bg-gray-500'
+                }`}
+              >
+                {showOriginalValues ? 'Origineel AAN' : 'Origineel UIT'}
               </button>
             </div>
           </div>
@@ -378,13 +424,28 @@ export default function DynamicPlanViewV2({ planId, planName, onBack }: DynamicP
 
         {/* Daily Totals */}
         <div className="bg-[#181F17] border border-[#3A4D23] rounded-xl p-6 mb-8">
-          <h3 className="text-xl font-bold text-white mb-6">Dagelijkse Totaal - {DAYS_NL[selectedDay]}</h3>
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xl font-bold text-white">Dagelijkse Totaal - {DAYS_NL[selectedDay]}</h3>
+            {showOriginalValues && (
+              <div className="flex items-center gap-2 text-sm">
+                <div className="w-3 h-3 bg-[#8BAE5A] rounded"></div>
+                <span className="text-gray-300">Gescaled</span>
+                <div className="w-3 h-3 bg-orange-500 rounded"></div>
+                <span className="text-gray-300">Origineel</span>
+              </div>
+            )}
+          </div>
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             <div className="text-center">
               <div className="text-3xl font-bold text-[#8BAE5A]">
                 {Math.round(getDayTotal(selectedDay).calories)}
               </div>
+              {showOriginalValues && (
+                <div className="text-lg font-semibold text-orange-500">
+                  {Math.round(getOriginalDayTotal(selectedDay).calories)}
+                </div>
+              )}
               <div className="text-sm text-gray-400">Calorieën</div>
               {planData.scalingInfo && (
                 <div className="text-xs text-gray-500 mt-1">
@@ -397,6 +458,11 @@ export default function DynamicPlanViewV2({ planId, planName, onBack }: DynamicP
               <div className="text-3xl font-bold text-[#8BAE5A]">
                 {getDayTotal(selectedDay).protein.toFixed(1)}g
               </div>
+              {showOriginalValues && (
+                <div className="text-lg font-semibold text-orange-500">
+                  {getOriginalDayTotal(selectedDay).protein.toFixed(1)}g
+                </div>
+              )}
               <div className="text-sm text-gray-400">Eiwit</div>
               {planData.scalingInfo && (
                 <div className="text-xs text-gray-500 mt-1">
@@ -409,6 +475,11 @@ export default function DynamicPlanViewV2({ planId, planName, onBack }: DynamicP
               <div className="text-3xl font-bold text-[#8BAE5A]">
                 {getDayTotal(selectedDay).carbs.toFixed(1)}g
               </div>
+              {showOriginalValues && (
+                <div className="text-lg font-semibold text-orange-500">
+                  {getOriginalDayTotal(selectedDay).carbs.toFixed(1)}g
+                </div>
+              )}
               <div className="text-sm text-gray-400">Koolhydraten</div>
               {planData.scalingInfo && (
                 <div className="text-xs text-gray-500 mt-1">
@@ -421,6 +492,11 @@ export default function DynamicPlanViewV2({ planId, planName, onBack }: DynamicP
               <div className="text-3xl font-bold text-[#8BAE5A]">
                 {getDayTotal(selectedDay).fat.toFixed(1)}g
               </div>
+              {showOriginalValues && (
+                <div className="text-lg font-semibold text-orange-500">
+                  {getOriginalDayTotal(selectedDay).fat.toFixed(1)}g
+                </div>
+              )}
               <div className="text-sm text-gray-400">Vet</div>
               {planData.scalingInfo && (
                 <div className="text-xs text-gray-500 mt-1">
@@ -528,21 +604,33 @@ export default function DynamicPlanViewV2({ planId, planName, onBack }: DynamicP
                   <div>
                     <h4 className="font-semibold text-white mb-3">Ingrediënten</h4>
                     <div className="space-y-2">
-                      {meal.ingredients.map((ingredient, index) => (
-                        <div key={index} className="flex justify-between items-center p-2 bg-[#232D1A] rounded">
-                          <div>
-                            <span className="text-white font-medium">{ingredient.name}</span>
-                            <span className="text-gray-400 ml-2">
-                              {ingredient.amount} {ingredient.unit}
-                            </span>
-                            {ingredient.adjustmentFactor && (
-                              <span className="text-[#8BAE5A] ml-2 text-sm">
-                                ({ingredient.adjustmentFactor.toFixed(2)}x)
-                              </span>
-                            )}
+                      {meal.ingredients.map((ingredient, index) => {
+                        const originalMeal = getOriginalMealData(selectedDay, mealType);
+                        const originalIngredient = originalMeal?.ingredients?.[index];
+                        
+                        return (
+                          <div key={index} className="flex justify-between items-center p-2 bg-[#232D1A] rounded">
+                            <div>
+                              <span className="text-white font-medium">{ingredient.name}</span>
+                              <div className="flex items-center gap-2">
+                                <span className="text-[#8BAE5A]">
+                                  {ingredient.amount} {ingredient.unit}
+                                </span>
+                                {showOriginalValues && originalIngredient && (
+                                  <span className="text-orange-500 text-sm">
+                                    ({originalIngredient.amount} {originalIngredient.unit})
+                                  </span>
+                                )}
+                                {ingredient.adjustmentFactor && (
+                                  <span className="text-[#8BAE5A] ml-2 text-sm">
+                                    ({ingredient.adjustmentFactor.toFixed(2)}x)
+                                  </span>
+                                )}
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
 
@@ -551,15 +639,36 @@ export default function DynamicPlanViewV2({ planId, planName, onBack }: DynamicP
                     <div className="space-y-2">
                       <div className="flex justify-between">
                         <span className="text-gray-300">Eiwit:</span>
-                        <span className="text-white">{meal.nutrition.protein.toFixed(1)}g</span>
+                        <div className="text-right">
+                          <span className="text-[#8BAE5A]">{meal.nutrition.protein.toFixed(1)}g</span>
+                          {showOriginalValues && getOriginalMealData(selectedDay, mealType) && (
+                            <div className="text-orange-500 text-sm">
+                              ({getOriginalMealData(selectedDay, mealType)?.nutrition.protein.toFixed(1)}g)
+                            </div>
+                          )}
+                        </div>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-300">Koolhydraten:</span>
-                        <span className="text-white">{meal.nutrition.carbs.toFixed(1)}g</span>
+                        <div className="text-right">
+                          <span className="text-[#8BAE5A]">{meal.nutrition.carbs.toFixed(1)}g</span>
+                          {showOriginalValues && getOriginalMealData(selectedDay, mealType) && (
+                            <div className="text-orange-500 text-sm">
+                              ({getOriginalMealData(selectedDay, mealType)?.nutrition.carbs.toFixed(1)}g)
+                            </div>
+                          )}
+                        </div>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-300">Vet:</span>
-                        <span className="text-white">{meal.nutrition.fat.toFixed(1)}g</span>
+                        <div className="text-right">
+                          <span className="text-[#8BAE5A]">{meal.nutrition.fat.toFixed(1)}g</span>
+                          {showOriginalValues && getOriginalMealData(selectedDay, mealType) && (
+                            <div className="text-orange-500 text-sm">
+                              ({getOriginalMealData(selectedDay, mealType)?.nutrition.fat.toFixed(1)}g)
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -570,12 +679,107 @@ export default function DynamicPlanViewV2({ planId, planName, onBack }: DynamicP
         </div>
 
         {/* Debug Info */}
-        {showDebugInfo && planData.scalingInfo && (
-          <div className="mt-8 bg-[#181F17] border border-[#3A4D23] rounded-xl p-6">
-            <h3 className="text-lg font-bold text-white mb-4">Debug Informatie</h3>
-            <pre className="text-sm text-gray-300 overflow-auto">
-              {JSON.stringify(planData.scalingInfo, null, 2)}
-            </pre>
+        {showDebugInfo && (
+          <div className="mt-8 space-y-6">
+            {/* Scaling Info */}
+            {planData.scalingInfo && (
+              <div className="bg-[#181F17] border border-[#3A4D23] rounded-xl p-6">
+                <h3 className="text-lg font-bold text-white mb-4">Scaling Informatie</h3>
+                <pre className="text-sm text-gray-300 overflow-auto">
+                  {JSON.stringify(planData.scalingInfo, null, 2)}
+                </pre>
+              </div>
+            )}
+
+            {/* Original Plan Data */}
+            {originalPlanData && (
+              <div className="bg-[#181F17] border border-[#3A4D23] rounded-xl p-6">
+                <h3 className="text-lg font-bold text-white mb-4">Originele Plan Data</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <h4 className="font-semibold text-[#8BAE5A] mb-2">Plan Info</h4>
+                    <div className="text-sm text-gray-300 space-y-1">
+                      <div>Plan ID: {originalPlanData.planId}</div>
+                      <div>Plan Name: {originalPlanData.planName}</div>
+                      <div>Generated: {new Date(originalPlanData.generatedAt).toLocaleString('nl-NL')}</div>
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-[#8BAE5A] mb-2">Dagelijkse Totaal (Origineel)</h4>
+                    <div className="text-sm text-gray-300 space-y-1">
+                      <div>Calorieën: {Math.round(getOriginalDayTotal(selectedDay).calories)}</div>
+                      <div>Eiwit: {getOriginalDayTotal(selectedDay).protein.toFixed(1)}g</div>
+                      <div>Koolhydraten: {getOriginalDayTotal(selectedDay).carbs.toFixed(1)}g</div>
+                      <div>Vet: {getOriginalDayTotal(selectedDay).fat.toFixed(1)}g</div>
+                    </div>
+                  </div>
+                </div>
+                <details className="mt-4">
+                  <summary className="cursor-pointer text-[#8BAE5A] font-medium">Volledige Originele Data</summary>
+                  <pre className="text-xs text-gray-400 overflow-auto mt-2 max-h-96">
+                    {JSON.stringify(originalPlanData, null, 2)}
+                  </pre>
+                </details>
+              </div>
+            )}
+
+            {/* Comparison Table */}
+            {originalPlanData && planData.scalingInfo && (
+              <div className="bg-[#181F17] border border-[#3A4D23] rounded-xl p-6">
+                <h3 className="text-lg font-bold text-white mb-4">Vergelijking Origineel vs Gescaled</h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-[#3A4D23]">
+                        <th className="text-left py-2 text-gray-300">Macro</th>
+                        <th className="text-right py-2 text-orange-500">Origineel</th>
+                        <th className="text-right py-2 text-[#8BAE5A]">Gescaled</th>
+                        <th className="text-right py-2 text-white">Doel</th>
+                        <th className="text-right py-2 text-gray-300">Verschil %</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr className="border-b border-[#232D1A]">
+                        <td className="py-2 text-gray-300">Calorieën</td>
+                        <td className="py-2 text-right text-orange-500">{Math.round(getOriginalDayTotal(selectedDay).calories)}</td>
+                        <td className="py-2 text-right text-[#8BAE5A]">{Math.round(getDayTotal(selectedDay).calories)}</td>
+                        <td className="py-2 text-right text-white">{Math.round(planData.scalingInfo.targetTotals.calories)}</td>
+                        <td className="py-2 text-right text-gray-300">
+                          {((getDayTotal(selectedDay).calories / planData.scalingInfo.targetTotals.calories) * 100).toFixed(1)}%
+                        </td>
+                      </tr>
+                      <tr className="border-b border-[#232D1A]">
+                        <td className="py-2 text-gray-300">Eiwit</td>
+                        <td className="py-2 text-right text-orange-500">{getOriginalDayTotal(selectedDay).protein.toFixed(1)}g</td>
+                        <td className="py-2 text-right text-[#8BAE5A]">{getDayTotal(selectedDay).protein.toFixed(1)}g</td>
+                        <td className="py-2 text-right text-white">{Math.round(planData.scalingInfo.targetTotals.protein)}g</td>
+                        <td className="py-2 text-right text-gray-300">
+                          {((getDayTotal(selectedDay).protein / planData.scalingInfo.targetTotals.protein) * 100).toFixed(1)}%
+                        </td>
+                      </tr>
+                      <tr className="border-b border-[#232D1A]">
+                        <td className="py-2 text-gray-300">Koolhydraten</td>
+                        <td className="py-2 text-right text-orange-500">{getOriginalDayTotal(selectedDay).carbs.toFixed(1)}g</td>
+                        <td className="py-2 text-right text-[#8BAE5A]">{getDayTotal(selectedDay).carbs.toFixed(1)}g</td>
+                        <td className="py-2 text-right text-white">{Math.round(planData.scalingInfo.targetTotals.carbs)}g</td>
+                        <td className="py-2 text-right text-gray-300">
+                          {((getDayTotal(selectedDay).carbs / planData.scalingInfo.targetTotals.carbs) * 100).toFixed(1)}%
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="py-2 text-gray-300">Vet</td>
+                        <td className="py-2 text-right text-orange-500">{getOriginalDayTotal(selectedDay).fat.toFixed(1)}g</td>
+                        <td className="py-2 text-right text-[#8BAE5A]">{getDayTotal(selectedDay).fat.toFixed(1)}g</td>
+                        <td className="py-2 text-right text-white">{Math.round(planData.scalingInfo.targetTotals.fat)}g</td>
+                        <td className="py-2 text-right text-gray-300">
+                          {((getDayTotal(selectedDay).fat / planData.scalingInfo.targetTotals.fat) * 100).toFixed(1)}%
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
