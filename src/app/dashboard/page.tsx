@@ -302,8 +302,8 @@ export default function Dashboard() {
 
           {/* Dashboard Content */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8 animate-fade-in-up">
-            {/* Mijn Uitdagingen */}
-            <Link href="/dashboard/mijn-uitdagingen" className={`bg-gradient-to-br from-[#181F17] to-[#232D1A] border rounded-xl p-4 sm:p-6 text-center transition-transform duration-300 cursor-pointer block ${
+            {/* Mijn Challenges */}
+            <Link href="/dashboard/mijn-challenges" className={`bg-gradient-to-br from-[#181F17] to-[#232D1A] border rounded-xl p-4 sm:p-6 text-center transition-transform duration-300 cursor-pointer block ${
               stats?.missions.completedThisWeek === stats?.missions.total && (stats?.missions.total || 0) > 0
                 ? 'border-[#8BAE5A] shadow-2xl shadow-[#8BAE5A]/20 hover:scale-105 hover:shadow-[#8BAE5A]/40'
                 : 'border-[#3A4D23]/30 hover:scale-105 hover:shadow-2xl hover:border-[#8BAE5A]/50'

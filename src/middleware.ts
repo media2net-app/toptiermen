@@ -22,9 +22,9 @@ export async function middleware(req: NextRequest) {
     data: { session },
   } = await supabase.auth.getSession();
 
-  // Redirect old mijn-missies URL to nieuwe mijn-uitdagingen URL
+  // Redirect old mijn-missies URL to nieuwe mijn-challenges URL
   if (req.nextUrl.pathname === '/dashboard/mijn-missies') {
-    return NextResponse.redirect(new URL('/dashboard/mijn-uitdagingen', req.url));
+    return NextResponse.redirect(new URL('/dashboard/mijn-challenges', req.url));
   }
 
   // Only check onboarding redirects for authenticated users on dashboard routes
@@ -46,11 +46,11 @@ export async function middleware(req: NextRequest) {
         const allowedPaths = {
           0: ['/dashboard/welcome-video'],
           1: ['/dashboard/welcome-video', '/dashboard/profiel'],
-          2: ['/dashboard/welcome-video', '/dashboard/profiel', '/dashboard/mijn-uitdagingen'],
-          3: ['/dashboard/welcome-video', '/dashboard/profiel', '/dashboard/mijn-uitdagingen', '/dashboard/trainingsschemas'],
-          4: ['/dashboard/welcome-video', '/dashboard/profiel', '/dashboard/mijn-uitdagingen', '/dashboard/trainingsschemas', '/dashboard/voedingsplannen'],
-          5: ['/dashboard/welcome-video', '/dashboard/profiel', '/dashboard/mijn-uitdagingen', '/dashboard/trainingsschemas', '/dashboard/voedingsplannen', '/dashboard/challenges'],
-          6: ['/dashboard/welcome-video', '/dashboard/profiel', '/dashboard/mijn-uitdagingen', '/dashboard/trainingsschemas', '/dashboard/voedingsplannen', '/dashboard/challenges', '/dashboard/brotherhood/forum', '/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden']
+          2: ['/dashboard/welcome-video', '/dashboard/profiel', '/dashboard/mijn-challenges'],
+          3: ['/dashboard/welcome-video', '/dashboard/profiel', '/dashboard/mijn-challenges', '/dashboard/trainingsschemas'],
+          4: ['/dashboard/welcome-video', '/dashboard/profiel', '/dashboard/mijn-challenges', '/dashboard/trainingsschemas', '/dashboard/voedingsplannen'],
+          5: ['/dashboard/welcome-video', '/dashboard/profiel', '/dashboard/mijn-challenges', '/dashboard/trainingsschemas', '/dashboard/voedingsplannen'],
+          6: ['/dashboard/welcome-video', '/dashboard/profiel', '/dashboard/mijn-challenges', '/dashboard/trainingsschemas', '/dashboard/voedingsplannen', '/dashboard/brotherhood/forum', '/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden']
         };
 
         // Special case: If user tries to access main dashboard during onboarding, redirect to current step
@@ -60,7 +60,7 @@ export async function middleware(req: NextRequest) {
           if (currentStep === 1) {
             redirectPath = '/dashboard/profiel';
           } else if (currentStep === 2) {
-            redirectPath = '/dashboard/mijn-uitdagingen';
+            redirectPath = '/dashboard/mijn-challenges';
           } else if (currentStep === 3) {
             redirectPath = '/dashboard/trainingsschemas';
           } else if (currentStep === 4) {
@@ -89,7 +89,7 @@ export async function middleware(req: NextRequest) {
           } else if (currentStep === 1) {
             redirectPath = '/dashboard/profiel';
           } else if (currentStep === 2) {
-            redirectPath = '/dashboard/mijn-uitdagingen';
+            redirectPath = '/dashboard/mijn-challenges';
           } else if (currentStep === 3) {
             redirectPath = '/dashboard/trainingsschemas';
           } else if (currentStep === 4) {

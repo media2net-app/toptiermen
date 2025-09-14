@@ -55,13 +55,6 @@ interface NutritionPlan {
   category: string;
 }
 
-interface Challenge {
-  id: string;
-  title: string;
-  description: string;
-  duration: number;
-  difficulty: string;
-}
 
 interface ForcedOnboardingModalProps {
   isOpen: boolean;
@@ -82,14 +75,12 @@ export default function ForcedOnboardingModal({ isOpen, onComplete }: ForcedOnbo
   const [selectedMissions, setSelectedMissions] = useState<string[]>([]);
   const [selectedTrainingSchema, setSelectedTrainingSchema] = useState<string>('');
   const [selectedNutritionPlan, setSelectedNutritionPlan] = useState<string>('');
-  const [selectedChallenges, setSelectedChallenges] = useState<string[]>([]);
   const [forumIntroduction, setForumIntroduction] = useState('');
 
   // Data
   const [missions, setMissions] = useState<Mission[]>([]);
   const [trainingSchemas, setTrainingSchemas] = useState<TrainingSchema[]>([]);
   const [nutritionPlans, setNutritionPlans] = useState<NutritionPlan[]>([]);
-  const [challenges, setChallenges] = useState<Challenge[]>([]);
 
   // Load data when modal opens
   useEffect(() => {
@@ -107,7 +98,6 @@ export default function ForcedOnboardingModal({ isOpen, onComplete }: ForcedOnbo
         setMissions(data.missions || []);
         setTrainingSchemas(data.trainingSchemas || []);
         setNutritionPlans(data.nutritionPlans || []);
-        setChallenges(data.challenges || []);
       }
     } catch (error) {
       console.error('Error fetching onboarding data:', error);
@@ -188,7 +178,7 @@ export default function ForcedOnboardingModal({ isOpen, onComplete }: ForcedOnbo
       onComplete();
       // Then navigate to missions page
       setTimeout(() => {
-        router.push('/dashboard/mijn-uitdagingen');
+        router.push('/dashboard/mijn-challenges');
       }, 100);
     }
   };
@@ -230,14 +220,9 @@ export default function ForcedOnboardingModal({ isOpen, onComplete }: ForcedOnbo
       return;
     }
 
-    if (selectedChallenges.length < 2) {
-      toast.error('Selecteer minimaal 2 challenges');
-      return;
-    }
 
     const updatedStatus = await updateOnboardingStatus(4, 'complete_step', { 
-      selectedNutritionPlan, 
-      selectedChallenges 
+      selectedNutritionPlan
     });
     if (updatedStatus) {
       setCurrentStep(5); // Update step before closing modal
@@ -276,13 +261,6 @@ export default function ForcedOnboardingModal({ isOpen, onComplete }: ForcedOnbo
     );
   };
 
-  const toggleChallenge = (challengeId: string) => {
-    setSelectedMissions(prev => 
-      prev.includes(challengeId) 
-        ? prev.filter(id => id !== challengeId)
-        : [...prev, challengeId]
-    );
-  };
 
   if (!isOpen) return null;
 
@@ -527,10 +505,10 @@ export default function ForcedOnboardingModal({ isOpen, onComplete }: ForcedOnbo
             <div className="space-y-8">
               <div className="text-center mb-6">
                 <h3 className="text-2xl font-bold text-white mb-4">
-                  Voeding & Challenges 🥗
+                  Voeding 🥗
                 </h3>
                 <p className="text-[#8BAE5A]">
-                  Kies je voedingsplan en selecteer minimaal 2 challenges.
+                  Kies je voedingsplan.
                 </p>
               </div>
 
@@ -564,41 +542,11 @@ export default function ForcedOnboardingModal({ isOpen, onComplete }: ForcedOnbo
                 </div>
               </div>
 
-              {/* Challenges */}
-              <div>
-                <h4 className="text-lg font-semibold text-white mb-4">
-                  Challenges ({selectedChallenges.length}/2 minimaal)
-                </h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {challenges.slice(0, 6).map((challenge) => (
-                    <div
-                      key={challenge.id}
-                      onClick={() => toggleChallenge(challenge.id)}
-                      className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                        selectedChallenges.includes(challenge.id)
-                          ? 'border-[#8BAE5A] bg-[#8BAE5A]/10'
-                          : 'border-[#3A4D23] bg-[#181F17] hover:border-[#8BAE5A] hover:bg-[#8BAE5A]/5'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="text-2xl">🏆</span>
-                        <div className="flex-1">
-                          <h5 className="font-medium text-white">{challenge.title}</h5>
-                          <p className="text-sm text-[#8BAE5A]">{challenge.duration} dagen</p>
-                        </div>
-                        {selectedChallenges.includes(challenge.id) && (
-                          <CheckIcon className="w-5 h-5 text-[#8BAE5A]" />
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
 
               <div className="flex justify-center">
                 <button
                   onClick={handleNutritionComplete}
-                  disabled={loading || !selectedNutritionPlan || selectedChallenges.length < 2}
+                  disabled={loading || !selectedNutritionPlan}
                   className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] px-8 py-3 rounded-lg hover:from-[#A6C97B] hover:to-[#FFE55C] disabled:opacity-50 font-semibold transition-all duration-200 flex items-center gap-2"
                 >
                   {loading ? 'Bezig...' : 'Opslaan & Volgende'}

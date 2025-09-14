@@ -65,7 +65,7 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
       id: 2,
       title: 'Uitdagingen selecteren',
       description: 'Kies je dagelijkse uitdagingen',
-      targetPage: '/dashboard/mijn-uitdagingen',
+      targetPage: '/dashboard/mijn-challenges',
       targetMenuLabel: 'Mijn Uitdagingen',
       completed: false,
       icon: '🔥',
@@ -148,7 +148,7 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
           case '/dashboard/onboarding':
             pageBasedStep = steps.findIndex(step => step.id === 1); // Main goal step
             break;
-          case '/dashboard/mijn-uitdagingen':
+          case '/dashboard/mijn-challenges':
             pageBasedStep = steps.findIndex(step => step.id === 2); // Missions step
             break;
           case '/dashboard/trainingsschemas':

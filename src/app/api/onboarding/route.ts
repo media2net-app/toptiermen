@@ -180,8 +180,8 @@ export async function POST(request: Request) {
     const body = await request.json();
     console.log('📥 Received request body:', body);
     
-    const { userId, step, action, mainGoal, selectedMissions, selectedTrainingSchema, selectedNutritionPlan, selectedChallenge, forumIntroduction, test_video_watched } = body;
-    console.log('🔍 Extracted values:', { userId, step, action, mainGoal, selectedMissions, selectedTrainingSchema, selectedNutritionPlan, selectedChallenge, forumIntroduction });
+    const { userId, step, action, mainGoal, selectedMissions, selectedTrainingSchema, selectedNutritionPlan, forumIntroduction, test_video_watched } = body;
+    console.log('🔍 Extracted values:', { userId, step, action, mainGoal, selectedMissions, selectedTrainingSchema, selectedNutritionPlan, forumIntroduction });
 
     if (!userId || step === undefined || !action) {
       console.error('❌ Missing required fields:', { 
@@ -323,16 +323,6 @@ export async function POST(request: Request) {
           console.log('✅ Nutrition plan selected:', selectedNutritionPlan);
         }
         
-        if (selectedChallenge) {
-          await supabase
-            .from('user_preferences')
-            .upsert({
-              user_id: actualUserId,
-              selected_challenge: selectedChallenge,
-              updated_at: new Date().toISOString()
-            });
-          console.log('✅ Challenge selected:', selectedChallenge);
-        }
       }
       
       if (step === 5 && forumIntroduction) {

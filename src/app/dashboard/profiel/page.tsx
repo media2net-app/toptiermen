@@ -84,7 +84,7 @@ export default function ProfielPage() {
       await completeCurrentStep();
       
       // Redirect to next step
-      router.push('/dashboard/mijn-uitdagingen');
+      router.push('/dashboard/mijn-challenges');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Er is een fout opgetreden');
     } finally {

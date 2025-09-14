@@ -70,9 +70,8 @@ const menu = [
   { label: 'Dashboard', icon: HomeIcon, href: '/dashboard', onboardingStep: 0 },
   { label: 'Mijn Profiel', icon: UserCircleIcon, parent: 'Dashboard', href: '/dashboard/mijn-profiel', isSub: true, onboardingStep: 0 },
   { label: 'Notificaties', icon: BellIcon, parent: 'Dashboard', href: '/dashboard/notificaties', isSub: true, onboardingStep: 0 },
-  { label: 'Mijn Uitdagingen', icon: FireIcon, parent: 'Dashboard', href: '/dashboard/mijn-uitdagingen', isSub: true, onboardingStep: 2 },
+  { label: 'Mijn Challenges', icon: FireIcon, parent: 'Dashboard', href: '/dashboard/mijn-challenges', isSub: true, onboardingStep: 2 },
   { label: 'Mijn Trainingen', icon: AcademicCapIcon, parent: 'Dashboard', href: '/dashboard/mijn-trainingen', isSub: true, onboardingStep: 0 },
-  { label: 'Challenges', icon: TrophyIcon, href: '/dashboard/challenges', onboardingStep: 5 },
   { label: 'Finance & Business', icon: CurrencyDollarIcon, href: '/dashboard/finance-en-business', onboardingStep: 7 },
   { label: 'Academy', icon: FireIcon, href: '/dashboard/academy', onboardingStep: 7 },
   { label: 'Trainingsschemas', icon: AcademicCapIcon, href: '/dashboard/trainingsschemas', onboardingStep: 3 },
@@ -334,7 +333,7 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
               href={item.disabled ? '#' : (item.isDynamic && item.isOnboardingItem && isOnboarding ? 
                 (actualCurrentStep === 0 ? '/dashboard/welcome-video' :
                  actualCurrentStep === 1 ? '/dashboard/profiel' :
-                 actualCurrentStep === 2 ? '/dashboard/mijn-uitdagingen' :
+                 actualCurrentStep === 2 ? '/dashboard/mijn-challenges' :
                  actualCurrentStep === 3 ? '/dashboard/trainingsschemas' :
                  actualCurrentStep === 4 ? '/dashboard/voedingsplannen' :
                  actualCurrentStep === 5 ? '/dashboard/challenges' :
@@ -649,7 +648,7 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
                 href={item.disabled ? '#' : (item.isDynamic && item.isOnboardingItem && isOnboarding ? 
                   (actualCurrentStep === 0 ? '/dashboard/welcome-video' :
                    actualCurrentStep === 1 ? '/dashboard/profiel' :
-                   actualCurrentStep === 2 ? '/dashboard/mijn-uitdagingen' :
+                   actualCurrentStep === 2 ? '/dashboard/mijn-challenges' :
                    actualCurrentStep === 3 ? '/dashboard/trainingsschemas' :
                    actualCurrentStep === 4 ? '/dashboard/voedingsplannen' :
                    actualCurrentStep === 5 ? '/dashboard/challenges' :

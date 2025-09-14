@@ -12,7 +12,6 @@ const mobileMenu = [
 
 const fullMenu = [
   { label: 'Dashboard', href: '/dashboard' },
-  { label: 'Mijn Uitdagingen', href: '/dashboard/mijn-uitdagingen' },
   { label: 'Mijn Challenges', href: '/dashboard/mijn-challenges' },
   { label: 'Trainingsschemas', href: '/dashboard/trainingsschemas' },
   { label: 'Voedingsplannen', href: '/dashboard/voedingsplannen' },
