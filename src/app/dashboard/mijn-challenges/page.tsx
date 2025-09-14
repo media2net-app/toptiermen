@@ -38,240 +38,227 @@ interface Summary {
   dailyStreak: number;
 }
 
-// Challenge Library with suggested challenges
+// Top Tier Men Challenge Library - Designed to build real men
 const CHALLENGE_LIBRARY: SuggestedChallenge[] = [
-  // Fitness & Health
+  // FYSIEK - Physical Challenges
   {
-    id: 'fitness-1',
-    title: '30 minuten wandelen',
-    category: 'Fitness & Gezondheid',
-    icon: '🚶‍♂️',
-    description: 'Dagelijkse wandeling voor cardiovasculaire gezondheid',
-    xp_reward: 50,
-    difficulty: 'easy'
-  },
-  {
-    id: 'fitness-2',
-    title: '20 push-ups',
-    category: 'Fitness & Gezondheid',
-    icon: '💪',
-    description: 'Versterk je bovenlichaam met push-ups',
-    xp_reward: 75,
-    difficulty: 'medium'
-  },
-  {
-    id: 'fitness-3',
-    title: '10 minuten stretchen',
-    category: 'Fitness & Gezondheid',
-    icon: '🧘‍♂️',
-    description: 'Verbeter je flexibiliteit en herstel',
-    xp_reward: 40,
-    difficulty: 'easy'
-  },
-  {
-    id: 'fitness-4',
-    title: '30 squats',
-    category: 'Fitness & Gezondheid',
-    icon: '🦵',
-    description: 'Versterk je benen en core',
-    xp_reward: 60,
-    difficulty: 'medium'
-  },
-  {
-    id: 'fitness-5',
-    title: '2 liter water drinken',
-    category: 'Fitness & Gezondheid',
-    icon: '💧',
-    description: 'Blijf gehydrateerd voor optimale prestaties',
-    xp_reward: 30,
-    difficulty: 'easy'
-  },
-
-  // Mind & Focus
-  {
-    id: 'mind-1',
-    title: '10 minuten mediteren',
-    category: 'Mind & Focus',
-    icon: '🧘‍♀️',
-    description: 'Verbeter je mentale helderheid en focus',
-    xp_reward: 80,
-    difficulty: 'medium'
-  },
-  {
-    id: 'mind-2',
-    title: '30 minuten lezen',
-    category: 'Mind & Focus',
-    icon: '📚',
-    description: 'Stimuleer je brein met dagelijkse leesroutine',
-    xp_reward: 70,
-    difficulty: 'medium'
-  },
-  {
-    id: 'mind-3',
-    title: 'Journaling',
-    category: 'Mind & Focus',
-    icon: '✍️',
-    description: 'Schrijf je gedachten en doelen op',
-    xp_reward: 45,
-    difficulty: 'easy'
-  },
-  {
-    id: 'mind-4',
-    title: 'Gratitude practice',
-    category: 'Mind & Focus',
-    icon: '🙏',
-    description: 'Schrijf 3 dingen op waar je dankbaar voor bent',
-    xp_reward: 50,
-    difficulty: 'easy'
-  },
-  {
-    id: 'mind-5',
-    title: 'Geen telefoon 1 uur voor bed',
-    category: 'Mind & Focus',
-    icon: '📱',
-    description: 'Verbeter je slaapkwaliteit',
-    xp_reward: 60,
-    difficulty: 'hard'
-  },
-
-  // Finance & Business
-  {
-    id: 'finance-1',
-    title: 'Budget bijhouden',
-    category: 'Finance & Business',
-    icon: '💰',
-    description: 'Track je dagelijkse uitgaven',
-    xp_reward: 55,
-    difficulty: 'medium'
-  },
-  {
-    id: 'finance-2',
-    title: '15 minuten leren over investeren',
-    category: 'Finance & Business',
-    icon: '📈',
-    description: 'Verbreed je financiële kennis',
-    xp_reward: 75,
-    difficulty: 'medium'
-  },
-  {
-    id: 'finance-3',
-    title: 'Netwerken',
-    category: 'Finance & Business',
-    icon: '🤝',
-    description: 'Maak contact met 1 nieuwe persoon',
-    xp_reward: 65,
-    difficulty: 'medium'
-  },
-  {
-    id: 'finance-4',
-    title: 'Side hustle werk',
-    category: 'Finance & Business',
-    icon: '💼',
-    description: 'Besteed 30 minuten aan je side project',
-    xp_reward: 85,
-    difficulty: 'hard'
-  },
-  {
-    id: 'finance-5',
-    title: 'Financiële doelen review',
-    category: 'Finance & Business',
-    icon: '🎯',
-    description: 'Evalueer en update je financiële doelen',
-    xp_reward: 70,
-    difficulty: 'medium'
-  },
-
-  // Brotherhood & Social
-  {
-    id: 'social-1',
-    title: 'Forum post maken',
-    category: 'Brotherhood & Social',
-    icon: '💬',
-    description: 'Deel je ervaringen met de community',
-    xp_reward: 60,
-    difficulty: 'medium'
-  },
-  {
-    id: 'social-2',
-    title: 'Iemand helpen',
-    category: 'Brotherhood & Social',
-    icon: '🤲',
-    description: 'Help een medelid of vriend',
-    xp_reward: 80,
-    difficulty: 'medium'
-  },
-  {
-    id: 'social-3',
-    title: 'Gratitude uitdrukken',
-    category: 'Brotherhood & Social',
-    icon: '❤️',
-    description: 'Dank iemand voor hun steun',
-    xp_reward: 50,
-    difficulty: 'easy'
-  },
-  {
-    id: 'social-4',
-    title: 'Mentorship moment',
-    category: 'Brotherhood & Social',
-    icon: '👨‍🏫',
-    description: 'Geef of ontvang advies van een mentor',
-    xp_reward: 90,
-    difficulty: 'hard'
-  },
-  {
-    id: 'social-5',
-    title: 'Community challenge',
-    category: 'Brotherhood & Social',
-    icon: '🏆',
-    description: 'Doe mee aan een community challenge',
+    id: 'fysiek-1',
+    title: 'Koude douche',
+    category: 'Fysiek',
+    icon: '❄️',
+    description: 'Start je dag met een koude douche - bouw mentale weerbaarheid',
     xp_reward: 100,
     difficulty: 'hard'
   },
-
-  // Personal Development
   {
-    id: 'personal-1',
-    title: 'Nieuwe vaardigheid leren',
-    category: 'Persoonlijke Ontwikkeling',
-    icon: '🎓',
-    description: 'Besteed 20 minuten aan een nieuwe vaardigheid',
-    xp_reward: 75,
+    id: 'fysiek-2',
+    title: 'Vroeg opstaan (5:00)',
+    category: 'Fysiek',
+    icon: '🌅',
+    description: 'Sta op om 5:00 en begin je dag als een echte leider',
+    xp_reward: 120,
+    difficulty: 'hard'
+  },
+  {
+    id: 'fysiek-3',
+    title: '10.000 stappen',
+    category: 'Fysiek',
+    icon: '👟',
+    description: 'Loop minimaal 10.000 stappen - beweging is discipline',
+    xp_reward: 80,
     difficulty: 'medium'
   },
   {
-    id: 'personal-2',
-    title: 'Comfort zone verlaten',
-    category: 'Persoonlijke Ontwikkeling',
-    icon: '🚀',
-    description: 'Doe iets wat je normaal niet zou doen',
+    id: 'fysiek-4',
+    title: '50 push-ups',
+    category: 'Fysiek',
+    icon: '💪',
+    description: 'Doe 50 push-ups verdeeld over de dag - bouw kracht',
+    xp_reward: 90,
+    difficulty: 'medium'
+  },
+  {
+    id: 'fysiek-5',
+    title: '100 squats',
+    category: 'Fysiek',
+    icon: '🦵',
+    description: 'Voer 100 squats uit - sterke benen, sterke geest',
+    xp_reward: 85,
+    difficulty: 'medium'
+  },
+  {
+    id: 'fysiek-6',
+    title: 'Plank 5 minuten',
+    category: 'Fysiek',
+    icon: '🏋️‍♂️',
+    description: 'Houd een plank vast voor 5 minuten - test je uithoudingsvermogen',
+    xp_reward: 110,
+    difficulty: 'hard'
+  },
+  {
+    id: 'fysiek-7',
+    title: 'Geen suiker',
+    category: 'Fysiek',
+    icon: '🚫🍭',
+    description: 'Eet vandaag geen toegevoegde suikers - discipline in voeding',
     xp_reward: 95,
     difficulty: 'hard'
   },
   {
-    id: 'personal-3',
-    title: 'Doelen herzien',
-    category: 'Persoonlijke Ontwikkeling',
-    icon: '🎯',
-    description: 'Evalueer en update je persoonlijke doelen',
-    xp_reward: 65,
+    id: 'fysiek-8',
+    title: '3 liter water',
+    category: 'Fysiek',
+    icon: '💧',
+    description: 'Drink 3 liter water - hydratatie is essentieel',
+    xp_reward: 60,
+    difficulty: 'easy'
+  },
+
+  // MENTAAL - Mental Challenges
+  {
+    id: 'mentaal-1',
+    title: 'Geen sociale media',
+    category: 'Mentaal',
+    icon: '📱❌',
+    description: 'Geen sociale media voor 24 uur - focus op wat belangrijk is',
+    xp_reward: 120,
+    difficulty: 'hard'
+  },
+  {
+    id: 'mentaal-2',
+    title: 'Meditatie 20 min',
+    category: 'Mentaal',
+    icon: '🧘‍♂️',
+    description: 'Mediteer 20 minuten - train je geest zoals je lichaam',
+    xp_reward: 100,
     difficulty: 'medium'
   },
   {
-    id: 'personal-4',
-    title: 'Feedback vragen',
-    category: 'Persoonlijke Ontwikkeling',
-    icon: '📝',
-    description: 'Vraag feedback van iemand die je vertrouwt',
+    id: 'mentaal-3',
+    title: '1 uur lezen',
+    category: 'Mentaal',
+    icon: '📚',
+    description: 'Lees 1 uur uit een boek - kennis is macht',
+    xp_reward: 90,
+    difficulty: 'medium'
+  },
+  {
+    id: 'mentaal-4',
+    title: 'Journaling',
+    category: 'Mentaal',
+    icon: '✍️',
+    description: 'Schrijf 500 woorden in je journal - reflecteer op je dag',
     xp_reward: 70,
+    difficulty: 'easy'
+  },
+  {
+    id: 'mentaal-5',
+    title: 'Geen klagen',
+    category: 'Mentaal',
+    icon: '🤐',
+    description: 'Klaag vandaag nergens over - focus op oplossingen',
+    xp_reward: 110,
+    difficulty: 'hard'
+  },
+  {
+    id: 'mentaal-6',
+    title: 'Gratitude lijst',
+    category: 'Mentaal',
+    icon: '🙏',
+    description: 'Schrijf 10 dingen op waar je dankbaar voor bent',
+    xp_reward: 65,
+    difficulty: 'easy'
+  },
+  {
+    id: 'mentaal-7',
+    title: 'Nieuwe vaardigheid',
+    category: 'Mentaal',
+    icon: '🎓',
+    description: 'Besteed 30 minuten aan het leren van een nieuwe vaardigheid',
+    xp_reward: 85,
     difficulty: 'medium'
   },
   {
-    id: 'personal-5',
-    title: 'Reflectie sessie',
-    category: 'Persoonlijke Ontwikkeling',
-    icon: '🤔',
-    description: 'Neem 15 minuten om te reflecteren op je dag',
-    xp_reward: 55,
+    id: 'mentaal-8',
+    title: 'Doelen herzien',
+    category: 'Mentaal',
+    icon: '🎯',
+    description: 'Herzie en update je doelen - weet waar je naartoe gaat',
+    xp_reward: 75,
+    difficulty: 'easy'
+  },
+
+  // FINANCIEEL - Financial Challenges
+  {
+    id: 'financieel-1',
+    title: 'Budget bijhouden',
+    category: 'Financieel',
+    icon: '💰',
+    description: 'Track alle uitgaven van vandaag - controle over je geld',
+    xp_reward: 70,
+    difficulty: 'easy'
+  },
+  {
+    id: 'financieel-2',
+    title: 'Geen onnodige uitgaven',
+    category: 'Financieel',
+    icon: '💳❌',
+    description: 'Geen impulsieve aankopen vandaag - discipline in uitgaven',
+    xp_reward: 90,
+    difficulty: 'medium'
+  },
+  {
+    id: 'financieel-3',
+    title: 'Investeren leren',
+    category: 'Financieel',
+    icon: '📈',
+    description: 'Besteed 30 minuten aan het leren over investeren',
+    xp_reward: 80,
+    difficulty: 'medium'
+  },
+  {
+    id: 'financieel-4',
+    title: 'Netwerken',
+    category: 'Financieel',
+    icon: '🤝',
+    description: 'Maak contact met 3 nieuwe mensen - bouw je netwerk',
+    xp_reward: 95,
+    difficulty: 'hard'
+  },
+  {
+    id: 'financieel-5',
+    title: 'Side hustle werk',
+    category: 'Financieel',
+    icon: '💼',
+    description: 'Besteed 1 uur aan je side project - bouw extra inkomen',
+    xp_reward: 110,
+    difficulty: 'hard'
+  },
+  {
+    id: 'financieel-6',
+    title: 'Financiële doelen',
+    category: 'Financieel',
+    icon: '🎯',
+    description: 'Definieer 3 financiële doelen voor de komende maand',
+    xp_reward: 75,
+    difficulty: 'easy'
+  },
+  {
+    id: 'financieel-7',
+    title: 'Onderhandelen',
+    category: 'Financieel',
+    icon: '💬',
+    description: 'Onderhandel over een rekening of service - assertiviteit',
+    xp_reward: 100,
+    difficulty: 'hard'
+  },
+  {
+    id: 'financieel-8',
+    title: 'Expense review',
+    category: 'Financieel',
+    icon: '📊',
+    description: 'Analyseer je uitgaven van de afgelopen week',
+    xp_reward: 65,
     difficulty: 'easy'
   }
 ];
@@ -1013,115 +1000,127 @@ export default function MijnChallengesPage() {
           </form>
         </div>
 
-        {/* Challenge Library */}
+        {/* Top Tier Men Challenge Library */}
         {showChallengeLibrary && (
-          <div className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-6 mb-8">
-            <h2 className="text-xl font-bold text-white mb-4">📚 Challenge Bibliotheek</h2>
-            <p className="text-gray-400 mb-6">Kies uit voorgestelde challenges van verschillende categorieën</p>
+          <div className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-2xl p-6 mb-8 shadow-2xl">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold text-white mb-2">🏆 Top Tier Men Challenge Library</h2>
+              <p className="text-[#8BAE5A] text-lg">Kies challenges die jou tot een echte leider maken</p>
+            </div>
             
-            {/* Filters */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-              <div>
-                <label className="block text-sm font-medium text-[#8BAE5A] mb-2">Zoeken</label>
+            {/* Category Tabs */}
+            <div className="flex flex-wrap justify-center gap-3 mb-8">
+              {[
+                { key: 'all', label: 'Alle Challenges', icon: '🔥', color: 'from-[#8BAE5A] to-[#B6C948]' },
+                { key: 'Fysiek', label: 'Fysiek', icon: '💪', color: 'from-[#FF6B6B] to-[#FF8E8E]' },
+                { key: 'Mentaal', label: 'Mentaal', icon: '🧠', color: 'from-[#4ECDC4] to-[#7EDDD6]' },
+                { key: 'Financieel', label: 'Financieel', icon: '💰', color: 'from-[#FFD93D] to-[#FFE55C]' }
+              ].map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => setSelectedCategory(tab.key)}
+                  className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
+                    selectedCategory === tab.key
+                      ? `bg-gradient-to-r ${tab.color} text-[#181F17] shadow-lg scale-105`
+                      : 'bg-[#0F1419] text-[#8BAE5A] hover:bg-[#3A4D23] hover:text-white'
+                  }`}
+                >
+                  <span className="text-xl">{tab.icon}</span>
+                  <span>{tab.label}</span>
+                </button>
+              ))}
+            </div>
+
+            {/* Search and Difficulty Filter */}
+            <div className="flex flex-col md:flex-row gap-4 mb-8">
+              <div className="flex-1">
                 <input
                   type="text"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Zoek challenges..."
-                  className="w-full bg-[#0F1419] border border-[#3A4D23]/30 rounded-lg px-4 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-[#8BAE5A]"
+                  placeholder="🔍 Zoek naar specifieke challenges..."
+                  className="w-full bg-[#0F1419] border border-[#3A4D23]/30 rounded-xl px-6 py-4 text-white placeholder-gray-400 focus:outline-none focus:border-[#8BAE5A] focus:ring-2 focus:ring-[#8BAE5A]/20 text-lg"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-[#8BAE5A] mb-2">Categorie</label>
-                <select
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="w-full bg-[#0F1419] border border-[#3A4D23]/30 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#8BAE5A]"
-                >
-                  <option value="all">Alle Categorieën</option>
-                  {getCategories().map(category => (
-                    <option key={category} value={category}>{category}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-[#8BAE5A] mb-2">Moeilijkheid</label>
+              <div className="md:w-48">
                 <select
                   value={selectedDifficulty}
                   onChange={(e) => setSelectedDifficulty(e.target.value)}
-                  className="w-full bg-[#0F1419] border border-[#3A4D23]/30 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#8BAE5A]"
+                  className="w-full bg-[#0F1419] border border-[#3A4D23]/30 rounded-xl px-6 py-4 text-white focus:outline-none focus:border-[#8BAE5A] focus:ring-2 focus:ring-[#8BAE5A]/20 text-lg"
                 >
                   <option value="all">Alle Niveaus</option>
-                  <option value="easy">Makkelijk</option>
-                  <option value="medium">Gemiddeld</option>
-                  <option value="hard">Moeilijk</option>
+                  <option value="easy">🟢 Makkelijk</option>
+                  <option value="medium">🟡 Gemiddeld</option>
+                  <option value="hard">🔴 Moeilijk</option>
                 </select>
-              </div>
-              <div className="flex items-end">
-                <button
-                  onClick={() => {
-                    setSearchTerm('');
-                    setSelectedCategory('all');
-                    setSelectedDifficulty('all');
-                  }}
-                  className="w-full bg-[#3A4D23] text-[#8BAE5A] px-4 py-2 rounded-lg hover:bg-[#4A5D33] transition-colors duration-200"
-                >
-                  Reset Filters
-                </button>
               </div>
             </div>
 
             {/* Challenge Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {getFilteredSuggestedChallenges().map((mission) => (
                 <div
                   key={mission.id}
-                  className="bg-[#0F1419] border border-[#3A4D23]/30 rounded-xl p-4 hover:border-[#8BAE5A]/50 transition-all duration-200"
+                  className="group bg-gradient-to-br from-[#0F1419] to-[#181F17] border border-[#3A4D23]/30 rounded-2xl p-6 hover:border-[#8BAE5A]/50 hover:shadow-2xl hover:shadow-[#8BAE5A]/10 transition-all duration-300 transform hover:scale-105"
                 >
-                  <div className="flex items-start justify-between mb-3">
-                    <span className="text-2xl">{mission.icon}</span>
-                    <div className="flex items-center gap-1">
-                      <span className="text-xs text-[#FFD700] font-semibold">+{mission.xp_reward} XP</span>
-                      <span className={`text-xs px-2 py-1 rounded-full ${
+                  {/* Header */}
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <span className="text-4xl group-hover:scale-110 transition-transform duration-300">{mission.icon}</span>
+                      <div>
+                        <h3 className="text-xl font-bold text-white mb-1">{mission.title}</h3>
+                        <span className={`text-sm px-3 py-1 rounded-full font-medium ${
+                          mission.category === 'Fysiek' ? 'bg-red-600/20 text-red-400 border border-red-600/30' :
+                          mission.category === 'Mentaal' ? 'bg-blue-600/20 text-blue-400 border border-blue-600/30' :
+                          mission.category === 'Financieel' ? 'bg-yellow-600/20 text-yellow-400 border border-yellow-600/30' :
+                          'bg-gray-600/20 text-gray-400 border border-gray-600/30'
+                        }`}>
+                          {mission.category}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-end gap-2">
+                      <span className="text-lg text-[#FFD700] font-bold">+{mission.xp_reward} XP</span>
+                      <span className={`text-xs px-2 py-1 rounded-full font-medium ${
                         mission.difficulty === 'easy' ? 'bg-green-600/20 text-green-400' :
                         mission.difficulty === 'medium' ? 'bg-yellow-600/20 text-yellow-400' :
                         'bg-red-600/20 text-red-400'
                       }`}>
-                        {mission.difficulty === 'easy' ? 'Makkelijk' :
-                         mission.difficulty === 'medium' ? 'Gemiddeld' : 'Moeilijk'}
+                        {mission.difficulty === 'easy' ? '🟢 Makkelijk' :
+                         mission.difficulty === 'medium' ? '🟡 Gemiddeld' : '🔴 Moeilijk'}
                       </span>
                     </div>
                   </div>
-                  <h3 className="text-lg font-semibold text-white mb-2">{mission.title}</h3>
-                  <p className="text-sm text-gray-400 mb-3">{mission.description}</p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-[#8BAE5A] bg-[#8BAE5A]/10 px-2 py-1 rounded-full">
-                      {mission.category}
-                    </span>
-                    <button
-                      onClick={() => addSuggestedChallenge(mission)}
-                      className="bg-gradient-to-r from-[#8BAE5A] to-[#6B8E3A] hover:from-[#7A9D4A] hover:to-[#5A7D2A] text-white font-semibold px-3 py-1 rounded-lg transition-all duration-200 text-sm"
-                    >
-                      Toevoegen
-                    </button>
-                  </div>
+
+                  {/* Description */}
+                  <p className="text-gray-300 text-sm leading-relaxed mb-6">{mission.description}</p>
+
+                  {/* Action Button */}
+                  <button
+                    onClick={() => addSuggestedChallenge(mission)}
+                    className="w-full bg-gradient-to-r from-[#8BAE5A] to-[#B6C948] hover:from-[#B6C948] hover:to-[#8BAE5A] text-[#181F17] font-bold px-6 py-3 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg flex items-center justify-center gap-2"
+                  >
+                    <span>⚔️</span>
+                    <span>Challenge Aanvaarden</span>
+                  </button>
                 </div>
               ))}
             </div>
 
             {getFilteredSuggestedChallenges().length === 0 && (
-              <div className="text-center py-8">
-                <span className="text-4xl mb-4 block">🔍</span>
-                <p className="text-gray-400">Geen challenges gevonden met de huidige filters</p>
+              <div className="text-center py-12">
+                <div className="text-6xl mb-6">🔍</div>
+                <h3 className="text-2xl font-bold text-white mb-4">Geen challenges gevonden</h3>
+                <p className="text-gray-400 mb-6">Probeer andere filters of zoektermen</p>
                 <button
                   onClick={() => {
                     setSearchTerm('');
                     setSelectedCategory('all');
                     setSelectedDifficulty('all');
                   }}
-                  className="mt-4 bg-[#3A4D23] text-[#8BAE5A] px-4 py-2 rounded-lg hover:bg-[#4A5D33] transition-colors duration-200"
+                  className="bg-gradient-to-r from-[#8BAE5A] to-[#B6C948] text-[#181F17] px-8 py-3 rounded-xl font-bold hover:shadow-lg transition-all duration-300"
                 >
-                  Reset Filters
+                  🔄 Reset Alle Filters
                 </button>
               </div>
             )}
