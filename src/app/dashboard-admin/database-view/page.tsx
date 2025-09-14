@@ -26,6 +26,8 @@ export default function DatabaseViewPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [checkingStatus, setCheckingStatus] = useState<number | null>(null);
+  const [autoRefresh, setAutoRefresh] = useState(true);
+  const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
 
   const supabase = createClientComponentClient();
 
@@ -65,6 +67,7 @@ export default function DatabaseViewPage() {
         console.log('✅ Successfully fetched packages:', result.count);
         setPackages(result.packages || []);
         setError(null);
+        setLastRefresh(new Date());
       }
     } catch (err) {
       console.error('❌ Error:', err);
@@ -111,6 +114,18 @@ export default function DatabaseViewPage() {
   useEffect(() => {
     fetchPackages();
   }, []);
+
+  // Auto-refresh every 30 seconds
+  useEffect(() => {
+    if (!autoRefresh) return;
+
+    const interval = setInterval(() => {
+      console.log('🔄 Auto-refreshing packages...');
+      fetchPackages();
+    }, 30000); // 30 seconds
+
+    return () => clearInterval(interval);
+  }, [autoRefresh]);
 
   const formatPrice = (price: number) => `€${price.toFixed(2)}`;
   const formatDate = (dateString: string) => {
@@ -168,8 +183,23 @@ export default function DatabaseViewPage() {
         <div className="mb-6 flex justify-between items-center">
           <div className="text-white">
             {loading ? 'Laden...' : `${packages.length} pakketten gevonden`}
+            {autoRefresh && (
+              <span className="ml-3 text-sm text-green-400">
+                🔄 Auto-refresh actief (30s)
+              </span>
+            )}
           </div>
           <div className="flex gap-2">
+            <button
+              onClick={() => setAutoRefresh(!autoRefresh)}
+              className={`px-4 py-2 rounded-lg transition-colors ${
+                autoRefresh 
+                  ? 'bg-green-600 hover:bg-green-700 text-white' 
+                  : 'bg-gray-600 hover:bg-gray-700 text-gray-300'
+              }`}
+            >
+              {autoRefresh ? '⏸️ Pauzeer Auto-refresh' : '▶️ Start Auto-refresh'}
+            </button>
             <button
               onClick={async () => {
                 try {
@@ -190,7 +220,7 @@ export default function DatabaseViewPage() {
               onClick={fetchPackages}
               className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
             >
-              🔄 Vernieuwen
+              🔄 Handmatig Vernieuwen
             </button>
           </div>
         </div>
@@ -358,7 +388,9 @@ export default function DatabaseViewPage() {
             <div>Loading: {loading ? 'true' : 'false'}</div>
             <div>Error: {error || 'none'}</div>
             <div>Packages count: {packages.length}</div>
-            <div>Last fetch: {new Date().toLocaleTimeString('nl-NL')}</div>
+            <div>Auto-refresh: {autoRefresh ? 'AAN (30s)' : 'UIT'}</div>
+            <div>Last fetch: {lastRefresh.toLocaleTimeString('nl-NL')}</div>
+            <div>Next auto-refresh: {autoRefresh ? new Date(lastRefresh.getTime() + 30000).toLocaleTimeString('nl-NL') : 'Uitgeschakeld'}</div>
           </div>
         </div>
       </div>
