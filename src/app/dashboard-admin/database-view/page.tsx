@@ -28,6 +28,7 @@ export default function DatabaseViewPage() {
   const [checkingStatus, setCheckingStatus] = useState<number | null>(null);
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
+  const [syncingMollie, setSyncingMollie] = useState(false);
 
   const supabase = createClientComponentClient();
 
@@ -111,6 +112,42 @@ export default function DatabaseViewPage() {
     }
   };
 
+  const syncMollieSales = async () => {
+    try {
+      setSyncingMollie(true);
+      console.log('🔄 Syncing Mollie sales...');
+      
+      const response = await fetch('/api/admin/sync-mollie-sales', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        console.log('✅ Mollie sync successful:', result.summary);
+        
+        if (result.newPackages > 0) {
+          alert(`✅ Mollie sync completed!\n\nNew packages found: ${result.newPackages}\nErrors: ${result.errors}\n\nRefreshing package list...`);
+          // Refresh the packages list to show new sales
+          await fetchPackages();
+        } else {
+          alert(`ℹ️ Mollie sync completed!\n\nNo new packages found.\n\nChecked ${result.summary.totalMolliePayments} recent payments from Mollie.`);
+        }
+      } else {
+        console.error('❌ Mollie sync failed:', result.error);
+        alert(`❌ Mollie sync failed: ${result.error}`);
+      }
+    } catch (err) {
+      console.error('❌ Error syncing Mollie:', err);
+      alert('❌ Error syncing Mollie sales');
+    } finally {
+      setSyncingMollie(false);
+    }
+  };
+
   useEffect(() => {
     fetchPackages();
   }, []);
@@ -119,9 +156,28 @@ export default function DatabaseViewPage() {
   useEffect(() => {
     if (!autoRefresh) return;
 
-    const interval = setInterval(() => {
+    const interval = setInterval(async () => {
       console.log('🔄 Auto-refreshing packages...');
-      fetchPackages();
+      await fetchPackages();
+      
+      // Also sync Mollie sales every 2 minutes (4th refresh)
+      const refreshCount = Math.floor(Date.now() / 30000) % 4;
+      if (refreshCount === 0) {
+        console.log('🔄 Auto-syncing Mollie sales...');
+        try {
+          const response = await fetch('/api/admin/sync-mollie-sales', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+          });
+          const result = await response.json();
+          if (result.success && result.newPackages > 0) {
+            console.log(`✅ Auto-sync found ${result.newPackages} new packages`);
+            await fetchPackages(); // Refresh again to show new packages
+          }
+        } catch (error) {
+          console.error('Auto-sync error:', error);
+        }
+      }
     }, 30000); // 30 seconds
 
     return () => clearInterval(interval);
@@ -190,6 +246,17 @@ export default function DatabaseViewPage() {
             )}
           </div>
           <div className="flex gap-2">
+            <button
+              onClick={syncMollieSales}
+              disabled={syncingMollie}
+              className={`px-4 py-2 rounded-lg transition-colors ${
+                syncingMollie
+                  ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                  : 'bg-orange-600 hover:bg-orange-700 text-white'
+              }`}
+            >
+              {syncingMollie ? '🔄 Syncing...' : '🔄 Sync Mollie Sales'}
+            </button>
             <button
               onClick={() => setAutoRefresh(!autoRefresh)}
               className={`px-4 py-2 rounded-lg transition-colors ${
@@ -388,9 +455,10 @@ export default function DatabaseViewPage() {
             <div>Loading: {loading ? 'true' : 'false'}</div>
             <div>Error: {error || 'none'}</div>
             <div>Packages count: {packages.length}</div>
-            <div>Auto-refresh: {autoRefresh ? 'AAN (30s)' : 'UIT'}</div>
+            <div>Auto-refresh: {autoRefresh ? 'AAN (30s + Mollie sync every 2min)' : 'UIT'}</div>
             <div>Last fetch: {lastRefresh.toLocaleTimeString('nl-NL')}</div>
             <div>Next auto-refresh: {autoRefresh ? new Date(lastRefresh.getTime() + 30000).toLocaleTimeString('nl-NL') : 'Uitgeschakeld'}</div>
+            <div>Mollie sync: {syncingMollie ? 'Bezig...' : 'Beschikbaar'}</div>
           </div>
         </div>
       </div>
