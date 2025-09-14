@@ -340,7 +340,7 @@ export default function TrainingSchemaDetailPage() {
   if (loading) {
     return (
       <PageLayout title="Trainingsschema" subtitle="Laden...">
-        <div className="max-w-6xl mx-auto">
+        <div className="w-full">
           <div className="flex items-center justify-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8BAE5A]"></div>
           </div>
@@ -352,7 +352,7 @@ export default function TrainingSchemaDetailPage() {
   if (error || !schema) {
     return (
       <PageLayout title="Trainingsschema" subtitle="Fout">
-        <div className="max-w-6xl mx-auto">
+        <div className="w-full">
           <div className="bg-red-900/20 border border-red-500/50 rounded-xl p-6 text-center">
             <h2 className="text-xl font-semibold text-red-400 mb-2">Fout</h2>
             <p className="text-red-300 mb-4">{error || 'Trainingsschema niet gevonden'}</p>
@@ -378,7 +378,7 @@ export default function TrainingSchemaDetailPage() {
         <Breadcrumb items={createBreadcrumbs('Trainingsschemas', schema.name)} />
       </div>
       
-      <div className="max-w-6xl mx-auto">
+      <div className="w-full">
         {/* Schema Header */}
         <div className="bg-[#232D1A] border border-[#3A4D23] rounded-xl p-6 mb-8">
           <div className="flex items-center justify-between mb-4">

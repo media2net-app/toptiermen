@@ -910,7 +910,7 @@ function TrainingschemasContent() {
   if (!hasAccess('training')) {
     return (
       <PageLayout title="Training Schemas">
-        <div className="max-w-6xl mx-auto p-6">
+        <div className="w-full p-6">
           <div className="text-center py-16">
             <div className="mb-8">
               <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] rounded-full flex items-center justify-center">
@@ -971,7 +971,7 @@ function TrainingschemasContent() {
 
   return (
     <PageLayout title="Training Schemas">
-      <div className="max-w-6xl mx-auto p-3 sm:p-4 md:p-6">
+      <div className="w-full p-3 sm:p-4 md:p-6">
         {/* Dynamic Training Plan View */}
         <AnimatePresence mode="wait">
           {viewingDynamicPlan ? (
