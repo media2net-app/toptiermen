@@ -29,6 +29,7 @@ export default function DatabaseViewPage() {
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
   const [syncingMollie, setSyncingMollie] = useState(false);
+  const [updatingEmails, setUpdatingEmails] = useState(false);
 
   const supabase = createClientComponentClient();
 
@@ -148,6 +149,42 @@ export default function DatabaseViewPage() {
     }
   };
 
+  const updateExistingEmails = async () => {
+    try {
+      setUpdatingEmails(true);
+      console.log('🔄 Updating existing email addresses...');
+      
+      const response = await fetch('/api/admin/update-existing-emails', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        console.log('✅ Email update successful:', result.summary);
+        
+        if (result.updated > 0) {
+          alert(`✅ Email update completed!\n\nUpdated packages: ${result.updated}\nErrors: ${result.errors}\n\nRefreshing package list...`);
+          // Refresh the packages list to show updated emails
+          await fetchPackages();
+        } else {
+          alert(`ℹ️ Email update completed!\n\nNo packages needed updating.\n\nAll packages already have correct email addresses.`);
+        }
+      } else {
+        console.error('❌ Email update failed:', result.error);
+        alert(`❌ Email update failed: ${result.error}`);
+      }
+    } catch (err) {
+      console.error('❌ Error updating emails:', err);
+      alert('❌ Error updating email addresses');
+    } finally {
+      setUpdatingEmails(false);
+    }
+  };
+
   useEffect(() => {
     fetchPackages();
   }, []);
@@ -246,6 +283,17 @@ export default function DatabaseViewPage() {
             )}
           </div>
           <div className="flex gap-2">
+            <button
+              onClick={updateExistingEmails}
+              disabled={updatingEmails}
+              className={`px-4 py-2 rounded-lg transition-colors ${
+                updatingEmails
+                  ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                  : 'bg-red-600 hover:bg-red-700 text-white'
+              }`}
+            >
+              {updatingEmails ? '🔄 Updating...' : '📧 Fix Email Addresses'}
+            </button>
             <button
               onClick={syncMollieSales}
               disabled={syncingMollie}
@@ -459,6 +507,7 @@ export default function DatabaseViewPage() {
             <div>Last fetch: {lastRefresh.toLocaleTimeString('nl-NL')}</div>
             <div>Next auto-refresh: {autoRefresh ? new Date(lastRefresh.getTime() + 30000).toLocaleTimeString('nl-NL') : 'Uitgeschakeld'}</div>
             <div>Mollie sync: {syncingMollie ? 'Bezig...' : 'Beschikbaar'}</div>
+            <div>Email update: {updatingEmails ? 'Bezig...' : 'Beschikbaar'}</div>
           </div>
         </div>
       </div>
