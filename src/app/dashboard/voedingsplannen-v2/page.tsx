@@ -112,19 +112,20 @@ export default function VoedingsplannenV2Page() {
   const days = ['maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag', 'zondag'];
 
   // Function to calculate daily totals for selected day
-  const calculateDayTotals = (day: string) => {
+  const calculateDayTotals = (day: string, planData?: any) => {
+    const dataToUse = planData || originalPlanData;
     console.log('🧮 Calculating day totals for:', day);
-    console.log('🔍 OriginalPlanData available:', !!originalPlanData);
-    console.log('🔍 Meals available:', !!originalPlanData?.meals);
-    console.log('🔍 Weekly plan available:', !!originalPlanData?.meals?.weekly_plan);
-    console.log('🔍 Day data available:', !!originalPlanData?.meals?.weekly_plan?.[day]);
+    console.log('🔍 DataToUse available:', !!dataToUse);
+    console.log('🔍 Meals available:', !!dataToUse?.meals);
+    console.log('🔍 Weekly plan available:', !!dataToUse?.meals?.weekly_plan);
+    console.log('🔍 Day data available:', !!dataToUse?.meals?.weekly_plan?.[day]);
     
-    if (!originalPlanData?.meals?.weekly_plan?.[day]) {
+    if (!dataToUse?.meals?.weekly_plan?.[day]) {
       console.log('❌ No day data found, returning zeros');
       return { calories: 0, protein: 0, carbs: 0, fat: 0 };
     }
 
-    const dayMeals = originalPlanData.meals.weekly_plan[day];
+    const dayMeals = dataToUse.meals.weekly_plan[day];
     console.log('🔍 Day meals structure:', Object.keys(dayMeals));
     let totals = { calories: 0, protein: 0, carbs: 0, fat: 0 };
 
@@ -367,7 +368,7 @@ export default function VoedingsplannenV2Page() {
     const scaledPlan = JSON.parse(JSON.stringify(planData)); // Deep clone
     
     // Get personalized targets
-    const personalizedTargets = calculatePersonalizedTargets(userProfile, planData);
+    const personalizedTargets = calculatePersonalizedTargets(planData);
     const targetCalories = personalizedTargets.targetCalories;
     const targetProtein = personalizedTargets.targetProtein;
     const targetCarbs = personalizedTargets.targetCarbs;
@@ -418,7 +419,8 @@ export default function VoedingsplannenV2Page() {
       });
       
       // Recalculate day totals
-      const dayTotals = calculateDayTotals(scaledPlan, day);
+      const dayTotals = calculateDayTotals(day, scaledPlan);
+      
       if (scaledPlan.meals.weekly_plan[day]) {
         scaledPlan.meals.weekly_plan[day].dailyTotals = dayTotals;
       }
@@ -471,7 +473,8 @@ export default function VoedingsplannenV2Page() {
         });
         
         // Recalculate day totals after fine-tuning
-        const updatedDayTotals = calculateDayTotals(scaledPlan, day);
+        const updatedDayTotals = calculateDayTotals(day, scaledPlan);
+        
         if (scaledPlan.meals.weekly_plan[day]) {
           scaledPlan.meals.weekly_plan[day].dailyTotals = updatedDayTotals;
         }
@@ -866,7 +869,7 @@ export default function VoedingsplannenV2Page() {
                 <div className="bg-[#181F17] rounded-lg p-4">
                   <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Eiwit (%)</label>
                   <div className="text-2xl font-bold text-white">
-                    {originalPlanData.protein_percentage || (originalPlanData as any).protein_percentage}%
+                    {(originalPlanData as any).protein_percentage}%
                   </div>
                   <div className="text-sm text-gray-300 mt-1">
                     {personalizedTargets?.targetProtein || originalPlanData.target_protein}g eiwit
@@ -877,7 +880,7 @@ export default function VoedingsplannenV2Page() {
                 <div className="bg-[#181F17] rounded-lg p-4">
                   <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Koolhydraten (%)</label>
                   <div className="text-2xl font-bold text-white">
-                    {originalPlanData.carbs_percentage || (originalPlanData as any).carbs_percentage}%
+                    {(originalPlanData as any).carbs_percentage}%
                   </div>
                   <div className="text-sm text-gray-300 mt-1">
                     {personalizedTargets?.targetCarbs || originalPlanData.target_carbs}g koolhydraten
@@ -888,7 +891,7 @@ export default function VoedingsplannenV2Page() {
                 <div className="bg-[#181F17] rounded-lg p-4">
                   <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Vet (%)</label>
                   <div className="text-2xl font-bold text-white">
-                    {originalPlanData.fat_percentage || (originalPlanData as any).fat_percentage}%
+                    {(originalPlanData as any).fat_percentage}%
                   </div>
                   <div className="text-sm text-gray-300 mt-1">
                     {personalizedTargets?.targetFat || originalPlanData.target_fat}g vet
@@ -921,22 +924,20 @@ export default function VoedingsplannenV2Page() {
                   <div className="bg-[#181F17] rounded-lg p-4">
                     <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Activiteitsniveau</label>
                     <div className="text-lg font-bold text-white">
-                      {userProfile.activity_level === 'low' ? 'Laag (1.2)' :
-                       userProfile.activity_level === 'light' ? 'Licht (1.375)' :
+                      {userProfile.activity_level === 'sedentary' ? 'Zittend (1.1)' :
                        userProfile.activity_level === 'moderate' ? 'Matig (1.3)' :
-                       userProfile.activity_level === 'high' ? 'Hoog (1.55)' :
-                       userProfile.activity_level === 'very_high' ? 'Zeer hoog (1.725)' :
-                       userProfile.activity_level}
+                       userProfile.activity_level === 'very_active' ? 'Lopend (1.6)' :
+                       'Matig (1.3)'}
                     </div>
                   </div>
 
                   <div className="bg-[#181F17] rounded-lg p-4">
                     <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Fitness Doel</label>
                     <div className="text-lg font-bold text-white">
-                      {userProfile.goal === 'droogtrainen' ? 'Droogtrainen (-500 kcal)' :
-                       userProfile.goal === 'onderhoud' ? 'Onderhoud (0 kcal)' :
-                       userProfile.goal === 'spiermassa' ? 'Spiermassa (+400 kcal)' :
-                       userProfile.goal}
+                      {userProfile.fitness_goal === 'droogtrainen' ? 'Droogtrainen (-500 kcal)' :
+                       userProfile.fitness_goal === 'onderhoud' ? 'Onderhoud (0 kcal)' :
+                       userProfile.fitness_goal === 'spiermassa' ? 'Spiermassa (+400 kcal)' :
+                       userProfile.fitness_goal}
                     </div>
                   </div>
                 </div>
@@ -969,30 +970,22 @@ export default function VoedingsplannenV2Page() {
                   <h4 className="text-[#8BAE5A] font-bold text-lg mb-2">TTM Formule Berekening</h4>
                   <div className="text-white text-sm">
                     <div className="mb-2">
-                      <strong>Basis formule:</strong> {userProfile.weight}kg × 22 × {userProfile.activity_level === 'low' ? '1.2' :
-                       userProfile.activity_level === 'light' ? '1.375' :
+                      <strong>Basis formule:</strong> {userProfile.weight}kg × 22 × {userProfile.activity_level === 'sedentary' ? '1.1' :
                        userProfile.activity_level === 'moderate' ? '1.3' :
-                       userProfile.activity_level === 'high' ? '1.55' :
-                       userProfile.activity_level === 'very_high' ? '1.725' : '1.3'} = {Math.round(userProfile.weight * 22 * (userProfile.activity_level === 'low' ? 1.2 :
-                       userProfile.activity_level === 'light' ? 1.375 :
+                       userProfile.activity_level === 'very_active' ? '1.6' : '1.3'} = {Math.round(userProfile.weight * 22 * (userProfile.activity_level === 'sedentary' ? 1.1 :
                        userProfile.activity_level === 'moderate' ? 1.3 :
-                       userProfile.activity_level === 'high' ? 1.55 :
-                       userProfile.activity_level === 'very_high' ? 1.725 : 1.3))} kcal
+                       userProfile.activity_level === 'very_active' ? 1.6 : 1.3))} kcal
                     </div>
                     <div>
-                      <strong>Met doel:</strong> {Math.round(userProfile.weight * 22 * (userProfile.activity_level === 'low' ? 1.2 :
-                       userProfile.activity_level === 'light' ? 1.375 :
+                      <strong>Met doel:</strong> {Math.round(userProfile.weight * 22 * (userProfile.activity_level === 'sedentary' ? 1.1 :
                        userProfile.activity_level === 'moderate' ? 1.3 :
-                       userProfile.activity_level === 'high' ? 1.55 :
-                       userProfile.activity_level === 'very_high' ? 1.725 : 1.3))} kcal {userProfile.goal === 'droogtrainen' ? '- 500' :
-                       userProfile.goal === 'onderhoud' ? '+ 0' :
-                       userProfile.goal === 'spiermassa' ? '+ 400' : '+ 0'} = {Math.round(userProfile.weight * 22 * (userProfile.activity_level === 'low' ? 1.2 :
-                       userProfile.activity_level === 'light' ? 1.375 :
+                       userProfile.activity_level === 'very_active' ? 1.6 : 1.3))} kcal {userProfile.fitness_goal === 'droogtrainen' ? '- 500' :
+                       userProfile.fitness_goal === 'onderhoud' ? '+ 0' :
+                       userProfile.fitness_goal === 'spiermassa' ? '+ 400' : '+ 0'} = {Math.round(userProfile.weight * 22 * (userProfile.activity_level === 'sedentary' ? 1.1 :
                        userProfile.activity_level === 'moderate' ? 1.3 :
-                       userProfile.activity_level === 'high' ? 1.55 :
-                       userProfile.activity_level === 'very_high' ? 1.725 : 1.3)) + (userProfile.goal === 'droogtrainen' ? -500 :
-                       userProfile.goal === 'onderhoud' ? 0 :
-                       userProfile.goal === 'spiermassa' ? 400 : 0)} kcal
+                       userProfile.activity_level === 'very_active' ? 1.6 : 1.3)) + (userProfile.fitness_goal === 'droogtrainen' ? -500 :
+                       userProfile.fitness_goal === 'onderhoud' ? 0 :
+                       userProfile.fitness_goal === 'spiermassa' ? 400 : 0)} kcal
                     </div>
                   </div>
                 </div>
@@ -1791,7 +1784,7 @@ export default function VoedingsplannenV2Page() {
                 onClick={() => {
                   setShowOriginalData(false);
                   if (!scalingInfo) {
-                    applySmartScaling(selectedPlan.plan_id || selectedPlan.id.toString());
+                    applySmartScaling(originalPlanData, userProfile);
                   }
                 }}
                 disabled={loadingScaling}
