@@ -1289,8 +1289,8 @@ export default function VoedingsplannenV2Page() {
                                   };
 
                                   // Get original ingredient data for comparison
-                                  const originalIngredient = originalIngredientData && originalIngredientData.weekly_plan && originalIngredientData.weekly_plan[selectedDay] && originalIngredientData.weekly_plan[selectedDay][mealType] 
-                                    ? originalIngredientData.weekly_plan[selectedDay][mealType].ingredients?.find((orig: any) => orig.name === ingredient.name)
+                                  const originalIngredient = originalIngredientData && originalIngredientData.meals && originalIngredientData.meals.weekly_plan && originalIngredientData.meals.weekly_plan[selectedDay] && originalIngredientData.meals.weekly_plan[selectedDay][mealType] 
+                                    ? originalIngredientData.meals.weekly_plan[selectedDay][mealType].ingredients?.find((orig: any) => orig.name === ingredient.name)
                                     : null;
 
                                   // Debug logging
@@ -1300,10 +1300,11 @@ export default function VoedingsplannenV2Page() {
                                       mealType,
                                       ingredientName: ingredient.name,
                                       originalIngredientData: !!originalIngredientData,
-                                      weeklyPlan: !!originalIngredientData?.weekly_plan,
-                                      dayData: !!originalIngredientData?.weekly_plan?.[selectedDay],
-                                      mealData: !!originalIngredientData?.weekly_plan?.[selectedDay]?.[mealType],
-                                      ingredients: originalIngredientData?.weekly_plan?.[selectedDay]?.[mealType]?.ingredients?.length,
+                                      meals: !!originalIngredientData?.meals,
+                                      weeklyPlan: !!originalIngredientData?.meals?.weekly_plan,
+                                      dayData: !!originalIngredientData?.meals?.weekly_plan?.[selectedDay],
+                                      mealData: !!originalIngredientData?.meals?.weekly_plan?.[selectedDay]?.[mealType],
+                                      ingredients: originalIngredientData?.meals?.weekly_plan?.[selectedDay]?.[mealType]?.ingredients?.length,
                                       foundOriginal: !!originalIngredient,
                                       originalAmount: originalIngredient?.amount,
                                       currentAmount: ingredient.amount
