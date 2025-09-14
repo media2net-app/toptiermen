@@ -844,12 +844,26 @@ export default function VoedingsplannenV2Page() {
                   </p>
                 </div>
               </div>
-              {userProfile && userProfile.weight !== 100 && (
-                <div className="px-6 py-3 bg-gradient-to-r from-[#B6C948] to-[#8BAE5A] text-[#181F17] rounded-lg flex items-center gap-2 font-semibold">
-                  <RocketLaunchIcon className="w-5 h-5" />
-                  <span>Smart Scaling Actief ({userProfile.weight}kg)</span>
-                </div>
-              )}
+              <div className="flex gap-3">
+                {userProfile && userProfile.weight !== 100 && (
+                  <div className="px-6 py-3 bg-gradient-to-r from-[#B6C948] to-[#8BAE5A] text-[#181F17] rounded-lg flex items-center gap-2 font-semibold">
+                    <RocketLaunchIcon className="w-5 h-5" />
+                    <span>Smart Scaling Actief ({userProfile.weight}kg)</span>
+                  </div>
+                )}
+                
+                {/* Original Values Toggle */}
+                <button
+                  onClick={() => setShowOriginalData(!showOriginalData)}
+                  className={`px-4 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2 ${
+                    showOriginalData 
+                      ? 'bg-orange-600 text-white' 
+                      : 'bg-gray-600 text-gray-300 hover:bg-gray-500'
+                  }`}
+                >
+                  <span>{showOriginalData ? 'Origineel AAN' : 'Origineel UIT'}</span>
+                </button>
+              </div>
             </div>
 
             {/* Target Macros Section */}
