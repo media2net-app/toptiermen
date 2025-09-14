@@ -97,6 +97,7 @@ export default function VoedingsplannenV2Page() {
   const [loadingScaling, setLoadingScaling] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showOriginalData, setShowOriginalData] = useState(true);
+  const [originalIngredientData, setOriginalIngredientData] = useState<any>(null);
   const [userProfile, setUserProfile] = useState<UserProfile>({
     weight: 100,  // Backend basis plan is 100kg
     height: 180,
@@ -664,6 +665,9 @@ export default function VoedingsplannenV2Page() {
       
       const data = await response.json();
       let planData = data.plan;
+      
+      // Store original ingredient data for comparison
+      setOriginalIngredientData(planData);
       
       // Apply smart scaling automatically if user weight is not 100kg
       if (userProfile && userProfile.weight !== 100) {
@@ -1284,6 +1288,11 @@ export default function VoedingsplannenV2Page() {
                                     }
                                   };
 
+                                  // Get original ingredient data for comparison
+                                  const originalIngredient = originalIngredientData && originalIngredientData[selectedDay] && originalIngredientData[selectedDay][mealType] 
+                                    ? originalIngredientData[selectedDay][mealType].ingredients?.find((orig: any) => orig.name === ingredient.name)
+                                    : null;
+
                                   return (
                                     <tr key={index} className="border-b border-[#2A3A1A] last:border-b-0">
                                       <td className="py-3 text-white font-medium">
@@ -1291,21 +1300,46 @@ export default function VoedingsplannenV2Page() {
                                       </td>
                                       <td className="py-3 text-center text-white font-semibold">
                                         {ingredient.amount}
+                                        {showOriginalData && originalIngredient && originalIngredient.amount !== ingredient.amount && (
+                                          <div className="text-yellow-400 text-sm font-normal">
+                                            ({originalIngredient.amount})
+                                          </div>
+                                        )}
                                       </td>
                                       <td className="py-3 text-center text-gray-300 text-xs">
                                         {getUnitLabel(ingredient.unit)}
                                       </td>
                                       <td className="py-3 text-right text-white font-medium">
                                         {ingredientCalories.toFixed(0)}
+                                        {showOriginalData && originalIngredient && (
+                                          <div className="text-yellow-400 text-sm font-normal">
+                                            ({Math.round((originalIngredient.calories_per_100g || 0) * (originalIngredient.amount || 0) / (originalIngredient.unit === 'per_100g' || originalIngredient.unit === 'g' ? 100 : 1))})
+                                          </div>
+                                        )}
                                       </td>
                                       <td className="py-3 text-right text-white">
                                         {ingredientProtein.toFixed(1)}g
+                                        {showOriginalData && originalIngredient && (
+                                          <div className="text-yellow-400 text-sm font-normal">
+                                            ({(originalIngredient.protein_per_100g || 0) * (originalIngredient.amount || 0) / (originalIngredient.unit === 'per_100g' || originalIngredient.unit === 'g' ? 100 : 1)}g)
+                                          </div>
+                                        )}
                                       </td>
                                       <td className="py-3 text-right text-white">
                                         {ingredientCarbs.toFixed(1)}g
+                                        {showOriginalData && originalIngredient && (
+                                          <div className="text-yellow-400 text-sm font-normal">
+                                            ({(originalIngredient.carbs_per_100g || 0) * (originalIngredient.amount || 0) / (originalIngredient.unit === 'per_100g' || originalIngredient.unit === 'g' ? 100 : 1)}g)
+                                          </div>
+                                        )}
                                       </td>
                                       <td className="py-3 text-right text-white">
                                         {ingredientFat.toFixed(1)}g
+                                        {showOriginalData && originalIngredient && (
+                                          <div className="text-yellow-400 text-sm font-normal">
+                                            ({(originalIngredient.fat_per_100g || 0) * (originalIngredient.amount || 0) / (originalIngredient.unit === 'per_100g' || originalIngredient.unit === 'g' ? 100 : 1)}g)
+                                          </div>
+                                        )}
                                       </td>
                                     </tr>
                                   );
