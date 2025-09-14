@@ -9,7 +9,8 @@ import {
   FireIcon,
   AcademicCapIcon,
   CheckIcon,
-  PlayIcon
+  PlayIcon,
+  PrinterIcon
 } from '@heroicons/react/24/outline';
 import PageLayout from '@/components/PageLayout';
 import Breadcrumb, { createBreadcrumbs } from '@/components/Breadcrumb';
@@ -109,6 +110,231 @@ export default function TrainingSchemaDetailPage() {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
     return remainingSeconds > 0 ? `${minutes}m ${remainingSeconds}s` : `${minutes}m`;
+  };
+
+  const handlePrint = () => {
+    // Create a new window for printing
+    const printWindow = window.open('', '_blank');
+    
+    if (!printWindow) return;
+
+    const currentDate = new Date().toLocaleDateString('nl-NL', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>${schema.name} - Top Tier Men</title>
+          <style>
+            @page {
+              margin: 20mm;
+              size: A4;
+            }
+            body {
+              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+              line-height: 1.6;
+              color: #333;
+              margin: 0;
+              padding: 0;
+            }
+            .header {
+              text-align: center;
+              margin-bottom: 30px;
+              border-bottom: 3px solid #8BAE5A;
+              padding-bottom: 20px;
+            }
+            .logo {
+              font-size: 32px;
+              font-weight: bold;
+              color: #8BAE5A;
+              margin-bottom: 10px;
+              text-transform: uppercase;
+              letter-spacing: 2px;
+            }
+            .schema-title {
+              font-size: 28px;
+              font-weight: bold;
+              color: #333;
+              margin: 15px 0 10px 0;
+            }
+            .schema-info {
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+              gap: 15px;
+              margin: 20px 0;
+              padding: 20px;
+              background-color: #f8f9fa;
+              border-radius: 8px;
+            }
+            .info-item {
+              text-align: center;
+            }
+            .info-label {
+              font-size: 12px;
+              color: #666;
+              text-transform: uppercase;
+              letter-spacing: 1px;
+              margin-bottom: 5px;
+            }
+            .info-value {
+              font-size: 16px;
+              font-weight: bold;
+              color: #333;
+            }
+            .day-section {
+              margin: 30px 0;
+              page-break-inside: avoid;
+            }
+            .day-header {
+              background-color: #8BAE5A;
+              color: white;
+              padding: 15px;
+              border-radius: 8px 8px 0 0;
+              font-size: 20px;
+              font-weight: bold;
+              margin-bottom: 0;
+            }
+            .exercises-table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-bottom: 20px;
+              border-radius: 0 0 8px 8px;
+              overflow: hidden;
+              box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .exercises-table th {
+              background-color: #3A4D23;
+              color: white;
+              padding: 12px 8px;
+              text-align: center;
+              font-weight: bold;
+              font-size: 14px;
+            }
+            .exercises-table td {
+              padding: 12px 8px;
+              text-align: center;
+              border-bottom: 1px solid #e9ecef;
+              font-size: 14px;
+            }
+            .exercises-table tr:nth-child(even) {
+              background-color: #f8f9fa;
+            }
+            .exercise-name {
+              text-align: left !important;
+              font-weight: bold;
+              color: #333;
+            }
+            .notes {
+              text-align: left !important;
+              font-style: italic;
+              color: #666;
+              font-size: 12px;
+            }
+            .footer {
+              margin-top: 40px;
+              text-align: center;
+              font-size: 12px;
+              color: #666;
+              border-top: 1px solid #e9ecef;
+              padding-top: 20px;
+            }
+            @media print {
+              .no-print { display: none; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div class="logo">Top Tier Men</div>
+            <div class="schema-title">${schema.name}</div>
+            <div style="font-size: 14px; color: #666;">Gegenereerd op ${currentDate}</div>
+          </div>
+
+          <div class="schema-info">
+            <div class="info-item">
+              <div class="info-label">Doel</div>
+              <div class="info-value">${schema.training_goal}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Duur</div>
+              <div class="info-value">${schema.estimated_duration}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Dagen</div>
+              <div class="info-value">${schema.training_schema_days?.length || 0} dagen</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Rep Range</div>
+              <div class="info-value">${schema.rep_range}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Equipment</div>
+              <div class="info-value">${schema.equipment_type}</div>
+            </div>
+          </div>
+
+          ${schema.description ? `
+            <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h3 style="margin: 0 0 10px 0; color: #333; font-size: 18px;">Beschrijving</h3>
+              <p style="margin: 0; color: #666; line-height: 1.6;">${schema.description}</p>
+            </div>
+          ` : ''}
+
+          ${schema.training_schema_days && schema.training_schema_days.length > 0 ? 
+            schema.training_schema_days
+              .sort((a, b) => a.day_number - b.day_number)
+              .map(day => `
+                <div class="day-section">
+                  <h2 class="day-header">Dag ${day.day_number} - ${day.name}</h2>
+                  <table class="exercises-table">
+                    <thead>
+                      <tr>
+                        <th style="width: 40%;">Oefening</th>
+                        <th style="width: 15%;">Sets</th>
+                        <th style="width: 15%;">Reps</th>
+                        <th style="width: 15%;">Rust</th>
+                        <th style="width: 15%;">Gewicht</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${day.training_schema_exercises && day.training_schema_exercises.length > 0 ? 
+                        day.training_schema_exercises.map(exercise => `
+                          <tr>
+                            <td class="exercise-name">
+                              ${exercise.exercise_name}
+                              ${exercise.notes ? `<br><span class="notes">${exercise.notes}</span>` : ''}
+                            </td>
+                            <td>${exercise.sets}</td>
+                            <td>${exercise.reps}</td>
+                            <td>${formatRestTime(exercise.rest_time_seconds)}</td>
+                            <td>___ kg</td>
+                          </tr>
+                        `).join('') : 
+                        '<tr><td colspan="5" style="text-align: center; color: #666; font-style: italic;">Geen oefeningen beschikbaar</td></tr>'
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              `).join('') : 
+            '<div style="text-align: center; color: #666; font-style: italic; margin: 40px 0;">Geen trainingsdagen beschikbaar</div>'
+          }
+
+          <div class="footer">
+            <p>Top Tier Men - Trainingsschema</p>
+            <p>Gegenereerd op ${currentDate}</p>
+          </div>
+        </body>
+      </html>
+    `);
+
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    printWindow.close();
   };
 
   if (loading) {
@@ -286,13 +512,21 @@ export default function TrainingSchemaDetailPage() {
         )}
 
         {/* Action Buttons */}
-        <div className="mt-8 flex gap-4 justify-center">
+        <div className="mt-8 flex flex-wrap gap-4 justify-center">
           <button
             onClick={handleBack}
             className="px-6 py-3 bg-[#3A4D23] text-white rounded-lg hover:bg-[#4A5D33] transition-colors flex items-center gap-2"
           >
             <ArrowLeftIcon className="w-5 h-5" />
             Terug naar overzicht
+          </button>
+          
+          <button
+            onClick={handlePrint}
+            className="px-6 py-3 bg-[#1E3A8A] text-white rounded-lg hover:bg-[#1E40AF] transition-colors flex items-center gap-2"
+          >
+            <PrinterIcon className="w-5 h-5" />
+            Print Schema
           </button>
           
           <button

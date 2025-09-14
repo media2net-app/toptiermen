@@ -4697,6 +4697,11 @@ video {
   background-color: rgb(42 58 26 / var(--tw-bg-opacity, 1));
 }
 
+.bg-\[\#1E3A8A\] {
+  --tw-bg-opacity: 1;
+  background-color: rgb(30 58 138 / var(--tw-bg-opacity, 1));
+}
+
 .bg-opacity-10 {
   --tw-bg-opacity: 0.1;
 }
@@ -8086,6 +8091,11 @@ body {
 
   .hover\:bg-yellow-900\/20:hover {
     background-color: rgb(113 63 18 / 0.2);
+  }
+
+  .hover\:bg-\[\#1E40AF\]:hover {
+    --tw-bg-opacity: 1;
+    background-color: rgb(30 64 175 / var(--tw-bg-opacity, 1));
   }
 
   .hover\:bg-opacity-30:hover {
