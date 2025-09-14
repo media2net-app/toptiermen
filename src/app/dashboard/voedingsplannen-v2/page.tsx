@@ -1289,9 +1289,26 @@ export default function VoedingsplannenV2Page() {
                                   };
 
                                   // Get original ingredient data for comparison
-                                  const originalIngredient = originalIngredientData && originalIngredientData[selectedDay] && originalIngredientData[selectedDay][mealType] 
-                                    ? originalIngredientData[selectedDay][mealType].ingredients?.find((orig: any) => orig.name === ingredient.name)
+                                  const originalIngredient = originalIngredientData && originalIngredientData.weekly_plan && originalIngredientData.weekly_plan[selectedDay] && originalIngredientData.weekly_plan[selectedDay][mealType] 
+                                    ? originalIngredientData.weekly_plan[selectedDay][mealType].ingredients?.find((orig: any) => orig.name === ingredient.name)
                                     : null;
+
+                                  // Debug logging
+                                  if (showOriginalData && ingredient.name === 'Ei' && mealType === 'ontbijt') {
+                                    console.log('🔍 Debug original ingredient lookup:', {
+                                      selectedDay,
+                                      mealType,
+                                      ingredientName: ingredient.name,
+                                      originalIngredientData: !!originalIngredientData,
+                                      weeklyPlan: !!originalIngredientData?.weekly_plan,
+                                      dayData: !!originalIngredientData?.weekly_plan?.[selectedDay],
+                                      mealData: !!originalIngredientData?.weekly_plan?.[selectedDay]?.[mealType],
+                                      ingredients: originalIngredientData?.weekly_plan?.[selectedDay]?.[mealType]?.ingredients?.length,
+                                      foundOriginal: !!originalIngredient,
+                                      originalAmount: originalIngredient?.amount,
+                                      currentAmount: ingredient.amount
+                                    });
+                                  }
 
                                   return (
                                     <tr key={index} className="border-b border-[#2A3A1A] last:border-b-0">
