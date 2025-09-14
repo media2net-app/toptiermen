@@ -130,6 +130,7 @@ export default function DynamicPlanViewV2({ planId, planName, onBack }: DynamicP
   const [planData, setPlanData] = useState<PlanData | null>(null);
   const [originalPlanData, setOriginalPlanData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [originalLoading, setOriginalLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedDay, setSelectedDay] = useState('maandag');
   const [showDebugInfo, setShowDebugInfo] = useState(false);
@@ -192,6 +193,7 @@ export default function DynamicPlanViewV2({ planId, planName, onBack }: DynamicP
 
   const fetchOriginalPlan = async () => {
     try {
+      setOriginalLoading(true);
       console.log('📋 Fetching original plan data for comparison...');
       const response = await fetch(`/api/nutrition-plan-original?planId=${planId}`);
       
@@ -200,17 +202,23 @@ export default function DynamicPlanViewV2({ planId, planName, onBack }: DynamicP
       }
       
       const data = await response.json();
+      console.log('✅ Original plan data loaded:', data);
       return data;
     } catch (error) {
       console.error('❌ Error fetching original plan:', error);
       return null;
+    } finally {
+      setOriginalLoading(false);
     }
   };
 
   useEffect(() => {
     if (user) {
       fetchDynamicPlan(testWeight);
-      fetchOriginalPlan().then(data => setOriginalPlanData(data));
+      fetchOriginalPlan().then(data => {
+        console.log('📋 Setting original plan data:', data);
+        setOriginalPlanData(data);
+      });
     }
   }, [user, planId, testWeight]);
 
@@ -277,6 +285,14 @@ export default function DynamicPlanViewV2({ planId, planName, onBack }: DynamicP
       </div>
     );
   }
+
+  // Debug logging
+  console.log('🔍 Render debug:', {
+    originalLoading,
+    originalPlanData: !!originalPlanData,
+    showOriginalValues,
+    planData: !!planData
+  });
 
   return (
     <div className="min-h-screen bg-[#0F1419]">
@@ -350,13 +366,16 @@ export default function DynamicPlanViewV2({ planId, planName, onBack }: DynamicP
               {/* Original Values Toggle */}
               <button
                 onClick={() => setShowOriginalValues(!showOriginalValues)}
+                disabled={originalLoading || !originalPlanData}
                 className={`px-3 py-2 rounded-lg transition-colors text-sm font-medium ${
-                  showOriginalValues 
-                    ? 'bg-orange-600 text-white' 
-                    : 'bg-gray-600 text-gray-300 hover:bg-gray-500'
+                  originalLoading || !originalPlanData
+                    ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
+                    : showOriginalValues 
+                      ? 'bg-orange-600 text-white' 
+                      : 'bg-gray-600 text-gray-300 hover:bg-gray-500'
                 }`}
               >
-                {showOriginalValues ? 'Origineel AAN' : 'Origineel UIT'}
+                {originalLoading ? 'Laden...' : showOriginalValues ? 'Origineel AAN' : 'Origineel UIT'}
               </button>
             </div>
           </div>
