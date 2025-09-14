@@ -158,12 +158,13 @@ export async function POST(request: NextRequest) {
         // Check if this is a test payment
         const isTestPayment = payment.mode === 'test' || payment.id.startsWith('test_');
 
-        // Extract customer info from payment
-        const customerEmail = payment.customerId ? 
-          await getCustomerEmail(payment.customerId) : 
-          payment.metadata?.email || 'unknown@example.com';
+        // Extract customer info from payment metadata
+        const customerEmail = payment.metadata?.customerEmail || 
+          payment.metadata?.email || 
+          (payment.customerId ? await getCustomerEmail(payment.customerId) : 'unknown@example.com');
         
-        const customerName = payment.metadata?.name || 
+        const customerName = payment.metadata?.customerName || 
+          payment.metadata?.name || 
           payment.description?.split(' - ')[0] || 
           'Unknown Customer';
 
@@ -200,6 +201,19 @@ export async function POST(request: NextRequest) {
         } else {
           console.log(`✅ Successfully added package ${payment.id}: ${customerName}`);
           newPackages.push(insertedPackage);
+          
+          // Create user account if payment is successful
+          if (paymentStatus === 'paid' && customerEmail !== 'unknown@example.com') {
+            try {
+              await createUserAccountFromPayment(insertedPackage, payment);
+            } catch (accountError) {
+              console.error(`❌ Error creating user account for ${payment.id}:`, accountError);
+              errors.push({
+                paymentId: payment.id,
+                error: `Account creation failed: ${accountError.message}`
+              });
+            }
+          }
         }
 
       } catch (error) {
@@ -257,4 +271,107 @@ async function getCustomerEmail(customerId: string): Promise<string> {
   }
   
   return 'unknown@example.com';
+}
+
+// Function to create user account from successful payment
+async function createUserAccountFromPayment(packageData: any, payment: any) {
+  try {
+    console.log(`👤 Creating user account for ${packageData.email}...`);
+    
+    // Check if user already exists
+    const { data: existingUser } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('email', packageData.email)
+      .single();
+
+    if (existingUser) {
+      console.log(`ℹ️ User ${packageData.email} already exists, skipping account creation`);
+      return;
+    }
+
+    // Create user account in Supabase Auth
+    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+      email: packageData.email,
+      password: generateTemporaryPassword(),
+      email_confirm: true,
+      user_metadata: {
+        full_name: packageData.full_name,
+        source: 'prelaunch_payment',
+        package_id: packageData.package_id,
+        mollie_payment_id: payment.id
+      }
+    });
+
+    if (authError) {
+      console.error('❌ Auth user creation error:', authError);
+      throw new Error(`Auth creation failed: ${authError.message}`);
+    }
+
+    console.log(`✅ Auth user created: ${authData.user?.id}`);
+
+    // Create profile record
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .insert({
+        id: authData.user?.id,
+        email: packageData.email,
+        full_name: packageData.full_name,
+        role: 'member',
+        onboarding_completed: true,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      });
+
+    if (profileError) {
+      console.error('❌ Profile creation error:', profileError);
+      throw new Error(`Profile creation failed: ${profileError.message}`);
+    }
+
+    console.log(`✅ Profile created for ${packageData.email}`);
+
+    // Create user subscription
+    const subscriptionEndDate = new Date();
+    if (packageData.package_id === 'lifetime') {
+      subscriptionEndDate.setFullYear(subscriptionEndDate.getFullYear() + 100); // 100 years for lifetime
+    } else if (packageData.payment_period.includes('6months')) {
+      subscriptionEndDate.setMonth(subscriptionEndDate.getMonth() + 6);
+    } else if (packageData.payment_period.includes('12months')) {
+      subscriptionEndDate.setFullYear(subscriptionEndDate.getFullYear() + 1);
+    }
+
+    const { error: subscriptionError } = await supabase
+      .from('user_subscriptions')
+      .insert({
+        user_id: authData.user?.id,
+        package_id: packageData.package_id,
+        billing_period: packageData.payment_period,
+        status: 'active',
+        start_date: new Date().toISOString(),
+        end_date: subscriptionEndDate.toISOString(),
+        payment_id: packageData.id,
+        created_at: new Date().toISOString()
+      });
+
+    if (subscriptionError) {
+      console.error('❌ Subscription creation error:', subscriptionError);
+      throw new Error(`Subscription creation failed: ${subscriptionError.message}`);
+    }
+
+    console.log(`✅ Subscription created for ${packageData.email}`);
+
+  } catch (error) {
+    console.error('❌ User account creation error:', error);
+    throw error;
+  }
+}
+
+// Generate temporary password for new users
+function generateTemporaryPassword(): string {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+  let password = '';
+  for (let i = 0; i < 12; i++) {
+    password += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return password;
 }
