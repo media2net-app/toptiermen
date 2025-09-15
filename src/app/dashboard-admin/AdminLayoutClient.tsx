@@ -214,6 +214,7 @@ const SidebarContent = ({ pathname }: { pathname: string }) => {
         { label: 'Email Sjablonen', icon: EnvelopeIcon, href: '/dashboard-admin/email-sjablonen', badge: 'NEW' },
         { label: 'Aankondigingen', icon: MegaphoneIcon, href: '/dashboard-admin/aankondigingen' },
         { label: 'Push Notificatie Tests', icon: BellIcon, href: '/dashboard-admin/push-test' },
+        { label: 'Email Logs', icon: EnvelopeIcon, href: '/dashboard-admin/email-logs', badge: 'NEW' },
         { label: 'Login Logs', icon: KeyIcon, href: '/dashboard-admin/login-logs', badge: 'NEW' },
         { label: 'Systeem Updates', icon: ArrowPathIcon, href: '/systeem-status', badge: 'V1.2' }
       ]
