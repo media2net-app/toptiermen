@@ -1690,89 +1690,129 @@ function TrainingschemasContent() {
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
-                {trainingSchemas.map((schema) => (
-                  <motion.div
-                    key={schema.id}
-                    whileHover={{ scale: 1.02, y: -5 }}
-                    className={`p-3 sm:p-4 md:p-6 rounded-2xl border-2 transition-all duration-300 shadow-lg ${
-                      selectedTrainingSchema === schema.id
-                        ? 'border-[#8BAE5A] bg-[#8BAE5A]/10 shadow-[#8BAE5A]/20'
-                        : 'border-gray-700 bg-[#1A1A1A]/50 hover:border-[#8BAE5A]/50 hover:shadow-[#8BAE5A]/10'
-                    }`}
-                  >
+                {trainingSchemas.map((schema) => {
+                  const isSchema1 = schema.schema_nummer === 1;
+                  const isLocked = !isSchema1;
+                  
+                  return (
+                    <motion.div
+                      key={schema.id}
+                      whileHover={isLocked ? {} : { scale: 1.02, y: -5 }}
+                      className={`p-3 sm:p-4 md:p-6 rounded-2xl border-2 transition-all duration-300 shadow-lg ${
+                        isLocked
+                          ? 'border-gray-600 bg-[#1A1A1A]/30 opacity-50 cursor-not-allowed'
+                          : selectedTrainingSchema === schema.id
+                          ? 'border-[#8BAE5A] bg-[#8BAE5A]/10 shadow-[#8BAE5A]/20'
+                          : 'border-gray-700 bg-[#1A1A1A]/50 hover:border-[#8BAE5A]/50 hover:shadow-[#8BAE5A]/10'
+                      }`}
+                    >
                     <div className="flex items-start justify-between mb-3 sm:mb-4">
                       <div className="flex items-center space-x-2 sm:space-x-3">
-                        <div className="p-2 sm:p-3 bg-[#8BAE5A]/20 rounded-xl">
-                          <AcademicCapIcon className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-[#8BAE5A]" />
+                        <div className={`p-2 sm:p-3 rounded-xl ${isLocked ? 'bg-gray-600/20' : 'bg-[#8BAE5A]/20'}`}>
+                          <AcademicCapIcon className={`h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 ${isLocked ? 'text-gray-500' : 'text-[#8BAE5A]'}`} />
                         </div>
                         <div>
-                          <h3 className="text-sm sm:text-base md:text-lg font-semibold text-white">
+                          <h3 className={`text-sm sm:text-base md:text-lg font-semibold ${isLocked ? 'text-gray-500' : 'text-white'}`}>
                             {schema.name}
                             {schema.schema_nummer && (
-                              <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-[#8BAE5A]/20 text-[#8BAE5A] border border-[#8BAE5A]/30">
+                              <span className={`ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${
+                                isSchema1 
+                                  ? 'bg-[#8BAE5A]/20 text-[#8BAE5A] border-[#8BAE5A]/30'
+                                  : 'bg-gray-600/20 text-gray-400 border-gray-600/30'
+                              }`}>
                                 Schema {schema.schema_nummer}
                               </span>
                             )}
                           </h3>
-                          <p className="text-xs sm:text-sm text-gray-400">{schema.difficulty}</p>
+                          <p className={`text-xs sm:text-sm ${isLocked ? 'text-gray-500' : 'text-gray-400'}`}>{schema.difficulty}</p>
                         </div>
                       </div>
-                      {selectedTrainingSchema === schema.id && (
+                      {!isLocked && selectedTrainingSchema === schema.id && (
                         <div className="p-1.5 sm:p-2 bg-[#8BAE5A] rounded-full">
                           <CheckIcon className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5 text-[#232D1A]" />
                         </div>
                       )}
+                      {isLocked && (
+                        <div className="p-1.5 sm:p-2 bg-gray-600 rounded-full">
+                          <span className="text-gray-400 text-xs">🔒</span>
+                        </div>
+                      )}
                     </div>
 
-                    <p className="text-gray-300 text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-3">
+                    <p className={`text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-3 ${isLocked ? 'text-gray-500' : 'text-gray-300'}`}>
                       {schema.description}
                     </p>
 
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between text-xs sm:text-sm text-gray-400 mb-3 sm:mb-4 md:mb-6 gap-2 sm:gap-0">
+                    {isLocked && (
+                      <div className="mb-3 sm:mb-4 p-2 sm:p-3 bg-gray-800/50 border border-gray-700 rounded-lg">
+                        <div className="flex items-center gap-2 text-gray-400 text-xs sm:text-sm">
+                          <span className="text-yellow-500">🔒</span>
+                          <span>Vergrendeld - Voltooi Schema 1 eerst</span>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className={`flex flex-col sm:flex-row sm:items-center sm:justify-between text-xs sm:text-sm mb-3 sm:mb-4 md:mb-6 gap-2 sm:gap-0 ${isLocked ? 'text-gray-500' : 'text-gray-400'}`}>
                       <div className="flex items-center space-x-2 sm:space-x-3 md:space-x-4">
                         <div className="flex items-center space-x-1">
-                          <ClockIcon className="h-3 w-3 sm:h-4 sm:w-4 text-[#8BAE5A]" />
+                          <ClockIcon className={`h-3 w-3 sm:h-4 sm:w-4 ${isLocked ? 'text-gray-500' : 'text-[#8BAE5A]'}`} />
                           <span className="text-xs sm:text-sm">{schema.estimated_duration}</span>
                         </div>
                         <div className="flex items-center space-x-1">
-                          <FireIcon className="h-3 w-3 sm:h-4 sm:w-4 text-[#8BAE5A]" />
+                          <FireIcon className={`h-3 w-3 sm:h-4 sm:w-4 ${isLocked ? 'text-gray-500' : 'text-[#8BAE5A]'}`} />
                           <span className="text-xs sm:text-sm">{schema.rep_range}</span>
                         </div>
                       </div>
-                      <span className="px-2 sm:px-3 py-1 bg-[#3A4D23] rounded-full text-xs font-medium self-start sm:self-auto">
+                      <span className={`px-2 sm:px-3 py-1 rounded-full text-xs font-medium self-start sm:self-auto ${
+                        isLocked ? 'bg-gray-700 text-gray-500' : 'bg-[#3A4D23]'
+                      }`}>
                         {schema.category}
                       </span>
                     </div>
 
                     <div className="flex flex-col gap-2 sm:gap-3">
                       <button
-                        onClick={() => handleViewDynamicPlan(schema.id, schema.name)}
-                        className="w-full py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium transition-colors bg-[#8BAE5A] text-[#232D1A] hover:bg-[#7A9D4A] shadow-lg shadow-[#8BAE5A]/20 text-xs sm:text-sm"
+                        onClick={() => !isLocked && handleViewDynamicPlan(schema.id, schema.name)}
+                        disabled={isLocked}
+                        className={`w-full py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium transition-colors text-xs sm:text-sm ${
+                          isLocked
+                            ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
+                            : 'bg-[#8BAE5A] text-[#232D1A] hover:bg-[#7A9D4A] shadow-lg shadow-[#8BAE5A]/20'
+                        }`}
                       >
                         Bekijk schema
                       </button>
                       <div className="flex gap-2">
                         <button
-                          onClick={() => selectTrainingSchema(schema.id)}
+                          onClick={() => !isLocked && selectTrainingSchema(schema.id)}
+                          disabled={isLocked}
                           className={`flex-1 py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium transition-colors text-xs sm:text-sm ${
-                            selectedTrainingSchema === schema.id
+                            isLocked
+                              ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
+                              : selectedTrainingSchema === schema.id
                               ? 'bg-[#8BAE5A] text-[#232D1A] shadow-lg shadow-[#8BAE5A]/20'
                               : 'bg-[#3A4D23] text-white hover:bg-[#4A5D33]'
                           }`}
                         >
-                          {selectedTrainingSchema === schema.id ? 'Geselecteerd' : 'Selecteer'}
+                          {isLocked ? 'Vergrendeld' : selectedTrainingSchema === schema.id ? 'Geselecteerd' : 'Selecteer'}
                         </button>
                         <button
-                          onClick={() => handlePrintSchema(schema.id)}
-                          className="py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium transition-colors bg-[#1E3A8A] text-white hover:bg-[#1E40AF] text-xs sm:text-sm flex items-center justify-center"
-                          title="Print schema"
+                          onClick={() => !isLocked && handlePrintSchema(schema.id)}
+                          disabled={isLocked}
+                          className={`py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium transition-colors text-xs sm:text-sm flex items-center justify-center ${
+                            isLocked
+                              ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
+                              : 'bg-[#1E3A8A] text-white hover:bg-[#1E40AF]'
+                          }`}
+                          title={isLocked ? 'Vergrendeld' : 'Print schema'}
                         >
                           <PrinterIcon className="w-4 h-4" />
                         </button>
                       </div>
                     </div>
                   </motion.div>
-                ))}
+                  );
+                })}
               </div>
             )}
             </div>
