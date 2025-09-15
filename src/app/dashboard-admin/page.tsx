@@ -22,7 +22,8 @@ import {
   ArrowDownIcon,
   EyeIcon,
   AcademicCapIcon as AcademicCapIconSolid,
-  ArrowPathIcon
+  ArrowPathIcon,
+  EnvelopeIcon
 } from '@heroicons/react/24/outline';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { AdminCard, AdminStatsCard, AdminButton } from '@/components/admin';
@@ -723,10 +724,11 @@ function AdminDashboardContent() {
           icon={<ExclamationTriangleIcon className="w-6 h-6" />}
           gradient
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {loading && !dataLoaded ? (
               // Skeleton loading voor actions
               <>
+                <SkeletonCard />
                 <SkeletonCard />
                 <SkeletonCard />
               </>
@@ -786,6 +788,45 @@ function AdminDashboardContent() {
                         </div>
                       </div>
                     )}
+                  </div>
+                </div>
+
+                {/* Admin Tools */}
+                <div className="bg-[#181F17] rounded-xl p-4 sm:p-6 border border-[#3A4D23]">
+                  <h3 className="text-lg font-semibold text-white mb-4">Admin Tools</h3>
+                  <div className="space-y-3">
+                    <a
+                      href="/dashboard-admin/login-logs"
+                      className="flex items-center gap-3 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg hover:bg-blue-500/20 transition-colors"
+                    >
+                      <UserIcon className="w-5 h-5 text-blue-400" />
+                      <div>
+                        <div className="text-white font-medium">Login Logs</div>
+                        <div className="text-gray-400 text-sm">Monitor alle inlogpogingen</div>
+                      </div>
+                    </a>
+                    
+                    <a
+                      href="/dashboard-admin/email-logs"
+                      className="flex items-center gap-3 p-3 bg-green-500/10 border border-green-500/20 rounded-lg hover:bg-green-500/20 transition-colors"
+                    >
+                      <EnvelopeIcon className="w-5 h-5 text-green-400" />
+                      <div>
+                        <div className="text-white font-medium">Email Logs</div>
+                        <div className="text-gray-400 text-sm">Monitor alle verzonden emails</div>
+                      </div>
+                    </a>
+                    
+                    <a
+                      href="/dashboard-admin/database-view"
+                      className="flex items-center gap-3 p-3 bg-purple-500/10 border border-purple-500/20 rounded-lg hover:bg-purple-500/20 transition-colors"
+                    >
+                      <WrenchScrewdriverIcon className="w-5 h-5 text-purple-400" />
+                      <div>
+                        <div className="text-white font-medium">Database View</div>
+                        <div className="text-gray-400 text-sm">Database overzicht en beheer</div>
+                      </div>
+                    </a>
                   </div>
                 </div>
               </>
