@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 
-
 // Force dynamic rendering to prevent navigator errors
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -40,7 +39,15 @@ interface ForumTopic {
   };
 }
 
-const ThreadPage = ({ params }: { params: { id: string } }) => {
+interface ForumCategory {
+  id: number;
+  name: string;
+  slug: string;
+  emoji: string;
+}
+
+const ThreadPage = ({ params }: { params: { slug: string; id: string } }) => {
+  const [category, setCategory] = useState<ForumCategory | null>(null);
   const [topic, setTopic] = useState<ForumTopic | null>(null);
   const [posts, setPosts] = useState<ForumPost[]>([]);
   const [loading, setLoading] = useState(true);
@@ -51,7 +58,7 @@ const ThreadPage = ({ params }: { params: { id: string } }) => {
   const [currentUser, setCurrentUser] = useState<any>(null);
 
   useEffect(() => {
-    console.log('🔄 Thread page mounted, fetching data for topic ID:', params.id);
+    console.log('🔄 Thread page mounted, fetching data for category:', params.slug, 'topic ID:', params.id);
     
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
@@ -69,7 +76,7 @@ const ThreadPage = ({ params }: { params: { id: string } }) => {
 
     // Cleanup subscription
     return () => subscription.unsubscribe();
-  }, [params.id]);
+  }, [params.slug, params.id]);
 
   const fetchCurrentUser = async () => {
     try {
@@ -232,6 +239,22 @@ const ThreadPage = ({ params }: { params: { id: string } }) => {
       const topicId = parseInt(params.id);
       console.log('🔍 Topic ID:', topicId);
 
+      // First, get the category by slug
+      const { data: categoryData, error: categoryError } = await supabase
+        .from('forum_categories')
+        .select('id, name, slug, emoji')
+        .eq('slug', params.slug)
+        .single();
+
+      if (categoryError) {
+        console.error('❌ Error fetching category:', categoryError);
+        setError(`Category niet gevonden: ${categoryError.message}`);
+        return;
+      }
+
+      console.log('✅ Category data received:', categoryData);
+      setCategory(categoryData);
+
       // Fetch topic
       const { data: topicData, error: topicError } = await supabase
         .from('forum_topics')
@@ -244,6 +267,7 @@ const ThreadPage = ({ params }: { params: { id: string } }) => {
           author_id
         `)
         .eq('id', topicId)
+        .eq('category_id', categoryData.id)
         .single();
 
       if (topicError) {
@@ -529,10 +553,10 @@ const ThreadPage = ({ params }: { params: { id: string } }) => {
               Try Again
             </button>
             <Link 
-              href="/dashboard/brotherhood/forum/fitness-gezondheid"
+              href={`/dashboard/brotherhood/forum/${params.slug}`}
               className="px-4 sm:px-6 py-2 sm:py-3 rounded-lg lg:rounded-xl bg-[#3A4D23] text-white font-bold text-sm sm:text-base shadow hover:bg-[#4A5D33] transition-all text-center"
             >
-              Back to Forum
+              Back to {category?.name || 'Forum'}
             </Link>
           </div>
         </div>
@@ -540,7 +564,7 @@ const ThreadPage = ({ params }: { params: { id: string } }) => {
     );
   }
 
-  if (!topic) {
+  if (!topic || !category) {
     return (
       <div className="px-2 sm:px-4 md:px-8 lg:px-12">
         <div className="text-center text-white py-8 sm:py-12">
@@ -548,10 +572,10 @@ const ThreadPage = ({ params }: { params: { id: string } }) => {
           <h3 className="text-lg sm:text-xl font-bold mb-2">Topic niet gevonden</h3>
           <p className="text-[#8BAE5A] mb-4 sm:mb-6 text-sm sm:text-base">Het opgevraagde topic bestaat niet of is verwijderd.</p>
           <Link 
-            href="/dashboard/brotherhood/forum/fitness-gezondheid"
+            href={`/dashboard/brotherhood/forum/${params.slug}`}
             className="px-4 sm:px-6 py-2 sm:py-3 rounded-lg lg:rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-bold text-sm sm:text-base shadow hover:from-[#B6C948] hover:to-[#8BAE5A] transition-all"
           >
-            Terug naar Forum
+            Terug naar {category?.name || 'Forum'}
           </Link>
         </div>
       </div>
@@ -563,7 +587,7 @@ const ThreadPage = ({ params }: { params: { id: string } }) => {
       {/* Debug Info */}
       <div className="mb-3 sm:mb-4 p-3 sm:p-4 bg-[#232D1A]/50 rounded-lg">
         <p className="text-xs sm:text-sm text-[#8BAE5A]">
-          Debug: Topic ID {topic.id} | Posts: {posts.length} | Loading: {loading.toString()} | Error: {error || 'None'}
+          Debug: Category "{category.name}" | Topic ID {topic.id} | Posts: {posts.length} | Loading: {loading.toString()} | Error: {error || 'None'}
         </p>
         <p className="text-xs sm:text-sm text-[#8BAE5A] mt-2">
           Auth: {currentUser ? `Logged in as ${currentUser.email} (${currentUser.id})` : 'Not logged in (fallback available)'} | Reply: {newReply.length} chars
@@ -573,10 +597,10 @@ const ThreadPage = ({ params }: { params: { id: string } }) => {
       {/* Back Button */}
       <div className="mb-4 sm:mb-6">
         <Link 
-          href="/dashboard/brotherhood/forum/fitness-gezondheid"
+          href={`/dashboard/brotherhood/forum/${category.slug}`}
           className="inline-flex items-center gap-2 text-[#8BAE5A] hover:text-[#FFD700] transition-colors text-sm sm:text-base"
         >
-          ← Terug naar Fitness & Gezondheid
+          ← Terug naar {category.name}
         </Link>
       </div>
 
@@ -680,4 +704,4 @@ const ThreadPage = ({ params }: { params: { id: string } }) => {
   );
 };
 
-export default ThreadPage; 
+export default ThreadPage;

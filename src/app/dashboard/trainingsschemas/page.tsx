@@ -140,6 +140,7 @@ function TrainingschemasContent() {
 
   // Training schemas state
   const [trainingSchemas, setTrainingSchemas] = useState<TrainingSchema[]>([]);
+  const [allTrainingSchemas, setAllTrainingSchemas] = useState<TrainingSchema[]>([]);
   const [trainingLoading, setTrainingLoading] = useState(true);
   const [trainingError, setTrainingError] = useState<string | null>(null);
   const [userTrainingProfile, setUserTrainingProfile] = useState<TrainingProfile | null>(null);
@@ -241,6 +242,9 @@ function TrainingschemasContent() {
       
       console.log('✅ Training schemas fetched from database:', data?.length || 0);
       
+      // Store all schemas for re-filtering
+      setAllTrainingSchemas(data || []);
+      
       // Filter schemas based on user's profile if they have one
       let filteredSchemas = data || [];
       
@@ -314,6 +318,7 @@ function TrainingschemasContent() {
       });
       
       // Process training schemas
+      let allSchemas: TrainingSchema[] = [];
       if (schemasResult.status === 'fulfilled') {
         const { data, error } = schemasResult.value;
         if (error) {
@@ -321,7 +326,7 @@ function TrainingschemasContent() {
           setTrainingError(`Failed to load training schemas: ${error.message}`);
         } else {
           console.log('✅ Training schemas loaded:', data?.length || 0, 'schemas');
-          setTrainingSchemas(data || []);
+          allSchemas = data || [];
         }
       } else {
         console.error('❌ Training schemas promise rejected:', schemasResult.reason);
@@ -329,6 +334,7 @@ function TrainingschemasContent() {
       }
       
       // Process training profile
+      let userProfile: TrainingProfile | null = null;
       if (profileResult.status === 'fulfilled') {
         const response = profileResult.value;
         console.log('📡 Profile API response status:', response.status);
@@ -338,6 +344,7 @@ function TrainingschemasContent() {
           console.log('📡 Profile API response data:', data);
           
           if (data.success && data.profile) {
+            userProfile = data.profile;
             setUserTrainingProfile(data.profile);
             console.log('✅ Training profile loaded:', data.profile);
             
@@ -378,14 +385,21 @@ function TrainingschemasContent() {
       
       // Apply filtering after both data sources are loaded
       console.log('🎯 Applying filtering...', {
-        hasProfile: !!userTrainingProfile,
-        schemasCount: trainingSchemas.length
+        hasProfile: !!userProfile,
+        schemasCount: allSchemas.length
       });
       
-      if (userTrainingProfile && trainingSchemas.length > 0) {
-        const filtered = filterSchemasByProfile(trainingSchemas, userTrainingProfile);
+      // Store all schemas for re-filtering
+      setAllTrainingSchemas(allSchemas);
+      
+      if (userProfile && allSchemas.length > 0) {
+        const filtered = filterSchemasByProfile(allSchemas, userProfile);
         setTrainingSchemas(filtered);
         console.log('🎯 Applied filtering:', filtered.length, 'schemas');
+      } else {
+        // If no profile, show all schemas
+        setTrainingSchemas(allSchemas);
+        console.log('🎯 No profile found, showing all schemas:', allSchemas.length);
       }
       
     } catch (error) {
@@ -647,8 +661,12 @@ function TrainingschemasContent() {
         // Reset calculator data
         setCalculatorData({ training_goal: '', training_frequency: '', equipment_type: '' });
         
-        // Fetch updated training schemas
-        await fetchTrainingSchemas();
+        // Re-apply filtering with new profile
+        if (allTrainingSchemas.length > 0) {
+          const filtered = filterSchemasByProfile(allTrainingSchemas, data.profile);
+          setTrainingSchemas(filtered);
+          console.log('🎯 Re-applied filtering after profile save:', filtered.length, 'schemas');
+        }
       } else {
         console.error('❌ Failed to save training profile:', data);
         toast.error(data.error || 'Failed to save training profile');
@@ -1138,13 +1156,13 @@ function TrainingschemasContent() {
 
   useEffect(() => {
     console.log('🔄 UserTrainingProfile changed:', userTrainingProfile);
-    // Only re-fetch if we have both profile and schemas data
-    if (userTrainingProfile && trainingSchemas.length > 0) {
-      const filtered = filterSchemasByProfile(trainingSchemas, userTrainingProfile);
+    // Only re-filter if we have both profile and all schemas data
+    if (userTrainingProfile && allTrainingSchemas.length > 0) {
+      const filtered = filterSchemasByProfile(allTrainingSchemas, userTrainingProfile);
       setTrainingSchemas(filtered);
       console.log('🎯 Re-applied filtering after profile change:', filtered.length, 'schemas');
     }
-  }, [userTrainingProfile]);
+  }, [userTrainingProfile, allTrainingSchemas]);
 
   // Handle schema selection from URL parameter
   useEffect(() => {
@@ -1186,7 +1204,7 @@ function TrainingschemasContent() {
   // Progressieve loading states
   if (authLoading) {
     return (
-      <PageLayout title="Training Schemas">
+      <PageLayout title="Trainingsschemas">
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
             <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
@@ -1201,7 +1219,7 @@ function TrainingschemasContent() {
   // Check if user is authenticated
   if (!user) {
     return (
-      <PageLayout title="Training Schemas">
+      <PageLayout title="Trainingsschemas">
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
             <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] rounded-full flex items-center justify-center">
@@ -1226,7 +1244,7 @@ function TrainingschemasContent() {
   // Check subscription loading
   if (subscriptionLoading) {
     return (
-      <PageLayout title="Training Schemas">
+      <PageLayout title="Trainingsschemas">
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center max-w-md mx-auto px-4">
             <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
@@ -1268,7 +1286,7 @@ function TrainingschemasContent() {
   // Check access permissions for training schemas
   if (!hasAccess('training')) {
     return (
-      <PageLayout title="Training Schemas">
+      <PageLayout title="Trainingsschemas">
         <div className="w-full p-6">
           <div className="text-center py-16">
             <div className="mb-8">
@@ -1329,7 +1347,7 @@ function TrainingschemasContent() {
   }
 
   return (
-    <PageLayout title="Training Schemas">
+    <PageLayout title="Trainingsschemas">
       <div className="w-full p-3 sm:p-4 md:p-6">
         {/* Dynamic Training Plan View */}
         <AnimatePresence mode="wait">
@@ -1797,6 +1815,11 @@ function TrainingschemasContent() {
                   <div>
                     <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-white">Beschikbare Trainingsschemas</h2>
                     <p className="text-xs sm:text-sm text-gray-400">Gepersonaliseerd voor jouw profiel</p>
+                    <div className="mt-2 p-3 bg-[#8BAE5A]/10 border border-[#8BAE5A]/30 rounded-lg">
+                      <p className="text-xs sm:text-sm text-[#8BAE5A] leading-relaxed">
+                        <span className="font-semibold">📅 8-weken systeem:</span> De trainingsschemas gaan per 8 weken. Zodra je schema 1 hebt afgerond, wordt schema 2 beschikbaar. <span className="font-semibold">Consistentie zorgt voor resultaat</span> - daarom is het belangrijk een schema voor minimaal 8 weken te volgen.
+                      </p>
+                    </div>
                   </div>
                 </div>
                 {/* Schema count and view toggle removed - user only sees filtered schemas */}
@@ -2084,7 +2107,7 @@ function TrainingschemasContent() {
 export default function TrainingschemasPage() {
   return (
     <Suspense fallback={
-      <PageLayout title="Training Schemas">
+      <PageLayout title="Trainingsschemas">
         <div className="flex items-center justify-center min-h-screen">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#8BAE5A]"></div>
         </div>

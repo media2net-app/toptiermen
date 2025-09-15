@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 
-
 // Force dynamic rendering to prevent navigator errors
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -28,16 +27,25 @@ interface ForumTopic {
   };
 }
 
-const FitnessGezondheidPage = () => {
+interface ForumCategory {
+  id: number;
+  name: string;
+  description: string;
+  emoji: string;
+  slug: string;
+}
+
+const CategoryPage = ({ params }: { params: { slug: string } }) => {
+  const [category, setCategory] = useState<ForumCategory | null>(null);
   const [topics, setTopics] = useState<ForumTopic[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [userProfiles, setUserProfiles] = useState<{ [key: string]: UserProfile }>({});
 
   useEffect(() => {
-    console.log('🔄 Forum page mounted, fetching topics...');
-    fetchTopics();
-  }, []);
+    console.log('🔄 Category page mounted, fetching data for slug:', params.slug);
+    fetchCategoryAndTopics();
+  }, [params.slug]);
 
   const fetchUserProfiles = async (userIds: string[]) => {
     try {
@@ -65,13 +73,30 @@ const FitnessGezondheidPage = () => {
     }
   };
 
-  const fetchTopics = async () => {
+  const fetchCategoryAndTopics = async () => {
     try {
-      console.log('📝 Fetching forum topics...');
+      console.log('📝 Fetching category and topics...');
       setLoading(true);
       setError(null);
 
-      const { data: topicsData, error } = await supabase
+      // First, get the category by slug
+      const { data: categoryData, error: categoryError } = await supabase
+        .from('forum_categories')
+        .select('*')
+        .eq('slug', params.slug)
+        .single();
+
+      if (categoryError) {
+        console.error('❌ Error fetching category:', categoryError);
+        setError(`Category niet gevonden: ${categoryError.message}`);
+        return;
+      }
+
+      console.log('✅ Category data received:', categoryData);
+      setCategory(categoryData);
+
+      // Then fetch topics for this category
+      const { data: topicsData, error: topicsError } = await supabase
         .from('forum_topics')
         .select(`
           id,
@@ -82,12 +107,12 @@ const FitnessGezondheidPage = () => {
           view_count,
           author_id
         `)
-        .eq('category_id', 1) // Fitness & Gezondheid category
+        .eq('category_id', categoryData.id)
         .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('❌ Error fetching topics:', error);
-        setError(`Error fetching topics: ${error.message}`);
+      if (topicsError) {
+        console.error('❌ Error fetching topics:', topicsError);
+        setError(`Error fetching topics: ${topicsError.message}`);
         return;
       }
 
@@ -143,7 +168,7 @@ const FitnessGezondheidPage = () => {
       console.log('✅ Processed topics:', processedTopics);
       setTopics(processedTopics);
     } catch (error) {
-      console.error('❌ Error in fetchTopics:', error);
+      console.error('❌ Error in fetchCategoryAndTopics:', error);
       setError(`Unexpected error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setLoading(false);
@@ -192,14 +217,40 @@ const FitnessGezondheidPage = () => {
       <div className="px-2 sm:px-4 md:px-8 lg:px-12">
         <div className="text-center text-white py-8 sm:py-12">
           <div className="text-4xl sm:text-6xl mb-3 sm:mb-4">⚠️</div>
-          <h3 className="text-lg sm:text-xl font-bold mb-2">Error Loading Topics</h3>
+          <h3 className="text-lg sm:text-xl font-bold mb-2">Error Loading Category</h3>
           <p className="text-[#8BAE5A] mb-4 sm:mb-6 text-sm sm:text-base">{error}</p>
-          <button 
-            onClick={fetchTopics}
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+            <button 
+              onClick={fetchCategoryAndTopics}
+              className="px-4 sm:px-6 py-2 sm:py-3 rounded-lg lg:rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-bold text-sm sm:text-base shadow hover:from-[#B6C948] hover:to-[#8BAE5A] transition-all"
+            >
+              Try Again
+            </button>
+            <Link 
+              href="/dashboard/brotherhood/forum"
+              className="px-4 sm:px-6 py-2 sm:py-3 rounded-lg lg:rounded-xl bg-[#3A4D23] text-white font-bold text-sm sm:text-base shadow hover:bg-[#4A5D33] transition-all text-center"
+            >
+              Back to Forum
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!category) {
+    return (
+      <div className="px-2 sm:px-4 md:px-8 lg:px-12">
+        <div className="text-center text-white py-8 sm:py-12">
+          <div className="text-4xl sm:text-6xl mb-3 sm:mb-4">❓</div>
+          <h3 className="text-lg sm:text-xl font-bold mb-2">Category niet gevonden</h3>
+          <p className="text-[#8BAE5A] mb-4 sm:mb-6 text-sm sm:text-base">De opgevraagde categorie bestaat niet.</p>
+          <Link 
+            href="/dashboard/brotherhood/forum"
             className="px-4 sm:px-6 py-2 sm:py-3 rounded-lg lg:rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-bold text-sm sm:text-base shadow hover:from-[#B6C948] hover:to-[#8BAE5A] transition-all"
           >
-            Try Again
-          </button>
+            Terug naar Forum
+          </Link>
         </div>
       </div>
     );
@@ -210,8 +261,10 @@ const FitnessGezondheidPage = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 sm:mb-8 gap-3 sm:gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">💪 Fitness & Gezondheid</h1>
-          <p className="text-[#8BAE5A] text-sm sm:text-base">Alles over trainingsschema's, voeding, herstel en blessurepreventie.</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">
+            {category.emoji} {category.name}
+          </h1>
+          <p className="text-[#8BAE5A] text-sm sm:text-base">{category.description}</p>
         </div>
         <button className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 rounded-lg lg:rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-bold text-sm sm:text-base shadow hover:from-[#B6C948] hover:to-[#8BAE5A] transition-all">
           + Start Nieuwe Topic
@@ -221,7 +274,7 @@ const FitnessGezondheidPage = () => {
       {/* Debug Info */}
       <div className="mb-3 sm:mb-4 p-3 sm:p-4 bg-[#232D1A]/50 rounded-lg">
         <p className="text-xs sm:text-sm text-[#8BAE5A]">
-          Debug: {topics.length} topics loaded | Loading: {loading.toString()} | Error: {error || 'None'}
+          Debug: Category "{category.name}" (ID: {category.id}) | Topics: {topics.length} | Loading: {loading.toString()} | Error: {error || 'None'}
         </p>
       </div>
 
@@ -230,7 +283,7 @@ const FitnessGezondheidPage = () => {
         {topics.map((topic) => (
           <Link 
             key={topic.id} 
-            href={`/dashboard/brotherhood/forum/fitness-gezondheid/thread/${topic.id}`}
+            href={`/dashboard/brotherhood/forum/${category.slug}/thread/${topic.id}`}
             className="block bg-[#232D1A]/90 rounded-xl lg:rounded-2xl shadow-lg lg:shadow-xl border border-[#3A4D23]/40 p-4 sm:p-6 hover:shadow-2xl hover:-translate-y-1 hover:border-[#FFD700] transition-all cursor-pointer no-underline"
           >
             <div className="flex items-start gap-3 sm:gap-4">
@@ -265,9 +318,9 @@ const FitnessGezondheidPage = () => {
 
       {topics.length === 0 && (
         <div className="text-center text-white py-8 sm:py-12">
-          <div className="text-4xl sm:text-6xl mb-3 sm:mb-4">💪</div>
+          <div className="text-4xl sm:text-6xl mb-3 sm:mb-4">{category.emoji}</div>
           <h3 className="text-lg sm:text-xl font-bold mb-2">Nog geen topics</h3>
-          <p className="text-[#8BAE5A] mb-4 sm:mb-6 text-sm sm:text-base">Wees de eerste om een discussie te starten over fitness en gezondheid!</p>
+          <p className="text-[#8BAE5A] mb-4 sm:mb-6 text-sm sm:text-base">Wees de eerste om een discussie te starten in {category.name}!</p>
           <button className="px-4 sm:px-6 py-2 sm:py-3 rounded-lg lg:rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-bold text-sm sm:text-base shadow hover:from-[#B6C948] hover:to-[#8BAE5A] transition-all">
             Start Eerste Topic
           </button>
@@ -277,4 +330,4 @@ const FitnessGezondheidPage = () => {
   );
 };
 
-export default FitnessGezondheidPage; 
+export default CategoryPage;
