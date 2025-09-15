@@ -59,6 +59,7 @@ const EmailLogsPage = () => {
   const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
   const [selectedLog, setSelectedLog] = useState<EmailLog | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [isSampleData, setIsSampleData] = useState(false);
 
   useEffect(() => {
     if (user && isAdmin) {
@@ -97,6 +98,7 @@ const EmailLogsPage = () => {
       if (data.success) {
         setLogs(data.logs || []);
         setStats(data.stats || { total: 0, sent: 0, failed: 0, success_rate: 0 });
+        setIsSampleData(data.isSampleData || false);
       } else {
         throw new Error(data.error || 'Failed to fetch email logs');
       }
@@ -301,6 +303,27 @@ const EmailLogsPage = () => {
             </div>
           </div>
         </div>
+
+        {/* Sample Data Notice */}
+        {isSampleData && (
+          <div className="bg-yellow-500/20 border border-yellow-500/30 rounded-2xl p-6 mb-6">
+            <div className="flex items-center">
+              <ExclamationTriangleIcon className="w-6 h-6 text-yellow-400 mr-3" />
+              <div>
+                <h3 className="text-yellow-400 font-semibold">Sample Data</h3>
+                <p className="text-yellow-300 text-sm mt-1">
+                  De email_logs tabel bestaat nog niet in de database. Je ziet nu sample data. 
+                  Om echte email logs te zien, moet je de email_logs tabel aanmaken in je Supabase dashboard.
+                </p>
+                <div className="mt-3 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+                  <p className="text-yellow-200 text-xs font-mono">
+                    CREATE TABLE email_logs (id UUID PRIMARY KEY, user_id UUID, to_email TEXT, email_type TEXT, subject TEXT, status TEXT, error_message TEXT, provider TEXT, message_id TEXT, template_id TEXT, created_at TIMESTAMP DEFAULT NOW());
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Error Message */}
         {error && (

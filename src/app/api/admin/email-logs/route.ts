@@ -24,18 +24,113 @@ export async function GET(request: NextRequest) {
       .limit(1);
 
     if (tableError && tableError.code === '42P01') {
-      // Table doesn't exist, return empty results for now
-      console.log('⚠️ Email_logs table does not exist yet');
+      // Table doesn't exist, return sample data for demonstration
+      console.log('⚠️ Email_logs table does not exist yet, returning sample data');
+      
+      const sampleLogs = [
+        {
+          id: 'sample-1',
+          user_id: '061e43d5-c89a-42bb-8a4c-04be2ce99a7e',
+          to_email: 'chiel@media2net.nl',
+          email_type: 'welcome',
+          subject: 'Welkom bij Top Tier Men!',
+          status: 'sent',
+          provider: 'resend',
+          message_id: 'msg_sample_001',
+          template_id: 'welcome_template',
+          created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
+          profiles: {
+            id: '061e43d5-c89a-42bb-8a4c-04be2ce99a7e',
+            full_name: 'Chiel',
+            username: 'chiel',
+            email: 'chiel@media2net.nl',
+            role: 'admin'
+          }
+        },
+        {
+          id: 'sample-2',
+          user_id: '061e43d5-c89a-42bb-8a4c-04be2ce99a7e',
+          to_email: 'chiel@media2net.nl',
+          email_type: 'password_reset',
+          subject: 'Wachtwoord Reset - Top Tier Men',
+          status: 'sent',
+          provider: 'resend',
+          message_id: 'msg_sample_002',
+          template_id: 'password_reset_template',
+          created_at: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(), // 1 hour ago
+          profiles: {
+            id: '061e43d5-c89a-42bb-8a4c-04be2ce99a7e',
+            full_name: 'Chiel',
+            username: 'chiel',
+            email: 'chiel@media2net.nl',
+            role: 'admin'
+          }
+        },
+        {
+          id: 'sample-3',
+          user_id: '061e43d5-c89a-42bb-8a4c-04be2ce99a7e',
+          to_email: 'chiel@media2net.nl',
+          email_type: 'login_notification',
+          subject: 'Nieuwe Login Detectie',
+          status: 'delivered',
+          provider: 'resend',
+          message_id: 'msg_sample_003',
+          template_id: 'login_notification_template',
+          created_at: new Date(Date.now() - 30 * 60 * 1000).toISOString(), // 30 minutes ago
+          profiles: {
+            id: '061e43d5-c89a-42bb-8a4c-04be2ce99a7e',
+            full_name: 'Chiel',
+            username: 'chiel',
+            email: 'chiel@media2net.nl',
+            role: 'admin'
+          }
+        },
+        {
+          id: 'sample-4',
+          user_id: null,
+          to_email: 'test@example.com',
+          email_type: 'welcome',
+          subject: 'Welkom bij Top Tier Men!',
+          status: 'failed',
+          provider: 'resend',
+          message_id: 'msg_sample_004',
+          template_id: 'welcome_template',
+          error_message: 'Invalid email address',
+          created_at: new Date(Date.now() - 15 * 60 * 1000).toISOString(), // 15 minutes ago
+          profiles: null
+        },
+        {
+          id: 'sample-5',
+          user_id: '061e43d5-c89a-42bb-8a4c-04be2ce99a7e',
+          to_email: 'chiel@media2net.nl',
+          email_type: 'newsletter',
+          subject: 'Top Tier Men Weekly Update',
+          status: 'pending',
+          provider: 'resend',
+          message_id: 'msg_sample_005',
+          template_id: 'newsletter_template',
+          created_at: new Date(Date.now() - 5 * 60 * 1000).toISOString(), // 5 minutes ago
+          profiles: {
+            id: '061e43d5-c89a-42bb-8a4c-04be2ce99a7e',
+            full_name: 'Chiel',
+            username: 'chiel',
+            email: 'chiel@media2net.nl',
+            role: 'admin'
+          }
+        }
+      ];
+      
       return NextResponse.json({
         success: true,
-        logs: [],
+        logs: sampleLogs,
         stats: {
-          total: 0,
-          sent: 0,
-          failed: 0,
-          success_rate: 0
+          total: 5,
+          sent: 2,
+          failed: 1,
+          success_rate: 60
         },
-        message: 'Email logs table not created yet. Please create it in Supabase dashboard.'
+        message: 'Email logs table not created yet. Showing sample data. Please create the email_logs table in Supabase dashboard to see real data.',
+        isSampleData: true
       });
     }
 
