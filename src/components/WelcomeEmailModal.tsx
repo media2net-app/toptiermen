@@ -192,7 +192,7 @@ export default function WelcomeEmailModal({
                         <span className="text-2xl">💡</span>
                         <h3 className="font-bold text-[#181F17]">Bewezen Methoden</h3>
                       </div>
-                      <p className="text-gray-700">Strategieën die al duizenden mannen naar succes hebben gebracht</p>
+                      <p className="text-gray-700">Strategieën die mannen naar succes brengen</p>
                     </div>
                   </div>
                 </div>

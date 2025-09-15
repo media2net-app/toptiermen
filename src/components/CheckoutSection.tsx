@@ -188,7 +188,7 @@ export default function CheckoutSection({
             Klaar om je transformatie te starten?
           </h2>
           <p className="text-xl text-[#8BAE5A] max-w-3xl mx-auto">
-            Sluit je aan bij duizenden mannen die al hun leven hebben getransformeerd met Top Tier Men
+            Sluit je aan bij de brotherhood en wordt een Top Tier Men
           </p>
         </div>
 
