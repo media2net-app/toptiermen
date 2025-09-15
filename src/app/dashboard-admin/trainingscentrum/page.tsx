@@ -394,6 +394,7 @@ export default function TrainingscentrumBeheer() {
           training_goal,
           rep_range,
           rest_time_seconds,
+          schema_nummer,
           created_at,
           training_schema_days (
             id,
@@ -1181,6 +1182,7 @@ export default function TrainingscentrumBeheer() {
                     <tr>
                       <th className="px-6 py-4 text-center text-sm font-medium text-[#8BAE5A] w-16">#</th>
                       <th className="px-6 py-4 text-left text-sm font-medium text-[#8BAE5A] w-1/3">Schema</th>
+                      <th className="px-6 py-4 text-center text-sm font-medium text-[#8BAE5A] w-20">Schema #</th>
                       <th className="px-6 py-4 text-left text-sm font-medium text-[#8BAE5A] w-1/12">Categorie</th>
                       <th className="px-6 py-4 text-center text-sm font-medium text-[#8BAE5A] w-1/12">Dagen</th>
                       <th className="px-6 py-4 text-center text-sm font-medium text-[#8BAE5A] w-1/12">Status</th>
@@ -1204,6 +1206,15 @@ export default function TrainingscentrumBeheer() {
                               <p className="text-[#B6C948] text-sm line-clamp-2">{schema.description}</p>
                             </div>
                           </div>
+                        </td>
+                        <td className="px-6 py-4 text-center">
+                          {schema.schema_nummer ? (
+                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-[#8BAE5A]/20 text-[#8BAE5A] border border-[#8BAE5A]/30">
+                              Schema {schema.schema_nummer}
+                            </span>
+                          ) : (
+                            <span className="text-gray-500 text-xs">-</span>
+                          )}
                         </td>
                         <td className="px-6 py-4 text-center">
                           <span className="px-3 py-1 rounded-full text-xs font-semibold text-[#8BAE5A] bg-[#181F17]">
