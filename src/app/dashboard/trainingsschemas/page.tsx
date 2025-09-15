@@ -377,8 +377,22 @@ function TrainingschemasContent() {
     
     console.log('✅ Filtered schemas with exact matching:', filtered.length);
     
+    // Sort schemas by schema_nummer (1, 2, 3) within each group
+    const sortedSchemas = filtered.sort((a, b) => {
+      // First sort by name to group similar schemas together
+      const nameComparison = a.name.localeCompare(b.name);
+      if (nameComparison !== 0) {
+        return nameComparison;
+      }
+      
+      // Then sort by schema_nummer (1, 2, 3)
+      const aNum = a.schema_nummer || 0;
+      const bNum = b.schema_nummer || 0;
+      return aNum - bNum;
+    });
+    
     // Limit to 3 schemas maximum
-    const limitedSchemas = filtered.slice(0, 3);
+    const limitedSchemas = sortedSchemas.slice(0, 3);
     
     // If no schemas match the exact criteria, show fallback with relaxed matching
     if (limitedSchemas.length === 0) {
@@ -391,7 +405,18 @@ function TrainingschemasContent() {
         console.log(`🔄 Fallback Schema "${schema.name}": goal=${schema.training_goal} (${goalMatch}), equipment=${schema.equipment_type} (${equipmentMatch})`);
         
         return goalMatch && equipmentMatch;
-      }).slice(0, 3); // Limit to 3 fallback schemas
+      })
+      // Sort fallback schemas by schema_nummer as well
+      .sort((a, b) => {
+        const nameComparison = a.name.localeCompare(b.name);
+        if (nameComparison !== 0) {
+          return nameComparison;
+        }
+        const aNum = a.schema_nummer || 0;
+        const bNum = b.schema_nummer || 0;
+        return aNum - bNum;
+      })
+      .slice(0, 3); // Limit to 3 fallback schemas
       
       console.log('🔄 Showing fallback schemas:', fallbackSchemas.length);
       return fallbackSchemas;

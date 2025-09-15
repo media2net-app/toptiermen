@@ -422,7 +422,7 @@ export default function TrainingscentrumBeheer() {
       
       console.log(`✅ Successfully fetched ${data?.length || 0} training schemas`);
       
-      // Sort schemas by number of days (ascending) and then by creation date
+      // Sort schemas by number of days (ascending) and then by schema_nummer
       // But group copies with their originals
       const processedSchemas = (data || [])
         .map(schema => ({
@@ -438,8 +438,16 @@ export default function TrainingscentrumBeheer() {
             return aDays - bDays;
           }
           
-          // If same number of days, sort by creation date (newest first)
-          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+          // If same number of days, sort by name to group similar schemas
+          const nameComparison = a.name.localeCompare(b.name);
+          if (nameComparison !== 0) {
+            return nameComparison;
+          }
+          
+          // Then sort by schema_nummer (1, 2, 3)
+          const aNum = a.schema_nummer || 0;
+          const bNum = b.schema_nummer || 0;
+          return aNum - bNum;
         });
 
       // Group copies with their originals
