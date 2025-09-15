@@ -14,6 +14,11 @@ interface EmailConfig {
   fromName: string;
 }
 
+export interface EmailOptions {
+  tracking?: boolean;
+  userId?: string;
+}
+
 export class EmailService {
   private config: EmailConfig | null = null;
 
@@ -79,7 +84,7 @@ export class EmailService {
     }
   }
 
-  async sendEmail(to: string, subject: string, template: string, variables: Record<string, string>, options: { tracking?: boolean } = {}): Promise<boolean> {
+  async sendEmail(to: string, subject: string, template: string, variables: Record<string, string>, options: EmailOptions = {}): Promise<boolean> {
     // Check if template is enabled
     const isTemplateEnabled = await this.isTemplateEnabled(template);
     if (!isTemplateEnabled) {
@@ -100,19 +105,97 @@ export class EmailService {
       tracking: options.tracking
     });
 
-    try {
-      // Skip tracking for now to avoid database issues
-      console.log('📧 Skipping email tracking to avoid database dependencies');
+    let emailSuccess = false;
+    let errorMessage: string | null = null;
+    let messageId: string | null = null;
 
+    try {
       // Send email
       if (config.provider === 'smtp' && config.useManualSmtp) {
-        return await this.sendViaSmtp(to, emailTemplate.subject, emailTemplate.html, emailTemplate.text);
+        emailSuccess = await this.sendViaSmtp(to, emailTemplate.subject, emailTemplate.html, emailTemplate.text);
       } else {
-        return await this.sendViaApi(to, emailTemplate.subject, emailTemplate.html, emailTemplate.text);
+        emailSuccess = await this.sendViaApi(to, emailTemplate.subject, emailTemplate.html, emailTemplate.text);
+      }
+
+      if (emailSuccess) {
+        messageId = `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        console.log(`✅ Email sent successfully to ${to}`);
+      } else {
+        errorMessage = 'Email sending failed';
+        console.error(`❌ Failed to send email to ${to}`);
       }
     } catch (error) {
+      emailSuccess = false;
+      errorMessage = error instanceof Error ? error.message : 'Unknown error';
       console.error('❌ Failed to send email:', error);
-      return false;
+    }
+
+    // Log email attempt to database
+    try {
+      await this.logEmailAttempt({
+        userId: options.userId || null,
+        toEmail: to,
+        emailType: template,
+        subject: emailTemplate.subject,
+        status: emailSuccess ? 'sent' : 'failed',
+        errorMessage: errorMessage,
+        provider: config.provider,
+        messageId: messageId,
+        templateId: template
+      });
+    } catch (logError) {
+      console.error('❌ Failed to log email attempt:', logError);
+      // Don't fail the email sending if logging fails
+    }
+
+    return emailSuccess;
+  }
+
+  async logEmailAttempt(logData: {
+    userId: string | null;
+    toEmail: string;
+    emailType: string;
+    subject: string;
+    status: 'sent' | 'failed' | 'pending' | 'delivered';
+    errorMessage: string | null;
+    provider: string;
+    messageId: string | null;
+    templateId: string;
+  }): Promise<void> {
+    try {
+      // Only log if we have Supabase configured
+      if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+        console.log('📧 Supabase not configured, skipping email logging');
+        return;
+      }
+
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL,
+        process.env.SUPABASE_SERVICE_ROLE_KEY
+      );
+
+      const { error } = await supabase
+        .from('email_logs')
+        .insert([{
+          user_id: logData.userId,
+          to_email: logData.toEmail,
+          email_type: logData.emailType,
+          subject: logData.subject,
+          status: logData.status,
+          error_message: logData.errorMessage,
+          provider: logData.provider,
+          message_id: logData.messageId,
+          template_id: logData.templateId
+        }]);
+
+      if (error) {
+        console.error('❌ Error logging email attempt:', error);
+      } else {
+        console.log(`📧 Email logged: ${logData.emailType} to ${logData.toEmail} (${logData.status})`);
+      }
+    } catch (error) {
+      console.error('❌ Failed to log email attempt:', error);
     }
   }
 

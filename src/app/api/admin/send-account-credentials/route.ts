@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
             packageType: user.package_type || 'Basic Tier',
             platformUrl: process.env.NEXT_PUBLIC_SITE_URL || 'https://platform.toptiermen.eu'
           },
-          { tracking: true }
+          { tracking: true, userId: user.id }
         );
 
         if (success) {

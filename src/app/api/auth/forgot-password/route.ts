@@ -290,7 +290,7 @@ export async function POST(request: NextRequest) {
         '🔐 Je Nieuwe Top Tier Men Wachtwoord - Wachtwoord Reset',
         'password-reset',
         emailVariables,
-        { tracking: true }
+        { tracking: true, userId: user.id }
       );
 
       if (emailSuccess) {

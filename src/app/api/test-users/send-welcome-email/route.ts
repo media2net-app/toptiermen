@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 import { getTestUserWelcomeEmailTemplate } from '@/lib/test-user-email-template';
-import { emailService } from '@/lib/email-service';
+import { emailService, EmailOptions } from '@/lib/email-service';
 
 export async function POST(request: NextRequest) {
   try {
@@ -44,16 +44,21 @@ export async function POST(request: NextRequest) {
     const emailTemplate = getTestUserWelcomeEmailTemplate(emailData);
 
     // Send email using email service with custom template
-    const result = await emailService.sendEmail({
-      to: email,
-      template: 'custom', // Use custom template
-      variables: {
+    const result = await emailService.sendEmail(
+      email,
+      emailTemplate.subject,
+      'welcome',
+      {
         name: name,
-        subject: emailTemplate.subject,
-        html: emailTemplate.html,
-        text: emailTemplate.text
-      }
-    });
+        email: email,
+        testUserId: testUserId,
+        feedbackUrl: feedbackUrl,
+        platformUrl: platformUrl,
+        loginUrl: loginUrl,
+        password: password
+      },
+      { tracking: true, userId: null }
+    );
 
     if (result) {
       console.log('✅ Test user email sent successfully');
