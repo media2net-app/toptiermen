@@ -46,8 +46,8 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const updatedPackages = [];
-    const errors = [];
+    const updatedPackages: any[] = [];
+    const errors: { packageId: string; mollieId: string; error: string }[] = [];
 
     for (const packageData of packages) {
       try {

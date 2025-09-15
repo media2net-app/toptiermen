@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
         loginUrl: loginUrl,
         password: password
       },
-      { tracking: true, userId: null }
+      { tracking: true }
     );
 
     if (result) {

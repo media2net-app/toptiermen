@@ -129,7 +129,7 @@ export default function TrainingSchemaDetailPage() {
       <!DOCTYPE html>
       <html>
         <head>
-          <title>${schema.name} - Top Tier Men</title>
+          <title>${schema?.name || 'Training Schema'} - Top Tier Men</title>
           <style>
             @page {
               margin: 20mm;
@@ -251,41 +251,41 @@ export default function TrainingSchemaDetailPage() {
         <body>
           <div class="header">
             <div class="logo">Top Tier Men</div>
-            <div class="schema-title">${schema.name}</div>
+            <div class="schema-title">${schema?.name || 'Training Schema'}</div>
             <div style="font-size: 14px; color: #666;">Gegenereerd op ${currentDate}</div>
           </div>
 
           <div class="schema-info">
             <div class="info-item">
               <div class="info-label">Doel</div>
-              <div class="info-value">${schema.training_goal}</div>
+              <div class="info-value">${schema?.training_goal || 'N/A'}</div>
             </div>
             <div class="info-item">
               <div class="info-label">Duur</div>
-              <div class="info-value">${schema.estimated_duration}</div>
+              <div class="info-value">${schema?.estimated_duration || 'N/A'}</div>
             </div>
             <div class="info-item">
               <div class="info-label">Dagen</div>
-              <div class="info-value">${schema.training_schema_days?.length || 0} dagen</div>
+              <div class="info-value">${schema?.training_schema_days?.length || 0} dagen</div>
             </div>
             <div class="info-item">
               <div class="info-label">Rep Range</div>
-              <div class="info-value">${schema.rep_range}</div>
+              <div class="info-value">${schema?.rep_range || 'N/A'}</div>
             </div>
             <div class="info-item">
               <div class="info-label">Equipment</div>
-              <div class="info-value">${schema.equipment_type}</div>
+              <div class="info-value">${schema?.equipment_type || 'N/A'}</div>
             </div>
           </div>
 
-          ${schema.description ? `
+          ${schema?.description ? `
             <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
               <h3 style="margin: 0 0 10px 0; color: #333; font-size: 18px;">Beschrijving</h3>
               <p style="margin: 0; color: #666; line-height: 1.6;">${schema.description}</p>
             </div>
           ` : ''}
 
-          ${schema.training_schema_days && schema.training_schema_days.length > 0 ? 
+          ${schema?.training_schema_days && schema.training_schema_days.length > 0 ? 
             schema.training_schema_days
               .sort((a, b) => a.day_number - b.day_number)
               .map(day => `

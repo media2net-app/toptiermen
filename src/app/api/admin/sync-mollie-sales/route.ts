@@ -82,8 +82,8 @@ export async function POST(request: NextRequest) {
 
     console.log(`🆕 Found ${newPayments.length} potential new prelaunch packages`);
 
-    const newPackages = [];
-    const errors = [];
+    const newPackages: any[] = [];
+    const errors: { paymentId: string; error: string }[] = [];
 
     for (const payment of newPayments) {
       try {
