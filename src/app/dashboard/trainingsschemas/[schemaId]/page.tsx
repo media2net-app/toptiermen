@@ -28,6 +28,7 @@ interface TrainingSchema {
   rep_range: string;
   rest_time_seconds: number;
   equipment_type: string;
+  schema_nummer: number | null;
   training_schema_days?: {
     id: string;
     day_number: number;
@@ -387,7 +388,14 @@ export default function TrainingSchemaDetailPage() {
                 <AcademicCapIcon className="w-8 h-8 text-white" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-white">{schema.name}</h1>
+                <h1 className="text-3xl font-bold text-white">
+                  {schema.name}
+                  {schema.schema_nummer && (
+                    <span className="ml-3 inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-[#8BAE5A]/20 text-[#8BAE5A] border border-[#8BAE5A]/30">
+                      Schema {schema.schema_nummer}
+                    </span>
+                  )}
+                </h1>
                 <p className="text-[#8BAE5A] text-lg">{schema.training_goal}</p>
               </div>
             </div>

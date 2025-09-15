@@ -37,6 +37,7 @@ interface TrainingSchema {
   rep_range: string;
   rest_time_seconds: number;
   equipment_type: string;
+  schema_nummer: number | null;
   duration?: string;
   training_schema_days?: {
     id: string;
@@ -1680,7 +1681,14 @@ function TrainingschemasContent() {
                           <AcademicCapIcon className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-[#8BAE5A]" />
                         </div>
                         <div>
-                          <h3 className="text-sm sm:text-base md:text-lg font-semibold text-white">{schema.name}</h3>
+                          <h3 className="text-sm sm:text-base md:text-lg font-semibold text-white">
+                            {schema.name}
+                            {schema.schema_nummer && (
+                              <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-[#8BAE5A]/20 text-[#8BAE5A] border border-[#8BAE5A]/30">
+                                Schema {schema.schema_nummer}
+                              </span>
+                            )}
+                          </h3>
                           <p className="text-xs sm:text-sm text-gray-400">{schema.difficulty}</p>
                         </div>
                       </div>

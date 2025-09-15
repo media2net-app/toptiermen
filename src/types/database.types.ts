@@ -452,6 +452,7 @@ export interface Database {
           cover_image: string | null
           estimated_duration: string | null
           target_audience: string | null
+          schema_nummer: number | null
           created_at: string
           updated_at: string
         }
@@ -465,6 +466,7 @@ export interface Database {
           cover_image?: string | null
           estimated_duration?: string | null
           target_audience?: string | null
+          schema_nummer?: number | null
           created_at?: string
           updated_at?: string
         }
@@ -478,6 +480,7 @@ export interface Database {
           cover_image?: string | null
           estimated_duration?: string | null
           target_audience?: string | null
+          schema_nummer?: number | null
           created_at?: string
           updated_at?: string
         }
