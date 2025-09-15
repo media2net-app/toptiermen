@@ -1692,6 +1692,8 @@ function TrainingschemasContent() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
                 {trainingSchemas.map((schema) => {
                   const isSchema1 = schema.schema_nummer === 1;
+                  const isSchema2 = schema.schema_nummer === 2;
+                  const isSchema3 = schema.schema_nummer === 3;
                   const isLocked = !isSchema1;
                   
                   return (
@@ -1747,7 +1749,14 @@ function TrainingschemasContent() {
                       <div className="mb-3 sm:mb-4 p-2 sm:p-3 bg-gray-800/50 border border-gray-700 rounded-lg">
                         <div className="flex items-center gap-2 text-gray-400 text-xs sm:text-sm">
                           <span className="text-yellow-500">🔒</span>
-                          <span>Vergrendeld - Voltooi Schema 1 eerst</span>
+                          <span>
+                            {isSchema2 
+                              ? 'Vergrendeld - Voltooi Schema 1 eerst'
+                              : isSchema3 
+                              ? 'Vergrendeld - Voltooi Schema 2 eerst'
+                              : 'Vergrendeld - Voltooi vorig schema eerst'
+                            }
+                          </span>
                         </div>
                       </div>
                     )}
