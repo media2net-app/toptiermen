@@ -485,6 +485,38 @@ export interface Database {
           updated_at?: string
         }
       }
+      user_schema_periods: {
+        Row: {
+          id: string
+          user_id: string
+          training_schema_id: string
+          start_date: string
+          end_date: string
+          status: 'active' | 'completed' | 'paused' | 'cancelled'
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          training_schema_id: string
+          start_date: string
+          end_date?: string
+          status?: 'active' | 'completed' | 'paused' | 'cancelled'
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          training_schema_id?: string
+          start_date?: string
+          end_date?: string
+          status?: 'active' | 'completed' | 'paused' | 'cancelled'
+          created_at?: string
+          updated_at?: string
+        }
+      }
       training_schema_days: {
         Row: {
           id: string

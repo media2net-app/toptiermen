@@ -67,6 +67,24 @@ interface TrainingProfile {
   updated_at?: string;
 }
 
+interface SchemaPeriod {
+  id: string;
+  user_id: string;
+  training_schema_id: string;
+  start_date: string;
+  end_date: string;
+  status: 'active' | 'completed' | 'paused' | 'cancelled';
+  created_at: string;
+  updated_at: string;
+  training_schemas?: {
+    id: string;
+    name: string;
+    description: string;
+    difficulty: string;
+    schema_nummer: number | null;
+  };
+}
+
 const trainingGoals = [
   {
     id: 'spiermassa',
@@ -131,6 +149,8 @@ function TrainingschemasContent() {
   const [showAllSchemas, setShowAllSchemas] = useState(false);
   const [selectedSchemaDetail, setSelectedSchemaDetail] = useState<TrainingSchema | null>(null);
   const [profileLoading, setProfileLoading] = useState(true);
+  const [currentSchemaPeriod, setCurrentSchemaPeriod] = useState<SchemaPeriod | null>(null);
+  const [schemaPeriodLoading, setSchemaPeriodLoading] = useState(true);
   const [videoModal, setVideoModal] = useState<{isOpen: boolean, exerciseName: string, videoUrl: string}>({
     isOpen: false,
     exerciseName: '',
@@ -166,6 +186,30 @@ function TrainingschemasContent() {
     showOnboardingStep3,
     onboardingStatus
   });
+
+  // Fetch current schema period
+  const fetchCurrentSchemaPeriod = async () => {
+    if (!user?.id) return;
+    
+    try {
+      setSchemaPeriodLoading(true);
+      const response = await fetch(`/api/user/schema-periods?userId=${user.id}`);
+      const result = await response.json();
+      
+      if (response.ok) {
+        setCurrentSchemaPeriod(result.data);
+        console.log('✅ Current schema period loaded:', result.data);
+      } else {
+        console.log('⚠️ No active schema period found');
+        setCurrentSchemaPeriod(null);
+      }
+    } catch (error) {
+      console.error('❌ Error fetching schema period:', error);
+      setCurrentSchemaPeriod(null);
+    } finally {
+      setSchemaPeriodLoading(false);
+    }
+  };
 
   // Training functions - using same method as admin dashboard
   const fetchTrainingSchemas = async () => {
@@ -241,7 +285,7 @@ function TrainingschemasContent() {
       
       // Start all API calls in parallel
       console.log('📡 Starting parallel API calls...');
-      const [schemasResult, profileResult] = await Promise.allSettled([
+      const [schemasResult, profileResult, periodResult] = await Promise.allSettled([
         // Load training schemas
         supabase
           .from('training_schemas')
@@ -257,12 +301,16 @@ function TrainingschemasContent() {
           .order('created_at', { ascending: false }),
         
         // Load training profile
-        fetch(`/api/training-profile?userId=${user.email}`)
+        fetch(`/api/training-profile?userId=${user.email}`),
+        
+        // Load current schema period
+        fetch(`/api/user/schema-periods?userId=${user.id}`)
       ]);
       
       console.log('📡 API calls completed:', {
         schemasStatus: schemasResult.status,
-        profileStatus: profileResult.status
+        profileStatus: profileResult.status,
+        periodStatus: periodResult.status
       });
       
       // Process training schemas
@@ -310,6 +358,22 @@ function TrainingschemasContent() {
       } else {
         console.error('❌ Training profile promise rejected:', profileResult.reason);
         await createBasicProfile();
+      }
+      
+      // Process schema period
+      if (periodResult.status === 'fulfilled') {
+        const response = periodResult.value;
+        if (response.ok) {
+          const result = await response.json();
+          setCurrentSchemaPeriod(result.data);
+          console.log('✅ Current schema period loaded:', result.data);
+        } else {
+          console.log('⚠️ No active schema period found');
+          setCurrentSchemaPeriod(null);
+        }
+      } else {
+        console.error('❌ Schema period promise rejected:', periodResult.reason);
+        setCurrentSchemaPeriod(null);
       }
       
       // Apply filtering after both data sources are loaded
@@ -653,7 +717,30 @@ function TrainingschemasContent() {
       
       if (response.ok && data.success) {
         setSelectedTrainingSchema(schemaId);
-        toast.success('Trainingsschema geselecteerd!');
+        
+        // Create schema period (8 weeks)
+        const startDate = new Date().toISOString().split('T')[0]; // Today's date
+        const createPeriodResponse = await fetch('/api/user/schema-periods', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userId: actualUserId,
+            trainingSchemaId: schemaId,
+            startDate: startDate
+          }),
+        });
+
+        if (createPeriodResponse.ok) {
+          const periodData = await createPeriodResponse.json();
+          setCurrentSchemaPeriod(periodData.data);
+          console.log('✅ Schema period created:', periodData.data);
+          toast.success(`Trainingsschema geselecteerd! 8-weken periode gestart: ${new Date(periodData.data.start_date).toLocaleDateString('nl-NL')} - ${new Date(periodData.data.end_date).toLocaleDateString('nl-NL')}`);
+        } else {
+          console.error('❌ Failed to create schema period');
+          toast.success('Trainingsschema geselecteerd!');
+        }
         
         // Complete onboarding step if needed
         if (isOnboarding && onboardingStep === 3) {
@@ -1429,6 +1516,66 @@ function TrainingschemasContent() {
                       </p>
                     </div>
                   </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Current Schema Period */}
+        {currentSchemaPeriod && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8"
+          >
+            <div className="bg-gradient-to-r from-[#8BAE5A]/10 to-[#8BAE5A]/5 border border-[#8BAE5A]/30 rounded-2xl p-4 sm:p-6">
+              <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+                <div className="p-2 bg-[#8BAE5A]/20 rounded-lg">
+                  <CalendarDaysIcon className="h-5 w-5 sm:h-6 sm:w-6 text-[#8BAE5A]" />
+                </div>
+                <div>
+                  <h3 className="text-lg sm:text-xl font-semibold text-white">Huidige Schema Periode</h3>
+                  <p className="text-xs sm:text-sm text-gray-400">8-weken trainingsperiode</p>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                <div className="bg-[#232D1A]/50 border border-[#3A4D23] rounded-xl p-3 sm:p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-[#8BAE5A]">📅</span>
+                    <span className="text-sm font-medium text-gray-300">Startdatum</span>
+                  </div>
+                  <p className="text-white font-semibold">
+                    {new Date(currentSchemaPeriod.start_date).toLocaleDateString('nl-NL')}
+                  </p>
+                </div>
+                
+                <div className="bg-[#232D1A]/50 border border-[#3A4D23] rounded-xl p-3 sm:p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-[#8BAE5A]">🏁</span>
+                    <span className="text-sm font-medium text-gray-300">Einddatum</span>
+                  </div>
+                  <p className="text-white font-semibold">
+                    {new Date(currentSchemaPeriod.end_date).toLocaleDateString('nl-NL')}
+                  </p>
+                </div>
+                
+                <div className="bg-[#232D1A]/50 border border-[#3A4D23] rounded-xl p-3 sm:p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-[#8BAE5A]">📊</span>
+                    <span className="text-sm font-medium text-gray-300">Schema</span>
+                  </div>
+                  <p className="text-white font-semibold">
+                    {currentSchemaPeriod.training_schemas?.name || 'Onbekend'}
+                  </p>
+                </div>
+              </div>
+              
+              <div className="mt-4 p-3 bg-[#8BAE5A]/10 border border-[#8BAE5A]/30 rounded-lg">
+                <div className="flex items-center gap-2 text-[#8BAE5A] text-sm">
+                  <span>ℹ️</span>
+                  <span>Je volgt dit schema voor 8 weken. Na voltooiing kun je een nieuw schema selecteren.</span>
                 </div>
               </div>
             </div>
