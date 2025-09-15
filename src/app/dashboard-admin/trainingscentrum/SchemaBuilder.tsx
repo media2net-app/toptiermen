@@ -151,6 +151,7 @@ interface TrainingSchema {
   description: string;
   category: 'Gym' | 'Outdoor' | 'Home';
   difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
+  schema_nummer?: number | null;
   days: TrainingDay[];
   status: 'draft' | 'published' | 'archived';
 }
@@ -232,6 +233,32 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
     console.log(logMessage);
   };
 
+  // State to track used schema numbers
+  const [usedSchemaNumbers, setUsedSchemaNumbers] = useState<number[]>([]);
+
+  // Function to check if schema number is already used
+  const isSchemaNumberUsed = (schemaNumber: number): boolean => {
+    // If we're editing an existing schema, don't consider its own number as "used"
+    if (schema && schema.schema_nummer === schemaNumber) {
+      return false;
+    }
+    
+    return usedSchemaNumbers.includes(schemaNumber);
+  };
+
+  // Fetch used schema numbers when component opens
+  const fetchUsedSchemaNumbers = async () => {
+    try {
+      const response = await fetch('/api/admin/training-schemas/used-numbers');
+      if (response.ok) {
+        const data = await response.json();
+        setUsedSchemaNumbers(data.usedNumbers || []);
+      }
+    } catch (error) {
+      console.error('Error fetching used schema numbers:', error);
+    }
+  };
+
   // Bulk edit functions
   const applyBulkEdit = () => {
     if (!bulkEditData.sets && !bulkEditData.reps && !bulkEditData.restTime) {
@@ -292,6 +319,7 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
     description: '',
     category: 'Gym',
     difficulty: 'Beginner',
+    schema_nummer: null,
     days: [],
     status: 'draft'
   });
@@ -305,6 +333,7 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
   useEffect(() => {
     if (isOpen) {
       fetchExercises();
+      fetchUsedSchemaNumbers();
       if (schema) {
         // The schema data is already transformed by mapDbSchemaToForm, so use it directly
         const transformedSchema: TrainingSchema = {
@@ -313,6 +342,7 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
           description: schema.description,
           category: schema.category,
           difficulty: schema.difficulty,
+          schema_nummer: schema.schema_nummer || null,
           days: schema.days || [], // Data is already sorted and transformed
           status: schema.status
         };
@@ -323,6 +353,7 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
           description: '',
           category: 'Gym',
           difficulty: 'Beginner',
+          schema_nummer: null,
           days: [],
           status: 'draft'
         });
@@ -881,16 +912,27 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
 
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Niveau
+                      Schema Nummer
                     </label>
                     <select
-                      value={formData.difficulty}
-                      onChange={(e) => setFormData(prev => ({ ...prev, difficulty: e.target.value as any }))}
+                      value={formData.schema_nummer || ''}
+                      onChange={(e) => setFormData(prev => ({ ...prev, schema_nummer: e.target.value ? parseInt(e.target.value) : null }))}
                       className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-[#8BAE5A] focus:ring-2"
                     >
-                      <option value="Beginner">Beginner</option>
-                      <option value="Intermediate">Intermediate</option>
-                      <option value="Advanced">Advanced</option>
+                      <option value="">Selecteer schema nummer</option>
+                      {[1, 2, 3].map(num => {
+                        const isUsed = isSchemaNumberUsed(num);
+                        return (
+                          <option 
+                            key={num} 
+                            value={num} 
+                            disabled={isUsed}
+                            className={isUsed ? 'text-gray-500' : ''}
+                          >
+                            Schema {num} {isUsed ? '(Al in gebruik)' : ''}
+                          </option>
+                        );
+                      })}
                     </select>
                   </div>
                 </div>
