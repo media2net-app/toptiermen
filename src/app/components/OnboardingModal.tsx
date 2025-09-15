@@ -359,9 +359,31 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
                   ref={videoRef}
                   className="w-full rounded-lg"
                   controls
-                  preload="metadata"
+                  preload="auto"
+                  playsInline
                   onEnded={() => setVideoWatched(true)}
                   onPlay={() => setShowVideoOverlay(false)}
+                  onLoadedData={() => {
+                    console.log('📺 Welcome video data loaded, ready for smooth playback');
+                  }}
+                  onProgress={() => {
+                    // Log buffering progress for debugging
+                    if (videoRef.current) {
+                      const buffered = videoRef.current.buffered;
+                      if (buffered.length > 0) {
+                        const bufferedEnd = buffered.end(buffered.length - 1);
+                        const duration = videoRef.current.duration;
+                        const bufferedPercent = (bufferedEnd / duration) * 100;
+                        console.log(`📺 Video buffered: ${bufferedPercent.toFixed(1)}%`);
+                      }
+                    }
+                  }}
+                  onSeeking={() => {
+                    console.log('📺 User seeking video, ensuring smooth playback');
+                  }}
+                  onSeeked={() => {
+                    console.log('📺 Seek completed, video ready to play');
+                  }}
                 >
                   <source src="/welkom-v2.MP4" type="video/mp4" />
                   <source src="/welkom-v2.MP4" type="video/mp4" />

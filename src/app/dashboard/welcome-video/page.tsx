@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { useOnboarding } from '@/contexts/OnboardingContext';
 import { useRouter } from 'next/navigation';
@@ -11,6 +11,7 @@ export default function WelcomeVideoPage() {
   const router = useRouter();
   const [videoWatched, setVideoWatched] = useState(false);
   const [loading, setLoading] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   const handleVideoEnd = async () => {
     setVideoWatched(true);
@@ -60,10 +61,34 @@ export default function WelcomeVideoPage() {
 
           <div className="bg-black rounded-lg overflow-hidden mb-6">
             <video
+              ref={videoRef}
               className="w-full h-auto"
               controls
+              preload="auto"
+              playsInline
               onEnded={handleVideoEnd}
               poster="/welkom-v2-poster.jpg"
+              onLoadedData={() => {
+                console.log('📺 Welcome video data loaded, ready for smooth playback');
+              }}
+              onProgress={() => {
+                // Log buffering progress for debugging
+                if (videoRef.current) {
+                  const buffered = videoRef.current.buffered;
+                  if (buffered.length > 0) {
+                    const bufferedEnd = buffered.end(buffered.length - 1);
+                    const duration = videoRef.current.duration;
+                    const bufferedPercent = (bufferedEnd / duration) * 100;
+                    console.log(`📺 Video buffered: ${bufferedPercent.toFixed(1)}%`);
+                  }
+                }
+              }}
+              onSeeking={() => {
+                console.log('📺 User seeking video, ensuring smooth playback');
+              }}
+              onSeeked={() => {
+                console.log('📺 Seek completed, video ready to play');
+              }}
             >
               <source src="/welkom-v2.mp4" type="video/mp4" />
               <source src="/welkom.mp4" type="video/mp4" />

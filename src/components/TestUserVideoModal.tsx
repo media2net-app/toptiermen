@@ -102,9 +102,31 @@ export default function TestUserVideoModal({ isOpen, onComplete }: TestUserVideo
                 ref={videoRef}
                 className="w-full rounded-lg"
                 controls
-                preload="metadata"
+                preload="auto"
+                playsInline
                 onEnded={() => setVideoWatched(true)}
                 onPlay={() => setShowVideoOverlay(false)}
+                onLoadedData={() => {
+                  console.log('📺 Test user video data loaded, ready for smooth playback');
+                }}
+                onProgress={() => {
+                  // Log buffering progress for debugging
+                  if (videoRef.current) {
+                    const buffered = videoRef.current.buffered;
+                    if (buffered.length > 0) {
+                      const bufferedEnd = buffered.end(buffered.length - 1);
+                      const duration = videoRef.current.duration;
+                      const bufferedPercent = (bufferedEnd / duration) * 100;
+                      console.log(`📺 Test video buffered: ${bufferedPercent.toFixed(1)}%`);
+                    }
+                  }
+                }}
+                onSeeking={() => {
+                  console.log('📺 User seeking test video, ensuring smooth playback');
+                }}
+                onSeeked={() => {
+                  console.log('📺 Test video seek completed, ready to play');
+                }}
                 onLoadedMetadata={() => {
                   // Show first frame when metadata is loaded
                   if (videoRef.current) {
