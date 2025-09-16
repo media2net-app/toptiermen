@@ -179,7 +179,8 @@ const ForumOverview = () => {
   }
 
   return (
-    <div className="flex flex-col lg:flex-row gap-4 lg:gap-8 xl:gap-12 max-w-7xl mx-auto w-full px-2 sm:px-4 md:px-6 lg:px-8">
+    <div className="w-full min-h-screen bg-[#0A0F0A]">
+      <div className="flex flex-col lg:flex-row gap-4 lg:gap-8 xl:gap-12 max-w-7xl mx-auto w-full px-2 sm:px-4 md:px-6 lg:px-8 pb-20 sm:pb-24 lg:pb-8">
       {/* Linkerkolom: Categorieën */}
       <div className="flex-1 grid grid-cols-1 gap-3 sm:gap-4 lg:gap-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 sm:mb-4 lg:mb-6 gap-3 sm:gap-4">
@@ -187,51 +188,27 @@ const ForumOverview = () => {
           <button className="w-full sm:w-auto px-3 sm:px-4 lg:px-6 py-2 sm:py-2 lg:py-3 rounded-lg lg:rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-bold text-sm lg:text-lg shadow hover:from-[#B6C948] hover:to-[#8BAE5A] transition-all">+ Start Nieuwe Discussie</button>
         </div>
         {categories.map((cat, idx) => (
-          idx === 0 ? (
-            <Link key={cat.id} href={`/dashboard/brotherhood/forum/${cat.slug}`} className="group bg-[#232D1A]/90 rounded-xl lg:rounded-2xl shadow-lg lg:shadow-xl border border-[#3A4D23]/40 p-3 sm:p-4 lg:p-6 flex flex-col gap-2 sm:gap-3 lg:gap-4 hover:shadow-2xl hover:-translate-y-1 hover:border-[#FFD700] transition-all cursor-pointer no-underline">
-              <div className="flex items-center gap-2 sm:gap-3 lg:gap-4">
-                <span className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl">{cat.emoji}</span>
-                <div className="min-w-0 flex-1">
-                  <div className="text-base sm:text-lg lg:text-xl font-bold text-white mb-1">{cat.name}</div>
-                  <div className="text-[#8BAE5A] text-xs sm:text-sm mb-2 line-clamp-2">{cat.description}</div>
-                </div>
+          <Link key={cat.id} href={`/dashboard/brotherhood/forum/${cat.slug}`} className="group bg-[#232D1A]/90 rounded-xl lg:rounded-2xl shadow-lg lg:shadow-xl border border-[#3A4D23]/40 p-3 sm:p-4 lg:p-6 flex flex-col gap-2 sm:gap-3 lg:gap-4 hover:shadow-2xl hover:-translate-y-1 hover:border-[#FFD700] transition-all cursor-pointer no-underline">
+            <div className="flex items-center gap-2 sm:gap-3 lg:gap-4">
+              <span className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl flex-shrink-0">{cat.emoji}</span>
+              <div className="min-w-0 flex-1">
+                <div className="text-base sm:text-lg lg:text-xl font-bold text-white mb-1">{cat.name}</div>
+                <div className="text-[#8BAE5A] text-xs sm:text-sm mb-2 line-clamp-2">{cat.description}</div>
               </div>
-              <div className="flex flex-wrap gap-1 sm:gap-2 lg:gap-4 text-xs mt-1 sm:mt-2">
-                <span className="bg-[#3A4D23]/60 text-[#8BAE5A] px-2 sm:px-3 py-1 rounded-full font-semibold">Topics: {cat.topics_count}</span>
-                <span className="bg-[#3A4D23]/60 text-[#8BAE5A] px-2 sm:px-3 py-1 rounded-full font-semibold">Reacties: {cat.posts_count}</span>
-              </div>
-              {cat.last_post && (
-                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mt-1 sm:mt-2 text-xs text-[#8BAE5A]">
-                  <span className="hidden sm:inline">Laatste post:</span>
-                  <span className="text-white font-semibold truncate max-w-[100px] sm:max-w-[120px] lg:max-w-[180px]">Re: {cat.last_post.title}</span>
-                  <span className="text-[#FFD700]">door {cat.last_post.author}</span>
-                  <span className="text-[#8BAE5A]">- {cat.last_post.time}</span>
-                </div>
-              )}
-            </Link>
-          ) : (
-            <div key={cat.id} className="group bg-[#232D1A]/90 rounded-xl lg:rounded-2xl shadow-lg lg:shadow-xl border border-[#3A4D23]/40 p-3 sm:p-4 lg:p-6 flex flex-col gap-2 sm:gap-3 lg:gap-4 hover:shadow-2xl hover:-translate-y-1 hover:border-[#FFD700] transition-all cursor-pointer">
-              <div className="flex items-center gap-2 sm:gap-3 lg:gap-4">
-                <span className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl">{cat.emoji}</span>
-                <div className="min-w-0 flex-1">
-                  <div className="text-base sm:text-lg lg:text-xl font-bold text-white mb-1">{cat.name}</div>
-                  <div className="text-[#8BAE5A] text-xs sm:text-sm mb-2 line-clamp-2">{cat.description}</div>
-                </div>
-              </div>
-              <div className="flex flex-wrap gap-1 sm:gap-2 lg:gap-4 text-xs mt-1 sm:mt-2">
-                <span className="bg-[#3A4D23]/60 text-[#8BAE5A] px-2 sm:px-3 py-1 rounded-full font-semibold">Topics: {cat.topics_count}</span>
-                <span className="bg-[#3A4D23]/60 text-[#8BAE5A] px-2 sm:px-3 py-1 rounded-full font-semibold">Reacties: {cat.posts_count}</span>
-              </div>
-              {cat.last_post && (
-                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mt-1 sm:mt-2 text-xs text-[#8BAE5A]">
-                  <span className="hidden sm:inline">Laatste post:</span>
-                  <span className="text-white font-semibold truncate max-w-[100px] sm:max-w-[120px] lg:max-w-[180px]">Re: {cat.last_post.title}</span>
-                  <span className="text-[#FFD700]">door {cat.last_post.author}</span>
-                  <span className="text-[#8BAE5A]">- {cat.last_post.time}</span>
-                </div>
-              )}
             </div>
-          )
+            <div className="flex flex-wrap gap-1 sm:gap-2 lg:gap-4 text-xs mt-1 sm:mt-2">
+              <span className="bg-[#3A4D23]/60 text-[#8BAE5A] px-2 sm:px-3 py-1 rounded-full font-semibold">Topics: {cat.topics_count}</span>
+              <span className="bg-[#3A4D23]/60 text-[#8BAE5A] px-2 sm:px-3 py-1 rounded-full font-semibold">Reacties: {cat.posts_count}</span>
+            </div>
+            {cat.last_post && (
+              <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mt-1 sm:mt-2 text-xs text-[#8BAE5A]">
+                <span className="hidden sm:inline">Laatste post:</span>
+                <span className="text-white font-semibold truncate max-w-[100px] sm:max-w-[120px] lg:max-w-[180px]">Re: {cat.last_post.title}</span>
+                <span className="text-[#FFD700]">door {cat.last_post.author}</span>
+                <span className="text-[#8BAE5A]">- {cat.last_post.time}</span>
+              </div>
+            )}
+          </Link>
         ))}
       </div>
       {/* Rechterkolom: Widgets - Verborgen op mobiel */}
@@ -269,6 +246,7 @@ const ForumOverview = () => {
           </ul>
         </div>
       </aside>
+      </div>
     </div>
   );
 };

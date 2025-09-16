@@ -61,7 +61,7 @@ export default function BrotherhoodSubNav() {
         
         {/* Navigation Content */}
         <div className="relative overflow-x-auto scrollbar-hide">
-          <ul className="flex space-x-1 p-2">
+          <ul className="flex space-x-1 p-2 min-w-max">
             {tabs.map((tab) => {
               const active = pathname === tab.href || (tab.href !== "/dashboard/brotherhood" && pathname.startsWith(tab.href));
               const IconComponent = tab.icon;
@@ -70,26 +70,26 @@ export default function BrotherhoodSubNav() {
                 <li key={tab.href} className="flex-shrink-0">
                   <Link
                     href={tab.href}
-                    className={`group relative flex flex-col items-center py-3 px-4 rounded-xl font-medium transition-all duration-300 min-w-[100px] ${
+                    className={`group relative flex flex-col items-center py-2 sm:py-3 px-2 sm:px-4 rounded-xl font-medium transition-all duration-300 min-w-[80px] sm:min-w-[100px] ${
                       active
                         ? "bg-gradient-to-br from-[#8BAE5A] to-[#B6C948] text-[#181F17] shadow-lg shadow-[#8BAE5A]/20 transform scale-105"
                         : "text-[#8BAE5A]/70 hover:text-[#8BAE5A] hover:bg-[#232D1A]/50 hover:transform hover:scale-105"
                     }`}
                   >
                      {/* Icon */}
-                     <IconComponent className={`w-5 h-5 mb-1 transition-all duration-300 ${
+                     <IconComponent className={`w-4 h-4 sm:w-5 sm:h-5 mb-1 transition-all duration-300 ${
                        active ? "text-[#181F17]" : "text-[#8BAE5A]/70 group-hover:text-[#8BAE5A]"
                      }`} />
                      
                      {/* Label */}
-                     <span className={`text-xs font-semibold transition-all duration-300 ${
+                     <span className={`text-[10px] sm:text-xs font-semibold transition-all duration-300 ${
                        active ? "text-[#181F17]" : "text-[#8BAE5A]/70 group-hover:text-[#8BAE5A]"
                      }`}>
                        {tab.label}
                      </span>
                      
-                     {/* Description */}
-                     <span className={`text-xs opacity-60 transition-all duration-300 ${
+                     {/* Description - Hidden on mobile */}
+                     <span className={`hidden sm:block text-xs opacity-60 transition-all duration-300 ${
                        active ? "text-[#181F17]/80" : "text-[#8BAE5A]/40 group-hover:text-[#8BAE5A]/60"
                      }`}>
                        {tab.description}
