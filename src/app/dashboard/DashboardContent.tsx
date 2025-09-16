@@ -73,10 +73,9 @@ const menu = [
   { label: 'Mijn Trainingen', icon: AcademicCapIcon, parent: 'Dashboard', href: '/dashboard/mijn-trainingen', isSub: true, onboardingStep: 0 },
   { label: 'Finance & Business', icon: CurrencyDollarIcon, href: '/dashboard/finance-en-business', onboardingStep: 7 },
   { label: 'Academy', icon: FireIcon, href: '/dashboard/academy', onboardingStep: 7 },
-  { label: 'Mijn Challenges', icon: FireIcon, href: '/dashboard/mijn-challenges', onboardingStep: 2 },
+  { label: 'Challenges', icon: FireIcon, href: '/dashboard/mijn-challenges', onboardingStep: 2 },
   { label: 'Trainingsschemas', icon: AcademicCapIcon, href: '/dashboard/trainingsschemas', onboardingStep: 3 },
-  { label: 'Voedingsplannen', icon: BookOpenIcon, href: '/dashboard/voedingsplannen', onboardingStep: 4 },
-  { label: 'Voedingsplannen V2', icon: RocketLaunchIcon, href: '/dashboard/voedingsplannen-v2', onboardingStep: 4, adminOnly: true, badge: 'V2' },
+  { label: 'Voedingsplannen', icon: RocketLaunchIcon, href: '/dashboard/voedingsplannen-v2', onboardingStep: 4 },
   { label: 'Mind & Focus (binnenkort online)', icon: ChartBarIcon, href: null, onboardingStep: 7, disabled: true },
   { label: 'Brotherhood', icon: UsersIcon, href: '/dashboard/brotherhood', onboardingStep: 7 },
   { label: 'Social Feed', icon: ChatBubbleLeftRightIcon, parent: 'Brotherhood', href: '/dashboard/brotherhood/social-feed', isSub: true, onboardingStep: 7 },
@@ -356,15 +355,6 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
               <item.icon className={`w-6 h-6 ${item.disabled ? 'text-gray-500' : isActive ? 'text-white' : shouldBeYellow ? 'text-[#FFD700]' : shouldBeGreen ? 'text-[#8BAE5A]' : 'text-[#8BAE5A]'}`} />
               <div className="flex items-center justify-between w-full">
                 <span className="truncate">{item.label}</span>
-                {item.badge && (
-                  <span className={`ml-2 px-2 py-1 text-xs font-bold rounded-full ${
-                    item.badge === 'V2' 
-                      ? 'bg-[#B6C948] text-[#181F17]' 
-                      : 'bg-[#8BAE5A] text-[#181F17]'
-                  }`}>
-                    {item.badge}
-                  </span>
-                )}
               </div>
             </Link>
           );
@@ -672,15 +662,6 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
               {!collapsed && (
                 <div className="flex items-center justify-between w-full">
                   <span className="truncate">{item.label}</span>
-                  {item.badge && (
-                    <span className={`ml-2 px-2 py-1 text-xs font-bold rounded-full ${
-                      item.badge === 'V2' 
-                        ? 'bg-[#B6C948] text-[#181F17]' 
-                        : 'bg-[#8BAE5A] text-[#181F17]'
-                    }`}>
-                      {item.badge}
-                    </span>
-                  )}
                 </div>
               )}
             </Link>

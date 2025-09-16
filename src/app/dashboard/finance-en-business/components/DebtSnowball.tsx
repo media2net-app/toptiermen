@@ -180,17 +180,17 @@ export default function DebtSnowball() {
           <label className="block text-[#8BAE5A] font-semibold mb-2">
             Maandelijkse Extra Betaling
           </label>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             <input
               type="number"
               value={monthlyPayment === 0 ? '' : monthlyPayment}
               onChange={e => setMonthlyPayment(e.target.value === '' ? 0 : Number(e.target.value))}
-              className="flex-1 bg-[#232D1A] border border-[#3A4D23] rounded-lg px-4 py-3 text-white text-lg font-bold focus:outline-none focus:border-[#8BAE5A]"
+              className="flex-1 bg-[#232D1A] border border-[#3A4D23] rounded-lg px-4 py-3 text-white text-lg font-bold focus:outline-none focus:border-[#8BAE5A] min-w-0"
               placeholder="800"
             />
             <Button 
               onClick={calculatePaymentPlan}
-              className="flex items-center gap-2"
+              className="flex items-center justify-center gap-2 w-full sm:w-auto px-4 py-3 whitespace-nowrap"
             >
               <CalculatorIcon className="h-5 w-5" />
               Bereken Plan

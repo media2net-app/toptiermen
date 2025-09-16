@@ -132,6 +132,7 @@ export class EmailService {
 
     // Log email attempt to database
     try {
+      console.log('📧 Attempting to log email attempt to database...');
       await this.logEmailAttempt({
         userId: options.userId || null,
         toEmail: to,
@@ -143,6 +144,7 @@ export class EmailService {
         messageId: messageId,
         templateId: template
       });
+      console.log('✅ Email attempt logged successfully to database');
     } catch (logError) {
       console.error('❌ Failed to log email attempt:', logError);
       // Don't fail the email sending if logging fails
@@ -163,21 +165,28 @@ export class EmailService {
     templateId: string;
   }): Promise<void> {
     try {
+      console.log('📧 logEmailAttempt called with data:', logData);
+      
       // Only log if we have Supabase configured
       if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
         console.log('📧 Supabase not configured, skipping email logging');
+        console.log('📧 NEXT_PUBLIC_SUPABASE_URL:', !!process.env.NEXT_PUBLIC_SUPABASE_URL);
+        console.log('📧 SUPABASE_SERVICE_ROLE_KEY:', !!process.env.SUPABASE_SERVICE_ROLE_KEY);
         return;
       }
 
+      console.log('📧 Supabase configured, creating client...');
       const { createClient } = await import('@supabase/supabase-js');
       const supabase = createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL,
         process.env.SUPABASE_SERVICE_ROLE_KEY
       );
 
+      console.log('📧 Inserting email log into database...');
       const { error } = await supabase
         .from('email_logs')
         .insert([{
+          id: crypto.randomUUID(), // Generate UUID for the id field
           user_id: logData.userId,
           to_email: logData.toEmail,
           email_type: logData.emailType,
@@ -192,7 +201,7 @@ export class EmailService {
       if (error) {
         console.error('❌ Error logging email attempt:', error);
       } else {
-        console.log(`📧 Email logged: ${logData.emailType} to ${logData.toEmail} (${logData.status})`);
+        console.log(`✅ Email logged successfully: ${logData.emailType} to ${logData.toEmail} (${logData.status})`);
       }
     } catch (error) {
       console.error('❌ Failed to log email attempt:', error);

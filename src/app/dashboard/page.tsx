@@ -309,7 +309,7 @@ export default function Dashboard() {
                 : 'border-[#3A4D23]/30 hover:scale-105 hover:shadow-2xl hover:border-[#8BAE5A]/50'
             }`}>
               <div className="flex items-center justify-between mb-3 sm:mb-4">
-                <h3 className="text-lg sm:text-xl font-bold text-white">Mijn Uitdagingen</h3>
+                <h3 className="text-lg sm:text-xl font-bold text-white">Mijn Challenges</h3>
                 <span className={`text-xl sm:text-2xl ${
                   stats?.missions.completedThisWeek === stats?.missions.total && (stats?.missions.total || 0) > 0
                     ? 'text-[#FFD700]'

@@ -34,6 +34,7 @@ export default function Brotherhood() {
   const [myConnections, setMyConnections] = useState<Connection[]>([]);
   const [recentTopics, setRecentTopics] = useState<Topic[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('dashboard');
 
   useEffect(() => {
     if (user) {
@@ -126,83 +127,190 @@ export default function Brotherhood() {
       <div className="mb-6">
         <Breadcrumb items={createBreadcrumbs('Brotherhood')} />
       </div>
-      
-      <div className="space-y-8">
-        {/* Stats Overview - Only Leden and Forum */}
-        <div className="grid grid-cols-2 gap-4 sm:gap-6">
-          <div className="bg-[#232D1A]/80 rounded-xl p-4 sm:p-6 text-center border border-[#3A4D23]/40">
-            <FaUsers className="w-8 h-8 sm:w-10 sm:h-10 text-[#8BAE5A] mx-auto mb-3" />
-            <div className="text-2xl sm:text-3xl font-bold text-white">{myConnections.length}</div>
-            <div className="text-[#8BAE5A] text-sm sm:text-base">Leden</div>
-          </div>
-          <div className="bg-[#232D1A]/80 rounded-xl p-4 sm:p-6 text-center border border-[#3A4D23]/40">
-            <FaComments className="w-8 h-8 sm:w-10 sm:h-10 text-[#8BAE5A] mx-auto mb-3" />
-            <div className="text-2xl sm:text-3xl font-bold text-white">{recentTopics.length}</div>
-            <div className="text-[#8BAE5A] text-sm sm:text-base">Forum Topics</div>
-          </div>
-        </div>
 
-        {/* Content Grid - Only Leden and Forum */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
-          {/* My Connections */}
-          <div className="bg-[#232D1A]/80 rounded-2xl p-4 sm:p-6 border border-[#3A4D23]/40">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg sm:text-xl font-bold text-white">Leden</h2>
-              <Link href="/dashboard/brotherhood/leden" className="text-[#8BAE5A] hover:text-[#FFD700] text-xs sm:text-sm">
-                Bekijk alle
-              </Link>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {myConnections.map((connection) => (
-                <div key={connection.id} className="flex items-center gap-2 p-2 bg-[#181F17] rounded-lg">
-                  <Image
-                    src={connection.avatar}
-                    alt={connection.name}
-                    width={32}
-                    height={32}
-                    className="w-6 h-6 sm:w-8 sm:h-8 rounded-full"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-white text-xs sm:text-sm truncate">{connection.name}</h3>
-                    <p className="text-[#8BAE5A] text-xs">{connection.rank}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Recent Topics */}
-          <div className="bg-[#232D1A]/80 rounded-2xl p-4 sm:p-6 border border-[#3A4D23]/40">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg sm:text-xl font-bold text-white">Forum</h2>
-              <Link href="/dashboard/brotherhood/forum" className="text-[#8BAE5A] hover:text-[#FFD700] text-xs sm:text-sm">
-                Bekijk alle
-              </Link>
-            </div>
-            <div className="space-y-3">
-              {recentTopics.map((topic) => (
-                <div key={topic.id} className="p-3 bg-[#181F17] rounded-lg">
-                  <h3 className="font-semibold text-white text-sm">{topic.title}</h3>
-                  <p className="text-[#8BAE5A] text-xs">
-                    door {topic.author} • {topic.time}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Call to Action */}
-        <div className="text-center">
-          <Link
-            href="/dashboard/brotherhood/forum"
-            className="inline-flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] rounded-xl font-semibold hover:from-[#A6C97B] hover:to-[#FFE55C] transition-all shadow-lg text-sm sm:text-base"
-          >
-            <FaComments className="w-4 h-4 sm:w-5 sm:h-5" />
-            Start een Discussie
-          </Link>
+      {/* Tab Navigation */}
+      <div className="mb-8">
+        <div className="flex flex-wrap gap-2 border-b border-[#3A4D23]/40">
+          {[
+            { id: 'dashboard', label: 'Dashboard Overzicht', icon: '🏠' },
+            { id: 'social', label: 'Social Feed Connecties', icon: '👥' },
+            { id: 'forum', label: 'Forum Discussies', icon: '💬' },
+            { id: 'leden', label: 'Leden Brotherhood', icon: '👨‍👨‍👦' },
+            { id: 'groepen', label: 'Mijn Groepen Groepen', icon: '👨‍👨‍👦' },
+            { id: 'evenementen', label: 'Mijn Evenementen Events', icon: '📅' }
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-all duration-200 ${
+                activeTab === tab.id
+                  ? 'bg-[#8BAE5A] text-[#181F17] rounded-t-lg'
+                  : 'text-[#8BAE5A] hover:text-white hover:bg-[#3A4D23]/40'
+              }`}
+            >
+              <span>{tab.icon}</span>
+              <span className="hidden sm:inline">{tab.label}</span>
+            </button>
+          ))}
         </div>
       </div>
+      
+      {/* Tab Content */}
+      {activeTab === 'dashboard' && (
+        <div className="space-y-8">
+          {/* Stats Overview - Only Leden and Forum */}
+          <div className="grid grid-cols-2 gap-4 sm:gap-6">
+            <div className="bg-[#232D1A]/80 rounded-xl p-4 sm:p-6 text-center border border-[#3A4D23]/40">
+              <FaUsers className="w-8 h-8 sm:w-10 sm:h-10 text-[#8BAE5A] mx-auto mb-3" />
+              <div className="text-2xl sm:text-3xl font-bold text-white">{myConnections.length}</div>
+              <div className="text-[#8BAE5A] text-sm sm:text-base">Leden</div>
+            </div>
+            <div className="bg-[#232D1A]/80 rounded-xl p-4 sm:p-6 text-center border border-[#3A4D23]/40">
+              <FaComments className="w-8 h-8 sm:w-10 sm:h-10 text-[#8BAE5A] mx-auto mb-3" />
+              <div className="text-2xl sm:text-3xl font-bold text-white">{recentTopics.length}</div>
+              <div className="text-[#8BAE5A] text-sm sm:text-base">Forum Topics</div>
+            </div>
+          </div>
+
+          {/* Content Grid - Only Leden and Forum */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+            {/* My Connections */}
+            <div className="bg-[#232D1A]/80 rounded-2xl p-4 sm:p-6 border border-[#3A4D23]/40">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg sm:text-xl font-bold text-white">Leden</h2>
+                <Link href="/dashboard/brotherhood/leden" className="text-[#8BAE5A] hover:text-[#FFD700] text-xs sm:text-sm">
+                  Bekijk alle
+                </Link>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {myConnections.map((connection) => (
+                  <div key={connection.id} className="flex items-center gap-2 p-2 bg-[#181F17] rounded-lg">
+                    <Image
+                      src={connection.avatar}
+                      alt={connection.name}
+                      width={32}
+                      height={32}
+                      className="w-6 h-6 sm:w-8 sm:h-8 rounded-full"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-white text-xs sm:text-sm truncate">{connection.name}</h3>
+                      <p className="text-[#8BAE5A] text-xs">{connection.rank}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Recent Topics */}
+            <div className="bg-[#232D1A]/80 rounded-2xl p-4 sm:p-6 border border-[#3A4D23]/40">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg sm:text-xl font-bold text-white">Forum</h2>
+                <Link href="/dashboard/brotherhood/forum" className="text-[#8BAE5A] hover:text-[#FFD700] text-xs sm:text-sm">
+                  Bekijk alle
+                </Link>
+              </div>
+              <div className="space-y-3">
+                {recentTopics.map((topic) => (
+                  <div key={topic.id} className="p-3 bg-[#181F17] rounded-lg">
+                    <h3 className="font-semibold text-white text-sm">{topic.title}</h3>
+                    <p className="text-[#8BAE5A] text-xs">
+                      door {topic.author} • {topic.time}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Call to Action */}
+          <div className="text-center">
+            <Link
+              href="/dashboard/brotherhood/forum"
+              className="inline-flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] rounded-xl font-semibold hover:from-[#A6C97B] hover:to-[#FFE55C] transition-all shadow-lg text-sm sm:text-base"
+            >
+              <FaComments className="w-4 h-4 sm:w-5 sm:h-5" />
+              Start een Discussie
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {/* Forum Tab Content */}
+      {activeTab === 'forum' && (
+        <div className="space-y-6">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-white mb-4">Forum Discussies</h2>
+            <p className="text-[#8BAE5A] mb-6">Deel je ervaringen en stel vragen aan de community</p>
+            <Link
+              href="/dashboard/brotherhood/forum"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] rounded-xl font-semibold hover:from-[#A6C97B] hover:to-[#FFE55C] transition-all shadow-lg"
+            >
+              <FaComments className="w-5 h-5" />
+              Ga naar Forum
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {/* Social Feed Tab Content */}
+      {activeTab === 'social' && (
+        <div className="space-y-6">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-white mb-4">Social Feed Connecties</h2>
+            <p className="text-[#8BAE5A] mb-6">Connecteer met andere leden en deel je voortgang</p>
+            <div className="bg-[#232D1A]/80 rounded-2xl p-6 border border-[#3A4D23]/40">
+              <p className="text-[#8BAE5A]">Social Feed functionaliteit komt binnenkort beschikbaar!</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Leden Tab Content */}
+      {activeTab === 'leden' && (
+        <div className="space-y-6">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-white mb-4">Leden Brotherhood</h2>
+            <p className="text-[#8BAE5A] mb-6">Ontdek en connecteer met andere leden</p>
+            <Link
+              href="/dashboard/brotherhood/leden"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] rounded-xl font-semibold hover:from-[#A6C97B] hover:to-[#FFE55C] transition-all shadow-lg"
+            >
+              <FaUsers className="w-5 h-5" />
+              Bekijk Alle Leden
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {/* Groepen Tab Content */}
+      {activeTab === 'groepen' && (
+        <div className="space-y-6">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-white mb-4">Mijn Groepen</h2>
+            <p className="text-[#8BAE5A] mb-6">Beheer je groepen en evenementen</p>
+            <Link
+              href="/dashboard/brotherhood/mijn-groepen"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] rounded-xl font-semibold hover:from-[#A6C97B] hover:to-[#FFE55C] transition-all shadow-lg"
+            >
+              <FaUsers className="w-5 h-5" />
+              Bekijk Mijn Groepen
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {/* Evenementen Tab Content */}
+      {activeTab === 'evenementen' && (
+        <div className="space-y-6">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-white mb-4">Mijn Evenementen</h2>
+            <p className="text-[#8BAE5A] mb-6">Bekijk en beheer je evenementen</p>
+            <div className="bg-[#232D1A]/80 rounded-2xl p-6 border border-[#3A4D23]/40">
+              <p className="text-[#8BAE5A]">Evenementen functionaliteit komt binnenkort beschikbaar!</p>
+            </div>
+          </div>
+        </div>
+      )}
     </ClientLayout>
   );
 } 

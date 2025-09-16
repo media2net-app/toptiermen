@@ -33,8 +33,10 @@ const ForumOverview = () => {
   const [categories, setCategories] = useState<ForumCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [userProfiles, setUserProfiles] = useState<{ [key: string]: UserProfile }>({});
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
+    setIsClient(true);
     fetchCategories();
   }, []);
 
@@ -159,7 +161,7 @@ const ForumOverview = () => {
     return `${Math.floor(diffInMinutes / 1440)} dagen geleden`;
   };
 
-  if (loading) {
+  if (!isClient || loading) {
     return (
       <div className="flex flex-col md:flex-row gap-8 md:gap-12 max-w-7xl mx-auto w-full px-2 sm:px-4 md:px-0">
         <div className="flex-1">

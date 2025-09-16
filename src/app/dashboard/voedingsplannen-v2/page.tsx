@@ -17,6 +17,8 @@ import {
   FireIcon,
   HeartIcon
 } from '@heroicons/react/24/solid';
+import { PencilIcon } from '@heroicons/react/24/outline';
+import IngredientEditModal from '@/components/IngredientEditModal';
 
 interface NutritionPlan {
   id: string | number;
@@ -107,9 +109,102 @@ export default function VoedingsplannenV2Page() {
   });
   const [showUserProfileForm, setShowUserProfileForm] = useState(false);
   const [selectedDay, setSelectedDay] = useState<string>('maandag');
+  const [customAmounts, setCustomAmounts] = useState<{[key: string]: number}>({});
+  const [showIngredientModal, setShowIngredientModal] = useState(false);
+  const [editingMealType, setEditingMealType] = useState<string>('');
+  const [editingDay, setEditingDay] = useState<string>('');
 
   // Days of the week
   const days = ['maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag', 'zondag'];
+
+  // Function to update custom amounts
+  const updateCustomAmount = (ingredientKey: string, amount: number) => {
+    // Find the ingredient to check its unit type
+    const [day, mealType, ingredientName] = ingredientKey.split('_');
+    const mealData = originalPlanData?.meals?.weekly_plan?.[day]?.[mealType];
+    const ingredient = mealData?.ingredients?.find((ing: any) => ing.name === ingredientName);
+    
+    let finalAmount = amount;
+    
+    // Round to whole numbers for pieces/slices and per_100g
+    if (ingredient && (ingredient.unit === 'per_piece' || ingredient.unit === 'per_plakje' || ingredient.unit === 'stuk' || ingredient.unit === 'per_100g' || ingredient.unit === 'g')) {
+      finalAmount = Math.round(amount);
+    }
+    
+    setCustomAmounts(prev => ({
+      ...prev,
+      [ingredientKey]: finalAmount
+    }));
+  };
+
+  // Function to get ingredient key for custom amounts
+  const getIngredientKey = (mealType: string, ingredientName: string, day: string) => {
+    return `${day}_${mealType}_${ingredientName}`;
+  };
+
+  // Function to format amount display based on unit type
+  const formatAmountDisplay = (amount: number, unit: string) => {
+    if (unit === 'per_piece' || unit === 'per_plakje' || unit === 'stuk' || unit === 'per_100g' || unit === 'g') {
+      return Math.round(amount).toString();
+    }
+    return amount.toFixed(1);
+  };
+
+  // Function to reset all custom amounts
+  const resetAllCustomAmounts = () => {
+    setCustomAmounts({});
+  };
+
+  // Function to open ingredient edit modal
+  const openIngredientModal = (mealType: string, day: string) => {
+    console.log('🔧 DEBUG: openIngredientModal called with:', { mealType, day });
+    console.log('🔧 DEBUG: Current modal state before change:', { showIngredientModal, editingMealType, editingDay });
+    
+    setEditingMealType(mealType);
+    setEditingDay(day);
+    setShowIngredientModal(true);
+    
+    console.log('🔧 DEBUG: Modal state set to true');
+    
+    // Debug: Check if modal state is actually set
+    setTimeout(() => {
+      console.log('🔧 DEBUG: Modal state after timeout:', { showIngredientModal, editingMealType, editingDay });
+    }, 100);
+    
+    // Additional debug: Force a re-render check
+    setTimeout(() => {
+      console.log('🔧 DEBUG: Force re-render check - modal should be visible now');
+    }, 200);
+  };
+
+  // Function to save edited ingredients
+  const saveEditedIngredients = (newIngredients: any[]) => {
+    if (!originalPlanData || !editingMealType || !editingDay) return;
+
+    // Update the original plan data with new ingredients
+    const updatedPlan = { ...originalPlanData };
+    if (updatedPlan.meals?.weekly_plan?.[editingDay]?.[editingMealType]) {
+      updatedPlan.meals.weekly_plan[editingDay][editingMealType].ingredients = newIngredients;
+      
+      // Recalculate meal totals
+      const mealTotals = calculateMealTotals(updatedPlan.meals.weekly_plan[editingDay][editingMealType]);
+      updatedPlan.meals.weekly_plan[editingDay][editingMealType].totals = mealTotals;
+      
+      // Recalculate day totals
+      const dayTotals = calculateDayTotals(editingDay, updatedPlan);
+      (updatedPlan.meals.weekly_plan[editingDay] as any).dailyTotals = dayTotals;
+      
+      setOriginalPlanData(updatedPlan);
+    }
+  };
+
+  // Function to get current ingredients for editing
+  const getCurrentIngredients = () => {
+    if (!originalPlanData || !editingMealType || !editingDay) return [];
+    
+    const mealData = originalPlanData.meals?.weekly_plan?.[editingDay]?.[editingMealType];
+    return mealData?.ingredients || [];
+  };
 
   // Function to calculate daily totals for selected day
   const calculateDayTotals = (day: string, planData?: any) => {
@@ -146,9 +241,21 @@ export default function VoedingsplannenV2Page() {
         let mealTotals = { calories: 0, protein: 0, carbs: 0, fat: 0 };
         
         meal.ingredients.forEach((ingredient: any, index: number) => {
+          // Get custom amount or use original amount
+          const ingredientKey = getIngredientKey(mealType, ingredient.name, day);
+          const customAmount = customAmounts[ingredientKey];
+          let amount = customAmount !== undefined ? customAmount : (ingredient.amount || 0);
+          
+          // Round to whole numbers for pieces/slices and per_100g
+          if (ingredient.unit === 'per_piece' || ingredient.unit === 'per_plakje' || ingredient.unit === 'stuk' || ingredient.unit === 'per_100g' || ingredient.unit === 'g') {
+            amount = Math.round(amount);
+          }
+          
           console.log(`🔍 Ingredient ${index}:`, {
             name: ingredient.name,
-            amount: ingredient.amount,
+            originalAmount: ingredient.amount,
+            customAmount: customAmount,
+            finalAmount: amount,
             unit: ingredient.unit,
             calories_per_100g: ingredient.calories_per_100g,
             protein_per_100g: ingredient.protein_per_100g,
@@ -158,7 +265,6 @@ export default function VoedingsplannenV2Page() {
           
           // Calculate macros based on amount and unit (matching backend logic exactly)
           let multiplier = 1;
-          const amount = ingredient.amount || 0;
           
           // Handle different unit types based on database unit_type (matching backend exactly)
           if (ingredient.unit === 'per_piece' || ingredient.unit === 'per_plakje' || ingredient.unit === 'stuk') {
@@ -635,16 +741,21 @@ export default function VoedingsplannenV2Page() {
 
   const fetchPlans = async () => {
     try {
+      console.log('🔧 DEBUG: fetchPlans called');
       setLoading(true);
       const response = await fetch('/api/nutrition-plans');
+      
+      console.log('🔧 DEBUG: fetchPlans response status:', response.status);
       
       if (!response.ok) {
         throw new Error('Failed to fetch nutrition plans');
       }
       
       const data = await response.json();
+      console.log('🔧 DEBUG: fetchPlans data received:', { plansCount: data.plans?.length || 0, plans: data.plans });
       setPlans(data.plans || []);
     } catch (err) {
+      console.error('🔧 DEBUG: fetchPlans error:', err);
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setLoading(false);
@@ -653,16 +764,20 @@ export default function VoedingsplannenV2Page() {
 
   const loadOriginalPlanData = async (planId: string) => {
     try {
+      console.log('🔧 DEBUG: loadOriginalPlanData called with planId:', planId);
       setLoadingOriginal(true);
       setError(null);
       
       const response = await fetch(`/api/nutrition-plan-original?planId=${planId}`);
+      
+      console.log('🔧 DEBUG: loadOriginalPlanData response status:', response.status);
       
       if (!response.ok) {
         throw new Error('Failed to load original plan data');
       }
       
       const data = await response.json();
+      console.log('🔧 DEBUG: loadOriginalPlanData data received:', { planName: data.plan?.name, hasMeals: !!data.plan?.meals });
       let planData = data.plan;
       
       // Apply smart scaling automatically if user weight is not 100kg
@@ -753,7 +868,7 @@ export default function VoedingsplannenV2Page() {
 
 
   const handlePlanSelect = (plan: NutritionPlan) => {
-    console.log('🎯 Plan selected:', plan.name, 'ID:', plan.plan_id || plan.id);
+    console.log('🔧 DEBUG: handlePlanSelect called with plan:', { name: plan.name, id: plan.plan_id || plan.id });
     setSelectedPlan(plan);
     setShowOriginalData(true);
     setScalingInfo(null); // Reset scaling info
@@ -1058,23 +1173,44 @@ export default function VoedingsplannenV2Page() {
           transition={{ delay: 0.1 }}
         >
           <div className="bg-[#181F17] border border-[#3A4D23] rounded-xl p-6">
-            <h3 className="text-xl font-bold text-white mb-6">Gedetailleerde Eetmomenten</h3>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-white">Gedetailleerde Eetmomenten</h3>
+              {Object.keys(customAmounts).length > 0 && (
+                <div className="flex items-center gap-2 px-3 py-1 bg-[#B6C948] text-[#181F17] rounded-full text-sm font-semibold">
+                  <span>✏️</span>
+                  {Object.keys(customAmounts).length} aangepast
+                </div>
+              )}
+            </div>
             
-            {/* Day Tabs */}
-            <div className="flex flex-wrap gap-2 mb-6">
-              {days.map((day) => (
+            {/* Day Tabs and Controls */}
+            <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+              <div className="flex flex-wrap gap-2">
+                {days.map((day) => (
+                  <button
+                    key={day}
+                    onClick={() => setSelectedDay(day)}
+                    className={`px-4 py-2 rounded-lg font-semibold transition-all duration-200 capitalize ${
+                      selectedDay === day
+                        ? 'bg-[#8BAE5A] text-[#181F17]'
+                        : 'bg-[#0A0F0A] text-white hover:bg-[#3A4D23] border border-[#3A4D23]'
+                    }`}
+                  >
+                    {day}
+                  </button>
+                ))}
+              </div>
+              
+              {/* Reset All Button */}
+              {Object.keys(customAmounts).length > 0 && (
                 <button
-                  key={day}
-                  onClick={() => setSelectedDay(day)}
-                  className={`px-4 py-2 rounded-lg font-semibold transition-all duration-200 capitalize ${
-                    selectedDay === day
-                      ? 'bg-[#8BAE5A] text-[#181F17]'
-                      : 'bg-[#0A0F0A] text-white hover:bg-[#3A4D23] border border-[#3A4D23]'
-                  }`}
+                  onClick={resetAllCustomAmounts}
+                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition-all duration-200 flex items-center gap-2"
                 >
-                  {day}
+                  <span>↺</span>
+                  Reset Alle Aantallen
                 </button>
-              ))}
+              )}
             </div>
             
             {/* Daily Totals Progress Bars */}
@@ -1200,19 +1336,31 @@ export default function VoedingsplannenV2Page() {
                               <ClockIcon className="w-4 h-4 text-[#8BAE5A]" />
                               {mealTypeLabel}
                             </h5>
-                            <div className="flex gap-6 text-sm">
-                              <div className="text-[#B6C948] font-medium">
-                                {mealTotals.calories.toFixed(1)} kcal
+                            <div className="flex items-center gap-4">
+                              <div className="flex gap-6 text-sm">
+                                <div className="text-[#B6C948] font-medium">
+                                  {mealTotals.calories.toFixed(1)} kcal
+                                </div>
+                                <div className="text-white">
+                                  P: {mealTotals.protein.toFixed(1)}g
+                                </div>
+                                <div className="text-white">
+                                  K: {mealTotals.carbs.toFixed(1)}g
+                                </div>
+                                <div className="text-white">
+                                  V: {mealTotals.fat.toFixed(1)}g
+                                </div>
                               </div>
-                              <div className="text-white">
-                                P: {mealTotals.protein.toFixed(1)}g
-                              </div>
-                              <div className="text-white">
-                                K: {mealTotals.carbs.toFixed(1)}g
-                              </div>
-                              <div className="text-white">
-                                V: {mealTotals.fat.toFixed(1)}g
-                              </div>
+                              <button
+                                onClick={() => {
+                                  console.log('🔧 DEBUG: Bewerk button clicked for:', { mealType, selectedDay });
+                                  openIngredientModal(mealType, selectedDay);
+                                }}
+                                className="flex items-center gap-1 px-3 py-1 bg-[#8BAE5A] text-[#181F17] rounded-lg text-sm font-medium hover:bg-[#B6C948] transition-colors"
+                              >
+                                <PencilIcon className="w-4 h-4" />
+                                Bewerk
+                              </button>
                             </div>
                           </div>
                         </div>
@@ -1234,9 +1382,18 @@ export default function VoedingsplannenV2Page() {
                               </thead>
                               <tbody>
                                 {mealData.ingredients.map((ingredient: any, index: number) => {
+                                  // Get custom amount or use original amount
+                                  const ingredientKey = getIngredientKey(mealType, ingredient.name, selectedDay);
+                                  const customAmount = customAmounts[ingredientKey];
+                                  let amount = customAmount !== undefined ? customAmount : (ingredient.amount || 0);
+                                  
+                                  // Round to whole numbers for pieces/slices
+                                  if (ingredient.unit === 'per_piece' || ingredient.unit === 'per_plakje' || ingredient.unit === 'stuk') {
+                                    amount = Math.round(amount);
+                                  }
+                                  
                                   // Calculate individual ingredient totals (matching backend logic exactly)
                                   let multiplier = 1;
-                                  const amount = ingredient.amount || 0;
                                   
                                   // Handle different unit types based on database unit_type (matching backend exactly)
                                   if (ingredient.unit === 'per_piece' || ingredient.unit === 'per_plakje' || ingredient.unit === 'stuk') {
@@ -1275,8 +1432,36 @@ export default function VoedingsplannenV2Page() {
                                       <td className="py-3 text-white font-medium">
                                         {ingredient.name}
                                       </td>
-                                      <td className="py-3 text-center text-white font-semibold">
-                                        {ingredient.amount}
+                                      <td className="py-3 text-center">
+                                        <div className="flex items-center justify-center gap-2">
+                                          <input
+                                            type="number"
+                                            value={formatAmountDisplay(amount, ingredient.unit)}
+                                            onChange={(e) => {
+                                              const newValue = parseFloat(e.target.value) || 0;
+                                              let finalValue = newValue;
+                                              
+                                              // Round to whole numbers for pieces/slices and per_100g
+                                              if (ingredient.unit === 'per_piece' || ingredient.unit === 'per_plakje' || ingredient.unit === 'stuk' || ingredient.unit === 'per_100g' || ingredient.unit === 'g') {
+                                                finalValue = Math.round(newValue);
+                                              }
+                                              
+                                              updateCustomAmount(ingredientKey, finalValue);
+                                            }}
+                                            className="w-16 px-2 py-1 bg-[#232D1A] border border-[#3A4D23] rounded text-white text-center text-sm focus:border-[#B6C948] focus:outline-none"
+                                            min="0"
+                                            step={ingredient.unit === 'per_piece' || ingredient.unit === 'per_plakje' || ingredient.unit === 'stuk' || ingredient.unit === 'per_100g' || ingredient.unit === 'g' ? "1" : "0.1"}
+                                          />
+                                          {customAmount !== undefined && customAmount !== ingredient.amount && (
+                                            <button
+                                              onClick={() => updateCustomAmount(ingredientKey, ingredient.amount)}
+                                              className="text-[#8BAE5A] hover:text-[#B6C948] text-xs"
+                                              title="Reset naar origineel"
+                                            >
+                                              ↺
+                                            </button>
+                                          )}
+                                        </div>
                                       </td>
                                       <td className="py-3 text-center text-gray-300 text-xs">
                                         {getUnitLabel(ingredient.unit)}
@@ -1616,7 +1801,71 @@ export default function VoedingsplannenV2Page() {
           transition={{ delay: 0.2 }}
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8"
         >
-          {plans.map((plan) => {
+          {(() => {
+            const filteredPlans = plans.filter((plan) => {
+              // Filter plans based on selected fitness goal
+              const planGoal = plan.goal?.toLowerCase();
+              const userGoal = userProfile.fitness_goal;
+              
+              console.log('🔧 DEBUG: Filtering plan:', { 
+                planName: plan.name, 
+                planGoal, 
+                userGoal, 
+                matches: planGoal === userGoal 
+              });
+              
+              return planGoal === userGoal;
+            });
+            
+            // If no plans match the fitness goal, show all plans
+            if (filteredPlans.length === 0) {
+              console.log('🔧 DEBUG: No plans match fitness goal, showing all plans');
+              return plans.map((plan) => {
+                const personalizedTargets = calculatePersonalizedTargets(plan);
+                return (
+                  <motion.div
+                    key={plan.id}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className={`bg-[#181F17] border rounded-xl p-6 cursor-pointer transition-all duration-200 ${
+                      selectedPlan?.id === plan.id
+                        ? 'border-[#B6C948] bg-[#181F17]/50'
+                        : 'border-[#3A4D23] hover:border-[#8BAE5A]'
+                    }`}
+                    onClick={() => handlePlanSelect(plan)}
+                  >
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-xl font-bold text-white">{plan.name}</h3>
+                      <span className="text-xs text-[#8BAE5A] bg-[#3A4D23] px-2 py-1 rounded">
+                        {plan.goal}
+                      </span>
+                    </div>
+                    <p className="text-[#8BAE5A] text-sm mb-4">{plan.description}</p>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-[#8BAE5A]">Calorieën:</span>
+                        <span className="text-white font-semibold">{personalizedTargets.targetCalories} kcal</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-[#8BAE5A]">Eiwit:</span>
+                        <span className="text-white font-semibold">{personalizedTargets.targetProtein}g</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-[#8BAE5A]">Koolhydraten:</span>
+                        <span className="text-white font-semibold">{personalizedTargets.targetCarbs}g</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-[#8BAE5A]">Vet:</span>
+                        <span className="text-white font-semibold">{personalizedTargets.targetFat}g</span>
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              });
+            }
+            
+            // Show filtered plans
+            return filteredPlans.map((plan) => {
             // Calculate personalized targets for this plan
             const personalizedTargets = calculatePersonalizedTargets(plan);
             
@@ -1703,7 +1952,8 @@ export default function VoedingsplannenV2Page() {
               </div>
             </motion.div>
             );
-          })}
+          });
+        })()}
         </motion.div>
 
         {/* TTM Formula Info */}
@@ -2243,6 +2493,19 @@ export default function VoedingsplannenV2Page() {
           </button>
         </motion.div>
       </div>
+
+      {/* Ingredient Edit Modal */}
+      <IngredientEditModal
+        isOpen={showIngredientModal}
+        onClose={() => {
+          console.log('🔧 DEBUG: Modal onClose called');
+          setShowIngredientModal(false);
+        }}
+        ingredients={getCurrentIngredients()}
+        onSave={saveEditedIngredients}
+        mealType={editingMealType}
+        day={editingDay}
+      />
     </div>
   );
 }

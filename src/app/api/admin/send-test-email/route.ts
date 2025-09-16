@@ -676,6 +676,32 @@ export async function POST(request: NextRequest) {
         console.log('✅ Tracking status updated to sent');
       }
 
+      // Log email to email_logs table
+      try {
+        const { error: emailLogError } = await supabaseAdmin
+          .from('email_logs')
+          .insert({
+            id: crypto.randomUUID(), // Generate UUID for the id field
+            user_id: null, // Test email doesn't have a specific user
+            to_email: recipient,
+            email_type: 'test_email',
+            subject: subject,
+            status: 'sent',
+            error_message: null,
+            provider: 'smtp',
+            message_id: info.messageId,
+            template_id: 'test_email'
+          });
+        
+        if (emailLogError) {
+          console.error('❌ Error logging email to email_logs:', emailLogError);
+        } else {
+          console.log('✅ Email logged to email_logs table');
+        }
+      } catch (logError) {
+        console.error('❌ Failed to log email to email_logs:', logError);
+      }
+
       // Update campaign stats
       await supabase
         .from('email_campaigns')
@@ -708,6 +734,32 @@ export async function POST(request: NextRequest) {
           status: 'failed'
         })
         .eq('id', tracking.id);
+
+      // Log failed email to email_logs table
+      try {
+        const { error: emailLogError } = await supabaseAdmin
+          .from('email_logs')
+          .insert({
+            id: crypto.randomUUID(), // Generate UUID for the id field
+            user_id: null, // Test email doesn't have a specific user
+            to_email: recipient,
+            email_type: 'test_email',
+            subject: subject,
+            status: 'failed',
+            error_message: emailError instanceof Error ? emailError.message : 'Unknown error',
+            provider: 'smtp',
+            message_id: null,
+            template_id: 'test_email'
+          });
+        
+        if (emailLogError) {
+          console.error('❌ Error logging failed email to email_logs:', emailLogError);
+        } else {
+          console.log('✅ Failed email logged to email_logs table');
+        }
+      } catch (logError) {
+        console.error('❌ Failed to log failed email to email_logs:', logError);
+      }
 
       return NextResponse.json({
         success: false,

@@ -45,13 +45,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   // 2.0.1: Enhanced authentication check with error recovery - IMPROVED TO PREVENT LOOPS
   useEffect(() => {
-    if (loading) {
-      // setLoadingState('auth-check', true);
-      return;
-    }
-
-    // setLoadingState('auth-check', false);
-
     // Wait for auth to complete before making any decisions
     if (loading) {
       console.log('⏳ Auth still loading, waiting...');

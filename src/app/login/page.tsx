@@ -16,7 +16,7 @@ function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, profile, loading: authLoading, signIn, isAdmin } = useSupabaseAuth();
-  const loading = false; // Force loading to false to prevent infinite loading screen
+  const loading = authLoading; // Use actual auth loading state
   
   // ✅ FIXED: Split complex state into separate useState hooks
   const [email, setEmail] = useState("");
@@ -25,13 +25,18 @@ function LoginPageContent() {
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const [isClient, setIsClient] = useState(true); // Start with true to prevent loading screen
+  const [isClient, setIsClient] = useState(false); // Start with false to prevent hydration mismatch
   
   // Forgot password states
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
   const [isSendingReset, setIsSendingReset] = useState(false);
   const [resetMessage, setResetMessage] = useState("");
+
+  // ✅ FIXED: Hydration safety - set isClient after mount
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   // ✅ FIXED: Simplified admin detection
   const getRedirectPath = (user: any, profile: any, redirectTo?: string) => {
@@ -73,11 +78,17 @@ function LoginPageContent() {
     }
   }, [searchParams]);
 
-  // ✅ FIXED: Single useEffect for authentication redirect
+  // ✅ FIXED: Single useEffect for authentication redirect with better loading handling
   useEffect(() => {
-    if (loading || isLoading) return;
+    // Don't redirect while auth is still loading or form is submitting
+    if (loading || isLoading) {
+      console.log('⏳ Auth or form still loading, waiting...', { loading, isLoading });
+      return;
+    }
 
-    if (user && !isLoading) {
+    // Only redirect if we have a confirmed authenticated user
+    if (user && profile !== undefined) {
+      console.log('✅ User authenticated, redirecting...', { email: user.email, profile: profile?.full_name });
       const redirectTo = searchParams?.get('redirect') || undefined;
       const targetPath = getRedirectPath(user, profile, redirectTo);
       
@@ -85,6 +96,8 @@ function LoginPageContent() {
       setTimeout(() => {
         router.replace(targetPath);
       }, 100);
+    } else if (!user && !loading) {
+      console.log('ℹ️ No authenticated user found, staying on login page');
     }
   }, [loading, user, profile, router, searchParams, isLoading]);
 

@@ -244,6 +244,7 @@ export async function POST(request: NextRequest) {
     const { data, error } = await supabase
       .from('email_logs')
       .insert([{
+        id: crypto.randomUUID(), // Generate UUID for the id field
         user_id,
         to_email,
         email_type,
