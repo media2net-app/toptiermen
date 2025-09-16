@@ -1,0 +1,214 @@
+{
+  "generatedAt": "2025-09-16T11:28:36.212Z",
+  "totalLessons": 34,
+  "successful": 34,
+  "errors": 0,
+  "successRate": 100,
+  "errorDetails": [],
+  "ebooks": [
+    {
+      "title": "De Financiële Mindset ",
+      "filename": "de-financile-mindset",
+      "module": "Business and Finance ",
+      "url": "/ebooks/de-financile-mindset.html"
+    },
+    {
+      "title": "De Basisprincipes van Voeding",
+      "filename": "de-basisprincipes-van-voeding",
+      "module": "Voeding & Gezondheid",
+      "url": "/ebooks/de-basisprincipes-van-voeding.html"
+    },
+    {
+      "title": "De basis van Discipline",
+      "filename": "de-basis-van-discipline",
+      "module": "Discipline & Identiteit",
+      "url": "/ebooks/de-basis-van-discipline.html"
+    },
+    {
+      "title": "Wat is Testosteron",
+      "filename": "wat-is-testosteron",
+      "module": "Testosteron",
+      "url": "/ebooks/wat-is-testosteron.html"
+    },
+    {
+      "title": "Wat is mentale kracht",
+      "filename": "wat-is-mentale-kracht",
+      "module": "Mentale Kracht/Weerbaarheid",
+      "url": "/ebooks/wat-is-mentale-kracht.html"
+    },
+    {
+      "title": "Waarom is fysieke dominantie zo belangrijk?",
+      "filename": "waarom-is-fysieke-dominantie-zo-belangrijk",
+      "module": "Fysieke Dominantie",
+      "url": "/ebooks/waarom-is-fysieke-dominantie-zo-belangrijk.html"
+    },
+    {
+      "title": "Waarom een Brotherhood",
+      "filename": "waarom-een-brotherhood",
+      "module": "Brotherhood",
+      "url": "/ebooks/waarom-een-brotherhood.html"
+    },
+    {
+      "title": "Grip op je geld",
+      "filename": "grip-op-je-geld",
+      "module": "Business and Finance ",
+      "url": "/ebooks/grip-op-je-geld.html"
+    },
+    {
+      "title": "Het belang van kracht, spiermassa en conditie",
+      "filename": "het-belang-van-kracht-spiermassa-en-conditie",
+      "module": "Fysieke Dominantie",
+      "url": "/ebooks/het-belang-van-kracht-spiermassa-en-conditie.html"
+    },
+    {
+      "title": "De Kracht van Hoog Testosteron",
+      "filename": "de-kracht-van-hoog-testosteron",
+      "module": "Testosteron",
+      "url": "/ebooks/de-kracht-van-hoog-testosteron.html"
+    },
+    {
+      "title": "Een Onbreekbare Mindset",
+      "filename": "een-onbreekbare-mindset",
+      "module": "Mentale Kracht/Weerbaarheid",
+      "url": "/ebooks/een-onbreekbare-mindset.html"
+    },
+    {
+      "title": "Eer en Loyaliteit",
+      "filename": "eer-en-loyaliteit",
+      "module": "Brotherhood",
+      "url": "/ebooks/eer-en-loyaliteit.html"
+    },
+    {
+      "title": "Militaire Discipline",
+      "filename": "militaire-discipline",
+      "module": "Discipline & Identiteit",
+      "url": "/ebooks/militaire-discipline.html"
+    },
+    {
+      "title": "Hydratatie en Water inname",
+      "filename": "hydratatie-en-water-inname",
+      "module": "Voeding & Gezondheid",
+      "url": "/ebooks/hydratatie-en-water-inname.html"
+    },
+    {
+      "title": "Van Werknemer naar eigen Verdienmodellen",
+      "filename": "van-werknemer-naar-eigen-verdienmodellen",
+      "module": "Business and Finance ",
+      "url": "/ebooks/van-werknemer-naar-eigen-verdienmodellen.html"
+    },
+    {
+      "title": " Status, Zelfrespect en Aantrekkingskracht",
+      "filename": "status-zelfrespect-en-aantrekkingskracht",
+      "module": "Fysieke Dominantie",
+      "url": "/ebooks/status-zelfrespect-en-aantrekkingskracht.html"
+    },
+    {
+      "title": "Discipline van korte termijn naar een levensstijl",
+      "filename": "discipline-van-korte-termijn-naar-een-levensstijl",
+      "module": "Discipline & Identiteit",
+      "url": "/ebooks/discipline-van-korte-termijn-naar-een-levensstijl.html"
+    },
+    {
+      "title": "Slaap de vergeten superkracht",
+      "filename": "slaap-de-vergeten-superkracht",
+      "module": "Voeding & Gezondheid",
+      "url": "/ebooks/slaap-de-vergeten-superkracht.html"
+    },
+    {
+      "title": "Bouw de juiste Kring ",
+      "filename": "bouw-de-juiste-kring",
+      "module": "Brotherhood",
+      "url": "/ebooks/bouw-de-juiste-kring.html"
+    },
+    {
+      "title": "Testosteron Killers: Wat moet je Elimineren",
+      "filename": "testosteron-killers-wat-moet-je-elimineren",
+      "module": "Testosteron",
+      "url": "/ebooks/testosteron-killers-wat-moet-je-elimineren.html"
+    },
+    {
+      "title": "Mentale Weerbaarheid in de Praktijk",
+      "filename": "mentale-weerbaarheid-in-de-praktijk",
+      "module": "Mentale Kracht/Weerbaarheid",
+      "url": "/ebooks/mentale-weerbaarheid-in-de-praktijk.html"
+    },
+    {
+      "title": "Wat is Identiteit en Waarom zijn Kernwaarden Essentieel?",
+      "filename": "wat-is-identiteit-en-waarom-zijn-kernwaarden-essentieel",
+      "module": "Discipline & Identiteit",
+      "url": "/ebooks/wat-is-identiteit-en-waarom-zijn-kernwaarden-essentieel.html"
+    },
+    {
+      "title": "Vitaliteit en Levensduur",
+      "filename": "vitaliteit-en-levensduur",
+      "module": "Fysieke Dominantie",
+      "url": "/ebooks/vitaliteit-en-levensduur.html"
+    },
+    {
+      "title": "Wordt Een Onbreekbare Man",
+      "filename": "wordt-een-onbreekbare-man",
+      "module": "Mentale Kracht/Weerbaarheid",
+      "url": "/ebooks/wordt-een-onbreekbare-man.html"
+    },
+    {
+      "title": "Energie en Focus",
+      "filename": "energie-en-focus",
+      "module": "Voeding & Gezondheid",
+      "url": "/ebooks/energie-en-focus.html"
+    },
+    {
+      "title": "De Waarheid over Testosteron Doping",
+      "filename": "de-waarheid-over-testosteron-doping",
+      "module": "Testosteron",
+      "url": "/ebooks/de-waarheid-over-testosteron-doping.html"
+    },
+    {
+      "title": "Vermogen Opbouwen Begin met Investeren",
+      "filename": "vermogen-opbouwen-begin-met-investeren",
+      "module": "Business and Finance ",
+      "url": "/ebooks/vermogen-opbouwen-begin-met-investeren.html"
+    },
+    {
+      "title": "Cut The Weak",
+      "filename": "cut-the-weak",
+      "module": "Brotherhood",
+      "url": "/ebooks/cut-the-weak.html"
+    },
+    {
+      "title": "Financiële Vrijheid en Legacy ",
+      "filename": "financile-vrijheid-en-legacy",
+      "module": "Business and Finance ",
+      "url": "/ebooks/financile-vrijheid-en-legacy.html"
+    },
+    {
+      "title": "Ontdek je kernwaarden en bouw je Top Tier identiteit",
+      "filename": "ontdek-je-kernwaarden-en-bouw-je-top-tier-identiteit",
+      "module": "Discipline & Identiteit",
+      "url": "/ebooks/ontdek-je-kernwaarden-en-bouw-je-top-tier-identiteit.html"
+    },
+    {
+      "title": "Embrace the Suck",
+      "filename": "embrace-the-suck",
+      "module": "Fysieke Dominantie",
+      "url": "/ebooks/embrace-the-suck.html"
+    },
+    {
+      "title": "TRT en mijn Visie",
+      "filename": "trt-en-mijn-visie",
+      "module": "Testosteron",
+      "url": "/ebooks/trt-en-mijn-visie.html"
+    },
+    {
+      "title": "Hoe je je Broeders versterkt en samen groeit",
+      "filename": "hoe-je-je-broeders-versterkt-en-samen-groeit",
+      "module": "Brotherhood",
+      "url": "/ebooks/hoe-je-je-broeders-versterkt-en-samen-groeit.html"
+    },
+    {
+      "title": "Gezondheid als Fundament",
+      "filename": "gezondheid-als-fundament",
+      "module": "Voeding & Gezondheid",
+      "url": "/ebooks/gezondheid-als-fundament.html"
+    }
+  ]
+}
