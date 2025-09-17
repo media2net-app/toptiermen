@@ -156,9 +156,12 @@ export default function MijnTrainingen() {
     if (allDaysCompleted) {
       console.log('🎉 All days completed! Starting new week...');
       
+      // Calculate the correct week number based on completed weeks
+      const nextWeekNumber = completedWeeks.length + 1;
+      
       // Add current week to completed weeks
       const weekData = {
-        week: currentWeek,
+        week: nextWeekNumber,
         completedAt: new Date().toISOString(),
         days: days.map(day => ({
           day: day.day_number,
@@ -172,12 +175,12 @@ export default function MijnTrainingen() {
       // Reset all days for new week
       resetDaysForNewWeek();
       
-      // Increment week (max 8 weeks)
-      if (currentWeek < 8) {
-        setCurrentWeek(prev => prev + 1);
+      // Update current week
+      if (nextWeekNumber < 8) {
+        setCurrentWeek(nextWeekNumber + 1);
       } else {
         console.log('🏆 All 8 weeks completed! Congratulations!');
-        // Could show a completion message or unlock next schema
+        setCurrentWeek(8);
       }
     }
   };
@@ -534,43 +537,11 @@ export default function MijnTrainingen() {
             </motion.div>
         )}
 
-        {/* Quick Actions */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="bg-[#181F17] border border-[#3A4D23]/30 rounded-xl p-6"
-          >
-            <h2 className="text-xl font-bold text-white mb-4">Snelle Acties</h2>
-            <div className="flex flex-wrap gap-4">
-              <button
-                onClick={goToTrainingscentrum}
-                className="flex items-center px-6 py-3 bg-[#3A4D23] text-[#8BAE5A] font-semibold rounded-lg hover:bg-[#4A5D33] transition-all duration-200"
-              >
-                <PencilIcon className="w-5 h-5 mr-2" />
-                Wijzig Schema
-              </button>
-              <button
-                onClick={goToTrainingscentrum}
-                className="flex items-center px-6 py-3 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-semibold rounded-lg hover:from-[#7A9D4A] hover:to-[#e0903f] transition-all duration-200"
-              >
-                <AcademicCapIcon className="w-5 h-5 mr-2" />
-                Bekijk Alle Schema's
-              </button>
-              <button
-                onClick={viewSchemaDetails}
-                className="flex items-center px-6 py-3 bg-[#3A4D23] text-[#8BAE5A] font-semibold rounded-lg hover:bg-[#4A5D33] transition-all duration-200"
-              >
-                <EyeIcon className="w-5 h-5 mr-2" />
-                Schema Details
-              </button>
-            </div>
-          </motion.div>
         </div>
       </div>
 
-      {/* Week Overview Table - Only show when there are completed weeks */}
-      {completedWeeks.length > 0 && (
+      {/* Week Overview Table - Always visible */}
+      {trainingData?.hasActiveSchema && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -581,7 +552,7 @@ export default function MijnTrainingen() {
               <h3 className="text-2xl font-bold text-white">Week Overzicht</h3>
               <div className="flex items-center gap-4">
                 <span className="text-[#8BAE5A] font-semibold">
-                  Huidige Week: {currentWeek}/8
+                  Huidige Week: {completedWeeks.length + 1}/8
                 </span>
                 <span className="text-gray-400">
                   Voltooide weken: {completedWeeks.length}
@@ -653,14 +624,14 @@ export default function MijnTrainingen() {
                   ))}
                   
                   {/* Show current week row if not completed */}
-                  {currentWeek <= 8 && (
+                  {completedWeeks.length < 8 && (
                     <tr className="border-b border-[#3A4D23]/50">
                       <td className="py-4 px-4">
                         <div className="flex items-center gap-2">
                           <div className="w-8 h-8 bg-[#8BAE5A] rounded-full flex items-center justify-center">
-                            <span className="text-[#181F17] font-bold text-sm">{currentWeek}</span>
+                            <span className="text-[#181F17] font-bold text-sm">{completedWeeks.length + 1}</span>
                           </div>
-                          <span className="text-white font-semibold">Week {currentWeek}</span>
+                          <span className="text-white font-semibold">Week {completedWeeks.length + 1}</span>
                         </div>
                       </td>
                       <td className="py-4 px-4 text-gray-500">-</td>
@@ -708,7 +679,7 @@ export default function MijnTrainingen() {
               </table>
         </div>
             
-            {currentWeek > 8 && (
+            {completedWeeks.length >= 8 && (
               <div className="mt-6 p-4 bg-gradient-to-r from-[#8BAE5A]/10 to-[#FFD700]/10 rounded-lg border border-[#8BAE5A]/20">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] rounded-full flex items-center justify-center">
