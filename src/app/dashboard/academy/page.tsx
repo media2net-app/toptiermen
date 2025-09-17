@@ -308,15 +308,23 @@ export default function AcademyPage() {
           const isCompleted = progress === 100;
 
           return (
-            <div
+            <button
               key={module.id}
-              className={`p-6 rounded-xl border transition-all duration-200 hover:scale-105 relative overflow-hidden ${
+              onClick={() => {
+                if (isUnlocked) {
+                  console.log('🔄 Navigating to module...');
+                  setNavigating(true);
+                  router.push(`/dashboard/academy/${module.id}`);
+                }
+              }}
+              disabled={!isUnlocked || navigating}
+              className={`w-full p-6 rounded-xl border transition-all duration-200 hover:scale-105 relative overflow-hidden text-left ${
                 isCompleted
-                  ? 'border-[#3A4D23]'
+                  ? 'border-[#3A4D23] hover:bg-[#232D1A]/95'
                   : isUnlocked
-                  ? 'border-[#3A4D23]'
-                  : 'border-[#3A4D23] opacity-60'
-              }`}
+                  ? 'border-[#3A4D23] hover:bg-[#181F17]/95'
+                  : 'border-[#3A4D23] opacity-60 cursor-not-allowed'
+              } ${navigating ? 'opacity-50' : ''}`}
               style={{
                 backgroundImage: 'url(/wallpaper-academy.jpg)',
                 backgroundSize: 'cover',
@@ -374,7 +382,7 @@ export default function AcademyPage() {
                 </div>
               </div>
 
-              {/* Action Button */}
+              {/* Action Info */}
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2 text-sm text-gray-400">
                   <ClockIcon className="w-4 h-4" />
@@ -382,28 +390,19 @@ export default function AcademyPage() {
                 </div>
                 
                 {isUnlocked ? (
-                  <button
-                    onClick={() => {
-                      console.log('🔄 Navigating to module...');
-                      setNavigating(true);
-                      router.push(`/dashboard/academy/${module.id}`);
-                    }}
-                    disabled={navigating}
-                    className="px-4 py-2 bg-[#8BAE5A] text-[#181F17] rounded-lg hover:bg-[#B6C948] transition-colors font-semibold flex items-center gap-2 disabled:opacity-50"
-                  >
+                  <div className="flex items-center gap-2 text-sm text-[#8BAE5A] font-semibold">
                     {isCompleted ? 'Bekijk Module' : 'Start Module'}
                     {navigating ? (
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#181F17]"></div>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#8BAE5A]"></div>
                     ) : (
                       <ArrowRightIcon className="w-4 h-4" />
                     )}
-                  </button>
+                  </div>
                 ) : (
                   <span className="text-gray-500 text-sm">Module vergrendeld</span>
                 )}
               </div>
-            </div>
-            </div>
+            </button>
           );
         })}
       </div>
