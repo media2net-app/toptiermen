@@ -88,7 +88,7 @@ interface UserProfile {
 }
 
 export default function VoedingsplannenV2Page() {
-  const { user, isAdmin, loading: authLoading } = useSupabaseAuth();
+  const { user, loading: authLoading } = useSupabaseAuth();
   const router = useRouter();
   const [plans, setPlans] = useState<NutritionPlan[]>([]);
   const [selectedPlan, setSelectedPlan] = useState<NutritionPlan | null>(null);
@@ -815,8 +815,8 @@ export default function VoedingsplannenV2Page() {
   const carbsProgress = getProgressInfo(currentDayTotals.carbs, personalizedTargets?.targetCarbs || originalPlanData?.target_carbs || 0);
   const fatProgress = getProgressInfo(currentDayTotals.fat, personalizedTargets?.targetFat || originalPlanData?.target_fat || 0);
 
-  // Check if user is specifically chiel@media2net.nl
-  const isChiel = user?.email === 'chiel@media2net.nl';
+  // Access is now available for all authenticated users
+  const hasAccess = !!user;
 
   // Define fetchUserProfile function outside useEffect so it can be reused
   const fetchUserProfile = async () => {
@@ -866,7 +866,7 @@ export default function VoedingsplannenV2Page() {
   }, [user?.id]);
 
   useEffect(() => {
-    console.log('🔍 Access check useEffect triggered:', { authLoading, isChiel, userEmail: user?.email });
+    console.log('🔍 Access check useEffect triggered:', { authLoading, hasAccess, userEmail: user?.email });
     
     // Wait for auth to load before checking access
     if (authLoading) {
@@ -874,16 +874,16 @@ export default function VoedingsplannenV2Page() {
       return;
     }
     
-    // Only allow chiel@media2net.nl access
-    if (!isChiel) {
-      console.log('🚫 Access denied to voedingsplannen-v2, redirecting to dashboard');
-      router.push('/dashboard');
+    // Check if user is authenticated
+    if (!hasAccess) {
+      console.log('🚫 No authenticated user, redirecting to login');
+      router.push('/login');
       return;
     }
 
     console.log('✅ Access granted to voedingsplannen-v2 for:', user?.email);
     fetchPlans();
-  }, [isChiel, router, authLoading, user]);
+  }, [hasAccess, router, authLoading, user]);
 
   const fetchPlans = async () => {
     try {
