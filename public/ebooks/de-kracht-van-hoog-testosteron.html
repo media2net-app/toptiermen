@@ -220,6 +220,47 @@
             font-weight: 700;
         }
 
+        /* Sticky Back Button */
+        .sticky-back-btn {
+            position: fixed;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+            z-index: 1000;
+            background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 15px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(139, 174, 90, 0.3);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            min-width: 120px;
+            justify-content: center;
+        }
+
+        .sticky-back-btn:hover {
+            background: linear-gradient(135deg, #B6C948 0%, #8BAE5A 100%);
+            transform: translateY(-50%) scale(1.05);
+            box-shadow: 0 12px 35px rgba(139, 174, 90, 0.4);
+        }
+
+        .sticky-back-btn:active {
+            transform: translateY(-50%) scale(0.95);
+        }
+
+        .sticky-back-btn svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 1rem;
@@ -232,10 +273,25 @@
             .section {
                 padding: 1.5rem;
             }
+
+            .sticky-back-btn {
+                right: 10px;
+                padding: 12px 16px;
+                font-size: 12px;
+                min-width: 100px;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- Sticky Back Button -->
+    <a href="javascript:history.back()" class="sticky-back-btn" title="Terug naar Academy">
+        <svg viewBox="0 0 24 24">
+            <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+        </svg>
+        Terug
+    </a>
+
     <div class="container">
         <!-- Header -->
         <div class="header">
@@ -295,98 +351,332 @@
                 <p>In deze les hebben we de kracht van hoog testosteron behandeld. Dit is een cruciaal onderdeel van je ontwikkeling als Top Tier Man en vormt de basis voor verdere groei en prestaties.</p>
             </div>
 
-            <h3>Belangrijkste Inzichten</h3>
+            <h3>Wat Betekent Hoog Testosteron Precies?</h3>
+            <p>Hoog testosteron betekent dat je lichaam en geest op hun absolute best functioneren. Het is alsof je een raceauto hebt die op premium brandstof rijdt - alles werkt soepeler, krachtiger en efficiënter. Met optimale testosteronwaarden voel je je niet alleen beter, je presteert ook beter in alle aspecten van je leven.</p>
+            
+            <p>Denk aan testosteron als de "performance mode" van je lichaam. Net zoals een computer sneller werkt wanneer alle systemen optimaal zijn afgesteld, werkt je lichaam beter wanneer je testosteronwaarden hoog zijn. Je hebt meer energie, bent mentaal scherper, fysiek sterker, en emotioneel stabieler.</p>
+
+            <h3>De Vier Hoofdgebieden van Hoog Testosteron</h3>
+            <p>Hoog testosteron beïnvloedt vier cruciale gebieden van je leven. Elk van deze gebieden wordt aanzienlijk verbeterd wanneer je testosteronwaarden optimaal zijn:</p>
+            
+            <h4>1. Fysieke Prestaties en Kracht</h4>
+            <p>Met hoog testosteron voel je je fysiek onoverwinnelijk. Je spieren herstellen sneller na trainingen, je hebt meer uithoudingsvermogen, en je kunt zwaardere gewichten tillen. Het is alsof je lichaam een interne turbo heeft die altijd aan staat.</p>
+            
             <ul>
-                <li><strong>Wat hoge testosteron betekent:</strong> Een fundamenteel concept dat je dagelijks kunt toepassen</li><li><strong>Hoge testosteron = Je lichaam en geest op hun best.:</strong> Een fundamenteel concept dat je dagelijks kunt toepassen</li><li><strong>De 4 hoofdgebieden waar hoge testosteron voordeel geeft:</strong> Een fundamenteel concept dat je dagelijks kunt toepassen</li><li><strong>1. Fysieke prestaties:</strong> Een fundamenteel concept dat je dagelijks kunt toepassen</li><li><strong>Voorbeelden::</strong> Een fundamenteel concept dat je dagelijks kunt toepassen</li>
-                <li><strong>Praktische Toepassing:</strong> Het verschil tussen kennis en wijsheid ligt in de dagelijkse implementatie</li>
-                <li><strong>Consistentie:</strong> Kleine, dagelijkse acties leiden tot grote, langetermijn resultaten</li>
+                <li><strong>Snellere spiergroei:</strong> Je lichaam bouwt efficiënter spieren op</li>
+                <li><strong>Betere herstel:</strong> Je herstelt sneller van trainingen en stress</li>
+                <li><strong>Meer kracht:</strong> Je kunt zwaardere gewichten tillen en langer doorgaan</li>
+                <li><strong>Hogere energie:</strong> Je voelt je de hele dag energiek en gemotiveerd</li>
+                <li><strong>Betere coördinatie:</strong> Je bewegingen worden vloeiender en preciezer</li>
             </ul>
 
-            <h3>Waarom Dit Belangrijk Is</h3>
-            <p>De concepten uit deze les zijn niet alleen theoretisch interessant, maar vormen de praktische basis voor je dagelijkse leven. Door deze principes consequent toe te passen, bouw je aan een sterke fundering voor alle andere aspecten van je ontwikkeling.</p>
+            <h4>2. Mentale Scherpte en Focus</h4>
+            <p>Hoog testosteron maakt je mentaal scherper en gefocuster. Je kunt beter concentreren, sneller denken, en informatie beter verwerken. Het is alsof je hersenen op volle kracht draaien.</p>
+            
+            <ul>
+                <li><strong>Verbeterde concentratie:</strong> Je kunt je langer focussen op taken</li>
+                <li><strong>Snellere besluitvorming:</strong> Je neemt sneller en betere beslissingen</li>
+                <li><strong>Beter geheugen:</strong> Je onthoudt informatie beter en sneller</li>
+                <li><strong>Verhoogde creativiteit:</strong> Je hebt meer innovatieve ideeën</li>
+                <li><strong>Mentale veerkracht:</strong> Je kunt beter omgaan met mentale uitdagingen</li>
+            </ul>
+
+            <h4>3. Emotionele Stabiliteit en Zelfvertrouwen</h4>
+            <p>Met hoog testosteron voel je je emotioneel stabieler en zelfverzekerder. Je hebt minder stemmingswisselingen, voelt je positiever over jezelf, en bent beter bestand tegen stress.</p>
+            
+            <ul>
+                <li><strong>Hoger zelfvertrouwen:</strong> Je voelt je zekerder van jezelf en je capaciteiten</li>
+                <li><strong>Emotionele stabiliteit:</strong> Minder stemmingswisselingen en emotionele ups en downs</li>
+                <li><strong>Betere stressbestendigheid:</strong> Je kunt beter omgaan met druk en uitdagingen</li>
+                <li><strong>Positievere mindset:</strong> Je hebt een optimistischere kijk op het leven</li>
+                <li><strong>Verhoogde assertiviteit:</strong> Je durft voor jezelf op te komen</li>
+            </ul>
+
+            <h4>4. Seksuele Vitaliteit en Libido</h4>
+            <p>Hoog testosteron verhoogt je seksuele vitaliteit en libido aanzienlijk. Je hebt meer interesse in seks, betere prestaties, en meer tevredenheid in je seksleven.</p>
+            
+            <ul>
+                <li><strong>Verhoogde libido:</strong> Je hebt meer interesse en verlangen naar seks</li>
+                <li><strong>Betere erectiekwaliteit:</strong> Sterkere en langer aanhoudende erecties</li>
+                <li><strong>Meer seksuele energie:</strong> Je voelt je seksueel energiek en vitaal</li>
+                <li><strong>Verhoogde tevredenheid:</strong> Je geniet meer van seksuele activiteiten</li>
+                <li><strong>Betere intimiteit:</strong> Je bent meer betrokken bij je partner</li>
+            </ul>
+
+            <h3>De Wetenschap Achter Hoog Testosteron</h3>
+            <p>Wetenschappelijk onderzoek toont aan dat mannen met hogere testosteronwaarden significant beter presteren op verschillende gebieden. Studies hebben aangetoond dat optimale testosteronwaarden leiden tot:</p>
+            
+            <ul>
+                <li><strong>Betere cognitieve functies:</strong> Snellere reactietijden en betere probleemoplossende vaardigheden</li>
+                <li><strong>Verhoogde spierkracht:</strong> Tot 20% meer kracht bij optimale testosteronwaarden</li>
+                <li><strong>Verbeterde botdichtheid:</strong> Sterkere botten en minder kans op breuken</li>
+                <li><strong>Betere hartgezondheid:</strong> Lager risico op hart- en vaatziekten</li>
+                <li><strong>Verhoogde levensverwachting:</strong> Mannen met optimale testosteron leven langer en gezonder</li>
+            </ul>
+
+            <div class="highlight-box">
+                <h4>💡 Belangrijke Realiteit</h4>
+                <p>Hoog testosteron is niet alleen voor atleten of bodybuilders. Het is voor elke man die het beste uit zichzelf wil halen. Of je nu een kantoorbaan hebt, een eigen bedrijf runt, of met pensioen bent - optimale testosteronwaarden verbeteren je kwaliteit van leven aanzienlijk.</p>
+            </div>
+
+            <h3>Hoe Herken Je Hoog Testosteron?</h3>
+            <p>Mannen met hoog testosteron hebben bepaalde kenmerken die je kunt herkennen. Deze kenmerken zijn niet alleen fysiek, maar ook mentaal en emotioneel:</p>
+            
+            <h4>Fysieke Kenmerken:</h4>
+            <ul>
+                <li>Sterke, gedefinieerde spieren</li>
+                <li>Laag lichaamsvet percentage</li>
+                <li>Dikke, volle baard en lichaamshaar</li>
+                <li>Diepe, mannelijke stem</li>
+                <li>Brede schouders en smalle taille</li>
+                <li>Hoge energieniveaus gedurende de dag</li>
+            </ul>
+
+            <h4>Mentale en Emotionele Kenmerken:</h4>
+            <ul>
+                <li>Hoge mate van zelfvertrouwen</li>
+                <li>Sterke leiderschapskwaliteiten</li>
+                <li>Competitieve instelling</li>
+                <li>Goede besluitvorming onder druk</li>
+                <li>Emotionele stabiliteit</li>
+                <li>Hoge motivatie en drive</li>
+            </ul>
+
+            <h3>De Voordelen van Hoog Testosteron in het Dagelijks Leven</h3>
+            <p>Hoog testosteron beïnvloedt niet alleen je fysieke prestaties, maar ook je dagelijkse leven op manieren die je misschien niet verwacht:</p>
+            
+            <h4>Op het Werk:</h4>
+            <ul>
+                <li><strong>Betere prestaties:</strong> Je werkt efficiënter en productiever</li>
+                <li><strong>Leiderschapskwaliteiten:</strong> Je neemt natuurlijk de leiding</li>
+                <li><strong>Netwerken:</strong> Je bent zelfverzekerder in sociale situaties</li>
+                <li><strong>Onderhandelen:</strong> Je bent assertiever en overtuigender</li>
+                <li><strong>Stress management:</strong> Je kunt beter omgaan met werkdruk</li>
+            </ul>
+
+            <h4>In Relaties:</h4>
+            <ul>
+                <li><strong>Betere communicatie:</strong> Je bent zelfverzekerder in je communicatie</li>
+                <li><strong>Verhoogde intimiteit:</strong> Je hebt meer interesse in fysieke intimiteit</li>
+                <li><strong>Emotionele stabiliteit:</strong> Je bent een stabielere partner</li>
+                <li><strong>Besluitvorming:</strong> Je neemt betere beslissingen voor je relatie</li>
+                <li><strong>Bescherming:</strong> Je voelt je natuurlijk beschermend naar je partner</li>
+            </ul>
+
+            <h4>In Sociale Situaties:</h4>
+            <ul>
+                <li><strong>Zelfvertrouwen:</strong> Je voelt je comfortabel in groepen</li>
+                <li><strong>Charisma:</strong> Je trekt natuurlijk aandacht en respect</li>
+                <li><strong>Humor:</strong> Je bent spontaner en grappiger</li>
+                <li><strong>Competitie:</strong> Je geniet van gezonde competitie</li>
+                <li><strong>Netwerken:</strong> Je bouwt gemakkelijker nieuwe relaties op</li>
+            </ul>
+
+            <div class="highlight-box">
+                <h4>🎯 Het Goede Nieuws</h4>
+                <p>Hoog testosteron is niet iets waar je mee geboren wordt of niet. Het is iets dat je kunt optimaliseren door je levensstijl aan te passen. Door de juiste voeding, training, slaap, en stress management kun je je testosteronwaarden aanzienlijk verhogen en alle voordelen ervaren.</p>
+            </div>
         </div>
 
-        <!-- Praktische Oefeningen en Opdrachten -->
+        <!-- Huiswerk Opdrachten -->
         <div class="section">
-            <h2>💪 Praktische Oefeningen en Opdrachten</h2>
+            <h2>📝 Huiswerk Opdrachten</h2>
+            <p><strong>Belangrijk:</strong> Deze opdrachten zijn specifiek gebaseerd op de les inhoud over de kracht van hoog testosteron en zijn ontworpen om je begrip te verdiepen en praktische toepassing te stimuleren.</p>
 
             <div class="exercise-box">
-                <h4>Oefening 1: Zelf-Assessment</h4>
-                <p><strong>Doel:</strong> Evalueer je huidige situatie en identificeer verbeterpunten.</p>
-                <p><strong>Actie:</strong> Beantwoord de volgende vragen eerlijk en noteer je antwoorden:</p>
+                <h4>Opdracht 1: Testosteron Impact Assessment</h4>
+                <p><strong>Doel:</strong> Evalueer hoe hoog testosteron je leven zou beïnvloeden en identificeer je prioriteiten.</p>
+                <p><strong>Actie:</strong> Beantwoord de volgende vragen eerlijk en noteer je antwoorden (1-10 schaal):</p>
                 <ul>
-                    <li>Hoe pas je momenteel de concepten uit deze les toe in je dagelijkse leven?</li>
-                    <li>Welke aspecten vind je het moeilijkst om te implementeren?</li>
-                    <li>Wat zijn je grootste uitdagingen op dit gebied?</li>
-                    <li>Welke kleine veranderingen kun je vandaag nog maken?</li>
+                    <li>Hoe belangrijk is fysieke kracht en prestaties voor jou?</li>
+                    <li>Hoe tevreden ben je met je huidige mentale scherpte en focus?</li>
+                    <li>Hoe stabiel voel je je emotioneel de laatste tijd?</li>
+                    <li>Hoe tevreden ben je met je huidige zelfvertrouwen?</li>
+                    <li>Hoe belangrijk is seksuele vitaliteit voor jou?</li>
+                    <li>Hoe goed presteer je op je werk of in je carrière?</li>
+                    <li>Hoe tevreden ben je met je sociale vaardigheden?</li>
                 </ul>
+                <p><strong>Reflectie:</strong> Welke scores zijn het laagst? Dit zijn je prioriteiten voor testosteron optimalisatie.</p>
             </div>
 
             <div class="exercise-box">
-                <h4>Oefening 2: Dagelijkse Implementatie</h4>
-                <p><strong>Doel:</strong> Maak de concepten onderdeel van je dagelijkse routine.</p>
-                <p><strong>Actie:</strong> Kies 3 specifieke acties die je deze week gaat uitvoeren:</p>
+                <h4>Opdracht 2: Hoog Testosteron Dagboek (7 dagen)</h4>
+                <p><strong>Doel:</strong> Houd een week lang bij hoe je je voelt en identificeer patronen die wijzen op testosteron niveaus.</p>
+                <p><strong>Actie:</strong> Houd elke dag bij:</p>
                 <ul>
-                    <li>Actie 1: _________________________________</li>
-                    <li>Actie 2: _________________________________</li>
-                    <li>Actie 3: _________________________________</li>
+                    <li><strong>Fysieke energie:</strong> Hoe energiek voel je je? (1-10)</li>
+                    <li><strong>Mentale scherpte:</strong> Hoe scherp en gefocust voel je je? (1-10)</li>
+                    <li><strong>Zelfvertrouwen:</strong> Hoe zelfverzekerd voel je je? (1-10)</li>
+                    <li><strong>Libido:</strong> Hoe is je seksuele drive vandaag? (1-10)</li>
+                    <li><strong>Emotionele stabiliteit:</strong> Hoe stabiel voel je je emotioneel? (1-10)</li>
+                    <li><strong>Competitieve drive:</strong> Hoe gemotiveerd ben je om te winnen/succesvol te zijn? (1-10)</li>
+                    <li><strong>Assertiviteit:</strong> Hoe assertief ben je in je communicatie? (1-10)</li>
+                    <li><strong>Notities:</strong> Wat viel je op vandaag? Welke patronen zie je?</li>
                 </ul>
+                <p><strong>Analyse:</strong> Aan het einde van de week, identificeer patronen en correlaties. Welke dagen voelde je je het beste?</p>
             </div>
 
             <div class="exercise-box">
-                <h4>Oefening 3: Progressie Tracking</h4>
-                <p><strong>Doel:</strong> Monitor je voortgang en pas je aanpak aan.</p>
-                <p><strong>Actie:</strong> Houd deze week bij:</p>
+                <h4>Opdracht 3: Testosteron Optimalisatie Plan</h4>
+                <p><strong>Doel:</strong> Maak een concreet plan om je testosteron te optimaliseren en de voordelen van hoog testosteron te ervaren.</p>
+                <p><strong>Actie:</strong> Gebaseerd op je assessments, maak een 30-dagen plan:</p>
                 <ul>
-                    <li>Dagelijkse implementatie van de concepten</li>
-                    <li>Uitdagingen die je tegenkomt</li>
-                    <li>Momenten van succes en doorbraak</li>
-                    <li>Aanpassingen die je moet maken</li>
+                    <li><strong>Week 1:</strong> Focus op slaap optimalisatie (7-9 uur per nacht, regelmatige bedtijden)</li>
+                    <li><strong>Week 2:</strong> Implementeer krachttraining (3x per week, compound oefeningen)</li>
+                    <li><strong>Week 3:</strong> Optimaliseer voeding (gezonde vetten, eiwit, minder suiker)</li>
+                    <li><strong>Week 4:</strong> Stress management (meditatie, ademhalingsoefeningen, zonlicht)</li>
                 </ul>
+                <p><strong>Metingen:</strong> Houd bij hoe je je voelt na elke week en pas je plan aan. Focus op de 4 hoofdgebieden: fysiek, mentaal, emotioneel, en seksueel.</p>
+            </div>
+
+            <div class="exercise-box">
+                <h4>Opdracht 4: Hoog Testosteron Mindset Oefening</h4>
+                <p><strong>Doel:</strong> Ontwikkel een mindset die gericht is op het maximaliseren van je testosteron potentieel.</p>
+                <p><strong>Actie:</strong> Oefen elke dag de volgende mindset technieken:</p>
+                <ul>
+                    <li><strong>Ochtend affirmaties:</strong> "Ik ben een man met hoog testosteron en onbeperkte energie"</li>
+                    <li><strong>Visualisatie:</strong> Stel je voor hoe je je voelt met optimale testosteronwaarden</li>
+                    <li><strong>Power poses:</strong> Doe 2 minuten power poses om je testosteron te verhogen</li>
+                    <li><strong>Competitieve mindset:</strong> Benader elke taak alsof het een competitie is</li>
+                    <li><strong>Assertieve communicatie:</strong> Oefen met assertiever communiceren</li>
+                </ul>
+                <p><strong>Reflectie:</strong> Houd bij hoe deze mindset oefeningen je gedrag en gevoel beïnvloeden.</p>
+            </div>
+
+            <div class="exercise-box">
+                <h4>Opdracht 5: Testosteron Educatie Research</h4>
+                <p><strong>Doel:</strong> Verdiep je kennis over hoe je testosteron kunt optimaliseren en de voordelen kunt maximaliseren.</p>
+                <p><strong>Actie:</strong> Onderzoek de volgende onderwerpen:</p>
+                <ul>
+                    <li>Welke voedingsmiddelen verhogen testosteron natuurlijk?</li>
+                    <li>Hoe beïnvloedt krachttraining je testosteron productie?</li>
+                    <li>Wat is de rol van slaap in testosteron productie?</li>
+                    <li>Hoe beïnvloedt stress (cortisol) je testosteron levels?</li>
+                    <li>Welke supplementen kunnen testosteron ondersteunen?</li>
+                    <li>Hoe meet je je testosteron levels en wat zijn optimale waarden?</li>
+                </ul>
+                <p><strong>Presentatie:</strong> Maak een korte samenvatting van je bevindingen en deel deze met anderen. Focus op praktische toepassingen.</p>
             </div>
         </div>
 
-        <!-- Dagelijkse Checklists en Routines -->
+        <!-- Testosteron Optimalisatie Checklists -->
         <div class="section">
-            <h2>✅ Dagelijkse Checklists en Routines</h2>
+            <h2>✅ Testosteron Optimalisatie Checklists</h2>
+            <p><strong>Doel:</strong> Deze checklists zijn specifiek ontworpen om je testosteron levels te ondersteunen en te optimaliseren voor maximale voordelen.</p>
 
-            <h3>Ochtend Routine</h3>
+            <h3>Ochtend Routine (Testosteron Boost)</h3>
             <div class="checklist">
                 <div class="checklist-item">
                     <input type="checkbox" id="morning1">
-                    <label for="morning1">Herinner jezelf aan de belangrijkste concepten uit deze les</label>
+                    <label for="morning1">Drink een glas water direct na het opstaan</label>
                 </div>
                 <div class="checklist-item">
                     <input type="checkbox" id="morning2">
-                    <label for="morning2">Plan je dag met de principes in gedachten</label>
+                    <label for="morning2">Krijg 10-15 minuten zonlicht op je huid (vitamine D)</label>
                 </div>
                 <div class="checklist-item">
                     <input type="checkbox" id="morning3">
-                    <label for="morning3">Stel jezelf een specifiek doel voor vandaag</label>
+                    <label for="morning3">Doe 2-3 minuten power poses (testosteron verhogend)</label>
                 </div>
                 <div class="checklist-item">
                     <input type="checkbox" id="morning4">
-                    <label for="morning4">Visualiseer hoe je de concepten gaat toepassen</label>
+                    <label for="morning4">Eet een eiwitrijk ontbijt met gezonde vetten</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="morning5">
+                    <label for="morning5">Stel jezelf een competitief doel voor vandaag</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="morning6">
+                    <label for="morning6">Visualiseer jezelf met optimale testosteronwaarden</label>
                 </div>
             </div>
 
-            <h3>Dagelijkse Implementatie</h3>
+            <h3>Dagelijkse Testosteron Ondersteuning</h3>
             <div class="checklist">
                 <div class="checklist-item">
                     <input type="checkbox" id="daily1">
-                    <label for="daily1">Pas de concepten toe in je dagelijkse activiteiten</label>
+                    <label for="daily1">Eet voldoende gezonde vetten (avocado, noten, olijfolie)</label>
                 </div>
                 <div class="checklist-item">
                     <input type="checkbox" id="daily2">
-                    <label for="daily2">Wees bewust van momenten waar je kunt groeien</label>
+                    <label for="daily2">Vermijd suiker en bewerkte voeding</label>
                 </div>
                 <div class="checklist-item">
                     <input type="checkbox" id="daily3">
-                    <label for="daily3">Leer van uitdagingen en tegenslagen</label>
+                    <label for="daily3">Blijf gehydrateerd (2-3 liter water)</label>
                 </div>
                 <div class="checklist-item">
                     <input type="checkbox" id="daily4">
-                    <label for="daily4">Celebreer kleine overwinningen</label>
+                    <label for="daily4">Doe aan krachttraining of fysieke activiteit</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="daily5">
+                    <label for="daily5">Beheer stress met ademhalingsoefeningen</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="daily6">
+                    <label for="daily6">Wees assertief in je communicatie</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="daily7">
+                    <label for="daily7">Vermijd alcohol en roken</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="daily8">
+                    <label for="daily8">Neem voldoende magnesium en zink</label>
+                </div>
+            </div>
+
+            <h3>Avond Routine (Testosteron Herstel)</h3>
+            <div class="checklist">
+                <div class="checklist-item">
+                    <input type="checkbox" id="evening1">
+                    <label for="evening1">Vermijd schermen 1 uur voor het slapen</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="evening2">
+                    <label for="evening2">Zorg voor een koele, donkere slaapkamer</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="evening3">
+                    <label for="evening3">Ga op een vaste tijd naar bed (7-9 uur slaap)</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="evening4">
+                    <label for="evening4">Doe ontspanningsoefeningen voor het slapen</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="evening5">
+                    <label for="evening5">Evalueer je dag en vier je successen</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="evening6">
+                    <label for="evening6">Plan morgen met testosteron optimalisatie in gedachten</label>
+                </div>
+            </div>
+
+            <h3>Weekelijkse Testosteron Check</h3>
+            <div class="checklist">
+                <div class="checklist-item">
+                    <input type="checkbox" id="weekly1">
+                    <label for="weekly1">Krachttraining 3-4x per week (compound oefeningen)</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="weekly2">
+                    <label for="weekly2">High-intensity interval training (HIIT) 1-2x</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="weekly3">
+                    <label for="weekly3">Zonlicht blootstelling (vitamine D)</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="weekly4">
+                    <label for="weekly4">Sociale connectie en competitie</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="weekly5">
+                    <label for="weekly5">Evalueer je voortgang en pas aan waar nodig</label>
                 </div>
             </div>
 
