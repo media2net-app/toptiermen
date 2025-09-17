@@ -1324,6 +1324,47 @@ export default function VoedingsplannenV2Page() {
                 <span>🧪</span>
                 Test Modal
               </button>
+              
+              {/* Debug State Button */}
+              <button
+                onClick={() => {
+                  console.log('🔍 DEBUG: Current state:');
+                  console.log('🔍 customAmounts:', customAmounts);
+                  console.log('🔍 selectedDay:', selectedDay);
+                  console.log('🔍 currentDayTotals:', currentDayTotals);
+                  console.log('🔍 originalPlanData available:', !!originalPlanData);
+                  if (originalPlanData?.meals?.weekly_plan?.[selectedDay]) {
+                    console.log('🔍 Day data available for', selectedDay);
+                    const dayData = originalPlanData.meals.weekly_plan[selectedDay];
+                    Object.keys(dayData).forEach(mealType => {
+                      const meal = dayData[mealType];
+                      if (meal?.ingredients) {
+                        meal.ingredients.forEach((ing: any) => {
+                          const key = getIngredientKey(mealType, ing.name, selectedDay);
+                          console.log(`🔍 ${key}: original=${ing.amount}, custom=${customAmounts[key]}`);
+                        });
+                      }
+                    });
+                  }
+                }}
+                className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-semibold transition-all duration-200 flex items-center gap-2"
+              >
+                <span>🔍</span>
+                Debug State
+              </button>
+              
+              {/* Test Melk Button */}
+              <button
+                onClick={() => {
+                  console.log('🧪 TEST: Setting Melk to 1000');
+                  const testKey = getIngredientKey('ontbijt', 'Melk', selectedDay);
+                  updateCustomAmount(testKey, 1000);
+                }}
+                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-all duration-200 flex items-center gap-2"
+              >
+                <span>🧪</span>
+                Test Melk 1000
+              </button>
             </div>
             
             {/* Daily Totals Progress Bars */}
