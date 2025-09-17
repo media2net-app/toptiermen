@@ -113,6 +113,7 @@ export default function VoedingsplannenV2Page() {
   const [showIngredientModal, setShowIngredientModal] = useState(false);
   const [editingMealType, setEditingMealType] = useState<string>('');
   const [editingDay, setEditingDay] = useState<string>('');
+  const [showSimpleModal, setShowSimpleModal] = useState(false);
 
   // Reset modal state when component mounts
   useEffect(() => {
@@ -1602,8 +1603,8 @@ export default function VoedingsplannenV2Page() {
                               </div>
                               <button
                                 onClick={() => {
-                                  console.log('🔧 DEBUG: Bewerk button clicked for:', { mealType, selectedDay });
-                                  openIngredientModal(mealType, selectedDay);
+                                  console.log('🔧 DEBUG: Simple modal button clicked');
+                                  setShowSimpleModal(true);
                                 }}
                                 className="flex items-center gap-1 px-3 py-1 bg-[#8BAE5A] text-[#181F17] rounded-lg text-sm font-medium hover:bg-[#B6C948] transition-colors"
                               >
@@ -2092,7 +2093,36 @@ export default function VoedingsplannenV2Page() {
             <p className="text-gray-500">Er zijn momenteel geen voedingsplannen beschikbaar.</p>
               </div>
         )}
-      </div>
+            </div>
+
+      {/* Simple Modal */}
+      {showSimpleModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-[#232D1A] rounded-xl p-6 max-w-md w-full mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-bold text-white">Simpel Modal</h3>
+              <button
+                onClick={() => setShowSimpleModal(false)}
+                className="text-gray-400 hover:text-white"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="text-gray-300">
+              <p>Dit is een simpel modal zonder inhoud.</p>
+              <p className="mt-2">We gaan dit stap voor stap uitbreiden.</p>
+            </div>
+            <div className="flex justify-end mt-6">
+              <button
+                onClick={() => setShowSimpleModal(false)}
+                className="px-4 py-2 bg-[#8BAE5A] text-[#181F17] rounded-lg hover:bg-[#B6C948] transition-colors"
+              >
+                Sluiten
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Ingredient Edit Modal */}
       {showIngredientModal && editingMealType && editingDay && (
