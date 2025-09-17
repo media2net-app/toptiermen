@@ -308,7 +308,7 @@ export default function PrelaunchPage() {
                 Klaar om je transformatie te starten?
               </h2>
               <p className="text-lg text-[#D1D5DB] max-w-3xl mx-auto">
-                Sluit je aan bij de brotherhood en wordt een Top Tier Men
+                Sluit je aan bij de brotherhood en word een Top Tier Man
               </p>
             </div>
 

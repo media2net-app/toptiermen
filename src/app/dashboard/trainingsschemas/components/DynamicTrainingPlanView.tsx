@@ -136,7 +136,8 @@ export default function DynamicTrainingPlanView({ schemaId, schemaName, userId, 
       
       if (response.ok && data.success) {
         toast.success(`🎉 ${schemaName} is nu je actieve trainingsschema!`);
-        onBack();
+        // Navigate back to overview with the selected schema
+        window.location.href = `/dashboard/trainingsschemas?select=${schemaId}`;
       } else {
         throw new Error(data.error || 'Failed to select training schema');
       }

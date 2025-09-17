@@ -17,6 +17,7 @@ import {
   StarIcon
 } from '@heroicons/react/24/outline';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { useSubscription } from '@/hooks/useSubscription';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 
@@ -63,6 +64,7 @@ interface ForcedOnboardingModalProps {
 
 export default function ForcedOnboardingModal({ isOpen, onComplete }: ForcedOnboardingModalProps) {
   const { user } = useSupabaseAuth();
+  const { hasAccess } = useSubscription();
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -194,10 +196,20 @@ export default function ForcedOnboardingModal({ isOpen, onComplete }: ForcedOnbo
       setCurrentStep(3); // Update step before closing modal
       // Close modal first
       onComplete();
-      // Then navigate to training schemas
-      setTimeout(() => {
-        router.push('/dashboard/trainingsschemas');
-      }, 100);
+      
+      // Check if user has access to training - if not, skip to challenges
+      if (hasAccess('training')) {
+        // Navigate to training schemas
+        setTimeout(() => {
+          router.push('/dashboard/trainingsschemas');
+        }, 100);
+      } else {
+        // Skip training and nutrition steps, go directly to challenges
+        console.log('🚀 Basic tier user - skipping training and nutrition steps, going to challenges');
+        setTimeout(() => {
+          router.push('/dashboard/challenges');
+        }, 100);
+      }
     }
   };
 
@@ -209,8 +221,19 @@ export default function ForcedOnboardingModal({ isOpen, onComplete }: ForcedOnbo
 
     const updatedStatus = await updateOnboardingStatus(3, 'complete_step', { selectedTrainingSchema });
     if (updatedStatus) {
-      // Stay on training center page for nutrition step
-      setCurrentStep(4);
+      // Check if user has access to nutrition - if not, skip to challenges
+      if (hasAccess('nutrition')) {
+        // Stay on training center page for nutrition step
+        setCurrentStep(4);
+      } else {
+        // Skip nutrition step, go directly to challenges
+        console.log('🚀 Basic tier user - skipping nutrition step, going to challenges');
+        setCurrentStep(5); // Update step before closing modal
+        onComplete();
+        setTimeout(() => {
+          router.push('/dashboard/challenges');
+        }, 100);
+      }
     }
   };
 
@@ -220,7 +243,6 @@ export default function ForcedOnboardingModal({ isOpen, onComplete }: ForcedOnbo
       return;
     }
 
-
     const updatedStatus = await updateOnboardingStatus(4, 'complete_step', { 
       selectedNutritionPlan
     });
@@ -228,9 +250,9 @@ export default function ForcedOnboardingModal({ isOpen, onComplete }: ForcedOnbo
       setCurrentStep(5); // Update step before closing modal
       // Close modal first
       onComplete();
-      // Then navigate to forum
+      // Then navigate to challenges (nutrition is the last step before challenges)
       setTimeout(() => {
-        router.push('/dashboard/brotherhood/forum');
+        router.push('/dashboard/challenges');
       }, 100);
     }
   };
@@ -301,6 +323,24 @@ export default function ForcedOnboardingModal({ isOpen, onComplete }: ForcedOnbo
                 </p>
               </div>
 
+              {/* Video Completion Notice - Moved above video */}
+              <div className="mb-6 p-4 bg-[#FFD700]/10 border border-[#FFD700]/30 rounded-lg">
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0">
+                    <svg className="w-5 h-5 text-[#FFD700] mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 className="text-[#FFD700] font-semibold text-sm mb-1">Belangrijke instructie</h4>
+                    <p className="text-[#FFD700]/80 text-sm">
+                      Je moet eerst de welkomstvideo volledig bekijken voordat je naar de volgende stap kunt gaan. 
+                      De knop wordt pas beschikbaar nadat de video is afgespeeld.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
               <div className="bg-[#181F17] rounded-xl p-4 mb-6 border border-[#3A4D23] relative">
                 <video
                   ref={videoRef}
@@ -357,24 +397,6 @@ export default function ForcedOnboardingModal({ isOpen, onComplete }: ForcedOnbo
                 )}
               </div>
 
-              {/* Video Completion Notice */}
-              <div className="mb-6 p-4 bg-[#FFD700]/10 border border-[#FFD700]/30 rounded-lg">
-                <div className="flex items-start gap-3">
-                  <div className="flex-shrink-0">
-                    <svg className="w-5 h-5 text-[#FFD700] mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h4 className="text-[#FFD700] font-semibold text-sm mb-1">Belangrijke instructie</h4>
-                    <p className="text-[#FFD700]/80 text-sm">
-                      Je moet eerst de welkomstvideo volledig bekijken voordat je naar de volgende stap kunt gaan. 
-                      De knop wordt pas beschikbaar nadat de video is afgespeeld.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
               {videoWatched && (
                 <div className="mb-6 p-4 bg-[#8BAE5A]/10 border border-[#8BAE5A] rounded-lg">
                   <p className="text-[#8BAE5A] flex items-center gap-2 justify-center">
@@ -384,10 +406,11 @@ export default function ForcedOnboardingModal({ isOpen, onComplete }: ForcedOnbo
                 </div>
               )}
 
+              {/* Continue Button - Moved below video */}
               <button
                 onClick={handleWelcomeVideoComplete}
                 disabled={loading || !videoWatched}
-                className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] px-8 py-3 rounded-lg hover:from-[#A6C97B] hover:to-[#FFE55C] disabled:opacity-50 font-semibold transition-all duration-200 flex items-center gap-2 mx-auto"
+                className="w-full bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] px-8 py-3 rounded-lg hover:from-[#A6C97B] hover:to-[#FFE55C] disabled:opacity-50 font-semibold transition-all duration-200 flex items-center gap-2 justify-center"
               >
                 {loading ? 'Bezig...' : 'Volgende'}
                 <ArrowRightIcon className="w-5 h-5" />

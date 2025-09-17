@@ -58,113 +58,29 @@ export default function EbookDownload({
     'De Basisprincipes van Voeding': 'de-basisprincipes-van-voeding'
   };
 
-  // Function to open ebook in new tab
-  const handleOpenEbook = () => {
-    try {
-      // Try to find exact mapping first
-      let ebookFilename = ebookMapping[lessonTitle];
-      
-      // If no exact mapping found, create filename from title
-      if (!ebookFilename) {
-        ebookFilename = lessonTitle
-          .toLowerCase()
-          .replace(/[^a-z0-9\s]/g, '') // Remove special characters
-          .replace(/\s+/g, '-') // Replace spaces with hyphens
-          .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
-      }
-      
-      const ebookUrl = `/ebooks/${ebookFilename}.html`;
-      const fullUrl = window.location.origin + ebookUrl;
-      
-      // Debug logging
-      console.log('📖 Opening ebook:', {
-        lessonTitle,
-        ebookFilename,
-        ebookUrl,
-        fullUrl,
-        hasMapping: !!ebookMapping[lessonTitle]
-      });
-      
-      // Method 1: Try direct window.open with user interaction
-      console.log('✅ Attempting to open ebook directly:', ebookUrl);
-      
-      // Try window.open first (most reliable for user-initiated actions)
-      const newWindow = window.open(ebookUrl, '_blank', 'noopener,noreferrer');
-      
-      if (newWindow) {
-        console.log('✅ Ebook opened successfully in new tab');
-        return; // Success, exit early
-      }
-      
-      // If window.open failed (popup blocked), try the link method
-      console.log('⚠️ window.open failed, trying link method');
-      
-      // Create a temporary link element and click it - this bypasses popup blockers
-      const link = document.createElement('a');
-      link.href = ebookUrl;
-      link.target = '_blank';
-      link.rel = 'noopener noreferrer';
-      link.style.display = 'none';
-      
-      // Add to DOM, click, and remove
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-      console.log('✅ Ebook link clicked successfully');
-      
-      // Only show fallback message if window.open explicitly failed
-      // Don't show popup blocker message if the link method was used
-      console.log('✅ Link method completed - ebook should be opening');
-      
-    } catch (error) {
-      console.error('❌ Error in handleOpenEbook:', error);
-      
-      // Only show fallback if there's a real error, not just popup blocking
-      if (error instanceof Error && error.message.includes('blocked')) {
-        // Show a simple message without being too intrusive
-        console.log('🚫 Popup blocked, but link method should have worked');
-      } else {
-        // Show error message for real errors
-        alert(`Er is een probleem opgetreden bij het openen van het ebook.\n\nProbeer het volgende:\n1. Klik met de rechtermuisknop op de knop\n2. Selecteer "Open in nieuw tabblad"\n3. Of kopieer deze URL: ${window.location.origin}/ebooks/${ebookMapping[lessonTitle] || lessonTitle.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, '-').replace(/^-+|-+$/g, '')}.html`);
-      }
+  // Get ebook filename
+  const getEbookFilename = () => {
+    // Try to find exact mapping first
+    let ebookFilename = ebookMapping[lessonTitle];
+    
+    // If no exact mapping found, create filename from title
+    if (!ebookFilename) {
+      ebookFilename = lessonTitle
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, '') // Remove special characters
+        .replace(/\s+/g, '-') // Replace spaces with hyphens
+        .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
     }
+    
+    return ebookFilename;
   };
+
+  const ebookFilename = getEbookFilename();
+  const ebookUrl = `/ebooks/${ebookFilename}.html`;
 
   // Check if this lesson has an ebook available
   const hasEbook = true; // All lessons now have ebooks
 
-  // Debug function to list available ebooks (for development)
-  const debugAvailableEbooks = () => {
-    console.log('📚 Available ebooks in mapping:', Object.keys(ebookMapping));
-    console.log('📚 Current lesson title:', lessonTitle);
-    console.log('📚 Mapped filename:', ebookMapping[lessonTitle] || 'No mapping found');
-    
-    // Test if the ebook file exists
-    const mappedFilename = ebookMapping[lessonTitle];
-    if (mappedFilename) {
-      const testUrl = `/ebooks/${mappedFilename}.html`;
-      console.log('📚 Testing ebook URL:', testUrl);
-      
-      // Quick test to see if file exists
-      fetch(testUrl, { method: 'HEAD' })
-        .then(response => {
-          if (response.ok) {
-            console.log('✅ Ebook file exists and is accessible');
-          } else {
-            console.error('❌ Ebook file not found or not accessible:', response.status);
-          }
-        })
-        .catch(error => {
-          console.error('❌ Error testing ebook file:', error);
-        });
-    }
-  };
-
-  // Call debug function in development
-  if (process.env.NODE_ENV === 'development') {
-    debugAvailableEbooks();
-  }
 
   return (
     <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-6 mb-6">
@@ -204,17 +120,19 @@ export default function EbookDownload({
             </ul>
           </div>
 
-          {/* Show ebook button for all lessons */}
+          {/* Show ebook link for all lessons */}
           {hasEbook ? (
             <div className="mb-4">
-              <button
-                onClick={handleOpenEbook}
+              <a
+                href={ebookUrl}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-[#8BAE5A] to-[#B6C948] text-white rounded-lg hover:from-[#B6C948] hover:to-[#8BAE5A] transition-all duration-200 font-semibold shadow-md hover:shadow-lg transform hover:scale-105"
               >
                 <BookOpenIcon className="w-5 h-5 mr-2" />
                 Bekijk E-book
                 <ArrowTopRightOnSquareIcon className="w-4 h-4 ml-2" />
-              </button>
+              </a>
               <p className="text-xs text-gray-500 mt-2">
                 Het ebook opent in een nieuw tabblad met alle praktische informatie en oefeningen.
               </p>

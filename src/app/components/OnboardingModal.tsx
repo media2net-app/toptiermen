@@ -14,6 +14,7 @@ import {
   HeartIcon
 } from '@heroicons/react/24/outline';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { useSubscription } from '@/hooks/useSubscription';
 import { toast } from 'react-hot-toast';
 
 interface OnboardingStatus {
@@ -78,6 +79,7 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
     challenges: []
   });
   const { user, loading: authLoading } = useSupabaseAuth();
+  const { hasAccess } = useSubscription();
   const [onboardingStatus, setOnboardingStatus] = useState<OnboardingStatus | null>(null);
   const [currentStep, setCurrentStep] = useState(0); // 0 = welcome video, 1-5 = steps
   const [loading, setLoading] = useState(false);
@@ -247,16 +249,22 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
         additionalData = { selectedMissions };
         break;
       case 4:
-        // Step 4: Select training schema and nutrition plan
-        if (!selectedTrainingSchema || !selectedNutritionPlan) {
-          toast.error('Selecteer een trainingsschema en voedingsplan');
-          return;
+        // Step 4: Select training schema and nutrition plan (only for Premium/Lifetime users)
+        if (hasAccess('training') && hasAccess('nutrition')) {
+          if (!selectedTrainingSchema || !selectedNutritionPlan) {
+            toast.error('Selecteer een trainingsschema en voedingsplan');
+            return;
+          }
+          additionalData = { 
+            selectedTrainingSchema, 
+            selectedNutritionPlan,
+            selectedChallenge 
+          };
+        } else {
+          // Basic tier users skip this step
+          console.log('🚀 Basic tier user - skipping training and nutrition step');
+          additionalData = { selectedChallenge };
         }
-        additionalData = { 
-          selectedTrainingSchema, 
-          selectedNutritionPlan,
-          selectedChallenge 
-        };
         break;
       case 5:
         // Step 5: Forum introduction
@@ -354,6 +362,24 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
                 </p>
               </div>
 
+              {/* Video Completion Notice - Moved above video */}
+              <div className="mb-6 p-4 bg-[#FFD700]/10 border border-[#FFD700]/30 rounded-lg">
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0">
+                    <svg className="w-5 h-5 text-[#FFD700] mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 className="text-[#FFD700] font-semibold text-sm mb-1">Belangrijke instructie</h4>
+                    <p className="text-[#FFD700]/80 text-sm">
+                      Je moet eerst de welkomstvideo volledig bekijken voordat je naar de volgende stap kunt gaan. 
+                      De knop wordt pas beschikbaar nadat de video is afgespeeld.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
               <div className="bg-[#181F17] rounded-xl p-4 mb-6 border border-[#3A4D23] relative">
                 <video
                   ref={videoRef}
@@ -410,28 +436,11 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
                 )}
               </div>
 
-              {/* Video Completion Notice */}
-              <div className="mb-6 p-4 bg-[#FFD700]/10 border border-[#FFD700]/30 rounded-lg">
-                <div className="flex items-start gap-3">
-                  <div className="flex-shrink-0">
-                    <svg className="w-5 h-5 text-[#FFD700] mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h4 className="text-[#FFD700] font-semibold text-sm mb-1">Belangrijke instructie</h4>
-                    <p className="text-[#FFD700]/80 text-sm">
-                      Je moet eerst de welkomstvideo volledig bekijken voordat je naar de volgende stap kunt gaan. 
-                      De knop wordt pas beschikbaar nadat de video is afgespeeld.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
+              {/* Continue Button - Moved below video */}
               <button
                 onClick={handleWelcomeVideoComplete}
                 disabled={loading || authLoading || !user}
-                className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] px-6 py-3 rounded-lg hover:from-[#A6C97B] hover:to-[#FFE55C] disabled:opacity-50 font-semibold transition-all duration-200"
+                className="w-full bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] px-6 py-3 rounded-lg hover:from-[#A6C97B] hover:to-[#FFE55C] disabled:opacity-50 font-semibold transition-all duration-200"
               >
                 {authLoading ? 'Laden...' : loading ? 'Bezig...' : !user ? 'Gebruiker laden...' : 'Video bekeken, ga verder'}
               </button>

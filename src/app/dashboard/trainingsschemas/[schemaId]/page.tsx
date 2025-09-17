@@ -14,6 +14,8 @@ import {
 } from '@heroicons/react/24/outline';
 import PageLayout from '@/components/PageLayout';
 import Breadcrumb, { createBreadcrumbs } from '@/components/Breadcrumb';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import toast from 'react-hot-toast';
 
 interface TrainingSchema {
   id: string;
@@ -47,9 +49,11 @@ interface TrainingSchema {
 export default function TrainingSchemaDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const { user } = useSupabaseAuth();
   const [schema, setSchema] = useState<TrainingSchema | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectingSchema, setSelectingSchema] = useState(false);
 
   const schemaId = params?.schemaId as string;
 
@@ -273,7 +277,7 @@ export default function TrainingSchemaDetailPage() {
               <div class="info-value">${schema?.rep_range || 'N/A'}</div>
             </div>
             <div class="info-item">
-              <div class="info-label">Equipment</div>
+              <div class="info-label">Locatie</div>
               <div class="info-value">${schema?.equipment_type || 'N/A'}</div>
             </div>
           </div>
@@ -443,7 +447,7 @@ export default function TrainingSchemaDetailPage() {
             <div className="bg-[#3A4D23] rounded-lg p-3">
               <div className="flex items-center gap-2 mb-1">
                 <CheckIcon className="w-4 h-4 text-[#8BAE5A]" />
-                <span className="text-sm text-gray-400">Equipment</span>
+                <span className="text-sm text-gray-400">Locatie</span>
               </div>
               <p className="text-white font-semibold">{schema.equipment_type}</p>
             </div>
@@ -538,14 +542,51 @@ export default function TrainingSchemaDetailPage() {
           </button>
           
           <button
-            onClick={() => {
-              // Navigate back to schemas page and select this schema
-              router.push(`/dashboard/trainingsschemas?select=${schemaId}`);
+            onClick={async () => {
+              setSelectingSchema(true);
+              try {
+                // First select the schema via API
+                const response = await fetch('/api/training-schema-selection', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                    userId: user?.id,
+                    schemaId: schemaId
+                  }),
+                });
+
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                  toast.success(`🎉 ${schema?.name} is nu je actieve trainingsschema!`);
+                  // Navigate back to schemas page and select this schema
+                  router.push(`/dashboard/trainingsschemas?select=${schemaId}`);
+                } else {
+                  throw new Error(data.error || 'Failed to select training schema');
+                }
+              } catch (error) {
+                console.error('Error selecting training schema:', error);
+                toast.error('Failed to select training schema');
+              } finally {
+                setSelectingSchema(false);
+              }
             }}
-            className="px-6 py-3 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors flex items-center gap-2"
+            disabled={selectingSchema}
+            className="px-6 py-3 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <PlayIcon className="w-5 h-5" />
-            Selecteer dit schema
+            {selectingSchema ? (
+              <>
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#232D1A]"></div>
+                Selecteren...
+              </>
+            ) : (
+              <>
+                <PlayIcon className="w-5 h-5" />
+                Selecteer dit schema
+              </>
+            )}
           </button>
         </div>
       </div>

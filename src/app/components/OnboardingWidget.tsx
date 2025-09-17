@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { useSubscription } from '@/hooks/useSubscription';
 
 interface OnboardingStep {
   id: string;
@@ -21,44 +22,59 @@ interface OnboardingWidgetProps {
 
 export default function OnboardingWidget({ isVisible, onComplete }: OnboardingWidgetProps) {
   const { user } = useSupabaseAuth();
+  const { hasAccess } = useSubscription();
   const router = useRouter();
-  const [steps, setSteps] = useState<OnboardingStep[]>([
-    {
-      id: 'goal',
-      title: 'Definieer jouw #1 Hoofddoel',
-      description: 'Wat is je belangrijkste doel voor de komende 90 dagen?',
-      completed: false,
-      action: () => setShowGoalModal(true),
-    },
-    {
-      id: 'missions',
-      title: 'Kies je Eerste 3 Uitdagingen',
-      description: 'Selecteer 3 uitdagingen die je deze week wilt voltooien',
-      completed: false,
-      action: () => setShowMissionsModal(true),
-    },
-    {
-      id: 'training',
-      title: 'Kies je Trainingsschema',
-      description: 'Selecteer een trainingsschema dat bij je past',
-      completed: false,
-      action: () => router.push('/dashboard/trainingsschemas'),
-    },
-    {
-      id: 'nutrition',
-      title: 'Kies je Voedingsplan',
-      description: 'Selecteer een voedingsplan voor optimale prestaties',
-      completed: false,
-      action: () => router.push('/dashboard/voedingsplannen'),
-    },
-    {
-      id: 'challenge',
-      title: 'Doe mee aan een Starter-Challenge',
-      description: 'Kies een challenge om je discipline te testen',
-      completed: false,
-      action: () => setShowChallengeModal(true),
-    },
-  ]);
+  const [steps, setSteps] = useState<OnboardingStep[]>(() => {
+    const allSteps: OnboardingStep[] = [
+      {
+        id: 'goal',
+        title: 'Definieer jouw #1 Hoofddoel',
+        description: 'Wat is je belangrijkste doel voor de komende 90 dagen?',
+        completed: false,
+        action: () => setShowGoalModal(true),
+      },
+      {
+        id: 'missions',
+        title: 'Kies je Eerste 3 Uitdagingen',
+        description: 'Selecteer 3 uitdagingen die je deze week wilt voltooien',
+        completed: false,
+        action: () => setShowMissionsModal(true),
+      },
+      {
+        id: 'training',
+        title: 'Kies je Trainingsschema',
+        description: 'Selecteer een trainingsschema dat bij je past',
+        completed: false,
+        action: () => router.push('/dashboard/trainingsschemas'),
+      },
+      {
+        id: 'nutrition',
+        title: 'Kies je Voedingsplan',
+        description: 'Selecteer een voedingsplan voor optimale prestaties',
+        completed: false,
+        action: () => router.push('/dashboard/voedingsplannen'),
+      },
+      {
+        id: 'challenge',
+        title: 'Doe mee aan een Starter-Challenge',
+        description: 'Kies een challenge om je discipline te testen',
+        completed: false,
+        action: () => setShowChallengeModal(true),
+      },
+    ];
+
+    // Filter steps based on subscription tier
+    return allSteps.filter(step => {
+      // Basic tier users skip training and nutrition steps
+      if (!hasAccess('training') && step.id === 'training') {
+        return false;
+      }
+      if (!hasAccess('nutrition') && step.id === 'nutrition') {
+        return false;
+      }
+      return true;
+    });
+  });
 
   const [showGoalModal, setShowGoalModal] = useState(false);
   const [showMissionsModal, setShowMissionsModal] = useState(false);
@@ -169,6 +185,16 @@ export default function OnboardingWidget({ isVisible, onComplete }: OnboardingWi
       setSteps(updatedSteps);
       setShowMissionsModal(false);
       setSelectedMissions([]);
+      
+      // Check if user has access to training - if not, skip to challenges
+      if (!hasAccess('training')) {
+        console.log('🚀 Basic tier user - skipping training and nutrition steps, going to challenges');
+        // Mark training and nutrition steps as completed for Basic tier users
+        const finalSteps = updatedSteps.map(step => 
+          (step.id === 'training' || step.id === 'nutrition') ? { ...step, completed: true } : step
+        );
+        setSteps(finalSteps);
+      }
     }
   };
 

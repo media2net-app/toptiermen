@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   BookOpenIcon,
@@ -508,6 +508,13 @@ function TrainingschemasContent() {
     try {
       console.log('🔧 Creating basic training profile for user:', user?.email);
       
+      // Don't create automatic profile during onboarding step 3
+      if (showOnboardingStep3) {
+        console.log('🎯 Onboarding step 3 active - not creating automatic profile, user should fill form manually');
+        setUserTrainingProfile(null);
+        return;
+      }
+      
       // Get main_goal from user profile
       console.log('📡 Fetching main_goal from profiles table...');
       const { data: profileData, error: profileError } = await supabase
@@ -697,7 +704,7 @@ function TrainingschemasContent() {
     saveTrainingProfile(profile);
   };
 
-  const selectTrainingSchema = async (schemaId: string) => {
+  const selectTrainingSchema = useCallback(async (schemaId: string) => {
     try {
       if (!user?.id) return;
       
@@ -763,7 +770,27 @@ function TrainingschemasContent() {
         // Complete onboarding step if needed
         if (isOnboarding && onboardingStep === 3) {
           console.log('🎯 Completing onboarding step 3 after schema selection');
-          await completeStep(3);
+          // Call completeStep directly to avoid stale closure
+          try {
+            const response = await fetch('/api/onboarding', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                userId: actualUserId,
+                step: 3,
+                action: 'complete_step',
+                selectedTrainingSchema: schemaId
+              }),
+            });
+            
+            if (response.ok) {
+              console.log('✅ Onboarding step 3 completed');
+            }
+          } catch (error) {
+            console.error('❌ Error completing onboarding step:', error);
+          }
         } else if (showOnboardingStep3) {
           console.log('🎯 Schema selected during onboarding step 3');
           // Don't auto-complete, let user click "Volgende Stap" button
@@ -775,7 +802,7 @@ function TrainingschemasContent() {
       console.error('Error selecting training schema:', error);
       toast.error('Failed to select training schema');
     }
-  };
+  }, [user?.id, isOnboarding, onboardingStep, showOnboardingStep3]); // Removed completeStep from dependencies
 
   const viewSchemaDetail = async (schemaId: string) => {
     try {
@@ -1014,7 +1041,7 @@ function TrainingschemasContent() {
                 <div class="info-value">${schema.rep_range}</div>
               </div>
               <div class="info-item">
-                <div class="info-label">Equipment</div>
+                <div class="info-label">Locatie</div>
                 <div class="info-value">${schema.equipment_type}</div>
               </div>
             </div>
@@ -1170,6 +1197,8 @@ function TrainingschemasContent() {
     if (selectParam && trainingSchemas.length > 0) {
       const schema = trainingSchemas.find(s => s.id === selectParam);
       if (schema) {
+        console.log('🎯 Auto-selecting schema from URL parameter:', selectParam);
+        // Call selectTrainingSchema directly to avoid stale closure issues
         selectTrainingSchema(selectParam);
         // Remove the select parameter from URL
         const newUrl = new URL(window.location.href);
@@ -1177,7 +1206,7 @@ function TrainingschemasContent() {
         window.history.replaceState({}, '', newUrl.toString());
       }
     }
-  }, [searchParams, trainingSchemas]);
+  }, [searchParams, trainingSchemas]); // Removed selectTrainingSchema from dependencies
 
   // Check onboarding status
   useEffect(() => {
@@ -1528,7 +1557,7 @@ function TrainingschemasContent() {
                       {equipmentTypes.find(t => t.id === userTrainingProfile.equipment_type)?.icon}
                     </span>
                     <div>
-                      <h4 className="text-xs sm:text-sm font-medium text-gray-400">Equipment</h4>
+                      <h4 className="text-xs sm:text-sm font-medium text-gray-400">Locatie</h4>
                       <p className="text-white font-semibold text-sm sm:text-base">
                         {equipmentTypes.find(t => t.id === userTrainingProfile.equipment_type)?.name}
                       </p>
@@ -1702,7 +1731,7 @@ function TrainingschemasContent() {
                   </div>
 
 
-                  {/* Equipment Type - Only Gym Available */}
+                  {/* Training Location - Only Gym Available */}
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-3 md:mb-4 flex items-center gap-2">
                       <span className="text-base md:text-lg">🏋️</span>
@@ -1933,10 +1962,6 @@ function TrainingschemasContent() {
 
                     <div className={`flex flex-col sm:flex-row sm:items-center sm:justify-between text-xs sm:text-sm mb-3 sm:mb-4 md:mb-6 gap-2 sm:gap-0 ${isLocked ? 'text-gray-500' : 'text-gray-400'}`}>
                       <div className="flex items-center space-x-2 sm:space-x-3 md:space-x-4">
-                        <div className="flex items-center space-x-1">
-                          <ClockIcon className={`h-3 w-3 sm:h-4 sm:w-4 ${isLocked ? 'text-gray-500' : 'text-[#8BAE5A]'}`} />
-                          <span className="text-xs sm:text-sm">{schema.estimated_duration}</span>
-                        </div>
                         <div className="flex items-center space-x-1">
                           <FireIcon className={`h-3 w-3 sm:h-4 sm:w-4 ${isLocked ? 'text-gray-500' : 'text-[#8BAE5A]'}`} />
                           <span className="text-xs sm:text-sm">{schema.rep_range}</span>

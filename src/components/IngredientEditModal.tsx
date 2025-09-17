@@ -126,20 +126,16 @@ export default function IngredientEditModal({
 
   console.log('🔧 IngredientEditModal render:', { isOpen, ingredients: ingredients?.length, mealType, day });
   
-  if (!isOpen) {
-    console.log('🔧 Modal not open, returning null');
-    return null;
-  }
-
   return (
     <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black bg-opacity-75 z-[9999] flex items-center justify-center p-4"
-        style={{ zIndex: 9999 }}
-      >
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4"
+          style={{ zIndex: 50 }}
+        >
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -335,7 +331,8 @@ export default function IngredientEditModal({
             </div>
           </div>
         </motion.div>
-      </motion.div>
+        </motion.div>
+      )}
     </AnimatePresence>
   );
 }

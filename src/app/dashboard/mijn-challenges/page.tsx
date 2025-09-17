@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { useOnboarding } from '@/contexts/OnboardingContext';
+import { useSubscription } from '@/hooks/useSubscription';
 import { toast } from 'react-hot-toast';
 import ClientLayout from '@/app/components/ClientLayout';
 
@@ -266,6 +267,7 @@ const CHALLENGE_LIBRARY: SuggestedChallenge[] = [
 export default function MijnChallengesPage() {
   const { user } = useSupabaseAuth();
   const { isOnboarding, currentStep, completeCurrentStep } = useOnboarding();
+  const { hasAccess } = useSubscription();
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [summary, setSummary] = useState<Summary>({ completedToday: 0, totalToday: 0, dailyStreak: 0 });
   const [loading, setLoading] = useState(true);
@@ -288,6 +290,7 @@ export default function MijnChallengesPage() {
   // Onboarding status
   const [onboardingStatus, setOnboardingStatus] = useState<any>(null);
   const [showOnboardingStep3, setShowOnboardingStep3] = useState(false);
+  const [showOnboardingPopup, setShowOnboardingPopup] = useState(false);
 
   // Helper function to check if mission was completed today
   const isChallengeCompletedToday = (completionDate: string | null | undefined): boolean => {
@@ -377,7 +380,14 @@ export default function MijnChallengesPage() {
           setOnboardingStatus(data);
           
           // Only show onboarding step 3 if onboarding is not completed and user is on step 2 (challenges step)
-          setShowOnboardingStep3(!data.onboarding_completed && data.current_step === 2);
+          const isOnboardingStep2 = !data.onboarding_completed && data.current_step === 2;
+          setShowOnboardingStep3(isOnboardingStep2);
+          
+          // Show popup and open library for onboarding step 2
+          if (isOnboardingStep2) {
+            setShowOnboardingPopup(true);
+            setShowChallengeLibrary(true);
+          }
         }
       } catch (error) {
         console.error('Error checking onboarding status:', error);
@@ -826,11 +836,21 @@ export default function MijnChallengesPage() {
                       });
 
                       if (response.ok) {
-                        toast.success('Challenges opgeslagen! Doorsturen naar trainingsschemas...');
-                        // Navigate directly to training schemas
-                        setTimeout(() => {
-                          window.location.href = '/dashboard/trainingsschemas';
-                        }, 1500);
+                        // Check if user has access to training - if not, skip to challenges
+                        if (hasAccess('training')) {
+                          toast.success('Challenges opgeslagen! Doorsturen naar trainingsschemas...');
+                          // Navigate directly to training schemas
+                          setTimeout(() => {
+                            window.location.href = '/dashboard/trainingsschemas';
+                          }, 1500);
+                        } else {
+                          toast.success('Challenges opgeslagen! Doorsturen naar challenges...');
+                          // Skip training and nutrition steps, go directly to challenges
+                          console.log('🚀 Basic tier user - skipping training and nutrition steps, going to challenges');
+                          setTimeout(() => {
+                            window.location.href = '/dashboard/challenges';
+                          }, 1500);
+                        }
                       } else {
                         toast.error('Er is een fout opgetreden');
                       }
@@ -848,6 +868,29 @@ export default function MijnChallengesPage() {
             )}
           </div>
         </div>
+        )}
+
+        {/* Onboarding Popup */}
+        {showOnboardingPopup && (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="bg-[#181F17] border border-[#3A4D23] rounded-xl p-6 max-w-md w-full">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-[#8BAE5A] rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl">🏆</span>
+                </div>
+                <h3 className="text-xl font-bold text-white mb-3">Welkom bij Challenges!</h3>
+                <p className="text-gray-300 text-sm leading-relaxed mb-6">
+                  Je kunt challenges kiezen uit onze bestaande bibliotheek en/of je kunt handmatig eigen challenges aanmaken.
+                </p>
+                <button
+                  onClick={() => setShowOnboardingPopup(false)}
+                  className="w-full bg-[#8BAE5A] text-[#181F17] px-6 py-3 rounded-lg font-semibold hover:bg-[#7A9D4A] transition-colors"
+                >
+                  Begrepen!
+                </button>
+              </div>
+            </div>
+          </div>
         )}
 
         {/* Daily Completion Celebration */}
@@ -1000,132 +1043,6 @@ export default function MijnChallengesPage() {
           </form>
         </div>
 
-        {/* Top Tier Men Challenge Library */}
-        {showChallengeLibrary && (
-          <div className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-2xl p-6 mb-8 shadow-2xl">
-            <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold text-white mb-2">🏆 Top Tier Men Challenge Library</h2>
-              <p className="text-[#8BAE5A] text-lg">Kies challenges die jou tot een echte leider maken</p>
-            </div>
-            
-            {/* Category Tabs */}
-            <div className="flex flex-wrap justify-center gap-3 mb-8">
-              {[
-                { key: 'all', label: 'Alle Challenges', icon: '🔥', color: 'from-[#8BAE5A] to-[#B6C948]' },
-                { key: 'Fysiek', label: 'Fysiek', icon: '💪', color: 'from-[#FF6B6B] to-[#FF8E8E]' },
-                { key: 'Mentaal', label: 'Mentaal', icon: '🧠', color: 'from-[#4ECDC4] to-[#7EDDD6]' },
-                { key: 'Financieel', label: 'Financieel', icon: '💰', color: 'from-[#FFD93D] to-[#FFE55C]' }
-              ].map((tab) => (
-                <button
-                  key={tab.key}
-                  onClick={() => setSelectedCategory(tab.key)}
-                  className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
-                    selectedCategory === tab.key
-                      ? `bg-gradient-to-r ${tab.color} text-[#181F17] shadow-lg scale-105`
-                      : 'bg-[#0F1419] text-[#8BAE5A] hover:bg-[#3A4D23] hover:text-white'
-                  }`}
-                >
-                  <span className="text-xl">{tab.icon}</span>
-                  <span>{tab.label}</span>
-                </button>
-              ))}
-            </div>
-
-            {/* Search and Difficulty Filter */}
-            <div className="flex flex-col md:flex-row gap-4 mb-8">
-              <div className="flex-1">
-                <input
-                  type="text"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="🔍 Zoek naar specifieke challenges..."
-                  className="w-full bg-[#0F1419] border border-[#3A4D23]/30 rounded-xl px-6 py-4 text-white placeholder-gray-400 focus:outline-none focus:border-[#8BAE5A] focus:ring-2 focus:ring-[#8BAE5A]/20 text-lg"
-                />
-              </div>
-              <div className="md:w-48">
-                <select
-                  value={selectedDifficulty}
-                  onChange={(e) => setSelectedDifficulty(e.target.value)}
-                  className="w-full bg-[#0F1419] border border-[#3A4D23]/30 rounded-xl px-6 py-4 text-white focus:outline-none focus:border-[#8BAE5A] focus:ring-2 focus:ring-[#8BAE5A]/20 text-lg"
-                >
-                  <option value="all">Alle Niveaus</option>
-                  <option value="easy">🟢 Makkelijk</option>
-                  <option value="medium">🟡 Gemiddeld</option>
-                  <option value="hard">🔴 Moeilijk</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Challenge Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {getFilteredSuggestedChallenges().map((mission) => (
-                <div
-                  key={mission.id}
-                  className="group bg-gradient-to-br from-[#0F1419] to-[#181F17] border border-[#3A4D23]/30 rounded-2xl p-6 hover:border-[#8BAE5A]/50 hover:shadow-2xl hover:shadow-[#8BAE5A]/10 transition-all duration-300 transform hover:scale-105"
-                >
-                  {/* Header */}
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      <span className="text-4xl group-hover:scale-110 transition-transform duration-300">{mission.icon}</span>
-                      <div>
-                        <h3 className="text-xl font-bold text-white mb-1">{mission.title}</h3>
-                        <span className={`text-sm px-3 py-1 rounded-full font-medium ${
-                          mission.category === 'Fysiek' ? 'bg-red-600/20 text-red-400 border border-red-600/30' :
-                          mission.category === 'Mentaal' ? 'bg-blue-600/20 text-blue-400 border border-blue-600/30' :
-                          mission.category === 'Financieel' ? 'bg-yellow-600/20 text-yellow-400 border border-yellow-600/30' :
-                          'bg-gray-600/20 text-gray-400 border border-gray-600/30'
-                        }`}>
-                          {mission.category}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex flex-col items-end gap-2">
-                      <span className="text-lg text-[#FFD700] font-bold">+{mission.xp_reward} XP</span>
-                      <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                        mission.difficulty === 'easy' ? 'bg-green-600/20 text-green-400' :
-                        mission.difficulty === 'medium' ? 'bg-yellow-600/20 text-yellow-400' :
-                        'bg-red-600/20 text-red-400'
-                      }`}>
-                        {mission.difficulty === 'easy' ? '🟢 Makkelijk' :
-                         mission.difficulty === 'medium' ? '🟡 Gemiddeld' : '🔴 Moeilijk'}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Description */}
-                  <p className="text-gray-300 text-sm leading-relaxed mb-6">{mission.description}</p>
-
-                  {/* Action Button */}
-                  <button
-                    onClick={() => addSuggestedChallenge(mission)}
-                    className="w-full bg-gradient-to-r from-[#8BAE5A] to-[#B6C948] hover:from-[#B6C948] hover:to-[#8BAE5A] text-[#181F17] font-bold px-6 py-3 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg flex items-center justify-center gap-2"
-                  >
-                    <span>⚔️</span>
-                    <span>Challenge Aanvaarden</span>
-                  </button>
-                </div>
-              ))}
-            </div>
-
-            {getFilteredSuggestedChallenges().length === 0 && (
-              <div className="text-center py-12">
-                <div className="text-6xl mb-6">🔍</div>
-                <h3 className="text-2xl font-bold text-white mb-4">Geen challenges gevonden</h3>
-                <p className="text-gray-400 mb-6">Probeer andere filters of zoektermen</p>
-                <button
-                  onClick={() => {
-                    setSearchTerm('');
-                    setSelectedCategory('all');
-                    setSelectedDifficulty('all');
-                  }}
-                  className="bg-gradient-to-r from-[#8BAE5A] to-[#B6C948] text-[#181F17] px-8 py-3 rounded-xl font-bold hover:shadow-lg transition-all duration-300"
-                >
-                  🔄 Reset Alle Filters
-                </button>
-              </div>
-            )}
-          </div>
-        )}
 
         {/* TO DO Challenges */}
         {pendingChallenges.length > 0 && (
@@ -1257,6 +1174,133 @@ export default function MijnChallengesPage() {
             <div className="text-6xl mb-4">🎯</div>
             <h3 className="text-xl font-semibold text-white mb-2">Geen challenges gevonden</h3>
             <p className="text-gray-400">Voeg je eerste challenge toe om te beginnen!</p>
+          </div>
+        )}
+
+        {/* Top Tier Men Challenge Library */}
+        {showChallengeLibrary && (
+          <div className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-2xl p-6 mb-8 shadow-2xl">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold text-white mb-2">🏆 Top Tier Men Challenge Library</h2>
+              <p className="text-[#8BAE5A] text-lg">Kies challenges die jou tot een echte leider maken</p>
+            </div>
+            
+            {/* Category Tabs */}
+            <div className="flex flex-wrap justify-center gap-3 mb-8">
+              {[
+                { key: 'all', label: 'Alle Challenges', icon: '🔥', color: 'from-[#8BAE5A] to-[#B6C948]' },
+                { key: 'Fysiek', label: 'Fysiek', icon: '💪', color: 'from-[#FF6B6B] to-[#FF8E8E]' },
+                { key: 'Mentaal', label: 'Mentaal', icon: '🧠', color: 'from-[#4ECDC4] to-[#7EDDD6]' },
+                { key: 'Financieel', label: 'Financieel', icon: '💰', color: 'from-[#FFD93D] to-[#FFE55C]' }
+              ].map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => setSelectedCategory(tab.key)}
+                  className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
+                    selectedCategory === tab.key
+                      ? `bg-gradient-to-r ${tab.color} text-[#181F17] shadow-lg scale-105`
+                      : 'bg-[#0F1419] text-[#8BAE5A] hover:bg-[#3A4D23] hover:text-white'
+                  }`}
+                >
+                  <span className="text-xl">{tab.icon}</span>
+                  <span>{tab.label}</span>
+                </button>
+              ))}
+            </div>
+
+            {/* Search and Difficulty Filter */}
+            <div className="flex flex-col md:flex-row gap-4 mb-8">
+              <div className="flex-1">
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="🔍 Zoek naar specifieke challenges..."
+                  className="w-full bg-[#0F1419] border border-[#3A4D23]/30 rounded-xl px-6 py-4 text-white placeholder-gray-400 focus:outline-none focus:border-[#8BAE5A] focus:ring-2 focus:ring-[#8BAE5A]/20 text-lg"
+                />
+              </div>
+              <div className="md:w-48">
+                <select
+                  value={selectedDifficulty}
+                  onChange={(e) => setSelectedDifficulty(e.target.value)}
+                  className="w-full bg-[#0F1419] border border-[#3A4D23]/30 rounded-xl px-6 py-4 text-white focus:outline-none focus:border-[#8BAE5A] focus:ring-2 focus:ring-[#8BAE5A]/20 text-lg"
+                >
+                  <option value="all">Alle Niveaus</option>
+                  <option value="easy">🟢 Makkelijk</option>
+                  <option value="medium">🟡 Gemiddeld</option>
+                  <option value="hard">🔴 Moeilijk</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Challenge Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              {getFilteredSuggestedChallenges().map((mission) => (
+                <div
+                  key={mission.id}
+                  className="group bg-gradient-to-br from-[#0F1419] to-[#181F17] border border-[#3A4D23]/30 rounded-2xl p-6 hover:border-[#8BAE5A]/50 hover:shadow-2xl hover:shadow-[#8BAE5A]/10 transition-all duration-300 transform hover:scale-105"
+                >
+                  {/* Header */}
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <span className="text-4xl group-hover:scale-110 transition-transform duration-300">{mission.icon}</span>
+                      <div>
+                        <h3 className="text-xl font-bold text-white mb-1">{mission.title}</h3>
+                        <span className={`text-sm px-3 py-1 rounded-full font-medium ${
+                          mission.category === 'Fysiek' ? 'bg-red-600/20 text-red-400 border border-red-600/30' :
+                          mission.category === 'Mentaal' ? 'bg-blue-600/20 text-blue-400 border border-blue-600/30' :
+                          mission.category === 'Financieel' ? 'bg-yellow-600/20 text-yellow-400 border border-yellow-600/30' :
+                          'bg-gray-600/20 text-gray-400 border border-gray-600/30'
+                        }`}>
+                          {mission.category}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-end gap-2">
+                      <span className="text-lg text-[#FFD700] font-bold">+{mission.xp_reward} XP</span>
+                      <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                        mission.difficulty === 'easy' ? 'bg-green-600/20 text-green-400' :
+                        mission.difficulty === 'medium' ? 'bg-yellow-600/20 text-yellow-400' :
+                        'bg-red-600/20 text-red-400'
+                      }`}>
+                        {mission.difficulty === 'easy' ? '🟢 Makkelijk' :
+                         mission.difficulty === 'medium' ? '🟡 Gemiddeld' : '🔴 Moeilijk'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Description */}
+                  <p className="text-gray-300 text-sm leading-relaxed mb-6">{mission.description}</p>
+
+                  {/* Action Button */}
+                  <button
+                    onClick={() => addSuggestedChallenge(mission)}
+                    className="w-full bg-gradient-to-r from-[#8BAE5A] to-[#B6C948] hover:from-[#B6C948] hover:to-[#8BAE5A] text-[#181F17] font-bold px-6 py-3 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg flex items-center justify-center gap-2"
+                  >
+                    <span>⚔️</span>
+                    <span>Challenge Aanvaarden</span>
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            {getFilteredSuggestedChallenges().length === 0 && (
+              <div className="text-center py-12">
+                <div className="text-6xl mb-6">🔍</div>
+                <h3 className="text-2xl font-bold text-white mb-4">Geen challenges gevonden</h3>
+                <p className="text-gray-400 mb-6">Probeer andere filters of zoektermen</p>
+                <button
+                  onClick={() => {
+                    setSearchTerm('');
+                    setSelectedCategory('all');
+                    setSelectedDifficulty('all');
+                  }}
+                  className="bg-gradient-to-r from-[#8BAE5A] to-[#B6C948] text-[#181F17] px-8 py-3 rounded-xl font-bold hover:shadow-lg transition-all duration-300"
+                >
+                  🔄 Reset Alle Filters
+                </button>
+              </div>
+            )}
           </div>
         )}
 

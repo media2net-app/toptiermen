@@ -365,6 +365,7 @@ export default function LessonDetailPage() {
         console.log('👀 Page became visible, resetting stuck states');
         setNavigating(false);
         setIsVideoLoading(false);
+        setShowForceButton(false);
         
         // Only reset loading if we have data but are stuck loading
         if (loading && lesson && lesson.id === lessonId) {
@@ -378,6 +379,7 @@ export default function LessonDetailPage() {
       console.log('🎯 Page gained focus, ensuring clean state');
       setNavigating(false);
       setIsVideoLoading(false);
+      setShowForceButton(false);
       
       // Reset loading if we're stuck but have the right data
       if (loading && lesson && lesson.id === lessonId) {
@@ -400,6 +402,43 @@ export default function LessonDetailPage() {
       }
     };
   }, [loading, lesson, lessonId]); // Added lesson and lessonId to dependencies
+
+  // Additional handler for when user returns from ebook tab
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      console.log('📖 User navigating away (possibly to ebook), resetting states');
+      setNavigating(false);
+      setIsVideoLoading(false);
+      setShowForceButton(false);
+    };
+
+    const handlePageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) {
+        console.log('📖 User returned from ebook tab, ensuring clean state');
+        setNavigating(false);
+        setIsVideoLoading(false);
+        setShowForceButton(false);
+        
+        // Reset loading if we have data but are stuck loading
+        if (loading && lesson && lesson.id === lessonId) {
+          console.log('🔄 Page show: resetting stuck loading with correct data');
+          setLoading(false);
+        }
+      }
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('beforeunload', handleBeforeUnload);
+      window.addEventListener('pageshow', handlePageShow);
+    }
+
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('beforeunload', handleBeforeUnload);
+        window.removeEventListener('pageshow', handlePageShow);
+      }
+    };
+  }, [loading, lesson, lessonId]);
 
   // CRITICAL: Safety mechanism to prevent stuck loading states
   useEffect(() => {
@@ -496,6 +535,7 @@ export default function LessonDetailPage() {
         console.log('🖱️ Global click detected while stuck, resetting states');
         setNavigating(false);
         setIsVideoLoading(false);
+        setShowForceButton(false);
         
         // If we have data but are stuck loading, reset
         if (loading && lesson && lesson.id === lessonId) {
@@ -837,86 +877,15 @@ export default function LessonDetailPage() {
     
     return (
       <PageLayout 
-        title={isWaitingForVisibility ? "Wachten op tab focus..." : "Les laden..."}
-        subtitle={isWaitingForVisibility ? "Klik op dit tabblad om door te gaan" : "Even geduld..."}
+        title="Les laden..."
+        subtitle="Even geduld..."
       >
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
             <p className="text-gray-300">
-              {isWaitingForVisibility ? "Tabblad is niet actief - klik hier om door te gaan" : "Les laden..."}
+              Les laden...
             </p>
-            
-            {/* Debug info and force continue button */}
-            <div className="mt-6 space-y-3">
-              {/* Debug info */}
-              <details className="text-left bg-gray-800 p-4 rounded-lg text-xs">
-                <summary className="cursor-pointer text-yellow-400">🔍 Debug Info (klik om uit te klappen)</summary>
-                <div className="mt-2 space-y-1 text-gray-300">
-                  <div>User: {user ? '✅' : '❌'}</div>
-                  <div>Module ID: {moduleId || 'undefined'}</div>
-                  <div>Lesson ID: {lessonId || 'undefined'}</div>
-                  <div>Loading: {loading ? '✅' : '❌'}</div>
-                  <div>Data Loaded: {isDataLoaded ? '✅' : '❌'}</div>
-                  <div>Navigating: {navigating ? '✅' : '❌'}</div>
-                  <div>Has Lesson: {lesson ? '✅' : '❌'}</div>
-                  <div>Lesson Match: {lesson?.id === lessonId ? '✅' : '❌'}</div>
-                  <div>Page Visible: {typeof document !== 'undefined' ? document.visibilityState : 'server'}</div>
-                  <div>Page Focus: {typeof document !== 'undefined' ? (document.hasFocus() ? '✅' : '❌') : 'server'}</div>
-                </div>
-              </details>
-              
-              {/* Force continue button */}
-              {showForceButton && (
-                <div>
-                  <p className="text-yellow-400 text-sm mb-3">Laden duurt langer dan verwacht...</p>
-                  <button
-                    onClick={handleForceContinue}
-                    className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors"
-                  >
-                    🔄 Forceer doorgaan
-                  </button>
-                </div>
-              )}
-              
-              {/* Force fetch button if waiting for visibility */}
-              {isWaitingForVisibility && (
-                <div>
-                  <p className="text-blue-400 text-sm mb-3">Tabblad is niet actief</p>
-                  <button
-                    onClick={() => {
-                      console.log('🚀 Force fetch despite hidden state');
-                      setIsDataLoaded(false);
-                      fetchData();
-                    }}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors mr-2"
-                  >
-                    ⚡ Forceer laden
-                  </button>
-                </div>
-              )}
-
-              {/* Emergency reset button - always available */}
-              <div>
-                <p className="text-orange-400 text-sm mb-3">Problemen met laden?</p>
-                <button
-                  onClick={handleEmergencyReset}
-                  className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
-                >
-                  🚨 Emergency Reset
-                </button>
-              </div>
-
-              {/* Manual refresh button - always available */}
-              <div>
-                <button
-                  onClick={() => window.location.reload()}
-                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-                >
-                  🔄 Pagina verversen
-                </button>
-              </div>
-            </div>
           </div>
         </div>
       </PageLayout>
@@ -1014,6 +983,7 @@ export default function LessonDetailPage() {
                     setNavigating(false);
                     setLoading(false);
                     setIsDataLoaded(false);
+                    setShowForceButton(false);
                   }
                   
                   // Reset any stuck states before navigation
@@ -1046,6 +1016,7 @@ export default function LessonDetailPage() {
                     setNavigating(false);
                     setLoading(false);
                     setIsDataLoaded(false);
+                    setShowForceButton(false);
                   }
                   
                   // Reset any stuck states before navigation

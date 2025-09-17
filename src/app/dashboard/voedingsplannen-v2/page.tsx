@@ -114,6 +114,27 @@ export default function VoedingsplannenV2Page() {
   const [editingMealType, setEditingMealType] = useState<string>('');
   const [editingDay, setEditingDay] = useState<string>('');
 
+  // Reset modal state when component mounts
+  useEffect(() => {
+    setShowIngredientModal(false);
+    setEditingMealType('');
+    setEditingDay('');
+  }, []);
+
+  // Reset modal state when no plan is selected
+  useEffect(() => {
+    if (!selectedPlan) {
+      setShowIngredientModal(false);
+      setEditingMealType('');
+      setEditingDay('');
+    }
+  }, [selectedPlan]);
+
+  // Debug: Log modal state changes
+  useEffect(() => {
+    console.log('🔧 DEBUG: Modal state changed:', { showIngredientModal, editingMealType, editingDay });
+  }, [showIngredientModal, editingMealType, editingDay]);
+
   // Days of the week
   const days = ['maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag', 'zondag'];
 
@@ -153,13 +174,42 @@ export default function VoedingsplannenV2Page() {
   // Function to reset all custom amounts
   const resetAllCustomAmounts = () => {
     setCustomAmounts({});
+    console.log('🔄 All custom amounts reset');
+  };
+
+  // Function to check if all days have the same structure
+  const checkDayConsistency = () => {
+    if (!originalPlanData?.meals?.weekly_plan) return;
+    
+    const days = ['maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag', 'zondag'];
+    const firstDay = days[0];
+    const firstDayData = originalPlanData.meals.weekly_plan[firstDay];
+    
+    if (!firstDayData) return;
+    
+    console.log('🔍 Checking day consistency...');
+    days.forEach(day => {
+      const dayData = originalPlanData.meals.weekly_plan[day];
+      if (dayData) {
+        const dayTotals = calculateDayTotals(day);
+        console.log(`📊 ${day} totals:`, dayTotals);
+      }
+    });
   };
 
   // Function to open ingredient edit modal
   const openIngredientModal = (mealType: string, day: string) => {
     console.log('🔧 DEBUG: openIngredientModal called with:', { mealType, day });
     console.log('🔧 DEBUG: Current modal state before change:', { showIngredientModal, editingMealType, editingDay });
+    console.log('🔧 DEBUG: Selected plan:', selectedPlan?.name);
     
+    // Only open modal if a plan is selected
+    if (!selectedPlan) {
+      console.log('🔧 DEBUG: No plan selected, cannot open modal');
+      return;
+    }
+    
+    // Set all values at once
     setEditingMealType(mealType);
     setEditingDay(day);
     setShowIngredientModal(true);
@@ -170,11 +220,6 @@ export default function VoedingsplannenV2Page() {
     setTimeout(() => {
       console.log('🔧 DEBUG: Modal state after timeout:', { showIngredientModal, editingMealType, editingDay });
     }, 100);
-    
-    // Additional debug: Force a re-render check
-    setTimeout(() => {
-      console.log('🔧 DEBUG: Force re-render check - modal should be visible now');
-    }, 200);
   };
 
   // Function to save edited ingredients
@@ -242,6 +287,7 @@ export default function VoedingsplannenV2Page() {
         
         meal.ingredients.forEach((ingredient: any, index: number) => {
           // Get custom amount or use original amount
+          // IMPORTANT: Only apply custom amounts if they exist for this specific day
           const ingredientKey = getIngredientKey(mealType, ingredient.name, day);
           const customAmount = customAmounts[ingredientKey];
           let amount = customAmount !== undefined ? customAmount : (ingredient.amount || 0);
@@ -257,6 +303,7 @@ export default function VoedingsplannenV2Page() {
             customAmount: customAmount,
             finalAmount: amount,
             unit: ingredient.unit,
+            hasCustomAmount: customAmount !== undefined,
             calories_per_100g: ingredient.calories_per_100g,
             protein_per_100g: ingredient.protein_per_100g,
             carbs_per_100g: ingredient.carbs_per_100g,
@@ -294,7 +341,7 @@ export default function VoedingsplannenV2Page() {
       }
     });
 
-    console.log('📊 Final day totals:', totals);
+    console.log('📊 Final day totals for', day, ':', totals);
     return totals;
   };
 
@@ -489,12 +536,17 @@ export default function VoedingsplannenV2Page() {
     });
 
     // Scale ingredients for each day and meal with realistic constraints
-    Object.keys(scaledPlan.meals.weekly_plan).forEach(day => {
+    const days = Object.keys(scaledPlan.meals.weekly_plan);
+    console.log(`🧠 Scaling ${days.length} days:`, days);
+    
+    days.forEach(day => {
       const dayData = scaledPlan.meals.weekly_plan[day];
+      console.log(`🧠 Processing day: ${day}`);
       
       ['ontbijt', 'ochtend_snack', 'lunch', 'lunch_snack', 'diner', 'avond_snack'].forEach(mealType => {
         const meal = dayData[mealType];
         if (meal && meal.ingredients && Array.isArray(meal.ingredients)) {
+          console.log(`🧠 Processing ${day} ${mealType} with ${meal.ingredients.length} ingredients`);
           
           // Apply realistic scaling based on unit type
           meal.ingredients.forEach((ingredient: any) => {
@@ -506,12 +558,12 @@ export default function VoedingsplannenV2Page() {
               if (ingredient.unit === 'per_piece' || ingredient.unit === 'per_plakje' || ingredient.unit === 'stuk') {
                 // Whole pieces: round to nearest whole number, minimum 1
                 newAmount = Math.max(1, Math.round(newAmount));
-                console.log(`🧠 ${ingredient.name}: ${originalAmount} → ${newAmount} ${ingredient.unit} (whole piece)`);
+                console.log(`🧠 ${day} ${ingredient.name}: ${originalAmount} → ${newAmount} ${ingredient.unit} (whole piece)`);
               } else {
                 // All other items: round to 1 decimal place
                 newAmount = Math.round(newAmount * 10) / 10;
                 if (newAmount < 0.1) newAmount = 0.1; // Minimum 0.1
-                console.log(`🧠 ${ingredient.name}: ${originalAmount} → ${newAmount} ${ingredient.unit} (1 decimal)`);
+                console.log(`🧠 ${day} ${ingredient.name}: ${originalAmount} → ${newAmount} ${ingredient.unit} (1 decimal)`);
               }
               
               ingredient.amount = newAmount;
@@ -521,6 +573,7 @@ export default function VoedingsplannenV2Page() {
           // Recalculate meal totals after scaling
           const mealTotals = calculateMealTotals(meal);
           meal.totals = mealTotals;
+          console.log(`🧠 ${day} ${mealType} totals after scaling:`, mealTotals);
         }
       });
       
@@ -536,10 +589,11 @@ export default function VoedingsplannenV2Page() {
       const fatPercentage = (currentDayTotals.fat / targetFat) * 100;
       
       console.log(`🧠 Day ${day} fat percentage: ${fatPercentage.toFixed(1)}% (target: 100%)`);
+      console.log(`🧠 Day ${day} totals:`, currentDayTotals);
       
       // If fat is too low (< 95%), increase meat/fat-rich ingredients
       if (fatPercentage < 95) {
-        console.log(`🧠 Fat too low (${fatPercentage.toFixed(1)}%), fine-tuning meat portions...`);
+        console.log(`🧠 Fat too low (${fatPercentage.toFixed(1)}%), fine-tuning meat portions for ${day}...`);
         
         // Calculate how much fat we need to add
         const fatNeeded = targetFat - currentDayTotals.fat;
@@ -548,6 +602,7 @@ export default function VoedingsplannenV2Page() {
         ['diner', 'lunch', 'ontbijt', 'ochtend_snack'].forEach(mealType => { // Check all meals
           const meal = dayData[mealType];
           if (meal && meal.ingredients && Array.isArray(meal.ingredients)) {
+            console.log(`🧠 Fine-tuning ${day} ${mealType}...`);
             meal.ingredients.forEach((ingredient: any) => {
               // Increase meat and fat-rich ingredients more aggressively
               if (ingredient.unit === 'per_100g' && 
@@ -575,6 +630,7 @@ export default function VoedingsplannenV2Page() {
             // Recalculate meal totals after fine-tuning
             const mealTotals = calculateMealTotals(meal);
             meal.totals = mealTotals;
+            console.log(`🧠 ${day} ${mealType} totals after fine-tuning:`, mealTotals);
           }
         });
         
@@ -586,11 +642,24 @@ export default function VoedingsplannenV2Page() {
         }
         
         const newFatPercentage = (updatedDayTotals.fat / targetFat) * 100;
-        console.log(`🧠 After fine-tuning: ${newFatPercentage.toFixed(1)}% fat (improvement: ${(newFatPercentage - fatPercentage).toFixed(1)}%)`);
+        console.log(`🧠 After fine-tuning ${day}: ${newFatPercentage.toFixed(1)}% fat (improvement: ${(newFatPercentage - fatPercentage).toFixed(1)}%)`);
       }
     });
 
     console.log('✅ Realistic Smart Scaling applied');
+    
+    // Debug: Check if scaling was applied correctly
+    console.log('🔍 Post-scaling verification:');
+    days.forEach(day => {
+      const dayData = scaledPlan.meals.weekly_plan[day];
+      if (dayData.ontbijt && dayData.ontbijt.ingredients) {
+        const kaasIngredient = dayData.ontbijt.ingredients.find((ing: any) => ing.name === 'Kaas 30+');
+        if (kaasIngredient) {
+          console.log(`🔍 ${day} Kaas 30+: ${kaasIngredient.amount} plakjes`);
+        }
+      }
+    });
+    
     return scaledPlan;
   };
 
@@ -801,6 +870,11 @@ export default function VoedingsplannenV2Page() {
         },
         allPlanKeys: Object.keys(data.plan)
       });
+      
+      // Check day consistency after loading
+      setTimeout(() => {
+        checkDayConsistency();
+      }, 100);
       
       // Log detailed ingredient structure for first meal
       if (data.plan.meals?.weekly_plan?.maandag?.ontbijt) {
@@ -1186,19 +1260,19 @@ export default function VoedingsplannenV2Page() {
             {/* Day Tabs and Controls */}
             <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
               <div className="flex flex-wrap gap-2">
-                {days.map((day) => (
-                  <button
-                    key={day}
-                    onClick={() => setSelectedDay(day)}
-                    className={`px-4 py-2 rounded-lg font-semibold transition-all duration-200 capitalize ${
-                      selectedDay === day
-                        ? 'bg-[#8BAE5A] text-[#181F17]'
-                        : 'bg-[#0A0F0A] text-white hover:bg-[#3A4D23] border border-[#3A4D23]'
-                    }`}
-                  >
-                    {day}
-                  </button>
-                ))}
+              {days.map((day) => (
+                <button
+                  key={day}
+                  onClick={() => setSelectedDay(day)}
+                  className={`px-4 py-2 rounded-lg font-semibold transition-all duration-200 capitalize ${
+                    selectedDay === day
+                      ? 'bg-[#8BAE5A] text-[#181F17]'
+                      : 'bg-[#0A0F0A] text-white hover:bg-[#3A4D23] border border-[#3A4D23]'
+                  }`}
+                >
+                  {day}
+                </button>
+              ))}
               </div>
               
               {/* Reset All Button */}
@@ -1211,11 +1285,56 @@ export default function VoedingsplannenV2Page() {
                   Reset Alle Aantallen
                 </button>
               )}
+              
+              {/* Debug Button */}
+              <button
+                onClick={checkDayConsistency}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-all duration-200 flex items-center gap-2"
+              >
+                <span>🔍</span>
+                Check Dag Consistentie
+              </button>
+              
+              {/* Debug Modal Button */}
+              <button
+                onClick={() => {
+                  console.log('🔧 DEBUG: Test modal button clicked');
+                  console.log('🔧 DEBUG: Selected plan:', selectedPlan?.name);
+                  if (selectedPlan) {
+                    openIngredientModal('ontbijt', 'maandag');
+                  } else {
+                    console.log('🔧 DEBUG: No plan selected, cannot test modal');
+                  }
+                }}
+                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-semibold transition-all duration-200 flex items-center gap-2"
+              >
+                <span>🧪</span>
+                Test Modal
+              </button>
             </div>
             
             {/* Daily Totals Progress Bars */}
             {originalPlanData && (
               <div className="bg-[#0A0F0A] rounded-lg p-6 mb-6">
+                {/* Safe Range Information */}
+                <div className="bg-[#1A2A1A] border border-[#3A4D23] rounded-lg p-4 mb-6">
+                  <div className="flex items-start space-x-3">
+                    <div className="flex-shrink-0">
+                      <div className="w-8 h-8 bg-[#8BAE5A] rounded-full flex items-center justify-center">
+                        <span className="text-[#181F17] text-sm font-bold">ℹ️</span>
+                      </div>
+                    </div>
+                    <div className="flex-1">
+                      <h5 className="text-[#B6C948] font-semibold text-sm mb-2">Veilige Range</h5>
+                      <p className="text-gray-300 text-sm leading-relaxed">
+                        We begrijpen dat het lastig is om exact alle waardes op 100% te krijgen. 
+                        <span className="text-[#8BAE5A] font-medium"> Zolang je binnen de veilige range van -100kcal en +100kcal zit, zit je goed.</span> 
+                        Je hoeft niet naar perfectie te streven - consistentie is belangrijker dan perfectie.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
                 <h4 className="text-[#B6C948] font-bold text-lg mb-4 capitalize">
                   {selectedDay} - Dagtotalen
                 </h4>
@@ -1337,19 +1456,19 @@ export default function VoedingsplannenV2Page() {
                               {mealTypeLabel}
                             </h5>
                             <div className="flex items-center gap-4">
-                              <div className="flex gap-6 text-sm">
-                                <div className="text-[#B6C948] font-medium">
-                                  {mealTotals.calories.toFixed(1)} kcal
-                                </div>
-                                <div className="text-white">
-                                  P: {mealTotals.protein.toFixed(1)}g
-                                </div>
-                                <div className="text-white">
-                                  K: {mealTotals.carbs.toFixed(1)}g
-                                </div>
-                                <div className="text-white">
-                                  V: {mealTotals.fat.toFixed(1)}g
-                                </div>
+                            <div className="flex gap-6 text-sm">
+                              <div className="text-[#B6C948] font-medium">
+                                {mealTotals.calories.toFixed(1)} kcal
+                              </div>
+                              <div className="text-white">
+                                P: {mealTotals.protein.toFixed(1)}g
+                              </div>
+                              <div className="text-white">
+                                K: {mealTotals.carbs.toFixed(1)}g
+                              </div>
+                              <div className="text-white">
+                                V: {mealTotals.fat.toFixed(1)}g
+                              </div>
                               </div>
                               <button
                                 onClick={() => {
@@ -1570,942 +1689,4 @@ export default function VoedingsplannenV2Page() {
       </div>
     );
   }
-
-  return (
-    <div className="min-h-screen bg-[#0A0F0A] p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <motion.div 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 bg-gradient-to-r from-[#B6C948] to-[#8BAE5A] rounded-full flex items-center justify-center">
-              <RocketLaunchIcon className="w-6 h-6 text-[#181F17]" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold text-white">Voedingsplannen V2</h1>
-              <p className="text-[#B6C948]">Slimme schalingsfactor met AI-optimalisatie</p>
-            </div>
-          </div>
-          
-          <div className="bg-[#181F17] border border-[#B6C948] rounded-lg p-4">
-            <div className="flex items-start gap-3">
-              <div className="w-6 h-6 bg-[#B6C948] rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                <span className="text-[#181F17] text-xs font-bold">!</span>
-              </div>
-              <div>
-                <h3 className="text-white font-semibold mb-1">Slimme Schalingsfactor</h3>
-                <p className="text-[#8BAE5A] text-sm">
-                  Deze V2 versie gebruikt geavanceerde AI-algoritmes om voedingsplannen automatisch 
-                  te optimaliseren op basis van jouw gewicht en doelen. Elke portie wordt precies 
-                  berekend voor maximale resultaten.
-                </p>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* User Profile Section */}
-        <motion.div 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="mb-8"
-        >
-          <div className="bg-[#181F17] border border-[#3A4D23] rounded-xl p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-r from-[#B6C948] to-[#8BAE5A] rounded-full flex items-center justify-center">
-                  <UserIcon className="w-5 h-5 text-[#181F17]" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-white">Jouw Profiel</h3>
-                  <p className="text-[#8BAE5A]">Voor slimme schalingsfactor</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setShowUserProfileForm(!showUserProfileForm)}
-                className="px-4 py-2 bg-[#3A4D23] text-[#8BAE5A] rounded-lg hover:bg-[#4A5D33] transition-colors"
-              >
-                {showUserProfileForm ? 'Sluiten' : 'Bewerken'}
-              </button>
-            </div>
-
-            {/* Current Profile Display */}
-            <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-4">
-              <div className="bg-[#0A0F0A] rounded-lg p-3">
-                <p className="text-[#8BAE5A] text-sm">Gewicht</p>
-                <p className="text-white font-semibold">{userProfile.weight} kg</p>
-              </div>
-              <div className="bg-[#0A0F0A] rounded-lg p-3">
-                <p className="text-[#8BAE5A] text-sm">Lengte</p>
-                <p className="text-white font-semibold">{userProfile.height} cm</p>
-              </div>
-              <div className="bg-[#0A0F0A] rounded-lg p-3">
-                <p className="text-[#8BAE5A] text-sm">Leeftijd</p>
-                <p className="text-white font-semibold">{userProfile.age} jaar</p>
-              </div>
-              <div className="bg-[#0A0F0A] rounded-lg p-3">
-                <p className="text-[#8BAE5A] text-sm">Geslacht</p>
-                <p className="text-white font-semibold capitalize">{userProfile.gender === 'male' ? 'Man' : 'Vrouw'}</p>
-              </div>
-              <div className="bg-[#0A0F0A] rounded-lg p-3">
-                <p className="text-[#8BAE5A] text-sm">Activiteit</p>
-                <p className="text-white font-semibold">
-                  {userProfile.activity_level === 'sedentary' ? 'Zittend (1.1x)' :
-                   userProfile.activity_level === 'moderate' ? 'Staand (1.3x)' :
-                   userProfile.activity_level === 'very_active' ? 'Lopend (1.6x)' : userProfile.activity_level}
-                </p>
-              </div>
-              <div className="bg-[#0A0F0A] rounded-lg p-3">
-                <p className="text-[#8BAE5A] text-sm">Doel</p>
-                <p className="text-white font-semibold">
-                  {userProfile.fitness_goal === 'droogtrainen' ? 'Droogtrainen (-500 kcal)' :
-                   userProfile.fitness_goal === 'onderhoud' ? 'Onderhoud (basis)' :
-                   userProfile.fitness_goal === 'spiermassa' ? 'Spiermassa (+400 kcal)' : userProfile.fitness_goal}
-                </p>
-              </div>
-            </div>
-
-            {/* Profile Form */}
-            {showUserProfileForm && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                className="border-t border-[#3A4D23] pt-4"
-              >
-                <form onSubmit={(e) => {
-                  e.preventDefault();
-                  const formData = new FormData(e.currentTarget);
-                  saveUserProfile({
-                    weight: Number(formData.get('weight')),
-                    height: Number(formData.get('height')),
-                    age: Number(formData.get('age')),
-                    gender: formData.get('gender') as 'male' | 'female',
-                    activity_level: formData.get('activity_level') as any,
-                    fitness_goal: formData.get('fitness_goal') as any,
-                  });
-                }}>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                    <div>
-                      <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Gewicht (kg)</label>
-                      <input
-                        type="number"
-                        name="weight"
-                        defaultValue={userProfile.weight}
-                        className="w-full px-3 py-2 bg-[#0A0F0A] border border-[#3A4D23] rounded-lg text-white focus:border-[#8BAE5A] focus:outline-none"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Lengte (cm)</label>
-                      <input
-                        type="number"
-                        name="height"
-                        defaultValue={userProfile.height}
-                        className="w-full px-3 py-2 bg-[#0A0F0A] border border-[#3A4D23] rounded-lg text-white focus:border-[#8BAE5A] focus:outline-none"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Leeftijd</label>
-                      <input
-                        type="number"
-                        name="age"
-                        defaultValue={userProfile.age}
-                        className="w-full px-3 py-2 bg-[#0A0F0A] border border-[#3A4D23] rounded-lg text-white focus:border-[#8BAE5A] focus:outline-none"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                    <div>
-                      <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Geslacht</label>
-                      <select
-                        name="gender"
-                        defaultValue={userProfile.gender}
-                        className="w-full px-3 py-2 bg-[#0A0F0A] border border-[#3A4D23] rounded-lg text-white focus:border-[#8BAE5A] focus:outline-none"
-                      >
-                        <option value="male">Man</option>
-                        <option value="female">Vrouw</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Activiteitsniveau</label>
-                      <select
-                        name="activity_level"
-                        defaultValue={userProfile.activity_level}
-                        className="w-full px-3 py-2 bg-[#0A0F0A] border border-[#3A4D23] rounded-lg text-white focus:border-[#8BAE5A] focus:outline-none"
-                      >
-                        <option value="sedentary">Zittend (1.1x) - Licht actief</option>
-                        <option value="moderate">Staand (1.3x) - Matig actief</option>
-                        <option value="very_active">Lopend (1.6x) - Zeer actief</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Fitness Doel</label>
-                      <select
-                        name="fitness_goal"
-                        defaultValue={userProfile.fitness_goal}
-                        className="w-full px-3 py-2 bg-[#0A0F0A] border border-[#3A4D23] rounded-lg text-white focus:border-[#8BAE5A] focus:outline-none"
-                      >
-                        <option value="droogtrainen">Droogtrainen (-500 kcal)</option>
-                        <option value="onderhoud">Onderhoud (basis plan)</option>
-                        <option value="spiermassa">Spiermassa (+400 kcal)</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-3">
-                    <button
-                      type="submit"
-                      className="px-6 py-2 bg-gradient-to-r from-[#B6C948] to-[#8BAE5A] text-[#181F17] rounded-lg hover:opacity-90 transition-opacity font-semibold"
-                    >
-                      Profiel Opslaan
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setShowUserProfileForm(false)}
-                      className="px-6 py-2 bg-[#3A4D23] text-[#8BAE5A] rounded-lg hover:bg-[#4A5D33] transition-colors"
-                    >
-                      Annuleren
-                    </button>
-                  </div>
-                </form>
-              </motion.div>
-            )}
-
-            {/* Backend Formula Information */}
-            <div className="mt-4 p-4 bg-gradient-to-r from-[#3A4D23]/20 to-[#8BAE5A]/20 rounded-lg border border-[#3A4D23]/30">
-              <div className="flex items-center gap-2 mb-2">
-                <InformationCircleIcon className="w-5 h-5 text-[#8BAE5A]" />
-                <h4 className="text-[#8BAE5A] font-semibold">Backend Formules</h4>
-              </div>
-              <div className="text-sm text-gray-300 space-y-1">
-                <p><strong>TTM Formule:</strong> Gewicht × 22 × Activiteitsniveau</p>
-                <p><strong>Basis Plan:</strong> 100kg, Matig actief (1.3x), Onderhoud</p>
-                <p><strong>Activiteit:</strong> Zittend (1.1x) → Staand (1.3x) → Lopend (1.6x)</p>
-                <p><strong>Doelen:</strong> Droogtrainen (-500 kcal) → Onderhoud (basis) → Spiermassa (+400 kcal)</p>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Plans Grid */}
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8"
-        >
-          {(() => {
-            const filteredPlans = plans.filter((plan) => {
-              // Filter plans based on selected fitness goal
-              const planGoal = plan.goal?.toLowerCase();
-              const userGoal = userProfile.fitness_goal;
-              
-              console.log('🔧 DEBUG: Filtering plan:', { 
-                planName: plan.name, 
-                planGoal, 
-                userGoal, 
-                matches: planGoal === userGoal 
-              });
-              
-              return planGoal === userGoal;
-            });
-            
-            // If no plans match the fitness goal, show all plans
-            if (filteredPlans.length === 0) {
-              console.log('🔧 DEBUG: No plans match fitness goal, showing all plans');
-              return plans.map((plan) => {
-                const personalizedTargets = calculatePersonalizedTargets(plan);
-                return (
-                  <motion.div
-                    key={plan.id}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className={`bg-[#181F17] border rounded-xl p-6 cursor-pointer transition-all duration-200 ${
-                      selectedPlan?.id === plan.id
-                        ? 'border-[#B6C948] bg-[#181F17]/50'
-                        : 'border-[#3A4D23] hover:border-[#8BAE5A]'
-                    }`}
-                    onClick={() => handlePlanSelect(plan)}
-                  >
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-xl font-bold text-white">{plan.name}</h3>
-                      <span className="text-xs text-[#8BAE5A] bg-[#3A4D23] px-2 py-1 rounded">
-                        {plan.goal}
-                      </span>
-                    </div>
-                    <p className="text-[#8BAE5A] text-sm mb-4">{plan.description}</p>
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <span className="text-[#8BAE5A]">Calorieën:</span>
-                        <span className="text-white font-semibold">{personalizedTargets.targetCalories} kcal</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-[#8BAE5A]">Eiwit:</span>
-                        <span className="text-white font-semibold">{personalizedTargets.targetProtein}g</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-[#8BAE5A]">Koolhydraten:</span>
-                        <span className="text-white font-semibold">{personalizedTargets.targetCarbs}g</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-[#8BAE5A]">Vet:</span>
-                        <span className="text-white font-semibold">{personalizedTargets.targetFat}g</span>
-                      </div>
-                    </div>
-                  </motion.div>
-                );
-              });
-            }
-            
-            // Show filtered plans
-            return filteredPlans.map((plan) => {
-            // Calculate personalized targets for this plan
-            const personalizedTargets = calculatePersonalizedTargets(plan);
-            
-            return (
-            <motion.div
-              key={plan.id}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className={`bg-[#181F17] border rounded-xl p-6 cursor-pointer transition-all duration-200 ${
-                selectedPlan?.id === plan.id 
-                  ? 'border-[#B6C948] bg-[#181F17]/50' 
-                  : 'border-[#3A4D23] hover:border-[#8BAE5A]'
-              }`}
-              onClick={() => handlePlanSelect(plan)}
-            >
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-r from-[#B6C948] to-[#8BAE5A] rounded-lg flex items-center justify-center">
-                    <BookOpenIcon className="w-5 h-5 text-[#181F17]" />
-                  </div>
-                  <div>
-                    <h3 className="text-white font-semibold text-lg">{plan.name}</h3>
-                    <p className="text-[#8BAE5A] text-sm capitalize">{plan.goal}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-1">
-                  <span className="px-2 py-1 bg-[#B6C948] text-[#181F17] text-xs font-bold rounded-full">
-                    V2
-                  </span>
-                  {plan.difficulty === 'advanced' && (
-                    <span className="px-2 py-1 bg-red-600 text-white text-xs font-bold rounded-full">
-                      ADV
-                    </span>
-                  )}
-                </div>
-              </div>
-              
-              <p className="text-[#8BAE5A] text-sm mb-4">{plan.description}</p>
-              
-              {/* Personalized targets based on user profile */}
-              <div className="bg-[#0A0F0A] rounded-lg p-3 mb-4">
-                <div className="flex items-center justify-between mb-2">
-                  <p className="text-[#B6C948] font-semibold text-sm">Gepersonaliseerd voor jou:</p>
-                  <p className="text-gray-400 text-xs">{userProfile.weight}kg • {userProfile.activity_level} • {plan.goal}</p>
-                </div>
-                <div className="grid grid-cols-2 gap-2 text-xs">
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Calorieën:</span>
-                    <span className="text-white font-semibold">{personalizedTargets.targetCalories} kcal</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Eiwit:</span>
-                    <span className="text-white font-semibold">{personalizedTargets.targetProtein}g</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Koolhydraten:</span>
-                    <span className="text-white font-semibold">{personalizedTargets.targetCarbs}g</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Vet:</span>
-                    <span className="text-white font-semibold">{personalizedTargets.targetFat}g</span>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Original backend values for reference */}
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <p className="text-[#B6C948] font-semibold">{plan.target_calories} kcal</p>
-                  <p className="text-gray-400">Backend (100kg)</p>
-                </div>
-                <div>
-                  <p className="text-[#B6C948] font-semibold">{plan.target_protein}g</p>
-                  <p className="text-gray-400">Backend (100kg)</p>
-                </div>
-                <div>
-                  <p className="text-[#B6C948] font-semibold">{plan.target_carbs}g</p>
-                  <p className="text-gray-400">Backend (100kg)</p>
-                </div>
-                <div>
-                  <p className="text-[#B6C948] font-semibold">{plan.target_fat}g</p>
-                  <p className="text-gray-400">Backend (100kg)</p>
-                </div>
-              </div>
-            </motion.div>
-            );
-          });
-        })()}
-        </motion.div>
-
-        {/* TTM Formula Info */}
-        <div className="bg-[#0A0F0A] rounded-lg p-6 mb-8">
-          <h3 className="text-[#B6C948] font-bold text-lg mb-4">TTM Formule Uitleg</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h4 className="text-white font-semibold mb-2">Basis Formule:</h4>
-              <p className="text-gray-300 text-sm mb-3">
-                <span className="text-[#B6C948] font-mono">Gewicht × 22 × Activiteitsniveau</span>
-              </p>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Jouw berekening:</span>
-                  <span className="text-white">{userProfile.weight}kg × 22 × {userProfile.activity_level === 'sedentary' ? '1.1' : userProfile.activity_level === 'moderate' ? '1.3' : '1.6'}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Basis calorieën:</span>
-                  <span className="text-white">{calculatePersonalizedTargets(plans[0] || {}).baseCalories} kcal</span>
-                </div>
-              </div>
-            </div>
-            <div>
-              <h4 className="text-white font-semibold mb-2">Doel Aanpassingen:</h4>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Droogtrainen:</span>
-                  <span className="text-red-400">-500 kcal</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Onderhoud:</span>
-                  <span className="text-green-400">0 kcal</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Spiermassa:</span>
-                  <span className="text-blue-400">+400 kcal</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Jouw aanpassing:</span>
-                  <span className="text-white">Afhankelijk van plan doel</span>
-                </div>
-                <div className="text-xs text-gray-400 mt-2">
-                  <div>• Droogtrainen: -500 kcal</div>
-                  <div>• Onderhoud: 0 kcal</div>
-                  <div>• Spiermassa: +400 kcal</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Debug Info */}
-        {process.env.NODE_ENV === 'development' && (
-          <div className="mb-4 p-4 bg-gray-800 text-white text-xs rounded">
-            <p>Debug: selectedPlan={selectedPlan?.name || 'null'}, originalPlanData={originalPlanData?.name || 'null'}, showOriginalData={showOriginalData.toString()}</p>
-            <p>Loading states: loading={loading.toString()}, loadingOriginal={loadingOriginal.toString()}, loadingScaling={loadingScaling.toString()}</p>
-          </div>
-        )}
-
-        {/* Original Plan Data */}
-        {selectedPlan && originalPlanData && showOriginalData && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-[#181F17] border border-[#3A4D23] rounded-xl p-6 mb-6"
-          >
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-r from-[#3A4D23] to-[#8BAE5A] rounded-full flex items-center justify-center">
-                  <BookOpenIcon className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-white">Originele Backend Data</h3>
-                  <p className="text-[#8BAE5A]">1:1 zoals opgeslagen in database</p>
-                </div>
-              </div>
-              <button
-                onClick={() => {
-                  setShowOriginalData(false);
-                  if (!scalingInfo) {
-                    applySmartScaling(originalPlanData, userProfile);
-                  }
-                }}
-                disabled={loadingScaling}
-                className="px-4 py-2 bg-gradient-to-r from-[#B6C948] to-[#8BAE5A] text-[#181F17] rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-2"
-              >
-                {loadingScaling ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-[#181F17] border-t-transparent rounded-full animate-spin"></div>
-                    <span>Bezig...</span>
-                  </>
-                ) : (
-                  <>
-                    <RocketLaunchIcon className="w-4 h-4" />
-                    <span>{scalingInfo ? 'Bekijk Smart Scaling' : 'Smart Scaling Toepassen'}</span>
-                  </>
-                )}
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Plan Info */}
-              <div className="space-y-4">
-                <h4 className="text-white font-semibold mb-3">Plan Informatie</h4>
-                
-                <div className="bg-[#0A0F0A] rounded-lg p-4 space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-[#8BAE5A]">Naam:</span>
-                    <span className="text-white font-semibold">{originalPlanData.name}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-[#8BAE5A]">Plan ID:</span>
-                    <span className="text-white font-mono text-sm">{originalPlanData.plan_id}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-[#8BAE5A]">Beschrijving:</span>
-                    <span className="text-white text-sm">{originalPlanData.description}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-[#8BAE5A]">Plan Doel:</span>
-                    <span className="text-white capitalize">{selectedPlan?.name?.includes('droogtrainen') ? 'Droogtrainen' : selectedPlan?.name?.includes('spiermassa') ? 'Spiermassa' : 'Onderhoud'}</span>
-                  </div>
-                </div>
-                
-                {/* User Profile Data */}
-                <div className="bg-[#0A0F0A] rounded-lg p-4 mt-4">
-                  <h5 className="text-white font-semibold mb-3">Jouw Ingevoerde Gegevens</h5>
-                  <div className="grid grid-cols-2 gap-3 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-[#8BAE5A]">Gewicht:</span>
-                      <span className="text-white font-semibold">{userProfile.weight}kg</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-[#8BAE5A]">Lengte:</span>
-                      <span className="text-white font-semibold">{userProfile.height}cm</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-[#8BAE5A]">Leeftijd:</span>
-                      <span className="text-white font-semibold">{userProfile.age} jaar</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-[#8BAE5A]">Geslacht:</span>
-                      <span className="text-white capitalize">{userProfile.gender === 'male' ? 'Man' : 'Vrouw'}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-[#8BAE5A]">Activiteit:</span>
-                      <span className="text-white">
-                        {userProfile.activity_level === 'sedentary' ? 'Zittend (1.1x)' : 
-                         userProfile.activity_level === 'moderate' ? 'Matig (1.3x)' : 
-                         'Actief (1.6x)'}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-[#8BAE5A]">Fitness Doel:</span>
-                      <span className="text-white capitalize">
-                        {userProfile.fitness_goal === 'droogtrainen' ? 'Droogtrainen' :
-                         userProfile.fitness_goal === 'onderhoud' ? 'Onderhoud' :
-                         userProfile.fitness_goal === 'spiermassa' ? 'Spiermassa' :
-                         userProfile.fitness_goal}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Macro Percentages */}
-                <div className="bg-[#0A0F0A] rounded-lg p-4 mt-4">
-                  <h5 className="text-white font-semibold mb-3">Macro Percentages van dit Plan (Backend Instellingen)</h5>
-                  <div className="grid grid-cols-3 gap-4 text-sm">
-                    <div className="text-center bg-[#181F17] rounded-lg p-3">
-                      <p className="text-blue-400 font-bold text-2xl">{(originalPlanData as any).protein_percentage || 0}%</p>
-                      <p className="text-white font-medium">Eiwit</p>
-                      <p className="text-xs text-gray-400 mt-1">4 kcal per gram</p>
-                    </div>
-                    <div className="text-center bg-[#181F17] rounded-lg p-3">
-                      <p className="text-yellow-400 font-bold text-2xl">{(originalPlanData as any).carbs_percentage || 0}%</p>
-                      <p className="text-white font-medium">Koolhydraten</p>
-                      <p className="text-xs text-gray-400 mt-1">4 kcal per gram</p>
-                    </div>
-                    <div className="text-center bg-[#181F17] rounded-lg p-3">
-                      <p className="text-red-400 font-bold text-2xl">{(originalPlanData as any).fat_percentage || 0}%</p>
-                      <p className="text-white font-medium">Vet</p>
-                      <p className="text-xs text-gray-400 mt-1">9 kcal per gram</p>
-                    </div>
-                  </div>
-                  <div className="mt-4 p-3 bg-[#181F17] rounded-lg text-sm">
-                    <p className="text-[#8BAE5A] font-semibold mb-2">📊 Macro Verdeling Uitleg:</p>
-                    <p className="text-gray-300 text-xs leading-relaxed">
-                      Deze percentages zijn direct uit de backend gehaald en bepalen hoe de totale calorieën verdeeld worden over de drie macro's. 
-                      Voor jouw plan betekent dit: <span className="text-white font-medium">{(originalPlanData as any).protein_percentage || 0}% eiwit</span>, 
-                      <span className="text-white font-medium"> {(originalPlanData as any).carbs_percentage || 0}% koolhydraten</span>, en 
-                      <span className="text-white font-medium"> {(originalPlanData as any).fat_percentage || 0}% vet</span>.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Macro Targets */}
-              <div className="space-y-4">
-                <h4 className="text-white font-semibold mb-3">Gepersonaliseerde Macro Doelen</h4>
-                
-                <div className="bg-[#0A0F0A] rounded-lg p-4 space-y-3">
-                  <div className="mb-3 p-2 bg-[#181F17] rounded">
-                    <p className="text-[#B6C948] text-xs font-semibold">TTM Formule:</p>
-                    <p className="text-gray-400 text-xs">{userProfile.weight}kg × 22 × {userProfile.activity_level === 'sedentary' ? '1.1' : userProfile.activity_level === 'moderate' ? '1.3' : '1.6'} = {Math.round(userProfile.weight * 22 * (userProfile.activity_level === 'sedentary' ? 1.1 : userProfile.activity_level === 'moderate' ? 1.3 : 1.6))} kcal</p>
-                     <p className="text-gray-400 text-xs">Plan doel ({selectedPlan?.name?.includes('droogtrainen') ? 'Droogtrainen' : selectedPlan?.name?.includes('spiermassa') ? 'Spiermassa' : 'Onderhoud'}): {selectedPlan?.name?.includes('droogtrainen') ? '-500' : selectedPlan?.name?.includes('spiermassa') ? '+400' : '0'} kcal</p>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-[#8BAE5A]">Calorieën:</span>
-                    <div className="text-right">
-                      <span className="text-white font-semibold">{personalizedTargets?.targetCalories || originalPlanData.target_calories} kcal</span>
-                      <p className="text-gray-500 text-xs">Backend: {originalPlanData.target_calories} kcal</p>
-                    </div>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-[#8BAE5A]">Eiwit:</span>
-                    <div className="text-right">
-                      <span className="text-white font-semibold">{personalizedTargets?.targetProtein || originalPlanData.target_protein}g</span>
-                      <p className="text-gray-500 text-xs">Backend: {originalPlanData.target_protein}g</p>
-                    </div>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-[#8BAE5A]">Koolhydraten:</span>
-                    <div className="text-right">
-                      <span className="text-white font-semibold">{personalizedTargets?.targetCarbs || originalPlanData.target_carbs}g</span>
-                      <p className="text-gray-500 text-xs">Backend: {originalPlanData.target_carbs}g</p>
-                    </div>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-[#8BAE5A]">Vet:</span>
-                    <div className="text-right">
-                      <span className="text-white font-semibold">{personalizedTargets?.targetFat || originalPlanData.target_fat}g</span>
-                      <p className="text-gray-500 text-xs">Backend: {originalPlanData.target_fat}g</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Smart Scaling Daily Totals Progress Bars */}
-            {scalingInfo && originalPlanData && (
-              <div className="bg-[#0A0F0A] rounded-lg p-6 mb-6">
-                <h4 className="text-[#B6C948] font-bold text-lg mb-4 capitalize">
-                  {selectedDay} - Smart Scaling Dagtotalen
-                </h4>
-                
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  {/* Calories - Smart Scaling */}
-                  <div className="bg-[#181F17] rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-white font-semibold">Calorieën</span>
-                      <span className="text-[#8BAE5A] text-sm">100%</span>
-                    </div>
-                    <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
-                      <div className="h-2 rounded-full bg-green-500" style={{ width: '100%' }}></div>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-400">{scalingInfo.finalTotals?.calories || 0} kcal</span>
-                      <span className="text-white">{scalingInfo.adjustedCalories || 0} kcal</span>
-                    </div>
-                    <div className="text-xs mt-1 text-green-400">
-                      Geoptimaliseerd
-                    </div>
-                  </div>
-
-                  {/* Protein - Smart Scaling */}
-                  <div className="bg-[#181F17] rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-white font-semibold">Eiwit</span>
-                      <span className="text-[#8BAE5A] text-sm">100%</span>
-                    </div>
-                    <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
-                      <div className="h-2 rounded-full bg-green-500" style={{ width: '100%' }}></div>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-400">{scalingInfo.finalTotals?.protein || 0}g</span>
-                      <span className="text-white">{scalingInfo.adjustedProtein || 0}g</span>
-                    </div>
-                    <div className="text-xs mt-1 text-green-400">
-                      Geoptimaliseerd
-                    </div>
-                  </div>
-
-                  {/* Carbs - Smart Scaling */}
-                  <div className="bg-[#181F17] rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-white font-semibold">Koolhydraten</span>
-                      <span className="text-[#8BAE5A] text-sm">100%</span>
-                    </div>
-                    <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
-                      <div className="h-2 rounded-full bg-green-500" style={{ width: '100%' }}></div>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-400">{scalingInfo.finalTotals?.carbs || 0}g</span>
-                      <span className="text-white">{scalingInfo.adjustedCarbs || 0}g</span>
-                    </div>
-                    <div className="text-xs mt-1 text-green-400">
-                      Geoptimaliseerd
-                    </div>
-                  </div>
-
-                  {/* Fat - Smart Scaling */}
-                  <div className="bg-[#181F17] rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-white font-semibold">Vet</span>
-                      <span className="text-[#8BAE5A] text-sm">100%</span>
-                    </div>
-                    <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
-                      <div className="h-2 rounded-full bg-green-500" style={{ width: '100%' }}></div>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-400">{scalingInfo.finalTotals?.fat || 0}g</span>
-                      <span className="text-white">{scalingInfo.adjustedFat || 0}g</span>
-                    </div>
-                    <div className="text-xs mt-1 text-green-400">
-                      Geoptimaliseerd
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Detailed Meal Structure */}
-            <div className="mt-6">
-              <h4 className="text-white font-semibold mb-4">Gedetailleerde Eetmomenten</h4>
-              
-              {/* Day Tabs for Smart Scaling */}
-              <div className="flex flex-wrap gap-2 mb-6">
-                {days.map((day) => (
-                  <button
-                    key={day}
-                    onClick={() => setSelectedDay(day)}
-                    className={`px-4 py-2 rounded-lg font-semibold transition-all duration-200 capitalize ${
-                      selectedDay === day
-                        ? 'bg-[#8BAE5A] text-[#181F17]'
-                        : 'bg-[#0A0F0A] text-white hover:bg-[#3A4D23] border border-[#3A4D23]'
-                    }`}
-                  >
-                    {day}
-                  </button>
-                ))}
-              </div>
-              
-              {/* Selected Day Meals for Smart Scaling */}
-              {originalPlanData.meals?.weekly_plan && originalPlanData.meals.weekly_plan[selectedDay] && (
-                <div className="bg-[#0A0F0A] rounded-lg p-4">
-                  <h5 className="text-[#B6C948] font-semibold mb-4 capitalize">{selectedDay}</h5>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                    {['ontbijt', 'ochtend_snack', 'lunch', 'lunch_snack', 'diner'].map((mealType) => {
-                      const mealData = originalPlanData.meals.weekly_plan[selectedDay][mealType];
-                          const mealTypeLabel = mealType === 'ochtend_snack' ? 'Ochtend Snack' :
-                                               mealType === 'lunch_snack' ? 'Lunch Snack' :
-                                               mealType === 'ontbijt' ? 'Ontbijt' :
-                                               mealType === 'lunch' ? 'Lunch' :
-                                               mealType === 'diner' ? 'Diner' : mealType;
-
-                          return (
-                            <div key={mealType} className="bg-[#181F17] rounded-lg p-3">
-                              <h6 className="text-white font-medium mb-2">{mealTypeLabel}</h6>
-                              
-                              {mealData && mealData.ingredients ? (
-                                <div className="space-y-2">
-                                  <div className="text-xs text-[#8BAE5A] mb-2">
-                                    {mealData.ingredients.length} ingrediënten
-                                  </div>
-                                  
-                                  {/* Show first few ingredients */}
-                                  {mealData.ingredients.slice(0, 3).map((ingredient: any, index: number) => (
-                                    <div key={index} className="text-xs text-gray-400">
-                                      {ingredient.amount} {ingredient.unit} {ingredient.name}
-                                    </div>
-                                  ))}
-                                  
-                                  {mealData.ingredients.length > 3 && (
-                                    <div className="text-xs text-[#8BAE5A]">
-                                      +{mealData.ingredients.length - 3} meer...
-                                    </div>
-                                  )}
-                                  
-                                  {/* Show meal totals if available */}
-                                  {mealData.totals && (
-                                    <div className="text-xs text-[#B6C948] mt-2 pt-2 border-t border-[#3A4D23]">
-                                      <div>{mealData.totals.calories} kcal</div>
-                                      <div>P: {mealData.totals.protein}g</div>
-                                    </div>
-                                  )}
-                                </div>
-                              ) : (
-                                <div className="text-xs text-gray-500">Geen data</div>
-                              )}
-                            </div>
-                    );
-                  })}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="mt-6 p-4 bg-gradient-to-r from-[#3A4D23]/20 to-[#8BAE5A]/20 rounded-lg border border-[#3A4D23]/30">
-              <div className="flex items-center gap-2">
-                <CheckCircleIcon className="w-5 h-5 text-[#8BAE5A]" />
-                <p className="text-[#8BAE5A] font-semibold">
-                  Dit is de exacte data zoals opgeslagen in de backend database - 1:1 mapping.
-                </p>
-              </div>
-            </div>
-          </motion.div>
-        )}
-
-        {/* Smart Scaling Results */}
-        {selectedPlan && scalingInfo && !showOriginalData && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-[#181F17] border border-[#B6C948] rounded-xl p-6"
-          >
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-r from-[#B6C948] to-[#8BAE5A] rounded-full flex items-center justify-center">
-                  <ChartBarIcon className="w-5 h-5 text-[#181F17]" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-white">Slimme Schalingsresultaten</h3>
-                  <p className="text-[#B6C948]">Voor {selectedPlan.name}</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setShowOriginalData(true)}
-                className="px-4 py-2 bg-[#3A4D23] text-[#8BAE5A] rounded-lg hover:bg-[#4A5D33] transition-colors flex items-center gap-2"
-              >
-                <BookOpenIcon className="w-4 h-4" />
-                <span>Bekijk Originele Data</span>
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Scaling Info */}
-              <div className="space-y-4">
-                <h4 className="text-white font-semibold mb-3">Schalingsinformatie</h4>
-                
-                <div className="bg-[#0A0F0A] rounded-lg p-4">
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <p className="text-[#8BAE5A]">Jouw Gewicht</p>
-                      <p className="text-white font-semibold">{scalingInfo.userWeight || 0}kg</p>
-                    </div>
-                    <div>
-                      <p className="text-[#8BAE5A]">Basis Gewicht</p>
-                      <p className="text-white font-semibold">{scalingInfo.baseWeight || 0}kg</p>
-                    </div>
-                    <div className="col-span-2">
-                      <p className="text-[#8BAE5A]">Schalingsfactor</p>
-                      <p className="text-[#B6C948] font-bold text-lg">{(scalingInfo.scalingFactor || 0).toFixed(2)}x</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Macro Comparison */}
-              <div className="space-y-4">
-                <h4 className="text-white font-semibold mb-3">Macro Optimalisatie</h4>
-                
-                <div className="space-y-3">
-                  {/* Calories */}
-                  <div className="flex items-center justify-between bg-[#0A0F0A] rounded-lg p-3">
-                    <span className="text-[#8BAE5A]">Calorieën</span>
-                    <div className="text-right">
-                      <p className="text-white font-semibold">{scalingInfo.finalTotals?.calories || 0}</p>
-                      <p className="text-xs text-gray-400">
-                        {scalingInfo.originalTotals?.calories || 0} → {scalingInfo.finalTotals?.calories || 0}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Protein */}
-                  <div className="flex items-center justify-between bg-[#0A0F0A] rounded-lg p-3">
-                    <span className="text-[#8BAE5A]">Eiwit</span>
-                    <div className="text-right">
-                      <p className="text-white font-semibold">{scalingInfo.finalTotals?.protein || 0}g</p>
-                      <p className="text-xs text-gray-400">
-                        {scalingInfo.originalTotals?.protein || 0}g → {scalingInfo.finalTotals?.protein || 0}g
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Carbs */}
-                  <div className="flex items-center justify-between bg-[#0A0F0A] rounded-lg p-3">
-                    <span className="text-[#8BAE5A]">Koolhydraten</span>
-                    <div className="text-right">
-                      <p className="text-white font-semibold">{scalingInfo.finalTotals?.carbs || 0}g</p>
-                      <p className="text-xs text-gray-400">
-                        {scalingInfo.originalTotals?.carbs || 0}g → {scalingInfo.finalTotals?.carbs || 0}g
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Fat */}
-                  <div className="flex items-center justify-between bg-[#0A0F0A] rounded-lg p-3">
-                    <span className="text-[#8BAE5A]">Vet</span>
-                    <div className="text-right">
-                      <p className="text-white font-semibold">{scalingInfo.finalTotals?.fat || 0}g</p>
-                      <p className="text-xs text-gray-400">
-                        {scalingInfo.originalTotals?.fat || 0}g → {scalingInfo.finalTotals?.fat || 0}g
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-6 p-4 bg-gradient-to-r from-[#B6C948]/20 to-[#8BAE5A]/20 rounded-lg border border-[#B6C948]/30">
-              <div className="flex items-center gap-2">
-                <CheckCircleIcon className="w-5 h-5 text-[#B6C948]" />
-                <p className="text-[#B6C948] font-semibold">
-                  Slimme schalingsfactor succesvol toegepast! Jouw voedingsplan is nu geoptimaliseerd.
-                </p>
-              </div>
-            </div>
-          </motion.div>
-        )}
-
-        {/* Back Button */}
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4 }}
-          className="mt-8"
-        >
-          <button
-            onClick={() => router.push('/dashboard/voedingsplannen')}
-            className="flex items-center gap-2 px-6 py-3 bg-[#3A4D23] text-[#8BAE5A] rounded-lg hover:bg-[#4A5D33] transition-colors"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-            Terug naar Voedingsplannen
-          </button>
-        </motion.div>
-      </div>
-
-      {/* Ingredient Edit Modal */}
-      <IngredientEditModal
-        isOpen={showIngredientModal}
-        onClose={() => {
-          console.log('🔧 DEBUG: Modal onClose called');
-          setShowIngredientModal(false);
-        }}
-        ingredients={getCurrentIngredients()}
-        onSave={saveEditedIngredients}
-        mealType={editingMealType}
-        day={editingDay}
-      />
-    </div>
-  );
 }

@@ -59,6 +59,24 @@ export default function WelcomeVideoPage() {
             </p>
           </div>
 
+          {/* Video Instruction - Moved above video */}
+          <div className="mb-6 p-4 bg-[#FFD700]/10 border border-[#FFD700]/30 rounded-lg">
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0">
+                <svg className="w-5 h-5 text-[#FFD700] mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div>
+                <h4 className="text-[#FFD700] font-semibold text-sm mb-1">Belangrijke instructie</h4>
+                <p className="text-[#FFD700]/80 text-sm">
+                  Je moet eerst de welkomstvideo volledig bekijken voordat je naar de volgende stap kunt gaan. 
+                  De knop wordt pas beschikbaar nadat de video is afgespeeld.
+                </p>
+              </div>
+            </div>
+          </div>
+
           <div className="bg-black rounded-lg overflow-hidden mb-6">
             <video
               ref={videoRef}
@@ -106,10 +124,10 @@ export default function WelcomeVideoPage() {
               <button
                 onClick={handleNext}
                 disabled={loading}
-                className="px-8 py-4 bg-[#8BAE5A] text-[#181F17] rounded-lg font-semibold hover:bg-[#A6C97B] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full px-8 py-4 bg-[#8BAE5A] text-[#181F17] rounded-lg font-semibold hover:bg-[#A6C97B] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 justify-center">
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#181F17]"></div>
                     Bezig...
                   </div>
