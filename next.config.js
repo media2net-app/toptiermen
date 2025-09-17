@@ -2,8 +2,8 @@
 const nextConfig = {
   // Performance optimizations
   experimental: {
-    // Enable CSS optimization - DISABLED to fix CSS issues
-    optimizeCss: false,
+    // Enable CSS optimization
+    optimizeCss: true,
     optimizePackageImports: ['@heroicons/react'],
     // Enable TypeScript build cache
     typedRoutes: false,
