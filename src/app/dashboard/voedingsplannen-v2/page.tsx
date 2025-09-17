@@ -140,6 +140,8 @@ export default function VoedingsplannenV2Page() {
 
   // Function to update custom amounts
   const updateCustomAmount = (ingredientKey: string, amount: number) => {
+    console.log('🔄 updateCustomAmount called:', { ingredientKey, amount });
+    
     // Find the ingredient to check its unit type
     const [day, mealType, ingredientName] = ingredientKey.split('_');
     const mealData = originalPlanData?.meals?.weekly_plan?.[day]?.[mealType];
@@ -152,10 +154,16 @@ export default function VoedingsplannenV2Page() {
       finalAmount = Math.round(amount);
     }
     
-    setCustomAmounts(prev => ({
-      ...prev,
-      [ingredientKey]: finalAmount
-    }));
+    console.log('🔄 Setting custom amount:', { ingredientKey, finalAmount, originalAmount: amount });
+    
+    setCustomAmounts(prev => {
+      const newAmounts = {
+        ...prev,
+        [ingredientKey]: finalAmount
+      };
+      console.log('🔄 New customAmounts:', newAmounts);
+      return newAmounts;
+    });
   };
 
   // Function to get ingredient key for custom amounts
@@ -347,8 +355,11 @@ export default function VoedingsplannenV2Page() {
     return totals;
   };
 
-  // Get current day totals
-  const currentDayTotals = calculateDayTotals(selectedDay);
+  // Get current day totals - recalculate when customAmounts change
+  const currentDayTotals = React.useMemo(() => {
+    console.log('🔄 Recalculating day totals due to customAmounts change');
+    return calculateDayTotals(selectedDay);
+  }, [selectedDay, customAmounts, originalPlanData]);
 
   // Function to calculate meal totals
   const calculateMealTotals = (meal: any) => {
@@ -1720,26 +1731,26 @@ export default function VoedingsplannenV2Page() {
           className="bg-[#181F17] border border-[#3A4D23] rounded-xl p-6 mb-8"
         >
           <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3">
               <UserIcon className="w-6 h-6 text-[#8BAE5A]" />
               <h2 className="text-xl font-bold text-white">Jouw Profiel</h2>
-            </div>
-            <button
-              onClick={() => setShowUserProfileForm(!showUserProfileForm)}
+              </div>
+              <button
+                onClick={() => setShowUserProfileForm(!showUserProfileForm)}
               className="px-4 py-2 bg-[#8BAE5A] text-[#181F17] rounded-lg hover:bg-[#B6C948] transition-colors font-semibold"
-            >
+              >
               {showUserProfileForm ? 'Verberg' : 'Bewerk Profiel'}
-            </button>
-          </div>
+              </button>
+            </div>
 
-          {/* Current Profile Display */}
+            {/* Current Profile Display */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <div className="bg-[#0A0F0A] rounded-lg p-4">
               <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Gewicht</label>
               <div className="text-2xl font-bold text-white">
                 {userProfile.weight} kg
               </div>
-            </div>
+              </div>
             <div className="bg-[#0A0F0A] rounded-lg p-4">
               <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Activiteitsniveau</label>
               <div className="text-lg font-bold text-white">
@@ -1748,130 +1759,130 @@ export default function VoedingsplannenV2Page() {
                  userProfile.activity_level === 'very_active' ? 'Lopend (1.6)' :
                  'Matig (1.3)'}
               </div>
-            </div>
+              </div>
             <div className="bg-[#0A0F0A] rounded-lg p-4">
               <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Fitness Doel</label>
               <div className="text-lg font-bold text-white">
-                {userProfile.fitness_goal === 'droogtrainen' ? 'Droogtrainen (-500 kcal)' :
+                  {userProfile.fitness_goal === 'droogtrainen' ? 'Droogtrainen (-500 kcal)' :
                  userProfile.fitness_goal === 'onderhoud' ? 'Onderhoud (0 kcal)' :
                  userProfile.fitness_goal === 'spiermassa' ? 'Spiermassa (+400 kcal)' :
                  userProfile.fitness_goal}
               </div>
+              </div>
             </div>
-          </div>
 
-          {/* Profile Form */}
-          {showUserProfileForm && (
-            <motion.div 
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
+            {/* Profile Form */}
+            {showUserProfileForm && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
               className="bg-[#0A0F0A] rounded-lg p-6"
-            >
-              <form onSubmit={(e) => {
-                e.preventDefault();
+              >
+                <form onSubmit={(e) => {
+                  e.preventDefault();
                 const formData = new FormData(e.target as HTMLFormElement);
                 const profile = {
                   weight: parseFloat(formData.get('weight') as string),
                   height: parseFloat(formData.get('height') as string),
                   age: parseInt(formData.get('age') as string),
-                  gender: formData.get('gender') as 'male' | 'female',
+                    gender: formData.get('gender') as 'male' | 'female',
                   activity_level: formData.get('activity_level') as 'sedentary' | 'moderate' | 'very_active',
                   fitness_goal: formData.get('fitness_goal') as 'droogtrainen' | 'onderhoud' | 'spiermassa'
                 };
                 saveUserProfile(profile);
               }}>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Gewicht (kg)</label>
-                    <input
-                      type="number"
-                      name="weight"
-                      defaultValue={userProfile.weight}
+                    <div>
+                      <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Gewicht (kg)</label>
+                      <input
+                        type="number"
+                        name="weight"
+                        defaultValue={userProfile.weight}
                       min="40"
                       max="200"
                       step="0.1"
                       className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white focus:border-[#8BAE5A] focus:outline-none"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Lengte (cm)</label>
-                    <input
-                      type="number"
-                      name="height"
-                      defaultValue={userProfile.height}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Lengte (cm)</label>
+                      <input
+                        type="number"
+                        name="height"
+                        defaultValue={userProfile.height}
                       min="140"
                       max="220"
                       className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white focus:border-[#8BAE5A] focus:outline-none"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Leeftijd</label>
-                    <input
-                      type="number"
-                      name="age"
-                      defaultValue={userProfile.age}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Leeftijd</label>
+                      <input
+                        type="number"
+                        name="age"
+                        defaultValue={userProfile.age}
                       min="16"
                       max="80"
                       className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white focus:border-[#8BAE5A] focus:outline-none"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Geslacht</label>
-                    <select
-                      name="gender"
-                      defaultValue={userProfile.gender}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Geslacht</label>
+                      <select
+                        name="gender"
+                        defaultValue={userProfile.gender}
                       className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white focus:border-[#8BAE5A] focus:outline-none"
-                    >
-                      <option value="male">Man</option>
-                      <option value="female">Vrouw</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Activiteitsniveau</label>
-                    <select
-                      name="activity_level"
-                      defaultValue={userProfile.activity_level}
+                      >
+                        <option value="male">Man</option>
+                        <option value="female">Vrouw</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Activiteitsniveau</label>
+                      <select
+                        name="activity_level"
+                        defaultValue={userProfile.activity_level}
                       className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white focus:border-[#8BAE5A] focus:outline-none"
                     >
                       <option value="sedentary">Zittend (1.1)</option>
                       <option value="moderate">Matig (1.3)</option>
                       <option value="very_active">Lopend (1.6)</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Fitness Doel</label>
-                    <select
-                      name="fitness_goal"
-                      defaultValue={userProfile.fitness_goal}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Fitness Doel</label>
+                      <select
+                        name="fitness_goal"
+                        defaultValue={userProfile.fitness_goal}
                       className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white focus:border-[#8BAE5A] focus:outline-none"
-                    >
-                      <option value="droogtrainen">Droogtrainen (-500 kcal)</option>
+                      >
+                        <option value="droogtrainen">Droogtrainen (-500 kcal)</option>
                       <option value="onderhoud">Onderhoud (0 kcal)</option>
-                      <option value="spiermassa">Spiermassa (+400 kcal)</option>
-                    </select>
+                        <option value="spiermassa">Spiermassa (+400 kcal)</option>
+                      </select>
+                    </div>
                   </div>
-                </div>
                 <div className="mt-6 flex justify-end gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setShowUserProfileForm(false)}
+                    <button
+                      type="button"
+                      onClick={() => setShowUserProfileForm(false)}
                     className="px-4 py-2 bg-gray-600 text-gray-300 rounded-lg hover:bg-gray-500 transition-colors"
-                  >
-                    Annuleren
-                  </button>
+                    >
+                      Annuleren
+                    </button>
                   <button
                     type="submit"
                     className="px-6 py-2 bg-[#8BAE5A] text-[#181F17] rounded-lg hover:bg-[#B6C948] transition-colors font-semibold"
                   >
                     Opslaan
                   </button>
-                </div>
-              </form>
-            </motion.div>
-          )}
+                  </div>
+                </form>
+              </motion.div>
+            )}
         </motion.div>
 
         {/* Loading State */}
@@ -1879,7 +1890,7 @@ export default function VoedingsplannenV2Page() {
           <div className="flex justify-center items-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8BAE5A]"></div>
             <span className="ml-3 text-[#8BAE5A]">Voedingsplannen laden...</span>
-          </div>
+              </div>
         )}
 
         {/* Error State */}
@@ -1898,68 +1909,63 @@ export default function VoedingsplannenV2Page() {
         {/* Plans Grid */}
         {!loading && !error && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {plans.map((plan) => {
-              // Calculate personalized targets for this plan
-              const personalizedTargets = calculatePersonalizedTargets(plan);
-              
-              return (
-                <motion.div
-                  key={plan.id}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => handlePlanSelect(plan)}
+          {plans.map((plan) => {
+            // Calculate personalized targets for this plan
+            const personalizedTargets = calculatePersonalizedTargets(plan);
+            
+            return (
+            <motion.div
+              key={plan.id}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => handlePlanSelect(plan)}
                   className="bg-[#181F17] border border-[#3A4D23] rounded-xl p-6 cursor-pointer hover:border-[#B6C948] transition-colors"
                 >
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-xl font-bold text-white">{plan.name}</h3>
                     <div className="px-3 py-1 bg-[#8BAE5A] text-[#181F17] rounded-full text-xs font-semibold">
                       {plan.goal}
-                    </div>
-                  </div>
-                  
-                  <p className="text-[#8BAE5A] text-sm mb-4">{plan.description}</p>
-                  
-                  {/* Target vs Personalized Calories */}
+                </div>
+              </div>
+              
+              <p className="text-[#8BAE5A] text-sm mb-4">{plan.description}</p>
+              
+                  {/* Personalized Calories */}
                   <div className="space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-400 text-sm">Target Calorieën:</span>
-                      <span className="text-[#B6C948] font-semibold">{plan.target_calories} kcal</span>
-                    </div>
-                    
                     {personalizedTargets && (
                       <div className="flex justify-between items-center">
                         <span className="text-gray-400 text-sm">Jouw Calorieën:</span>
                         <span className="text-[#8BAE5A] font-bold text-lg">{personalizedTargets.targetCalories} kcal</span>
-                      </div>
-                    )}
-                    
+          </div>
+        )}
+
                     {/* Macro Breakdown */}
                     <div className="grid grid-cols-3 gap-2 pt-2 border-t border-[#3A4D23]">
                       <div className="text-center">
                         <div className="text-xs text-gray-400">Eiwit</div>
                         <div className="text-sm font-semibold text-white">
                           {personalizedTargets?.targetProtein || plan.target_protein}g
-                        </div>
-                      </div>
+                </div>
+                </div>
                       <div className="text-center">
                         <div className="text-xs text-gray-400">Koolhydraten</div>
                         <div className="text-sm font-semibold text-white">
                           {personalizedTargets?.targetCarbs || plan.target_carbs}g
-                        </div>
-                      </div>
+              </div>
+            </div>
                       <div className="text-center">
                         <div className="text-xs text-gray-400">Vet</div>
                         <div className="text-sm font-semibold text-white">
                           {personalizedTargets?.targetFat || plan.target_fat}g
-                        </div>
-                      </div>
-                    </div>
+                  </div>
+                  </div>
+                  </div>
                   </div>
                 </motion.div>
-              );
-            })}
-          </div>
-        )}
+                    );
+                  })}
+                </div>
+              )}
                                   
         {/* No Plans State */}
         {!loading && !error && plans.length === 0 && (
@@ -1967,7 +1973,7 @@ export default function VoedingsplannenV2Page() {
             <BookOpenIcon className="w-16 h-16 text-gray-500 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-400 mb-2">Geen voedingsplannen gevonden</h3>
             <p className="text-gray-500">Er zijn momenteel geen voedingsplannen beschikbaar.</p>
-          </div>
+              </div>
         )}
       </div>
     </div>
