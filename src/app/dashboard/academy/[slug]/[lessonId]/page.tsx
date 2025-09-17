@@ -1342,7 +1342,24 @@ export default function LessonDetailPage() {
                       
                       const ebookUrl = `/ebooks/${ebookFilename}.html`;
                       console.log('📖 Opening ebook:', ebookUrl);
-                      window.open(ebookUrl, '_blank', 'noopener,noreferrer');
+                      console.log('📖 Lesson title:', lesson.title);
+                      console.log('📖 Generated filename:', ebookFilename);
+                      
+                      // Try multiple methods to open the ebook
+                      try {
+                        const newWindow = window.open(ebookUrl, '_blank', 'noopener,noreferrer');
+                        if (!newWindow) {
+                          console.error('❌ Popup blocked! Trying alternative method...');
+                          // Fallback: try to navigate directly
+                          window.location.href = ebookUrl;
+                        } else {
+                          console.log('✅ New window opened successfully');
+                        }
+                      } catch (error) {
+                        console.error('❌ Error opening ebook:', error);
+                        // Final fallback: try to navigate in same window
+                        window.location.href = ebookUrl;
+                      }
                     }}
                     className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-[#8BAE5A] to-[#B6C948] text-white rounded-lg hover:from-[#B6C948] hover:to-[#8BAE5A] transition-all duration-200 font-semibold shadow-md hover:shadow-lg transform hover:scale-105"
                   >
