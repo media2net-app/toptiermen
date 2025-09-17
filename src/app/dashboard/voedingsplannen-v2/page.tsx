@@ -773,7 +773,7 @@ export default function VoedingsplannenV2Page() {
     }
     
     return {
-      percentage: Math.min(percentage, 120), // Cap at 120% for display
+      percentage: Math.min(percentage, 100), // Cap at 100% for progress bar width
       difference,
       isGood,
       color,
