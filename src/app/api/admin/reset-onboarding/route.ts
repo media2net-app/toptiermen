@@ -88,20 +88,20 @@ export async function POST(request: NextRequest) {
     }
 
     // Reset main goal in profile
-    const { error: profileError } = await supabase
-      .from('profiles')
+      const { error: profileError } = await supabase
+        .from('profiles')
       .update({ main_goal: null })
-      .eq('id', userId);
+        .eq('id', userId);
 
-    if (profileError) {
-      console.log('⚠️ Error resetting profile:', profileError.message);
+      if (profileError) {
+        console.log('⚠️ Error resetting profile:', profileError.message);
     } else {
       console.log('✅ Profile reset');
     }
 
     console.log('🎉 Onboarding reset completed for:', email);
 
-    return NextResponse.json({
+    return NextResponse.json({ 
       success: true,
       message: `Onboarding reset completed for ${email}`,
       userId: userId
@@ -111,4 +111,4 @@ export async function POST(request: NextRequest) {
     console.error('❌ Error resetting onboarding:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-}
+} 
