@@ -1341,25 +1341,12 @@ export default function LessonDetailPage() {
                         .replace(/^-+|-+$/g, '');
                       
                       const ebookUrl = `/ebooks/${ebookFilename}.html`;
-                      console.log('📖 Opening ebook:', ebookUrl);
+                      console.log('📖 Opening ebook in same tab:', ebookUrl);
                       console.log('📖 Lesson title:', lesson.title);
                       console.log('📖 Generated filename:', ebookFilename);
                       
-                      // Try multiple methods to open the ebook
-                      try {
-                        const newWindow = window.open(ebookUrl, '_blank', 'noopener,noreferrer');
-                        if (!newWindow) {
-                          console.error('❌ Popup blocked! Trying alternative method...');
-                          // Fallback: try to navigate directly
-                          window.location.href = ebookUrl;
-                        } else {
-                          console.log('✅ New window opened successfully');
-                        }
-                      } catch (error) {
-                        console.error('❌ Error opening ebook:', error);
-                        // Final fallback: try to navigate in same window
-                        window.location.href = ebookUrl;
-                      }
+                      // Open ebook in same tab only
+                      window.location.href = ebookUrl;
                     }}
                     className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-[#8BAE5A] to-[#B6C948] text-white rounded-lg hover:from-[#B6C948] hover:to-[#8BAE5A] transition-all duration-200 font-semibold shadow-md hover:shadow-lg transform hover:scale-105"
                   >
@@ -1372,7 +1359,7 @@ export default function LessonDetailPage() {
                     </svg>
                   </button>
                   <p className="text-xs text-gray-500 mt-2">
-                    Het ebook opent in een nieuw tabblad met alle praktische informatie en oefeningen.
+                    Het ebook opent in hetzelfde tabblad met alle praktische informatie en oefeningen.
                   </p>
                 </div>
               </div>
