@@ -149,15 +149,15 @@ export default function AcademyPage() {
           throw new Error('Fout bij het laden van les voortgang');
         }
 
-        // Fetch unlocks
+        // Fetch unlocks (optional - table might not exist yet)
         const { data: unlocksData, error: unlocksError } = await supabase
           .from('user_academy_unlocks')
           .select('*')
           .eq('user_id', user.id);
 
         if (unlocksError) {
-          console.error('❌ Error fetching unlocks:', unlocksError);
-          throw new Error('Fout bij het laden van unlocks');
+          console.warn('⚠️ Warning fetching unlocks (table might not exist):', unlocksError);
+          // Don't throw error, just use empty unlocks data
         }
 
         // Process data
