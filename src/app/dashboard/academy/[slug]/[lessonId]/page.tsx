@@ -7,7 +7,6 @@ import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import PageLayout from '@/components/PageLayout';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import EbookDownload from '@/components/EbookDownload';
 import { PlayIcon } from '@heroicons/react/24/solid';
 import { academyNav } from '@/utils/academyNavigation';
 
@@ -1290,14 +1289,78 @@ export default function LessonDetailPage() {
 
         {/* Ebook Download Section */}
         <div className="mt-8">
-          <EbookDownload
-            lessonId={lesson.id}
-            lessonTitle={lesson.title}
-            moduleTitle={module.title}
-            moduleNumber={module.order_index.toString()}
-            ebookData={ebook}
-            isCompleted={completed}
-          />
+          <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-6">
+            <div className="flex items-start space-x-4">
+              <div className="flex-shrink-0">
+                <div className="w-12 h-12 bg-gradient-to-br from-[#8BAE5A] to-[#3A4D23] rounded-lg flex items-center justify-center">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                  </svg>
+                </div>
+              </div>
+              
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Les Ebook
+                  </h3>
+                  {completed && (
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                      Voltooid
+                    </span>
+                  )}
+                </div>
+                
+                <p className="text-sm text-gray-600 mb-4">
+                  Download het uitgebreide ebook voor <strong>{lesson.title}</strong> uit de module <strong>Module {module.order_index}: {module.title}</strong>. 
+                  Dit ebook bevat extra lesmateriaal, praktische oefeningen en reflectie vragen.
+                </p>
+                
+                <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                  <h4 className="text-sm font-medium text-gray-900 mb-2">Wat krijg je in dit ebook?</h4>
+                  <ul className="text-sm text-gray-600 space-y-1">
+                    <li>• Uitgebreide samenvatting van de les</li>
+                    <li>• Praktische oefeningen en opdrachten</li>
+                    <li>• Dagelijkse checklists en routines</li>
+                    <li>• Reflectie vragen voor persoonlijke groei</li>
+                    <li>• Volgende stappen en actieplan</li>
+                  </ul>
+                </div>
+
+                <div className="mb-4">
+                  <button
+                    onClick={() => {
+                      // Simple ebook filename mapping
+                      const ebookFilename = lesson.title
+                        .toLowerCase()
+                        .replace(/[^a-z0-9\s]/g, '')
+                        .replace(/\s+/g, '-')
+                        .replace(/^-+|-+$/g, '');
+                      
+                      const ebookUrl = `/ebooks/${ebookFilename}.html`;
+                      console.log('📖 Opening ebook:', ebookUrl);
+                      window.open(ebookUrl, '_blank', 'noopener,noreferrer');
+                    }}
+                    className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-[#8BAE5A] to-[#B6C948] text-white rounded-lg hover:from-[#B6C948] hover:to-[#8BAE5A] transition-all duration-200 font-semibold shadow-md hover:shadow-lg transform hover:scale-105"
+                  >
+                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                    Bekijk E-book
+                    <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </button>
+                  <p className="text-xs text-gray-500 mt-2">
+                    Het ebook opent in een nieuw tabblad met alle praktische informatie en oefeningen.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Navigation buttons - Only show for non-exam lessons */}
