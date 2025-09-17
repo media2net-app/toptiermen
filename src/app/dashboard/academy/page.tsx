@@ -43,7 +43,7 @@ interface ProgressData {
 
 interface UnlockData {
   [moduleId: string]: {
-    unlocked: boolean;
+    unlocked_at?: string;
     opened_at?: string;
   };
 }
@@ -127,15 +127,15 @@ export default function AcademyPage() {
           throw new Error('Fout bij het laden van lessen');
         }
 
-        // Fetch user progress
+        // Fetch user progress (optional - table might not exist yet)
         const { data: progressData, error: progressError } = await supabase
           .from('user_academy_progress')
           .select('*')
           .eq('user_id', user.id);
 
         if (progressError) {
-          console.error('❌ Error fetching progress:', progressError);
-          throw new Error('Fout bij het laden van voortgang');
+          console.warn('⚠️ Warning fetching academy progress (table might not exist):', progressError);
+          // Don't throw error, just use empty progress data
         }
 
         // Fetch lesson progress
@@ -151,8 +151,8 @@ export default function AcademyPage() {
 
         // Fetch unlocks (optional - table might not exist yet)
         const { data: unlocksData, error: unlocksError } = await supabase
-          .from('user_academy_unlocks')
-          .select('*')
+          .from('user_module_unlocks')
+          .select('module_id, unlocked_at, opened_at')
           .eq('user_id', user.id);
 
         if (unlocksError) {
@@ -164,11 +164,9 @@ export default function AcademyPage() {
         const processedModules = modulesData || [];
         const processedLessons = lessonsData || [];
         
-        // Process progress data
+        // Process progress data (calculate from lesson progress instead of using separate table)
         const progressMap: ProgressData = {};
-        progressData?.forEach((progress: any) => {
-          progressMap[progress.module_id] = progress.progress_percentage || 0;
-        });
+        // We'll calculate progress from lesson progress instead of using a separate table
 
         // Process lesson progress
         const lessonProgressMap: LessonProgress = {};
@@ -183,7 +181,7 @@ export default function AcademyPage() {
         const unlocksMap: UnlockData = {};
         unlocksData?.forEach((unlock: any) => {
           unlocksMap[unlock.module_id] = {
-            unlocked: unlock.unlocked || false,
+            unlocked_at: unlock.unlocked_at,
             opened_at: unlock.opened_at
           };
         });
@@ -331,11 +329,15 @@ export default function AcademyPage() {
       )}
 
       {/* Modules Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
         {modules.map((module) => {
           const moduleLessons = lessons.filter(lesson => lesson.module_id === module.id);
-          const progress = progressData[module.id] || 0;
-          const isUnlocked = unlocks[module.id]?.unlocked || module.order_index === 1;
+          const completedLessons = moduleLessons.filter(lesson => 
+            lessonProgress[lesson.id]?.completed
+          ).length;
+          const progress = moduleLessons.length > 0 ? 
+            Math.round((completedLessons / moduleLessons.length) * 100) : 0;
+          const isUnlocked = unlocks[module.id]?.unlocked_at || module.order_index === 1;
           const isCompleted = progress === 100;
 
           return (

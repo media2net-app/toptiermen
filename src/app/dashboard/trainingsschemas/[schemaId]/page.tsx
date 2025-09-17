@@ -562,6 +562,7 @@ export default function TrainingSchemaDetailPage() {
                 if (response.ok && data.success) {
                   toast.success(`🎉 ${schema?.name} is nu je actieve trainingsschema!`);
                   // Navigate back to schemas page and select this schema
+                  // Note: This will trigger the main selectTrainingSchema function which handles onboarding logic
                   router.push(`/dashboard/trainingsschemas?select=${schemaId}`);
                 } else {
                   throw new Error(data.error || 'Failed to select training schema');

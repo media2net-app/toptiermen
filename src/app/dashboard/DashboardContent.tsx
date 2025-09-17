@@ -129,13 +129,8 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
       return false;
     }
     
-    // Check subscription-based access for specific features
-    if (item.href === '/dashboard/voedingsplannen') {
-      return hasAccess('nutrition');
-    }
-    if (item.href === '/dashboard/trainingsschemas') {
-      return hasAccess('training');
-    }
+    // Show nutrition and training items to all users, but they'll see upgrade screen if Basic Tier
+    // This allows Basic Tier users to see the menu items and click them to see upgrade options
     
     // All other items are visible by default
     return true;
@@ -407,13 +402,8 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
       return false;
     }
     
-    // Check subscription-based access for specific features
-    if (item.href === '/dashboard/voedingsplannen') {
-      return hasAccess('nutrition');
-    }
-    if (item.href === '/dashboard/trainingsschemas') {
-      return hasAccess('training');
-    }
+    // Show nutrition and training items to all users, but they'll see upgrade screen if Basic Tier
+    // This allows Basic Tier users to see the menu items and click them to see upgrade options
     
     // All other items are visible by default
     return true;

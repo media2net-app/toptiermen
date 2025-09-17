@@ -27,7 +27,10 @@ export async function GET(request: NextRequest) {
     if (dayError) {
       console.error('Error loading day:', dayError);
       return NextResponse.json({ 
-        error: 'Failed to load training day' 
+        error: 'Failed to load training day',
+        details: dayError.message,
+        schemaId,
+        dayNumber
       }, { status: 500 });
     }
 
@@ -39,10 +42,9 @@ export async function GET(request: NextRequest) {
         exercises (
           id,
           name,
-          description,
           instructions,
           video_url,
-          muscle_group,
+          primary_muscle,
           equipment,
           difficulty
         )
@@ -53,7 +55,9 @@ export async function GET(request: NextRequest) {
     if (exercisesError) {
       console.error('Error loading exercises:', exercisesError);
       return NextResponse.json({ 
-        error: 'Failed to load exercises' 
+        error: 'Failed to load exercises',
+        details: exercisesError.message,
+        dayData: dayData ? { id: dayData.id, name: dayData.name } : null
       }, { status: 500 });
     }
 

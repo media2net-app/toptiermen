@@ -836,7 +836,7 @@ export default function MijnChallengesPage() {
                       });
 
                       if (response.ok) {
-                        // Check if user has access to training - if not, skip to challenges
+                        // Check if user has access to training - if yes, go to training schemas; if not, skip to forum
                         if (hasAccess('training')) {
                           toast.success('Challenges opgeslagen! Doorsturen naar trainingsschemas...');
                           // Navigate directly to training schemas
@@ -844,11 +844,11 @@ export default function MijnChallengesPage() {
                             window.location.href = '/dashboard/trainingsschemas';
                           }, 1500);
                         } else {
-                          toast.success('Challenges opgeslagen! Doorsturen naar challenges...');
-                          // Skip training and nutrition steps, go directly to challenges
-                          console.log('🚀 Basic tier user - skipping training and nutrition steps, going to challenges');
+                          toast.success('Challenges opgeslagen! Doorsturen naar forum...');
+                          // Skip training and nutrition steps, go directly to forum
+                          console.log('🚀 Basic tier user - skipping training and nutrition steps, going to forum');
                           setTimeout(() => {
-                            window.location.href = '/dashboard/challenges';
+                            window.location.href = '/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden';
                           }, 1500);
                         }
                       } else {

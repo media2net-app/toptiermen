@@ -93,16 +93,6 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
     },
     {
       id: 5,
-      title: 'Challenge selecteren',
-      description: 'Kies een challenge om jezelf uit te dagen',
-      targetPage: '/dashboard/challenges',
-      targetMenuLabel: 'Challenges',
-      completed: false,
-      icon: '🏆',
-      instructions: 'Selecteer een challenge die past bij je doelen en voorkeuren'
-    },
-    {
-      id: 6,
       title: 'Forum introductie',
       description: 'Stel je voor aan de community',
       targetPage: '/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden',

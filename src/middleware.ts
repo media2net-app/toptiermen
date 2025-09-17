@@ -31,14 +31,40 @@ export async function middleware(req: NextRequest) {
   if (session?.user && req.nextUrl.pathname.startsWith('/dashboard')) {
     try {
       // Get onboarding status
-      const { data: onboardingData, error } = await supabase
-        .from('onboarding_status')
-        .select('current_step, onboarding_completed')
+      const { data: onboardingRecords, error } = await supabase
+        .from('user_onboarding_status')
+        .select('*')
         .eq('user_id', session.user.id)
-        .single();
+        .order('created_at', { ascending: false });
+      
+      const onboardingData = onboardingRecords && onboardingRecords.length > 0 ? onboardingRecords[0] : null;
+      
+      // Calculate current_step based on completed flags
+      let current_step = 0;
+      let onboarding_completed = false;
+      
+      if (onboardingData) {
+        onboarding_completed = onboardingData.onboarding_completed;
+        
+        if (onboardingData.challenge_started) {
+          current_step = 5;
+        } else if (onboardingData.nutrition_plan_selected) {
+          current_step = 4;
+        } else if (onboardingData.training_schema_selected) {
+          current_step = 3;
+        } else if (onboardingData.missions_selected) {
+          current_step = 2;
+        } else if (onboardingData.goal_set) {
+          current_step = 1;
+        } else if (onboardingData.welcome_video_shown) {
+          current_step = 1;
+        } else {
+          current_step = 0;
+        }
+      }
 
-      if (!error && onboardingData && !onboardingData.onboarding_completed) {
-        const currentStep = onboardingData.current_step;
+      if (!error && onboardingData && !onboarding_completed) {
+        const currentStep = current_step;
         const currentPath = req.nextUrl.pathname;
         
         // Define allowed paths for each onboarding step
@@ -49,8 +75,7 @@ export async function middleware(req: NextRequest) {
           2: ['/dashboard/welcome-video', '/dashboard/profiel', '/dashboard/mijn-challenges'],
           3: ['/dashboard/welcome-video', '/dashboard/profiel', '/dashboard/mijn-challenges', '/dashboard/trainingsschemas'],
           4: ['/dashboard/welcome-video', '/dashboard/profiel', '/dashboard/mijn-challenges', '/dashboard/trainingsschemas', '/dashboard/voedingsplannen'],
-          5: ['/dashboard/welcome-video', '/dashboard/profiel', '/dashboard/mijn-challenges', '/dashboard/trainingsschemas', '/dashboard/voedingsplannen'],
-          6: ['/dashboard/welcome-video', '/dashboard/profiel', '/dashboard/mijn-challenges', '/dashboard/trainingsschemas', '/dashboard/voedingsplannen', '/dashboard/brotherhood/forum', '/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden']
+          5: ['/dashboard/welcome-video', '/dashboard/profiel', '/dashboard/mijn-challenges', '/dashboard/trainingsschemas', '/dashboard/voedingsplannen', '/dashboard/brotherhood/forum', '/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden']
         };
 
         // Special case: If user tries to access main dashboard during onboarding, redirect to current step
@@ -66,8 +91,6 @@ export async function middleware(req: NextRequest) {
           } else if (currentStep === 4) {
             redirectPath = '/dashboard/voedingsplannen';
           } else if (currentStep === 5) {
-            redirectPath = '/dashboard/challenges';
-          } else if (currentStep === 6) {
             redirectPath = '/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden';
           }
           
@@ -95,8 +118,6 @@ export async function middleware(req: NextRequest) {
           } else if (currentStep === 4) {
             redirectPath = '/dashboard/voedingsplannen';
           } else if (currentStep === 5) {
-            redirectPath = '/dashboard/challenges';
-          } else if (currentStep === 6) {
             redirectPath = '/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden';
           }
           

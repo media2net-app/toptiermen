@@ -98,122 +98,70 @@ export async function POST(request: NextRequest) {
       if (createError) {
         console.error('❌ Error creating auth account:', createError);
         
-        // If user already exists but is not visible in listUsers, try to send email anyway
+        // If user already exists but is not visible in listUsers, try to find and update them
         if (createError.message.includes('already been registered') || createError.message.includes('email_exists')) {
-          console.log('🔄 User exists but not visible, proceeding with email...');
+          console.log('🔄 User exists but not visible, searching for existing user...');
           
-          // Send email with new password (since user exists but auth account creation failed)
-          try {
-            const emailService = new EmailService();
-            const loginUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://platform.toptiermen.eu'}/login`;
-            const newTempPassword = generateTempPassword();
-            
-            // Try to update the existing auth user's password
-            console.log('🔄 Attempting to update existing auth user password...');
-            
-            // Try to find the user by email using a different method
-            console.log('🔍 Searching for existing auth user...');
-            const { data: authUsers, error: listError } = await supabaseAdmin.auth.admin.listUsers();
-            
-            if (listError) {
-              console.error('❌ Error listing auth users:', listError);
-            } else {
-              console.log(`📊 Found ${authUsers?.users?.length || 0} total auth users`);
-            }
-            
-            const existingUser = authUsers?.users?.find((u: any) => u.email === email);
-            
-            if (existingUser) {
-              console.log(`✅ Found existing auth user ${existingUser.id}, updating password...`);
-              console.log(`🔄 Setting password: ${newTempPassword} (length: ${newTempPassword.length})`);
-              
-              const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
-                existingUser.id,
-                { password: newTempPassword }
-              );
-              
-              if (updateError) {
-                console.error('❌ Error updating existing user password:', updateError);
-              } else {
-                console.log(`✅ Successfully updated existing user password for ${existingUser.id}`);
-              }
-            } else {
-              console.log('⚠️ Could not find existing auth user to update password');
-              console.log('🔍 Available users:', authUsers?.users?.map(u => u.email).slice(0, 5));
-              
-              // Try to find user by email in a different way
-              console.log('🔄 Attempting alternative user lookup...');
-              try {
-                // Try to get user by email directly
-                const { data: userByEmail, error: emailError } = await supabaseAdmin.auth.admin.listUsers();
-                const foundUser = userByEmail?.users?.find((u: any) => u.email === email);
-                
-                if (foundUser && !emailError) {
-                  console.log(`✅ Found user via alternative lookup: ${foundUser.id}`);
-                  
-                  const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
-                    foundUser.id,
-                    { password: newTempPassword }
-                  );
-                  
-                  if (updateError) {
-                    console.error('❌ Error updating user password via alternative lookup:', updateError);
-                  } else {
-                    console.log(`✅ Successfully updated user password via alternative lookup for ${foundUser.id}`);
-                  }
-                } else {
-                  console.log('❌ Could not find user via alternative lookup:', emailError);
-                }
-              } catch (altError) {
-                console.error('❌ Alternative lookup failed:', altError);
-              }
-            }
-            
-            // Log the variables being sent to email template (fallback)
-            const fallbackEmailVariables = {
-              name: profile?.full_name || profile?.display_name || 'Gebruiker',
-              email: email,
-              username: profile?.display_name || email.split('@')[0],
-              tempPassword: newTempPassword,
-              loginUrl: loginUrl,
-              packageType: profile?.package_type || 'Basic Tier',
-              isTestUser: 'false',
-              platformUrl: process.env.NEXT_PUBLIC_SITE_URL || 'https://platform.toptiermen.eu'
-            };
-            
-            console.log('📧 Fallback email variables:', {
-              ...fallbackEmailVariables,
-              tempPassword: `[${newTempPassword.length} chars] ${newTempPassword.substring(0, 3)}...`
-            });
-            
-            const emailSuccess = await emailService.sendEmail(
-              email,
-              '🔐 Je Nieuwe Top Tier Men Wachtwoord - Wachtwoord Reset',
-              'password-reset',
-              fallbackEmailVariables,
-              { tracking: true }
-            );
-
-            if (emailSuccess) {
-              console.log(`✅ Password reset email sent to: ${email}`);
-              return NextResponse.json({
-                success: true,
-                message: 'Nieuw wachtwoord is gegenereerd en per e-mail verzonden'
-              });
-            }
-          } catch (emailError) {
-            console.error('❌ Error sending help email:', emailError);
+          // Try to find the existing user and update their password
+          const { data: authUsers, error: listError } = await supabaseAdmin.auth.admin.listUsers();
+          
+          if (listError) {
+            console.error('❌ Error listing auth users:', listError);
+          } else {
+            console.log(`📊 Found ${authUsers?.users?.length || 0} total auth users`);
           }
+          
+          const existingUser = authUsers?.users?.find((u: any) => u.email === email);
+          
+          if (existingUser) {
+            console.log(`✅ Found existing auth user ${existingUser.id}, updating password...`);
+            
+            // Generate new password and update
+            const newTempPassword = generateTempPassword();
+            console.log(`🔄 Setting password: ${newTempPassword} (length: ${newTempPassword.length})`);
+            
+            const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
+              existingUser.id,
+              { password: newTempPassword }
+            );
+            
+            if (updateError) {
+              console.error('❌ Error updating existing user password:', updateError);
+              return NextResponse.json({
+                success: false,
+                error: 'Fout bij het resetten van wachtwoord'
+              }, { status: 500 });
+            } else {
+              console.log(`✅ Successfully updated existing user password for ${existingUser.id}`);
+              
+              // Set user variable for main flow
+              user = existingUser;
+            }
+          } else {
+            console.log('❌ Could not find existing auth user');
+            return NextResponse.json({
+              success: false,
+              error: 'Account bestaat maar er is een technisch probleem. Neem contact op met de beheerder.'
+            }, { status: 500 });
+          }
+        } else {
+          return NextResponse.json({
+            success: false,
+            error: 'Account bestaat maar er is een technisch probleem. Neem contact op met de beheerder.'
+          }, { status: 500 });
         }
-        
-        return NextResponse.json({
-          success: false,
-          error: 'Account bestaat maar er is een technisch probleem. Neem contact op met de beheerder.'
-        }, { status: 500 });
       }
       
-      user = newAuthUser.user;
+      user = newAuthUser.user || undefined;
       console.log('✅ Auth account created for:', email);
+    }
+
+    // Check if user exists
+    if (!user) {
+      return NextResponse.json({
+        success: false,
+        error: 'Gebruiker niet gevonden'
+      }, { status: 404 });
     }
 
     // Get user profile for full name

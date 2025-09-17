@@ -197,17 +197,17 @@ export default function ForcedOnboardingModal({ isOpen, onComplete }: ForcedOnbo
       // Close modal first
       onComplete();
       
-      // Check if user has access to training - if not, skip to challenges
+      // Check if user has access to training - if yes, go to training schemas; if not, skip to forum
       if (hasAccess('training')) {
         // Navigate to training schemas
         setTimeout(() => {
           router.push('/dashboard/trainingsschemas');
         }, 100);
       } else {
-        // Skip training and nutrition steps, go directly to challenges
-        console.log('🚀 Basic tier user - skipping training and nutrition steps, going to challenges');
+        // Skip training and nutrition steps, go directly to forum
+        console.log('🚀 Basic tier user - skipping training and nutrition steps, going to forum');
         setTimeout(() => {
-          router.push('/dashboard/challenges');
+          router.push('/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden');
         }, 100);
       }
     }
@@ -221,17 +221,17 @@ export default function ForcedOnboardingModal({ isOpen, onComplete }: ForcedOnbo
 
     const updatedStatus = await updateOnboardingStatus(3, 'complete_step', { selectedTrainingSchema });
     if (updatedStatus) {
-      // Check if user has access to nutrition - if not, skip to challenges
+      // Check if user has access to nutrition - if yes, go to nutrition step; if not, skip to forum
       if (hasAccess('nutrition')) {
         // Stay on training center page for nutrition step
         setCurrentStep(4);
       } else {
-        // Skip nutrition step, go directly to challenges
-        console.log('🚀 Basic tier user - skipping nutrition step, going to challenges');
+        // Skip nutrition step, go directly to forum
+        console.log('🚀 Basic tier user - skipping nutrition step, going to forum');
         setCurrentStep(5); // Update step before closing modal
         onComplete();
         setTimeout(() => {
-          router.push('/dashboard/challenges');
+          router.push('/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden');
         }, 100);
       }
     }

@@ -82,9 +82,9 @@ export async function GET(request: Request) {
     }
 
     // First, get all records for this user
-    console.log('🔍 Querying onboarding_status table for user:', actualUserId);
+    console.log('🔍 Querying user_onboarding_status table for user:', actualUserId);
     const { data: allRecords, error: fetchError } = await supabase
-      .from('onboarding_status')
+      .from('user_onboarding_status')
       .select('*')
       .eq('user_id', actualUserId);
 
@@ -124,7 +124,7 @@ export async function GET(request: Request) {
       const deleteIds = sortedRecords.slice(1).map(record => record.id);
       for (const id of deleteIds) {
         await supabase
-          .from('onboarding_status')
+          .from('user_onboarding_status')
           .delete()
           .eq('id', id);
       }
@@ -136,17 +136,16 @@ export async function GET(request: Request) {
       // No records found, create one
       console.log(`📝 No onboarding record found for user ${userId}, creating one`);
       const { data: newRecord, error: createError } = await supabase
-        .from('onboarding_status')
+        .from('user_onboarding_status')
         .insert({
           user_id: actualUserId,
-          welcome_video_watched: false,
-          step_1_completed: false,
-          step_2_completed: false,
-          step_3_completed: false,
-          step_4_completed: false,
-          step_5_completed: false,
-          onboarding_completed: false,
-          current_step: 1
+          welcome_video_shown: false,
+          goal_set: false,
+          missions_selected: false,
+          training_schema_selected: false,
+          nutrition_plan_selected: false,
+          challenge_started: false,
+          onboarding_completed: false
         })
         .select()
         .single();
@@ -161,13 +160,28 @@ export async function GET(request: Request) {
 
 
 
-    console.log('✅ Onboarding status fetched:', {
+    // Map the new database structure to the expected frontend format
+    const mappedData = {
       user_id: data.user_id,
+      welcome_video_watched: data.welcome_video_shown,
+      step_1_completed: data.goal_set,
+      step_2_completed: data.missions_selected,
+      step_3_completed: data.training_schema_selected,
+      step_4_completed: data.nutrition_plan_selected,
+      step_5_completed: data.challenge_started,
       onboarding_completed: data.onboarding_completed,
-      current_step: data.current_step
+      current_step: data.onboarding_completed ? 5 : (data.challenge_started ? 5 : (data.nutrition_plan_selected ? 4 : (data.training_schema_selected ? 3 : (data.missions_selected ? 2 : (data.goal_set ? 1 : 0))))),
+      created_at: data.created_at,
+      updated_at: data.updated_at
+    };
+
+    console.log('✅ Onboarding status fetched:', {
+      user_id: mappedData.user_id,
+      onboarding_completed: mappedData.onboarding_completed,
+      current_step: mappedData.current_step
     });
 
-    return NextResponse.json(data);
+    return NextResponse.json(mappedData);
 
   } catch (error) {
     console.error('❌ Error in onboarding GET:', error);
@@ -228,45 +242,100 @@ export async function POST(request: Request) {
     };
 
     if (action === 'complete_step') {
-      // Mark specific step as completed (only for steps 1-5, step 6 doesn't have a column)
-      if (step <= 5) {
-        updateData[`step_${step}_completed`] = true;
+      // Get user's subscription tier to determine access
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('package_type')
+        .eq('id', actualUserId)
+        .single();
+      
+      const packageType = profile?.package_type || 'Basic Tier';
+      const isBasic = packageType === 'Basic Tier';
+      const hasTrainingAccess = packageType === 'Premium Tier' || packageType === 'Lifetime Tier' || packageType === 'Lifetime Access';
+      const hasNutritionAccess = packageType === 'Premium Tier' || packageType === 'Lifetime Tier' || packageType === 'Lifetime Access';
+      
+      console.log('🎯 User access:', { packageType, isBasic, hasTrainingAccess, hasNutritionAccess });
+      
+      // Mark specific step as completed using the new database structure
+      if (step === 0) {
+        updateData.welcome_video_shown = true;
+      } else if (step === 1) {
+        updateData.goal_set = true;
+      } else if (step === 2) {
+        updateData.missions_selected = true;
+      } else if (step === 3) {
+        updateData.training_schema_selected = true;
+      } else if (step === 4) {
+        updateData.nutrition_plan_selected = true;
+      } else if (step === 5) {
+        updateData.challenge_started = true;
       }
       
-      // Calculate next step based on completion status
+      // Calculate next step based on completion status and subscription tier
       let nextStep = step + 1;
+      
+          // For Basic tier users, skip training (step 3) and nutrition (step 4) steps
+          if (isBasic) {
+            if (step === 2) {
+              // After missions (step 2), skip to forum (step 5)
+              nextStep = 5;
+              // Mark training and nutrition steps as completed for Basic tier
+              updateData.training_schema_selected = true;
+              updateData.nutrition_plan_selected = true;
+              console.log('🚀 Basic tier user - skipping training and nutrition steps, going to forum');
+            } else if (step === 3 || step === 4) {
+              // If somehow a Basic tier user reaches these steps, skip to forum
+              nextStep = 5;
+              updateData.training_schema_selected = true;
+              updateData.nutrition_plan_selected = true;
+              console.log('🚀 Basic tier user - skipping training/nutrition step, going to forum');
+            }
+          }
       
       // Check if all steps are completed
       const stepCompletionCheck = await supabase
-        .from('onboarding_status')
+        .from('user_onboarding_status')
         .select('*')
         .eq('user_id', actualUserId)
+        .order('created_at', { ascending: false })
+        .limit(1)
         .single();
 
       if (stepCompletionCheck.data) {
-        // For step 6 (forum post), complete onboarding immediately
-        if (step === 6) {
+        // For step 5 (forum post), complete onboarding immediately
+        if (step === 5) {
           updateData.onboarding_completed = true;
           updateData.completed_at = new Date().toISOString();
-          nextStep = 6; // Completed
+          nextStep = 5; // Completed
         } else {
-          // For other steps, check if all previous steps are completed
-          const allStepsCompleted = 
-            stepCompletionCheck.data.step_1_completed &&
-            stepCompletionCheck.data.step_2_completed &&
-            stepCompletionCheck.data.step_3_completed &&
-            stepCompletionCheck.data.step_4_completed &&
-            stepCompletionCheck.data.step_5_completed;
+          // For other steps, check if all required steps are completed based on subscription tier
+          let allStepsCompleted;
+          
+          if (isBasic) {
+            // Basic tier users only need steps 1, 2, and 5 (missions and forum)
+            allStepsCompleted = 
+              stepCompletionCheck.data.goal_set &&
+              stepCompletionCheck.data.missions_selected &&
+              stepCompletionCheck.data.challenge_started;
+          } else {
+            // Premium/Lifetime users need all steps
+            allStepsCompleted = 
+              stepCompletionCheck.data.goal_set &&
+              stepCompletionCheck.data.missions_selected &&
+              stepCompletionCheck.data.training_schema_selected &&
+              stepCompletionCheck.data.nutrition_plan_selected &&
+              stepCompletionCheck.data.challenge_started;
+          }
 
           if (allStepsCompleted && step === 5) {
             updateData.onboarding_completed = true;
             updateData.completed_at = new Date().toISOString();
-            nextStep = 6; // Completed
+            nextStep = 5; // Completed
           }
         }
       }
       
-      updateData.current_step = nextStep;
+      // Don't set current_step in updateData - it will be calculated in the response mapping
       
       // Handle step-specific data
       if (step === 1 && mainGoal) {
@@ -346,50 +415,60 @@ export async function POST(request: Request) {
       
       // Check if all steps are completed
       const { data: currentStatusRecords } = await supabase
-        .from('onboarding_status')
+        .from('user_onboarding_status')
         .select('*')
-        .eq('user_id', actualUserId);
+        .eq('user_id', actualUserId)
+        .order('created_at', { ascending: false })
+        .limit(1);
 
       const currentStatus = currentStatusRecords && currentStatusRecords.length > 0 
         ? currentStatusRecords[0] 
         : null;
 
       if (currentStatus) {
-        const allStepsCompleted = 
-          currentStatus.step_1_completed &&
-          currentStatus.step_2_completed &&
-          currentStatus.step_3_completed &&
-          currentStatus.step_4_completed &&
-          currentStatus.step_5_completed;
+        // Check completion based on subscription tier
+        let allStepsCompleted;
+        
+        if (isBasic) {
+          // Basic tier users only need steps 1, 2, and 5 (missions and forum)
+          allStepsCompleted = 
+            currentStatus.goal_set &&
+            currentStatus.missions_selected &&
+            currentStatus.challenge_started;
+        } else {
+          // Premium/Lifetime users need all steps
+          allStepsCompleted = 
+            currentStatus.goal_set &&
+            currentStatus.missions_selected &&
+            currentStatus.training_schema_selected &&
+            currentStatus.nutrition_plan_selected &&
+            currentStatus.challenge_started;
+        }
 
         if (allStepsCompleted) {
           updateData.onboarding_completed = true;
-          updateData.completed_at = new Date().toISOString();
         }
       }
     } else if (action === 'watch_welcome_video') {
-      updateData.welcome_video_watched = true;
-      updateData.current_step = 1;
+      updateData.welcome_video_shown = true;
     } else if (action === 'skip_onboarding') {
       updateData.onboarding_completed = true;
-      updateData.completed_at = new Date().toISOString();
-      updateData.current_step = 6;
     } else if (action === 'update_test_video_watched') {
-      updateData.test_video_watched = test_video_watched;
-      updateData.current_step = 1;
+      updateData.welcome_video_shown = test_video_watched;
     }
 
     // Get the current record to update
     const { data: currentRecords } = await supabase
-      .from('onboarding_status')
+      .from('user_onboarding_status')
       .select('*')
-      .eq('user_id', userId);
+      .eq('user_id', actualUserId)
+      .order('created_at', { ascending: false });
 
     let data;
     if (currentRecords && currentRecords.length > 0) {
       // Update the first (most recent) record
       const { data: updatedRecord, error } = await supabase
-        .from('onboarding_status')
+        .from('user_onboarding_status')
         .update(updateData)
         .eq('id', currentRecords[0].id)
         .select()
@@ -404,9 +483,16 @@ export async function POST(request: Request) {
     } else {
       // Create new record if none exists
       const { data: newRecord, error } = await supabase
-        .from('onboarding_status')
+        .from('user_onboarding_status')
         .insert({
           user_id: actualUserId,
+          welcome_video_shown: false,
+          goal_set: false,
+          missions_selected: false,
+          training_schema_selected: false,
+          nutrition_plan_selected: false,
+          challenge_started: false,
+          onboarding_completed: false,
           ...updateData
         })
         .select()
@@ -422,13 +508,28 @@ export async function POST(request: Request) {
 
 
 
-    console.log('✅ Onboarding status updated:', {
+    // Map the new database structure to the frontend format
+    const mappedData = {
       user_id: data.user_id,
+      welcome_video_watched: data.welcome_video_shown,
+      step_1_completed: data.goal_set,
+      step_2_completed: data.missions_selected,
+      step_3_completed: data.training_schema_selected,
+      step_4_completed: data.nutrition_plan_selected,
+      step_5_completed: data.challenge_started,
       onboarding_completed: data.onboarding_completed,
-      current_step: data.current_step
+      current_step: data.onboarding_completed ? 5 : (data.challenge_started ? 5 : (data.nutrition_plan_selected ? 4 : (data.training_schema_selected ? 3 : (data.missions_selected ? 2 : (data.goal_set ? 1 : 0))))),
+      created_at: data.created_at,
+      updated_at: data.updated_at
+    };
+
+    console.log('✅ Onboarding status updated:', {
+      user_id: mappedData.user_id,
+      onboarding_completed: mappedData.onboarding_completed,
+      current_step: mappedData.current_step
     });
 
-    return NextResponse.json(data);
+    return NextResponse.json(mappedData);
 
   } catch (error) {
     console.error('❌ Error in onboarding POST:', error);

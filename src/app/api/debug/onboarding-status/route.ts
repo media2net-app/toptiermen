@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -22,12 +27,15 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Profile not found', details: profileError }, { status: 404 });
     }
 
-    // Get onboarding status
-    const { data: onboardingStatus, error: onboardingError } = await supabase
+    // Get onboarding status (get the most recent record)
+    const { data: onboardingRecords, error: onboardingError } = await supabase
       .from('user_onboarding_status')
       .select('*')
       .eq('user_id', profile.id)
-      .single();
+      .order('created_at', { ascending: false });
+    
+    const onboardingStatus = onboardingRecords && onboardingRecords.length > 0 ? onboardingRecords[0] : null;
+
 
     // Map package_type to access control
     const packageType = profile.package_type || 'Basic Tier';
@@ -65,7 +73,7 @@ export async function GET(request: NextRequest) {
         full_name: profile.full_name,
         package_type: packageType
       },
-      onboarding_status: onboardingStatus || null,
+      onboarding_status: onboardingStatus,
       onboarding_error: onboardingError?.message || null,
       access_control: {
         hasTrainingAccess,
@@ -76,7 +84,7 @@ export async function GET(request: NextRequest) {
         all_steps: allSteps,
         available_steps: availableSteps,
         step_mapping: stepMapping,
-        current_step_in_sequence: onboardingStatus ? stepMapping[onboardingStatus.current_step] : null,
+        current_step_in_sequence: onboardingStatus ? (onboardingStatus.onboarding_completed ? null : 0) : null,
         should_skip_training: !hasTrainingAccess,
         should_skip_nutrition: !hasNutritionAccess
       }

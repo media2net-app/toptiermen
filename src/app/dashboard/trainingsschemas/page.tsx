@@ -378,16 +378,23 @@ function TrainingschemasContent() {
               equipment_type: data.profile.equipment_type
             });
           } else {
-            console.log('ℹ️ No training profile found, creating basic profile');
+            console.log('ℹ️ No training profile found');
+            if (!showOnboardingStep3) {
+              console.log('🔧 Creating basic profile for non-onboarding user');
             await createBasicProfile();
+            }
           }
         } else {
           console.error('❌ Profile API error:', response.status, response.statusText);
+          if (!showOnboardingStep3) {
           await createBasicProfile();
+          }
         }
       } else {
         console.error('❌ Training profile promise rejected:', profileResult.reason);
+        if (!showOnboardingStep3) {
         await createBasicProfile();
+        }
       }
       
       // Process schema period
@@ -454,9 +461,6 @@ function TrainingschemasContent() {
   };
 
   const filterSchemasByProfile = (schemas: TrainingSchema[], profile: TrainingProfile) => {
-    // Always apply filtering - showAllSchemas functionality removed
-    console.log('🔍 Applying filtering (showAllSchemas disabled)');
-    
     console.log('🔍 Filtering schemas for profile:', profile);
     console.log('📊 Total schemas before filtering:', schemas.length);
     
@@ -477,71 +481,142 @@ function TrainingschemasContent() {
     
     console.log(`🎯 Mapping frontend goal "${profile.training_goal}" to database goal "${dbGoal}"`);
     
-    const filtered = schemas.filter(schema => {
-      // EXACT matching on training_goal field from database
+    // SMART FILTERING: Always show exactly 3 schemas (1, 2, 3) for the user's goal
+    // Strategy: Find the best available schemas for each schema number
+      
+    // Step 1: Find all schemas for this goal + equipment combination
+    const goalEquipmentMatches = schemas.filter(schema => {
       const goalMatch = schema.training_goal === dbGoal;
-      
-      // EXACT matching on equipment_type field from database
       const equipmentMatch = schema.equipment_type === profile.equipment_type;
-      
-      // EXACT matching on training frequency (number of days)
-      const schemaDays = schema.training_schema_days?.length || 0;
-      const frequencyMatch = schemaDays === profile.training_frequency;
-      
-      console.log(`📋 Schema "${schema.name}" (${schema.schema_nummer}): goal=${schema.training_goal} (${goalMatch}), equipment=${schema.equipment_type} (${equipmentMatch}), frequency=${schemaDays} days (${frequencyMatch})`);
-      console.log(`   User profile: goal=${profile.training_goal}->${dbGoal}, equipment=${profile.equipment_type}, frequency=${profile.training_frequency}`);
-      
-      return goalMatch && equipmentMatch && frequencyMatch;
+      return goalMatch && equipmentMatch;
     });
     
-    console.log('✅ Filtered schemas with exact matching:', filtered.length);
+    console.log(`🎯 Goal + equipment matches: ${goalEquipmentMatches.length}`);
     
-    // Sort schemas by schema_nummer (1, 2, 3) within each group
-    const sortedSchemas = filtered.sort((a, b) => {
-      // First sort by name to group similar schemas together
-      const nameComparison = a.name.localeCompare(b.name);
-      if (nameComparison !== 0) {
-        return nameComparison;
+    // Step 2: If no equipment matches, fall back to goal only
+    const goalMatches = goalEquipmentMatches.length > 0 ? goalEquipmentMatches : schemas.filter(schema => {
+      return schema.training_goal === dbGoal;
+    });
+    
+    console.log(`🎯 Using ${goalEquipmentMatches.length > 0 ? 'goal + equipment' : 'goal only'} matches: ${goalMatches.length}`);
+    
+    // Step 3: Group by schema_nummer and select the best schema for each number
+    const schemaGroups = {};
+    
+    goalMatches.forEach(schema => {
+      const num = schema.schema_nummer || 1;
+      if (!schemaGroups[num]) {
+        schemaGroups[num] = [];
+      }
+      schemaGroups[num].push(schema);
+    });
+    
+    console.log(`🎯 Available schema groups:`, Object.keys(schemaGroups).map(n => `${n}: ${schemaGroups[n].length}`).join(', '));
+    
+    // Step 4: Select the best schema for each number (1, 2, 3)
+    const finalSchemas: TrainingSchema[] = [];
+    
+    for (let i = 1; i <= 3; i++) {
+      if (schemaGroups[i] && schemaGroups[i].length > 0) {
+        // Select the best schema for this number
+        let bestSchema = schemaGroups[i][0];
+        
+        // Priority: exact frequency match > equipment match > first available
+        for (const schema of schemaGroups[i]) {
+          const schemaDays = schema.training_schema_days?.length || 0;
+          const currentDays = bestSchema.training_schema_days?.length || 0;
+          
+          // Prefer exact frequency match
+          if (schemaDays === profile.training_frequency && currentDays !== profile.training_frequency) {
+            bestSchema = schema;
+            break;
+          }
+          // Prefer same equipment type
+          if (schema.equipment_type === profile.equipment_type && bestSchema.equipment_type !== profile.equipment_type) {
+            bestSchema = schema;
+          }
+        }
+        
+        finalSchemas.push(bestSchema);
+        console.log(`  ✅ Schema ${i}: Selected "${bestSchema.name}" (${bestSchema.equipment_type}, ${bestSchema.training_schema_days?.length || 0} days)`);
+      } else {
+        console.log(`  ❌ Schema ${i}: No schemas available`);
+      }
+    }
+    
+    // If we still don't have 3 schemas, fill with the best available from other numbers
+    if (finalSchemas.length < 3) {
+      console.log('⚠️ Less than 3 schemas found, filling with best available...');
+      
+      // Get all remaining schemas not already selected
+      const remaining = goalMatches.filter(schema => 
+        !finalSchemas.find(selected => selected.id === schema.id)
+      );
+      
+      // Sort by priority: exact frequency > equipment match > schema number
+      remaining.sort((a, b) => {
+        const aDays = a.training_schema_days?.length || 0;
+        const bDays = b.training_schema_days?.length || 0;
+        
+        // Exact frequency match first
+        if (aDays === profile.training_frequency && bDays !== profile.training_frequency) return -1;
+        if (bDays === profile.training_frequency && aDays !== profile.training_frequency) return 1;
+        
+        // Equipment match second
+        if (a.equipment_type === profile.equipment_type && b.equipment_type !== profile.equipment_type) return -1;
+        if (b.equipment_type === profile.equipment_type && a.equipment_type !== profile.equipment_type) return 1;
+        
+        // Schema number third
+        return (a.schema_nummer || 0) - (b.schema_nummer || 0);
+      });
+      
+      // Add remaining schemas to reach 3 total
+      while (finalSchemas.length < 3 && remaining.length > 0) {
+        const nextSchema = remaining.shift();
+        if (nextSchema) {
+          finalSchemas.push(nextSchema);
+          console.log(`  ➕ Added Schema ${nextSchema.schema_nummer}: "${nextSchema.name}" (${nextSchema.equipment_type}, ${nextSchema.training_schema_days?.length || 0} days)`);
+        }
       }
       
-      // Then sort by schema_nummer (1, 2, 3)
+      // If still not enough schemas, use all available schemas for this goal (fallback to any equipment)
+      if (finalSchemas.length < 3) {
+        console.log('⚠️ Still not enough schemas, using all available for this goal...');
+        const allGoalSchemas = schemas.filter(schema => schema.training_goal === dbGoal);
+        const notSelected = allGoalSchemas.filter(schema => 
+          !finalSchemas.find(selected => selected.id === schema.id)
+        );
+        
+        // Sort by schema number priority
+        notSelected.sort((a, b) => {
+        const aNum = a.schema_nummer || 0;
+        const bNum = b.schema_nummer || 0;
+        return aNum - bNum;
+        });
+        
+        while (finalSchemas.length < 3 && notSelected.length > 0) {
+          const nextSchema = notSelected.shift();
+          if (nextSchema) {
+            finalSchemas.push(nextSchema);
+            console.log(`  ➕ Added fallback Schema ${nextSchema.schema_nummer}: "${nextSchema.name}" (${nextSchema.equipment_type}, ${nextSchema.training_schema_days?.length || 0} days)`);
+          }
+        }
+      }
+    }
+    
+    // Sort by schema_nummer to ensure 1, 2, 3 order
+    finalSchemas.sort((a, b) => {
       const aNum = a.schema_nummer || 0;
       const bNum = b.schema_nummer || 0;
       return aNum - bNum;
     });
     
-    // Don't limit schemas - show all matching schemas
-    const limitedSchemas = sortedSchemas;
+    console.log('✅ Final filtered schemas:', finalSchemas.length);
+    finalSchemas.forEach((schema, index) => {
+      console.log(`  ${index + 1}. Schema ${schema.schema_nummer}: "${schema.name}" (${schema.training_goal}, ${schema.equipment_type}, ${schema.training_schema_days?.length || 0} days)`);
+    });
     
-    // If no schemas match the exact criteria, show fallback with relaxed matching
-    if (limitedSchemas.length === 0) {
-      console.log('⚠️ No schemas match exact criteria, showing fallback schemas');
-      const fallbackSchemas = schemas.filter(schema => {
-        // Relaxed matching: only match on training_goal and equipment_type
-        const goalMatch = schema.training_goal === dbGoal;
-        const equipmentMatch = schema.equipment_type === profile.equipment_type;
-        
-        console.log(`🔄 Fallback Schema "${schema.name}": goal=${schema.training_goal} (${goalMatch}), equipment=${schema.equipment_type} (${equipmentMatch})`);
-        
-        return goalMatch && equipmentMatch;
-      })
-      // Sort fallback schemas by schema_nummer as well
-      .sort((a, b) => {
-        const nameComparison = a.name.localeCompare(b.name);
-        if (nameComparison !== 0) {
-          return nameComparison;
-        }
-        const aNum = a.schema_nummer || 0;
-        const bNum = b.schema_nummer || 0;
-        return aNum - bNum;
-      })
-      .slice(0, 3); // Limit to 3 fallback schemas
-      
-      console.log('🔄 Showing fallback schemas:', fallbackSchemas.length);
-      return fallbackSchemas;
-    }
-    
-    return limitedSchemas; // Return limited schemas (max 3)
+    return finalSchemas;
   };
 
   // OPTIMIZED: Create basic profile function with enhanced debugging
@@ -658,8 +733,15 @@ function TrainingschemasContent() {
             equipment_type: data.profile.equipment_type
           });
         } else {
-          console.log('ℹ️ No training profile found, creating basic profile');
+          console.log('ℹ️ No training profile found');
+          // Don't create automatic profile during onboarding - let user fill form manually
+          if (showOnboardingStep3) {
+            console.log('🎯 Onboarding step 3 active - not creating automatic profile');
+            setUserTrainingProfile(null);
+          } else {
+            console.log('🔧 Creating basic profile for non-onboarding user');
           await createBasicProfile();
+          }
         }
       } else {
         console.log('❌ Failed to fetch training profile:', response.status);
@@ -804,20 +886,28 @@ function TrainingschemasContent() {
           console.log('✅ Schema period created:', periodData.data);
           toast.success(`Trainingsschema geselecteerd! 8-weken periode gestart: ${new Date(periodData.data.start_date).toLocaleDateString('nl-NL')} - ${new Date(periodData.data.end_date).toLocaleDateString('nl-NL')}`);
           
-          // Automatically redirect to Mijn trainingen after successful selection
+          // Only redirect to Mijn trainingen if NOT in onboarding
+          if (!isOnboarding && !showOnboardingStep3) {
           console.log('🔄 Redirecting to Mijn trainingen...');
           setTimeout(() => {
             router.push('/dashboard/mijn-trainingen');
           }, 1500); // Small delay to show the success message
+          } else {
+            console.log('🎯 Onboarding active - NOT redirecting to Mijn trainingen');
+          }
         } else {
           console.error('❌ Failed to create schema period');
           toast.success('Trainingsschema geselecteerd!');
           
-          // Still redirect even if period creation failed
+          // Still redirect even if period creation failed, but only if NOT in onboarding
+          if (!isOnboarding && !showOnboardingStep3) {
           console.log('🔄 Redirecting to Mijn trainingen...');
           setTimeout(() => {
             router.push('/dashboard/mijn-trainingen');
           }, 1500);
+          } else {
+            console.log('🎯 Onboarding active - NOT redirecting to Mijn trainingen');
+          }
         }
         
         // Complete onboarding step if needed
@@ -840,11 +930,8 @@ function TrainingschemasContent() {
             
             if (response.ok) {
               console.log('✅ Onboarding step 3 completed');
-              // Redirect to Mijn trainingen after onboarding completion
-              console.log('🔄 Redirecting to Mijn trainingen after onboarding completion...');
-              setTimeout(() => {
-                router.push('/dashboard/mijn-trainingen');
-              }, 2000); // Slightly longer delay for onboarding
+              // DON'T redirect to mijn-trainingen during onboarding - let onboarding flow continue
+              console.log('🎯 Onboarding step 3 completed, staying in onboarding flow');
             }
           } catch (error) {
             console.error('❌ Error completing onboarding step:', error);
@@ -1277,8 +1364,11 @@ function TrainingschemasContent() {
           const data = await response.json();
           setOnboardingStatus(data);
           
-          // Only show onboarding step 3 if onboarding is not completed and user is on step 3
-          setShowOnboardingStep3(!data.onboarding_completed && data.current_step === 3);
+          // Show onboarding step 3 if onboarding is not completed and user needs to select training schema
+          // This includes users on step 3 OR users who haven't selected training schema yet
+          const shouldShowStep3 = !data.onboarding_completed && 
+            (data.current_step === 3 || (!data.step_3_completed && data.current_step >= 2));
+          setShowOnboardingStep3(shouldShowStep3);
         }
       } catch (error) {
         console.error('Error checking onboarding status:', error);
@@ -1287,6 +1377,14 @@ function TrainingschemasContent() {
 
     checkOnboardingStatus();
   }, [user?.id]);
+
+  // Re-fetch training profile when onboarding step 3 status changes
+  useEffect(() => {
+    if (user?.id && !profileLoading) {
+      console.log('🔄 Onboarding step 3 status changed, re-fetching training profile...');
+      fetchUserTrainingProfile();
+    }
+  }, [showOnboardingStep3]);
 
   // Progressieve loading states
   if (authLoading) {
@@ -1414,13 +1512,17 @@ function TrainingschemasContent() {
               
               <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center">
                 <button
-                  onClick={() => router.push('/pakketten/premium-tier')}
+                  onClick={() => {
+                    alert('Mocht je deze onderdelen willen neem dan contact op met Rick voor het upgraden van je pakket');
+                  }}
                   className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#0A0F0A] font-bold px-6 md:px-8 py-3 rounded-lg hover:from-[#A6C97B] hover:to-[#FFE55C] transition-all duration-200 text-sm md:text-base"
                 >
                   Upgrade naar Premium
                 </button>
                 <button
-                  onClick={() => router.push('/pakketten/lifetime-tier')}
+                  onClick={() => {
+                    alert('Mocht je deze onderdelen willen neem dan contact op met Rick voor het upgraden van je pakket');
+                  }}
                   className="bg-gradient-to-r from-[#FFD700] to-[#8BAE5A] text-[#0A0F0A] font-bold px-6 md:px-8 py-3 rounded-lg hover:from-[#FFE55C] hover:to-[#A6C97B] transition-all duration-200 text-sm md:text-base"
                 >
                   Upgrade naar Lifetime

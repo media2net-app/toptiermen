@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { useRouter } from 'next/navigation';
+import { useSubscription } from '@/hooks/useSubscription';
 import { motion } from 'framer-motion';
 import { 
   BookOpenIcon, 
@@ -89,12 +90,13 @@ interface UserProfile {
 
 export default function VoedingsplannenV2Page() {
   const { user, loading: authLoading } = useSupabaseAuth();
+  const { hasAccess, loading: subscriptionLoading } = useSubscription();
   const router = useRouter();
   const [plans, setPlans] = useState<NutritionPlan[]>([]);
   const [selectedPlan, setSelectedPlan] = useState<NutritionPlan | null>(null);
   const [originalPlanData, setOriginalPlanData] = useState<OriginalPlanData | null>(null);
   const [scalingInfo, setScalingInfo] = useState<SmartScalingInfo | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [loadingOriginal, setLoadingOriginal] = useState(false);
   const [loadingScaling, setLoadingScaling] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -829,7 +831,7 @@ export default function VoedingsplannenV2Page() {
   const fatProgress = getProgressInfo(currentDayTotals.fat, personalizedTargets?.targetFat || originalPlanData?.target_fat || 0);
 
   // Access is now available for all authenticated users
-  const hasAccess = !!user;
+  const hasBasicAccess = !!user;
 
   // Define fetchUserProfile function outside useEffect so it can be reused
   const fetchUserProfile = async () => {
@@ -873,32 +875,8 @@ export default function VoedingsplannenV2Page() {
     }
   };
 
-  // Fetch user profile when component loads
-  useEffect(() => {
-    fetchUserProfile();
-  }, [user?.id]);
-
-  useEffect(() => {
-    console.log('🔍 Access check useEffect triggered:', { authLoading, hasAccess, userEmail: user?.email });
-    
-    // Wait for auth to load before checking access
-    if (authLoading) {
-      console.log('⏳ Auth still loading, waiting...');
-      return;
-    }
-    
-    // Check if user is authenticated
-    if (!hasAccess) {
-      console.log('🚫 No authenticated user, redirecting to login');
-      router.push('/login');
-      return;
-    }
-
-    console.log('✅ Access granted to voedingsplannen-v2 for:', user?.email);
-    fetchPlans();
-  }, [hasAccess, router, authLoading, user]);
-
-  const fetchPlans = async () => {
+  // Define fetchPlans function first to avoid hoisting issues
+  const fetchPlans = useCallback(async () => {
     try {
       console.log('🔧 DEBUG: fetchPlans called');
       setLoading(true);
@@ -907,19 +885,46 @@ export default function VoedingsplannenV2Page() {
       console.log('🔧 DEBUG: fetchPlans response status:', response.status);
       
       if (!response.ok) {
-        throw new Error('Failed to fetch nutrition plans');
+        throw new Error(`Failed to fetch nutrition plans: ${response.status} ${response.statusText}`);
       }
       
       const data = await response.json();
       console.log('🔧 DEBUG: fetchPlans data received:', { plansCount: data.plans?.length || 0, plans: data.plans });
       setPlans(data.plans || []);
+      console.log('🔧 DEBUG: Plans state updated, setting loading to false');
     } catch (err) {
       console.error('🔧 DEBUG: fetchPlans error:', err);
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
+      console.log('🔧 DEBUG: Setting loading to false in finally block');
       setLoading(false);
     }
-  };
+  }, []);
+
+  // Fetch user profile when component loads
+  useEffect(() => {
+    fetchUserProfile();
+  }, [user?.id]);
+
+  useEffect(() => {
+    console.log('🔍 Access check useEffect triggered:', { authLoading, hasBasicAccess, userEmail: user?.email });
+    
+    // Wait for auth to load before checking access
+    if (authLoading) {
+      console.log('⏳ Auth still loading, waiting...');
+      return;
+    }
+    
+    // Check if user is authenticated
+    if (!hasBasicAccess) {
+      console.log('🚫 No authenticated user, redirecting to login');
+      router.push('/login');
+      return;
+    }
+
+    console.log('✅ Access granted to voedingsplannen-v2 for:', user?.email);
+    fetchPlans();
+  }, [hasBasicAccess, router, authLoading, user, fetchPlans]);
 
   const loadOriginalPlanData = async (planId: string) => {
     try {
@@ -1033,10 +1038,8 @@ export default function VoedingsplannenV2Page() {
 
   const handlePlanSelect = (plan: NutritionPlan) => {
     console.log('🔧 DEBUG: handlePlanSelect called with plan:', { name: plan.name, id: plan.plan_id || plan.id });
-    setSelectedPlan(plan);
-    setShowOriginalData(true);
-    setScalingInfo(null); // Reset scaling info
-    loadOriginalPlanData(plan.plan_id || plan.id.toString());
+    // Navigate to subpage instead of showing details on same page
+    router.push(`/dashboard/voedingsplannen-v2/${plan.plan_id || plan.id}`);
   };
 
   const handleBackToPlans = () => {
@@ -1821,6 +1824,81 @@ export default function VoedingsplannenV2Page() {
     );
   }
 
+  // Check access permissions for nutrition plans
+  if (!hasAccess('nutrition')) {
+    return (
+      <div className="min-h-screen bg-[#0A0F0A] p-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center py-16">
+            <div className="mb-8">
+              <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] rounded-full flex items-center justify-center">
+                <BookOpenIcon className="w-12 h-12 text-[#0A0F0A]" />
+              </div>
+              <h1 className="text-3xl font-bold text-white mb-4">Voedingsplannen V2</h1>
+              <p className="text-xl text-gray-300 mb-8">
+                Upgrade naar Premium of Lifetime voor toegang tot voedingsplannen
+              </p>
+            </div>
+            
+            <div className="bg-[#232D1A] border border-[#3A4D23] rounded-xl p-8 max-w-2xl mx-auto">
+              <h2 className="text-2xl font-bold text-white mb-4">🚀 Upgrade je Account</h2>
+              <p className="text-gray-300 mb-6">
+                Voedingsplannen zijn alleen beschikbaar voor Premium en Lifetime leden. 
+                Upgrade nu om toegang te krijgen tot:
+              </p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 mb-8">
+                <div className="flex items-center gap-3 p-3 bg-[#181F17] rounded-lg">
+                  <div className="w-8 h-8 bg-[#8BAE5A] rounded-full flex items-center justify-center">
+                    <BookOpenIcon className="w-4 h-4 text-[#0A0F0A]" />
+                  </div>
+                  <span className="text-white font-medium">Voedingsplannen V2</span>
+                </div>
+                <div className="flex items-center gap-3 p-3 bg-[#181F17] rounded-lg">
+                  <div className="w-8 h-8 bg-[#8BAE5A] rounded-full flex items-center justify-center">
+                    <RocketLaunchIcon className="w-4 h-4 text-[#0A0F0A]" />
+                  </div>
+                  <span className="text-white font-medium">AI-Optimalisatie</span>
+                </div>
+                <div className="flex items-center gap-3 p-3 bg-[#181F17] rounded-lg">
+                  <div className="w-8 h-8 bg-[#8BAE5A] rounded-full flex items-center justify-center">
+                    <ChartBarIcon className="w-4 h-4 text-[#0A0F0A]" />
+                  </div>
+                  <span className="text-white font-medium">Slimme Schaling</span>
+                </div>
+                <div className="flex items-center gap-3 p-3 bg-[#181F17] rounded-lg">
+                  <div className="w-8 h-8 bg-[#8BAE5A] rounded-full flex items-center justify-center">
+                    <UserIcon className="w-4 h-4 text-[#0A0F0A]" />
+                  </div>
+                  <span className="text-white font-medium">Persoonlijke Plannen</span>
+                </div>
+              </div>
+              
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <button 
+                  onClick={() => {
+                    alert('Mocht je deze onderdelen willen neem dan contact op met Rick voor het upgraden van je pakket');
+                  }}
+                  className="px-6 py-3 bg-gradient-to-r from-[#8BAE5A] to-[#B6C948] text-[#0A0F0A] font-bold rounded-lg hover:from-[#7A9E4A] hover:to-[#A6C838] transition-all duration-200 transform hover:scale-105"
+                >
+                  Upgrade naar Premium
+                </button>
+                <button 
+                  onClick={() => {
+                    alert('Mocht je deze onderdelen willen neem dan contact op met Rick voor het upgraden van je pakket');
+                  }}
+                  className="px-6 py-3 bg-gradient-to-r from-[#FFD700] to-[#FFA500] text-[#0A0F0A] font-bold rounded-lg hover:from-[#E6C200] hover:to-[#E69500] transition-all duration-200 transform hover:scale-105"
+                >
+                  Upgrade naar Lifetime
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // Overview page - show when no plan is selected
   return (
     <div className="min-h-screen bg-[#0A0F0A] p-6">
@@ -2054,7 +2132,7 @@ export default function VoedingsplannenV2Page() {
                       <div className="flex justify-between items-center">
                         <span className="text-gray-400 text-sm">Jouw Calorieën:</span>
                         <span className="text-[#8BAE5A] font-bold text-lg">{personalizedTargets.targetCalories} kcal</span>
-          </div>
+                </div>
         )}
 
                     {/* Macro Breakdown */}
@@ -2063,35 +2141,35 @@ export default function VoedingsplannenV2Page() {
                         <div className="text-xs text-gray-400">Eiwit</div>
                         <div className="text-sm font-semibold text-white">
                           {personalizedTargets?.targetProtein || plan.target_protein}g
-                </div>
-                </div>
+                  </div>
+                  </div>
                       <div className="text-center">
                         <div className="text-xs text-gray-400">Koolhydraten</div>
                         <div className="text-sm font-semibold text-white">
                           {personalizedTargets?.targetCarbs || plan.target_carbs}g
-              </div>
-            </div>
+                  </div>
+                  </div>
                       <div className="text-center">
                         <div className="text-xs text-gray-400">Vet</div>
                         <div className="text-sm font-semibold text-white">
                           {personalizedTargets?.targetFat || plan.target_fat}g
-                  </div>
-                  </div>
-                  </div>
-                  </div>
-                </motion.div>
-                    );
-                  })}
                 </div>
-              )}
-                                  
+              </div>
+                </div>
+              </div>
+            </motion.div>
+            );
+          })}
+          </div>
+        )}
+
         {/* No Plans State */}
         {!loading && !error && plans.length === 0 && (
           <div className="text-center py-12">
             <BookOpenIcon className="w-16 h-16 text-gray-500 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-400 mb-2">Geen voedingsplannen gevonden</h3>
             <p className="text-gray-500">Er zijn momenteel geen voedingsplannen beschikbaar.</p>
-              </div>
+                </div>
         )}
             </div>
 
@@ -2101,17 +2179,17 @@ export default function VoedingsplannenV2Page() {
           <div className="bg-[#232D1A] rounded-xl p-6 max-w-md w-full mx-4">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-xl font-bold text-white">Simpel Modal</h3>
-              <button
+                  <button
                 onClick={() => setShowSimpleModal(false)}
                 className="text-gray-400 hover:text-white"
               >
                 ✕
-              </button>
-            </div>
+                  </button>
+              </div>
             <div className="text-gray-300">
               <p>Dit is een simpel modal zonder inhoud.</p>
               <p className="mt-2">We gaan dit stap voor stap uitbreiden.</p>
-            </div>
+                                  </div>
             <div className="flex justify-end mt-6">
               <button
                 onClick={() => setShowSimpleModal(false)}
@@ -2120,8 +2198,8 @@ export default function VoedingsplannenV2Page() {
                 Sluiten
               </button>
             </div>
-          </div>
-        </div>
+                    </div>
+                    </div>
       )}
 
       {/* Ingredient Edit Modal */}

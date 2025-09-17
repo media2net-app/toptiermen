@@ -146,7 +146,42 @@ export default function WorkoutPage() {
     console.log('🔍 User ID:', user.id);
     
     try {
-      // Use the existing API endpoint to get training data
+      // Try the new workout-data API endpoint first
+      console.log('🔄 Trying workout-data API endpoint...');
+      const workoutResponse = await fetch(`/api/training/workout-data?schemaId=${schemaId}&dayNumber=${dayNumber}`);
+      
+      if (workoutResponse.ok) {
+        const workoutData = await workoutResponse.json();
+        console.log('✅ Workout data loaded:', workoutData);
+        
+        if (workoutData.success && workoutData.data && workoutData.data.exercises && workoutData.data.exercises.length > 0) {
+          // Transform exercises from workout-data API
+          const transformedExercises: Exercise[] = [];
+          
+          for (const ex of workoutData.data.exercises) {
+            transformedExercises.push({
+              id: ex.id,
+              name: ex.name || 'Unknown Exercise',
+              sets: ex.targetSets || 3,
+              reps: ex.reps || '8-12',
+              rest: ex.rest || '90s',
+              completed: false,
+              currentSet: 0,
+              notes: ex.notes || undefined,
+              videoUrl: ex.videoUrl || undefined
+            });
+          }
+
+          setExercises(transformedExercises);
+          console.log('✅ Exercises loaded from workout-data API:', transformedExercises.length);
+          setLoading(false);
+          return;
+        }
+      }
+
+      console.log('⚠️ Workout-data API failed, trying user-training-schema API...');
+      
+      // Fallback to user-training-schema API
       const response = await fetch(`/api/user-training-schema?userId=${user.id}`);
       const data = await response.json();
       

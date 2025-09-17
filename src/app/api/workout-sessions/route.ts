@@ -91,7 +91,7 @@ export async function GET(request: Request) {
       .from('workout_sessions')
       .select(`
         *,
-        training_schemas(name, description),
+        training_schemas!workout_sessions_schema_id_fkey(name, description),
         workout_exercises(*)
       `)
       .eq('user_id', userId)
