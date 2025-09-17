@@ -274,7 +274,6 @@ export default function AcademyPage() {
         </div>
       </PageLayout>
     );
-
   return (
     <PageLayout title="Academy" subtitle="Leer en groei met onze uitgebreide cursussen">
       {/* Overall Progress */}
