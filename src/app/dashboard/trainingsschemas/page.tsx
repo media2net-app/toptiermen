@@ -762,9 +762,21 @@ function TrainingschemasContent() {
           setCurrentSchemaPeriod(periodData.data);
           console.log('✅ Schema period created:', periodData.data);
           toast.success(`Trainingsschema geselecteerd! 8-weken periode gestart: ${new Date(periodData.data.start_date).toLocaleDateString('nl-NL')} - ${new Date(periodData.data.end_date).toLocaleDateString('nl-NL')}`);
+          
+          // Automatically redirect to Mijn trainingen after successful selection
+          console.log('🔄 Redirecting to Mijn trainingen...');
+          setTimeout(() => {
+            router.push('/dashboard/mijn-trainingen');
+          }, 1500); // Small delay to show the success message
         } else {
           console.error('❌ Failed to create schema period');
           toast.success('Trainingsschema geselecteerd!');
+          
+          // Still redirect even if period creation failed
+          console.log('🔄 Redirecting to Mijn trainingen...');
+          setTimeout(() => {
+            router.push('/dashboard/mijn-trainingen');
+          }, 1500);
         }
         
         // Complete onboarding step if needed
@@ -787,6 +799,11 @@ function TrainingschemasContent() {
             
             if (response.ok) {
               console.log('✅ Onboarding step 3 completed');
+              // Redirect to Mijn trainingen after onboarding completion
+              console.log('🔄 Redirecting to Mijn trainingen after onboarding completion...');
+              setTimeout(() => {
+                router.push('/dashboard/mijn-trainingen');
+              }, 2000); // Slightly longer delay for onboarding
             }
           } catch (error) {
             console.error('❌ Error completing onboarding step:', error);
