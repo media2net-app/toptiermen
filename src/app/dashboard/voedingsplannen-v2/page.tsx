@@ -283,8 +283,72 @@ export default function VoedingsplannenV2Page() {
       const meal = dayMeals[mealType];
       console.log(`🔍 ${mealType}:`, meal ? 'exists' : 'missing', meal?.totals ? 'has totals' : 'no totals');
       
-      if (meal?.totals) {
-        // Use existing totals if available
+      // Always calculate from ingredients when custom amounts are present
+      const hasCustomAmounts = meal?.ingredients && Array.isArray(meal.ingredients) && 
+        meal.ingredients.some((ingredient: any) => {
+          const ingredientKey = getIngredientKey(mealType, ingredient.name, day);
+          return customAmounts[ingredientKey] !== undefined;
+        });
+
+      if (hasCustomAmounts && meal?.ingredients && Array.isArray(meal.ingredients)) {
+        // Calculate totals from individual ingredients when custom amounts are present
+        console.log(`🧮 Calculating ${mealType} from ${meal.ingredients.length} ingredients (custom amounts detected)`);
+        let mealTotals = { calories: 0, protein: 0, carbs: 0, fat: 0 };
+        
+        meal.ingredients.forEach((ingredient: any, index: number) => {
+          // Get custom amount or use original amount
+          const ingredientKey = getIngredientKey(mealType, ingredient.name, day);
+          const customAmount = customAmounts[ingredientKey];
+          let amount = customAmount !== undefined ? customAmount : (ingredient.amount || 0);
+          
+          // Round to whole numbers for pieces/slices and per_100g
+          if (ingredient.unit === 'per_piece' || ingredient.unit === 'per_plakje' || ingredient.unit === 'stuk' || ingredient.unit === 'per_100g' || ingredient.unit === 'g') {
+            amount = Math.round(amount);
+          }
+          
+          console.log(`🔍 Ingredient ${index}:`, {
+            name: ingredient.name,
+            originalAmount: ingredient.amount,
+            customAmount: customAmount,
+            finalAmount: amount,
+            unit: ingredient.unit,
+            hasCustomAmount: customAmount !== undefined,
+            calories_per_100g: ingredient.calories_per_100g,
+            protein_per_100g: ingredient.protein_per_100g,
+            carbs_per_100g: ingredient.carbs_per_100g,
+            fat_per_100g: ingredient.fat_per_100g
+          });
+          
+          // Calculate macros based on amount and unit (matching backend logic exactly)
+          let multiplier = 1;
+          
+          // Handle different unit types based on database unit_type (matching backend exactly)
+          if (ingredient.unit === 'per_piece' || ingredient.unit === 'per_plakje' || ingredient.unit === 'stuk') {
+            multiplier = amount;
+          } else if (ingredient.unit === 'per_100g' || ingredient.unit === 'g') {
+            multiplier = amount / 100;
+          } else if (ingredient.unit === 'per_ml') {
+            multiplier = amount / 100; // Assuming 1ml = 1g for liquids
+          } else if (ingredient.unit === 'handje') {
+            multiplier = amount;
+          } else {
+            // Default to per 100g calculation
+            multiplier = amount / 100;
+          }
+          
+          mealTotals.calories += (ingredient.calories_per_100g || 0) * multiplier;
+          mealTotals.protein += (ingredient.protein_per_100g || 0) * multiplier;
+          mealTotals.carbs += (ingredient.carbs_per_100g || 0) * multiplier;
+          mealTotals.fat += (ingredient.fat_per_100g || 0) * multiplier;
+        });
+        
+        console.log(`📊 ${mealType} calculated totals:`, mealTotals);
+        totals.calories += mealTotals.calories;
+        totals.protein += mealTotals.protein;
+        totals.carbs += mealTotals.carbs;
+        totals.fat += mealTotals.fat;
+      } else if (meal?.totals) {
+        // Use existing totals if no custom amounts
         console.log(`📊 ${mealType} totals:`, meal.totals);
         totals.calories += meal.totals.calories || 0;
         totals.protein += meal.totals.protein || 0;
@@ -1919,7 +1983,7 @@ export default function VoedingsplannenV2Page() {
                     className="px-6 py-2 bg-[#8BAE5A] text-[#181F17] rounded-lg hover:bg-[#B6C948] transition-colors font-semibold"
                   >
                     Opslaan
-                  </button>
+                    </button>
                   </div>
                 </form>
               </motion.div>
