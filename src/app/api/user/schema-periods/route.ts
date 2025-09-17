@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
     }
 
     const { data, error } = await supabase
-      .from('user_schema_periods')
+      .from('user_schema_selections')
       .select(`
         *,
         training_schemas (
@@ -58,14 +58,14 @@ export async function POST(request: NextRequest) {
 
     // First, deactivate any existing active periods for this user
     await supabase
-      .from('user_schema_periods')
+      .from('user_schema_selections')
       .update({ status: 'completed' })
       .eq('user_id', userId)
       .eq('status', 'active');
 
     // Create new schema period
     const { data, error } = await supabase
-      .from('user_schema_periods')
+      .from('user_schema_selections')
       .insert({
         user_id: userId,
         training_schema_id: trainingSchemaId,
@@ -109,7 +109,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const { data, error } = await supabase
-      .from('user_schema_periods')
+      .from('user_schema_selections')
       .update({ status })
       .eq('id', periodId)
       .select(`

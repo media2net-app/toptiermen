@@ -145,6 +145,7 @@ function TrainingschemasContent() {
   const [trainingError, setTrainingError] = useState<string | null>(null);
   const [userTrainingProfile, setUserTrainingProfile] = useState<TrainingProfile | null>(null);
   const [selectedTrainingSchema, setSelectedTrainingSchema] = useState<string | null>(null);
+  const [unlockedSchemas, setUnlockedSchemas] = useState<{ [key: number]: boolean }>({ 1: true, 2: false, 3: false });
   const [showRequiredProfile, setShowRequiredProfile] = useState(false);
   const [showCalculator, setShowCalculator] = useState(false);
   const [showAllSchemas, setShowAllSchemas] = useState(false);
@@ -209,6 +210,24 @@ function TrainingschemasContent() {
       setCurrentSchemaPeriod(null);
     } finally {
       setSchemaPeriodLoading(false);
+    }
+  };
+
+  // Fetch user's schema progress to determine which schemas are unlocked
+  const fetchSchemaProgress = async (userId: string) => {
+    try {
+      console.log('🔍 Fetching schema progress for user:', userId);
+      const response = await fetch(`/api/user/schema-progress?userId=${userId}`);
+      const data = await response.json();
+      
+      if (data.unlockedSchemas) {
+        setUnlockedSchemas(data.unlockedSchemas);
+        console.log('✅ Schema progress loaded:', data.unlockedSchemas);
+      }
+    } catch (error) {
+      console.error('❌ Error fetching schema progress:', error);
+      // Default to only Schema 1 unlocked
+      setUnlockedSchemas({ 1: true, 2: false, 3: false });
     }
   };
 
@@ -289,7 +308,7 @@ function TrainingschemasContent() {
       
       // Start all API calls in parallel
       console.log('📡 Starting parallel API calls...');
-      const [schemasResult, profileResult, periodResult] = await Promise.allSettled([
+      const [schemasResult, profileResult, periodResult, progressResult] = await Promise.allSettled([
         // Load training schemas
         supabase
           .from('training_schemas')
@@ -308,13 +327,17 @@ function TrainingschemasContent() {
         fetch(`/api/training-profile?userId=${user.email}`),
         
         // Load current schema period
-        fetch(`/api/user/schema-periods?userId=${user.id}`)
+        fetch(`/api/user/schema-periods?userId=${user.id}`),
+        
+        // Load schema progress
+        fetch(`/api/user/schema-progress?userId=${user.id}`)
       ]);
       
       console.log('📡 API calls completed:', {
         schemasStatus: schemasResult.status,
         profileStatus: profileResult.status,
-        periodStatus: periodResult.status
+        periodStatus: periodResult.status,
+        progressStatus: progressResult.status
       });
       
       // Process training schemas
@@ -383,6 +406,24 @@ function TrainingschemasContent() {
         setCurrentSchemaPeriod(null);
       }
       
+      // Process schema progress
+      if (progressResult.status === 'fulfilled') {
+        const response = progressResult.value;
+        if (response.ok) {
+          const data = await response.json();
+          if (data.unlockedSchemas) {
+            setUnlockedSchemas(data.unlockedSchemas);
+            console.log('✅ Schema progress loaded:', data.unlockedSchemas);
+          }
+        } else {
+          console.log('⚠️ Schema progress API error:', response.status);
+          setUnlockedSchemas({ 1: true, 2: false, 3: false });
+        }
+      } else {
+        console.error('❌ Schema progress promise rejected:', progressResult.reason);
+        setUnlockedSchemas({ 1: true, 2: false, 3: false });
+      }
+      
       // Apply filtering after both data sources are loaded
       console.log('🎯 Applying filtering...', {
         hasProfile: !!userProfile,
@@ -447,7 +488,7 @@ function TrainingschemasContent() {
       const schemaDays = schema.training_schema_days?.length || 0;
       const frequencyMatch = schemaDays === profile.training_frequency;
       
-      console.log(`📋 Schema "${schema.name}": goal=${schema.training_goal} (${goalMatch}), equipment=${schema.equipment_type} (${equipmentMatch}), frequency=${schemaDays} days (${frequencyMatch})`);
+      console.log(`📋 Schema "${schema.name}" (${schema.schema_nummer}): goal=${schema.training_goal} (${goalMatch}), equipment=${schema.equipment_type} (${equipmentMatch}), frequency=${schemaDays} days (${frequencyMatch})`);
       console.log(`   User profile: goal=${profile.training_goal}->${dbGoal}, equipment=${profile.equipment_type}, frequency=${profile.training_frequency}`);
       
       return goalMatch && equipmentMatch && frequencyMatch;
@@ -469,8 +510,8 @@ function TrainingschemasContent() {
       return aNum - bNum;
     });
     
-    // Limit to 3 schemas maximum
-    const limitedSchemas = sortedSchemas.slice(0, 3);
+    // Don't limit schemas - show all matching schemas
+    const limitedSchemas = sortedSchemas;
     
     // If no schemas match the exact criteria, show fallback with relaxed matching
     if (limitedSchemas.length === 0) {
@@ -1910,7 +1951,9 @@ function TrainingschemasContent() {
                   const isSchema1 = schema.schema_nummer === 1;
                   const isSchema2 = schema.schema_nummer === 2;
                   const isSchema3 = schema.schema_nummer === 3;
-                  const isLocked = !isSchema1;
+                  
+                  // Progressive unlocking: Schema 1 is always unlocked, Schema 2 unlocks after 8 weeks of Schema 1, Schema 3 unlocks after 8 weeks of Schema 2
+                  const isLocked = !unlockedSchemas[schema.schema_nummer || 1];
                   
                   return (
                     <motion.div

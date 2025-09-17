@@ -136,42 +136,41 @@ export default function WorkoutPage() {
   };
 
   const loadExercisesFromDatabase = async () => {
-    if (!user || !schemaId || !dayNumber) return;
+    if (!user || !schemaId || !dayNumber) {
+      console.log('❌ Missing required data:', { user: !!user, schemaId, dayNumber });
+      return;
+    }
 
     setLoading(true);
+    console.log('🔄 Loading exercises from API:', { schemaId, dayNumber });
+    console.log('🔍 User ID:', user.id);
+    
     try {
-      // Get the day for this schema and day number
-      const { data: dayData, error: dayError } = await supabase
-        .from('training_schema_days')
-        .select('*')
-        .eq('schema_id', schemaId)
-        .eq('day_number', dayNumber)
-        .single();
-
-      if (dayError) {
-        console.error('Error loading day:', dayError);
-        // Fallback to sample data with video URLs
-        const sampleExercisesWithVideos = await Promise.all(
-          sampleExercises.map(async (exercise) => {
-            const videoUrl = await getVideoUrlForExercise(exercise.name);
-            return { ...exercise, videoUrl };
-          })
-        );
-        setExercises(sampleExercisesWithVideos);
-        setLoading(false);
-        return;
+      // Use the existing API endpoint to get training data
+      const response = await fetch(`/api/user-training-schema?userId=${user.id}`);
+      const data = await response.json();
+      
+      if (!data.success || !data.days) {
+        console.error('❌ Error loading training data from API:', data);
+        throw new Error('Failed to load training data');
       }
 
-      // Get exercises for this day
-      const { data: exercisesData, error: exercisesError } = await supabase
-        .from('training_schema_exercises')
-        .select('*')
-        .eq('schema_day_id', dayData.id)
-        .order('order_index');
+      console.log('✅ Training data loaded from API:', data.days.length, 'days');
 
-      if (exercisesError) {
-        console.error('Error loading exercises:', exercisesError);
-        // Fallback to sample data with video URLs
+      // Find the specific day we need
+      const targetDay = data.days.find((day: any) => day.day_number === dayNumber);
+      
+      if (!targetDay) {
+        console.error('❌ Day not found:', dayNumber);
+        console.error('❌ Available days:', data.days.map((d: any) => ({ day_number: d.day_number, name: d.name })));
+        throw new Error(`Day ${dayNumber} not found`);
+      }
+
+      console.log('✅ Target day found:', targetDay.name, 'with', targetDay.training_schema_exercises?.length || 0, 'exercises');
+
+      // Check if we have exercises
+      if (!targetDay.training_schema_exercises || targetDay.training_schema_exercises.length === 0) {
+        console.log('⚠️ No exercises found for this day, using fallback sample exercises');
         const sampleExercisesWithVideos = await Promise.all(
           sampleExercises.map(async (exercise) => {
             const videoUrl = await getVideoUrlForExercise(exercise.name);
@@ -186,7 +185,7 @@ export default function WorkoutPage() {
       // Transform database exercises to our format and fetch video URLs
       const transformedExercises: Exercise[] = [];
       
-      for (const ex of exercisesData) {
+      for (const ex of targetDay.training_schema_exercises) {
         const videoUrl = await getVideoUrlForExercise(ex.exercise_name);
         
         transformedExercises.push({
@@ -194,7 +193,7 @@ export default function WorkoutPage() {
           name: ex.exercise_name,
           sets: ex.sets,
           reps: ex.reps.toString(),
-          rest: `${ex.rest_time}s`,
+          rest: `${ex.rest_time_seconds || ex.rest_time || 90}s`,
           completed: false,
           currentSet: 0,
           notes: ex.notes || undefined,
@@ -203,8 +202,9 @@ export default function WorkoutPage() {
       }
 
       setExercises(transformedExercises);
+      console.log('✅ Exercises transformed and set:', transformedExercises.length);
     } catch (error) {
-      console.error('Error loading exercises:', error);
+      console.error('❌ Error loading exercises:', error);
       // Fallback to sample data with video URLs
       try {
         const sampleExercisesWithVideos = await Promise.all(
@@ -214,12 +214,15 @@ export default function WorkoutPage() {
           })
         );
         setExercises(sampleExercisesWithVideos);
+        console.log('✅ Fallback exercises loaded:', sampleExercisesWithVideos.length);
       } catch (fallbackError) {
-        console.error('Error loading sample exercises with videos:', fallbackError);
+        console.error('❌ Error loading sample exercises with videos:', fallbackError);
         setExercises(sampleExercises);
+        console.log('✅ Basic sample exercises loaded:', sampleExercises.length);
       }
     } finally {
       setLoading(false);
+      console.log('✅ Loading completed');
     }
   };
 
@@ -380,10 +383,14 @@ export default function WorkoutPage() {
     return (
       <ClientLayout>
         <div className="min-h-screen bg-gradient-to-br from-[#0F1419] to-[#1A1F2E] p-6">
-          <div className="flex items-center justify-center min-h-[60vh]">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8BAE5A]">          </div>
+          <div className="flex flex-col items-center justify-center min-h-[60vh]">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8BAE5A] mb-4"></div>
+            <p className="text-white text-lg mb-2">Workout laden...</p>
+            <p className="text-gray-400 text-sm">Schema: {schemaId}</p>
+            <p className="text-gray-400 text-sm">Dag: {dayNumber}</p>
+            <p className="text-gray-400 text-sm">Exercises: {exercises.length}</p>
+          </div>
         </div>
-      </div>
 
       {/* Workout Video Modal */}
       <WorkoutVideoModal

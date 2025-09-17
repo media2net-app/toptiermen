@@ -123,8 +123,12 @@ export default function PreWorkoutModal({
 
       if (response.ok) {
         onClose();
-        // Show success message or redirect
+        // Show success message or redirect with hard refresh
         router.push('/dashboard/mijn-trainingen');
+        // Force a hard refresh to show updated completion status
+        setTimeout(() => {
+          window.location.reload();
+        }, 100);
       }
     } catch (error) {
       console.error('Error completing quick workout:', error);

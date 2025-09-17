@@ -66,15 +66,40 @@ export async function GET(request: Request) {
         });
       }
 
-      // Get schema days
+      // Get schema days first
       const { data: daysData, error: daysError } = await supabase
         .from('training_schema_days')
         .select('*')
         .eq('schema_id', userData.selected_schema_id)
-        .order('order_index');
+        .order('day_number');
+
+      // Then get exercises for each day
+      let daysWithExercises: any[] = [];
+      if (daysData && !daysError) {
+        for (const day of daysData) {
+          const { data: exercisesData, error: exercisesError } = await supabase
+            .from('training_schema_exercises')
+            .select('*')
+            .eq('schema_day_id', day.id)
+            .order('order_index');
+          
+          daysWithExercises.push({
+            ...day,
+            training_schema_exercises: exercisesData || []
+          });
+        }
+      }
 
       if (daysError) {
-        console.log('⚠️  Schema days not available');
+        console.log('⚠️  Schema days not available:', daysError);
+      } else {
+        console.log('✅ Schema days loaded:', daysWithExercises?.length || 0);
+        if (daysWithExercises) {
+          daysWithExercises.forEach((day, index) => {
+            const exerciseCount = day.training_schema_exercises?.length || 0;
+            console.log(`   Day ${day.day_number} (${day.name}): ${exerciseCount} exercises`);
+          });
+        }
       }
 
       // Get user progress
@@ -89,11 +114,32 @@ export async function GET(request: Request) {
         console.log('⚠️  User progress not available');
       }
 
+      // Get day-specific completion status
+      const { data: dayProgressData, error: dayProgressError } = await supabase
+        .from('user_training_day_progress')
+        .select('schema_day_id, completed, completed_at')
+        .eq('user_id', userId)
+        .in('schema_day_id', daysWithExercises.map(day => day.id));
+
+      if (dayProgressError) {
+        console.log('⚠️  Day progress not available:', dayProgressError);
+      }
+
+      // Add completion status to each day
+      const daysWithCompletion = daysWithExercises.map(day => {
+        const dayProgress = dayProgressData?.find(dp => dp.schema_day_id === day.id);
+        return {
+          ...day,
+          isCompleted: dayProgress?.completed || false,
+          completedAt: dayProgress?.completed_at || null
+        };
+      });
+
       console.log('✅ Active training schema fetched successfully');
       return NextResponse.json({
         hasActiveSchema: true,
         schema: schemaData,
-        days: daysData || [],
+        days: daysWithCompletion || [],
         progress: progressData || null
       });
 

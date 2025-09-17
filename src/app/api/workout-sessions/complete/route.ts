@@ -90,6 +90,32 @@ export async function POST(request: Request) {
       .single();
 
     if (sessionData) {
+      // First, get the schema day ID for this day
+      const { data: dayData, error: dayError } = await supabase
+        .from('training_schema_days')
+        .select('id')
+        .eq('schema_id', sessionData.schema_id)
+        .eq('day_number', sessionData.day_number)
+        .single();
+
+      if (dayData && !dayError) {
+        // Mark day as completed in user_training_day_progress
+        const { error: dayProgressError } = await supabase
+          .from('user_training_day_progress')
+          .upsert({
+            user_id: sessionData.user_id,
+            schema_day_id: dayData.id,
+            completed: true,
+            completed_at: new Date().toISOString()
+          });
+
+        if (dayProgressError) {
+          console.log('❌ Error updating day progress:', dayProgressError.message);
+        } else {
+          console.log('✅ Day marked as completed in user_training_day_progress');
+        }
+      }
+
       // Update user training progress
       const { error: progressError } = await supabase
         .from('user_training_progress')

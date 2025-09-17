@@ -36,7 +36,18 @@ function LoginPageContent() {
   // ✅ FIXED: Hydration safety - set isClient after mount
   useEffect(() => {
     setIsClient(true);
-  }, []);
+    
+    // Fallback timeout to prevent infinite loading
+    const fallbackTimeout = setTimeout(() => {
+      if (authLoading) {
+        console.log('⚠️ Login page timeout - forcing auth loading to false');
+        // Force loading to false after 15 seconds
+        setIsLoading(false);
+      }
+    }, 15000);
+    
+    return () => clearTimeout(fallbackTimeout);
+  }, [authLoading]);
 
   // ✅ FIXED: Simplified admin detection
   const getRedirectPath = (user: any, profile: any, redirectTo?: string) => {
@@ -205,6 +216,20 @@ function LoginPageContent() {
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#B6C948] mx-auto mb-4"></div>
             <p className="text-[#B6C948] text-lg">Laden...</p>
+            <div className="mt-4 text-xs text-gray-500">
+              <p>Auth Loading: {authLoading ? 'true' : 'false'}</p>
+              <p>Client Ready: {isClient ? 'true' : 'false'}</p>
+              <p>User: {user ? user.email : 'null'}</p>
+            </div>
+            <button
+              onClick={() => {
+                console.log('🔍 Debug info:', { authLoading, isClient, user, profile });
+                setIsLoading(false);
+              }}
+              className="mt-4 px-4 py-2 bg-[#3A4D23] text-[#8BAE5A] rounded-lg text-sm hover:bg-[#4A5D33] transition-colors"
+            >
+              Debug Info
+            </button>
           </div>
         </div>
       </div>

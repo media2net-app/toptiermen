@@ -870,10 +870,10 @@ export default function MijnChallengesPage() {
         </div>
         )}
 
-        {/* Onboarding Popup */}
+        {/* Onboarding Popup - Positioned at top for challenges page */}
         {showOnboardingPopup && (
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="bg-[#181F17] border border-[#3A4D23] rounded-xl p-6 max-w-md w-full">
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-start justify-center p-4 pt-8">
+            <div className="bg-[#181F17] border border-[#3A4D23] rounded-xl p-6 max-w-md w-full shadow-2xl">
               <div className="text-center">
                 <div className="w-16 h-16 bg-[#8BAE5A] rounded-full flex items-center justify-center mx-auto mb-4">
                   <span className="text-2xl">🏆</span>

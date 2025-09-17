@@ -29,6 +29,7 @@ import { toast } from 'react-hot-toast';
 import { useDebug } from '@/contexts/DebugContext';
 import { AdminCard, AdminStatsCard, AdminTable, AdminButton } from '@/components/admin';
 import { supabase } from '@/lib/supabase';
+import { useAdminImpersonation } from '@/contexts/AdminImpersonationContext';
 
 const ranks = ['Rookie', 'Warrior', 'Elite', 'Legend'];
 const statuses = ['active', 'inactive', 'suspended'];
@@ -51,6 +52,7 @@ const getUserType = (user: any) => {
 
 
 export default function Ledenbeheer() {
+  const { startImpersonation, endImpersonation, isImpersonating, targetUser, loading: impersonationLoading } = useAdminImpersonation();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRank, setSelectedRank] = useState('Alle Rangen');
   const [selectedStatus, setSelectedStatus] = useState('Alle Statussen');
@@ -91,6 +93,28 @@ export default function Ledenbeheer() {
   const [userToDelete, setUserToDelete] = useState<any>(null);
   const [deleteConfirmation, setDeleteConfirmation] = useState('');
   const [deletingUser, setDeletingUser] = useState(false);
+
+  // Handle login as user function
+  const handleLoginAsUser = async (member: any) => {
+    if (!member.id) {
+      toast.error('Gebruiker ID niet gevonden');
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Weet je zeker dat je wilt inloggen als ${member.email}?\n\n` +
+      'Dit geeft je toegang tot hun account voor debugging doeleinden.\n' +
+      'Je kunt altijd terugkeren naar je admin account.'
+    );
+
+    if (confirmed) {
+      const success = await startImpersonation(member.id);
+      if (success) {
+        // Optionally redirect to dashboard or refresh the page
+        window.location.href = '/dashboard';
+      }
+    }
+  };
 
   // Handle password reset function
   const handlePasswordReset = async (email: string) => {
@@ -878,6 +902,15 @@ export default function Ledenbeheer() {
           🔐 Reset
         </AdminButton>
         <AdminButton
+          variant="primary"
+          size="sm"
+          onClick={() => handleLoginAsUser(member)}
+          icon={<UserIcon className="w-4 h-4" />}
+          loading={impersonationLoading}
+        >
+          🔑 Login als
+        </AdminButton>
+        <AdminButton
           variant="danger"
           size="sm"
           onClick={async () => {
@@ -966,6 +999,34 @@ export default function Ledenbeheer() {
           </div>
         </div>
       </div>
+
+      {/* Impersonation Banner */}
+      {isImpersonating && targetUser && (
+        <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white p-4 rounded-lg border border-orange-400">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+                <span className="text-lg">🔑</span>
+              </div>
+              <div>
+                <h3 className="font-bold text-lg">Admin Impersonation Actief</h3>
+                <p className="text-sm opacity-90">
+                  Je bent ingelogd als: <span className="font-semibold">{targetUser.email}</span>
+                </p>
+              </div>
+            </div>
+            <AdminButton
+              variant="secondary"
+              size="sm"
+              onClick={endImpersonation}
+              loading={impersonationLoading}
+              className="bg-white/20 hover:bg-white/30 text-white border-white/30"
+            >
+              Terug naar Admin
+            </AdminButton>
+          </div>
+        </div>
+      )}
 
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
@@ -1340,6 +1401,15 @@ export default function Ledenbeheer() {
                       icon={<KeyIcon className="w-4 h-4" />}
                     >
                       Verstuur Wachtwoord Reset E-mail
+                    </AdminButton>
+
+                    <AdminButton
+                      variant="primary"
+                      onClick={() => handleLoginAsUser(editingMember)}
+                      icon={<UserIcon className="w-4 h-4" />}
+                      loading={impersonationLoading}
+                    >
+                      🔑 Login als deze gebruiker
                     </AdminButton>
                     
                     <AdminButton

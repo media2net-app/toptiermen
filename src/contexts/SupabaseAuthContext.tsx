@@ -109,6 +109,8 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     const getInitialSession = async () => {
       try {
         console.log('🔍 Initializing auth session...');
+        console.log('🔍 Supabase URL:', supabaseUrl);
+        console.log('🔍 Supabase Key (first 20 chars):', supabaseAnonKey.substring(0, 20) + '...');
         setLoading(true); // Set loading to true when starting initialization
         
         // Restore session after refresh - this is normal behavior
@@ -144,7 +146,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     const initTimeout = setTimeout(() => {
       console.log('⚠️ Auth initialization timeout - forcing completion');
       setLoading(false);
-    }, 5000); // Increased from 1s to 5s
+    }, 10000); // Increased from 5s to 10s
 
     getInitialSession().then(() => {
       clearTimeout(initTimeout);

@@ -60,15 +60,27 @@ export async function POST(request: Request) {
       }
     }
     
-    // For now, just log the schema selection - we'll handle this in the onboarding completion
-    console.log('✅ Training schema selected:', { userId: actualUserId, schemaId });
-    
-    // TODO: Store schema selection in a proper table when database schema is updated
-    // For now, the schema selection is handled during onboarding completion
+    // Store schema selection in profiles table
+    const { data: updateData, error: updateError } = await supabase
+      .from('profiles')
+      .update({ selected_schema_id: schemaId })
+      .eq('id', actualUserId)
+      .select();
+
+    if (updateError) {
+      console.error('❌ Error updating profile with schema selection:', updateError);
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Failed to save schema selection' 
+      }, { status: 500 });
+    }
+
+    console.log('✅ Training schema selected and saved:', { userId: actualUserId, schemaId });
     
     return NextResponse.json({
       success: true,
-      message: 'Training schema selection logged'
+      message: 'Training schema selection saved successfully',
+      data: updateData
     });
     
   } catch (error) {

@@ -217,7 +217,7 @@ export default function VoedingsplannenV2Page() {
       return;
     }
     
-    // Set all values at once
+      // Set all values at once using a single state update
     setEditingMealType(mealType);
     setEditingDay(day);
     setShowIngredientModal(true);
@@ -253,9 +253,21 @@ export default function VoedingsplannenV2Page() {
 
   // Function to get current ingredients for editing
   const getCurrentIngredients = () => {
-    if (!originalPlanData || !editingMealType || !editingDay) return [];
+    console.log('🔧 DEBUG: getCurrentIngredients called with:', { 
+      hasOriginalPlanData: !!originalPlanData, 
+      editingMealType, 
+      editingDay 
+    });
+    
+    if (!originalPlanData || !editingMealType || !editingDay) {
+      console.log('🔧 DEBUG: Missing required data, returning empty array');
+      return [];
+    }
     
     const mealData = originalPlanData.meals?.weekly_plan?.[editingDay]?.[editingMealType];
+    console.log('🔧 DEBUG: Meal data found:', !!mealData);
+    console.log('🔧 DEBUG: Ingredients found:', mealData?.ingredients?.length || 0);
+    
     return mealData?.ingredients || [];
   };
 
@@ -2081,6 +2093,23 @@ export default function VoedingsplannenV2Page() {
               </div>
         )}
       </div>
+
+      {/* Ingredient Edit Modal */}
+      {showIngredientModal && editingMealType && editingDay && (
+        <IngredientEditModal
+          isOpen={showIngredientModal}
+          onClose={() => {
+            console.log('🔧 DEBUG: Closing ingredient modal');
+            setShowIngredientModal(false);
+            setEditingMealType('');
+            setEditingDay('');
+          }}
+          ingredients={getCurrentIngredients()}
+          onSave={saveEditedIngredients}
+          mealType={editingMealType}
+          day={editingDay}
+        />
+      )}
     </div>
   );
 }
