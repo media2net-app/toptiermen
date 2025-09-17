@@ -1689,4 +1689,80 @@ export default function VoedingsplannenV2Page() {
       </div>
     );
   }
+
+  // Overview page - show when no plan is selected
+  return (
+    <div className="min-h-screen bg-[#0A0F0A] p-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8"
+        >
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-12 h-12 bg-gradient-to-r from-[#B6C948] to-[#8BAE5A] rounded-full flex items-center justify-center">
+              <RocketLaunchIcon className="w-6 h-6 text-[#181F17]" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-white">Voedingsplannen V2</h1>
+              <p className="text-[#B6C948]">Slimme schalingsfactor met AI-optimalisatie</p>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Loading State */}
+        {loading && (
+          <div className="flex justify-center items-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8BAE5A]"></div>
+            <span className="ml-3 text-[#8BAE5A]">Voedingsplannen laden...</span>
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && (
+          <div className="bg-red-900/20 border border-red-500/50 rounded-lg p-4 mb-6">
+            <div className="flex items-center gap-3">
+              <ExclamationTriangleIcon className="w-6 h-6 text-red-400" />
+              <div>
+                <h3 className="text-red-400 font-semibold">Fout bij laden</h3>
+                <p className="text-red-300 text-sm">{error}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Plans Grid */}
+        {!loading && !error && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {plans.map((plan) => (
+              <motion.div
+                key={plan.id}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => handlePlanSelect(plan)}
+                className="bg-[#181F17] border border-[#3A4D23] rounded-xl p-6 cursor-pointer hover:border-[#B6C948] transition-colors"
+              >
+                <h3 className="text-xl font-bold text-white mb-2">{plan.name}</h3>
+                <p className="text-[#8BAE5A] text-sm mb-4">{plan.description}</p>
+                <div className="flex justify-between text-sm">
+                  <span className="text-[#B6C948]">{plan.target_calories} kcal</span>
+                  <span className="text-[#8BAE5A]">{plan.goal}</span>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
+
+        {/* No Plans State */}
+        {!loading && !error && plans.length === 0 && (
+          <div className="text-center py-12">
+            <BookOpenIcon className="w-16 h-16 text-gray-500 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-gray-400 mb-2">Geen voedingsplannen gevonden</h3>
+            <p className="text-gray-500">Er zijn momenteel geen voedingsplannen beschikbaar.</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
