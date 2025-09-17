@@ -220,6 +220,47 @@
             font-weight: 700;
         }
 
+        /* Sticky Back Button */
+        .sticky-back-btn {
+            position: fixed;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+            z-index: 1000;
+            background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 15px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(139, 174, 90, 0.3);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            min-width: 120px;
+            justify-content: center;
+        }
+
+        .sticky-back-btn:hover {
+            background: linear-gradient(135deg, #B6C948 0%, #8BAE5A 100%);
+            transform: translateY(-50%) scale(1.05);
+            box-shadow: 0 12px 35px rgba(139, 174, 90, 0.4);
+        }
+
+        .sticky-back-btn:active {
+            transform: translateY(-50%) scale(0.95);
+        }
+
+        .sticky-back-btn svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 1rem;
@@ -232,10 +273,24 @@
             .section {
                 padding: 1.5rem;
             }
+
+            .sticky-back-btn {
+                right: 10px;
+                padding: 12px 16px;
+                font-size: 12px;
+                min-width: 100px;
+            }
         }
     </style>
 </head>
 <body>
+        <!-- Sticky Back Button -->
+        <a href="javascript:history.back()" class="sticky-back-btn" title="Terug naar Academy">
+            <svg viewBox="0 0 24 24">
+                <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+            </svg>
+            Terug
+        </a>
     <div class="container">
         <!-- Header -->
         <div class="header">
@@ -292,18 +347,66 @@
             
             <div class="highlight-box">
                 <h4>🎯 Les Overzicht</h4>
-                <p>In deze les hebben we testosteron killers: wat moet je elimineren behandeld. Dit is een cruciaal onderdeel van je ontwikkeling als Top Tier Man en vormt de basis voor verdere groei en prestaties.</p>
+                <p>In deze les hebben we testosteron killers behandeld - de factoren die je hormoonproductie verstoort en je mannelijkheid ondermijnt. Dit is een cruciaal onderdeel van je ontwikkeling als Top Tier Man en vormt de basis voor optimale hormoonproductie en prestaties.</p>
             </div>
 
-            <h3>Belangrijkste Inzichten</h3>
+            <h3>Wat zijn Testosteron Killers?</h3>
+            <p>Testosteron killers zijn alle factoren in je omgeving, levensstijl en gedrag die je natuurlijke testosteronproductie verstoort. Deze factoren kunnen je hormoonniveaus drastisch verlagen, wat leidt tot verminderde energie, libido, spiergroei, mentale scherpte en algehele mannelijkheid.</p>
+
+            <h3>De 5 Grootste Testosteron Killers</h3>
+            
+            <h4>1. Chronische Stress</h4>
+            <p>Chronische stress is de nummer één testosteron killer. Wanneer je lichaam constant onder stress staat, produceert het cortisol - het stresshormoon dat testosteron direct tegenwerkt. Voorbeelden van chronische stress:</p>
             <ul>
-                <li><strong>Wat testosteron killers zijn:</strong> Een fundamenteel concept dat je dagelijks kunt toepassen</li><li><strong>Testosteron killers = Alles wat je hormoonproductie verstoort.:</strong> Een fundamenteel concept dat je dagelijks kunt toepassen</li><li><strong>De 5 grootste testosteron killers:</strong> Een fundamenteel concept dat je dagelijks kunt toepassen</li><li><strong>1. Chronische stress:</strong> Een fundamenteel concept dat je dagelijks kunt toepassen</li><li><strong>Voorbeelden::</strong> Een fundamenteel concept dat je dagelijks kunt toepassen</li>
-                <li><strong>Praktische Toepassing:</strong> Het verschil tussen kennis en wijsheid ligt in de dagelijkse implementatie</li>
-                <li><strong>Consistentie:</strong> Kleine, dagelijkse acties leiden tot grote, langetermijn resultaten</li>
+                <li>Werkdruk en deadlines</li>
+                <li>Financiële zorgen</li>
+                <li>Relatieproblemen</li>
+                <li>Sociale media en informatie overload</li>
+                <li>Perfectionisme en zelfkritiek</li>
+            </ul>
+
+            <h4>2. Slechte Slaapkwaliteit</h4>
+            <p>Testosteron wordt voornamelijk geproduceerd tijdens diepe slaap. Slechte slaapkwaliteit of onvoldoende slaap verstoort dit proces drastisch. Problemen die je testosteron verlagen:</p>
+            <ul>
+                <li>Minder dan 7-8 uur slaap per nacht</li>
+                <li>Onregelmatige slaaptijden</li>
+                <li>Blauw licht van schermen voor het slapen</li>
+                <li>Alcohol en cafeïne voor het slapen</li>
+                <li>Stress en zorgen die je wakker houden</li>
+            </ul>
+
+            <h4>3. Verkeerde Voeding</h4>
+            <p>Wat je eet heeft directe invloed op je hormoonproductie. Voedingsmiddelen die je testosteron verlagen:</p>
+            <ul>
+                <li>Suiker en geraffineerde koolhydraten</li>
+                <li>Transvetten en bewerkte voedingsmiddelen</li>
+                <li>Soyaproducten (fyto-oestrogenen)</li>
+                <li>Alcohol in excess</li>
+                <li>Voedingsmiddelen met pesticiden en chemicaliën</li>
+            </ul>
+
+            <h4>4. Sedentaire Levensstijl</h4>
+            <p>Te weinig beweging en te veel zitten verlaagt je testosteron drastisch. Problemen die je testosteron verlagen:</p>
+            <ul>
+                <li>8+ uur per dag zitten</li>
+                <li>Geen krachttraining</li>
+                <li>Geen buitenactiviteiten</li>
+                <li>Overmatig cardio zonder krachttraining</li>
+                <li>Gebrek aan functionele beweging</li>
+            </ul>
+
+            <h4>5. Omgevingsfactoren</h4>
+            <p>Moderne omgevingsfactoren die je hormoonproductie verstoren:</p>
+            <ul>
+                <li>Endocriene verstoorders in plastic (BPA, ftalaten)</li>
+                <li>Chemicaliën in persoonlijke verzorgingsproducten</li>
+                <li>Vervuiling en luchtkwaliteit</li>
+                <li>Elektromagnetische straling van apparaten</li>
+                <li>Gebrek aan natuurlijk zonlicht</li>
             </ul>
 
             <h3>Waarom Dit Belangrijk Is</h3>
-            <p>De concepten uit deze les zijn niet alleen theoretisch interessant, maar vormen de praktische basis voor je dagelijkse leven. Door deze principes consequent toe te passen, bouw je aan een sterke fundering voor alle andere aspecten van je ontwikkeling.</p>
+            <p>Deze testosteron killers zijn niet alleen theoretisch interessant, maar vormen de praktische basis voor je dagelijkse leven. Door deze factoren te elimineren, bouw je aan een sterke fundering voor optimale hormoonproductie en algehele mannelijkheid.</p>
         </div>
 
         <!-- Praktische Oefeningen en Opdrachten -->
@@ -311,37 +414,66 @@
             <h2>💪 Praktische Oefeningen en Opdrachten</h2>
 
             <div class="exercise-box">
-                <h4>Oefening 1: Zelf-Assessment</h4>
-                <p><strong>Doel:</strong> Evalueer je huidige situatie en identificeer verbeterpunten.</p>
-                <p><strong>Actie:</strong> Beantwoord de volgende vragen eerlijk en noteer je antwoorden:</p>
+                <h4>Oefening 1: Testosteron Killer Audit</h4>
+                <p><strong>Doel:</strong> Identificeer welke testosteron killers je momenteel beïnvloeden.</p>
+                <p><strong>Actie:</strong> Evalueer jezelf op elk van de 5 testosteron killers (1-10 schaal):</p>
                 <ul>
-                    <li>Hoe pas je momenteel de concepten uit deze les toe in je dagelijkse leven?</li>
-                    <li>Welke aspecten vind je het moeilijkst om te implementeren?</li>
-                    <li>Wat zijn je grootste uitdagingen op dit gebied?</li>
-                    <li>Welke kleine veranderingen kun je vandaag nog maken?</li>
+                    <li><strong>Chronische Stress:</strong> Hoe gestrest voel je je dagelijks? (1 = ontspannen, 10 = constant gestrest)</li>
+                    <li><strong>Slaapkwaliteit:</strong> Hoe goed slaap je? (1 = slecht, 10 = uitstekend)</li>
+                    <li><strong>Voeding:</strong> Hoe gezond eet je? (1 = ongezond, 10 = optimaal)</li>
+                    <li><strong>Beweging:</strong> Hoe actief ben je? (1 = sedentair, 10 = zeer actief)</li>
+                    <li><strong>Omgeving:</strong> Hoe schoon is je omgeving? (1 = vervuild, 10 = natuurlijk)</li>
+                </ul>
+                <p><strong>Resultaat:</strong> Focus op de laagste scores eerst - dit zijn je grootste kansen voor verbetering.</p>
+            </div>
+
+            <div class="exercise-box">
+                <h4>Oefening 2: Stress Eliminatie Plan</h4>
+                <p><strong>Doel:</strong> Maak een concreet plan om chronische stress te verminderen.</p>
+                <p><strong>Actie:</strong> Identificeer je top 3 stressbronnen en maak een eliminatieplan:</p>
+                <ul>
+                    <li><strong>Stressbron 1:</strong> _________________________________</li>
+                    <li><strong>Eliminatiestrategie:</strong> _________________________________</li>
+                    <li><strong>Stressbron 2:</strong> _________________________________</li>
+                    <li><strong>Eliminatiestrategie:</strong> _________________________________</li>
+                    <li><strong>Stressbron 3:</strong> _________________________________</li>
+                    <li><strong>Eliminatiestrategie:</strong> _________________________________</li>
                 </ul>
             </div>
 
             <div class="exercise-box">
-                <h4>Oefening 2: Dagelijkse Implementatie</h4>
-                <p><strong>Doel:</strong> Maak de concepten onderdeel van je dagelijkse routine.</p>
-                <p><strong>Actie:</strong> Kies 3 specifieke acties die je deze week gaat uitvoeren:</p>
+                <h4>Oefening 3: Slaap Optimalisatie</h4>
+                <p><strong>Doel:</strong> Verbeter je slaapkwaliteit voor betere testosteronproductie.</p>
+                <p><strong>Actie:</strong> Implementeer deze slaapgewoonten:</p>
                 <ul>
-                    <li>Actie 1: _________________________________</li>
-                    <li>Actie 2: _________________________________</li>
-                    <li>Actie 3: _________________________________</li>
+                    <li>Ga elke dag op hetzelfde tijdstip naar bed</li>
+                    <li>Stop 2 uur voor bedtijd met schermen</li>
+                    <li>Zorg voor een koele, donkere slaapkamer</li>
+                    <li>Vermijd alcohol en cafeïne na 14:00</li>
+                    <li>Doe 10 minuten ademhalingsoefeningen voor het slapen</li>
                 </ul>
             </div>
 
             <div class="exercise-box">
-                <h4>Oefening 3: Progressie Tracking</h4>
-                <p><strong>Doel:</strong> Monitor je voortgang en pas je aanpak aan.</p>
-                <p><strong>Actie:</strong> Houd deze week bij:</p>
+                <h4>Oefening 4: Voeding Cleanup</h4>
+                <p><strong>Doel:</strong> Elimineer testosteron-verlagende voedingsmiddelen.</p>
+                <p><strong>Actie:</strong> Maak een lijst van voedingsmiddelen die je gaat elimineren:</p>
                 <ul>
-                    <li>Dagelijkse implementatie van de concepten</li>
-                    <li>Uitdagingen die je tegenkomt</li>
-                    <li>Momenten van succes en doorbraak</li>
-                    <li>Aanpassingen die je moet maken</li>
+                    <li><strong>Te elimineren:</strong> Suiker, bewerkte voedingsmiddelen, soyaproducten, alcohol</li>
+                    <li><strong>Te vervangen door:</strong> Groenten, fruit, eiwitten, gezonde vetten</li>
+                    <li><strong>Weekplan:</strong> Plan je maaltijden voor de komende week</li>
+                </ul>
+            </div>
+
+            <div class="exercise-box">
+                <h4>Oefening 5: Omgeving Detox</h4>
+                <p><strong>Doel:</strong> Verminder blootstelling aan endocriene verstoorders.</p>
+                <p><strong>Actie:</strong> Vervang deze items met natuurlijke alternatieven:</p>
+                <ul>
+                    <li>Plastic waterflessen → glazen of roestvrijstalen flessen</li>
+                    <li>Bewerkte persoonlijke verzorging → natuurlijke producten</li>
+                    <li>Plastic voedselcontainers → glazen containers</li>
+                    <li>Kunstmatige luchtverfrissers → essentiële oliën</li>
                 </ul>
             </div>
         </div>
@@ -350,63 +482,95 @@
         <div class="section">
             <h2>✅ Dagelijkse Checklists en Routines</h2>
 
-            <h3>Ochtend Routine</h3>
+            <h3>Ochtend Routine - Testosteron Boost</h3>
             <div class="checklist">
                 <div class="checklist-item">
                     <input type="checkbox" id="morning1">
-                    <label for="morning1">Herinner jezelf aan de belangrijkste concepten uit deze les</label>
+                    <label for="morning1">Word wakker zonder wekker (natuurlijke cyclus)</label>
                 </div>
                 <div class="checklist-item">
                     <input type="checkbox" id="morning2">
-                    <label for="morning2">Plan je dag met de principes in gedachten</label>
+                    <label for="morning2">Drink direct een glas water</label>
                 </div>
                 <div class="checklist-item">
                     <input type="checkbox" id="morning3">
-                    <label for="morning3">Stel jezelf een specifiek doel voor vandaag</label>
+                    <label for="morning3">Ga 10 minuten naar buiten voor natuurlijk licht</label>
                 </div>
                 <div class="checklist-item">
                     <input type="checkbox" id="morning4">
-                    <label for="morning4">Visualiseer hoe je de concepten gaat toepassen</label>
+                    <label for="morning4">Doe 5 minuten diepe ademhalingsoefeningen</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="morning5">
+                    <label for="morning5">Eet een eiwitrijk ontbijt</label>
                 </div>
             </div>
 
-            <h3>Dagelijkse Implementatie</h3>
+            <h3>Dagelijkse Testosteron Killer Eliminatie</h3>
             <div class="checklist">
                 <div class="checklist-item">
                     <input type="checkbox" id="daily1">
-                    <label for="daily1">Pas de concepten toe in je dagelijkse activiteiten</label>
+                    <label for="daily1">Vermijd suiker en bewerkte voedingsmiddelen</label>
                 </div>
                 <div class="checklist-item">
                     <input type="checkbox" id="daily2">
-                    <label for="daily2">Wees bewust van momenten waar je kunt groeien</label>
+                    <label for="daily2">Doe minstens 30 minuten krachttraining of beweging</label>
                 </div>
                 <div class="checklist-item">
                     <input type="checkbox" id="daily3">
-                    <label for="daily3">Leer van uitdagingen en tegenslagen</label>
+                    <label for="daily3">Beperk schermtijd en sociale media</label>
                 </div>
                 <div class="checklist-item">
                     <input type="checkbox" id="daily4">
-                    <label for="daily4">Celebreer kleine overwinningen</label>
+                    <label for="daily4">Vermijd alcohol en overmatige cafeïne</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="daily5">
+                    <label for="daily5">Zorg voor voldoende zonlicht en frisse lucht</label>
                 </div>
             </div>
 
-            <h3>Avond Reflectie</h3>
+            <h3>Stress Management Checklist</h3>
+            <div class="checklist">
+                <div class="checklist-item">
+                    <input type="checkbox" id="stress1">
+                    <label for="stress1">Identificeer stressbronnen en plan eliminatie</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="stress2">
+                    <label for="stress2">Doe 3x per dag 2 minuten ademhalingsoefeningen</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="stress3">
+                    <label for="stress3">Vermijd multitasking en focus op één taak</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="stress4">
+                    <label for="stress4">Plan regelmatige pauzes en ontspanning</label>
+                </div>
+            </div>
+
+            <h3>Avond Routine - Slaap Optimalisatie</h3>
             <div class="checklist">
                 <div class="checklist-item">
                     <input type="checkbox" id="evening1">
-                    <label for="evening1">Evalueer hoe je dag is verlopen</label>
+                    <label for="evening1">Stop 2 uur voor bedtijd met schermen</label>
                 </div>
                 <div class="checklist-item">
                     <input type="checkbox" id="evening2">
-                    <label for="evening2">Identificeer wat goed ging en wat beter kan</label>
+                    <label for="evening2">Zorg voor een koele, donkere slaapkamer</label>
                 </div>
                 <div class="checklist-item">
                     <input type="checkbox" id="evening3">
-                    <label for="evening3">Plan verbeteringen voor morgen</label>
+                    <label for="evening3">Doe 10 minuten ontspanningsoefeningen</label>
                 </div>
                 <div class="checklist-item">
                     <input type="checkbox" id="evening4">
-                    <label for="evening4">Wees dankbaar voor je groei en leerervaringen</label>
+                    <label for="evening4">Ga op hetzelfde tijdstip naar bed</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="evening5">
+                    <label for="evening5">Evalueer je dag en plan morgen</label>
                 </div>
             </div>
         </div>
@@ -416,28 +580,38 @@
             <h2>🤔 Reflectie Vragen voor Persoonlijke Groei</h2>
 
             <div class="reflection-question">
-                <h4>Vraag 1: Huidige Situatie</h4>
-                <p>Hoe zou je je huidige implementatie van de concepten uit deze les beoordelen op een schaal van 1-10? Wat zijn de specifieke gebieden waar je de meeste groei kunt maken?</p>
+                <h4>Vraag 1: Testosteron Killer Assessment</h4>
+                <p>Welke van de 5 testosteron killers beïnvloeden je het meest? Hoe zou je jezelf beoordelen op elk gebied (1-10)? Wat zijn je grootste kansen voor verbetering?</p>
             </div>
 
             <div class="reflection-question">
-                <h4>Vraag 2: Uitdagingen</h4>
-                <p>Welke uitdagingen kom je tegen bij het toepassen van deze concepten? Hoe kun je deze uitdagingen omzetten in kansen voor groei?</p>
+                <h4>Vraag 2: Stress Analyse</h4>
+                <p>Wat zijn je top 3 stressbronnen? Hoe beïnvloeden deze je dagelijkse leven en testosteronproductie? Welke strategieën kun je implementeren om deze te elimineren?</p>
             </div>
 
             <div class="reflection-question">
-                <h4>Vraag 3: Impact</h4>
-                <p>Welke positieve veranderingen heb je al gemerkt sinds je begonnen bent met het toepassen van deze concepten? Hoe heeft dit je leven beïnvloed?</p>
+                <h4>Vraag 3: Slaap Evaluatie</h4>
+                <p>Hoe zou je je huidige slaapkwaliteit beoordelen? Wat zijn de grootste obstakels voor een goede nachtrust? Welke veranderingen kun je maken om je slaap te optimaliseren?</p>
             </div>
 
             <div class="reflection-question">
-                <h4>Vraag 4: Toekomst</h4>
-                <p>Hoe ziet je ideale implementatie van deze concepten eruit over 3 maanden? Welke specifieke doelen stel je jezelf?</p>
+                <h4>Vraag 4: Voeding en Levensstijl</h4>
+                <p>Welke voedingsmiddelen en gewoonten verlagen waarschijnlijk je testosteron? Hoe kun je deze vervangen door testosteron-verhogende alternatieven? Wat is je plan voor de komende maand?</p>
             </div>
 
             <div class="reflection-question">
-                <h4>Vraag 5: Ondersteuning</h4>
-                <p>Welke ondersteuning heb je nodig om deze concepten beter te kunnen toepassen? Hoe kun je jezelf en anderen helpen om te groeien?</p>
+                <h4>Vraag 5: Omgeving en Blootstelling</h4>
+                <p>Welke omgevingsfactoren in je huis, werk of dagelijkse routine kunnen je hormoonproductie verstoren? Hoe kun je je blootstelling aan endocriene verstoorders verminderen?</p>
+            </div>
+
+            <div class="reflection-question">
+                <h4>Vraag 6: Implementatie Plan</h4>
+                <p>Welke 3 testosteron killers ga je als eerste aanpakken? Wat is je concrete plan voor de komende 30 dagen? Hoe ga je je voortgang meten en bijsturen?</p>
+            </div>
+
+            <div class="reflection-question">
+                <h4>Vraag 7: Langetermijn Visie</h4>
+                <p>Hoe ziet je ideale hormoon-geoptimaliseerde levensstijl eruit over 6 maanden? Welke gewoonten wil je hebben geïmplementeerd? Hoe zal dit je leven en prestaties beïnvloeden?</p>
             </div>
         </div>
 
@@ -446,59 +620,76 @@
             <h2>🚀 Volgende Stappen en Actieplan</h2>
 
             <div class="action-plan">
-                <h3>30-Dagen Implementatie Plan</h3>
+                <h3>30-Dagen Testosteron Killer Eliminatie Plan</h3>
 
                 <div class="action-step">
-                    <h4>Week 1: Bewustwording en Baseline</h4>
+                    <h4>Week 1: Assessment en Bewustwording</h4>
                     <ul>
-                        <li>Voltooi de zelf-assessment oefening</li>
+                        <li>Voltooi de Testosteron Killer Audit</li>
+                        <li>Identificeer je top 3 testosteron killers</li>
+                        <li>Start met het bijhouden van je huidige gewoonten</li>
                         <li>Implementeer de ochtend routine</li>
-                        <li>Begin met dagelijkse bewustwording van de concepten</li>
-                        <li>Start met het bijhouden van je voortgang</li>
+                        <li>Begin met stress management technieken</li>
                     </ul>
                 </div>
 
                 <div class="action-step">
-                    <h4>Week 2: Dagelijkse Implementatie</h4>
+                    <h4>Week 2: Slaap en Stress Optimalisatie</h4>
                     <ul>
-                        <li>Pas de concepten toe in je dagelijkse activiteiten</li>
-                        <li>Focus op consistentie boven perfectie</li>
-                        <li>Identificeer en adresseer uitdagingen</li>
-                        <li>Bouw momentum op door kleine overwinningen</li>
+                        <li>Implementeer de avond routine voor betere slaap</li>
+                        <li>Elimineer schermtijd 2 uur voor bedtijd</li>
+                        <li>Start met dagelijkse ademhalingsoefeningen</li>
+                        <li>Identificeer en elimineer je grootste stressbron</li>
+                        <li>Zorg voor regelmatige slaaptijden</li>
                     </ul>
                 </div>
 
                 <div class="action-step">
-                    <h4>Week 3: Optimalisatie en Verfijning</h4>
+                    <h4>Week 3: Voeding en Beweging</h4>
                     <ul>
-                        <li>Evalueer je voortgang en pas je aanpak aan</li>
-                        <li>Verhoog de intensiteit waar mogelijk</li>
-                        <li>Integreer de concepten in nieuwe situaties</li>
-                        <li>Zoek naar manieren om anderen te helpen</li>
+                        <li>Elimineer suiker en bewerkte voedingsmiddelen</li>
+                        <li>Start met dagelijkse krachttraining of beweging</li>
+                        <li>Vervang testosteron-verlagende voedingsmiddelen</li>
+                        <li>Implementeer de dagelijkse checklists</li>
+                        <li>Zorg voor voldoende eiwit en gezonde vetten</li>
                     </ul>
                 </div>
 
                 <div class="action-step">
-                    <h4>Week 4: Consolidatie en Planning</h4>
+                    <h4>Week 4: Omgeving en Consolidatie</h4>
                     <ul>
-                        <li>Consolideer je nieuwe gewoonten</li>
-                        <li>Plan voor langetermijn implementatie</li>
+                        <li>Detox je omgeving van endocriene verstoorders</li>
+                        <li>Vervang plastic producten met natuurlijke alternatieven</li>
+                        <li>Consolideer alle nieuwe gewoonten</li>
+                        <li>Evalueer je voortgang en plan voor de toekomst</li>
                         <li>Stel nieuwe, uitdagende doelen</li>
-                        <li>Deel je ervaringen en leer van anderen</li>
                     </ul>
                 </div>
             </div>
 
-            <h3>Langetermijn Strategieën</h3>
+            <h3>60-Dagen Verdieping Plan</h3>
             <ul>
-                <li><strong>Maand 2-3:</strong> Verdieping en geavanceerde toepassing</li>
-                <li><strong>Maand 4-6:</strong> Integratie met andere ontwikkelingsgebieden</li>
+                <li><strong>Maand 2:</strong> Geavanceerde hormoon optimalisatie technieken</li>
+                <li><strong>Maand 3:</strong> Integratie met andere ontwikkelingsgebieden</li>
+                <li><strong>Maand 4-6:</strong> Langetermijn gewoonten en levensstijl</li>
                 <li><strong>Maand 6+:</strong> Mentorschap en doorgeven van kennis</li>
             </ul>
 
+            <h3>Specifieke Actie Items</h3>
+            <div class="highlight-box">
+                <h4>🎯 Deze Week Te Doen</h4>
+                <ul>
+                    <li>Voltooi de Testosteron Killer Audit</li>
+                    <li>Identificeer je grootste stressbron</li>
+                    <li>Start met de ochtend routine</li>
+                    <li>Plan je maaltijden voor de komende week</li>
+                    <li>Zorg voor een goede slaapomgeving</li>
+                </ul>
+            </div>
+
             <div class="highlight-box">
                 <h4>🎯 Belangrijke Herinnering</h4>
-                <p>Echte groei gebeurt door consistente, dagelijkse actie. Focus op progressie, niet op perfectie. Elke dag is een nieuwe kans om te groeien en jezelf te verbeteren.</p>
+                <p>Testosteron optimalisatie is een marathon, geen sprint. Focus op consistente, dagelijkse actie. Elke kleine verandering telt en bouwt op elkaar voort. Begin met de makkelijkste veranderingen en bouw geleidelijk op naar de moeilijkere.</p>
             </div>
         </div>
 

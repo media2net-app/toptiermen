@@ -220,6 +220,47 @@
             font-weight: 700;
         }
 
+        /* Sticky Back Button */
+        .sticky-back-btn {
+            position: fixed;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+            z-index: 1000;
+            background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 15px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(139, 174, 90, 0.3);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            min-width: 120px;
+            justify-content: center;
+        }
+
+        .sticky-back-btn:hover {
+            background: linear-gradient(135deg, #B6C948 0%, #8BAE5A 100%);
+            transform: translateY(-50%) scale(1.05);
+            box-shadow: 0 12px 35px rgba(139, 174, 90, 0.4);
+        }
+
+        .sticky-back-btn:active {
+            transform: translateY(-50%) scale(0.95);
+        }
+
+        .sticky-back-btn svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 1rem;
@@ -232,10 +273,24 @@
             .section {
                 padding: 1.5rem;
             }
+
+            .sticky-back-btn {
+                right: 10px;
+                padding: 12px 16px;
+                font-size: 12px;
+                min-width: 100px;
+            }
         }
     </style>
 </head>
 <body>
+        <!-- Sticky Back Button -->
+        <a href="javascript:history.back()" class="sticky-back-btn" title="Terug naar Academy">
+            <svg viewBox="0 0 24 24">
+                <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+            </svg>
+            Terug
+        </a>
     <div class="container">
         <!-- Header -->
         <div class="header">
@@ -292,18 +347,96 @@
             
             <div class="highlight-box">
                 <h4>🎯 Les Overzicht</h4>
-                <p>In deze les hebben we de waarheid over testosteron doping behandeld. Dit is een cruciaal onderdeel van je ontwikkeling als Top Tier Man en vormt de basis voor verdere groei en prestaties.</p>
+                <p>In deze les hebben we de waarheid over testosteron doping behandeld. Dit is een cruciaal onderdeel van je ontwikkeling als Top Tier Man en vormt de basis voor het begrijpen van de verschillen tussen medische behandeling en recreatief gebruik.</p>
             </div>
 
-            <h3>Belangrijkste Inzichten</h3>
+            <h3>Wat is Testosteron Doping?</h3>
+            <p>Testosteron doping verwijst naar het gebruik van kunstmatig testosteron voor het verbeteren van prestaties, buiten medische noodzaak om. Het is belangrijk om onderscheid te maken tussen verschillende vormen van testosteron gebruik en de bijbehorende risico's en overwegingen.</p>
+
+            <h3>De Verschillende Vormen van Testosteron Gebruik</h3>
+            
+            <h4>1. Medische Behandeling (TRT)</h4>
+            <p>Testosteron Replacement Therapy voor mannen met klinisch lage testosteronniveaus:</p>
             <ul>
-                <li><strong>Wat testosteron doping is:</strong> Een fundamenteel concept dat je dagelijks kunt toepassen</li><li><strong>Testosteron doping = Kunstmatig testosteron gebruiken voor betere prestaties.:</strong> Een fundamenteel concept dat je dagelijks kunt toepassen</li><li><strong>De verschillende vormen van testosteron gebruik:</strong> Een fundamenteel concept dat je dagelijks kunt toepassen</li><li><strong>1. Medische behandeling (TRT):</strong> Een fundamenteel concept dat je dagelijks kunt toepassen</li><li><strong>Voorbeelden::</strong> Een fundamenteel concept dat je dagelijks kunt toepassen</li>
-                <li><strong>Praktische Toepassing:</strong> Het verschil tussen kennis en wijsheid ligt in de dagelijkse implementatie</li>
-                <li><strong>Consistentie:</strong> Kleine, dagelijkse acties leiden tot grote, langetermijn resultaten</li>
+                <li>Onder medische begeleiding</li>
+                <li>Gebaseerd op bloedonderzoek</li>
+                <li>Gemonitord door professionals</li>
+                <li>Veilige doseringen</li>
+                <li>Langetermijn gezondheidsdoelen</li>
+            </ul>
+
+            <h4>2. Recreatief Gebruik</h4>
+            <p>Het gebruik van testosteron voor prestaties zonder medische noodzaak:</p>
+            <ul>
+                <li>Zonder medische begeleiding</li>
+                <li>Hoge doseringen</li>
+                <li>Korte termijn doelen</li>
+                <li>Verhoogde risico's</li>
+                <li>Mogelijke bijwerkingen</li>
+            </ul>
+
+            <h4>3. Performance Enhancement</h4>
+            <p>Het gebruik van testosteron voor sportieve prestaties:</p>
+            <ul>
+                <li>Verboden in competitieve sport</li>
+                <li>Ethische overwegingen</li>
+                <li>Risico op diskwalificatie</li>
+                <li>Langetermijn gezondheidsrisico's</li>
+                <li>Impact op natuurlijke productie</li>
+            </ul>
+
+            <h3>De Waarheid over Testosteron Doping</h3>
+            
+            <h4>Voordelen (Korte Termijn)</h4>
+            <ul>
+                <li>Verhoogde spiergroei en kracht</li>
+                <li>Verbeterde herstel na training</li>
+                <li>Verhoogde energie en motivatie</li>
+                <li>Betere mentale focus</li>
+                <li>Verhoogd libido</li>
+            </ul>
+
+            <h4>Risico's en Bijwerkingen</h4>
+            <ul>
+                <li>Acne en huidproblemen</li>
+                <li>Haaruitval en kaalheid</li>
+                <li>Stemmingswisselingen en agressie</li>
+                <li>Verhoogd risico op hart- en vaatziekten</li>
+                <li>Lever- en nierproblemen</li>
+                <li>Verhoogd risico op bloedstolsels</li>
+                <li>Onderdrukking van natuurlijke testosteronproductie</li>
+                <li>Mogelijke onvruchtbaarheid</li>
+            </ul>
+
+            <h3>Langetermijn Gevolgen</h3>
+            <ul>
+                <li>Afhankelijkheid van externe testosteron</li>
+                <li>Permanente onderdrukking van natuurlijke productie</li>
+                <li>Verhoogd risico op chronische ziekten</li>
+                <li>Mogelijke psychologische afhankelijkheid</li>
+                <li>Impact op relaties en sociale leven</li>
+            </ul>
+
+            <h3>Ethische Overwegingen</h3>
+            <ul>
+                <li>Eerlijkheid in competitieve sport</li>
+                <li>Gelijke kansen voor alle atleten</li>
+                <li>Integriteit van de sport</li>
+                <li>Voorbeeld voor jongere generaties</li>
+                <li>Langetermijn gezondheidsimpact</li>
+            </ul>
+
+            <h3>Alternatieven voor Doping</h3>
+            <ul>
+                <li>Natuurlijke testosteron optimalisatie</li>
+                <li>Optimale voeding en suppletie</li>
+                <li>Effectieve training en herstel</li>
+                <li>Stress management en slaap</li>
+                <li>Medische begeleiding indien nodig</li>
             </ul>
 
             <h3>Waarom Dit Belangrijk Is</h3>
-            <p>De concepten uit deze les zijn niet alleen theoretisch interessant, maar vormen de praktische basis voor je dagelijkse leven. Door deze principes consequent toe te passen, bouw je aan een sterke fundering voor alle andere aspecten van je ontwikkeling.</p>
+            <p>Het begrijpen van de waarheid over testosteron doping is cruciaal voor elke man die zijn prestaties wil verbeteren. Het helpt je om weloverwogen beslissingen te nemen over je gezondheid, prestaties en integriteit, en om de beste weg te vinden naar optimale mannelijkheid.</p>
         </div>
 
         <!-- Praktische Oefeningen en Opdrachten -->
@@ -311,37 +444,67 @@
             <h2>💪 Praktische Oefeningen en Opdrachten</h2>
 
             <div class="exercise-box">
-                <h4>Oefening 1: Zelf-Assessment</h4>
-                <p><strong>Doel:</strong> Evalueer je huidige situatie en identificeer verbeterpunten.</p>
-                <p><strong>Actie:</strong> Beantwoord de volgende vragen eerlijk en noteer je antwoorden:</p>
+                <h4>Oefening 1: Doping Assessment</h4>
+                <p><strong>Doel:</strong> Evalueer je houding ten opzichte van testosteron doping.</p>
+                <p><strong>Actie:</strong> Beantwoord deze vragen eerlijk:</p>
                 <ul>
-                    <li>Hoe pas je momenteel de concepten uit deze les toe in je dagelijkse leven?</li>
-                    <li>Welke aspecten vind je het moeilijkst om te implementeren?</li>
-                    <li>Wat zijn je grootste uitdagingen op dit gebied?</li>
-                    <li>Welke kleine veranderingen kun je vandaag nog maken?</li>
+                    <li>Heb je overwogen om testosteron te gebruiken voor prestaties?</li>
+                    <li>Wat zijn je belangrijkste redenen voor of tegen doping?</li>
+                    <li>Hoe evalueer je de risico's versus de voordelen?</li>
+                    <li>Wat zijn je ethische overwegingen?</li>
+                    <li>Hoe past dit in je waarden en doelen?</li>
                 </ul>
             </div>
 
             <div class="exercise-box">
-                <h4>Oefening 2: Dagelijkse Implementatie</h4>
-                <p><strong>Doel:</strong> Maak de concepten onderdeel van je dagelijkse routine.</p>
-                <p><strong>Actie:</strong> Kies 3 specifieke acties die je deze week gaat uitvoeren:</p>
+                <h4>Oefening 2: Natuurlijke Alternatieven</h4>
+                <p><strong>Doel:</strong> Identificeer natuurlijke alternatieven voor doping.</p>
+                <p><strong>Actie:</strong> Maak een plan voor natuurlijke optimalisatie:</p>
                 <ul>
-                    <li>Actie 1: _________________________________</li>
-                    <li>Actie 2: _________________________________</li>
-                    <li>Actie 3: _________________________________</li>
+                    <li><strong>Voeding:</strong> Welke testosteron-verhogende voedingsmiddelen ga je toevoegen?</li>
+                    <li><strong>Training:</strong> Hoe ga je je training optimaliseren voor betere resultaten?</li>
+                    <li><strong>Herstel:</strong> Welke herstelstrategieën ga je implementeren?</li>
+                    <li><strong>Suppletie:</strong> Welke natuurlijke supplementen overweeg je?</li>
+                    <li><strong>Levensstijl:</strong> Welke gewoonten ga je veranderen?</li>
                 </ul>
             </div>
 
             <div class="exercise-box">
-                <h4>Oefening 3: Progressie Tracking</h4>
-                <p><strong>Doel:</strong> Monitor je voortgang en pas je aanpak aan.</p>
-                <p><strong>Actie:</strong> Houd deze week bij:</p>
+                <h4>Oefening 3: Risico-Baten Analyse</h4>
+                <p><strong>Doel:</strong> Evalueer de risico's en voordelen van doping.</p>
+                <p><strong>Actie:</strong> Maak een gedetailleerde analyse:</p>
                 <ul>
-                    <li>Dagelijkse implementatie van de concepten</li>
-                    <li>Uitdagingen die je tegenkomt</li>
-                    <li>Momenten van succes en doorbraak</li>
-                    <li>Aanpassingen die je moet maken</li>
+                    <li><strong>Korte termijn voordelen:</strong> Wat hoop je te bereiken?</li>
+                    <li><strong>Langetermijn risico's:</strong> Welke gezondheidsrisico's accepteer je?</li>
+                    <li><strong>Ethische overwegingen:</strong> Hoe past dit in je waarden?</li>
+                    <li><strong>Alternatieven:</strong> Welke andere opties heb je?</li>
+                    <li><strong>Beslissing:</strong> Wat is je conclusie?</li>
+                </ul>
+            </div>
+
+            <div class="exercise-box">
+                <h4>Oefening 4: Ethische Reflectie</h4>
+                <p><strong>Doel:</strong> Reflecteer op de ethische aspecten van doping.</p>
+                <p><strong>Actie:</strong> Stel jezelf deze vragen:</p>
+                <ul>
+                    <li>Hoe zou je je voelen als je zou winnen door doping?</li>
+                    <li>Wat zou je tegen je kinderen zeggen over doping?</li>
+                    <li>Hoe beïnvloedt doping de integriteit van de sport?</li>
+                    <li>Wat zijn de gevolgen voor andere atleten?</li>
+                    <li>Hoe past dit in je persoonlijke waarden?</li>
+                </ul>
+            </div>
+
+            <div class="exercise-box">
+                <h4>Oefening 5: Langetermijn Planning</h4>
+                <p><strong>Doel:</strong> Plan je langetermijn strategie voor prestaties.</p>
+                <p><strong>Actie:</strong> Stel jezelf deze vragen:</p>
+                <ul>
+                    <li>Wat zijn je doelen voor de komende 5 jaar?</li>
+                    <li>Hoe kun je deze bereiken zonder doping?</li>
+                    <li>Welke natuurlijke methoden ga je gebruiken?</li>
+                    <li>Hoe ga je je voortgang monitoren?</li>
+                    <li>Wat is je plan voor langetermijn gezondheid?</li>
                 </ul>
             </div>
         </div>
@@ -350,55 +513,87 @@
         <div class="section">
             <h2>✅ Dagelijkse Checklists en Routines</h2>
 
-            <h3>Ochtend Routine</h3>
+            <h3>Ochtend Routine - Natuurlijke Optimalisatie</h3>
             <div class="checklist">
                 <div class="checklist-item">
                     <input type="checkbox" id="morning1">
-                    <label for="morning1">Herinner jezelf aan de belangrijkste concepten uit deze les</label>
+                    <label for="morning1">Herinner jezelf aan je waarden en doelen</label>
                 </div>
                 <div class="checklist-item">
                     <input type="checkbox" id="morning2">
-                    <label for="morning2">Plan je dag met de principes in gedachten</label>
+                    <label for="morning2">Eet een eiwitrijk ontbijt</label>
                 </div>
                 <div class="checklist-item">
                     <input type="checkbox" id="morning3">
-                    <label for="morning3">Stel jezelf een specifiek doel voor vandaag</label>
+                    <label for="morning3">Ga naar buiten voor natuurlijk licht</label>
                 </div>
                 <div class="checklist-item">
                     <input type="checkbox" id="morning4">
-                    <label for="morning4">Visualiseer hoe je de concepten gaat toepassen</label>
+                    <label for="morning4">Doe 5 minuten ademhalingsoefeningen</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="morning5">
+                    <label for="morning5">Plan je dag met natuurlijke optimalisatie in gedachten</label>
                 </div>
             </div>
 
-            <h3>Dagelijkse Implementatie</h3>
+            <h3>Dagelijkse Natuurlijke Optimalisatie</h3>
             <div class="checklist">
                 <div class="checklist-item">
                     <input type="checkbox" id="daily1">
-                    <label for="daily1">Pas de concepten toe in je dagelijkse activiteiten</label>
+                    <label for="daily1">Eet testosteron-verhogende voedingsmiddelen</label>
                 </div>
                 <div class="checklist-item">
                     <input type="checkbox" id="daily2">
-                    <label for="daily2">Wees bewust van momenten waar je kunt groeien</label>
+                    <label for="daily2">Doe krachttraining of beweging</label>
                 </div>
                 <div class="checklist-item">
                     <input type="checkbox" id="daily3">
-                    <label for="daily3">Leer van uitdagingen en tegenslagen</label>
+                    <label for="daily3">Beheer stress effectief</label>
                 </div>
                 <div class="checklist-item">
                     <input type="checkbox" id="daily4">
-                    <label for="daily4">Celebreer kleine overwinningen</label>
+                    <label for="daily4">Vermijd testosteron killers</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="daily5">
+                    <label for="daily5">Zorg voor voldoende hydratatie</label>
                 </div>
             </div>
 
-            <h3>Avond Reflectie</h3>
+            <h3>Ethische Reflectie</h3>
+            <div class="checklist">
+                <div class="checklist-item">
+                    <input type="checkbox" id="ethics1">
+                    <label for="ethics1">Reflecteer op je waarden en integriteit</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="ethics2">
+                    <label for="ethics2">Wees eerlijk over je prestaties</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="ethics3">
+                    <label for="ethics3">Steun andere atleten in hun natuurlijke ontwikkeling</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="ethics4">
+                    <label for="ethics4">Wees een voorbeeld voor jongere generaties</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="ethics5">
+                    <label for="ethics5">Focus op langetermijn gezondheid</label>
+                </div>
+            </div>
+
+            <h3>Avond Routine - Reflectie</h3>
             <div class="checklist">
                 <div class="checklist-item">
                     <input type="checkbox" id="evening1">
-                    <label for="evening1">Evalueer hoe je dag is verlopen</label>
+                    <label for="evening1">Evalueer je dagelijkse prestaties</label>
                 </div>
                 <div class="checklist-item">
                     <input type="checkbox" id="evening2">
-                    <label for="evening2">Identificeer wat goed ging en wat beter kan</label>
+                    <label for="evening2">Reflecteer op je waarden en keuzes</label>
                 </div>
                 <div class="checklist-item">
                     <input type="checkbox" id="evening3">
@@ -406,7 +601,11 @@
                 </div>
                 <div class="checklist-item">
                     <input type="checkbox" id="evening4">
-                    <label for="evening4">Wees dankbaar voor je groei en leerervaringen</label>
+                    <label for="evening4">Zorg voor een goede slaapomgeving</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="evening5">
+                    <label for="evening5">Wees dankbaar voor je natuurlijke ontwikkeling</label>
                 </div>
             </div>
         </div>
@@ -416,28 +615,38 @@
             <h2>🤔 Reflectie Vragen voor Persoonlijke Groei</h2>
 
             <div class="reflection-question">
-                <h4>Vraag 1: Huidige Situatie</h4>
-                <p>Hoe zou je je huidige implementatie van de concepten uit deze les beoordelen op een schaal van 1-10? Wat zijn de specifieke gebieden waar je de meeste groei kunt maken?</p>
+                <h4>Vraag 1: Doping Overweging</h4>
+                <p>Heb je overwogen om testosteron te gebruiken voor prestaties? Wat zijn je belangrijkste overwegingen? Welke factoren wegen het zwaarst in je beslissing?</p>
             </div>
 
             <div class="reflection-question">
-                <h4>Vraag 2: Uitdagingen</h4>
-                <p>Welke uitdagingen kom je tegen bij het toepassen van deze concepten? Hoe kun je deze uitdagingen omzetten in kansen voor groei?</p>
+                <h4>Vraag 2: Ethische Waarden</h4>
+                <p>Hoe evalueer je de ethische aspecten van doping? Wat zijn je persoonlijke waarden ten opzichte van eerlijkheid en integriteit? Hoe past dit in je levensfilosofie?</p>
             </div>
 
             <div class="reflection-question">
-                <h4>Vraag 3: Impact</h4>
-                <p>Welke positieve veranderingen heb je al gemerkt sinds je begonnen bent met het toepassen van deze concepten? Hoe heeft dit je leven beïnvloed?</p>
+                <h4>Vraag 3: Natuurlijke Alternatieven</h4>
+                <p>Welke natuurlijke methoden heb je al geprobeerd om je prestaties te verbeteren? Wat waren de resultaten? Welke methoden werkten het beste voor jou?</p>
             </div>
 
             <div class="reflection-question">
-                <h4>Vraag 4: Toekomst</h4>
-                <p>Hoe ziet je ideale implementatie van deze concepten eruit over 3 maanden? Welke specifieke doelen stel je jezelf?</p>
+                <h4>Vraag 4: Risico's en Voordelen</h4>
+                <p>Hoe evalueer je de risico's en voordelen van doping? Welke aspecten maken je het meest zorgen? Welke voordelen zijn het meest aantrekkelijk?</p>
             </div>
 
             <div class="reflection-question">
-                <h4>Vraag 5: Ondersteuning</h4>
-                <p>Welke ondersteuning heb je nodig om deze concepten beter te kunnen toepassen? Hoe kun je jezelf en anderen helpen om te groeien?</p>
+                <h4>Vraag 5: Langetermijn Gevolgen</h4>
+                <p>Hoe denk je over de langetermijn gevolgen van doping? Wat zijn je zorgen over je gezondheid en welzijn? Hoe past dit in je langetermijn doelen?</p>
+            </div>
+
+            <div class="reflection-question">
+                <h4>Vraag 6: Sociale Impact</h4>
+                <p>Hoe beïnvloedt doping de integriteit van de sport? Wat zijn de gevolgen voor andere atleten? Hoe wil je een voorbeeld zijn voor anderen?</p>
+            </div>
+
+            <div class="reflection-question">
+                <h4>Vraag 7: Persoonlijke Groei</h4>
+                <p>Hoe kun je je prestaties verbeteren zonder doping? Welke natuurlijke methoden ga je gebruiken? Hoe ga je je voortgang monitoren en bijsturen?</p>
             </div>
         </div>
 
@@ -446,35 +655,38 @@
             <h2>🚀 Volgende Stappen en Actieplan</h2>
 
             <div class="action-plan">
-                <h3>30-Dagen Implementatie Plan</h3>
+                <h3>30-Dagen Natuurlijke Optimalisatie Plan</h3>
 
                 <div class="action-step">
-                    <h4>Week 1: Bewustwording en Baseline</h4>
+                    <h4>Week 1: Assessment en Bewustwording</h4>
                     <ul>
-                        <li>Voltooi de zelf-assessment oefening</li>
-                        <li>Implementeer de ochtend routine</li>
-                        <li>Begin met dagelijkse bewustwording van de concepten</li>
-                        <li>Start met het bijhouden van je voortgang</li>
+                        <li>Voltooi de Doping Assessment oefening</li>
+                        <li>Identificeer je waarden en ethische overwegingen</li>
+                        <li>Start met het bijhouden van je huidige prestaties</li>
+                        <li>Onderzoek natuurlijke optimalisatie methoden</li>
+                        <li>Plan je langetermijn doelen</li>
                     </ul>
                 </div>
 
                 <div class="action-step">
-                    <h4>Week 2: Dagelijkse Implementatie</h4>
+                    <h4>Week 2: Natuurlijke Optimalisatie</h4>
                     <ul>
-                        <li>Pas de concepten toe in je dagelijkse activiteiten</li>
-                        <li>Focus op consistentie boven perfectie</li>
-                        <li>Identificeer en adresseer uitdagingen</li>
-                        <li>Bouw momentum op door kleine overwinningen</li>
+                        <li>Implementeer natuurlijke testosteron verhogende methoden</li>
+                        <li>Optimaliseer je voeding en beweging</li>
+                        <li>Verbeter je slaapkwaliteit</li>
+                        <li>Beheer stress effectief</li>
+                        <li>Start met natuurlijke suppletie</li>
                     </ul>
                 </div>
 
                 <div class="action-step">
-                    <h4>Week 3: Optimalisatie en Verfijning</h4>
+                    <h4>Week 3: Training en Herstel</h4>
                     <ul>
-                        <li>Evalueer je voortgang en pas je aanpak aan</li>
-                        <li>Verhoog de intensiteit waar mogelijk</li>
-                        <li>Integreer de concepten in nieuwe situaties</li>
-                        <li>Zoek naar manieren om anderen te helpen</li>
+                        <li>Optimaliseer je training voor betere resultaten</li>
+                        <li>Implementeer effectieve herstelstrategieën</li>
+                        <li>Focus op consistentie en progressie</li>
+                        <li>Monitor je voortgang en aanpassingen</li>
+                        <li>Integreer nieuwe gewoonten in je routine</li>
                     </ul>
                 </div>
 
@@ -482,6 +694,7 @@
                     <h4>Week 4: Consolidatie en Planning</h4>
                     <ul>
                         <li>Consolideer je nieuwe gewoonten</li>
+                        <li>Evalueer je voortgang en resultaten</li>
                         <li>Plan voor langetermijn implementatie</li>
                         <li>Stel nieuwe, uitdagende doelen</li>
                         <li>Deel je ervaringen en leer van anderen</li>
@@ -489,16 +702,29 @@
                 </div>
             </div>
 
-            <h3>Langetermijn Strategieën</h3>
+            <h3>60-Dagen Verdieping Plan</h3>
             <ul>
-                <li><strong>Maand 2-3:</strong> Verdieping en geavanceerde toepassing</li>
-                <li><strong>Maand 4-6:</strong> Integratie met andere ontwikkelingsgebieden</li>
+                <li><strong>Maand 2:</strong> Geavanceerde natuurlijke optimalisatie technieken</li>
+                <li><strong>Maand 3:</strong> Integratie met andere ontwikkelingsgebieden</li>
+                <li><strong>Maand 4-6:</strong> Langetermijn gewoonten en levensstijl</li>
                 <li><strong>Maand 6+:</strong> Mentorschap en doorgeven van kennis</li>
             </ul>
 
+            <h3>Specifieke Actie Items</h3>
+            <div class="highlight-box">
+                <h4>🎯 Deze Week Te Doen</h4>
+                <ul>
+                    <li>Voltooi de Doping Assessment</li>
+                    <li>Identificeer je waarden en ethische overwegingen</li>
+                    <li>Start met natuurlijke optimalisatie</li>
+                    <li>Plan je training en voeding</li>
+                    <li>Begin met het bijhouden van je voortgang</li>
+                </ul>
+            </div>
+
             <div class="highlight-box">
                 <h4>🎯 Belangrijke Herinnering</h4>
-                <p>Echte groei gebeurt door consistente, dagelijkse actie. Focus op progressie, niet op perfectie. Elke dag is een nieuwe kans om te groeien en jezelf te verbeteren.</p>
+                <p>Natuurlijke optimalisatie is een marathon, geen sprint. Focus op consistente, dagelijkse actie. Elke kleine verandering telt en bouwt op elkaar voort. Begin met de makkelijkste veranderingen en bouw geleidelijk op naar de moeilijkere.</p>
             </div>
         </div>
 
