@@ -8,6 +8,7 @@ import { toast } from 'react-hot-toast';
 import ClientLayout from '@/app/components/ClientLayout';
 import OnboardingV2Modal from '@/components/OnboardingV2Modal';
 import OnboardingV2Progress from '@/components/OnboardingV2Progress';
+import OnboardingNotice from '@/components/OnboardingNotice';
 
 interface Challenge {
   id: string;
@@ -837,6 +838,8 @@ export default function MijnChallengesPage() {
           </div>
         </div>
 
+        {/* Onboarding Notice */}
+        <OnboardingNotice />
 
         {/* Onboarding Popup - Positioned at top for challenges page */}
         {showOnboardingPopup && (

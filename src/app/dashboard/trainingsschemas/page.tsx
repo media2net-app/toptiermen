@@ -18,6 +18,7 @@ import { toast } from 'react-hot-toast';
 import PageLayout from '@/components/PageLayout';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { useOnboardingV2 } from "@/contexts/OnboardingV2Context";
+import OnboardingNotice from '@/components/OnboardingNotice';
 import OnboardingV2Progress from '@/components/OnboardingV2Progress';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useSubscription } from '@/hooks/useSubscription';
@@ -1548,6 +1549,7 @@ function TrainingschemasContent() {
   return (
     <PageLayout title="Trainingsschemas">
       <OnboardingV2Progress />
+      <OnboardingNotice />
       
       {/* Continue to Voedingsplannen Button - Only show during onboarding and when schema is selected */}
       {userTrainingProfile && trainingSchemas.length > 0 && !isCompleted && selectedTrainingSchema && (

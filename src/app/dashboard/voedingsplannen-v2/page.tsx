@@ -5,6 +5,7 @@ import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { useOnboardingV2 } from '@/contexts/OnboardingV2Context';
 import { useRouter } from 'next/navigation';
 import OnboardingV2Progress from '@/components/OnboardingV2Progress';
+import OnboardingNotice from '@/components/OnboardingNotice';
 import { motion } from 'framer-motion';
 import { 
   BookOpenIcon, 
@@ -1661,6 +1662,7 @@ export default function VoedingsplannenV2Page() {
   return (
     <div className="min-h-screen bg-[#0A0F0A]">
       <OnboardingV2Progress />
+      <OnboardingNotice />
       <div className="p-6">
         <div className="max-w-7xl mx-auto">
         {/* Header */}
