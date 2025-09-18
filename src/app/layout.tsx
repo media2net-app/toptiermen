@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { SupabaseAuthProvider } from '@/contexts/SupabaseAuthContext';
+import { OnboardingV2Provider } from '@/contexts/OnboardingV2Context';
 // import { V2StateProvider } from '@/contexts/V2StateContext';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { SpeedInsights } from '@vercel/speed-insights/next';
@@ -88,7 +89,9 @@ export default function RootLayout({
           {/* <CacheBuster version="3.0.0" forceRefresh={true} /> - DISABLED TO PREVENT LOGOUT */}
           {/* <V2StateProvider> */}
           <SupabaseAuthProvider>
-            {children}
+            <OnboardingV2Provider>
+              {children}
+            </OnboardingV2Provider>
           </SupabaseAuthProvider>
           {/* </V2StateProvider> */}
           <SpeedInsights />

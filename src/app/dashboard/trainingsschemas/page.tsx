@@ -17,7 +17,7 @@ import {
 import { toast } from 'react-hot-toast';
 import PageLayout from '@/components/PageLayout';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
-import { useOnboarding } from "@/contexts/OnboardingContext";
+import { useOnboardingV2 } from "@/contexts/OnboardingV2Context";
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useSubscription } from '@/hooks/useSubscription';
 import { supabase } from '@/lib/supabase';
@@ -131,7 +131,7 @@ const trainingFrequencies = [
 
 function TrainingschemasContent() {
   const { user, loading: authLoading } = useSupabaseAuth();
-  const { isOnboarding, currentStep: onboardingStep, completeStep } = useOnboarding();
+  const { isCompleted, currentStep: onboardingStep, completeStep } = useOnboardingV2();
   const { hasAccess, loading: subscriptionLoading } = useSubscription();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -887,7 +887,7 @@ function TrainingschemasContent() {
           toast.success(`Trainingsschema geselecteerd! 8-weken periode gestart: ${new Date(periodData.data.start_date).toLocaleDateString('nl-NL')} - ${new Date(periodData.data.end_date).toLocaleDateString('nl-NL')}`);
           
           // Only redirect to Mijn trainingen if NOT in onboarding
-          if (!isOnboarding && !showOnboardingStep3) {
+          if (isCompleted && !showOnboardingStep3) {
           console.log('🔄 Redirecting to Mijn trainingen...');
           setTimeout(() => {
             router.push('/dashboard/mijn-trainingen');
@@ -900,7 +900,7 @@ function TrainingschemasContent() {
           toast.success('Trainingsschema geselecteerd!');
           
           // Still redirect even if period creation failed, but only if NOT in onboarding
-          if (!isOnboarding && !showOnboardingStep3) {
+          if (isCompleted && !showOnboardingStep3) {
           console.log('🔄 Redirecting to Mijn trainingen...');
           setTimeout(() => {
             router.push('/dashboard/mijn-trainingen');
@@ -911,7 +911,7 @@ function TrainingschemasContent() {
         }
         
         // Complete onboarding step if needed
-        if (isOnboarding && onboardingStep === 3) {
+        if (!isCompleted && onboardingStep === 3) {
           console.log('🎯 Completing onboarding step 3 after schema selection');
           // Call completeStep directly to avoid stale closure
           try {
@@ -947,7 +947,7 @@ function TrainingschemasContent() {
       console.error('Error selecting training schema:', error);
       toast.error('Failed to select training schema');
     }
-  }, [user?.id, isOnboarding, onboardingStep, showOnboardingStep3]); // Removed completeStep from dependencies
+  }, [user?.id, isCompleted, onboardingStep, showOnboardingStep3]); // Removed completeStep from dependencies
 
   const viewSchemaDetail = async (schemaId: string) => {
     try {
@@ -1609,28 +1609,13 @@ function TrainingschemasContent() {
                     onClick={async () => {
                       try {
                         // Mark step 3 as completed
-                        const response = await fetch('/api/onboarding', {
-                          method: 'POST',
-                          headers: {
-                            'Content-Type': 'application/json',
-                          },
-                          body: JSON.stringify({
-                            userId: user?.id,
-                            step: 3,
-                            action: 'complete_step',
-                            selectedTrainingSchema: selectedTrainingSchema
-                          }),
-                        });
+            await completeStep(3, { trainingSchema: selectedTrainingSchema });
 
-                        if (response.ok) {
-                          toast.success('Trainingsschema opgeslagen! Doorsturen naar voedingsplannen...');
-                          // Navigate to nutrition plans
-                          setTimeout(() => {
-                            window.location.href = '/dashboard/voedingsplannen';
-                          }, 1500);
-                        } else {
-                          toast.error('Er is een fout opgetreden');
-                        }
+                        toast.success('Trainingsschema opgeslagen! Doorsturen naar voedingsplannen...');
+                        // Navigate to nutrition plans
+                        setTimeout(() => {
+                          window.location.href = '/dashboard/voedingsplannen-v2';
+                        }, 1500);
                       } catch (error) {
                         console.error('Error completing step:', error);
                         toast.error('Er is een fout opgetreden');
@@ -2187,7 +2172,7 @@ function TrainingschemasContent() {
 
 
         {/* Continue to Voedingsplannen Button - Only show during onboarding and when schema is selected */}
-        {userTrainingProfile && trainingSchemas.length > 0 && isOnboarding && selectedTrainingSchema && (
+        {userTrainingProfile && trainingSchemas.length > 0 && !isCompleted && selectedTrainingSchema && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

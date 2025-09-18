@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
     
     if (packageType === 'Premium Tier') {
       tier = 'premium';
-    } else if (packageType === 'Lifetime Tier') {
+    } else if (packageType === 'Lifetime Tier' || packageType === 'Lifetime Access') {
       tier = 'lifetime';
     }
 

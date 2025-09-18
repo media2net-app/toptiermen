@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
-import { useOnboarding } from '@/contexts/OnboardingContext';
+import { useOnboardingV2 } from '@/contexts/OnboardingV2Context';
 import { useSubscription } from '@/hooks/useSubscription';
 import { toast } from 'react-hot-toast';
 import ClientLayout from '@/app/components/ClientLayout';
-import ForcedOnboardingModal from '@/components/ForcedOnboardingModal';
+import OnboardingV2Modal from '@/components/OnboardingV2Modal';
 
 interface Challenge {
   id: string;
@@ -267,7 +267,7 @@ const CHALLENGE_LIBRARY: SuggestedChallenge[] = [
 
 export default function MijnChallengesPage() {
   const { user } = useSupabaseAuth();
-  const { isOnboarding, currentStep, completeCurrentStep } = useOnboarding();
+  const { currentStep, completeStep, isCompleted } = useOnboardingV2();
   const { hasAccess } = useSubscription();
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [summary, setSummary] = useState<Summary>({ completedToday: 0, totalToday: 0, dailyStreak: 0 });
@@ -374,34 +374,20 @@ export default function MijnChallengesPage() {
   useEffect(() => {
     if (!user?.id) return;
 
-    async function checkOnboardingStatus() {
-      try {
-        const response = await fetch(`/api/onboarding?userId=${user?.id}`);
-        if (response.ok) {
-          const data = await response.json();
-          setOnboardingStatus(data);
-          
-          // Only show onboarding step 3 if onboarding is not completed and user is on step 2 (challenges step)
-          const isOnboardingStep2 = !data.onboarding_completed && data.current_step === 2;
-          setShowOnboardingStep3(isOnboardingStep2);
-          
-          // Show popup and open library for onboarding step 2
-          if (isOnboardingStep2) {
-            setShowOnboardingPopup(true);
-            setShowChallengeLibrary(true);
-          }
-          
-          // Show ForcedOnboardingModal for basic users who haven't completed step 2
-          const shouldShowModal = data.current_step <= 2 && !data.step_2_completed;
-          setShowForcedOnboarding(shouldShowModal);
-        }
-      } catch (error) {
-        console.error('Error checking onboarding status:', error);
-      }
+    // Check if user is on step 2 (challenges step) using onboarding V2
+    const isOnboardingStep2 = currentStep === 2;
+    setShowOnboardingStep3(isOnboardingStep2);
+    
+    // Show popup and open library for onboarding step 2
+    if (isOnboardingStep2) {
+      setShowOnboardingPopup(true);
+      setShowChallengeLibrary(true);
     }
-
-    checkOnboardingStatus();
-  }, [user?.id]);
+    
+    // Show ForcedOnboardingModal for users who haven't completed step 2
+    const shouldShowModal = currentStep !== null && currentStep <= 2 && !isCompleted;
+    setShowForcedOnboarding(shouldShowModal);
+  }, [user?.id, currentStep, isCompleted]);
 
   // Load challenges
   useEffect(() => {
@@ -827,35 +813,25 @@ export default function MijnChallengesPage() {
                 <button
                   onClick={async () => {
                     try {
-                      // Mark step 3 as completed
-                      const response = await fetch('/api/onboarding', {
-                        method: 'POST',
-                        headers: {
-                          'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                          userId: user?.id,
-                          step: 2,
-                          action: 'complete_step',
-                          selectedChallenges: challenges.map(m => m.id)
-                        }),
-                      });
+                      // Mark missions as selected using onboarding V2 API
+                      const success = await completeStep(2, { challenges: challenges.map(m => m.id) });
 
-                      if (response.ok) {
+                      if (success) {
+                        setShowOnboardingStep3(false);
+                        setShowOnboardingPopup(false);
+                        setShowChallengeLibrary(false);
+                        toast.success('Uitdagingen geselecteerd! Je kunt nu door naar de volgende stap.');
+                        
                         // Check if user has access to training - if yes, go to training schemas; if not, skip to forum
                         if (hasAccess('training')) {
-                          toast.success('Challenges opgeslagen! Doorsturen naar trainingsschemas...');
-                          // Navigate directly to training schemas
                           setTimeout(() => {
                             window.location.href = '/dashboard/trainingsschemas';
-                          }, 1500);
+                          }, 1000);
                         } else {
-                          toast.success('Challenges opgeslagen! Doorsturen naar forum...');
-                          // Skip training and nutrition steps, go directly to forum
-                          console.log('🚀 Basic tier user - skipping training and nutrition steps, going to forum');
+                          // Basic users skip training and nutrition steps, go directly to forum
                           setTimeout(() => {
                             window.location.href = '/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden';
-                          }, 1500);
+                          }, 1000);
                         }
                       } else {
                         toast.error('Er is een fout opgetreden');
@@ -1367,10 +1343,10 @@ export default function MijnChallengesPage() {
           </div>
         )}
         
-        {/* ForcedOnboardingModal for basic users */}
-        <ForcedOnboardingModal 
+        {/* OnboardingV2Modal for users in onboarding */}
+        <OnboardingV2Modal 
           isOpen={showForcedOnboarding}
-          onComplete={() => {
+          onClose={() => {
             setShowForcedOnboarding(false);
           }}
         />

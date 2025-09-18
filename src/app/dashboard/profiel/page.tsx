@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
-import { useOnboarding } from '@/contexts/OnboardingContext';
+import { useOnboardingV2 } from '@/contexts/OnboardingV2Context';
 import { useRouter } from 'next/navigation';
 
 interface ProfileFormData {
@@ -17,7 +17,7 @@ interface ProfileFormData {
 
 export default function ProfielPage() {
   const { user, profile } = useSupabaseAuth();
-  const { completeCurrentStep } = useOnboarding();
+  const { completeStep, currentStep } = useOnboardingV2();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -81,7 +81,7 @@ export default function ProfielPage() {
       }
 
       // Complete onboarding step
-      await completeCurrentStep();
+      await completeStep(1, { goal: formData.main_goal });
       
       // Redirect to next step
       router.push('/dashboard/mijn-challenges');

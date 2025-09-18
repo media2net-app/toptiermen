@@ -39,8 +39,8 @@ export async function GET(request: NextRequest) {
 
     // Map package_type to access control
     const packageType = profile.package_type || 'Basic Tier';
-    const hasTrainingAccess = packageType === 'Premium Tier' || packageType === 'Lifetime Tier';
-    const hasNutritionAccess = packageType === 'Premium Tier' || packageType === 'Lifetime Tier';
+    const hasTrainingAccess = packageType === 'Premium Tier' || packageType === 'Lifetime Tier' || packageType === 'Lifetime Access';
+    const hasNutritionAccess = packageType === 'Premium Tier' || packageType === 'Lifetime Tier' || packageType === 'Lifetime Access';
 
     // Define all onboarding steps
     const allSteps = [
@@ -84,7 +84,26 @@ export async function GET(request: NextRequest) {
         all_steps: allSteps,
         available_steps: availableSteps,
         step_mapping: stepMapping,
-        current_step_in_sequence: onboardingStatus ? (onboardingStatus.onboarding_completed ? null : 0) : null,
+        current_step_in_sequence: onboardingStatus ? (() => {
+          if (onboardingStatus.onboarding_completed) return null;
+          
+          // Determine the NEXT step the user should go to (not the current step)
+          if (onboardingStatus.challenge_started) {
+            return stepMapping[6] || 4; // Forum Introductie (final step)
+          } else if (onboardingStatus.nutrition_plan_selected) {
+            return stepMapping[6] || 4; // Next: Forum Introductie
+          } else if (onboardingStatus.training_schema_selected) {
+            return stepMapping[4] || 3; // Next: Voedingsplan
+          } else if (onboardingStatus.missions_selected) {
+            return stepMapping[3] || 2; // Next: Trainingsschema
+          } else if (onboardingStatus.goal_set) {
+            return stepMapping[2] || 1; // Next: Missies Selecteren
+          } else if (onboardingStatus.welcome_video_shown) {
+            return stepMapping[1] || 0; // Next: Doel Omschrijven
+          } else {
+            return stepMapping[0] || 0; // Next: Welkom Video
+          }
+        })() : null,
         should_skip_training: !hasTrainingAccess,
         should_skip_nutrition: !hasNutritionAccess
       }

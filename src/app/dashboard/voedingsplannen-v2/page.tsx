@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { useOnboardingV2 } from '@/contexts/OnboardingV2Context';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { 
@@ -89,6 +90,7 @@ interface UserProfile {
 
 export default function VoedingsplannenV2Page() {
   const { user, isAdmin, loading: authLoading } = useSupabaseAuth();
+  const { completeStep, currentStep, isCompleted } = useOnboardingV2();
   const router = useRouter();
   const [plans, setPlans] = useState<NutritionPlan[]>([]);
   const [selectedPlan, setSelectedPlan] = useState<NutritionPlan | null>(null);
@@ -760,8 +762,7 @@ export default function VoedingsplannenV2Page() {
   const carbsProgress = getProgressInfo(currentDayTotals.carbs, personalizedTargets?.targetCarbs || originalPlanData?.target_carbs || 0);
   const fatProgress = getProgressInfo(currentDayTotals.fat, personalizedTargets?.targetFat || originalPlanData?.target_fat || 0);
 
-  // Check if user is specifically chiel@media2net.nl
-  const isChiel = user?.email === 'chiel@media2net.nl';
+  // Removed hardcoded access control - now allows all authenticated users
 
   // Define fetchUserProfile function outside useEffect so it can be reused
   const fetchUserProfile = async () => {
@@ -811,7 +812,7 @@ export default function VoedingsplannenV2Page() {
   }, [user?.id]);
 
   useEffect(() => {
-    console.log('🔍 Access check useEffect triggered:', { authLoading, isChiel, userEmail: user?.email });
+    console.log('🔍 Access check useEffect triggered:', { authLoading, userEmail: user?.email });
     
     // Wait for auth to load before checking access
     if (authLoading) {
@@ -819,16 +820,16 @@ export default function VoedingsplannenV2Page() {
       return;
     }
     
-    // Only allow chiel@media2net.nl access
-    if (!isChiel) {
-      console.log('🚫 Access denied to voedingsplannen-v2, redirecting to dashboard');
-      router.push('/dashboard');
+    // Check if user is authenticated
+    if (!user) {
+      console.log('🚫 No user authenticated, redirecting to login');
+      router.push('/login');
       return;
     }
 
     console.log('✅ Access granted to voedingsplannen-v2 for:', user?.email);
     fetchPlans();
-  }, [isChiel, router, authLoading, user]);
+  }, [router, authLoading, user]);
 
   const fetchPlans = async () => {
     try {
@@ -921,12 +922,22 @@ export default function VoedingsplannenV2Page() {
 
 
 
-  const handlePlanSelect = (plan: NutritionPlan) => {
+  const handlePlanSelect = async (plan: NutritionPlan) => {
     console.log('🔧 DEBUG: handlePlanSelect called with plan:', { name: plan.name, id: plan.plan_id || plan.id });
     setSelectedPlan(plan);
     setShowOriginalData(true);
     setScalingInfo(null); // Reset scaling info
     loadOriginalPlanData(plan.plan_id || plan.id.toString());
+    
+    // Complete onboarding step 4 if in onboarding
+    if (!isCompleted && currentStep === 4) {
+      try {
+        await completeStep(4, { nutritionPlan: plan.plan_id || plan.id });
+        console.log('✅ Onboarding step 4 completed');
+      } catch (error) {
+        console.error('❌ Error completing onboarding step 4:', error);
+      }
+    }
   };
 
   const handleBackToPlans = () => {

@@ -66,7 +66,7 @@ export function useSubscription(): UseSubscriptionReturn {
 
         const fetchPromise = supabase
           .from('profiles')
-          .select('subscription_tier, subscription_status, role')
+          .select('subscription_tier, subscription_status, role, package_type')
           .eq('id', user.id)
           .single();
 
@@ -94,8 +94,19 @@ export function useSubscription(): UseSubscriptionReturn {
           return;
         }
 
-        // Use subscription_tier directly
-        const tier = profile.subscription_tier || 'basic';
+        // Use subscription_tier or package_type for tier mapping
+        let tier = profile.subscription_tier || 'basic';
+        
+        // If no subscription_tier, use package_type
+        if (!profile.subscription_tier && profile.package_type) {
+          if (profile.package_type === 'Premium Tier') {
+            tier = 'premium';
+          } else if (profile.package_type === 'Lifetime Tier' || profile.package_type === 'Lifetime Access') {
+            tier = 'lifetime';
+          } else {
+            tier = 'basic';
+          }
+        }
 
         console.log('✅ Subscription data loaded:', {
           subscription_tier: profile.subscription_tier,

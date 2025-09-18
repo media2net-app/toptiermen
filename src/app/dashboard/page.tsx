@@ -7,7 +7,7 @@ import { toast } from 'react-hot-toast';
 import Link from 'next/link';
 import BadgeDisplay from '@/components/BadgeDisplay';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
-import { useOnboarding } from '@/contexts/OnboardingContext';
+import { useOnboardingV2 } from '@/contexts/OnboardingV2Context';
 import DashboardLoadingModal from '@/components/ui/DashboardLoadingModal';
 import DashboardDebugger from '@/components/DashboardDebugger';
 import { useRouter } from 'next/navigation';
@@ -101,7 +101,7 @@ export default function Dashboard() {
   const [showDebugger, setShowDebugger] = useState(false);
 
   const { user, profile, loading: authLoading } = useSupabaseAuth();
-  const { isOnboarding, currentStep } = useOnboarding();
+  const { isCompleted, currentStep } = useOnboardingV2();
   const router = useRouter();
 
   // Only redirect if user tries to access future onboarding steps
@@ -109,7 +109,7 @@ export default function Dashboard() {
   useEffect(() => {
     // Remove automatic redirect - let users navigate freely within allowed steps
     // The middleware will handle blocking access to future steps
-  }, [isOnboarding, currentStep, router]);
+  }, [isCompleted, currentStep, router]);
 
   // 2.0.1: Fetch real dashboard data from database
   useEffect(() => {
@@ -145,7 +145,7 @@ export default function Dashboard() {
           setUserBadges(data.userBadges || []);
           
           // Check for onboarding completion badge unlock
-          if (data.stats && !isOnboarding && (data.userBadges || []).length === 0) {
+          if (data.stats && isCompleted && (data.userBadges || []).length === 0) {
             await checkOnboardingCompletionBadge(user.id);
           }
         } else {
@@ -187,7 +187,7 @@ export default function Dashboard() {
     };
 
     fetchDashboardData();
-  }, [user?.id, authLoading, isOnboarding]);
+  }, [user?.id, authLoading, isCompleted]);
 
   // Check for onboarding completion badge unlock
   const checkOnboardingCompletionBadge = async (userId: string) => {

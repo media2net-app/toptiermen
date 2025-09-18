@@ -6,7 +6,7 @@ import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 // import { useV2Monitoring } from '@/lib/v2-monitoring';
 // import { useV2ErrorRecovery } from '@/lib/v2-error-recovery';
 // import { useV2Cache } from '@/lib/v2-cache-strategy';
-import { OnboardingProvider, useOnboarding } from '@/contexts/OnboardingContext';
+import { useOnboardingV2 } from '@/contexts/OnboardingV2Context';
 import { useDebug } from '@/contexts/DebugContext';
 import { useTestUser } from '@/hooks/useTestUser';
 import { useSubscription } from '@/hooks/useSubscription';
@@ -22,7 +22,7 @@ import {
   RocketLaunchIcon
 } from '@heroicons/react/24/solid';
 import DebugPanel from '@/components/DebugPanel';
-import ForcedOnboardingModal from '@/components/ForcedOnboardingModal';
+import OnboardingV2Modal from '@/components/OnboardingV2Modal';
 import TestUserVideoModal from '@/components/TestUserVideoModal';
 import TestUserFeedback from '@/components/TestUserFeedback';
 import PWAInstallPrompt from '@/components/PWAInstallPrompt';
@@ -98,10 +98,10 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
   const [openBrotherhood, setOpenBrotherhood] = useState(true); // Default expanded
   const [openDashboard, setOpenDashboard] = useState(true); // Default expanded
   const [showOnboardingCompletion, setShowOnboardingCompletion] = useState(false);
-  const { isOnboarding, highlightedMenu, currentStep } = useOnboarding();
+  const { isCompleted, currentStep } = useOnboardingV2();
   
   // Use onboardingStatus from props if available, otherwise fallback to context
-  const actualOnboardingStatus = onboardingStatus || { current_step: currentStep, onboarding_completed: !isOnboarding };
+  const actualOnboardingStatus = onboardingStatus || { current_step: currentStep, onboarding_completed: isCompleted };
   const { user, isAdmin } = useSupabaseAuth();
   const { hasAccess } = useSubscription();
   
@@ -144,7 +144,7 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
     // If onboarding is completed, no items should be disabled (except explicitly disabled ones)
     if (actualOnboardingStatus?.onboarding_completed) return false;
     
-    if (!isOnboarding || !actualOnboardingStatus) return false;
+    if (isCompleted || !actualOnboardingStatus) return false;
     
     // If item has onboardingStep defined, check if current step allows access
     if (item.onboardingStep !== undefined) {
@@ -172,10 +172,10 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
     }
     
     // Auto-open Brotherhood submenu during onboarding step 6 (forum introduction)
-    if (isOnboarding && actualCurrentStep === 6) {
+    if (!isCompleted && actualCurrentStep === 6) {
       setOpenBrotherhood(true);
     }
-  }, [safePathname, isOnboarding, actualCurrentStep]);
+  }, [safePathname, isCompleted, actualCurrentStep]);
 
   return (
     <nav className="flex flex-col gap-2">
@@ -191,7 +191,7 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
       
       {menu.map((item) => {
         // Skip onboarding menu item if onboarding is completed and animation is done, or user is not in onboarding mode
-        if (item.isOnboardingItem && (actualOnboardingStatus?.onboarding_completed && !showOnboardingCompletion || !isOnboarding)) {
+        if (item.isOnboardingItem && (actualOnboardingStatus?.onboarding_completed && !showOnboardingCompletion || isCompleted)) {
           return null;
         }
         
@@ -202,7 +202,7 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
         
         if (!item.parent) {
           // During onboarding, only the current step should be active
-          const isActive = isOnboarding 
+          const isActive = !isCompleted 
             ? (safePathname === item.href && item.onboardingStep === actualCurrentStep)
             : safePathname === item.href;
           const hasSubmenu = menu.some(sub => sub.parent === item.label);
@@ -212,7 +212,7 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
             const setIsOpen = item.label === 'Dashboard' ? setOpenDashboard : setOpenBrotherhood;
             const subItems = menu.filter(sub => sub.parent === item.label);
             const hasActiveSubItem = subItems.some(sub => 
-              isOnboarding 
+              !isCompleted 
                 ? (sub.href === safePathname && sub.onboardingStep === actualCurrentStep)
                 : sub.href === safePathname
             );
@@ -254,10 +254,10 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
                       transition={{ duration: 0.2 }}
                     >
                       {subItems.map(sub => {
-                        const isSubActive = isOnboarding 
+                        const isSubActive = !isCompleted 
                           ? (safePathname === sub.href && sub.onboardingStep === actualCurrentStep)
                           : safePathname === sub.href;
-                        const isHighlighted = isOnboarding && highlightedMenu === sub.label;
+                        const isHighlighted = false; // highlightedMenu not available in V2
                         const isDisabled = isMenuItemDisabled(sub);
                         
                         if (isDisabled) {
@@ -299,12 +299,12 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
             );
           }
 
-          const isHighlighted = isOnboarding && highlightedMenu === item.label;
+          const isHighlighted = false; // highlightedMenu not available in V2
           const isDisabled = isMenuItemDisabled(item);
           const isOnboardingItem = item.isOnboardingItem;
           
           // Only the onboarding menu item should be yellow during onboarding, green when completed
-          const shouldBeYellow = isOnboardingItem && isOnboarding && !actualOnboardingStatus?.onboarding_completed;
+          const shouldBeYellow = isOnboardingItem && !isCompleted && !actualOnboardingStatus?.onboarding_completed;
           const shouldBeGreen = isOnboardingItem && actualOnboardingStatus?.onboarding_completed && showOnboardingCompletion;
           
           // Special case: Onboarding menu item should always be yellow during onboarding, never disabled
@@ -324,12 +324,12 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
           return (
             <Link
               key={item.label}
-              href={item.disabled ? '#' : (item.isDynamic && item.isOnboardingItem && isOnboarding ? 
-                (actualCurrentStep === 0 ? '/dashboard/welcome-video' :
+              href={item.disabled ? '#' : (item.isDynamic && item.isOnboardingItem && !isCompleted ? 
+                (actualCurrentStep === 0 ? '/dashboard/welcome-video-v2' :
                  actualCurrentStep === 1 ? '/dashboard/profiel' :
                  actualCurrentStep === 2 ? '/dashboard/mijn-challenges' :
                  actualCurrentStep === 3 ? '/dashboard/trainingsschemas' :
-                 actualCurrentStep === 4 ? '/dashboard/voedingsplannen' :
+                 actualCurrentStep === 4 ? '/dashboard/voedingsplannen-v2' :
                  actualCurrentStep === 5 ? '/dashboard/challenges' :
                  actualCurrentStep === 6 ? '/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden' :
                  '/dashboard/welcome-video') : (item.href || '#'))}
@@ -370,10 +370,10 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
   const [openBrotherhood, setOpenBrotherhood] = useState(false);
   const [openDashboard, setOpenDashboard] = useState(false);
   const [showOnboardingCompletion, setShowOnboardingCompletion] = useState(false);
-  const { isOnboarding, highlightedMenu, currentStep } = useOnboarding();
+  const { isCompleted, currentStep } = useOnboardingV2();
   
   // Use onboardingStatus from props if available, otherwise fallback to context
-  const actualOnboardingStatus = onboardingStatus || { current_step: currentStep, onboarding_completed: !isOnboarding };
+  const actualOnboardingStatus = onboardingStatus || { current_step: currentStep, onboarding_completed: isCompleted };
   // const { trackFeatureUsage } = useV2Monitoring();
   const { user, isAdmin } = useSupabaseAuth();
   const { hasAccess } = useSubscription();
@@ -417,7 +417,7 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
     // If onboarding is completed, no items should be disabled (except explicitly disabled ones)
     if (actualOnboardingStatus?.onboarding_completed) return false;
     
-    if (!isOnboarding || !actualOnboardingStatus) return false;
+    if (isCompleted || !actualOnboardingStatus) return false;
     
     // If item has onboardingStep defined, check if current step allows access
     if (item.onboardingStep !== undefined) {
@@ -463,16 +463,16 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
     }
     
     // Auto-open Brotherhood submenu during onboarding step 6 (forum introduction)
-    if (isOnboarding && actualCurrentStep === 6) {
+    if (!isCompleted && actualCurrentStep === 6) {
       setOpenBrotherhood(true);
     }
-  }, [safePathname, isOnboarding, actualCurrentStep]);
+  }, [safePathname, isCompleted, actualCurrentStep]);
 
   return (
     <nav className="flex flex-col gap-2">
       {menu.map((item) => {
         // Skip onboarding menu item if onboarding is completed and animation is done, or user is not in onboarding mode
-        if (item.isOnboardingItem && (actualOnboardingStatus?.onboarding_completed && !showOnboardingCompletion || !isOnboarding)) {
+        if (item.isOnboardingItem && (actualOnboardingStatus?.onboarding_completed && !showOnboardingCompletion || isCompleted)) {
           return null;
         }
         
@@ -483,7 +483,7 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
         
         if (!item.parent) {
           // During onboarding, only the current step should be active
-          const isActive = isOnboarding 
+          const isActive = !isCompleted 
             ? (safePathname === item.href && item.onboardingStep === actualCurrentStep)
             : safePathname === item.href;
           const hasSubmenu = menu.some(sub => sub.parent === item.label);
@@ -493,7 +493,7 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
             const setIsOpen = item.label === 'Dashboard' ? setOpenDashboard : setOpenBrotherhood;
             const subItems = menu.filter(sub => sub.parent === item.label);
             const hasActiveSubItem = subItems.some(sub => 
-              isOnboarding 
+              !isCompleted 
                 ? (sub.href === safePathname && sub.onboardingStep === actualCurrentStep)
                 : sub.href === safePathname
             );
@@ -540,10 +540,10 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
                       transition={{ duration: 0.2 }}
                     >
                       {subItems.map(sub => {
-                        const isSubActive = isOnboarding 
+                        const isSubActive = !isCompleted 
                           ? (safePathname === sub.href && sub.onboardingStep === actualCurrentStep)
                           : safePathname === sub.href;
-                        const isHighlighted = isOnboarding && highlightedMenu === sub.label;
+                        const isHighlighted = false; // highlightedMenu not available in V2
                         const isDisabled = isMenuItemDisabled(sub);
                         
                         if (isDisabled) {
@@ -585,12 +585,12 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
             );
           }
 
-          const isHighlighted = isOnboarding && highlightedMenu === item.label;
+          const isHighlighted = false; // highlightedMenu not available in V2
           const isDisabled = isMenuItemDisabled(item);
           const isOnboardingItem = item.isOnboardingItem;
           
           // Only the onboarding menu item should be yellow during onboarding, green when completed
-          const shouldBeYellow = isOnboardingItem && isOnboarding && !actualOnboardingStatus?.onboarding_completed;
+          const shouldBeYellow = isOnboardingItem && !isCompleted && !actualOnboardingStatus?.onboarding_completed;
           const shouldBeGreen = isOnboardingItem && actualOnboardingStatus?.onboarding_completed && showOnboardingCompletion;
           
           // Special case: Onboarding menu item should always be yellow during onboarding, never disabled
@@ -625,12 +625,12 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
               }}
             >
               <Link
-                href={item.disabled ? '#' : (item.isDynamic && item.isOnboardingItem && isOnboarding ? 
-                  (actualCurrentStep === 0 ? '/dashboard/welcome-video' :
+                href={item.disabled ? '#' : (item.isDynamic && item.isOnboardingItem && !isCompleted ? 
+                  (actualCurrentStep === 0 ? '/dashboard/welcome-video-v2' :
                    actualCurrentStep === 1 ? '/dashboard/profiel' :
                    actualCurrentStep === 2 ? '/dashboard/mijn-challenges' :
                    actualCurrentStep === 3 ? '/dashboard/trainingsschemas' :
-                   actualCurrentStep === 4 ? '/dashboard/voedingsplannen' :
+                   actualCurrentStep === 4 ? '/dashboard/voedingsplannen-v2' :
                    actualCurrentStep === 5 ? '/dashboard/challenges' :
                    actualCurrentStep === 6 ? '/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden' :
                    '/dashboard/welcome-video') : (item.href || '#'))}
@@ -670,7 +670,9 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { user, profile, isAdmin, logoutAndRedirect } = useSupabaseAuth();
   const { showDebug, toggleDebug } = useDebug();
-  const { isOnboarding, isTransitioning } = useOnboarding();
+  // const { isCompleted, isLoading: onboardingLoading } = useOnboardingV2();
+  const isCompleted = false;
+  const onboardingLoading = false;
   const isTestUser = useTestUser();
   // const { addNotification, setLoadingState } = useV2State();
   // const { trackFeatureUsage } = useV2Monitoring();
@@ -682,7 +684,7 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
   const [onboardingStatus, setOnboardingStatus] = useState<any>(null);
   const [showForcedOnboarding, setShowForcedOnboarding] = useState(false);
   const [showTestUserVideo, setShowTestUserVideo] = useState(false);
-  const [isLoading, setIsLoading] = useState(false); // DISABLED TO FIX FLICKERING
+  const [isLoadingLocal, setIsLoadingLocal] = useState(false); // DISABLED TO FIX FLICKERING
 
   // 2.0.1: Cache busting for existing users
   useEffect(() => {
@@ -783,7 +785,7 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
 
   // Check onboarding status on mount
   useEffect(() => {
-    if (user && !isLoading) {
+    if (user && !isLoadingLocal) {
       checkOnboardingStatus();
     }
   }, [user?.id, checkOnboardingStatus]);
@@ -1134,7 +1136,7 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
 
           {/* Page Content */}
           <div className="p-3 sm:p-4 md:p-6 lg:p-8">
-            <div className={`transition-all duration-300 ${isTransitioning ? 'opacity-50 scale-95' : 'opacity-100 scale-100'}`}>
+            <div className={`transition-all duration-300 ${onboardingLoading ? 'opacity-50 scale-95' : 'opacity-100 scale-100'}`}>
               {children}
             </div>
           </div>
@@ -1143,9 +1145,9 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
         {/* Onboarding Banner - Removed */}
 
         {/* Modals and Components */}
-        <ForcedOnboardingModal 
+        <OnboardingV2Modal 
           isOpen={showForcedOnboarding}
-          onComplete={() => {
+          onClose={() => {
             setShowForcedOnboarding(false);
           }}
         />
@@ -1193,10 +1195,8 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
 // 2.0.1: Wrapper component with providers
 export default function DashboardContent({ children }: { children: React.ReactNode }) {
   return (
-    <OnboardingProvider>
-      <DashboardContentInner>
-        {children}
-      </DashboardContentInner>
-    </OnboardingProvider>
+    <DashboardContentInner>
+      {children}
+    </DashboardContentInner>
   );
 }
