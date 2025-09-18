@@ -472,6 +472,11 @@ function TrainingschemasContent() {
   const filterSchemasByProfile = (schemas: TrainingSchema[], profile: TrainingProfile) => {
     console.log('🔍 Filtering schemas for profile:', profile);
     console.log('📊 Total schemas before filtering:', schemas.length);
+    console.log('🎯 Looking for schemas with:', {
+      goal: profile.training_goal,
+      frequency: profile.training_frequency,
+      equipment: profile.equipment_type
+    });
     
     // Map frontend training goals to database values
     const goalMapping: { [key: string]: string } = {
@@ -497,10 +502,18 @@ function TrainingschemasContent() {
     const goalEquipmentMatches = schemas.filter(schema => {
       const goalMatch = schema.training_goal === dbGoal;
       const equipmentMatch = schema.equipment_type === profile.equipment_type;
+      const days = schema.training_schema_days?.length || 0;
+      
+      console.log(`🔍 Schema "${schema.name}": goal=${goalMatch} (${schema.training_goal} vs ${dbGoal}), equipment=${equipmentMatch} (${schema.equipment_type} vs ${profile.equipment_type}), days=${days}`);
+      
       return goalMatch && equipmentMatch;
     });
     
     console.log(`🎯 Goal + equipment matches: ${goalEquipmentMatches.length}`);
+    goalEquipmentMatches.forEach(schema => {
+      const days = schema.training_schema_days?.length || 0;
+      console.log(`  ✅ "${schema.name}" - ${days} dagen (${schema.schema_nummer})`);
+    });
     
     // Step 2: If no equipment matches, fall back to goal only
     const goalMatches = goalEquipmentMatches.length > 0 ? goalEquipmentMatches : schemas.filter(schema => {
@@ -535,13 +548,17 @@ function TrainingschemasContent() {
           const schemaDays = schema.training_schema_days?.length || 0;
           const currentDays = bestSchema.training_schema_days?.length || 0;
           
+          console.log(`  🔍 Comparing "${schema.name}" (${schemaDays} days) vs "${bestSchema.name}" (${currentDays} days) for frequency ${profile.training_frequency}`);
+          
           // Prefer exact frequency match
           if (schemaDays === profile.training_frequency && currentDays !== profile.training_frequency) {
+            console.log(`  ✅ Exact frequency match found: "${schema.name}" (${schemaDays} days)`);
             bestSchema = schema;
             break;
           }
           // Prefer same equipment type
           if (schema.equipment_type === profile.equipment_type && bestSchema.equipment_type !== profile.equipment_type) {
+            console.log(`  ✅ Equipment match found: "${schema.name}" (${schema.equipment_type})`);
             bestSchema = schema;
           }
         }

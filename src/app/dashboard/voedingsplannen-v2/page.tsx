@@ -6,6 +6,7 @@ import { useOnboardingV2 } from '@/contexts/OnboardingV2Context';
 import { useRouter } from 'next/navigation';
 import OnboardingV2Progress from '@/components/OnboardingV2Progress';
 import OnboardingNotice from '@/components/OnboardingNotice';
+import UpgradeRequiredModal from '@/components/UpgradeRequiredModal';
 import { motion } from 'framer-motion';
 import { 
   BookOpenIcon, 
@@ -95,8 +96,40 @@ export default function VoedingsplannenV2Page() {
   const { user, isAdmin, loading: authLoading } = useSupabaseAuth();
   const { completeStep, currentStep, isCompleted } = useOnboardingV2();
   const router = useRouter();
+  
+  // State for upgrade modal
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [userAccessLevel, setUserAccessLevel] = useState<string>('');
   const [plans, setPlans] = useState<NutritionPlan[]>([]);
   const [selectedPlan, setSelectedPlan] = useState<NutritionPlan | null>(null);
+
+  // Function to check user access level
+  const checkUserAccess = async () => {
+    if (!user?.email) return;
+    
+    try {
+      const response = await fetch(`/api/user-profile?email=${user.email}`);
+      if (response.ok) {
+        const data = await response.json();
+        const packageType = data.profile?.package_type || 'Basic Tier';
+        const role = data.profile?.role || 'user';
+        
+        setUserAccessLevel(packageType);
+        
+        // Check if user has access to nutrition plans
+        const hasAccess = isAdmin || 
+          packageType === 'Premium Tier' || 
+          packageType === 'Lifetime Tier' || 
+          packageType === 'Lifetime Access';
+        
+        if (!hasAccess) {
+          setShowUpgradeModal(true);
+        }
+      }
+    } catch (error) {
+      console.error('Error checking user access:', error);
+    }
+  };
   const [originalPlanData, setOriginalPlanData] = useState<OriginalPlanData | null>(null);
   const [scalingInfo, setScalingInfo] = useState<SmartScalingInfo | null>(null);
   const [loading, setLoading] = useState(true);
@@ -858,6 +891,13 @@ export default function VoedingsplannenV2Page() {
       console.error('Error fetching user profile:', error);
     }
   };
+
+  // Check user access when component loads
+  useEffect(() => {
+    if (user?.email && !authLoading) {
+      checkUserAccess();
+    }
+  }, [user?.email, authLoading]);
 
   // Fetch user profile when component loads
   useEffect(() => {
@@ -1708,6 +1748,13 @@ export default function VoedingsplannenV2Page() {
           </motion.div>
         )}
       </div>
+      
+      {/* Upgrade Required Modal */}
+      <UpgradeRequiredModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        feature="Voedingsplannen"
+      />
     );
   }
 
@@ -2085,6 +2132,13 @@ export default function VoedingsplannenV2Page() {
         )}
         </div>
       </div>
+      
+      {/* Upgrade Required Modal */}
+      <UpgradeRequiredModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        feature="Voedingsplannen"
+      />
     </div>
   );
 }
