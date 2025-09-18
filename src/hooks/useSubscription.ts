@@ -97,6 +97,18 @@ export function useSubscription(): UseSubscriptionReturn {
         // Use subscription_tier or package_type for tier mapping
         let tier = profile.subscription_tier || 'basic';
         
+        // Normalize tier values to lowercase for consistent comparison
+        if (tier && typeof tier === 'string') {
+          const normalizedTier = tier.toLowerCase();
+          if (normalizedTier.includes('premium')) {
+            tier = 'premium';
+          } else if (normalizedTier.includes('lifetime')) {
+            tier = 'lifetime';
+          } else {
+            tier = 'basic';
+          }
+        }
+        
         // If no subscription_tier, use package_type
         if (!profile.subscription_tier && profile.package_type) {
           if (profile.package_type === 'Premium Tier') {
