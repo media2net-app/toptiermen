@@ -687,7 +687,10 @@ export default function NutritionPlanDetailPage() {
             <div className="bg-[#232D1A] rounded-lg p-4">
               <h3 className="text-sm text-gray-400 mb-1">Activiteitsniveau</h3>
               <p className="text-lg font-semibold">
-                {userProfile.activity_level === 'moderate' ? 'Matig' : userProfile.activity_level} (1.3)
+                {userProfile.activity_level === 'sedentary' ? 'Zittend (Licht actief)' :
+                 userProfile.activity_level === 'moderate' ? 'Staand (Matig actief)' :
+                 userProfile.activity_level === 'very_active' ? 'Lopend (Zeer actief)' :
+                 'Staand (Matig actief)'}
               </p>
             </div>
             <div className="bg-[#232D1A] rounded-lg p-4">

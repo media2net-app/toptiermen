@@ -1169,10 +1169,10 @@ export default function VoedingsplannenV2Page() {
                   <div className="bg-[#181F17] rounded-lg p-4">
                     <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Activiteitsniveau</label>
                     <div className="text-lg font-bold text-white">
-                      {userProfile.activity_level === 'sedentary' ? 'Zittend' :
-                       userProfile.activity_level === 'moderate' ? 'Matig' :
-                       userProfile.activity_level === 'very_active' ? 'Lopend' :
-                       'Matig'}
+                      {userProfile.activity_level === 'sedentary' ? 'Zittend (Licht actief)' :
+                       userProfile.activity_level === 'moderate' ? 'Staand (Matig actief)' :
+                       userProfile.activity_level === 'very_active' ? 'Lopend (Zeer actief)' :
+                       'Staand (Matig actief)'}
                     </div>
                   </div>
 
@@ -1215,9 +1215,7 @@ export default function VoedingsplannenV2Page() {
                   <h4 className="text-[#8BAE5A] font-bold text-lg mb-2">TTM Formule Berekening</h4>
                   <div className="text-white text-sm">
                     <div className="mb-2">
-                      <strong>Basis formule:</strong> {userProfile.weight}kg × 22 × {userProfile.activity_level === 'sedentary' ? '1.1' :
-                       userProfile.activity_level === 'moderate' ? '1.3' :
-                       userProfile.activity_level === 'very_active' ? '1.6' : '1.3'} = {Math.round(userProfile.weight * 22 * (userProfile.activity_level === 'sedentary' ? 1.1 :
+                      <strong>Basis formule:</strong> {userProfile.weight}kg × 22 × activiteitsfactor = {Math.round(userProfile.weight * 22 * (userProfile.activity_level === 'sedentary' ? 1.1 :
                        userProfile.activity_level === 'moderate' ? 1.3 :
                        userProfile.activity_level === 'very_active' ? 1.6 : 1.3))} kcal
                     </div>
@@ -1769,10 +1767,10 @@ export default function VoedingsplannenV2Page() {
               <div className="bg-[#0A0F0A] rounded-lg p-4">
                 <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Activiteitsniveau</label>
                 <div className="text-lg font-bold text-white">
-                  {userProfile.activity_level === 'sedentary' ? 'Zittend' :
-                   userProfile.activity_level === 'moderate' ? 'Matig' :
-                   userProfile.activity_level === 'very_active' ? 'Lopend' :
-                   'Matig'}
+                  {userProfile.activity_level === 'sedentary' ? 'Zittend (Licht actief)' :
+                   userProfile.activity_level === 'moderate' ? 'Staand (Matig actief)' :
+                   userProfile.activity_level === 'very_active' ? 'Lopend (Zeer actief)' :
+                   'Staand (Matig actief)'}
                 </div>
               </div>
               <div className="bg-[#0A0F0A] rounded-lg p-4">
@@ -1863,9 +1861,9 @@ export default function VoedingsplannenV2Page() {
                       required
                     >
                       <option value="">Selecteer activiteitsniveau</option>
-                      <option value="sedentary">Zittend</option>
-                      <option value="moderate">Matig</option>
-                      <option value="very_active">Lopend</option>
+                      <option value="sedentary">Zittend (Licht actief) - Kantoorbaan, weinig beweging</option>
+                      <option value="moderate">Staand (Matig actief) - Staand werk, matige beweging</option>
+                      <option value="very_active">Lopend (Zeer actief) - Fysiek werk, veel beweging</option>
                     </select>
                   </div>
                   <div>
