@@ -34,6 +34,7 @@ interface SuggestedChallenge {
   description: string;
   xp_reward: number;
   difficulty: 'easy' | 'medium' | 'hard';
+  type?: string;
 }
 
 interface Summary {
@@ -363,6 +364,14 @@ export default function MijnChallengesPage() {
         
         toast.success(`Challenge "${suggestedChallenge.title}" toegevoegd!`);
         setShowChallengeLibrary(false);
+        
+        // Update summary to include the new daily mission
+        if ((suggestedChallenge.type || 'Dagelijks') === 'Dagelijks') {
+          setSummary(prev => ({
+            ...prev,
+            totalToday: prev.totalToday + 1
+          }));
+        }
         
         // Check if user is in onboarding step 2 and has enough challenges
         if (currentStep === 2 && !isCompleted && challenges.length >= 2) { // 2 because we just added one, so total will be 3
@@ -841,6 +850,23 @@ export default function MijnChallengesPage() {
         {/* Onboarding Notice */}
         <OnboardingNotice />
 
+        {/* Onboarding Continue Button - Moved to top for better visibility */}
+        {showContinueButton && currentStep === 2 && !isCompleted && (
+          <div className="bg-gradient-to-r from-[#8BAE5A]/20 to-[#FFD700]/20 border border-[#8BAE5A]/30 rounded-2xl p-6 mb-8 text-center">
+            <div className="text-4xl mb-4">🎯</div>
+            <h3 className="text-2xl font-bold text-white mb-2">Perfect! Je hebt 3 challenges toegevoegd</h3>
+            <p className="text-[#8BAE5A] mb-6">
+              Je bent klaar voor de volgende stap. Klik op "Ga verder" om door te gaan met je onboarding.
+            </p>
+            <button
+              onClick={completeOnboardingStep2}
+              className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] hover:from-[#7A9E4A] hover:to-[#E6C200] text-[#181F17] font-bold px-8 py-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg"
+            >
+              🚀 Ga verder
+            </button>
+          </div>
+        )}
+
         {/* Onboarding Popup - Positioned at top for challenges page */}
         {showOnboardingPopup && (
           <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-start justify-center p-4 pt-8">
@@ -1139,22 +1165,6 @@ export default function MijnChallengesPage() {
           </div>
         )}
 
-        {/* Onboarding Continue Button */}
-        {showContinueButton && currentStep === 2 && !isCompleted && (
-          <div className="bg-gradient-to-r from-[#8BAE5A]/20 to-[#FFD700]/20 border border-[#8BAE5A]/30 rounded-2xl p-6 mb-8 text-center">
-            <div className="text-4xl mb-4">🎯</div>
-            <h3 className="text-2xl font-bold text-white mb-2">Perfect! Je hebt 3 challenges toegevoegd</h3>
-            <p className="text-[#8BAE5A] mb-6">
-              Je bent klaar voor de volgende stap. Klik op "Ga verder" om door te gaan met je onboarding.
-            </p>
-            <button
-              onClick={completeOnboardingStep2}
-              className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] hover:from-[#7A9E4A] hover:to-[#E6C200] text-[#181F17] font-bold px-8 py-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg"
-            >
-              🚀 Ga verder
-            </button>
-          </div>
-        )}
 
         {/* Empty State */}
         {challenges.length === 0 && (
