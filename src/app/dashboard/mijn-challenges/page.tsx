@@ -284,7 +284,7 @@ export default function MijnChallengesPage() {
   const [missionToDelete, setChallengeToDelete] = useState<Challenge | null>(null);
   
   // Challenge Library state
-  const [showChallengeLibrary, setShowChallengeLibrary] = useState(false);
+  const [showChallengeLibrary, setShowChallengeLibrary] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');

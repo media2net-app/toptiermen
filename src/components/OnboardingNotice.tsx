@@ -39,7 +39,7 @@ export default function OnboardingNotice({ className = "" }: OnboardingNoticePro
           title: "Uitdagingen selecteren",
           message: "Voeg 3 uitdagingen toe die je dagelijks wilt voltooien. Klik op 'Nieuwe Challenge Toevoegen' of gebruik de 'Challenge Bibliotheek' om challenges te selecteren.",
           icon: "🔥",
-          color: "from-orange-500 to-orange-600"
+          color: "from-orange-300 to-orange-400"
         };
       
       case 3:
