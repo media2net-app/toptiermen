@@ -312,14 +312,26 @@ export default function WorkoutPage() {
     if (!sessionId) return;
 
     try {
+      console.log('🔄 Loading session data...');
       const response = await fetch(`/api/workout-sessions?userId=${user?.id}&sessionId=${sessionId}`);
       const data = await response.json();
       
       if (data.success && data.sessions.length > 0) {
+        console.log('✅ Session loaded:', data.sessions[0]);
         setSession(data.sessions[0]);
+        
+        // After loading session, also load exercises
+        console.log('🔄 Loading exercises after session load...');
+        await loadExercisesFromDatabase();
+      } else {
+        console.log('⚠️ No session found, loading exercises directly...');
+        await loadExercisesFromDatabase();
       }
     } catch (error) {
-      console.error('Error loading session:', error);
+      console.error('❌ Error loading session:', error);
+      // Fallback to loading exercises directly
+      console.log('🔄 Fallback: loading exercises directly...');
+      await loadExercisesFromDatabase();
     }
   };
 
