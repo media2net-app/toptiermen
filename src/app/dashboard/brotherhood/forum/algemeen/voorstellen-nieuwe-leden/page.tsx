@@ -195,9 +195,9 @@ const VoorstellenTopicPage = () => {
       
       // Complete the onboarding step
       if (completeStep) {
-        console.log('🎯 Completing onboarding step 6...');
-        await completeStep(6);
-        console.log('✅ Onboarding step 6 completed');
+        console.log('🎯 Completing onboarding step 5...');
+        await completeStep(5);
+        console.log('✅ Onboarding step 5 completed');
         
         // Show success modal
         setShowSuccessModal(true);

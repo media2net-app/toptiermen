@@ -3,7 +3,7 @@ import { supabaseAdmin } from '@/lib/supabase-admin';
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, password, fullName, role = 'user', subscription_tier = 'basic' } = await request.json();
+    const { email, password, fullName, role = 'user', subscriptionTier = 'basic' } = await request.json();
     
     console.log('🔧 Creating test user:', email);
     
@@ -31,11 +31,11 @@ export async function POST(request: NextRequest) {
     if (authData.user) {
       console.log('✅ Auth user created:', authData.user.email);
       
-      // Map subscription_tier to package_type
+      // Map subscriptionTier to package_type
       let package_type = 'Basic Tier';
-      if (subscription_tier === 'premium') {
+      if (subscriptionTier === 'Premium Tier') {
         package_type = 'Premium Tier';
-      } else if (subscription_tier === 'lifetime') {
+      } else if (subscriptionTier === 'Lifetime Access') {
         package_type = 'Lifetime Access';
       }
 
@@ -48,7 +48,8 @@ export async function POST(request: NextRequest) {
             email: authData.user.email,
             full_name: fullName,
             role: role,
-            package_type: package_type
+            package_type: package_type,
+            subscription_tier: subscriptionTier
           }
         ])
         .select();

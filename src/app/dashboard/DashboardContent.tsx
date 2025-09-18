@@ -745,7 +745,7 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
     try {
       // setLoadingState('onboarding-check', true);
       
-      const response = await fetch(`/api/onboarding?userId=${user.id}&t=${Date.now()}&v=2.0.1`, {
+      const response = await fetch(`/api/onboarding-v2?email=${user.email}&t=${Date.now()}&v=2.0.1`, {
         cache: 'no-cache', // Prevent caching of onboarding status
         headers: {
           'Cache-Control': 'no-cache, no-store, must-revalidate',
@@ -755,8 +755,15 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
       });
       const data = await response.json();
 
-      if (response.ok) {
-        setOnboardingStatus(data);
+      if (response.ok && data.success) {
+        // Transform Onboarding V2 API response to match expected format
+        const transformedData = {
+          onboarding_completed: data.onboarding.isCompleted,
+          current_step: data.onboarding.currentStep,
+          user_id: user.id,
+          ...data.onboarding.status // Include the full status object if available
+        };
+        setOnboardingStatus(transformedData);
         // trackFeatureUsage('onboarding-status-check', user.id);
       } else {
         throw new Error('Failed to fetch onboarding status');

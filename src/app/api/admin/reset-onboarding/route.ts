@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
 
     // Delete onboarding status records
     const { error: onboardingError } = await supabase
-      .from('onboarding_status')
+      .from('user_onboarding_status')
       .delete()
       .eq('user_id', userId);
 

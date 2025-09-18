@@ -21,6 +21,7 @@ import {
 } from '@heroicons/react/24/solid';
 import { PencilIcon } from '@heroicons/react/24/outline';
 import IngredientEditModal from '@/components/IngredientEditModal';
+import { toast } from 'react-hot-toast';
 
 interface NutritionPlan {
   id: string | number;
@@ -102,20 +103,14 @@ export default function VoedingsplannenV2Page() {
   const [loadingScaling, setLoadingScaling] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showOriginalData, setShowOriginalData] = useState(true);
-  const [userProfile, setUserProfile] = useState<UserProfile>({
-    weight: 100,  // Backend basis plan is 100kg
-    height: 180,
-    age: 30,
-    gender: 'male',
-    activity_level: 'moderate',  // Backend basis plan is matig actief
-    fitness_goal: 'onderhoud'   // Backend basis plan is onderhoud
-  });
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [showUserProfileForm, setShowUserProfileForm] = useState(false);
   const [selectedDay, setSelectedDay] = useState<string>('maandag');
   const [customAmounts, setCustomAmounts] = useState<{[key: string]: number}>({});
   const [showIngredientModal, setShowIngredientModal] = useState(false);
   const [editingMealType, setEditingMealType] = useState<string>('');
   const [editingDay, setEditingDay] = useState<string>('');
+  const [selectedPlanId, setSelectedPlanId] = useState<string | number | null>(null);
 
   // Reset modal state when component mounts
   useEffect(() => {
@@ -259,19 +254,19 @@ export default function VoedingsplannenV2Page() {
     if (!user) return;
     
     try {
-      const response = await fetch('/api/nutrition-profile', {
+      const response = await fetch('/api/nutrition-profile-v2', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          userId: user.id,
-          age: profile.age,
-          height: profile.height,
+          email: user.email,
           weight: profile.weight,
+          height: profile.height,
+          age: profile.age,
           gender: profile.gender,
-          activityLevel: profile.activity_level,
-          goal: profile.fitness_goal
+          activity_level: profile.activity_level,
+          fitness_goal: profile.fitness_goal
         }),
       });
 
@@ -285,11 +280,13 @@ export default function VoedingsplannenV2Page() {
       setUserProfile(profile);
       setShowUserProfileForm(false);
       setError(null); // Clear any previous errors
+      toast.success('Profiel opgeslagen!');
       console.log('✅ User profile saved:', result);
     } catch (err) {
       console.error('❌ Save profile error:', err);
       const errorMessage = err instanceof Error ? err.message : 'Failed to save profile';
       setError(errorMessage);
+      toast.error('Fout bij opslaan profiel');
     }
   };
 
@@ -733,18 +730,18 @@ export default function VoedingsplannenV2Page() {
   const [forceUpdate, setForceUpdate] = useState(0);
   useEffect(() => {
     setForceUpdate(prev => prev + 1);
-  }, [userProfile.weight, userProfile.activity_level]);
+  }, [userProfile?.weight, userProfile?.activity_level]);
   
   // Get personalized targets for progress calculations
   // Calculate personalized targets when originalPlanData is available
   const personalizedTargets = React.useMemo(() => {
-    if (!originalPlanData || !userProfile.weight) {
+    if (!originalPlanData || !userProfile?.weight) {
       return null;
     }
     const targets = calculatePersonalizedTargets(originalPlanData);
     console.log('🧮 Calculated personalized targets:', targets);
     return targets;
-  }, [originalPlanData, userProfile.weight, userProfile.activity_level, forceUpdate]);
+  }, [originalPlanData, userProfile?.weight, userProfile?.activity_level, forceUpdate]);
   
   // Debug: Log current user profile and personalized targets
   console.log('🔍 Current userProfile:', userProfile);
@@ -767,25 +764,25 @@ export default function VoedingsplannenV2Page() {
 
   // Define fetchUserProfile function outside useEffect so it can be reused
   const fetchUserProfile = async () => {
-    if (!user?.id) {
-      console.log('❌ No user ID available for profile fetch');
+    if (!user?.email) {
+      console.log('❌ No user email available for profile fetch');
       return;
     }
     
     try {
-      console.log('📊 Fetching user profile for userId:', user.id);
-      const response = await fetch(`/api/nutrition-profile-v2?userId=${user.id}`);
+      console.log('📊 Fetching user profile for email:', user.email);
+      const response = await fetch(`/api/nutrition-profile-v2?email=${user.email}`);
       console.log('📊 Profile fetch response status:', response.status);
       
       if (response.ok) {
         const data = await response.json();
         console.log('📊 V2 API Response:', data);
-        if (data.profile) {
+        if (data.profile && data.profile.weight && data.profile.height && data.profile.age) {
           console.log('📊 Fetched user profile:', data.profile);
           const newProfile = {
-            weight: data.profile.weight || 100,
-            height: data.profile.height || 180,
-            age: data.profile.age || 30,
+            weight: data.profile.weight,
+            height: data.profile.height,
+            age: data.profile.age,
             gender: data.profile.gender || 'male',
             activity_level: data.profile.activity_level || 'moderate',
             fitness_goal: (data.profile.goal === 'cut' ? 'droogtrainen' : 
@@ -795,7 +792,8 @@ export default function VoedingsplannenV2Page() {
           console.log('📊 Setting user profile to:', newProfile);
           setUserProfile(newProfile);
         } else {
-          console.log('📊 No profile found, using defaults');
+          console.log('📊 No complete profile found, user needs to fill in profile first');
+          setUserProfile(null);
         }
       } else {
         console.error('Failed to fetch user profile:', response.status);
@@ -810,7 +808,7 @@ export default function VoedingsplannenV2Page() {
   // Fetch user profile when component loads
   useEffect(() => {
     fetchUserProfile();
-  }, [user?.id]);
+  }, [user?.email]);
 
   useEffect(() => {
     console.log('🔍 Access check useEffect triggered:', { authLoading, userEmail: user?.email });
@@ -923,21 +921,39 @@ export default function VoedingsplannenV2Page() {
 
 
 
-  const handlePlanSelect = async (plan: NutritionPlan) => {
-    console.log('🔧 DEBUG: handlePlanSelect called with plan:', { name: plan.name, id: plan.plan_id || plan.id });
+  const handlePlanView = (plan: NutritionPlan) => {
+    console.log('🔧 DEBUG: handlePlanView called with plan:', { name: plan.name, id: plan.plan_id || plan.id });
+    
     setSelectedPlan(plan);
     setShowOriginalData(true);
     setScalingInfo(null); // Reset scaling info
     loadOriginalPlanData(plan.plan_id || plan.id.toString());
+  };
+
+  const handlePlanSelect = async (plan: NutritionPlan) => {
+    console.log('🔧 DEBUG: handlePlanSelect called with plan:', { name: plan.name, id: plan.plan_id || plan.id });
+    console.log('🔧 DEBUG: Onboarding status:', { isCompleted, currentStep });
+    
+    // Set the selected plan ID for visual selection
+    setSelectedPlanId(plan.plan_id || plan.id);
     
     // Complete onboarding step 4 if in onboarding
     if (!isCompleted && currentStep === 4) {
+      console.log('🔧 DEBUG: Completing onboarding step 4...');
       try {
         await completeStep(4, { nutritionPlan: plan.plan_id || plan.id });
         console.log('✅ Onboarding step 4 completed');
+        
+        // Redirect to forum intro after completing nutrition plan selection
+        setTimeout(() => {
+          console.log('🔧 DEBUG: Redirecting to forum intro...');
+          window.location.href = '/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden';
+        }, 1000);
       } catch (error) {
         console.error('❌ Error completing onboarding step 4:', error);
       }
+    } else {
+      console.log('🔧 DEBUG: Not in onboarding or not step 4, skipping onboarding completion');
     }
   };
 
@@ -988,8 +1004,8 @@ export default function VoedingsplannenV2Page() {
     );
   }
 
-  // Show detail page when a plan is selected
-  if (selectedPlan && originalPlanData) {
+  // Show detail page when a plan is selected and user profile is complete
+  if (selectedPlan && originalPlanData && userProfile) {
     return (
       <div className="min-h-screen bg-[#0A0F0A] p-6">
         {/* Back Button */}
@@ -1641,13 +1657,13 @@ export default function VoedingsplannenV2Page() {
     );
   }
 
-  // Overview page - show when no plan is selected
+  // Overview page - show when no plan is selected and user profile is complete
   return (
     <div className="min-h-screen bg-[#0A0F0A]">
       <OnboardingV2Progress />
       <div className="p-6">
         <div className="max-w-7xl mx-auto">
-          {/* Header */}
+        {/* Header */}
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -1665,6 +1681,7 @@ export default function VoedingsplannenV2Page() {
         </motion.div>
 
         {/* User Profile Form */}
+        {(
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -1684,35 +1701,37 @@ export default function VoedingsplannenV2Page() {
           </div>
 
           {/* Current Profile Display */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div className="bg-[#0A0F0A] rounded-lg p-4">
-              <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Gewicht</label>
-              <div className="text-2xl font-bold text-white">
-                {userProfile.weight} kg
+          {userProfile && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              <div className="bg-[#0A0F0A] rounded-lg p-4">
+                <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Gewicht</label>
+                <div className="text-2xl font-bold text-white">
+                  {userProfile.weight} kg
+                </div>
+              </div>
+              <div className="bg-[#0A0F0A] rounded-lg p-4">
+                <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Activiteitsniveau</label>
+                <div className="text-lg font-bold text-white">
+                  {userProfile.activity_level === 'sedentary' ? 'Zittend' :
+                   userProfile.activity_level === 'moderate' ? 'Matig' :
+                   userProfile.activity_level === 'very_active' ? 'Lopend' :
+                   'Matig'}
+                </div>
+              </div>
+              <div className="bg-[#0A0F0A] rounded-lg p-4">
+                <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Fitness Doel</label>
+                <div className="text-lg font-bold text-white">
+                  {userProfile.fitness_goal === 'droogtrainen' ? 'Droogtrainen' :
+                   userProfile.fitness_goal === 'onderhoud' ? 'Onderhoud' :
+                   userProfile.fitness_goal === 'spiermassa' ? 'Spiermassa' :
+                   userProfile.fitness_goal}
+                </div>
               </div>
             </div>
-            <div className="bg-[#0A0F0A] rounded-lg p-4">
-              <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Activiteitsniveau</label>
-              <div className="text-lg font-bold text-white">
-                {userProfile.activity_level === 'sedentary' ? 'Zittend' :
-                 userProfile.activity_level === 'moderate' ? 'Matig' :
-                 userProfile.activity_level === 'very_active' ? 'Lopend' :
-                 'Matig'}
-              </div>
-            </div>
-            <div className="bg-[#0A0F0A] rounded-lg p-4">
-              <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Fitness Doel</label>
-              <div className="text-lg font-bold text-white">
-                {userProfile.fitness_goal === 'droogtrainen' ? 'Droogtrainen' :
-                 userProfile.fitness_goal === 'onderhoud' ? 'Onderhoud' :
-                 userProfile.fitness_goal === 'spiermassa' ? 'Spiermassa' :
-                 userProfile.fitness_goal}
-              </div>
-            </div>
-          </div>
+          )}
 
           {/* Profile Form */}
-          {showUserProfileForm && (
+          {(showUserProfileForm || !userProfile) && (
             <motion.div 
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
@@ -1737,11 +1756,12 @@ export default function VoedingsplannenV2Page() {
                     <input
                       type="number"
                       name="weight"
-                      defaultValue={userProfile.weight}
+                      defaultValue={userProfile?.weight || ''}
                       min="40"
                       max="200"
                       step="0.1"
                       className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white focus:border-[#8BAE5A] focus:outline-none"
+                      placeholder="Voer je gewicht in"
                       required
                     />
                   </div>
@@ -1750,10 +1770,11 @@ export default function VoedingsplannenV2Page() {
                     <input
                       type="number"
                       name="height"
-                      defaultValue={userProfile.height}
+                      defaultValue={userProfile?.height || ''}
                       min="140"
                       max="220"
                       className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white focus:border-[#8BAE5A] focus:outline-none"
+                      placeholder="Voer je lengte in"
                       required
                     />
                   </div>
@@ -1762,10 +1783,11 @@ export default function VoedingsplannenV2Page() {
                     <input
                       type="number"
                       name="age"
-                      defaultValue={userProfile.age}
+                      defaultValue={userProfile?.age || ''}
                       min="16"
                       max="80"
                       className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white focus:border-[#8BAE5A] focus:outline-none"
+                      placeholder="Voer je leeftijd in"
                       required
                     />
                   </div>
@@ -1779,9 +1801,11 @@ export default function VoedingsplannenV2Page() {
                     <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Activiteitsniveau</label>
                     <select
                       name="activity_level"
-                      defaultValue={userProfile.activity_level}
+                      defaultValue={userProfile?.activity_level || ''}
                       className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white focus:border-[#8BAE5A] focus:outline-none"
+                      required
                     >
+                      <option value="">Selecteer activiteitsniveau</option>
                       <option value="sedentary">Zittend</option>
                       <option value="moderate">Matig</option>
                       <option value="very_active">Lopend</option>
@@ -1791,9 +1815,11 @@ export default function VoedingsplannenV2Page() {
                     <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Fitness Doel</label>
                     <select
                       name="fitness_goal"
-                      defaultValue={userProfile.fitness_goal}
+                      defaultValue={userProfile?.fitness_goal || ''}
                       className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white focus:border-[#8BAE5A] focus:outline-none"
+                      required
                     >
+                      <option value="">Selecteer fitness doel</option>
                       <option value="droogtrainen">Droogtrainen</option>
                       <option value="onderhoud">Onderhoud</option>
                       <option value="spiermassa">Spiermassa</option>
@@ -1819,6 +1845,7 @@ export default function VoedingsplannenV2Page() {
             </motion.div>
           )}
         </motion.div>
+        )}
 
         {/* Loading State */}
         {loading && (
@@ -1842,13 +1869,33 @@ export default function VoedingsplannenV2Page() {
         )}
 
         {/* Plans Grid */}
-        {!loading && !error && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {!loading && !error && userProfile && (
+          <div>
+            {/* Instructions for onboarding users */}
+            {!isCompleted && currentStep === 4 && (
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-[#181F17] border border-[#3A4D23] rounded-xl p-6 mb-6"
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-8 h-8 bg-gradient-to-r from-[#B6C948] to-[#8BAE5A] rounded-full flex items-center justify-center">
+                    <span className="text-[#181F17] font-bold text-sm">4</span>
+                  </div>
+                  <h3 className="text-lg font-bold text-white">Selecteer Je Voedingsplan</h3>
+                </div>
+                <p className="text-[#8BAE5A] text-sm">
+                  Kies het voedingsplan dat het beste bij jouw doel past. Klik op "Selecteer Dit Plan" om door te gaan naar de volgende stap.
+                </p>
+              </motion.div>
+            )}
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {plans
               .filter((plan) => {
                 // Filter plans based on user's fitness goal
                 const planGoal = plan.goal?.toLowerCase();
-                const userGoal = userProfile.fitness_goal;
+                const userGoal = userProfile?.fitness_goal;
                 
                 // Map user goals to plan goals
                 const goalMapping = {
@@ -1857,63 +1904,119 @@ export default function VoedingsplannenV2Page() {
                   'spiermassa': 'spiermassa'
                 };
                 
-                return planGoal === goalMapping[userGoal];
+                return userGoal && planGoal === goalMapping[userGoal];
               })
               .map((plan) => {
               // Calculate personalized targets for this plan
               const personalizedTargets = calculatePersonalizedTargets(plan);
+              
+              const isSelected = selectedPlanId === (plan.plan_id || plan.id);
               
               return (
                 <motion.div
                   key={plan.id}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  onClick={() => handlePlanSelect(plan)}
-                  className="bg-[#181F17] border border-[#3A4D23] rounded-xl p-6 cursor-pointer hover:border-[#B6C948] transition-colors"
+                  className={`rounded-xl p-6 cursor-pointer transition-all duration-200 relative group ${
+                    isSelected 
+                      ? 'bg-gradient-to-br from-[#8BAE5A] to-[#B6C948] border-2 border-[#B6C948] shadow-lg shadow-[#8BAE5A]/20' 
+                      : 'bg-[#181F17] border border-[#3A4D23] hover:border-[#B6C948]'
+                  }`}
                 >
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-xl font-bold text-white">{plan.name}</h3>
-                    <div className="px-3 py-1 bg-[#8BAE5A] text-[#181F17] rounded-full text-xs font-semibold">
-                      {plan.goal}
+                    <h3 className={`text-xl font-bold ${isSelected ? 'text-[#181F17]' : 'text-white'}`}>
+                      {plan.name}
+                    </h3>
+                    <div className="flex items-center gap-2">
+                      {isSelected && (
+                        <CheckCircleIcon className="w-6 h-6 text-[#181F17]" />
+                      )}
+                      <div className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                        isSelected 
+                          ? 'bg-[#181F17] text-[#8BAE5A]' 
+                          : 'bg-[#8BAE5A] text-[#181F17]'
+                      }`}>
+                        {plan.goal}
+                      </div>
                     </div>
                   </div>
                   
-                  <p className="text-[#8BAE5A] text-sm mb-4">{plan.description}</p>
+                  <p className={`text-sm mb-4 ${isSelected ? 'text-[#181F17]' : 'text-[#8BAE5A]'}`}>
+                    {plan.description}
+                  </p>
                   
                   {/* Personalized Calories */}
                   <div className="space-y-3">
                     {personalizedTargets && (
                       <div className="flex justify-between items-center">
-                        <span className="text-gray-400 text-sm">Jouw Calorieën:</span>
-                        <span className="text-[#8BAE5A] font-bold text-lg">{personalizedTargets.targetCalories} kcal</span>
+                        <span className={`text-sm ${isSelected ? 'text-[#181F17]' : 'text-gray-400'}`}>
+                          Jouw Calorieën:
+                        </span>
+                        <span className={`font-bold text-lg ${isSelected ? 'text-[#181F17]' : 'text-[#8BAE5A]'}`}>
+                          {personalizedTargets.targetCalories} kcal
+                        </span>
                       </div>
                     )}
                     
                     {/* Macro Breakdown */}
-                    <div className="grid grid-cols-3 gap-2 pt-2 border-t border-[#3A4D23]">
+                    <div className={`grid grid-cols-3 gap-2 pt-2 border-t ${isSelected ? 'border-[#181F17]' : 'border-[#3A4D23]'}`}>
                       <div className="text-center">
-                        <div className="text-xs text-gray-400">Eiwit</div>
-                        <div className="text-sm font-semibold text-white">
+                        <div className={`text-xs ${isSelected ? 'text-[#181F17]' : 'text-gray-400'}`}>Eiwit</div>
+                        <div className={`text-sm font-semibold ${isSelected ? 'text-[#181F17]' : 'text-white'}`}>
                           {personalizedTargets?.targetProtein || plan.target_protein}g
                         </div>
                       </div>
                       <div className="text-center">
-                        <div className="text-xs text-gray-400">Koolhydraten</div>
-                        <div className="text-sm font-semibold text-white">
+                        <div className={`text-xs ${isSelected ? 'text-[#181F17]' : 'text-gray-400'}`}>Koolhydraten</div>
+                        <div className={`text-sm font-semibold ${isSelected ? 'text-[#181F17]' : 'text-white'}`}>
                           {personalizedTargets?.targetCarbs || plan.target_carbs}g
                         </div>
                       </div>
                       <div className="text-center">
-                        <div className="text-xs text-gray-400">Vet</div>
-                        <div className="text-sm font-semibold text-white">
+                        <div className={`text-xs ${isSelected ? 'text-[#181F17]' : 'text-gray-400'}`}>Vet</div>
+                        <div className={`text-sm font-semibold ${isSelected ? 'text-[#181F17]' : 'text-white'}`}>
                           {personalizedTargets?.targetFat || plan.target_fat}g
                         </div>
                       </div>
                     </div>
                   </div>
+                  
+                  {/* Plan Action Buttons */}
+                  <div className={`mt-4 pt-4 border-t space-y-2 ${isSelected ? 'border-[#181F17]' : 'border-[#3A4D23]'}`}>
+                    {/* Bekijk Plan Button - Always visible */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handlePlanView(plan);
+                      }}
+                      className={`w-full px-4 py-2 rounded-lg transition-all duration-200 font-semibold border ${
+                        isSelected 
+                          ? 'bg-[#181F17] text-[#8BAE5A] border-[#8BAE5A] hover:bg-[#2A3A2A]' 
+                          : 'bg-[#3A4D23] text-[#8BAE5A] border-[#8BAE5A] hover:bg-[#4A5D33]'
+                      }`}
+                    >
+                      Bekijk Plan
+                    </button>
+                    
+                    {/* Select Plan Button - Always visible */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handlePlanSelect(plan);
+                      }}
+                      className={`w-full px-4 py-2 rounded-lg transition-all duration-200 font-semibold ${
+                        isSelected 
+                          ? 'bg-[#181F17] text-[#8BAE5A] border border-[#8BAE5A] hover:bg-[#2A3A2A]' 
+                          : 'bg-gradient-to-r from-[#B6C948] to-[#8BAE5A] text-[#181F17] hover:from-[#8BAE5A] hover:to-[#B6C948]'
+                      }`}
+                    >
+                      {isSelected ? 'Geselecteerd' : 'Selecteer Dit Plan'}
+                    </button>
+                  </div>
                 </motion.div>
               );
             })}
+            </div>
           </div>
         )}
                                   

@@ -268,8 +268,7 @@ const CHALLENGE_LIBRARY: SuggestedChallenge[] = [
 
 export default function MijnChallengesPage() {
   const { user } = useSupabaseAuth();
-  const { currentStep, completeStep, isCompleted } = useOnboardingV2();
-  const { hasAccess } = useSubscription();
+  const { currentStep, completeStep, isCompleted, hasTrainingAccess, hasNutritionAccess } = useOnboardingV2();
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [summary, setSummary] = useState<Summary>({ completedToday: 0, totalToday: 0, dailyStreak: 0 });
   const [loading, setLoading] = useState(true);
@@ -645,6 +644,28 @@ export default function MijnChallengesPage() {
         
         setNewChallenge({ title: '', type: 'Dagelijks' });
         toast.success(data.message || 'Challenge toegevoegd!');
+
+        // Check if user is in onboarding step 2 and has enough challenges
+        if (currentStep === 2 && !isCompleted && challenges.length >= 2) { // 2 because we just added one, so total will be 3
+          console.log('🔧 DEBUG: Completing onboarding step 2 with challenges:', challenges.length + 1);
+          try {
+            await completeStep(2, { challenges: challenges.map(c => c.id).concat([newChallengeData.id]) });
+            console.log('✅ Onboarding step 2 completed');
+            
+            // Redirect based on user access
+            setTimeout(() => {
+              if (hasTrainingAccess) {
+                console.log('🔧 DEBUG: Redirecting to training schemas...');
+                window.location.href = '/dashboard/trainingsschemas';
+              } else {
+                console.log('🔧 DEBUG: Redirecting to forum intro...');
+                window.location.href = '/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden';
+              }
+            }, 1000);
+          } catch (error) {
+            console.error('❌ Error completing onboarding step 2:', error);
+          }
+        }
       }
     } catch (err) {
       console.error('Error creating mission:', err);
@@ -783,82 +804,6 @@ export default function MijnChallengesPage() {
           </div>
         </div>
 
-        {/* Onboarding Progress - Step 3: Challenges */}
-        {showOnboardingStep3 && (
-          <div className="mb-6 sm:mb-8">
-            <div className="bg-gradient-to-br from-[#8BAE5A]/10 to-[#FFD700]/10 border-2 border-[#8BAE5A] rounded-2xl p-4 sm:p-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
-              <div className="flex items-center gap-3">
-                <span className="text-2xl sm:text-3xl">🔥</span>
-                <div>
-                  <h2 className="text-lg sm:text-xl font-bold text-white">Onboarding Stap 3: Challenges Selecteren</h2>
-                  <p className="text-[#8BAE5A] text-xs sm:text-sm">Selecteer minimaal 3 challenges om door te gaan</p>
-                </div>
-              </div>
-              <div className="text-right">
-                <div className="text-xl sm:text-2xl font-bold text-[#FFD700]">{challenges.length}/3</div>
-                <div className="text-[#8BAE5A] text-xs sm:text-sm">Challenges geselecteerd</div>
-              </div>
-            </div>
-            
-            {challenges.length < 3 ? (
-              <div className="bg-[#181F17]/80 rounded-xl p-3 sm:p-4 border border-[#3A4D23]">
-                <p className="text-[#f0a14f] text-xs sm:text-sm font-semibold mb-2">
-                  ⚠️ Je hebt nog {3 - challenges.length} challenge{3 - challenges.length !== 1 ? 's' : ''} nodig
-                </p>
-                <p className="text-gray-300 text-xs sm:text-sm">
-                  Voeg nog {3 - challenges.length} challenge{3 - challenges.length !== 1 ? 's' : ''} toe om door te gaan naar de volgende stap van de onboarding.
-                </p>
-              </div>
-            ) : (
-              <div className="bg-[#8BAE5A]/20 rounded-xl p-3 sm:p-4 border border-[#8BAE5A]">
-                <p className="text-[#8BAE5A] text-xs sm:text-sm font-semibold mb-2">
-                  ✅ Perfect! Je hebt {challenges.length} challenges geselecteerd
-                </p>
-                <p className="text-gray-300 text-xs sm:text-sm mb-4">
-                  Je kunt nu door naar de volgende stap van de onboarding.
-                </p>
-                <button
-                  onClick={async () => {
-                    try {
-                      // Mark missions as selected using onboarding V2 API
-                      const success = await completeStep(2, { challenges: challenges.map(m => m.id) });
-
-                      if (success) {
-                        setShowOnboardingStep3(false);
-                        setShowOnboardingPopup(false);
-                        setShowChallengeLibrary(false);
-                        toast.success('Uitdagingen geselecteerd! Je kunt nu door naar de volgende stap.');
-                        
-                        // Check if user has access to training - if yes, go to training schemas; if not, skip to forum
-                        if (hasAccess('training')) {
-                          setTimeout(() => {
-                            window.location.href = '/dashboard/trainingsschemas';
-                          }, 1000);
-                        } else {
-                          // Basic users skip training and nutrition steps, go directly to forum
-                          setTimeout(() => {
-                            window.location.href = '/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden';
-                          }, 1000);
-                        }
-                      } else {
-                        toast.error('Er is een fout opgetreden');
-                      }
-                    } catch (error) {
-                      console.error('Error completing challenges step:', error);
-                      toast.error('Er is een fout opgetreden');
-                    }
-                  }}
-                  className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#0A0F0A] px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold hover:from-[#A6C97B] hover:to-[#FFE55C] transition-all duration-200 flex items-center gap-2 text-sm sm:text-base"
-                >
-                  <span>Volgende Stap</span>
-                  <span>→</span>
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-        )}
 
         {/* Onboarding Popup - Positioned at top for challenges page */}
         {showOnboardingPopup && (

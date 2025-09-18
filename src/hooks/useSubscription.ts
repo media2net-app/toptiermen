@@ -155,9 +155,9 @@ export function useSubscription(): UseSubscriptionReturn {
   }, [user]);
 
   // Computed properties
-  const isPremium = subscription?.subscription_tier === 'premium' || subscription?.subscription_tier === 'premium-tier';
-  const isLifetime = subscription?.subscription_tier === 'lifetime' || subscription?.subscription_tier === 'lifetime-tier';
-  const isBasic = subscription?.subscription_tier === 'basic' || subscription?.subscription_tier === 'basic-tier';
+  const isPremium = subscription?.subscription_tier === 'premium' || subscription?.subscription_tier === 'premium-tier' || subscription?.subscription_tier === 'Premium Tier';
+  const isLifetime = subscription?.subscription_tier === 'lifetime' || subscription?.subscription_tier === 'lifetime-tier' || subscription?.subscription_tier === 'Lifetime Access';
+  const isBasic = subscription?.subscription_tier === 'basic' || subscription?.subscription_tier === 'basic-tier' || subscription?.subscription_tier === 'Basic Tier';
 
   // Access control function
   const hasAccess = (feature: 'nutrition' | 'training'): boolean => {
@@ -166,6 +166,11 @@ export function useSubscription(): UseSubscriptionReturn {
     
     // Premium and Lifetime users have access to nutrition and training
     if (isPremium || isLifetime) return true;
+    
+    // Also check subscription_tier directly for Premium Tier and Lifetime Access
+    if (subscription?.subscription_tier === 'Premium Tier' || subscription?.subscription_tier === 'Lifetime Access') {
+      return true;
+    }
     
     // Basic users don't have access to nutrition and training
     if (isBasic) return false;

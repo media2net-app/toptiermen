@@ -384,16 +384,20 @@ export default function OnboardingV2Modal({ isOpen, onClose }: OnboardingV2Modal
   } = useOnboardingV2();
   const router = useRouter();
 
-  // Don't show modal if completed, loading, or for steps 1-4 (only show for step 0 - welcome video)
-  if (!isOpen || isLoading || isCompleted || (currentStep !== null && currentStep > 0)) {
+  // Don't show modal if completed, loading, or for steps 2+ (only show for step 0 - welcome video and step 1 - goal setting)
+  if (!isOpen || isLoading || isCompleted || (currentStep !== null && currentStep > 1)) {
     return null;
   }
 
   const handleStepComplete = async (step: number, data?: any) => {
     const success = await completeStep(step, data);
     if (success) {
-      // Check if onboarding is completed
-      if (step === 5) { // Forum intro step
+      // Handle redirects after step completion
+      if (step === 0) { // Welcome video -> redirect to goal step
+        router.push('/dashboard');
+      } else if (step === 1) { // Goal step -> redirect to challenges
+        router.push('/dashboard/mijn-challenges');
+      } else if (step === 5) { // Forum intro step -> complete onboarding
         onClose();
         router.push('/dashboard');
       }
@@ -412,9 +416,8 @@ export default function OnboardingV2Modal({ isOpen, onClose }: OnboardingV2Modal
       case 0: // Welcome video
         return <WelcomeVideoStep onComplete={() => handleStepComplete(0)} />;
       
-      case 1: // Set goal - redirect to profile page
-        router.push('/dashboard/profiel');
-        return null;
+      case 1: // Set goal - show modal
+        return <SetGoalStep onComplete={() => handleStepComplete(1)} />;
       
       case 2: // Select challenges - redirect to challenges page
         router.push('/dashboard/mijn-challenges');
@@ -451,7 +454,7 @@ export default function OnboardingV2Modal({ isOpen, onClose }: OnboardingV2Modal
 
   const getStepInfo = () => {
     const totalSteps = 5;
-    const currentStepNumber = currentStep + 1;
+    const currentStepNumber = (currentStep ?? 0) + 1;
     const percentage = (currentStepNumber / totalSteps) * 100;
     
     const stepNames = {

@@ -916,13 +916,13 @@ function TrainingschemasContent() {
           console.log('🎯 Completing onboarding step 3 after schema selection');
           // Call completeStep directly to avoid stale closure
           try {
-            const response = await fetch('/api/onboarding', {
+            const response = await fetch(`/api/onboarding-v2?email=${user?.email}`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
               },
               body: JSON.stringify({
-                userId: actualUserId,
+                email: user?.email,
                 step: 3,
                 action: 'complete_step',
                 selectedTrainingSchema: schemaId
@@ -1360,16 +1360,25 @@ function TrainingschemasContent() {
 
     async function checkOnboardingStatus() {
       try {
-        const response = await fetch(`/api/onboarding?userId=${user?.id}`);
+        const response = await fetch(`/api/onboarding-v2?email=${user?.email}`);
         if (response.ok) {
           const data = await response.json();
-          setOnboardingStatus(data);
-          
-          // Show onboarding step 3 if onboarding is not completed and user needs to select training schema
-          // This includes users on step 3 OR users who haven't selected training schema yet
-          const shouldShowStep3 = !data.onboarding_completed && 
-            (data.current_step === 3 || (!data.step_3_completed && data.current_step >= 2));
-          setShowOnboardingStep3(shouldShowStep3);
+          if (data.success) {
+            // Transform Onboarding V2 API response to match expected format
+            const transformedData = {
+              onboarding_completed: data.onboarding.isCompleted,
+              current_step: data.onboarding.currentStep,
+              user_id: user?.id,
+              ...data.onboarding.status // Include the full status object if available
+            };
+            setOnboardingStatus(transformedData);
+            
+            // Show onboarding step 3 if onboarding is not completed and user needs to select training schema
+            // This includes users on step 3 OR users who haven't selected training schema yet
+            const shouldShowStep3 = !data.onboarding.isCompleted && 
+              (data.onboarding.currentStep === 3 || (!data.onboarding.status?.training_schema_selected && data.onboarding.currentStep >= 2));
+            setShowOnboardingStep3(shouldShowStep3);
+          }
         }
       } catch (error) {
         console.error('Error checking onboarding status:', error);
@@ -1539,6 +1548,46 @@ function TrainingschemasContent() {
   return (
     <PageLayout title="Trainingsschemas">
       <OnboardingV2Progress />
+      
+      {/* Continue to Voedingsplannen Button - Only show during onboarding and when schema is selected */}
+      {userTrainingProfile && trainingSchemas.length > 0 && !isCompleted && selectedTrainingSchema && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mx-3 sm:mx-4 md:mx-6 mb-4 sm:mb-6"
+        >
+          <div className="bg-gradient-to-r from-[#8BAE5A]/10 to-[#8BAE5A]/5 border border-[#8BAE5A]/30 rounded-2xl p-4 sm:p-6">
+            <div className="flex items-center justify-center gap-2 sm:gap-3 mb-4">
+              <div className="p-2 bg-[#8BAE5A]/20 rounded-lg">
+                <CheckIcon className="h-5 w-5 sm:h-6 sm:w-6 text-[#8BAE5A]" />
+              </div>
+              <div>
+                <h3 className="text-base sm:text-lg font-semibold text-white">Trainingsschema Geselecteerd!</h3>
+                <p className="text-xs sm:text-sm text-gray-400">Je bent klaar voor de volgende stap</p>
+              </div>
+            </div>
+            
+            <button
+              onClick={() => {
+                completeStep(3);
+                window.location.href = '/dashboard/voedingsplannen-v2';
+              }}
+              className="flex items-center gap-2 px-6 sm:px-8 py-2 sm:py-3 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold shadow-lg shadow-[#8BAE5A]/20 mx-auto text-sm sm:text-base"
+            >
+              <span className="hidden sm:inline">Doorgaan naar Voedingsplannen</span>
+              <span className="sm:hidden">Volgende Stap</span>
+              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+            
+            <p className="mt-3 sm:mt-4 text-xs sm:text-sm text-gray-400 px-4">
+              Je kunt later altijd terugkomen om je trainingsschema te wijzigen
+            </p>
+          </div>
+        </motion.div>
+      )}
+      
       <div className="w-full p-3 sm:p-4 md:p-6">
         {/* Dynamic Training Plan View */}
         <AnimatePresence mode="wait">
@@ -1559,82 +1608,6 @@ function TrainingschemasContent() {
                 </p>
               </div>
 
-        {/* Onboarding Progress - Step 3: Training Schemas */}
-        {!profileLoading && showOnboardingStep3 && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-8"
-          >
-            <div className="bg-gradient-to-br from-[#8BAE5A]/10 to-[#FFD700]/10 border-2 border-[#8BAE5A] rounded-2xl p-4 sm:p-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
-                <div className="flex items-center gap-2 sm:gap-3">
-                  <span className="text-xl sm:text-2xl md:text-3xl">💪</span>
-                  <div>
-                    <h2 className="text-base sm:text-lg md:text-xl font-bold text-white">Onboarding Stap 3: Trainingsschema Selecteren</h2>
-                    <p className="text-[#8BAE5A] text-xs sm:text-sm">Vul je trainingsprofiel in en selecteer een trainingsschema</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="text-lg sm:text-xl md:text-2xl font-bold text-[#FFD700]">3/6</div>
-                  <div className="text-[#8BAE5A] text-xs sm:text-sm">Stappen voltooid</div>
-                </div>
-              </div>
-              
-              {!userTrainingProfile ? (
-                <div className="bg-[#181F17]/80 rounded-xl p-4 border border-[#3A4D23]">
-                  <p className="text-[#f0a14f] text-sm font-semibold mb-2">
-                    ⚠️ Je moet eerst je trainingsprofiel invullen
-                  </p>
-                  <p className="text-gray-300 text-sm">
-                    Vul je trainingsvoorkeuren in om gepersonaliseerde trainingsschemas te krijgen die perfect bij jou passen.
-                  </p>
-                </div>
-              ) : !selectedTrainingSchema ? (
-                <div className="bg-[#181F17]/80 rounded-xl p-4 border border-[#3A4D23]">
-                  <p className="text-[#f0a14f] text-sm font-semibold mb-2">
-                    ⚠️ Selecteer een trainingsschema om door te gaan
-                  </p>
-                  <p className="text-gray-300 text-sm">
-                    Kies een trainingsschema dat past bij je doelen en ervaringsniveau.
-                  </p>
-                </div>
-              ) : (
-                <div className="bg-[#8BAE5A]/20 rounded-xl p-4 border border-[#8BAE5A]">
-                  <p className="text-[#8BAE5A] text-sm font-semibold mb-2">
-                    ✅ Perfect! Je hebt een trainingsschema geselecteerd
-                  </p>
-                  <p className="text-gray-300 text-sm mb-4">
-                    Je kunt nu door naar de volgende stap van de onboarding.
-                  </p>
-                  <button
-                    onClick={async () => {
-                      try {
-                        // Mark step 3 as completed
-            await completeStep(3, { trainingSchema: selectedTrainingSchema });
-
-                        toast.success('Trainingsschema opgeslagen! Doorsturen naar voedingsplannen...');
-                        // Navigate to nutrition plans
-                        setTimeout(() => {
-                          window.location.href = '/dashboard/voedingsplannen-v2';
-                        }, 1500);
-                      } catch (error) {
-                        console.error('Error completing step:', error);
-                        toast.error('Er is een fout opgetreden');
-                      }
-                    }}
-                    className="bg-[#8BAE5A] hover:bg-[#B6C948] text-[#181F17] px-6 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center gap-2"
-                  >
-                    Volgende Stap
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </button>
-                </div>
-              )}
-            </div>
-          </motion.div>
-        )}
 
         {/* User Training Profile Summary */}
         {userTrainingProfile && (
@@ -2173,44 +2146,6 @@ function TrainingschemasContent() {
         )}
 
 
-        {/* Continue to Voedingsplannen Button - Only show during onboarding and when schema is selected */}
-        {userTrainingProfile && trainingSchemas.length > 0 && !isCompleted && selectedTrainingSchema && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mt-8 text-center"
-          >
-            <div className="bg-gradient-to-r from-[#8BAE5A]/10 to-[#8BAE5A]/5 border border-[#8BAE5A]/30 rounded-2xl p-4 sm:p-6">
-              <div className="flex items-center justify-center gap-2 sm:gap-3 mb-4">
-                <div className="p-2 bg-[#8BAE5A]/20 rounded-lg">
-                  <CheckIcon className="h-5 w-5 sm:h-6 sm:w-6 text-[#8BAE5A]" />
-                </div>
-                <div>
-                  <h3 className="text-base sm:text-lg font-semibold text-white">Trainingsschema Geselecteerd!</h3>
-                  <p className="text-xs sm:text-sm text-gray-400">Je bent klaar voor de volgende stap</p>
-                </div>
-              </div>
-              
-              <button
-                onClick={() => {
-                  completeStep(3);
-                  window.location.href = '/dashboard/voedingsplannen';
-                }}
-                className="flex items-center gap-2 px-6 sm:px-8 py-2 sm:py-3 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold shadow-lg shadow-[#8BAE5A]/20 mx-auto text-sm sm:text-base"
-              >
-                <span className="hidden sm:inline">Doorgaan naar Voedingsplannen</span>
-                <span className="sm:hidden">Volgende Stap</span>
-                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-              
-              <p className="mt-3 sm:mt-4 text-xs sm:text-sm text-gray-400 px-4">
-                Je kunt later altijd terugkomen om je trainingsschema te wijzigen
-              </p>
-            </div>
-          </motion.div>
-        )}
 
         {/* Video Modal */}
         {videoModal.isOpen && (

@@ -10,6 +10,7 @@ import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { useOnboardingV2 } from '@/contexts/OnboardingV2Context';
 import DashboardLoadingModal from '@/components/ui/DashboardLoadingModal';
 import DashboardDebugger from '@/components/DashboardDebugger';
+import OnboardingV2Modal from '@/components/OnboardingV2Modal';
 import { useRouter } from 'next/navigation';
 
 
@@ -104,12 +105,35 @@ export default function Dashboard() {
   const { isCompleted, currentStep } = useOnboardingV2();
   const router = useRouter();
 
-  // Only redirect if user tries to access future onboarding steps
-  // Users can stay on dashboard or access previous steps
+  // Onboarding V2 redirect logic - redirect users to correct onboarding step
   useEffect(() => {
-    // Remove automatic redirect - let users navigate freely within allowed steps
-    // The middleware will handle blocking access to future steps
-  }, [isCompleted, currentStep, router]);
+    if (!user || !user.email) return;
+    
+    // If onboarding is not completed, redirect to the current step
+    if (!isCompleted && currentStep !== null) {
+      console.log(`🔄 Onboarding V2 Dashboard Redirect: User on step ${currentStep}, redirecting...`);
+      
+      let redirectPath = '/dashboard/welcome-video-v2';
+      
+      if (currentStep === 0) {
+        redirectPath = '/dashboard/welcome-video-v2';
+      } else if (currentStep === 1) {
+        // For step 1, stay on dashboard and show modal
+        return;
+      } else if (currentStep === 2) {
+        redirectPath = '/dashboard/mijn-challenges';
+      } else if (currentStep === 3) {
+        redirectPath = '/dashboard/trainingsschemas';
+      } else if (currentStep === 4) {
+        redirectPath = '/dashboard/voedingsplannen-v2';
+      } else if (currentStep === 5) {
+        redirectPath = '/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden';
+      }
+      
+      console.log(`🔄 Redirecting to: ${redirectPath}`);
+      router.push(redirectPath);
+    }
+  }, [user, isCompleted, currentStep, router]);
 
   // 2.0.1: Fetch real dashboard data from database
   useEffect(() => {
@@ -577,6 +601,12 @@ export default function Dashboard() {
           onToggle={() => setShowDebugger(!showDebugger)}
         />
       )}
+
+      {/* Onboarding V2 Modal */}
+      <OnboardingV2Modal 
+        isOpen={!isCompleted && (currentStep === 0 || currentStep === 1)}
+        onClose={() => {}} // Modal cannot be closed during onboarding
+      />
     </div>
   );
 } 

@@ -213,13 +213,22 @@ export default function VoedingsplannenPage() {
     if (!user?.id) return;
 
     try {
-      const response = await fetch(`/api/onboarding?userId=${user?.id}`);
+      const response = await fetch(`/api/onboarding-v2?email=${user?.email}`);
       if (response.ok) {
         const data = await response.json();
-        setOnboardingStatus(data);
-        
-        // Only show onboarding step 4 if onboarding is not completed and user is on step 4
-        setShowOnboardingStep4(!data.onboarding_completed && data.current_step === 4);
+        if (data.success) {
+          // Transform Onboarding V2 API response to match expected format
+          const transformedData = {
+            onboarding_completed: data.onboarding.isCompleted,
+            current_step: data.onboarding.currentStep,
+            user_id: user?.id,
+            ...data.onboarding.status // Include the full status object if available
+          };
+          setOnboardingStatus(transformedData);
+          
+          // Only show onboarding step 4 if onboarding is not completed and user is on step 4
+          setShowOnboardingStep4(!data.onboarding.isCompleted && data.onboarding.currentStep === 4);
+        }
       }
     } catch (error) {
       console.error('Error checking onboarding status:', error);
@@ -806,13 +815,13 @@ export default function VoedingsplannenPage() {
                     onClick={async () => {
                       try {
                         // Mark step 4 as completed
-                        const response = await fetch('/api/onboarding', {
+                        const response = await fetch(`/api/onboarding-v2?email=${user?.email}`, {
                           method: 'POST',
                           headers: {
                             'Content-Type': 'application/json',
                           },
                           body: JSON.stringify({
-                            userId: user?.id,
+                            email: user?.email,
                             step: 4,
                             action: 'complete_step',
                             selectedNutritionPlan: selectedNutritionPlan

@@ -17,8 +17,25 @@ export default function OnboardingV2Progress({ className = "" }: OnboardingV2Pro
   const getStepInfo = () => {
     // Determine total steps based on user access
     const { hasTrainingAccess, hasNutritionAccess } = useOnboardingV2();
-    const totalSteps = (!hasTrainingAccess && !hasNutritionAccess) ? 3 : 5; // Basic: 3 steps, Premium: 5 steps
-    const currentStepNumber = currentStep + 1;
+    const totalSteps = (!hasTrainingAccess && !hasNutritionAccess) ? 4 : 5; // Basic: 4 steps, Premium: 5 steps
+    
+    // Map step IDs to sequential step numbers based on user tier
+    const isBasicTier = !hasTrainingAccess && !hasNutritionAccess;
+    const stepMapping = isBasicTier ? {
+      0: 1, // Welcome video
+      1: 2, // Set goal
+      2: 3, // Select challenges
+      5: 4  // Forum intro
+    } : {
+      0: 1, // Welcome video
+      1: 2, // Set goal
+      2: 3, // Select challenges
+      3: 4, // Select training schema
+      4: 4, // Select nutrition plan (step 4 of 5)
+      5: 5  // Forum intro (step 5 of 5)
+    };
+    
+    const currentStepNumber = stepMapping[currentStep as keyof typeof stepMapping] || 1;
     const percentage = (currentStepNumber / totalSteps) * 100;
     
     const stepNames = {

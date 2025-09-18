@@ -194,6 +194,27 @@ export async function POST(request: NextRequest) {
             break;
           case ONBOARDING_STEPS.SELECT_CHALLENGES.id:
             updateData.missions_selected = true;
+            
+            // Create user missions if challenges are provided
+            if (data && data.challenges && Array.isArray(data.challenges)) {
+              const challengeData = data.challenges.map((challengeId: string) => ({
+                user_id: profile.id,
+                mission_id: challengeId,
+                is_active: true,
+                created_at: new Date().toISOString()
+              }));
+              
+              const { error: challengeError } = await supabase
+                .from('user_missions')
+                .insert(challengeData);
+                
+              if (challengeError) {
+                console.log('⚠️ Error creating challenges:', challengeError.message);
+              } else {
+                console.log('✅ User challenges created:', data.challenges);
+              }
+            }
+            
             // For Basic tier users, complete onboarding after challenges
             const packageType = profile.package_type || 'Basic Tier';
             const isAdmin = profile.role === 'admin';
