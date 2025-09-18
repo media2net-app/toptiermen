@@ -566,10 +566,11 @@ export default function MijnTrainingen() {
                   <tr className="border-b border-[#3A4D23]">
                     <th className="text-left py-3 px-4 text-[#8BAE5A] font-semibold">Week</th>
                     <th className="text-left py-3 px-4 text-[#8BAE5A] font-semibold">Voltooid Op</th>
-                    <th className="text-left py-3 px-4 text-[#8BAE5A] font-semibold">Dag 1</th>
-                    <th className="text-left py-3 px-4 text-[#8BAE5A] font-semibold">Dag 2</th>
-                    <th className="text-left py-3 px-4 text-[#8BAE5A] font-semibold">Dag 3</th>
-                    <th className="text-left py-3 px-4 text-[#8BAE5A] font-semibold">Dag 4</th>
+                    {days?.map((day) => (
+                      <th key={day.day_number} className="text-left py-3 px-4 text-[#8BAE5A] font-semibold">
+                        Dag {day.day_number}
+                      </th>
+                    ))}
                     <th className="text-left py-3 px-4 text-[#8BAE5A] font-semibold">Status</th>
                   </tr>
                 </thead>
@@ -591,10 +592,10 @@ export default function MijnTrainingen() {
                           year: 'numeric'
                         })}
                       </td>
-                      {[1, 2, 3, 4].map(dayNum => {
-                        const dayData = week.days.find(d => d.day === dayNum);
+                      {days?.map((day) => {
+                        const dayData = week.days.find(d => d.day === day.day_number);
                         return (
-                          <td key={dayNum} className="py-4 px-4">
+                          <td key={day.day_number} className="py-4 px-4">
                             {dayData ? (
                               <div className="flex items-center gap-2">
                                 <CheckIcon className="w-4 h-4 text-green-400" />
@@ -635,36 +636,31 @@ export default function MijnTrainingen() {
                         </div>
                       </td>
                       <td className="py-4 px-4 text-gray-500">-</td>
-                      {[1, 2, 3, 4].map(dayNum => {
-                        const day = trainingData?.days?.find(d => d.day_number === dayNum);
+                      {days?.map((day) => {
                         return (
-                          <td key={dayNum} className="py-4 px-4">
-                            {day ? (
-                              <div className="flex items-center gap-2">
-                                {day.isCompleted ? (
-                                  <>
-                                    <CheckIcon className="w-4 h-4 text-green-400" />
-                                    <div className="text-xs text-gray-300">
-                                      {day.name}
-                                      <br />
-                                      <span className="text-green-400">
-                                        {day.completedAt && new Date(day.completedAt).toLocaleTimeString('nl-NL', {
-                                          hour: '2-digit',
-                                          minute: '2-digit'
-                                        })}
-                                      </span>
-                                    </div>
-                                  </>
-                                ) : (
-                                  <>
-                                    <div className="w-4 h-4 border-2 border-[#8BAE5A] rounded-full"></div>
-                                    <span className="text-xs text-gray-400">{day.name}</span>
-                                  </>
-                                )}
-                              </div>
-                            ) : (
-                              <span className="text-gray-500">-</span>
-                            )}
+                          <td key={day.day_number} className="py-4 px-4">
+                            <div className="flex items-center gap-2">
+                              {day.isCompleted ? (
+                                <>
+                                  <CheckIcon className="w-4 h-4 text-green-400" />
+                                  <div className="text-xs text-gray-300">
+                                    {day.name}
+                                    <br />
+                                    <span className="text-green-400">
+                                      {day.completedAt && new Date(day.completedAt).toLocaleTimeString('nl-NL', {
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                      })}
+                                    </span>
+                                  </div>
+                                </>
+                              ) : (
+                                <>
+                                  <div className="w-4 h-4 border-2 border-[#8BAE5A] rounded-full"></div>
+                                  <span className="text-xs text-gray-400">{day.name}</span>
+                                </>
+                              )}
+                            </div>
                           </td>
                         );
                       })}

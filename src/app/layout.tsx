@@ -6,7 +6,6 @@ import { SupabaseAuthProvider } from '@/contexts/SupabaseAuthContext';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Analytics } from '@vercel/analytics/next';
-import MaintenanceBanner from '@/components/MaintenanceBanner';
 // import { CacheBuster } from '@/components/CacheBuster'; - DISABLED TO PREVENT LOGOUT
 
 const inter = Inter({ subsets: ['latin'] });
@@ -86,7 +85,6 @@ export default function RootLayout({
     <html lang="nl">
       <body className={inter.className}>
         <ErrorBoundary>
-          <MaintenanceBanner />
           {/* <CacheBuster version="3.0.0" forceRefresh={true} /> - DISABLED TO PREVENT LOGOUT */}
           {/* <V2StateProvider> */}
           <SupabaseAuthProvider>

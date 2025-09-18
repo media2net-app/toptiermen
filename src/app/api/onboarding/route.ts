@@ -170,7 +170,7 @@ export async function GET(request: Request) {
       step_4_completed: data.nutrition_plan_selected,
       step_5_completed: data.challenge_started,
       onboarding_completed: data.onboarding_completed,
-      current_step: data.onboarding_completed ? 5 : (data.challenge_started ? 5 : (data.nutrition_plan_selected ? 4 : (data.training_schema_selected ? 3 : (data.missions_selected ? 2 : (data.goal_set ? 1 : 0))))),
+      current_step: data.onboarding_completed ? 5 : (data.challenge_started ? 5 : (data.nutrition_plan_selected ? 4 : (data.training_schema_selected ? 3 : (data.missions_selected ? 2 : (data.goal_set ? 2 : 1))))),
       created_at: data.created_at,
       updated_at: data.updated_at
     };
@@ -518,7 +518,7 @@ export async function POST(request: Request) {
       step_4_completed: data.nutrition_plan_selected,
       step_5_completed: data.challenge_started,
       onboarding_completed: data.onboarding_completed,
-      current_step: data.onboarding_completed ? 5 : (data.challenge_started ? 5 : (data.nutrition_plan_selected ? 4 : (data.training_schema_selected ? 3 : (data.missions_selected ? 2 : (data.goal_set ? 1 : 0))))),
+      current_step: data.onboarding_completed ? 5 : (data.challenge_started ? 5 : (data.nutrition_plan_selected ? 4 : (data.training_schema_selected ? 3 : (data.missions_selected ? 2 : (data.goal_set ? 2 : 1))))),
       created_at: data.created_at,
       updated_at: data.updated_at
     };

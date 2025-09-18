@@ -267,16 +267,19 @@ export default function NutritionPlanDetailPage() {
 
   // Calculate personalized calories
   const calculatePersonalizedCalories = (baseCalories: number, userProfile: UserProfile) => {
-    // Calculate based on user profile data
+    // Use the target_calories from the database if available, otherwise calculate
+    if (userProfile.target_calories && userProfile.target_calories > 0) {
+      return userProfile.target_calories;
+    }
     
     const bmr = calculateBMR(userProfile.weight, userProfile.height, userProfile.age, userProfile.gender);
     const tdee = calculateTDEE(bmr, userProfile.activity_level);
     
     // Adjust based on fitness goal
     let adjustment = 0;
-    if (userProfile.fitness_goal === 'droogtrainen') {
+    if (userProfile.goal === 'cut' || userProfile.fitness_goal === 'droogtrainen') {
       adjustment = -500; // 500 calorie deficit
-    } else if (userProfile.fitness_goal === 'spiermassa') {
+    } else if (userProfile.goal === 'bulk' || userProfile.fitness_goal === 'spiermassa') {
       adjustment = 500; // 500 calorie surplus
     }
     
@@ -287,16 +290,26 @@ export default function NutritionPlanDetailPage() {
   const calculatePersonalizedMacros = (baseCalories: number, userProfile: UserProfile) => {
     const personalizedCalories = calculatePersonalizedCalories(baseCalories, userProfile);
     
+    // Use database macro targets if available, otherwise calculate
+    if (userProfile.target_protein && userProfile.target_carbs && userProfile.target_fat) {
+      return {
+        calories: personalizedCalories,
+        protein: userProfile.target_protein,
+        carbs: userProfile.target_carbs,
+        fat: userProfile.target_fat
+      };
+    }
+    
     // Macro ratios based on goal
     let proteinRatio = 0.25;
     let carbRatio = 0.45;
     let fatRatio = 0.30;
     
-    if (userProfile.fitness_goal === 'droogtrainen') {
+    if (userProfile.goal === 'cut' || userProfile.fitness_goal === 'droogtrainen') {
       proteinRatio = 0.35;
       carbRatio = 0.35;
       fatRatio = 0.30;
-    } else if (userProfile.fitness_goal === 'spiermassa') {
+    } else if (userProfile.goal === 'bulk' || userProfile.fitness_goal === 'spiermassa') {
       proteinRatio = 0.25;
       carbRatio = 0.50;
       fatRatio = 0.25;
@@ -559,6 +572,10 @@ export default function NutritionPlanDetailPage() {
   const personalizedMacros = calculatePersonalizedMacros(selectedPlan.target_calories, userProfile);
   const dayTotals = calculateDayTotals(selectedDay);
 
+  // Debug logging
+  console.log('🔍 DEBUG: This is the [planId] page for:', planId);
+  console.log('🔍 DEBUG: userProfile:', userProfile);
+  console.log('🔍 DEBUG: personalizedMacros:', personalizedMacros);
 
   // Get progress info for each macro using personalized targets
   const caloriesProgress = getProgressInfo(dayTotals.calories, personalizedMacros.calories);
@@ -838,15 +855,25 @@ export default function NutritionPlanDetailPage() {
                               {mealTotals.calories.toFixed(1)} kcal
                             </div>
                             <div className="text-white">
-                              Eiwitten: {mealTotals.protein.toFixed(1)}g
+                              P: {mealTotals.protein.toFixed(1)}g
                             </div>
                             <div className="text-white">
-                              Koolhydraten: {mealTotals.carbs.toFixed(1)}g
+                              K: {mealTotals.carbs.toFixed(1)}g
                             </div>
                             <div className="text-white">
-                              Vetten: {mealTotals.fat.toFixed(1)}g
+                              V: {mealTotals.fat.toFixed(1)}g
                             </div>
                           </div>
+                    <button
+                            onClick={() => {
+                              console.log('🔧 DEBUG: Bewerk button clicked for:', { mealType, selectedDay });
+                              openIngredientModal(mealType, selectedDay);
+                            }}
+                            className="flex items-center gap-1 px-3 py-1 bg-[#8BAE5A] text-[#181F17] rounded-lg text-sm font-medium hover:bg-[#B6C948] transition-colors"
+                          >
+                            <PencilIcon className="w-4 h-4" />
+                      Bewerk
+                    </button>
                   </div>
                         </div>
                     </div>

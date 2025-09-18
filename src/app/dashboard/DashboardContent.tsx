@@ -798,8 +798,8 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
         // Show test video first for test users who haven't watched the welcome video
         setShowTestUserVideo(true);
         setShowForcedOnboarding(false);
-      } else if (onboardingStatus.current_step <= 1 && !onboardingStatus.step_1_completed) {
-        // Show normal onboarding only if step 1 is not completed yet
+      } else if (onboardingStatus.current_step <= 2 && !onboardingStatus.step_2_completed) {
+        // Show normal onboarding if step 2 (challenges) is not completed yet
         setShowForcedOnboarding(true);
         setShowTestUserVideo(false);
       } else {

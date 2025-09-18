@@ -138,6 +138,7 @@ export default function WorkoutPage() {
   const loadExercisesFromDatabase = async () => {
     if (!user || !schemaId || !dayNumber) {
       console.log('❌ Missing required data:', { user: !!user, schemaId, dayNumber });
+      setLoading(false);
       return;
     }
 
@@ -176,7 +177,13 @@ export default function WorkoutPage() {
           console.log('✅ Exercises loaded from workout-data API:', transformedExercises.length);
           setLoading(false);
           return;
+        } else {
+          console.log('⚠️ Workout-data API returned no exercises:', workoutData);
         }
+      } else {
+        console.log('⚠️ Workout-data API failed with status:', workoutResponse.status);
+        const errorText = await workoutResponse.text();
+        console.log('⚠️ Error response:', errorText);
       }
 
       console.log('⚠️ Workout-data API failed, trying user-training-schema API...');
@@ -187,7 +194,11 @@ export default function WorkoutPage() {
       
       if (!data.success || !data.days) {
         console.error('❌ Error loading training data from API:', data);
-        throw new Error('Failed to load training data');
+        // Use sample exercises as fallback
+        console.log('🔄 Using sample exercises as fallback');
+        setExercises(sampleExercises);
+        setLoading(false);
+        return;
       }
 
       console.log('✅ Training data loaded from API:', data.days.length, 'days');
@@ -427,22 +438,22 @@ export default function WorkoutPage() {
           </div>
         </div>
 
-      {/* Workout Video Modal */}
-      <WorkoutVideoModal
-        isOpen={showVideoModal}
-        onClose={() => setShowVideoModal(false)}
-        exerciseName={currentExercise?.name || 'Oefening'}
-        videoUrl={currentExercise?.videoUrl}
-        exerciseDetails={currentExercise ? {
-          sets: currentExercise.sets,
-          reps: currentExercise.reps,
-          rest: currentExercise.rest,
-          notes: currentExercise.notes
-        } : undefined}
-      />
-    </ClientLayout>
-  );
-}
+        {/* Workout Video Modal */}
+        <WorkoutVideoModal
+          isOpen={showVideoModal}
+          onClose={() => setShowVideoModal(false)}
+          exerciseName={currentExercise?.name || 'Oefening'}
+          videoUrl={currentExercise?.videoUrl}
+          exerciseDetails={currentExercise ? {
+            sets: currentExercise.sets,
+            reps: currentExercise.reps,
+            rest: currentExercise.rest,
+            notes: currentExercise.notes
+          } : undefined}
+        />
+      </ClientLayout>
+    );
+  }
 
   return (
     <ClientLayout>

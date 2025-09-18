@@ -6,6 +6,7 @@ import { useOnboarding } from '@/contexts/OnboardingContext';
 import { useSubscription } from '@/hooks/useSubscription';
 import { toast } from 'react-hot-toast';
 import ClientLayout from '@/app/components/ClientLayout';
+import ForcedOnboardingModal from '@/components/ForcedOnboardingModal';
 
 interface Challenge {
   id: string;
@@ -291,6 +292,7 @@ export default function MijnChallengesPage() {
   const [onboardingStatus, setOnboardingStatus] = useState<any>(null);
   const [showOnboardingStep3, setShowOnboardingStep3] = useState(false);
   const [showOnboardingPopup, setShowOnboardingPopup] = useState(false);
+  const [showForcedOnboarding, setShowForcedOnboarding] = useState(false);
 
   // Helper function to check if mission was completed today
   const isChallengeCompletedToday = (completionDate: string | null | undefined): boolean => {
@@ -388,6 +390,10 @@ export default function MijnChallengesPage() {
             setShowOnboardingPopup(true);
             setShowChallengeLibrary(true);
           }
+          
+          // Show ForcedOnboardingModal for basic users who haven't completed step 2
+          const shouldShowModal = data.current_step <= 2 && !data.step_2_completed;
+          setShowForcedOnboarding(shouldShowModal);
         }
       } catch (error) {
         console.error('Error checking onboarding status:', error);
@@ -1360,6 +1366,14 @@ export default function MijnChallengesPage() {
             </div>
           </div>
         )}
+        
+        {/* ForcedOnboardingModal for basic users */}
+        <ForcedOnboardingModal 
+          isOpen={showForcedOnboarding}
+          onComplete={() => {
+            setShowForcedOnboarding(false);
+          }}
+        />
       </div>
     </ClientLayout>
   );

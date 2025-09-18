@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { useRouter } from 'next/navigation';
+import { useSubscription } from '@/hooks/useSubscription';
 import { motion } from 'framer-motion';
 import { 
   BookOpenIcon, 
@@ -88,13 +89,14 @@ interface UserProfile {
 }
 
 export default function VoedingsplannenV2Page() {
-  const { user, isAdmin, loading: authLoading } = useSupabaseAuth();
+  const { user, loading: authLoading } = useSupabaseAuth();
+  const { hasAccess, loading: subscriptionLoading } = useSubscription();
   const router = useRouter();
   const [plans, setPlans] = useState<NutritionPlan[]>([]);
   const [selectedPlan, setSelectedPlan] = useState<NutritionPlan | null>(null);
   const [originalPlanData, setOriginalPlanData] = useState<OriginalPlanData | null>(null);
   const [scalingInfo, setScalingInfo] = useState<SmartScalingInfo | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [loadingOriginal, setLoadingOriginal] = useState(false);
   const [loadingScaling, setLoadingScaling] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -113,6 +115,7 @@ export default function VoedingsplannenV2Page() {
   const [showIngredientModal, setShowIngredientModal] = useState(false);
   const [editingMealType, setEditingMealType] = useState<string>('');
   const [editingDay, setEditingDay] = useState<string>('');
+  const [showSimpleModal, setShowSimpleModal] = useState(false);
 
   // Reset modal state when component mounts
   useEffect(() => {
@@ -140,6 +143,8 @@ export default function VoedingsplannenV2Page() {
 
   // Function to update custom amounts
   const updateCustomAmount = (ingredientKey: string, amount: number) => {
+    console.log('🔄 updateCustomAmount called:', { ingredientKey, amount });
+    
     // Find the ingredient to check its unit type
     const [day, mealType, ingredientName] = ingredientKey.split('_');
     const mealData = originalPlanData?.meals?.weekly_plan?.[day]?.[mealType];
@@ -152,10 +157,16 @@ export default function VoedingsplannenV2Page() {
       finalAmount = Math.round(amount);
     }
     
-    setCustomAmounts(prev => ({
-      ...prev,
-      [ingredientKey]: finalAmount
-    }));
+    console.log('🔄 Setting custom amount:', { ingredientKey, finalAmount, originalAmount: amount });
+    
+    setCustomAmounts(prev => {
+      const newAmounts = {
+        ...prev,
+        [ingredientKey]: finalAmount
+      };
+      console.log('🔄 New customAmounts:', newAmounts);
+      return newAmounts;
+    });
   };
 
   // Function to get ingredient key for custom amounts
@@ -209,7 +220,7 @@ export default function VoedingsplannenV2Page() {
       return;
     }
     
-    // Set all values at once
+      // Set all values at once using a single state update
     setEditingMealType(mealType);
     setEditingDay(day);
     setShowIngredientModal(true);
@@ -245,104 +256,25 @@ export default function VoedingsplannenV2Page() {
 
   // Function to get current ingredients for editing
   const getCurrentIngredients = () => {
-    if (!originalPlanData || !editingMealType || !editingDay) return [];
+    console.log('🔧 DEBUG: getCurrentIngredients called with:', { 
+      hasOriginalPlanData: !!originalPlanData, 
+      editingMealType, 
+      editingDay 
+    });
+    
+    if (!originalPlanData || !editingMealType || !editingDay) {
+      console.log('🔧 DEBUG: Missing required data, returning empty array');
+      return [];
+    }
     
     const mealData = originalPlanData.meals?.weekly_plan?.[editingDay]?.[editingMealType];
+    console.log('🔧 DEBUG: Meal data found:', !!mealData);
+    console.log('🔧 DEBUG: Ingredients found:', mealData?.ingredients?.length || 0);
+    
     return mealData?.ingredients || [];
   };
 
-  // Function to save user profile
-  const saveUserProfile = async (profile: UserProfile) => {
-    if (!user) return;
-    
-    try {
-      const response = await fetch('/api/nutrition-profile', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId: user.id,
-          age: profile.age,
-          height: profile.height,
-          weight: profile.weight,
-          gender: profile.gender,
-          activityLevel: profile.activity_level,
-          goal: profile.fitness_goal
-        }),
-      });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('❌ API Error:', errorData);
-        throw new Error(`${errorData.error || 'Failed to save profile'}${errorData.details ? ` - ${errorData.details}` : ''}`);
-      }
-
-      const result = await response.json();
-      setUserProfile(profile);
-      setShowUserProfileForm(false);
-      setError(null); // Clear any previous errors
-      console.log('✅ User profile saved:', result);
-    } catch (err) {
-      console.error('❌ Save profile error:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Failed to save profile';
-      setError(errorMessage);
-    }
-  };
-
-  // Function to calculate personalized targets for a plan
-  const calculatePersonalizedTargets = (plan: NutritionPlan | any) => {
-    if (!userProfile) return null;
-
-    // Use TTM Formula: weight x 22 x activity_level
-    const activityMultipliers = {
-      sedentary: 1.1,
-      moderate: 1.3,
-      very_active: 1.6
-    };
-    
-    const baseCalories = userProfile.weight * 22 * activityMultipliers[userProfile.activity_level];
-
-    // Apply goal adjustment based on the PLAN's goal, not user's fitness goal
-    const goalAdjustments = {
-      droogtrainen: -500,
-      onderhoud: 0,
-      spiermassa: 400
-    };
-    
-    // Use the plan's goal for calorie adjustment
-    const planGoal = plan.goal?.toLowerCase() || 'onderhoud';
-    const goalAdjustment = goalAdjustments[planGoal] || 0;
-    const targetCalories = Math.round(baseCalories + goalAdjustment);
-
-    // Calculate macro targets based on plan type and percentages
-    const isCarnivore = plan.name.toLowerCase().includes('carnivoor');
-    
-    let proteinPercentage, carbsPercentage, fatPercentage;
-    
-    if (isCarnivore) {
-      // Carnivore plans: higher protein, lower carbs
-      proteinPercentage = 35;
-      carbsPercentage = 5;
-      fatPercentage = 60;
-    } else {
-      // Regular plans: balanced macros
-      proteinPercentage = 25;
-      carbsPercentage = 45;
-      fatPercentage = 30;
-    }
-
-    const targetProtein = Math.round((targetCalories * proteinPercentage / 100) / 4); // 4 kcal per gram protein
-    const targetCarbs = Math.round((targetCalories * carbsPercentage / 100) / 4);     // 4 kcal per gram carbs
-    const targetFat = Math.round((targetCalories * fatPercentage / 100) / 9);         // 9 kcal per gram fat
-
-    return {
-      targetCalories,
-      targetProtein,
-      targetCarbs,
-      targetFat
-    };
-  };
 
   // Function to calculate daily totals for selected day
   const calculateDayTotals = (day: string, planData?: any) => {
@@ -366,8 +298,72 @@ export default function VoedingsplannenV2Page() {
       const meal = dayMeals[mealType];
       console.log(`🔍 ${mealType}:`, meal ? 'exists' : 'missing', meal?.totals ? 'has totals' : 'no totals');
       
-      if (meal?.totals) {
-        // Use existing totals if available
+      // Always calculate from ingredients when custom amounts are present
+      const hasCustomAmounts = meal?.ingredients && Array.isArray(meal.ingredients) && 
+        meal.ingredients.some((ingredient: any) => {
+          const ingredientKey = getIngredientKey(mealType, ingredient.name, day);
+          return customAmounts[ingredientKey] !== undefined;
+        });
+
+      if (hasCustomAmounts && meal?.ingredients && Array.isArray(meal.ingredients)) {
+        // Calculate totals from individual ingredients when custom amounts are present
+        console.log(`🧮 Calculating ${mealType} from ${meal.ingredients.length} ingredients (custom amounts detected)`);
+        let mealTotals = { calories: 0, protein: 0, carbs: 0, fat: 0 };
+        
+        meal.ingredients.forEach((ingredient: any, index: number) => {
+          // Get custom amount or use original amount
+          const ingredientKey = getIngredientKey(mealType, ingredient.name, day);
+          const customAmount = customAmounts[ingredientKey];
+          let amount = customAmount !== undefined ? customAmount : (ingredient.amount || 0);
+          
+          // Round to whole numbers for pieces/slices and per_100g
+          if (ingredient.unit === 'per_piece' || ingredient.unit === 'per_plakje' || ingredient.unit === 'stuk' || ingredient.unit === 'per_100g' || ingredient.unit === 'g') {
+            amount = Math.round(amount);
+          }
+          
+          console.log(`🔍 Ingredient ${index}:`, {
+            name: ingredient.name,
+            originalAmount: ingredient.amount,
+            customAmount: customAmount,
+            finalAmount: amount,
+            unit: ingredient.unit,
+            hasCustomAmount: customAmount !== undefined,
+            calories_per_100g: ingredient.calories_per_100g,
+            protein_per_100g: ingredient.protein_per_100g,
+            carbs_per_100g: ingredient.carbs_per_100g,
+            fat_per_100g: ingredient.fat_per_100g
+          });
+          
+          // Calculate macros based on amount and unit (matching backend logic exactly)
+          let multiplier = 1;
+          
+          // Handle different unit types based on database unit_type (matching backend exactly)
+          if (ingredient.unit === 'per_piece' || ingredient.unit === 'per_plakje' || ingredient.unit === 'stuk') {
+            multiplier = amount;
+          } else if (ingredient.unit === 'per_100g' || ingredient.unit === 'g') {
+            multiplier = amount / 100;
+          } else if (ingredient.unit === 'per_ml') {
+            multiplier = amount / 100; // Assuming 1ml = 1g for liquids
+          } else if (ingredient.unit === 'handje') {
+            multiplier = amount;
+          } else {
+            // Default to per 100g calculation
+            multiplier = amount / 100;
+          }
+          
+          mealTotals.calories += (ingredient.calories_per_100g || 0) * multiplier;
+          mealTotals.protein += (ingredient.protein_per_100g || 0) * multiplier;
+          mealTotals.carbs += (ingredient.carbs_per_100g || 0) * multiplier;
+          mealTotals.fat += (ingredient.fat_per_100g || 0) * multiplier;
+        });
+        
+        console.log(`📊 ${mealType} calculated totals:`, mealTotals);
+        totals.calories += mealTotals.calories;
+        totals.protein += mealTotals.protein;
+        totals.carbs += mealTotals.carbs;
+        totals.fat += mealTotals.fat;
+      } else if (meal?.totals) {
+        // Use existing totals if no custom amounts
         console.log(`📊 ${mealType} totals:`, meal.totals);
         totals.calories += meal.totals.calories || 0;
         totals.protein += meal.totals.protein || 0;
@@ -438,8 +434,11 @@ export default function VoedingsplannenV2Page() {
     return totals;
   };
 
-  // Get current day totals
-  const currentDayTotals = calculateDayTotals(selectedDay);
+  // Get current day totals - recalculate when customAmounts change
+  const currentDayTotals = React.useMemo(() => {
+    console.log('🔄 Recalculating day totals due to customAmounts change');
+    return calculateDayTotals(selectedDay);
+  }, [selectedDay, customAmounts, originalPlanData]);
 
   // Function to calculate meal totals
   const calculateMealTotals = (meal: any) => {
@@ -509,6 +508,96 @@ export default function VoedingsplannenV2Page() {
     return null;
   };
 
+  // TTM Formula: weight x 22 x activity_level + goal_adjustment
+  const calculatePersonalizedTargets = (basePlan: any) => {
+    // Debug logging
+    console.log('🔍 Calculating targets for plan:', {
+      name: basePlan.name,
+      goal: basePlan.goal,
+      fitness_goal: basePlan.fitness_goal,
+      userProfile: userProfile
+    });
+
+    // Activity level multipliers
+    const activityMultipliers = {
+      'sedentary': 1.1,    // Zittend (1.1x)
+      'moderate': 1.3,     // Staand (1.3x) - Backend basis
+      'very_active': 1.6   // Lopend (1.6x)
+    };
+
+    // Goal adjustments (kcal) - based on the PLAN's goal, not user's fitness goal
+    const goalAdjustments = {
+      'droogtrainen': -500,  // -500 kcal
+      'onderhoud': 0,        // Basis plan (0 kcal)
+      'spiermassa': +400     // +400 kcal
+    };
+
+    // Calculate base calories using TTM formula
+    const baseCalories = userProfile.weight * 22 * (activityMultipliers[userProfile.activity_level] || 1.3);
+    
+    // Use the PLAN's goal for calorie adjustment, not the user's fitness goal
+    const planGoal = basePlan.goal?.toLowerCase() || 'onderhoud';
+    const goalAdjustment = goalAdjustments[planGoal] || 0;
+    const targetCalories = baseCalories + goalAdjustment;
+
+    console.log('🧮 Calculation details:', {
+      userWeight: userProfile.weight,
+      userActivity: userProfile.activity_level,
+      baseCalories,
+      planGoal,
+      goalAdjustment,
+      targetCalories
+    });
+
+    // Calculate scaling factor compared to backend base (100kg, moderate, onderhoud)
+    const backendBase = 100 * 22 * 1.3; // 2860 kcal
+    const scalingFactor = targetCalories / backendBase;
+
+    console.log('📊 Scaling calculation:', {
+      backendBase,
+      scalingFactor,
+      targetCalories
+    });
+
+    // Try macro percentages approach first, fallback to scaling
+    const macroTargetsFromPercentages = calculatePersonalizedTargetsWithPercentages(basePlan, targetCalories);
+    
+    let targetProtein, targetCarbs, targetFat;
+    
+    if (macroTargetsFromPercentages) {
+      // Use macro percentages approach
+      targetProtein = macroTargetsFromPercentages.targetProtein;
+      targetCarbs = macroTargetsFromPercentages.targetCarbs;
+      targetFat = macroTargetsFromPercentages.targetFat;
+      console.log('✅ Using macro percentages approach');
+    } else {
+      // Fallback to scaling approach
+      targetProtein = Math.round(basePlan.target_protein * scalingFactor);
+      targetCarbs = Math.round(basePlan.target_carbs * scalingFactor);
+      targetFat = Math.round(basePlan.target_fat * scalingFactor);
+      console.log('✅ Using scaling approach');
+    }
+
+    console.log('🎯 Final macro targets:', {
+      targetProtein,
+      targetCarbs,
+      targetFat,
+      originalProtein: basePlan.target_protein,
+      originalCarbs: basePlan.target_carbs,
+      originalFat: basePlan.target_fat
+    });
+
+    return {
+      targetCalories: Math.round(targetCalories),
+      targetProtein,
+      targetCarbs,
+      targetFat,
+      scalingFactor,
+      baseCalories: Math.round(baseCalories),
+      goalAdjustment,
+      planGoal
+    };
+  };
 
   // Smart Scaling Algorithm with Realistic Constraints
   const applySmartScaling = (planData: any, userProfile: any) => {
@@ -525,8 +614,6 @@ export default function VoedingsplannenV2Page() {
     
     // Get personalized targets
     const personalizedTargets = calculatePersonalizedTargets(planData);
-    if (!personalizedTargets) return null;
-    
     const targetCalories = personalizedTargets.targetCalories;
     const targetProtein = personalizedTargets.targetProtein;
     const targetCarbs = personalizedTargets.targetCarbs;
@@ -701,8 +788,7 @@ export default function VoedingsplannenV2Page() {
     }
     
     return {
-      percentage: percentage, // Real percentage for text display
-      displayPercentage: Math.min(percentage, 100), // Capped percentage for progress bar width
+      percentage: Math.min(percentage, 100), // Cap at 100% for progress bar width
       difference,
       isGood,
       color,
@@ -744,8 +830,8 @@ export default function VoedingsplannenV2Page() {
   const carbsProgress = getProgressInfo(currentDayTotals.carbs, personalizedTargets?.targetCarbs || originalPlanData?.target_carbs || 0);
   const fatProgress = getProgressInfo(currentDayTotals.fat, personalizedTargets?.targetFat || originalPlanData?.target_fat || 0);
 
-  // Check if user is specifically chiel@media2net.nl
-  const isChiel = user?.email === 'chiel@media2net.nl';
+  // Access is now available for all authenticated users
+  const hasBasicAccess = !!user;
 
   // Define fetchUserProfile function outside useEffect so it can be reused
   const fetchUserProfile = async () => {
@@ -789,32 +875,8 @@ export default function VoedingsplannenV2Page() {
     }
   };
 
-  // Fetch user profile when component loads
-  useEffect(() => {
-    fetchUserProfile();
-  }, [user?.id]);
-
-  useEffect(() => {
-    console.log('🔍 Access check useEffect triggered:', { authLoading, isChiel, userEmail: user?.email });
-    
-    // Wait for auth to load before checking access
-    if (authLoading) {
-      console.log('⏳ Auth still loading, waiting...');
-      return;
-    }
-    
-    // Only allow chiel@media2net.nl access
-    if (!isChiel) {
-      console.log('🚫 Access denied to voedingsplannen-v2, redirecting to dashboard');
-      router.push('/dashboard');
-      return;
-    }
-
-    console.log('✅ Access granted to voedingsplannen-v2 for:', user?.email);
-    fetchPlans();
-  }, [isChiel, router, authLoading, user]);
-
-  const fetchPlans = async () => {
+  // Define fetchPlans function first to avoid hoisting issues
+  const fetchPlans = useCallback(async () => {
     try {
       console.log('🔧 DEBUG: fetchPlans called');
       setLoading(true);
@@ -823,19 +885,46 @@ export default function VoedingsplannenV2Page() {
       console.log('🔧 DEBUG: fetchPlans response status:', response.status);
       
       if (!response.ok) {
-        throw new Error('Failed to fetch nutrition plans');
+        throw new Error(`Failed to fetch nutrition plans: ${response.status} ${response.statusText}`);
       }
       
       const data = await response.json();
       console.log('🔧 DEBUG: fetchPlans data received:', { plansCount: data.plans?.length || 0, plans: data.plans });
       setPlans(data.plans || []);
+      console.log('🔧 DEBUG: Plans state updated, setting loading to false');
     } catch (err) {
       console.error('🔧 DEBUG: fetchPlans error:', err);
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
+      console.log('🔧 DEBUG: Setting loading to false in finally block');
       setLoading(false);
     }
-  };
+  }, []);
+
+  // Fetch user profile when component loads
+  useEffect(() => {
+    fetchUserProfile();
+  }, [user?.id]);
+
+  useEffect(() => {
+    console.log('🔍 Access check useEffect triggered:', { authLoading, hasBasicAccess, userEmail: user?.email });
+    
+    // Wait for auth to load before checking access
+    if (authLoading) {
+      console.log('⏳ Auth still loading, waiting...');
+      return;
+    }
+    
+    // Check if user is authenticated
+    if (!hasBasicAccess) {
+      console.log('🚫 No authenticated user, redirecting to login');
+      router.push('/login');
+      return;
+    }
+
+    console.log('✅ Access granted to voedingsplannen-v2 for:', user?.email);
+    fetchPlans();
+  }, [hasBasicAccess, router, authLoading, user, fetchPlans]);
 
   const loadOriginalPlanData = async (planId: string) => {
     try {
@@ -903,14 +992,54 @@ export default function VoedingsplannenV2Page() {
     }
   };
 
+  const saveUserProfile = async (profile: UserProfile) => {
+    try {
+      // Validate user ID before making request
+      if (!user?.id) {
+        throw new Error('No user ID available. Please log in again.');
+      }
+
+      console.log('💾 Saving profile for user:', user.id, profile);
+
+      const response = await fetch('/api/nutrition-profile-v2', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user.id,
+          age: profile.age,
+          height: profile.height,
+          weight: profile.weight,
+          gender: profile.gender,
+          activityLevel: profile.activity_level,
+          goal: profile.fitness_goal
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('❌ API Error:', errorData);
+        throw new Error(`${errorData.error || 'Failed to save profile'}${errorData.details ? ` - ${errorData.details}` : ''}`);
+      }
+
+      const result = await response.json();
+      setUserProfile(profile);
+      setShowUserProfileForm(false);
+      setError(null); // Clear any previous errors
+      console.log('✅ User profile saved:', result);
+    } catch (err) {
+      console.error('❌ Save profile error:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to save profile';
+      setError(errorMessage);
+    }
+  };
 
 
   const handlePlanSelect = (plan: NutritionPlan) => {
     console.log('🔧 DEBUG: handlePlanSelect called with plan:', { name: plan.name, id: plan.plan_id || plan.id });
-    setSelectedPlan(plan);
-    setShowOriginalData(true);
-    setScalingInfo(null); // Reset scaling info
-    loadOriginalPlanData(plan.plan_id || plan.id.toString());
+    // Navigate to subpage instead of showing details on same page
+    router.push(`/dashboard/voedingsplannen-v2/${plan.plan_id || plan.id}`);
   };
 
   const handleBackToPlans = () => {
@@ -1077,19 +1206,19 @@ export default function VoedingsplannenV2Page() {
                   <div className="bg-[#181F17] rounded-lg p-4">
                     <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Activiteitsniveau</label>
                     <div className="text-lg font-bold text-white">
-                      {userProfile.activity_level === 'sedentary' ? 'Zittend' :
-                       userProfile.activity_level === 'moderate' ? 'Matig' :
-                       userProfile.activity_level === 'very_active' ? 'Lopend' :
-                       'Matig'}
+                      {userProfile.activity_level === 'sedentary' ? 'Zittend (1.1)' :
+                       userProfile.activity_level === 'moderate' ? 'Matig (1.3)' :
+                       userProfile.activity_level === 'very_active' ? 'Lopend (1.6)' :
+                       'Matig (1.3)'}
                     </div>
                   </div>
 
                   <div className="bg-[#181F17] rounded-lg p-4">
                     <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Fitness Doel</label>
                     <div className="text-lg font-bold text-white">
-                      {userProfile.fitness_goal === 'droogtrainen' ? 'Droogtrainen' :
-                       userProfile.fitness_goal === 'onderhoud' ? 'Onderhoud' :
-                       userProfile.fitness_goal === 'spiermassa' ? 'Spiermassa' :
+                      {userProfile.fitness_goal === 'droogtrainen' ? 'Droogtrainen (-500 kcal)' :
+                       userProfile.fitness_goal === 'onderhoud' ? 'Onderhoud (0 kcal)' :
+                       userProfile.fitness_goal === 'spiermassa' ? 'Spiermassa (+400 kcal)' :
                        userProfile.fitness_goal}
                     </div>
                   </div>
@@ -1113,7 +1242,7 @@ export default function VoedingsplannenV2Page() {
                   <div className="bg-[#181F17] rounded-lg p-4">
                     <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Geslacht</label>
                     <div className="text-lg font-bold text-white">
-                      Man
+                      {userProfile.gender === 'male' ? 'Man' : 'Vrouw'}
                     </div>
                   </div>
                 </div>
@@ -1250,6 +1379,72 @@ export default function VoedingsplannenV2Page() {
                 </button>
               )}
               
+              {/* Debug Button */}
+              <button
+                onClick={checkDayConsistency}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-all duration-200 flex items-center gap-2"
+              >
+                <span>🔍</span>
+                Check Dag Consistentie
+              </button>
+              
+              {/* Debug Modal Button */}
+              <button
+                onClick={() => {
+                  console.log('🔧 DEBUG: Test modal button clicked');
+                  console.log('🔧 DEBUG: Selected plan:', selectedPlan?.name);
+                  if (selectedPlan) {
+                    openIngredientModal('ontbijt', 'maandag');
+                  } else {
+                    console.log('🔧 DEBUG: No plan selected, cannot test modal');
+                  }
+                }}
+                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-semibold transition-all duration-200 flex items-center gap-2"
+              >
+                <span>🧪</span>
+                Test Modal
+              </button>
+              
+              {/* Debug State Button */}
+              <button
+                onClick={() => {
+                  console.log('🔍 DEBUG: Current state:');
+                  console.log('🔍 customAmounts:', customAmounts);
+                  console.log('🔍 selectedDay:', selectedDay);
+                  console.log('🔍 currentDayTotals:', currentDayTotals);
+                  console.log('🔍 originalPlanData available:', !!originalPlanData);
+                  if (originalPlanData?.meals?.weekly_plan?.[selectedDay]) {
+                    console.log('🔍 Day data available for', selectedDay);
+                    const dayData = originalPlanData.meals.weekly_plan[selectedDay];
+                    Object.keys(dayData).forEach(mealType => {
+                      const meal = dayData[mealType];
+                      if (meal?.ingredients) {
+                        meal.ingredients.forEach((ing: any) => {
+                          const key = getIngredientKey(mealType, ing.name, selectedDay);
+                          console.log(`🔍 ${key}: original=${ing.amount}, custom=${customAmounts[key]}`);
+                        });
+                      }
+                    });
+                  }
+                }}
+                className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-semibold transition-all duration-200 flex items-center gap-2"
+              >
+                <span>🔍</span>
+                Debug State
+              </button>
+              
+              {/* Test Melk Button */}
+              <button
+                onClick={() => {
+                  console.log('🧪 TEST: Setting Melk to 1000');
+                  const testKey = getIngredientKey('ontbijt', 'Melk', selectedDay);
+                  updateCustomAmount(testKey, 1000);
+                }}
+                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-all duration-200 flex items-center gap-2"
+              >
+                <span>🧪</span>
+                Test Melk 1000
+              </button>
             </div>
             
             {/* Daily Totals Progress Bars */}
@@ -1288,7 +1483,7 @@ export default function VoedingsplannenV2Page() {
                     <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
                       <div 
                         className={`h-2 rounded-full ${caloriesProgress.color}`}
-                        style={{ width: `${caloriesProgress.displayPercentage}%` }}
+                        style={{ width: `${caloriesProgress.percentage}%` }}
                       ></div>
                     </div>
                     <div className="flex justify-between text-sm">
@@ -1309,7 +1504,7 @@ export default function VoedingsplannenV2Page() {
                     <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
                       <div 
                         className={`h-2 rounded-full ${proteinProgress.color}`}
-                        style={{ width: `${proteinProgress.displayPercentage}%` }}
+                        style={{ width: `${proteinProgress.percentage}%` }}
                       ></div>
                     </div>
                     <div className="flex justify-between text-sm">
@@ -1330,7 +1525,7 @@ export default function VoedingsplannenV2Page() {
                     <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
                       <div 
                         className={`h-2 rounded-full ${carbsProgress.color}`}
-                        style={{ width: `${carbsProgress.displayPercentage}%` }}
+                        style={{ width: `${carbsProgress.percentage}%` }}
                       ></div>
                     </div>
                     <div className="flex justify-between text-sm">
@@ -1351,7 +1546,7 @@ export default function VoedingsplannenV2Page() {
                     <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
                       <div 
                         className={`h-2 rounded-full ${fatProgress.color}`}
-                        style={{ width: `${fatProgress.displayPercentage}%` }}
+                        style={{ width: `${fatProgress.percentage}%` }}
                       ></div>
                     </div>
                     <div className="flex justify-between text-sm">
@@ -1400,15 +1595,25 @@ export default function VoedingsplannenV2Page() {
                                 {mealTotals.calories.toFixed(1)} kcal
                               </div>
                               <div className="text-white">
-                                Eiwitten: {mealTotals.protein.toFixed(1)}g
+                                P: {mealTotals.protein.toFixed(1)}g
                               </div>
                               <div className="text-white">
-                                Koolhydraten: {mealTotals.carbs.toFixed(1)}g
+                                K: {mealTotals.carbs.toFixed(1)}g
                               </div>
                               <div className="text-white">
-                                Vetten: {mealTotals.fat.toFixed(1)}g
+                                V: {mealTotals.fat.toFixed(1)}g
                               </div>
                               </div>
+                              <button
+                                onClick={() => {
+                                  console.log('🔧 DEBUG: Simple modal button clicked');
+                                  setShowSimpleModal(true);
+                                }}
+                                className="flex items-center gap-1 px-3 py-1 bg-[#8BAE5A] text-[#181F17] rounded-lg text-sm font-medium hover:bg-[#B6C948] transition-colors"
+                              >
+                                <PencilIcon className="w-4 h-4" />
+                                Bewerk
+                              </button>
                             </div>
                           </div>
                         </div>
@@ -1619,6 +1824,81 @@ export default function VoedingsplannenV2Page() {
     );
   }
 
+  // Check access permissions for nutrition plans
+  if (!hasAccess('nutrition')) {
+    return (
+      <div className="min-h-screen bg-[#0A0F0A] p-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center py-16">
+            <div className="mb-8">
+              <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] rounded-full flex items-center justify-center">
+                <BookOpenIcon className="w-12 h-12 text-[#0A0F0A]" />
+              </div>
+              <h1 className="text-3xl font-bold text-white mb-4">Voedingsplannen V2</h1>
+              <p className="text-xl text-gray-300 mb-8">
+                Upgrade naar Premium of Lifetime voor toegang tot voedingsplannen
+              </p>
+            </div>
+            
+            <div className="bg-[#232D1A] border border-[#3A4D23] rounded-xl p-8 max-w-2xl mx-auto">
+              <h2 className="text-2xl font-bold text-white mb-4">🚀 Upgrade je Account</h2>
+              <p className="text-gray-300 mb-6">
+                Voedingsplannen zijn alleen beschikbaar voor Premium en Lifetime leden. 
+                Upgrade nu om toegang te krijgen tot:
+              </p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 mb-8">
+                <div className="flex items-center gap-3 p-3 bg-[#181F17] rounded-lg">
+                  <div className="w-8 h-8 bg-[#8BAE5A] rounded-full flex items-center justify-center">
+                    <BookOpenIcon className="w-4 h-4 text-[#0A0F0A]" />
+                  </div>
+                  <span className="text-white font-medium">Voedingsplannen V2</span>
+                </div>
+                <div className="flex items-center gap-3 p-3 bg-[#181F17] rounded-lg">
+                  <div className="w-8 h-8 bg-[#8BAE5A] rounded-full flex items-center justify-center">
+                    <RocketLaunchIcon className="w-4 h-4 text-[#0A0F0A]" />
+                  </div>
+                  <span className="text-white font-medium">AI-Optimalisatie</span>
+                </div>
+                <div className="flex items-center gap-3 p-3 bg-[#181F17] rounded-lg">
+                  <div className="w-8 h-8 bg-[#8BAE5A] rounded-full flex items-center justify-center">
+                    <ChartBarIcon className="w-4 h-4 text-[#0A0F0A]" />
+                  </div>
+                  <span className="text-white font-medium">Slimme Schaling</span>
+                </div>
+                <div className="flex items-center gap-3 p-3 bg-[#181F17] rounded-lg">
+                  <div className="w-8 h-8 bg-[#8BAE5A] rounded-full flex items-center justify-center">
+                    <UserIcon className="w-4 h-4 text-[#0A0F0A]" />
+                  </div>
+                  <span className="text-white font-medium">Persoonlijke Plannen</span>
+                </div>
+              </div>
+              
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <button 
+                  onClick={() => {
+                    alert('Mocht je deze onderdelen willen neem dan contact op met Rick voor het upgraden van je pakket');
+                  }}
+                  className="px-6 py-3 bg-gradient-to-r from-[#8BAE5A] to-[#B6C948] text-[#0A0F0A] font-bold rounded-lg hover:from-[#7A9E4A] hover:to-[#A6C838] transition-all duration-200 transform hover:scale-105"
+                >
+                  Upgrade naar Premium
+                </button>
+                <button 
+                  onClick={() => {
+                    alert('Mocht je deze onderdelen willen neem dan contact op met Rick voor het upgraden van je pakket');
+                  }}
+                  className="px-6 py-3 bg-gradient-to-r from-[#FFD700] to-[#FFA500] text-[#0A0F0A] font-bold rounded-lg hover:from-[#E6C200] hover:to-[#E69500] transition-all duration-200 transform hover:scale-105"
+                >
+                  Upgrade naar Lifetime
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // Overview page - show when no plan is selected
   return (
     <div className="min-h-screen bg-[#0A0F0A] p-6">
@@ -1647,153 +1927,158 @@ export default function VoedingsplannenV2Page() {
           className="bg-[#181F17] border border-[#3A4D23] rounded-xl p-6 mb-8"
         >
           <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3">
               <UserIcon className="w-6 h-6 text-[#8BAE5A]" />
               <h2 className="text-xl font-bold text-white">Jouw Profiel</h2>
-            </div>
-            <button
-              onClick={() => setShowUserProfileForm(!showUserProfileForm)}
+              </div>
+              <button
+                onClick={() => setShowUserProfileForm(!showUserProfileForm)}
               className="px-4 py-2 bg-[#8BAE5A] text-[#181F17] rounded-lg hover:bg-[#B6C948] transition-colors font-semibold"
-            >
+              >
               {showUserProfileForm ? 'Verberg' : 'Bewerk Profiel'}
-            </button>
-          </div>
+              </button>
+            </div>
 
-          {/* Current Profile Display */}
+            {/* Current Profile Display */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <div className="bg-[#0A0F0A] rounded-lg p-4">
               <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Gewicht</label>
               <div className="text-2xl font-bold text-white">
                 {userProfile.weight} kg
               </div>
-            </div>
+              </div>
             <div className="bg-[#0A0F0A] rounded-lg p-4">
               <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Activiteitsniveau</label>
               <div className="text-lg font-bold text-white">
-                {userProfile.activity_level === 'sedentary' ? 'Zittend' :
-                 userProfile.activity_level === 'moderate' ? 'Matig' :
-                 userProfile.activity_level === 'very_active' ? 'Lopend' :
-                 'Matig'}
+                {userProfile.activity_level === 'sedentary' ? 'Zittend (1.1)' :
+                 userProfile.activity_level === 'moderate' ? 'Matig (1.3)' :
+                 userProfile.activity_level === 'very_active' ? 'Lopend (1.6)' :
+                 'Matig (1.3)'}
               </div>
-            </div>
+              </div>
             <div className="bg-[#0A0F0A] rounded-lg p-4">
               <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Fitness Doel</label>
               <div className="text-lg font-bold text-white">
-                {userProfile.fitness_goal === 'droogtrainen' ? 'Droogtrainen' :
-                 userProfile.fitness_goal === 'onderhoud' ? 'Onderhoud' :
-                 userProfile.fitness_goal === 'spiermassa' ? 'Spiermassa' :
+                  {userProfile.fitness_goal === 'droogtrainen' ? 'Droogtrainen (-500 kcal)' :
+                 userProfile.fitness_goal === 'onderhoud' ? 'Onderhoud (0 kcal)' :
+                 userProfile.fitness_goal === 'spiermassa' ? 'Spiermassa (+400 kcal)' :
                  userProfile.fitness_goal}
               </div>
+              </div>
             </div>
-          </div>
 
-          {/* Profile Form */}
-          {showUserProfileForm && (
-            <motion.div 
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
+            {/* Profile Form */}
+            {showUserProfileForm && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
               className="bg-[#0A0F0A] rounded-lg p-6"
-            >
-              <form onSubmit={(e) => {
-                e.preventDefault();
+              >
+                <form onSubmit={(e) => {
+                  e.preventDefault();
                 const formData = new FormData(e.target as HTMLFormElement);
                 const profile = {
                   weight: parseFloat(formData.get('weight') as string),
                   height: parseFloat(formData.get('height') as string),
                   age: parseInt(formData.get('age') as string),
-                  gender: 'male' as 'male' | 'female',
+                    gender: formData.get('gender') as 'male' | 'female',
                   activity_level: formData.get('activity_level') as 'sedentary' | 'moderate' | 'very_active',
                   fitness_goal: formData.get('fitness_goal') as 'droogtrainen' | 'onderhoud' | 'spiermassa'
                 };
                 saveUserProfile(profile);
               }}>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Gewicht (kg)</label>
-                    <input
-                      type="number"
-                      name="weight"
-                      defaultValue={userProfile.weight}
+                    <div>
+                      <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Gewicht (kg)</label>
+                      <input
+                        type="number"
+                        name="weight"
+                        defaultValue={userProfile.weight}
                       min="40"
                       max="200"
                       step="0.1"
                       className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white focus:border-[#8BAE5A] focus:outline-none"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Lengte (cm)</label>
-                    <input
-                      type="number"
-                      name="height"
-                      defaultValue={userProfile.height}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Lengte (cm)</label>
+                      <input
+                        type="number"
+                        name="height"
+                        defaultValue={userProfile.height}
                       min="140"
                       max="220"
                       className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white focus:border-[#8BAE5A] focus:outline-none"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Leeftijd</label>
-                    <input
-                      type="number"
-                      name="age"
-                      defaultValue={userProfile.age}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Leeftijd</label>
+                      <input
+                        type="number"
+                        name="age"
+                        defaultValue={userProfile.age}
                       min="16"
                       max="80"
                       className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white focus:border-[#8BAE5A] focus:outline-none"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Geslacht</label>
-                    <div className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white">
-                      Man
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Geslacht</label>
+                      <select
+                        name="gender"
+                        defaultValue={userProfile.gender}
+                      className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white focus:border-[#8BAE5A] focus:outline-none"
+                      >
+                        <option value="male">Man</option>
+                        <option value="female">Vrouw</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Activiteitsniveau</label>
+                      <select
+                        name="activity_level"
+                        defaultValue={userProfile.activity_level}
+                      className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white focus:border-[#8BAE5A] focus:outline-none"
+                    >
+                      <option value="sedentary">Zittend (1.1)</option>
+                      <option value="moderate">Matig (1.3)</option>
+                      <option value="very_active">Lopend (1.6)</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Fitness Doel</label>
+                      <select
+                        name="fitness_goal"
+                        defaultValue={userProfile.fitness_goal}
+                      className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white focus:border-[#8BAE5A] focus:outline-none"
+                      >
+                        <option value="droogtrainen">Droogtrainen (-500 kcal)</option>
+                      <option value="onderhoud">Onderhoud (0 kcal)</option>
+                        <option value="spiermassa">Spiermassa (+400 kcal)</option>
+                      </select>
                     </div>
                   </div>
-                  <div>
-                    <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Activiteitsniveau</label>
-                    <select
-                      name="activity_level"
-                      defaultValue={userProfile.activity_level}
-                      className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white focus:border-[#8BAE5A] focus:outline-none"
-                    >
-                      <option value="sedentary">Zittend</option>
-                      <option value="moderate">Matig</option>
-                      <option value="very_active">Lopend</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Fitness Doel</label>
-                    <select
-                      name="fitness_goal"
-                      defaultValue={userProfile.fitness_goal}
-                      className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white focus:border-[#8BAE5A] focus:outline-none"
-                    >
-                      <option value="droogtrainen">Droogtrainen</option>
-                      <option value="onderhoud">Onderhoud</option>
-                      <option value="spiermassa">Spiermassa</option>
-                    </select>
-                  </div>
-                </div>
                 <div className="mt-6 flex justify-end gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setShowUserProfileForm(false)}
+                    <button
+                      type="button"
+                      onClick={() => setShowUserProfileForm(false)}
                     className="px-4 py-2 bg-gray-600 text-gray-300 rounded-lg hover:bg-gray-500 transition-colors"
-                  >
-                    Annuleren
-                  </button>
+                    >
+                      Annuleren
+                    </button>
                   <button
                     type="submit"
                     className="px-6 py-2 bg-[#8BAE5A] text-[#181F17] rounded-lg hover:bg-[#B6C948] transition-colors font-semibold"
                   >
                     Opslaan
-                  </button>
-                </div>
-              </form>
-            </motion.div>
-          )}
+                    </button>
+                  </div>
+                </form>
+              </motion.div>
+            )}
         </motion.div>
 
         {/* Loading State */}
@@ -1801,7 +2086,7 @@ export default function VoedingsplannenV2Page() {
           <div className="flex justify-center items-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8BAE5A]"></div>
             <span className="ml-3 text-[#8BAE5A]">Voedingsplannen laden...</span>
-          </div>
+              </div>
         )}
 
         {/* Error State */}
@@ -1820,78 +2105,119 @@ export default function VoedingsplannenV2Page() {
         {/* Plans Grid */}
         {!loading && !error && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {plans.map((plan) => {
-              // Calculate personalized targets for this plan
-              const personalizedTargets = calculatePersonalizedTargets(plan);
-              
-              return (
-                <motion.div
-                  key={plan.id}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => handlePlanSelect(plan)}
+          {plans.map((plan) => {
+            // Calculate personalized targets for this plan
+            const personalizedTargets = calculatePersonalizedTargets(plan);
+            
+            return (
+            <motion.div
+              key={plan.id}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => handlePlanSelect(plan)}
                   className="bg-[#181F17] border border-[#3A4D23] rounded-xl p-6 cursor-pointer hover:border-[#B6C948] transition-colors"
                 >
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-xl font-bold text-white">{plan.name}</h3>
                     <div className="px-3 py-1 bg-[#8BAE5A] text-[#181F17] rounded-full text-xs font-semibold">
                       {plan.goal}
-                    </div>
-                  </div>
-                  
-                  <p className="text-[#8BAE5A] text-sm mb-4">{plan.description}</p>
-                  
-                  {/* Target vs Personalized Calories */}
+                </div>
+              </div>
+              
+              <p className="text-[#8BAE5A] text-sm mb-4">{plan.description}</p>
+              
+                  {/* Personalized Calories */}
                   <div className="space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-400 text-sm">Target Calorieën:</span>
-                      <span className="text-[#B6C948] font-semibold">{plan.target_calories} kcal</span>
-                    </div>
-                    
                     {personalizedTargets && (
                       <div className="flex justify-between items-center">
                         <span className="text-gray-400 text-sm">Jouw Calorieën:</span>
                         <span className="text-[#8BAE5A] font-bold text-lg">{personalizedTargets.targetCalories} kcal</span>
-                      </div>
-                    )}
-                    
+                </div>
+        )}
+
                     {/* Macro Breakdown */}
                     <div className="grid grid-cols-3 gap-2 pt-2 border-t border-[#3A4D23]">
                       <div className="text-center">
                         <div className="text-xs text-gray-400">Eiwit</div>
                         <div className="text-sm font-semibold text-white">
                           {personalizedTargets?.targetProtein || plan.target_protein}g
-                        </div>
-                      </div>
+                  </div>
+                  </div>
                       <div className="text-center">
                         <div className="text-xs text-gray-400">Koolhydraten</div>
                         <div className="text-sm font-semibold text-white">
                           {personalizedTargets?.targetCarbs || plan.target_carbs}g
-                        </div>
-                      </div>
+                  </div>
+                  </div>
                       <div className="text-center">
                         <div className="text-xs text-gray-400">Vet</div>
                         <div className="text-sm font-semibold text-white">
                           {personalizedTargets?.targetFat || plan.target_fat}g
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-              );
-            })}
+                </div>
+              </div>
+                </div>
+              </div>
+            </motion.div>
+            );
+          })}
           </div>
         )}
-                                  
+
         {/* No Plans State */}
         {!loading && !error && plans.length === 0 && (
           <div className="text-center py-12">
             <BookOpenIcon className="w-16 h-16 text-gray-500 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-400 mb-2">Geen voedingsplannen gevonden</h3>
             <p className="text-gray-500">Er zijn momenteel geen voedingsplannen beschikbaar.</p>
-          </div>
+                </div>
         )}
-      </div>
+            </div>
+
+      {/* Simple Modal */}
+      {showSimpleModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-[#232D1A] rounded-xl p-6 max-w-md w-full mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-bold text-white">Simpel Modal</h3>
+                  <button
+                onClick={() => setShowSimpleModal(false)}
+                className="text-gray-400 hover:text-white"
+              >
+                ✕
+                  </button>
+              </div>
+            <div className="text-gray-300">
+              <p>Dit is een simpel modal zonder inhoud.</p>
+              <p className="mt-2">We gaan dit stap voor stap uitbreiden.</p>
+                                  </div>
+            <div className="flex justify-end mt-6">
+              <button
+                onClick={() => setShowSimpleModal(false)}
+                className="px-4 py-2 bg-[#8BAE5A] text-[#181F17] rounded-lg hover:bg-[#B6C948] transition-colors"
+              >
+                Sluiten
+              </button>
+            </div>
+                    </div>
+                    </div>
+      )}
+
+      {/* Ingredient Edit Modal */}
+      {showIngredientModal && editingMealType && editingDay && (
+        <IngredientEditModal
+          isOpen={showIngredientModal}
+          onClose={() => {
+            console.log('🔧 DEBUG: Closing ingredient modal');
+            setShowIngredientModal(false);
+            setEditingMealType('');
+            setEditingDay('');
+          }}
+          ingredients={getCurrentIngredients()}
+          onSave={saveEditedIngredients}
+          mealType={editingMealType}
+          day={editingDay}
+        />
+      )}
     </div>
   );
 }
