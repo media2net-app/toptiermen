@@ -12,7 +12,8 @@ import {
   FireIcon,
   HeartIcon,
   ChatBubbleLeftRightIcon,
-  FlagIcon
+  FlagIcon,
+  InformationCircleIcon
 } from '@heroicons/react/24/outline';
 import { useOnboardingV2 } from '@/contexts/OnboardingV2Context';
 import { useRouter } from 'next/navigation';
