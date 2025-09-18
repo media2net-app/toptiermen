@@ -146,7 +146,7 @@ const SetGoalStep = ({ onComplete }: { onComplete: (goal: string) => void }) => 
           value={goal}
           onChange={(e) => setGoal(e.target.value)}
           placeholder="Bijvoorbeeld: Ik wil 10kg afvallen en sterker worden..."
-          className="w-full h-32 p-4 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-[#8BAE5A] resize-none"
+          className="w-full h-32 p-4 bg-[#1a2e1a] border border-[#8BAE5A] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-[#8BAE5A] focus:ring-2 focus:ring-[#8BAE5A] focus:ring-opacity-50 resize-none"
         />
       </div>
 
@@ -456,7 +456,7 @@ export default function OnboardingV2Modal({ isOpen, onClose }: OnboardingV2Modal
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4">
       <div className="bg-gradient-to-br from-[#1a2e1a] via-[#2d4a2d] to-[#1a2e1a] rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-[#8BAE5A]">
         <div className="p-8">
           <div className="flex justify-end items-center mb-8">
