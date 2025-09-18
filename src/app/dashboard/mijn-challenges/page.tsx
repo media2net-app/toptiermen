@@ -379,8 +379,14 @@ export default function MijnChallengesPage() {
     const isOnboardingStep2 = currentStep === 2;
     setShowOnboardingStep3(isOnboardingStep2);
     
-    // Show popup and open library for onboarding step 2
-    if (isOnboardingStep2) {
+    // Show popup and open library for onboarding step 2, but NOT for onboarding V2 users
+    // Onboarding V2 users should see the real page without popups
+    if (isOnboardingStep2 && !isCompleted) {
+      // Don't show popup for onboarding V2 users - they should see the real page
+      setShowOnboardingPopup(false);
+      setShowChallengeLibrary(false);
+    } else if (isOnboardingStep2 && isCompleted) {
+      // Show popup for completed users (old onboarding system)
       setShowOnboardingPopup(true);
       setShowChallengeLibrary(true);
     }
