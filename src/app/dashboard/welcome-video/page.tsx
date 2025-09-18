@@ -2,12 +2,12 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
-import { useOnboarding } from '@/contexts/OnboardingContext';
+import { useOnboardingV2 } from '@/contexts/OnboardingV2Context';
 import { useRouter } from 'next/navigation';
 
 export default function WelcomeVideoPage() {
   const { user } = useSupabaseAuth();
-  const { completeCurrentStep } = useOnboarding();
+  const { completeStep } = useOnboardingV2();
   const router = useRouter();
   const [videoWatched, setVideoWatched] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -22,7 +22,7 @@ export default function WelcomeVideoPage() {
     
     setLoading(true);
     try {
-      await completeCurrentStep();
+      await completeStep(0);
       router.push('/dashboard/profiel');
     } catch (error) {
       console.error('Error completing welcome video step:', error);

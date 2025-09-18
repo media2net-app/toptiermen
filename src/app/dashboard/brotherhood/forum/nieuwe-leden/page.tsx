@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
-import { useOnboarding } from '@/contexts/OnboardingContext';
+import { useOnboardingV2 } from '@/contexts/OnboardingV2Context';
 import { supabase } from '@/lib/supabase';
 import { motion } from 'framer-motion';
 import { 
@@ -42,7 +42,7 @@ interface ForumTopic {
 
 export default function NieuweLedenForumPage() {
   const { user } = useSupabaseAuth();
-  const { isOnboarding, currentStep, completeCurrentStep } = useOnboarding();
+  const { isCompleted, currentStep, completeStep } = useOnboardingV2();
   const [topic, setTopic] = useState<ForumTopic | null>(null);
   const [posts, setPosts] = useState<ForumPost[]>([]);
   const [loading, setLoading] = useState(true);
@@ -164,8 +164,8 @@ export default function NieuweLedenForumPage() {
       toast.success('Bericht geplaatst! Welkom in de community! 🎉');
 
       // If this is onboarding step 5, complete it
-      if (isOnboarding && currentStep === 5) {
-        await completeCurrentStep();
+      if (!isCompleted && currentStep === 5) {
+        await completeStep(5);
       }
 
     } catch (error) {
@@ -226,7 +226,7 @@ export default function NieuweLedenForumPage() {
         </div>
 
         {/* Onboarding Notice */}
-        {isOnboarding && currentStep === 5 && (
+        {!isCompleted && currentStep === 5 && (
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}

@@ -12,7 +12,7 @@ import {
 import { toast } from 'react-hot-toast';
 import PageLayout from '@/components/PageLayout';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
-import { useOnboarding } from "@/contexts/OnboardingContext";
+import { useOnboardingV2 } from "@/contexts/OnboardingV2Context";
 import { useRouter } from 'next/navigation';
 import { useSubscription } from '@/hooks/useSubscription';
 import DynamicPlanViewNew from './components/DynamicPlanViewNew';
@@ -89,7 +89,7 @@ const dietTypes = [
 
 export default function VoedingsplannenPage() {
   const { user, loading: authLoading } = useSupabaseAuth();
-  const { isOnboarding, currentStep: onboardingStep, completeStep } = useOnboarding();
+  const { isCompleted, currentStep: onboardingStep, completeStep } = useOnboardingV2();
   const { hasAccess, loading: subscriptionLoading } = useSubscription();
   const router = useRouter();
 

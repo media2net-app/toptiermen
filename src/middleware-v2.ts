@@ -47,7 +47,7 @@ export async function middleware(req: NextRequest) {
       const hasNutritionAccess = isAdmin || packageType === 'Premium Tier' || packageType === 'Lifetime Tier' || packageType === 'Lifetime Access';
 
       // Calculate current step
-      let currentStep = null;
+      let currentStep: number | null = null;
       let isCompleted = false;
 
       if (onboardingStatus) {
