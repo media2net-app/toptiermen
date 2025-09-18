@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import ClientLayout from '../components/ClientLayout';
-import { CheckCircleIcon, TrophyIcon, FireIcon, BookOpenIcon, CurrencyDollarIcon } from '@heroicons/react/24/solid';
+import { CheckCircleIcon, TrophyIcon, BookOpenIcon, CurrencyDollarIcon } from '@heroicons/react/24/solid';
 import { BeakerIcon as DumbbellIcon, LightBulbIcon as BrainIcon } from '@heroicons/react/24/solid';
 import { toast } from 'react-hot-toast';
 import Link from 'next/link';
@@ -23,12 +23,6 @@ interface DashboardStats {
     total: number;
     completedToday: number;
     completedThisWeek: number;
-    progress: number;
-  };
-  challenges: {
-    active: number;
-    completed: number;
-    totalDays: number;
     progress: number;
   };
   training: {
@@ -121,12 +115,10 @@ export default function Dashboard() {
         // For step 1, stay on dashboard and show modal
         return;
       } else if (currentStep === 2) {
-        redirectPath = '/dashboard/mijn-challenges';
-      } else if (currentStep === 3) {
         redirectPath = '/dashboard/trainingsschemas';
-      } else if (currentStep === 4) {
+      } else if (currentStep === 3) {
         redirectPath = '/dashboard/voedingsplannen-v2';
-      } else if (currentStep === 5) {
+      } else if (currentStep === 4) {
         redirectPath = '/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden';
       }
       
@@ -177,7 +169,6 @@ export default function Dashboard() {
           // Set minimal fallback data (not mock, just empty)
           setStats({
             missions: { total: 0, completedToday: 0, completedThisWeek: 0, progress: 0 },
-            challenges: { active: 0, completed: 0, totalDays: 0, progress: 0 },
             training: { hasActiveSchema: false, currentDay: 0, totalDays: 0, weeklySessions: 0, progress: 0 },
             mindFocus: { total: 0, completedToday: 0, progress: 0 },
             boekenkamer: { total: 0, completedToday: 0, progress: 0 },
@@ -194,7 +185,6 @@ export default function Dashboard() {
         // Set minimal fallback data (not mock, just empty)
         setStats({
           missions: { total: 0, completedToday: 0, completedThisWeek: 0, progress: 0 },
-          challenges: { active: 0, completed: 0, totalDays: 0, progress: 0 },
           training: { hasActiveSchema: false, currentDay: 0, totalDays: 0, weeklySessions: 0, progress: 0 },
           mindFocus: { total: 0, completedToday: 0, progress: 0 },
           boekenkamer: { total: 0, completedToday: 0, progress: 0 },
@@ -378,26 +368,6 @@ export default function Dashboard() {
               </div>
             </Link>
 
-            {/* Challenges */}
-            <Link href="/dashboard/challenges" className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-4 sm:p-6 text-center transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#8BAE5A]/50 cursor-pointer block">
-              <div className="flex items-center justify-between mb-3 sm:mb-4">
-                <h3 className="text-lg sm:text-xl font-bold text-white">Challenges</h3>
-                <FireIcon className="w-6 h-6 text-[#8BAE5A]" />
-              </div>
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-2xl sm:text-3xl font-bold text-[#FFD700]">{stats?.challenges.active || 0}</span>
-                <span className="text-[#8BAE5A] text-sm sm:text-base">actief</span>
-              </div>
-              <div className="w-full h-2 bg-[#3A4D23]/40 rounded-full">
-                <div 
-                  className="h-2 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] rounded-full transition-all duration-700" 
-                  style={{ width: `${stats?.challenges.progress || 0}%` }}
-                ></div>
-              </div>
-              <div className="text-xs text-gray-400 mt-2">
-                {stats?.challenges.totalDays || 0} dagen voltooid
-              </div>
-            </Link>
 
             {/* Mijn Trainingen */}
             <Link href="/dashboard/mijn-trainingen" className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-4 sm:p-6 text-center transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#8BAE5A]/50 cursor-pointer block">

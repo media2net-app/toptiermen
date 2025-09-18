@@ -40,7 +40,6 @@ async function fetchDashboardStats(userId: string) {
     // Fetch all stats in parallel
     const [
       missionsStats,
-      challengesStats,
       trainingStats,
       mindFocusStats,
       boekenkamerStats,
@@ -52,8 +51,6 @@ async function fetchDashboardStats(userId: string) {
     ] = await Promise.all([
       // Missions stats
       fetchMissionsStats(userId),
-      // Challenges stats
-      fetchChallengesStats(userId),
       // Training stats
       fetchTrainingStats(userId),
       // Mind & Focus stats
@@ -74,7 +71,6 @@ async function fetchDashboardStats(userId: string) {
 
     const stats = {
       missions: missionsStats,
-      challenges: challengesStats,
       training: trainingStats,
       mindFocus: mindFocusStats,
       boekenkamer: boekenkamerStats,
@@ -83,7 +79,7 @@ async function fetchDashboardStats(userId: string) {
       academy: academyStats,
       xp: xpStats,
       summary: {
-        totalProgress: calculateTotalProgress(missionsStats, challengesStats, trainingStats, mindFocusStats, boekenkamerStats, financeStats, brotherhoodStats, academyStats)
+        totalProgress: calculateTotalProgress(missionsStats, trainingStats, mindFocusStats, boekenkamerStats, financeStats, brotherhoodStats, academyStats)
       }
     };
 
@@ -129,35 +125,6 @@ async function fetchMissionsStats(userId: string) {
   }
 }
 
-async function fetchChallengesStats(userId: string) {
-  try {
-    // Get user challenges
-    const { data: challenges, error } = await supabaseAdmin
-      .from('user_challenges')
-      .select('*')
-      .eq('user_id', userId);
-
-    if (error) {
-      console.error('Error fetching challenges:', error);
-      return { active: 0, completed: 0, totalDays: 0, progress: 0 };
-    }
-
-    const activeChallenges = challenges?.filter(c => c.status === 'active').length || 0;
-    const completedChallenges = challenges?.filter(c => c.status === 'completed').length || 0;
-    const totalDays = challenges?.reduce((sum, c) => sum + (c.current_streak || 0), 0) || 0;
-    const progress = activeChallenges > 0 ? Math.round((totalDays / (activeChallenges * 30)) * 100) : 0;
-
-    return {
-      active: activeChallenges,
-      completed: completedChallenges,
-      totalDays,
-      progress
-    };
-  } catch (error) {
-    console.error('Error fetching challenges stats:', error);
-    return { active: 0, completed: 0, totalDays: 0, progress: 0 };
-  }
-}
 
 async function fetchTrainingStats(userId: string) {
   try {
@@ -525,10 +492,9 @@ async function fetchAcademyStats(userId: string) {
   }
 }
 
-function calculateTotalProgress(missions: any, challenges: any, training: any, mindFocus: any, boekenkamer: any, finance: any, brotherhood: any, academy: any) {
+function calculateTotalProgress(missions: any, training: any, mindFocus: any, boekenkamer: any, finance: any, brotherhood: any, academy: any) {
   const progressValues = [
     missions.progress,
-    challenges.progress,
     training.progress,
     mindFocus.progress,
     boekenkamer.progress,

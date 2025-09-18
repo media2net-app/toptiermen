@@ -42,10 +42,18 @@ export function useSubscription(): UseSubscriptionReturn {
     if (cachedData) {
       try {
         const parsed = JSON.parse(cachedData);
-        console.log('🚀 Using cached subscription data:', parsed);
-        setSubscription(parsed);
-        setLoading(false);
-        return;
+        // Check if cache is still valid (2 minutes)
+        const cacheTime = parsed.cacheTime || 0;
+        const now = Date.now();
+        if (now - cacheTime < 2 * 60 * 1000) {
+          console.log('🚀 Using cached subscription data:', parsed);
+          setSubscription(parsed);
+          setLoading(false);
+          return;
+        } else {
+          console.log('⏰ Cache expired, fetching fresh data');
+          sessionStorage.removeItem(cacheKey);
+        }
       } catch (e) {
         console.log('⚠️ Invalid cached data, fetching fresh data');
         sessionStorage.removeItem(cacheKey);
@@ -94,26 +102,26 @@ export function useSubscription(): UseSubscriptionReturn {
           return;
         }
 
-        // Use subscription_tier or package_type for tier mapping
-        let tier = profile.subscription_tier || 'basic';
+        // Use package_type as primary source, fallback to subscription_tier
+        let tier = 'basic';
         
-        // Normalize tier values to lowercase for consistent comparison
-        if (tier && typeof tier === 'string') {
-          const normalizedTier = tier.toLowerCase();
-          if (normalizedTier.includes('premium')) {
+        // First check package_type (primary source)
+        if (profile.package_type) {
+          const packageType = profile.package_type.toLowerCase();
+          if (packageType.includes('premium')) {
             tier = 'premium';
-          } else if (normalizedTier.includes('lifetime')) {
+          } else if (packageType.includes('lifetime')) {
             tier = 'lifetime';
           } else {
             tier = 'basic';
           }
         }
-        
-        // If no subscription_tier, use package_type
-        if (!profile.subscription_tier && profile.package_type) {
-          if (profile.package_type === 'Premium Tier') {
+        // Fallback to subscription_tier if no package_type
+        else if (profile.subscription_tier) {
+          const subscriptionTier = profile.subscription_tier.toLowerCase();
+          if (subscriptionTier.includes('premium')) {
             tier = 'premium';
-          } else if (profile.package_type === 'Lifetime Tier' || profile.package_type === 'Lifetime Access') {
+          } else if (subscriptionTier.includes('lifetime')) {
             tier = 'lifetime';
           } else {
             tier = 'basic';
@@ -121,9 +129,10 @@ export function useSubscription(): UseSubscriptionReturn {
         }
 
         console.log('✅ Subscription data loaded:', {
+          package_type: profile.package_type,
           subscription_tier: profile.subscription_tier,
           subscription_status: profile.subscription_status,
-          tier,
+          final_tier: tier,
           role: profile.role
         });
 
@@ -133,12 +142,13 @@ export function useSubscription(): UseSubscriptionReturn {
           billing_period: 'monthly',
           start_date: new Date().toISOString(),
           end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-          status: 'active' // Default to active
+          status: 'active', // Default to active
+          cacheTime: Date.now() // Add cache timestamp
         };
 
         setSubscription(subscriptionData);
         
-        // Cache the subscription data for 5 minutes
+        // Cache the subscription data for 2 minutes (shorter cache for testing)
         sessionStorage.setItem(cacheKey, JSON.stringify(subscriptionData));
         
       } catch (err) {

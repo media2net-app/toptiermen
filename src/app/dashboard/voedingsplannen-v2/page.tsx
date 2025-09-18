@@ -1089,7 +1089,7 @@ export default function VoedingsplannenV2Page() {
                   <h1 className="text-2xl font-bold text-white">{selectedPlan.name}</h1>
                   <p className="text-[#8BAE5A]">
                     {userProfile && userProfile.weight !== 100 
-                      ? `Smart Scaling Toegepast - Aangepast voor ${userProfile.weight}kg gebruiker`
+                      ? `Aangepast voor ${userProfile.weight}kg gebruiker`
                       : 'Originele Backend Data - 1:1 zoals opgeslagen in database'
                     }
                   </p>
@@ -1144,13 +1144,6 @@ export default function VoedingsplannenV2Page() {
                 </div>
               </div>
 
-              {/* Confirmation Message */}
-              <div className="mt-4 bg-green-600 rounded-lg p-3 flex items-center gap-2">
-                <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                </svg>
-                <span className="text-white font-medium">Macro verdeling is correct (100%)</span>
-              </div>
             </div>
 
             {/* Your Profile Data Section */}
@@ -1169,10 +1162,16 @@ export default function VoedingsplannenV2Page() {
                   <div className="bg-[#181F17] rounded-lg p-4">
                     <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Activiteitsniveau</label>
                     <div className="text-lg font-bold text-white">
-                      {userProfile.activity_level === 'sedentary' ? 'Zittend' :
-                       userProfile.activity_level === 'moderate' ? 'Matig' :
-                       userProfile.activity_level === 'very_active' ? 'Lopend' :
-                       'Matig'}
+                      {userProfile.activity_level === 'sedentary' ? 'Zittend (Licht actief)' :
+                       userProfile.activity_level === 'moderate' ? 'Staand (Matig actief)' :
+                       userProfile.activity_level === 'very_active' ? 'Lopend (Zeer actief)' :
+                       'Staand (Matig actief)'}
+                    </div>
+                    <div className="text-sm text-gray-300 mt-1">
+                      {userProfile.activity_level === 'sedentary' ? 'Kantoorbaan, weinig beweging' :
+                       userProfile.activity_level === 'moderate' ? 'Staand werk, regelmatige beweging' :
+                       userProfile.activity_level === 'very_active' ? 'Fysiek werk, veel beweging' :
+                       'Staand werk, regelmatige beweging'}
                     </div>
                   </div>
 
@@ -1210,89 +1209,9 @@ export default function VoedingsplannenV2Page() {
                   </div>
                 </div>
 
-                {/* TTM Formula Display */}
-                <div className="mt-6 bg-[#181F17] rounded-lg p-4">
-                  <h4 className="text-[#8BAE5A] font-bold text-lg mb-2">TTM Formule Berekening</h4>
-                  <div className="text-white text-sm">
-                    <div className="mb-2">
-                      <strong>Basis formule:</strong> {userProfile.weight}kg × 22 × {userProfile.activity_level === 'sedentary' ? '1.1' :
-                       userProfile.activity_level === 'moderate' ? '1.3' :
-                       userProfile.activity_level === 'very_active' ? '1.6' : '1.3'} = {Math.round(userProfile.weight * 22 * (userProfile.activity_level === 'sedentary' ? 1.1 :
-                       userProfile.activity_level === 'moderate' ? 1.3 :
-                       userProfile.activity_level === 'very_active' ? 1.6 : 1.3))} kcal
-                    </div>
-                    <div>
-                      <strong>Met doel:</strong> {Math.round(userProfile.weight * 22 * (userProfile.activity_level === 'sedentary' ? 1.1 :
-                       userProfile.activity_level === 'moderate' ? 1.3 :
-                       userProfile.activity_level === 'very_active' ? 1.6 : 1.3))} kcal {userProfile.fitness_goal === 'droogtrainen' ? '- 500' :
-                       userProfile.fitness_goal === 'onderhoud' ? '+ 0' :
-                       userProfile.fitness_goal === 'spiermassa' ? '+ 400' : '+ 0'} = {Math.round(userProfile.weight * 22 * (userProfile.activity_level === 'sedentary' ? 1.1 :
-                       userProfile.activity_level === 'moderate' ? 1.3 :
-                       userProfile.activity_level === 'very_active' ? 1.6 : 1.3)) + (userProfile.fitness_goal === 'droogtrainen' ? -500 :
-                       userProfile.fitness_goal === 'onderhoud' ? 0 :
-                       userProfile.fitness_goal === 'spiermassa' ? 400 : 0)} kcal
-                    </div>
-                  </div>
-                </div>
               </div>
             )}
 
-            {/* Plan Information Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Left Column - Plan Info */}
-              <div>
-                <h3 className="text-xl font-bold text-white mb-4">Plan Informatie</h3>
-                <div className="space-y-3">
-                  <div>
-                    <span className="text-[#8BAE5A] font-medium">Naam:</span>
-                    <span className="text-white ml-2">{originalPlanData.name}</span>
-                  </div>
-                  <div>
-                    <span className="text-[#8BAE5A] font-medium">Plan ID:</span>
-                    <span className="text-white ml-2">{originalPlanData.plan_id}</span>
-                  </div>
-                  <div>
-                    <span className="text-[#8BAE5A] font-medium">Beschrijving:</span>
-                    <p className="text-white mt-1">{selectedPlan.description}</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Right Column - Macro Targets */}
-              <div>
-                <h3 className="text-xl font-bold text-white mb-4">Macro Doelen</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-[#0A0F0A] rounded-lg p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <FireIcon className="w-5 h-5 text-[#B6C948]" />
-                      <span className="text-[#8BAE5A] font-medium">Calorieën</span>
-                    </div>
-                    <p className="text-2xl font-bold text-white">{personalizedTargets?.targetCalories || originalPlanData.target_calories} kcal</p>
-                  </div>
-                  <div className="bg-[#0A0F0A] rounded-lg p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <ChartBarIcon className="w-5 h-5 text-[#B6C948]" />
-                      <span className="text-[#8BAE5A] font-medium">Eiwit</span>
-                    </div>
-                    <p className="text-2xl font-bold text-white">{personalizedTargets?.targetProtein || originalPlanData.target_protein}g</p>
-                  </div>
-                  <div className="bg-[#0A0F0A] rounded-lg p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <ClockIcon className="w-5 h-5 text-[#B6C948]" />
-                      <span className="text-[#8BAE5A] font-medium">Koolhydraten</span>
-                    </div>
-                    <p className="text-2xl font-bold text-white">{personalizedTargets?.targetCarbs || originalPlanData.target_carbs}g</p>
-                  </div>
-                  <div className="bg-[#0A0F0A] rounded-lg p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <HeartIcon className="w-5 h-5 text-[#B6C948]" />
-                      <span className="text-[#8BAE5A] font-medium">Vet</span>
-                    </div>
-                    <p className="text-2xl font-bold text-white">{personalizedTargets?.targetFat || originalPlanData.target_fat}g</p>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         </motion.div>
 
@@ -1726,14 +1645,9 @@ export default function VoedingsplannenV2Page() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 bg-gradient-to-r from-[#B6C948] to-[#8BAE5A] rounded-full flex items-center justify-center">
-              <RocketLaunchIcon className="w-6 h-6 text-[#181F17]" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold text-white">Voedingsplannen V2</h1>
-              <p className="text-[#B6C948]">Slimme schalingsfactor met AI-optimalisatie</p>
-            </div>
+          <div className="mb-4">
+            <h1 className="text-3xl font-bold text-white">Voedingsplannen</h1>
+            <p className="text-[#B6C948]">Persoonlijk op basis van gewicht, doel en activiteitsniveau</p>
           </div>
         </motion.div>
 
@@ -1769,10 +1683,16 @@ export default function VoedingsplannenV2Page() {
               <div className="bg-[#0A0F0A] rounded-lg p-4">
                 <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Activiteitsniveau</label>
                 <div className="text-lg font-bold text-white">
-                  {userProfile.activity_level === 'sedentary' ? 'Zittend' :
-                   userProfile.activity_level === 'moderate' ? 'Matig' :
-                   userProfile.activity_level === 'very_active' ? 'Lopend' :
-                   'Matig'}
+                  {userProfile.activity_level === 'sedentary' ? 'Zittend (Licht actief)' :
+                   userProfile.activity_level === 'moderate' ? 'Staand (Matig actief)' :
+                   userProfile.activity_level === 'very_active' ? 'Lopend (Zeer actief)' :
+                   'Staand (Matig actief)'}
+                </div>
+                <div className="text-sm text-gray-300 mt-1">
+                  {userProfile.activity_level === 'sedentary' ? 'Kantoorbaan, weinig beweging' :
+                   userProfile.activity_level === 'moderate' ? 'Staand werk, regelmatige beweging' :
+                   userProfile.activity_level === 'very_active' ? 'Fysiek werk, veel beweging' :
+                   'Staand werk, regelmatige beweging'}
                 </div>
               </div>
               <div className="bg-[#0A0F0A] rounded-lg p-4">
@@ -1863,9 +1783,9 @@ export default function VoedingsplannenV2Page() {
                       required
                     >
                       <option value="">Selecteer activiteitsniveau</option>
-                      <option value="sedentary">Zittend</option>
-                      <option value="moderate">Matig</option>
-                      <option value="very_active">Lopend</option>
+                      <option value="sedentary">Zittend (Licht actief) - Kantoorbaan, weinig beweging</option>
+                      <option value="moderate">Staand (Matig actief) - Staand werk, regelmatige beweging</option>
+                      <option value="very_active">Lopend (Zeer actief) - Fysiek werk, veel beweging</option>
                     </select>
                   </div>
                   <div>

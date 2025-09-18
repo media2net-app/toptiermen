@@ -10,6 +10,8 @@ import { useOnboardingV2 } from '@/contexts/OnboardingV2Context';
 import { useDebug } from '@/contexts/DebugContext';
 import { useTestUser } from '@/hooks/useTestUser';
 import { useSubscription } from '@/hooks/useSubscription';
+import { WorkoutSessionProvider, useWorkoutSession } from '@/contexts/WorkoutSessionContext';
+import FloatingWorkoutWidget from '@/components/FloatingWorkoutWidget';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -32,6 +34,21 @@ import CacheIssueHelper from '@/components/CacheIssueHelper';
 import NotificationBell from '@/components/NotificationBell';
 import InboxIcon from '@/components/InboxIcon';
 import SupportButton from '@/components/SupportButton';
+
+// Workout Widget Component
+const WorkoutWidget = () => {
+  const { session, stopWorkout } = useWorkoutSession();
+  
+  if (!session) return null;
+  
+  return (
+    <FloatingWorkoutWidget
+      session={session}
+      onClose={stopWorkout}
+      onResume={() => {}}
+    />
+  );
+};
 
 // Subscription Tier Display Component
 const SubscriptionTier = () => {
@@ -1263,6 +1280,9 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
         
         {/* Support Button - Fixed position */}
         <SupportButton />
+        
+        {/* Floating Workout Widget */}
+        <WorkoutWidget />
       </div>
     </>
   );
@@ -1271,8 +1291,10 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
 // 2.0.1: Wrapper component with providers
 export default function DashboardContent({ children }: { children: React.ReactNode }) {
   return (
-    <DashboardContentInner>
-      {children}
-    </DashboardContentInner>
+    <WorkoutSessionProvider>
+      <DashboardContentInner>
+        {children}
+      </DashboardContentInner>
+    </WorkoutSessionProvider>
   );
 }

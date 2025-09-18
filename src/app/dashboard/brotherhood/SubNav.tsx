@@ -4,9 +4,7 @@ import { usePathname } from "next/navigation";
 import { 
   HomeIcon, 
   ChatBubbleLeftRightIcon, 
-  UserGroupIcon, 
   UsersIcon, 
-  CalendarDaysIcon,
   FireIcon
 } from "@heroicons/react/24/outline";
 
@@ -34,18 +32,6 @@ const tabs = [
     href: "/dashboard/brotherhood/leden", 
     icon: UsersIcon,
     description: "Brotherhood"
-  },
-  { 
-    label: "Mijn Groepen", 
-    href: "/dashboard/brotherhood/mijn-groepen", 
-    icon: UserGroupIcon,
-    description: "Groepen"
-  },
-  { 
-    label: "Mijn Evenementen", 
-    href: "/dashboard/brotherhood/mijn-evenementen", 
-    icon: CalendarDaysIcon,
-    description: "Events"
   },
 ];
 

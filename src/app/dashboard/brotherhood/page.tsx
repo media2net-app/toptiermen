@@ -136,8 +136,6 @@ export default function Brotherhood() {
             { id: 'social', label: 'Social Feed Connecties', icon: '👥' },
             { id: 'forum', label: 'Forum Discussies', icon: '💬' },
             { id: 'leden', label: 'Leden Brotherhood', icon: '👨‍👨‍👦' },
-            { id: 'groepen', label: 'Mijn Groepen Groepen', icon: '👨‍👨‍👦' },
-            { id: 'evenementen', label: 'Mijn Evenementen Events', icon: '📅' }
           ].map((tab) => (
             <button
               key={tab.id}

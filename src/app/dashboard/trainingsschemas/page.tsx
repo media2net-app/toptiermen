@@ -495,154 +495,68 @@ function TrainingschemasContent() {
     
     console.log(`🎯 Mapping frontend goal "${profile.training_goal}" to database goal "${dbGoal}"`);
     
-    // SMART FILTERING: Always show exactly 3 schemas (1, 2, 3) for the user's goal
-    // Strategy: Find the best available schemas for each schema number
+    // SIMPLIFIED FILTERING: Filter by goal, equipment, and frequency
+    // Priority: exact frequency match > equipment match > goal match
       
-    // Step 1: Find all schemas for this goal + equipment combination
-    const goalEquipmentMatches = schemas.filter(schema => {
+    // Step 1: Find schemas that match goal + equipment + frequency (perfect match)
+    const perfectMatches = schemas.filter(schema => {
       const goalMatch = schema.training_goal === dbGoal;
       const equipmentMatch = schema.equipment_type === profile.equipment_type;
-      const days = schema.training_schema_days?.length || 0;
+      const frequencyMatch = (schema.training_schema_days?.length || 0) === profile.training_frequency;
       
-      console.log(`🔍 Schema "${schema.name}": goal=${goalMatch} (${schema.training_goal} vs ${dbGoal}), equipment=${equipmentMatch} (${schema.equipment_type} vs ${profile.equipment_type}), days=${days}`);
+      console.log(`🔍 Schema "${schema.name}": goal=${goalMatch}, equipment=${equipmentMatch}, frequency=${frequencyMatch} (${schema.training_schema_days?.length || 0} days vs ${profile.training_frequency})`);
+      
+      return goalMatch && equipmentMatch && frequencyMatch;
+    });
+    
+    console.log(`🎯 Perfect matches (goal + equipment + frequency): ${perfectMatches.length}`);
+    perfectMatches.forEach(schema => {
+      console.log(`  ✅ "${schema.name}" - ${schema.training_schema_days?.length || 0} dagen (${schema.schema_nummer})`);
+    });
+    
+    // Step 2: If no perfect matches, find goal + frequency matches (any equipment)
+    const goalFrequencyMatches = perfectMatches.length > 0 ? perfectMatches : schemas.filter(schema => {
+      const goalMatch = schema.training_goal === dbGoal;
+      const frequencyMatch = (schema.training_schema_days?.length || 0) === profile.training_frequency;
+      
+      return goalMatch && frequencyMatch;
+    });
+    
+    console.log(`🎯 Goal + frequency matches: ${goalFrequencyMatches.length}`);
+    
+    // Step 3: If still no matches, find goal + equipment matches (any frequency)
+    const goalEquipmentMatches = goalFrequencyMatches.length > 0 ? goalFrequencyMatches : schemas.filter(schema => {
+      const goalMatch = schema.training_goal === dbGoal;
+      const equipmentMatch = schema.equipment_type === profile.equipment_type;
       
       return goalMatch && equipmentMatch;
     });
     
     console.log(`🎯 Goal + equipment matches: ${goalEquipmentMatches.length}`);
-    goalEquipmentMatches.forEach(schema => {
-      const days = schema.training_schema_days?.length || 0;
-      console.log(`  ✅ "${schema.name}" - ${days} dagen (${schema.schema_nummer})`);
-    });
     
-    // Step 2: If no equipment matches, fall back to goal only
-    const goalMatches = goalEquipmentMatches.length > 0 ? goalEquipmentMatches : schemas.filter(schema => {
+    // Step 4: Final fallback - just goal matches
+    const finalMatches = goalEquipmentMatches.length > 0 ? goalEquipmentMatches : schemas.filter(schema => {
       return schema.training_goal === dbGoal;
     });
     
-    console.log(`🎯 Using ${goalEquipmentMatches.length > 0 ? 'goal + equipment' : 'goal only'} matches: ${goalMatches.length}`);
+    console.log(`🎯 Final matches: ${finalMatches.length}`);
     
-    // Step 3: Group by schema_nummer and select the best schema for each number
-    const schemaGroups = {};
-    
-    goalMatches.forEach(schema => {
-      const num = schema.schema_nummer || 1;
-      if (!schemaGroups[num]) {
-        schemaGroups[num] = [];
-      }
-      schemaGroups[num].push(schema);
-    });
-    
-    console.log(`🎯 Available schema groups:`, Object.keys(schemaGroups).map(n => `${n}: ${schemaGroups[n].length}`).join(', '));
-    
-    // Step 4: Select the best schema for each number (1, 2, 3)
-    const finalSchemas: TrainingSchema[] = [];
-    
-    for (let i = 1; i <= 3; i++) {
-      if (schemaGroups[i] && schemaGroups[i].length > 0) {
-        // Select the best schema for this number
-        let bestSchema = schemaGroups[i][0];
-        
-        // Priority: exact frequency match > equipment match > first available
-        for (const schema of schemaGroups[i]) {
-          const schemaDays = schema.training_schema_days?.length || 0;
-          const currentDays = bestSchema.training_schema_days?.length || 0;
-          
-          console.log(`  🔍 Comparing "${schema.name}" (${schemaDays} days) vs "${bestSchema.name}" (${currentDays} days) for frequency ${profile.training_frequency}`);
-          
-          // Prefer exact frequency match
-          if (schemaDays === profile.training_frequency && currentDays !== profile.training_frequency) {
-            console.log(`  ✅ Exact frequency match found: "${schema.name}" (${schemaDays} days)`);
-            bestSchema = schema;
-            break;
-          }
-          // Prefer same equipment type
-          if (schema.equipment_type === profile.equipment_type && bestSchema.equipment_type !== profile.equipment_type) {
-            console.log(`  ✅ Equipment match found: "${schema.name}" (${schema.equipment_type})`);
-            bestSchema = schema;
-          }
-        }
-        
-        finalSchemas.push(bestSchema);
-        console.log(`  ✅ Schema ${i}: Selected "${bestSchema.name}" (${bestSchema.equipment_type}, ${bestSchema.training_schema_days?.length || 0} days)`);
-      } else {
-        console.log(`  ❌ Schema ${i}: No schemas available`);
-      }
-    }
-    
-    // If we still don't have 3 schemas, fill with the best available from other numbers
-    if (finalSchemas.length < 3) {
-      console.log('⚠️ Less than 3 schemas found, filling with best available...');
-      
-      // Get all remaining schemas not already selected
-      const remaining = goalMatches.filter(schema => 
-        !finalSchemas.find(selected => selected.id === schema.id)
-      );
-      
-      // Sort by priority: exact frequency > equipment match > schema number
-      remaining.sort((a, b) => {
-        const aDays = a.training_schema_days?.length || 0;
-        const bDays = b.training_schema_days?.length || 0;
-        
-        // Exact frequency match first
-        if (aDays === profile.training_frequency && bDays !== profile.training_frequency) return -1;
-        if (bDays === profile.training_frequency && aDays !== profile.training_frequency) return 1;
-        
-        // Equipment match second
-        if (a.equipment_type === profile.equipment_type && b.equipment_type !== profile.equipment_type) return -1;
-        if (b.equipment_type === profile.equipment_type && a.equipment_type !== profile.equipment_type) return 1;
-        
-        // Schema number third
-        return (a.schema_nummer || 0) - (b.schema_nummer || 0);
-      });
-      
-      // Add remaining schemas to reach 3 total
-      while (finalSchemas.length < 3 && remaining.length > 0) {
-        const nextSchema = remaining.shift();
-        if (nextSchema) {
-          finalSchemas.push(nextSchema);
-          console.log(`  ➕ Added Schema ${nextSchema.schema_nummer}: "${nextSchema.name}" (${nextSchema.equipment_type}, ${nextSchema.training_schema_days?.length || 0} days)`);
-        }
-      }
-      
-      // If still not enough schemas, use all available schemas for this goal (fallback to any equipment)
-      if (finalSchemas.length < 3) {
-        console.log('⚠️ Still not enough schemas, using all available for this goal...');
-        const allGoalSchemas = schemas.filter(schema => schema.training_goal === dbGoal);
-        const notSelected = allGoalSchemas.filter(schema => 
-          !finalSchemas.find(selected => selected.id === schema.id)
-        );
-        
-        // Sort by schema number priority
-        notSelected.sort((a, b) => {
-        const aNum = a.schema_nummer || 0;
-        const bNum = b.schema_nummer || 0;
-        return aNum - bNum;
-        });
-        
-        while (finalSchemas.length < 3 && notSelected.length > 0) {
-          const nextSchema = notSelected.shift();
-          if (nextSchema) {
-            finalSchemas.push(nextSchema);
-            console.log(`  ➕ Added fallback Schema ${nextSchema.schema_nummer}: "${nextSchema.name}" (${nextSchema.equipment_type}, ${nextSchema.training_schema_days?.length || 0} days)`);
-          }
-        }
-      }
-    }
-    
-    // Sort by schema_nummer to ensure 1, 2, 3 order
-    finalSchemas.sort((a, b) => {
+    // Step 5: Sort by schema number and return up to 3 schemas
+    const sortedSchemas = finalMatches.sort((a, b) => {
       const aNum = a.schema_nummer || 0;
       const bNum = b.schema_nummer || 0;
       return aNum - bNum;
     });
     
-    console.log('✅ Final filtered schemas:', finalSchemas.length);
-    finalSchemas.forEach((schema, index) => {
+    // Return first 3 schemas
+    const result = sortedSchemas.slice(0, 3);
+    
+    console.log('✅ Final filtered schemas:', result.length);
+    result.forEach((schema, index) => {
       console.log(`  ${index + 1}. Schema ${schema.schema_nummer}: "${schema.name}" (${schema.training_goal}, ${schema.equipment_type}, ${schema.training_schema_days?.length || 0} days)`);
     });
     
-    return finalSchemas;
+    return result;
   };
 
   // OPTIMIZED: Create basic profile function with enhanced debugging
@@ -1628,7 +1542,6 @@ function TrainingschemasContent() {
             <>
               {/* Header */}
               <div className="mb-4 sm:mb-6 md:mb-8">
-                <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">Trainingsschemas</h1>
                 <p className="text-sm sm:text-base text-gray-300">
                   Kies en beheer je trainingsschemas voor optimale resultaten
                 </p>
@@ -1989,7 +1902,7 @@ function TrainingschemasContent() {
                   </div>
                   <div>
                     <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-white">Beschikbare Trainingsschemas</h2>
-                    <p className="text-xs sm:text-sm text-gray-400">Gepersonaliseerd voor jouw profiel</p>
+                    <p className="text-xs sm:text-sm text-gray-400">Beschikbaar op basis van jouw profiel</p>
                     <div className="mt-2 p-3 bg-[#8BAE5A]/10 border border-[#8BAE5A]/30 rounded-lg">
                       <p className="text-xs sm:text-sm text-[#8BAE5A] leading-relaxed">
                         <span className="font-semibold">📅 8-weken systeem:</span> De trainingsschemas gaan per 8 weken. Zodra je schema 1 hebt afgerond, wordt schema 2 beschikbaar. <span className="font-semibold">Consistentie zorgt voor resultaat</span> - daarom is het belangrijk een schema voor minimaal 8 weken te volgen.
@@ -2122,18 +2035,6 @@ function TrainingschemasContent() {
                       </span>
                     </div>
 
-                    <div className="flex flex-col gap-2 sm:gap-3">
-                      <button
-                        onClick={() => !isLocked && handleViewDynamicPlan(schema.id, schema.name)}
-                        disabled={isLocked}
-                        className={`w-full py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium transition-colors text-xs sm:text-sm ${
-                          isLocked
-                            ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
-                            : 'bg-[#8BAE5A] text-[#232D1A] hover:bg-[#7A9D4A] shadow-lg shadow-[#8BAE5A]/20'
-                        }`}
-                      >
-                        Bekijk schema
-                      </button>
                       <div className="flex gap-2">
                         <button
                           onClick={() => !isLocked && selectTrainingSchema(schema.id)}
@@ -2160,7 +2061,6 @@ function TrainingschemasContent() {
                         >
                           <PrinterIcon className="w-4 h-4" />
                         </button>
-                      </div>
                     </div>
                   </motion.div>
                   );

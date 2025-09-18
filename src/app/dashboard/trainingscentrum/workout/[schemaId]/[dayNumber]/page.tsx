@@ -18,6 +18,7 @@ import ClientLayout from '../../../../../components/ClientLayout';
 import WorkoutVideoModal from '@/components/WorkoutVideoModal';
 // import WorkoutPlayerModal from '../../WorkoutPlayerModal'; // Removed - file doesn't exist
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { useWorkoutSession } from '@/contexts/WorkoutSessionContext';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'react-hot-toast';
 
@@ -44,6 +45,14 @@ export default function WorkoutPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { user } = useSupabaseAuth();
+  const { 
+    session: globalSession, 
+    startWorkout, 
+    updateSession, 
+    updateRestTimer, 
+    updateProgress,
+    stopWorkout 
+  } = useWorkoutSession();
   
   const schemaId = params?.schemaId as string;
   const dayNumber = parseInt(params?.dayNumber as string);
@@ -181,6 +190,12 @@ export default function WorkoutPage() {
 
           setExercises(transformedExercises);
           console.log('✅ Exercises loaded from workout-data API:', transformedExercises.length);
+          
+          // Load saved set progress if sessionId exists
+          if (sessionId) {
+            await loadSavedSetProgress(transformedExercises);
+          }
+          
           setLoading(false);
           return;
         } else {
@@ -335,9 +350,27 @@ export default function WorkoutPage() {
     }
   };
 
-  const startWorkout = () => {
+  const startWorkoutLocal = () => {
     setIsWorkoutActive(true);
     setIsTimerRunning(true);
+    
+    // Start global workout session
+    if (exercises.length > 0) {
+      const currentExercise = exercises[currentExerciseIndex];
+      startWorkout({
+        id: sessionId || 'local-session',
+        schemaId: schemaId,
+        dayNumber: dayNumber,
+        exerciseName: currentExercise.name,
+        currentSet: currentExercise.currentSet,
+        totalSets: currentExercise.sets,
+        restTime: 0,
+        isRestActive: false,
+        currentExerciseIndex: currentExerciseIndex,
+        totalExercises: exercises.length
+      });
+    }
+    
     toast.success('Workout gestart! 💪');
   };
 
@@ -351,6 +384,72 @@ export default function WorkoutPage() {
     toast.success('Workout hervat!');
   };
 
+  const loadSavedSetProgress = async (exercises: Exercise[]) => {
+    if (!user || !sessionId) return;
+    
+    try {
+      console.log('📊 Loading saved set progress for session:', sessionId);
+      const response = await fetch(`/api/training/save-set-progress?userId=${user.id}&sessionId=${sessionId}`);
+      const data = await response.json();
+      
+      if (data.success && data.data) {
+        console.log('✅ Loaded set progress:', data.data);
+        
+        // Update exercises with saved progress
+        const updatedExercises = exercises.map(exercise => {
+          const savedSets = data.data.filter((set: any) => set.exercise_id === exercise.id);
+          const completedSets = savedSets.length;
+          const isCompleted = completedSets >= exercise.sets;
+          
+          return {
+            ...exercise,
+            currentSet: completedSets,
+            completed: isCompleted
+          };
+        });
+        
+        setExercises(updatedExercises);
+        console.log('✅ Exercises updated with saved progress');
+      }
+    } catch (error) {
+      console.error('❌ Error loading saved set progress:', error);
+    }
+  };
+
+  const saveSetProgress = async (exerciseId: string, setNumber: number, reps?: string, weight?: string) => {
+    if (!user || !sessionId) return;
+    
+    try {
+      const exercise = exercises.find(ex => ex.id === exerciseId);
+      if (!exercise) return;
+      
+      console.log('💾 Saving set progress:', { exerciseId, setNumber, reps, weight });
+      
+      const response = await fetch('/api/training/save-set-progress', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user.id,
+          sessionId: sessionId,
+          exerciseId: exerciseId,
+          exerciseName: exercise.name,
+          setNumber: setNumber,
+          reps: reps,
+          weight: weight,
+          completedAt: new Date().toISOString()
+        })
+      });
+      
+      if (response.ok) {
+        console.log('✅ Set progress saved successfully');
+      } else {
+        console.error('❌ Failed to save set progress');
+      }
+    } catch (error) {
+      console.error('❌ Error saving set progress:', error);
+    }
+  };
+
   const completeSet = (exerciseId: string) => {
     setExercises(prev => 
       prev.map(exercise => {
@@ -358,8 +457,27 @@ export default function WorkoutPage() {
           const newCurrentSet = exercise.currentSet + 1;
           const isCompleted = newCurrentSet >= exercise.sets;
           
-          if (isCompleted) {
-            // Start rest timer for next exercise
+          // Save set progress to database
+          saveSetProgress(exerciseId, newCurrentSet, exercise.reps);
+          
+          // Start rest timer after every set (not just when exercise is completed)
+          if (!isCompleted) {
+            // Still more sets to do - start rest timer for current exercise
+            let restTime: number;
+            if (exercise.rest.includes('min')) {
+              restTime = parseInt(exercise.rest.split(' ')[0]) * 60; // Convert minutes to seconds
+            } else if (exercise.rest.includes('s')) {
+              restTime = parseInt(exercise.rest.replace('s', '')); // Already in seconds
+            } else {
+              restTime = parseInt(exercise.rest) || 120; // Default to 2 minutes
+            }
+            setRestTimer(restTime);
+            setIsRestTimerRunning(true);
+            
+            // Update global session with rest timer
+            updateRestTimer(restTime, true);
+          } else {
+            // Exercise completed - start rest timer for next exercise
             if (currentExerciseIndex < exercises.length - 1) {
               const nextExercise = exercises[currentExerciseIndex + 1];
               // Parse rest time correctly - handle both "2 min" and "120s" formats
@@ -373,8 +491,14 @@ export default function WorkoutPage() {
               }
               setRestTimer(restTime);
               setIsRestTimerRunning(true);
+              
+              // Update global session with rest timer
+              updateRestTimer(restTime, true);
             }
           }
+          
+          // Update global session with progress
+          updateProgress(newCurrentSet, exercise.name, currentExerciseIndex);
           
           return {
             ...exercise,
@@ -400,6 +524,10 @@ export default function WorkoutPage() {
   const skipRest = () => {
     setIsRestTimerRunning(false);
     setRestTimer(0);
+    
+    // Update global session
+    updateRestTimer(0, false);
+    
     toast.success('Rust overgeslagen! 💪');
   };
 
@@ -424,6 +552,9 @@ export default function WorkoutPage() {
       });
 
       if (response.ok) {
+        // Stop global workout session
+        stopWorkout();
+        
         toast.success('Workout voltooid! 🎉');
         router.push('/dashboard/mijn-trainingen');
       }
@@ -492,12 +623,6 @@ export default function WorkoutPage() {
             <div className="text-center">
               <h1 className="text-3xl font-bold text-white">Dag {dayNumber} Training</h1>
               <p className="text-[#8BAE5A]">Interactive Workout</p>
-              <button
-                onClick={() => {/* WorkoutPlayerModal removed */}}
-                className="mt-2 px-4 py-2 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#0A0F0A] font-semibold rounded-lg hover:from-[#FFD700] hover:to-[#8BAE5A] transition-all duration-300 text-sm"
-              >
-                🎮 Workout Player
-              </button>
             </div>
 
             <div className="text-right">
@@ -512,7 +637,7 @@ export default function WorkoutPage() {
           {!isWorkoutActive ? (
             <div className="text-center mb-8 space-y-4">
               <button
-                onClick={startWorkout}
+                onClick={startWorkoutLocal}
                 className="px-8 py-4 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-bold text-lg rounded-xl hover:from-[#7A9D4A] hover:to-[#e0903f] transition-all duration-200"
               >
                 <PlayIcon className="w-6 h-6 inline mr-2" />
