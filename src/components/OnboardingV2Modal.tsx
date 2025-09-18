@@ -384,8 +384,8 @@ export default function OnboardingV2Modal({ isOpen, onClose }: OnboardingV2Modal
   } = useOnboardingV2();
   const router = useRouter();
 
-  // Don't show modal if completed or loading
-  if (!isOpen || isLoading || isCompleted) {
+  // Don't show modal if completed, loading, or for steps 1-4 (only show for step 0 - welcome video)
+  if (!isOpen || isLoading || isCompleted || (currentStep !== null && currentStep > 0)) {
     return null;
   }
 
