@@ -27,56 +27,94 @@ interface OnboardingV2ModalProps {
 const WelcomeVideoStep = ({ onComplete }: { onComplete: () => void }) => {
   const [videoWatched, setVideoWatched] = useState(false);
   const [showOverlay, setShowOverlay] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const handleVideoEnd = () => {
     setVideoWatched(true);
     setShowOverlay(false);
+    setIsPlaying(false);
   };
 
   const handlePlay = () => {
     setShowOverlay(false);
+    setIsPlaying(true);
     if (videoRef.current) {
       videoRef.current.play();
     }
   };
 
+  const handlePause = () => {
+    setIsPlaying(false);
+  };
+
+  const handlePlayEvent = () => {
+    setIsPlaying(true);
+  };
+
   return (
     <div className="text-center">
-      <h2 className="text-2xl font-bold text-white mb-4">Welkom bij Top Tier Men!</h2>
-      <p className="text-gray-300 mb-6">
-        Bekijk deze korte introductievideo om te leren hoe je het meeste uit het platform kunt halen.
-      </p>
+      <div className="mb-6">
+        <h2 className="text-3xl font-bold text-white mb-4">Welkom bij Top Tier Men!</h2>
+        <p className="text-gray-300 text-lg mb-4">
+          Bekijk deze introductievideo om te leren hoe je het meeste uit het platform kunt halen.
+        </p>
+        
+        {/* Notice */}
+        <div className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] rounded-lg p-4 mb-6">
+          <div className="flex items-center justify-center space-x-2">
+            <InformationCircleIcon className="w-5 h-5 text-white" />
+            <p className="text-white font-semibold">
+              Let op: Je moet de video volledig afkijken om door te gaan
+            </p>
+          </div>
+        </div>
+      </div>
       
-      <div className="relative bg-black rounded-lg overflow-hidden mb-6">
+      <div className="relative bg-black rounded-xl overflow-hidden mb-6 shadow-2xl">
         <video
           ref={videoRef}
-          className="w-full h-64 object-cover"
+          className="w-full h-80 object-cover"
           onEnded={handleVideoEnd}
-          poster="/api/placeholder/400/200"
+          onPause={handlePause}
+          onPlay={handlePlayEvent}
+          controls={isPlaying}
         >
-          <source src="/videos/welcome-video.mp4" type="video/mp4" />
+          <source src="/onboarding-v2-video.mp4" type="video/mp4" />
           Je browser ondersteunt geen video element.
         </video>
         
         {showOverlay && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <button
-              onClick={handlePlay}
-              className="bg-[#8BAE5A] hover:bg-[#7A9E4A] text-white p-4 rounded-full transition-colors"
-            >
-              <PlayIcon className="w-8 h-8" />
-            </button>
+          <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-70">
+            <div className="text-center">
+              <button
+                onClick={handlePlay}
+                className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] hover:from-[#7A9E4A] hover:to-[#E6C200] text-white p-6 rounded-full transition-all duration-300 transform hover:scale-110 shadow-2xl"
+              >
+                <PlayIcon className="w-12 h-12" />
+              </button>
+              <p className="text-white mt-4 text-lg font-semibold">Klik om te starten</p>
+            </div>
           </div>
         )}
+      </div>
+
+      {/* Progress indicator */}
+      <div className="mb-6">
+        <div className="flex items-center justify-center space-x-2 mb-2">
+          <div className={`w-3 h-3 rounded-full ${videoWatched ? 'bg-[#8BAE5A]' : 'bg-gray-600'}`}></div>
+          <span className="text-gray-300 text-sm">
+            {videoWatched ? 'Video bekeken ✓' : 'Video nog niet bekeken'}
+          </span>
+        </div>
       </div>
 
       {videoWatched && (
         <button
           onClick={onComplete}
-          className="bg-[#8BAE5A] hover:bg-[#7A9E4A] text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+          className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] hover:from-[#7A9E4A] hover:to-[#E6C200] text-white px-8 py-4 rounded-lg font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-lg"
         >
-          Volgende →
+          Volgende Stap →
         </button>
       )}
     </div>
@@ -113,7 +151,7 @@ const SetGoalStep = ({ onComplete }: { onComplete: (goal: string) => void }) => 
       <button
         onClick={handleSubmit}
         disabled={!goal.trim()}
-        className="bg-[#8BAE5A] hover:bg-[#7A9E4A] disabled:bg-gray-600 disabled:cursor-not-allowed text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+        className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] hover:from-[#7A9E4A] hover:to-[#E6C200] disabled:from-gray-600 disabled:to-gray-600 disabled:cursor-not-allowed text-white px-8 py-4 rounded-lg font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-lg"
       >
         Doel opslaan →
       </button>
@@ -179,7 +217,7 @@ const SelectChallengesStep = ({ onComplete }: { onComplete: (challenges: string[
         <button
           onClick={handleSubmit}
           disabled={selectedChallenges.length < 3}
-          className="bg-[#8BAE5A] hover:bg-[#7A9E4A] disabled:bg-gray-600 disabled:cursor-not-allowed text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+          className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] hover:from-[#7A9E4A] hover:to-[#E6C200] disabled:from-gray-600 disabled:to-gray-600 disabled:cursor-not-allowed text-white px-8 py-4 rounded-lg font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-lg"
         >
           Uitdagingen opslaan →
         </button>
@@ -238,7 +276,7 @@ const SelectTrainingStep = ({ onComplete, onSkip }: { onComplete: (schema: strin
         <button
           onClick={handleSubmit}
           disabled={!selectedSchema}
-          className="flex-1 bg-[#8BAE5A] hover:bg-[#7A9E4A] disabled:bg-gray-600 disabled:cursor-not-allowed text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+          className="flex-1 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] hover:from-[#7A9E4A] hover:to-[#E6C200] disabled:from-gray-600 disabled:to-gray-600 disabled:cursor-not-allowed text-white px-6 py-3 rounded-lg font-bold transition-all duration-300 transform hover:scale-105 shadow-lg"
         >
           Schema opslaan →
         </button>
@@ -297,7 +335,7 @@ const SelectNutritionStep = ({ onComplete, onSkip }: { onComplete: (plan: string
         <button
           onClick={handleSubmit}
           disabled={!selectedPlan}
-          className="flex-1 bg-[#8BAE5A] hover:bg-[#7A9E4A] disabled:bg-gray-600 disabled:cursor-not-allowed text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+          className="flex-1 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] hover:from-[#7A9E4A] hover:to-[#E6C200] disabled:from-gray-600 disabled:to-gray-600 disabled:cursor-not-allowed text-white px-6 py-3 rounded-lg font-bold transition-all duration-300 transform hover:scale-105 shadow-lg"
         >
           Plan opslaan →
         </button>
@@ -324,7 +362,7 @@ const ForumIntroStep = ({ onComplete }: { onComplete: () => void }) => {
 
       <button
         onClick={onComplete}
-        className="bg-[#8BAE5A] hover:bg-[#7A9E4A] text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+        className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] hover:from-[#7A9E4A] hover:to-[#E6C200] text-white px-8 py-4 rounded-lg font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-lg"
       >
         Naar Dashboard →
       </button>
@@ -416,14 +454,19 @@ export default function OnboardingV2Modal({ isOpen, onClose }: OnboardingV2Modal
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-gray-900 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-xl font-bold text-white">Onboarding</h1>
+    <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+      <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-700">
+        <div className="p-8">
+          <div className="flex justify-between items-center mb-8">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] rounded-full flex items-center justify-center">
+                <span className="text-white font-bold text-sm">TTM</span>
+              </div>
+              <h1 className="text-2xl font-bold text-white">Onboarding</h1>
+            </div>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-white transition-colors"
+              className="text-gray-400 hover:text-white transition-colors p-2 hover:bg-gray-700 rounded-full"
             >
               <XMarkIcon className="w-6 h-6" />
             </button>
