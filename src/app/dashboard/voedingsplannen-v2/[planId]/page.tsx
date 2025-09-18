@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { useRouter, useParams } from 'next/navigation';
 import { useSubscription } from '@/hooks/useSubscription';
@@ -173,7 +173,7 @@ export default function NutritionPlanDetailPage() {
     fetchPlans();
   }, [hasBasicAccess, router, authLoading, user, fetchPlans]);
 
-  const loadOriginalPlanData = async (planId: string) => {
+  const loadOriginalPlanData = useCallback(async (planId: string) => {
     try {
       console.log('🔧 DEBUG: loadOriginalPlanData called with planId:', planId);
       setLoadingOriginal(true);
@@ -190,7 +190,7 @@ export default function NutritionPlanDetailPage() {
       if (data.success && data.plan) {
         setOriginalPlanData(data.plan);
       } else {
-      setOriginalPlanData(data);
+        setOriginalPlanData(data);
       }
     } catch (err) {
       console.error('🔧 DEBUG: Error loading original plan data:', err);
@@ -198,7 +198,7 @@ export default function NutritionPlanDetailPage() {
     } finally {
       setLoadingOriginal(false);
     }
-  };
+  }, []);
 
   // Define fetchUserProfile function outside useEffect so it can be reused
   const fetchUserProfile = async () => {
@@ -242,7 +242,7 @@ export default function NutritionPlanDetailPage() {
         loadOriginalPlanData(plan.plan_id || plan.id.toString());
       }
     }
-  }, [plans, planId]);
+  }, [plans, planId, loadOriginalPlanData]);
 
   // Calculate BMR using Mifflin-St Jeor Equation
   const calculateBMR = (weight: number, height: number, age: number, gender: string) => {
@@ -328,6 +328,11 @@ export default function NutritionPlanDetailPage() {
     return [];
   };
 
+  // Function to get ingredient key for custom amounts
+  const getIngredientKey = (mealType: string, ingredientName: string, day: string) => {
+    return `${day}_${mealType}_${ingredientName}`;
+  };
+
   // Open ingredient edit modal
   const openIngredientModal = (mealType: string, day: string) => {
     console.log('🔧 DEBUG: openIngredientModal called with:', { mealType, day });
@@ -351,8 +356,42 @@ export default function NutritionPlanDetailPage() {
     Object.keys(dayData).forEach(mealType => {
       const meal = dayData[mealType];
       
-      if (meal && meal.nutrition) {
-        // Use the nutrition section which already has the total values for the meal
+      if (meal && meal.ingredients && Array.isArray(meal.ingredients)) {
+        // Calculate totals from individual ingredients using custom amounts
+        let mealTotals = { calories: 0, protein: 0, carbs: 0, fat: 0 };
+        
+        meal.ingredients.forEach((ingredient: any) => {
+          // Get custom amount or use original amount
+          const ingredientKey = getIngredientKey(mealType, ingredient.name, day);
+          const customAmount = customAmounts[ingredientKey];
+          let amount = customAmount !== undefined ? customAmount : (ingredient.amount || 0);
+          
+          // Calculate multiplier based on unit type
+          let multiplier = 1;
+          if (ingredient.unit === 'per_piece' || ingredient.unit === 'per_plakje' || ingredient.unit === 'stuk') {
+            multiplier = amount;
+          } else if (ingredient.unit === 'per_100g' || ingredient.unit === 'g') {
+            multiplier = amount / 100;
+          } else if (ingredient.unit === 'per_ml') {
+            multiplier = amount / 100;
+          } else if (ingredient.unit === 'handje') {
+            multiplier = amount;
+          } else {
+            multiplier = amount / 100;
+          }
+          
+          mealTotals.calories += (ingredient.calories_per_100g || 0) * multiplier;
+          mealTotals.protein += (ingredient.protein_per_100g || 0) * multiplier;
+          mealTotals.carbs += (ingredient.carbs_per_100g || 0) * multiplier;
+          mealTotals.fat += (ingredient.fat_per_100g || 0) * multiplier;
+        });
+        
+        totalCalories += mealTotals.calories;
+        totalProtein += mealTotals.protein;
+        totalCarbs += mealTotals.carbs;
+        totalFat += mealTotals.fat;
+      } else if (meal && meal.nutrition) {
+        // Fallback to nutrition section if no ingredients
         totalCalories += meal.nutrition.calories || 0;
         totalProtein += meal.nutrition.protein || 0;
         totalCarbs += meal.nutrition.carbs || 0;
@@ -557,7 +596,15 @@ export default function NutritionPlanDetailPage() {
   }
 
   const personalizedMacros = calculatePersonalizedMacros(selectedPlan.target_calories, userProfile);
-  const dayTotals = calculateDayTotals(selectedDay);
+  // Get current day totals - recalculate when customAmounts change
+  const dayTotals = useMemo(() => {
+    if (!originalPlanData) {
+      console.log('🔄 No originalPlanData available, returning zeros');
+      return { calories: 0, protein: 0, carbs: 0, fat: 0 };
+    }
+    console.log('🔄 Recalculating day totals due to customAmounts change');
+    return calculateDayTotals(selectedDay);
+  }, [selectedDay, customAmounts, originalPlanData]);
 
 
   // Get progress info for each macro using personalized targets
@@ -812,13 +859,27 @@ export default function NutritionPlanDetailPage() {
 
                 // Calculate meal totals
                 const mealTotals = mealData.ingredients.reduce((totals: any, ingredient: any) => {
-                  const customAmount = customAmounts[`${selectedDay}-${mealType}-${ingredient.id}`] || ingredient.amount;
-                  const multiplier = customAmount / ingredient.amount;
+                  const customAmount = customAmounts[getIngredientKey(mealType, ingredient.name, selectedDay)] || ingredient.amount;
+                  let amount = customAmount;
                   
-                  totals.calories += (ingredient.calories || 0) * multiplier;
-                  totals.protein += (ingredient.protein || 0) * multiplier;
-                  totals.carbs += (ingredient.carbs || 0) * multiplier;
-                  totals.fat += (ingredient.fat || 0) * multiplier;
+                  // Calculate multiplier based on unit type
+                  let multiplier = 1;
+                  if (ingredient.unit === 'per_piece' || ingredient.unit === 'per_plakje' || ingredient.unit === 'stuk') {
+                    multiplier = amount;
+                  } else if (ingredient.unit === 'per_100g' || ingredient.unit === 'g') {
+                    multiplier = amount / 100;
+                  } else if (ingredient.unit === 'per_ml') {
+                    multiplier = amount / 100;
+                  } else if (ingredient.unit === 'handje') {
+                    multiplier = amount;
+                  } else {
+                    multiplier = amount / 100;
+                  }
+                  
+                  totals.calories += (ingredient.calories_per_100g || 0) * multiplier;
+                  totals.protein += (ingredient.protein_per_100g || 0) * multiplier;
+                  totals.carbs += (ingredient.carbs_per_100g || 0) * multiplier;
+                  totals.fat += (ingredient.fat_per_100g || 0) * multiplier;
                   
                   return totals;
                 }, { calories: 0, protein: 0, carbs: 0, fat: 0 });
@@ -869,7 +930,7 @@ export default function NutritionPlanDetailPage() {
                           <tbody>
                             {mealData.ingredients.map((ingredient: any, index: number) => {
                               // Get custom amount or use original amount
-                              const ingredientKey = `${selectedDay}-${mealType}-${ingredient.id}`;
+                              const ingredientKey = getIngredientKey(mealType, ingredient.name, selectedDay);
                               const customAmount = customAmounts[ingredientKey];
                               let amount = customAmount !== undefined ? customAmount : (ingredient.amount || 0);
                               

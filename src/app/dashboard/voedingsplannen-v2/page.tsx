@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
@@ -232,7 +232,7 @@ export default function VoedingsplannenV2Page() {
       updatedPlan.meals.weekly_plan[editingDay][editingMealType].ingredients = newIngredients;
       
       // Recalculate meal totals
-      const mealTotals = calculateMealTotals(updatedPlan.meals.weekly_plan[editingDay][editingMealType]);
+      const mealTotals = calculateMealTotals(updatedPlan.meals.weekly_plan[editingDay][editingMealType], editingMealType, editingDay);
       updatedPlan.meals.weekly_plan[editingDay][editingMealType].totals = mealTotals;
       
       // Recalculate day totals
@@ -438,11 +438,18 @@ export default function VoedingsplannenV2Page() {
     return totals;
   };
 
-  // Get current day totals
-  const currentDayTotals = calculateDayTotals(selectedDay);
+  // Get current day totals - recalculate when customAmounts change
+  const currentDayTotals = useMemo(() => {
+    if (!originalPlanData) {
+      console.log('🔄 No originalPlanData available, returning zeros');
+      return { calories: 0, protein: 0, carbs: 0, fat: 0 };
+    }
+    console.log('🔄 Recalculating day totals due to customAmounts change');
+    return calculateDayTotals(selectedDay);
+  }, [selectedDay, customAmounts, originalPlanData]);
 
   // Function to calculate meal totals
-  const calculateMealTotals = (meal: any) => {
+  const calculateMealTotals = (meal: any, mealType?: string, day?: string) => {
     if (!meal?.ingredients || !Array.isArray(meal.ingredients)) {
       return { calories: 0, protein: 0, carbs: 0, fat: 0 };
     }
@@ -450,9 +457,18 @@ export default function VoedingsplannenV2Page() {
     let totals = { calories: 0, protein: 0, carbs: 0, fat: 0 };
     
     meal.ingredients.forEach((ingredient: any) => {
+      // Get custom amount or use original amount
+      let amount = ingredient.amount || 0;
+      if (mealType && day) {
+        const ingredientKey = getIngredientKey(mealType, ingredient.name, day);
+        const customAmount = customAmounts[ingredientKey];
+        if (customAmount !== undefined) {
+          amount = customAmount;
+        }
+      }
+      
       // Calculate macros based on amount and unit (matching backend logic exactly)
       let multiplier = 1;
-      const amount = ingredient.amount || 0;
       
       // Handle different unit types based on database unit_type (matching backend exactly)
       if (ingredient.unit === 'per_piece' || ingredient.unit === 'per_plakje' || ingredient.unit === 'stuk') {
@@ -997,12 +1013,6 @@ export default function VoedingsplannenV2Page() {
                   </p>
                 </div>
               </div>
-              {userProfile && userProfile.weight !== 100 && (
-                <div className="px-6 py-3 bg-gradient-to-r from-[#B6C948] to-[#8BAE5A] text-[#181F17] rounded-lg flex items-center gap-2 font-semibold">
-                  <RocketLaunchIcon className="w-5 h-5" />
-                  <span>Smart Scaling Actief ({userProfile.weight}kg)</span>
-                </div>
-              )}
             </div>
 
             {/* Target Macros Section */}
@@ -1383,7 +1393,7 @@ export default function VoedingsplannenV2Page() {
 
                     if (!mealData || !mealData.ingredients) return null;
 
-                    const mealTotals = calculateMealTotals(mealData);
+                    const mealTotals = calculateMealTotals(mealData, mealType, selectedDay);
 
                     return (
                       <div key={mealType} className="bg-[#181F17] rounded-lg border border-[#3A4D23] overflow-hidden">
@@ -1820,7 +1830,22 @@ export default function VoedingsplannenV2Page() {
         {/* Plans Grid */}
         {!loading && !error && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {plans.map((plan) => {
+            {plans
+              .filter((plan) => {
+                // Filter plans based on user's fitness goal
+                const planGoal = plan.goal?.toLowerCase();
+                const userGoal = userProfile.fitness_goal;
+                
+                // Map user goals to plan goals
+                const goalMapping = {
+                  'droogtrainen': 'droogtrainen',
+                  'onderhoud': 'onderhoud', 
+                  'spiermassa': 'spiermassa'
+                };
+                
+                return planGoal === goalMapping[userGoal];
+              })
+              .map((plan) => {
               // Calculate personalized targets for this plan
               const personalizedTargets = calculatePersonalizedTargets(plan);
               
@@ -1841,13 +1866,8 @@ export default function VoedingsplannenV2Page() {
                   
                   <p className="text-[#8BAE5A] text-sm mb-4">{plan.description}</p>
                   
-                  {/* Target vs Personalized Calories */}
+                  {/* Personalized Calories */}
                   <div className="space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-400 text-sm">Target Calorieën:</span>
-                      <span className="text-[#B6C948] font-semibold">{plan.target_calories} kcal</span>
-                    </div>
-                    
                     {personalizedTargets && (
                       <div className="flex justify-between items-center">
                         <span className="text-gray-400 text-sm">Jouw Calorieën:</span>

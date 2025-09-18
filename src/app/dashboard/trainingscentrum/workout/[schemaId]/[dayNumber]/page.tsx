@@ -106,13 +106,17 @@ export default function WorkoutPage() {
   ];
 
   useEffect(() => {
+    console.log('🔄 useEffect triggered with:', { sessionId, schemaId, dayNumber, user: !!user });
+    
     if (sessionId) {
+      console.log('🔄 Loading session...');
       loadSession();
     } else {
+      console.log('🔄 No sessionId, loading exercises from database...');
       // Load exercises from database for the current schema and day
       loadExercisesFromDatabase();
     }
-  }, [sessionId, schemaId, dayNumber]);
+  }, [sessionId, schemaId, dayNumber, user]);
 
   const getVideoUrlForExercise = async (exerciseName: string): Promise<string | undefined> => {
     try {
@@ -136,6 +140,8 @@ export default function WorkoutPage() {
   };
 
   const loadExercisesFromDatabase = async () => {
+    console.log('🔄 loadExercisesFromDatabase called with:', { user: !!user, schemaId, dayNumber });
+    
     if (!user || !schemaId || !dayNumber) {
       console.log('❌ Missing required data:', { user: !!user, schemaId, dayNumber });
       setLoading(false);
@@ -435,6 +441,8 @@ export default function WorkoutPage() {
             <p className="text-gray-400 text-sm">Schema: {schemaId}</p>
             <p className="text-gray-400 text-sm">Dag: {dayNumber}</p>
             <p className="text-gray-400 text-sm">Exercises: {exercises.length}</p>
+            <p className="text-gray-400 text-sm">User: {user ? 'Logged in' : 'Not logged in'}</p>
+            <p className="text-gray-400 text-sm">SessionId: {sessionId || 'None'}</p>
           </div>
         </div>
 
