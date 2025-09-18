@@ -58,7 +58,7 @@ const WelcomeVideoStep = ({ onComplete }: { onComplete: () => void }) => {
       <div className="mb-6">
         <h2 className="text-3xl font-bold text-white mb-4">Welkom bij Top Tier Men!</h2>
         <p className="text-gray-300 text-lg mb-4">
-          Bekijk deze introductievideo om te leren hoe je het meeste uit het platform kunt halen.
+          Bekijk deze video en start daarna met onboarding om vervolgens te starten om een Top Tier Man te worden.
         </p>
         
         {/* Notice */}
@@ -459,12 +459,7 @@ export default function OnboardingV2Modal({ isOpen, onClose }: OnboardingV2Modal
       <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-700">
         <div className="p-8">
           <div className="flex justify-between items-center mb-8">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-sm">TTM</span>
-              </div>
-              <h1 className="text-2xl font-bold text-white">Onboarding</h1>
-            </div>
+            <h1 className="text-2xl font-bold text-white">Onboarding</h1>
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-white transition-colors p-2 hover:bg-gray-700 rounded-full"
