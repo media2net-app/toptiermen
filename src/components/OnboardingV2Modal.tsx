@@ -455,14 +455,54 @@ export default function OnboardingV2Modal({ isOpen, onClose }: OnboardingV2Modal
     }
   };
 
+  const getStepInfo = () => {
+    const totalSteps = 5;
+    const currentStepNumber = currentStep + 1;
+    const percentage = (currentStepNumber / totalSteps) * 100;
+    
+    const stepNames = {
+      0: "Welkomstvideo",
+      1: "Hoofddoel instellen", 
+      2: "Uitdagingen selecteren",
+      3: "Trainingsschema kiezen",
+      4: "Voedingsplan selecteren"
+    };
+    
+    return {
+      currentStepNumber,
+      totalSteps,
+      percentage,
+      stepName: stepNames[currentStep as keyof typeof stepNames] || "Onbekende stap"
+    };
+  };
+
+  const stepInfo = getStepInfo();
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4">
       <div className="bg-gradient-to-br from-[#1a2e1a] via-[#2d4a2d] to-[#1a2e1a] rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-[#8BAE5A]">
         <div className="p-8">
-          <div className="flex justify-end items-center mb-8">
+          <div className="flex justify-between items-center mb-8">
+            <div className="flex-1">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-[#8BAE5A]">
+                  Stap {stepInfo.currentStepNumber} van {stepInfo.totalSteps}
+                </span>
+                <span className="text-sm font-medium text-white">
+                  {Math.round(stepInfo.percentage)}%
+                </span>
+              </div>
+              <div className="w-full bg-gray-700 rounded-full h-2 mb-1">
+                <div 
+                  className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] h-2 rounded-full transition-all duration-500 ease-out"
+                  style={{ width: `${stepInfo.percentage}%` }}
+                ></div>
+              </div>
+              <p className="text-xs text-gray-400">{stepInfo.stepName}</p>
+            </div>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-white transition-colors p-2 hover:bg-[#8BAE5A] hover:bg-opacity-20 rounded-full"
+              className="text-gray-400 hover:text-white transition-colors p-2 hover:bg-[#8BAE5A] hover:bg-opacity-20 rounded-full ml-4"
             >
               <XMarkIcon className="w-6 h-6" />
             </button>
