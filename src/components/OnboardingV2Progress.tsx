@@ -15,7 +15,9 @@ export default function OnboardingV2Progress({ className = "" }: OnboardingV2Pro
   }
 
   const getStepInfo = () => {
-    const totalSteps = 5;
+    // Determine total steps based on user access
+    const { hasTrainingAccess, hasNutritionAccess } = useOnboardingV2();
+    const totalSteps = (!hasTrainingAccess && !hasNutritionAccess) ? 3 : 5; // Basic: 3 steps, Premium: 5 steps
     const currentStepNumber = currentStep + 1;
     const percentage = (currentStepNumber / totalSteps) * 100;
     
@@ -24,7 +26,8 @@ export default function OnboardingV2Progress({ className = "" }: OnboardingV2Pro
       1: "Hoofddoel instellen", 
       2: "Uitdagingen selecteren",
       3: "Trainingsschema kiezen",
-      4: "Voedingsplan selecteren"
+      4: "Voedingsplan selecteren",
+      5: "Forum introductie"
     };
     
     return {

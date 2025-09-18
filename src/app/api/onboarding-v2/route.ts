@@ -81,6 +81,12 @@ export async function GET(request: NextRequest) {
           currentStep = null;
           isCompleted = true;
         }
+        
+        // For Basic tier users, complete onboarding after challenges (step 2)
+        if (!hasTrainingAccess && !hasNutritionAccess && onboardingStatus.missions_selected) {
+          currentStep = null;
+          isCompleted = true;
+        }
       }
     } else {
       // No onboarding data, start at step 0
@@ -188,6 +194,15 @@ export async function POST(request: NextRequest) {
             break;
           case ONBOARDING_STEPS.SELECT_CHALLENGES.id:
             updateData.missions_selected = true;
+            // For Basic tier users, complete onboarding after challenges
+            const packageType = profile.package_type || 'Basic Tier';
+            const isAdmin = profile.role === 'admin';
+            const hasTrainingAccess = isAdmin || packageType === 'Premium Tier' || packageType === 'Lifetime Tier' || packageType === 'Lifetime Access';
+            const hasNutritionAccess = isAdmin || packageType === 'Premium Tier' || packageType === 'Lifetime Tier' || packageType === 'Lifetime Access';
+            
+            if (!hasTrainingAccess && !hasNutritionAccess) {
+              updateData.onboarding_completed = true;
+            }
             break;
           case ONBOARDING_STEPS.SELECT_TRAINING.id:
             updateData.training_schema_selected = true;
