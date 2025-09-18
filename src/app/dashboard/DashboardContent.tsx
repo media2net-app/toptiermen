@@ -144,7 +144,8 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
     // If onboarding is completed, no items should be disabled (except explicitly disabled ones)
     if (actualOnboardingStatus?.onboarding_completed) return false;
     
-    if (isCompleted || !actualOnboardingStatus) return false;
+    // If no onboarding status, allow all items
+    if (!actualOnboardingStatus) return false;
     
     // During onboarding V2, block ALL navigation except the current step
     if (actualCurrentStep !== null && actualCurrentStep !== undefined) {
@@ -446,7 +447,8 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
     // If onboarding is completed, no items should be disabled (except explicitly disabled ones)
     if (actualOnboardingStatus?.onboarding_completed) return false;
     
-    if (isCompleted || !actualOnboardingStatus) return false;
+    // If no onboarding status, allow all items
+    if (!actualOnboardingStatus) return false;
     
     // During onboarding V2, block ALL navigation except the current step
     if (actualCurrentStep !== null && actualCurrentStep !== undefined) {
@@ -802,7 +804,7 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
       if (response.ok && data.success) {
         // Transform Onboarding V2 API response to match expected format
         const transformedData = {
-          onboarding_completed: data.onboarding.isCompleted,
+          onboarding_completed: data.onboarding.status?.onboarding_completed || data.onboarding.isCompleted,
           current_step: data.onboarding.currentStep,
           user_id: user.id,
           ...data.onboarding.status // Include the full status object if available
