@@ -1,21 +1,9 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET() {
-  try {
-    // Simple placeholder response
-    return NextResponse.json({
-      success: true,
-      message: 'Announcement stats endpoint',
-      data: {
-        total: 0,
-        published: 0,
-        draft: 0
-      }
-    });
-  } catch (error) {
-    return NextResponse.json(
-      { success: false, error: 'Internal server error' },
-      { status: 500 }
-    );
-  }
-} 
+export async function GET(request: NextRequest) {
+  return NextResponse.json({ message: 'API route not implemented' });
+}
+
+export async function POST(request: NextRequest) {
+  return NextResponse.json({ message: 'API route not implemented' });
+}
