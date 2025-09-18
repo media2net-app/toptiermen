@@ -283,30 +283,47 @@ export default function NutritionPlanDetailPage() {
     return Math.round(tdee + adjustment);
   };
 
-  // Calculate personalized macros
+  // Calculate personalized macros - CORRECTED: Use percentage-based calculation
   const calculatePersonalizedMacros = (baseCalories: number, userProfile: UserProfile) => {
     const personalizedCalories = calculatePersonalizedCalories(baseCalories, userProfile);
     
-    // Macro ratios based on goal
-    let proteinRatio = 0.25;
-    let carbRatio = 0.45;
-    let fatRatio = 0.30;
+    // CORRECTED: Use correct percentage-based calculations for onderhoud
+    let proteinRatio = 0.35;  // 35% for maintain (onderhoud)
+    let carbRatio = 0.40;     // 40% for maintain (onderhoud)
+    let fatRatio = 0.25;      // 25% for maintain (onderhoud)
     
     if (userProfile.fitness_goal === 'droogtrainen') {
-      proteinRatio = 0.35;
-      carbRatio = 0.35;
-      fatRatio = 0.30;
+      proteinRatio = 0.35;    // 35% for cut
+      carbRatio = 0.35;       // 35% for cut
+      fatRatio = 0.30;        // 30% for cut
     } else if (userProfile.fitness_goal === 'spiermassa') {
-      proteinRatio = 0.25;
-      carbRatio = 0.50;
-      fatRatio = 0.25;
+      proteinRatio = 0.25;    // 25% for bulk
+      carbRatio = 0.50;       // 50% for bulk
+      fatRatio = 0.25;        // 25% for bulk
     }
     
+    // Calculate macro grams from percentages
     const protein = Math.round((personalizedCalories * proteinRatio) / 4);
     const carbs = Math.round((personalizedCalories * carbRatio) / 4);
     const fat = Math.round((personalizedCalories * fatRatio) / 9);
     
-    return { protein, carbs, fat, calories: personalizedCalories };
+    console.log('🔧 DEBUG: Percentage-based macro calculation:', {
+      calories: personalizedCalories,
+      goal: userProfile.fitness_goal,
+      proteinRatio: `${Math.round(proteinRatio * 100)}%`,
+      carbRatio: `${Math.round(carbRatio * 100)}%`,
+      fatRatio: `${Math.round(fatRatio * 100)}%`,
+      protein: `${protein}g`,
+      carbs: `${carbs}g`,
+      fat: `${fat}g`
+    });
+    
+    return { 
+      protein, 
+      carbs, 
+      fat, 
+      calories: personalizedCalories 
+    };
   };
 
   // Get current ingredients for a specific meal and day
@@ -407,7 +424,7 @@ export default function NutritionPlanDetailPage() {
     };
   };
 
-  // Function to calculate macro percentages
+  // Function to calculate macro percentages - FIXED
   const getMacroPercentages = (calories: number, protein: number, carbs: number, fat: number) => {
     const totalCalories = calories;
     if (totalCalories === 0) return { protein: 0, carbs: 0, fat: 0 };
@@ -417,10 +434,24 @@ export default function NutritionPlanDetailPage() {
     const carbsCalories = carbs * 4;
     const fatCalories = fat * 9;
     
+    const proteinPercent = Math.round((proteinCalories / totalCalories) * 100);
+    const carbsPercent = Math.round((carbsCalories / totalCalories) * 100);
+    const fatPercent = Math.round((fatCalories / totalCalories) * 100);
+    
+    console.log('🔧 DEBUG: Macro percentages:', {
+      totalCalories,
+      protein: `${protein}g (${proteinCalories} kcal)`,
+      carbs: `${carbs}g (${carbsCalories} kcal)`,
+      fat: `${fat}g (${fatCalories} kcal)`,
+      proteinPercent: `${proteinPercent}%`,
+      carbsPercent: `${carbsPercent}%`,
+      fatPercent: `${fatPercent}%`
+    });
+    
     return {
-      protein: Math.round((proteinCalories / totalCalories) * 100),
-      carbs: Math.round((carbsCalories / totalCalories) * 100),
-      fat: Math.round((fatCalories / totalCalories) * 100)
+      protein: proteinPercent,
+      carbs: carbsPercent,
+      fat: fatPercent
     };
   };
 
@@ -956,13 +987,15 @@ export default function NutritionPlanDetailPage() {
                               // Convert database unit names to user-friendly labels
                               const getUnitLabel = (unit: string) => {
                                 switch (unit) {
-                                  case 'g': return 'Per 100g';
-                                  case 'plakje': return 'Per plakje';
-                                  case 'piece': return 'Per stuk';
-                                  case 'per_100g': return 'Per 100g';
-                                  case 'per_plakje': return 'Per plakje';
-                                  case 'per_piece': return 'Per stuk';
-                                  default: return `Per ${unit}`;
+                                  case 'g': return 'gram';
+                                  case 'plakje': return 'plakjes';
+                                  case 'piece': return 'stuk';
+                                  case 'per_100g': return 'gram';
+                                  case 'per_plakje': return 'plakjes';
+                                  case 'per_piece': return 'stuk';
+                                  case 'per_ml': return 'ml';
+                                  case 'handje': return 'handjes';
+                                  default: return unit;
                                 }
                               };
 

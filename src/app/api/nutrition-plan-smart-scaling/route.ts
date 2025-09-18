@@ -473,38 +473,42 @@ export async function GET(request: NextRequest) {
     const originalTotals = calculatePlanTotals(basePlan, INGREDIENT_DATABASE);
     console.log('📊 Original plan totals:', originalTotals);
     
-    // Calculate macro targets if not set in user profile
+    // CORRECTED: Calculate macro targets using percentage-based approach (matching frontend)
     let targetProtein = userProfile.target_protein;
     let targetCarbs = userProfile.target_carbs;
     let targetFat = userProfile.target_fat;
     
-    // If macro targets are not set, calculate them based on goal and weight
+    // If macro targets are not set, calculate them using percentage-based approach
     if (!targetProtein || targetProtein === 0) {
+      let proteinRatio = 0.35;  // 35% for maintain (onderhoud)
+      let carbRatio = 0.40;     // 40% for maintain (onderhoud)
+      let fatRatio = 0.25;      // 25% for maintain (onderhoud)
+      
       if (userProfile.goal === 'cut') {
-        targetProtein = Math.round(userProfile.weight * 2.2); // 2.2g per kg for cutting
+        proteinRatio = 0.35;    // 35% for cut
+        carbRatio = 0.35;       // 35% for cut
+        fatRatio = 0.30;        // 30% for cut
       } else if (userProfile.goal === 'bulk') {
-        targetProtein = Math.round(userProfile.weight * 2.0); // 2.0g per kg for bulking
-      } else {
-        targetProtein = Math.round(userProfile.weight * 2.1); // 2.1g per kg for maintenance
+        proteinRatio = 0.25;    // 25% for bulk
+        carbRatio = 0.50;       // 50% for bulk
+        fatRatio = 0.25;        // 25% for bulk
       }
-    }
-    
-    if (!targetCarbs || targetCarbs === 0) {
-      if (userProfile.goal === 'cut') {
-        targetCarbs = Math.round(userProfile.weight * 0.3); // Low carb for cutting
-      } else if (userProfile.goal === 'bulk') {
-        targetCarbs = Math.round(userProfile.weight * 3.0); // High carb for bulking
-      } else {
-        targetCarbs = Math.round(userProfile.weight * 2.0); // Moderate carb for maintenance
-      }
-    }
-    
-    if (!targetFat || targetFat === 0) {
-      // Calculate fat based on remaining calories
-      const proteinCalories = targetProtein * 4;
-      const carbCalories = targetCarbs * 4;
-      const remainingCalories = userProfile.target_calories - proteinCalories - carbCalories;
-      targetFat = Math.round(remainingCalories / 9); // 9 calories per gram of fat
+      
+      // Calculate macro grams from percentages
+      targetProtein = Math.round((userProfile.target_calories * proteinRatio) / 4);
+      targetCarbs = Math.round((userProfile.target_calories * carbRatio) / 4);
+      targetFat = Math.round((userProfile.target_calories * fatRatio) / 9);
+      
+      console.log('🎯 Smart Scaling: Using percentage-based targets:', {
+        goal: userProfile.goal,
+        calories: userProfile.target_calories,
+        proteinRatio: `${Math.round(proteinRatio * 100)}%`,
+        carbRatio: `${Math.round(carbRatio * 100)}%`,
+        fatRatio: `${Math.round(fatRatio * 100)}%`,
+        targetProtein: `${targetProtein}g`,
+        targetCarbs: `${targetCarbs}g`,
+        targetFat: `${targetFat}g`
+      });
     }
     
     // Target totals from user profile

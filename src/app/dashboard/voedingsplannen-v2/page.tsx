@@ -327,10 +327,10 @@ export default function VoedingsplannenV2Page() {
       carbsPercentage = 5;
       fatPercentage = 60;
     } else {
-      // Regular plans: balanced macros
-      proteinPercentage = 25;
-      carbsPercentage = 45;
-      fatPercentage = 30;
+      // Regular plans: CORRECTED percentages for onderhoud (35%, 40%, 25%)
+      proteinPercentage = 35;  // 35% for onderhoud
+      carbsPercentage = 40;    // 40% for onderhoud
+      fatPercentage = 25;      // 25% for onderhoud
     }
 
     const targetProtein = Math.round((targetCalories * proteinPercentage / 100) / 4); // 4 kcal per gram protein
@@ -527,14 +527,14 @@ export default function VoedingsplannenV2Page() {
   };
 
 
-  // Smart Scaling Algorithm with Realistic Constraints
+  // Smart Scaling Algorithm - Focus on Macro Balance Optimization
   const applySmartScaling = (planData: any, userProfile: any) => {
     if (!planData || !userProfile || userProfile.weight === 100) {
       // No scaling needed for 100kg users
       return planData;
     }
 
-    console.log('🧠 Applying Realistic Smart Scaling for weight:', userProfile.weight);
+    console.log('🧠 Applying Smart Scaling for weight:', userProfile.weight, '- Focus: Macro Balance to 100%');
     
     const baseWeight = 100;
     const weightRatio = userProfile.weight / baseWeight;
@@ -557,20 +557,20 @@ export default function VoedingsplannenV2Page() {
       weightRatio
     });
 
-    // Scale ingredients for each day and meal with realistic constraints
+    // Scale ingredients for each day to optimize macro balance to 100%
     const days = Object.keys(scaledPlan.meals.weekly_plan);
-    console.log(`🧠 Scaling ${days.length} days:`, days);
+    console.log(`🧠 Optimizing macro balance for ${days.length} days:`, days);
     
     days.forEach(day => {
       const dayData = scaledPlan.meals.weekly_plan[day];
       console.log(`🧠 Processing day: ${day}`);
       
+      // First pass: Apply basic weight-based scaling
       ['ontbijt', 'ochtend_snack', 'lunch', 'lunch_snack', 'diner', 'avond_snack'].forEach(mealType => {
         const meal = dayData[mealType];
         if (meal && meal.ingredients && Array.isArray(meal.ingredients)) {
-          console.log(`🧠 Processing ${day} ${mealType} with ${meal.ingredients.length} ingredients`);
+          console.log(`🧠 Basic scaling ${day} ${mealType} with ${meal.ingredients.length} ingredients`);
           
-          // Apply realistic scaling based on unit type
           meal.ingredients.forEach((ingredient: any) => {
             if (ingredient.amount && ingredient.unit) {
               const originalAmount = ingredient.amount;
@@ -578,107 +578,160 @@ export default function VoedingsplannenV2Page() {
               
               // Apply realistic scaling rules
               if (ingredient.unit === 'per_piece' || ingredient.unit === 'per_plakje' || ingredient.unit === 'stuk') {
-                // Whole pieces: round to nearest whole number, minimum 1
                 newAmount = Math.max(1, Math.round(newAmount));
-                console.log(`🧠 ${day} ${ingredient.name}: ${originalAmount} → ${newAmount} ${ingredient.unit} (whole piece)`);
               } else {
-                // All other items: round to 1 decimal place
                 newAmount = Math.round(newAmount * 10) / 10;
-                if (newAmount < 0.1) newAmount = 0.1; // Minimum 0.1
-                console.log(`🧠 ${day} ${ingredient.name}: ${originalAmount} → ${newAmount} ${ingredient.unit} (1 decimal)`);
+                if (newAmount < 0.1) newAmount = 0.1;
               }
               
               ingredient.amount = newAmount;
             }
           });
           
-          // Recalculate meal totals after scaling
+          // Recalculate meal totals after basic scaling
           const mealTotals = calculateMealTotals(meal);
           meal.totals = mealTotals;
-          console.log(`🧠 ${day} ${mealType} totals after scaling:`, mealTotals);
         }
       });
       
-      // Recalculate day totals
-      const dayTotals = calculateDayTotals(day, scaledPlan);
+      // Second pass: Optimize macro balance to get as close to 100% as possible
+      let iterations = 0;
+      const maxIterations = 5;
       
-      if (scaledPlan.meals.weekly_plan[day]) {
-        scaledPlan.meals.weekly_plan[day].dailyTotals = dayTotals;
-      }
-      
-      // Fine-tune for better macro balance (focus on fat targets)
-      const currentDayTotals = dayTotals;
-      const fatPercentage = (currentDayTotals.fat / targetFat) * 100;
-      
-      console.log(`🧠 Day ${day} fat percentage: ${fatPercentage.toFixed(1)}% (target: 100%)`);
-      console.log(`🧠 Day ${day} totals:`, currentDayTotals);
-      
-      // If fat is too low (< 95%), increase meat/fat-rich ingredients
-      if (fatPercentage < 95) {
-        console.log(`🧠 Fat too low (${fatPercentage.toFixed(1)}%), fine-tuning meat portions for ${day}...`);
+      while (iterations < maxIterations) {
+        const dayTotals = calculateDayTotals(day, scaledPlan);
         
-        // Calculate how much fat we need to add
-        const fatNeeded = targetFat - currentDayTotals.fat;
-        console.log(`🧠 Fat needed: ${fatNeeded.toFixed(1)}g`);
+        // Calculate current macro percentages
+        const caloriesPercent = (dayTotals.calories / targetCalories) * 100;
+        const proteinPercent = (dayTotals.protein / targetProtein) * 100;
+        const carbsPercent = (dayTotals.carbs / targetCarbs) * 100;
+        const fatPercent = (dayTotals.fat / targetFat) * 100;
         
-        ['diner', 'lunch', 'ontbijt', 'ochtend_snack'].forEach(mealType => { // Check all meals
+        console.log(`🧠 Day ${day} iteration ${iterations + 1}:`, {
+          calories: `${caloriesPercent.toFixed(1)}%`,
+          protein: `${proteinPercent.toFixed(1)}%`,
+          carbs: `${carbsPercent.toFixed(1)}%`,
+          fat: `${fatPercent.toFixed(1)}%`
+        });
+        
+        // Check if we're close enough to 100% (within 5%)
+        const allClose = Math.abs(caloriesPercent - 100) <= 5 && 
+                        Math.abs(proteinPercent - 100) <= 5 && 
+                        Math.abs(carbsPercent - 100) <= 5 && 
+                        Math.abs(fatPercent - 100) <= 5;
+        
+        if (allClose) {
+          console.log(`🧠 Day ${day} macro balance optimized! All within 5% of target.`);
+          break;
+        }
+        
+        // Optimize each macro by adjusting relevant ingredients
+        ['ontbijt', 'ochtend_snack', 'lunch', 'lunch_snack', 'diner', 'avond_snack'].forEach(mealType => {
           const meal = dayData[mealType];
           if (meal && meal.ingredients && Array.isArray(meal.ingredients)) {
-            console.log(`🧠 Fine-tuning ${day} ${mealType}...`);
+            
             meal.ingredients.forEach((ingredient: any) => {
-              // Increase meat and fat-rich ingredients more aggressively
-              if (ingredient.unit === 'per_100g' && 
-                  (ingredient.name.toLowerCase().includes('vlees') || 
-                   ingredient.name.toLowerCase().includes('rund') ||
-                   ingredient.name.toLowerCase().includes('kip') ||
-                   ingredient.name.toLowerCase().includes('zalm') ||
-                   ingredient.name.toLowerCase().includes('olie') ||
-                   ingredient.name.toLowerCase().includes('boter') ||
-                   ingredient.name.toLowerCase().includes('kaas') ||
-                   ingredient.name.toLowerCase().includes('noten'))) {
-                const currentAmount = ingredient.amount;
+              if (!ingredient.amount || !ingredient.unit) return;
+              
+              const currentAmount = ingredient.amount;
+              let adjustmentFactor = 1;
+              
+              // Determine which macro this ingredient primarily affects
+              const proteinPer100g = ingredient.protein_per_100g || 0;
+              const carbsPer100g = ingredient.carbs_per_100g || 0;
+              const fatPer100g = ingredient.fat_per_100g || 0;
+              const caloriesPer100g = ingredient.calories_per_100g || 0;
+              
+              // Calculate current contribution
+              let multiplier = 1;
+              if (ingredient.unit === 'per_piece' || ingredient.unit === 'per_plakje' || ingredient.unit === 'stuk') {
+                multiplier = currentAmount;
+              } else if (ingredient.unit === 'per_100g' || ingredient.unit === 'g') {
+                multiplier = currentAmount / 100;
+              }
+              
+              const currentProtein = proteinPer100g * multiplier;
+              const currentCarbs = carbsPer100g * multiplier;
+              const currentFat = fatPer100g * multiplier;
+              const currentCalories = caloriesPer100g * multiplier;
+              
+              // Determine if this ingredient should be adjusted based on macro needs
+              if (proteinPercent < 95 && proteinPer100g > 10) {
+                // Increase protein-rich ingredients
+                adjustmentFactor = 1.1;
+              } else if (proteinPercent > 105 && proteinPer100g > 10) {
+                // Decrease protein-rich ingredients
+                adjustmentFactor = 0.95;
+              } else if (carbsPercent < 95 && carbsPer100g > 10) {
+                // Increase carb-rich ingredients
+                adjustmentFactor = 1.1;
+              } else if (carbsPercent > 105 && carbsPer100g > 10) {
+                // Decrease carb-rich ingredients
+                adjustmentFactor = 0.95;
+              } else if (fatPercent < 95 && fatPer100g > 10) {
+                // Increase fat-rich ingredients
+                adjustmentFactor = 1.1;
+              } else if (fatPercent > 105 && fatPer100g > 10) {
+                // Decrease fat-rich ingredients
+                adjustmentFactor = 0.95;
+              }
+              
+              // Apply adjustment
+              if (adjustmentFactor !== 1) {
+                let newAmount = currentAmount * adjustmentFactor;
                 
-                // More aggressive increase based on fat deficit
-                let increasePercent = 0.20; // 20% base increase
-                if (fatPercentage < 90) increasePercent = 0.30; // 30% if very low
-                if (fatPercentage < 85) increasePercent = 0.40; // 40% if extremely low
+                // Apply realistic constraints
+                if (ingredient.unit === 'per_piece' || ingredient.unit === 'per_plakje' || ingredient.unit === 'stuk') {
+                  newAmount = Math.max(1, Math.round(newAmount));
+                } else {
+                  newAmount = Math.round(newAmount * 10) / 10;
+                  if (newAmount < 0.1) newAmount = 0.1;
+                }
                 
-                const increase = Math.max(10, Math.round(currentAmount * increasePercent * 10) / 10); // Round to 1 decimal
-                ingredient.amount = Math.round((currentAmount + increase) * 10) / 10; // Round final to 1 decimal
-                console.log(`🧠 Increased ${ingredient.name}: ${currentAmount}g → ${ingredient.amount}g for fat balance (+${increasePercent * 100}%)`);
+                ingredient.amount = newAmount;
+                
+                if (Math.abs(newAmount - currentAmount) > 0.1) {
+                  console.log(`🧠 Adjusted ${ingredient.name}: ${currentAmount} → ${newAmount} (factor: ${adjustmentFactor.toFixed(2)})`);
+                }
               }
             });
             
-            // Recalculate meal totals after fine-tuning
+            // Recalculate meal totals after adjustments
             const mealTotals = calculateMealTotals(meal);
             meal.totals = mealTotals;
-            console.log(`🧠 ${day} ${mealType} totals after fine-tuning:`, mealTotals);
           }
         });
         
-        // Recalculate day totals after fine-tuning
-        const updatedDayTotals = calculateDayTotals(day, scaledPlan);
-        
-        if (scaledPlan.meals.weekly_plan[day]) {
-          scaledPlan.meals.weekly_plan[day].dailyTotals = updatedDayTotals;
-        }
-        
-        const newFatPercentage = (updatedDayTotals.fat / targetFat) * 100;
-        console.log(`🧠 After fine-tuning ${day}: ${newFatPercentage.toFixed(1)}% fat (improvement: ${(newFatPercentage - fatPercentage).toFixed(1)}%)`);
+        iterations++;
       }
+      
+      // Final day totals
+      const finalDayTotals = calculateDayTotals(day, scaledPlan);
+      if (scaledPlan.meals.weekly_plan[day]) {
+        scaledPlan.meals.weekly_plan[day].dailyTotals = finalDayTotals;
+      }
+      
+      console.log(`🧠 Final day ${day} totals:`, {
+        calories: `${finalDayTotals.calories.toFixed(1)} (${((finalDayTotals.calories / targetCalories) * 100).toFixed(1)}%)`,
+        protein: `${finalDayTotals.protein.toFixed(1)}g (${((finalDayTotals.protein / targetProtein) * 100).toFixed(1)}%)`,
+        carbs: `${finalDayTotals.carbs.toFixed(1)}g (${((finalDayTotals.carbs / targetCarbs) * 100).toFixed(1)}%)`,
+        fat: `${finalDayTotals.fat.toFixed(1)}g (${((finalDayTotals.fat / targetFat) * 100).toFixed(1)}%)`
+      });
     });
 
-    console.log('✅ Realistic Smart Scaling applied');
+    console.log('✅ Smart Scaling applied - Macro balance optimized!');
     
-    // Debug: Check if scaling was applied correctly
-    console.log('🔍 Post-scaling verification:');
+    // Debug: Check final macro balance
+    console.log('🔍 Final macro balance verification:');
     days.forEach(day => {
-      const dayData = scaledPlan.meals.weekly_plan[day];
-      if (dayData.ontbijt && dayData.ontbijt.ingredients) {
-        const kaasIngredient = dayData.ontbijt.ingredients.find((ing: any) => ing.name === 'Kaas 30+');
-        if (kaasIngredient) {
-          console.log(`🔍 ${day} Kaas 30+: ${kaasIngredient.amount} plakjes`);
-        }
+      const dayTotals = scaledPlan.meals.weekly_plan[day]?.dailyTotals;
+      if (dayTotals) {
+        const caloriesPercent = ((dayTotals.calories / targetCalories) * 100).toFixed(1);
+        const proteinPercent = ((dayTotals.protein / targetProtein) * 100).toFixed(1);
+        const carbsPercent = ((dayTotals.carbs / targetCarbs) * 100).toFixed(1);
+        const fatPercent = ((dayTotals.fat / targetFat) * 100).toFixed(1);
+        
+        console.log(`🔍 ${day}: C:${caloriesPercent}% P:${proteinPercent}% K:${carbsPercent}% F:${fatPercent}%`);
       }
     });
     
@@ -1504,13 +1557,15 @@ export default function VoedingsplannenV2Page() {
                                   // Convert database unit names to user-friendly labels
                                   const getUnitLabel = (unit: string) => {
                                     switch (unit) {
-                                      case 'g': return 'Per 100g';
-                                      case 'plakje': return 'Per plakje';
-                                      case 'piece': return 'Per stuk';
-                                      case 'per_100g': return 'Per 100g';
-                                      case 'per_plakje': return 'Per plakje';
-                                      case 'per_piece': return 'Per stuk';
-                                      default: return `Per ${unit}`;
+                                      case 'g': return 'gram';
+                                      case 'plakje': return 'plakjes';
+                                      case 'piece': return 'stuk';
+                                      case 'per_100g': return 'gram';
+                                      case 'per_plakje': return 'plakjes';
+                                      case 'per_piece': return 'stuk';
+                                      case 'per_ml': return 'ml';
+                                      case 'handje': return 'handjes';
+                                      default: return unit;
                                     }
                                   };
 
