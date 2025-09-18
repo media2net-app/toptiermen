@@ -385,8 +385,8 @@ export default function MijnChallengesPage() {
       setShowChallengeLibrary(true);
     }
     
-    // Show ForcedOnboardingModal for users who haven't completed step 2
-    const shouldShowModal = currentStep !== null && currentStep <= 2 && !isCompleted;
+    // Show ForcedOnboardingModal only for step 0 (welcome video)
+    const shouldShowModal = currentStep !== null && currentStep === 0 && !isCompleted;
     setShowForcedOnboarding(shouldShowModal);
   }, [user?.id, currentStep, isCompleted]);
 
