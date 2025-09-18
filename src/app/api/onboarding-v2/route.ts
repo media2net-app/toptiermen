@@ -86,11 +86,6 @@ export async function GET(request: NextRequest) {
         if (!hasTrainingAccess && !hasNutritionAccess && onboardingStatus.missions_selected) {
           currentStep = null;
           isCompleted = true;
-          // Update the database to mark onboarding as completed
-          await supabase
-            .from('user_onboarding_status')
-            .update({ onboarding_completed: true })
-            .eq('id', onboardingStatus.id);
         }
       }
     } else {
