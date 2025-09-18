@@ -4,6 +4,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { useOnboardingV2 } from '@/contexts/OnboardingV2Context';
 import { useRouter } from 'next/navigation';
+import OnboardingV2Progress from '@/components/OnboardingV2Progress';
 import { motion } from 'framer-motion';
 import { 
   BookOpenIcon, 
@@ -1642,8 +1643,10 @@ export default function VoedingsplannenV2Page() {
 
   // Overview page - show when no plan is selected
   return (
-    <div className="min-h-screen bg-[#0A0F0A] p-6">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-[#0A0F0A]">
+      <OnboardingV2Progress />
+      <div className="p-6">
+        <div className="max-w-7xl mx-auto">
         {/* Header */}
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
@@ -1922,6 +1925,7 @@ export default function VoedingsplannenV2Page() {
             <p className="text-gray-500">Er zijn momenteel geen voedingsplannen beschikbaar.</p>
           </div>
         )}
+        </div>
       </div>
     </div>
   );

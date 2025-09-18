@@ -412,35 +412,29 @@ export default function OnboardingV2Modal({ isOpen, onClose }: OnboardingV2Modal
       case 0: // Welcome video
         return <WelcomeVideoStep onComplete={() => handleStepComplete(0)} />;
       
-      case 1: // Set goal
-        return <SetGoalStep onComplete={(goal) => handleStepComplete(1, { goal })} />;
+      case 1: // Set goal - redirect to profile page
+        router.push('/dashboard/profiel');
+        return null;
       
-      case 2: // Select challenges
-        return <SelectChallengesStep onComplete={(challenges) => handleStepComplete(2, { challenges })} />;
+      case 2: // Select challenges - redirect to challenges page
+        router.push('/dashboard/mijn-challenges');
+        return null;
       
-      case 3: // Select training
+      case 3: // Select training - redirect to training schemas page
         if (!hasTrainingAccess) {
           handleStepSkip(3);
           return null;
         }
-        return (
-          <SelectTrainingStep 
-            onComplete={(schema) => handleStepComplete(3, { trainingSchema: schema })} 
-            onSkip={() => handleStepSkip(3)}
-          />
-        );
+        router.push('/dashboard/trainingsschemas');
+        return null;
       
-      case 4: // Select nutrition
+      case 4: // Select nutrition - redirect to nutrition plans page
         if (!hasNutritionAccess) {
           handleStepSkip(4);
           return null;
         }
-        return (
-          <SelectNutritionStep 
-            onComplete={(plan) => handleStepComplete(4, { nutritionPlan: plan })} 
-            onSkip={() => handleStepSkip(4)}
-          />
-        );
+        router.push('/dashboard/voedingsplannen-v2');
+        return null;
       
       case 5: // Forum intro
         return <ForumIntroStep onComplete={() => handleStepComplete(5)} />;

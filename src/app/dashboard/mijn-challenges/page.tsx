@@ -7,6 +7,7 @@ import { useSubscription } from '@/hooks/useSubscription';
 import { toast } from 'react-hot-toast';
 import ClientLayout from '@/app/components/ClientLayout';
 import OnboardingV2Modal from '@/components/OnboardingV2Modal';
+import OnboardingV2Progress from '@/components/OnboardingV2Progress';
 
 interface Challenge {
   id: string;
@@ -755,6 +756,7 @@ export default function MijnChallengesPage() {
 
   return (
     <ClientLayout>
+      <OnboardingV2Progress />
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
         <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-2 drop-shadow-lg">Mijn Challenges</h1>
         <p className="text-[#8BAE5A] text-sm sm:text-lg mb-6 sm:mb-8">Voltooi dagelijkse challenges en verdien XP</p>

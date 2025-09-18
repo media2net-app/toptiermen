@@ -18,6 +18,7 @@ import { toast } from 'react-hot-toast';
 import PageLayout from '@/components/PageLayout';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { useOnboardingV2 } from "@/contexts/OnboardingV2Context";
+import OnboardingV2Progress from '@/components/OnboardingV2Progress';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useSubscription } from '@/hooks/useSubscription';
 import { supabase } from '@/lib/supabase';
@@ -1537,6 +1538,7 @@ function TrainingschemasContent() {
 
   return (
     <PageLayout title="Trainingsschemas">
+      <OnboardingV2Progress />
       <div className="w-full p-3 sm:p-4 md:p-6">
         {/* Dynamic Training Plan View */}
         <AnimatePresence mode="wait">

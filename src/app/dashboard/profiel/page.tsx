@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { useOnboardingV2 } from '@/contexts/OnboardingV2Context';
 import { useRouter } from 'next/navigation';
+import OnboardingV2Progress from '@/components/OnboardingV2Progress';
 
 interface ProfileFormData {
   full_name: string;
@@ -108,8 +109,10 @@ export default function ProfielPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#181F17] p-6">
-      <div className="max-w-2xl mx-auto">
+    <div className="min-h-screen bg-[#181F17]">
+      <OnboardingV2Progress />
+      <div className="p-6">
+        <div className="max-w-2xl mx-auto">
         <div className="bg-[#232D1A]/80 rounded-xl shadow-xl border border-[#3A4D23]/40 p-8">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-white mb-4">
@@ -263,6 +266,7 @@ export default function ProfielPage() {
               </button>
             </div>
           </form>
+        </div>
         </div>
       </div>
     </div>
