@@ -215,13 +215,15 @@ export async function POST(request: NextRequest) {
               }
             }
             
-            // For Basic tier users, complete onboarding after challenges
+            // For Basic tier users, only complete onboarding if explicitly requested
+            // This allows them to see the "Ga verder" button first
             const packageType = profile.package_type || 'Basic Tier';
             const isAdmin = profile.role === 'admin';
             const hasTrainingAccess = isAdmin || packageType === 'Premium Tier' || packageType === 'Lifetime Tier' || packageType === 'Lifetime Access';
             const hasNutritionAccess = isAdmin || packageType === 'Premium Tier' || packageType === 'Lifetime Tier' || packageType === 'Lifetime Access';
             
-            if (!hasTrainingAccess && !hasNutritionAccess) {
+            // Only auto-complete for basic tier if explicitly requested via data.completeOnboarding
+            if (!hasTrainingAccess && !hasNutritionAccess && data?.completeOnboarding) {
               updateData.onboarding_completed = true;
             }
             break;

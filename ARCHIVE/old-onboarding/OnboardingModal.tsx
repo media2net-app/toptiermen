@@ -522,7 +522,8 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
                       value={mainGoal}
                       onChange={(e) => setMainGoal(e.target.value)}
                       placeholder="Bijvoorbeeld: 10kg afvallen en mijn conditie verbeteren in 6 maanden..."
-                      className="w-full bg-[#232D1A] border border-[#3A4D23] rounded-lg p-3 text-white placeholder-[#8BAE5A]/50 focus:outline-none focus:border-[#8BAE5A] transition-colors"
+                      className="w-full bg-[#232D1A] border border-[#3A4D23] rounded-lg p-3 text-white placeholder-[#8BAE5A]/50 focus:outline-none focus:border-[#8BAE5A] transition-colors relative z-10"
+                      style={{ pointerEvents: 'auto' }}
                       rows={4}
                     />
                   </div>

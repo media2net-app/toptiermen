@@ -17,7 +17,7 @@ export default function OnboardingV2Progress({ className = "" }: OnboardingV2Pro
   const getStepInfo = () => {
     // Determine total steps based on user access
     const { hasTrainingAccess, hasNutritionAccess } = useOnboardingV2();
-    const totalSteps = (!hasTrainingAccess && !hasNutritionAccess) ? 4 : 5; // Basic: 4 steps, Premium: 5 steps
+    const totalSteps = (!hasTrainingAccess && !hasNutritionAccess) ? 4 : 6; // Basic: 4 steps, Premium: 6 steps
     
     // Map step IDs to sequential step numbers based on user tier
     const isBasicTier = !hasTrainingAccess && !hasNutritionAccess;
@@ -31,8 +31,8 @@ export default function OnboardingV2Progress({ className = "" }: OnboardingV2Pro
       1: 2, // Set goal
       2: 3, // Select challenges
       3: 4, // Select training schema
-      4: 4, // Select nutrition plan (step 4 of 5)
-      5: 5  // Forum intro (step 5 of 5)
+      4: 5, // Select nutrition plan (step 5 of 6)
+      5: 6  // Forum intro (step 6 of 6)
     };
     
     const currentStepNumber = stepMapping[currentStep as keyof typeof stepMapping] || 1;

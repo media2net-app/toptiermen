@@ -78,18 +78,12 @@ const WelcomeVideoStep = ({ onComplete }: { onComplete: () => void }) => {
           onPause={handlePause}
           onPlay={handlePlayEvent}
           onError={(e) => {
-            console.log('Video error, trying fallback:', e);
-            const video = e.target as HTMLVideoElement;
-            if (video.src !== '/videos/welcome-video.mp4') {
-              video.src = '/videos/welcome-video.mp4';
-            }
+            console.log('Video error:', e);
           }}
           controls
           preload="metadata"
         >
-          <source src="/onboarding-v2-video.mp4" type="video/mp4" />
-          <source src="/videos/welcome-video.mp4" type="video/mp4" />
-          <source src="/testgebruikers-v2.mp4" type="video/mp4" />
+          <source src="https://wkjvstuttbeyqzyjayxj.supabase.co/storage/v1/object/public/workout-videos/onboarding-v2-video.mp4" type="video/mp4" />
           Je browser ondersteunt geen video element.
         </video>
         
@@ -153,7 +147,8 @@ const SetGoalStep = ({ onComplete }: { onComplete: (goal: string) => void }) => 
           value={goal}
           onChange={(e) => setGoal(e.target.value)}
           placeholder="Bijvoorbeeld: Ik wil 10kg afvallen en sterker worden..."
-          className="w-full h-32 p-4 bg-[#1a2e1a] border border-[#8BAE5A] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-[#8BAE5A] focus:ring-2 focus:ring-[#8BAE5A] focus:ring-opacity-50 resize-none"
+          className="w-full h-32 p-4 bg-[#1a2e1a] border border-[#8BAE5A] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-[#8BAE5A] focus:ring-2 focus:ring-[#8BAE5A] focus:ring-opacity-50 resize-none relative z-10"
+          style={{ pointerEvents: 'auto' }}
         />
       </div>
 
@@ -391,6 +386,23 @@ export default function OnboardingV2Modal({ isOpen }: OnboardingV2ModalProps) {
   } = useOnboardingV2();
   const router = useRouter();
 
+  // Prevent ESC key from closing modal
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isOpen) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleKeyDown, true);
+      return () => {
+        document.removeEventListener('keydown', handleKeyDown, true);
+      };
+    }
+  }, [isOpen]);
+
   // Don't show modal if completed, loading, or for steps 2+ (only show for step 0 - welcome video and step 1 - goal setting)
   if (!isOpen || isLoading || isCompleted || (currentStep !== null && currentStep > 1)) {
     return null;
@@ -459,8 +471,26 @@ export default function OnboardingV2Modal({ isOpen }: OnboardingV2ModalProps) {
   };
 
   const getStepInfo = () => {
-    const totalSteps = 5;
-    const currentStepNumber = (currentStep ?? 0) + 1;
+    // Determine total steps based on user access
+    const totalSteps = (!hasTrainingAccess && !hasNutritionAccess) ? 4 : 6; // Basic: 4 steps, Premium: 6 steps
+    
+    // Map step IDs to sequential step numbers based on user tier
+    const isBasicTier = !hasTrainingAccess && !hasNutritionAccess;
+    const stepMapping = isBasicTier ? {
+      0: 1, // Welcome video
+      1: 2, // Set goal
+      2: 3, // Select challenges
+      5: 4  // Forum intro
+    } : {
+      0: 1, // Welcome video
+      1: 2, // Set goal
+      2: 3, // Select challenges
+      3: 4, // Select training schema
+      4: 5, // Select nutrition plan
+      5: 6  // Forum intro
+    };
+    
+    const currentStepNumber = stepMapping[currentStep as keyof typeof stepMapping] || 1;
     const percentage = (currentStepNumber / totalSteps) * 100;
     
     const stepNames = {
@@ -468,7 +498,8 @@ export default function OnboardingV2Modal({ isOpen }: OnboardingV2ModalProps) {
       1: "Hoofddoel instellen", 
       2: "Uitdagingen selecteren",
       3: "Trainingsschema kiezen",
-      4: "Voedingsplan selecteren"
+      4: "Voedingsplan selecteren",
+      5: "Forum introductie"
     };
     
     return {
@@ -482,8 +513,15 @@ export default function OnboardingV2Modal({ isOpen }: OnboardingV2ModalProps) {
   const stepInfo = getStepInfo();
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4">
-      <div className="bg-gradient-to-br from-[#1a2e1a] via-[#2d4a2d] to-[#1a2e1a] rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-[#8BAE5A]">
+    <div 
+      className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4"
+      onClick={(e) => e.preventDefault()}
+      onMouseDown={(e) => e.preventDefault()}
+    >
+      <div 
+        className="bg-gradient-to-br from-[#1a2e1a] via-[#2d4a2d] to-[#1a2e1a] rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-[#8BAE5A]"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="p-8">
           <div className="flex justify-between items-center mb-8">
             <div className="flex-1">

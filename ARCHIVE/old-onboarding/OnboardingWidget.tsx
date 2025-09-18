@@ -415,7 +415,8 @@ export default function OnboardingWidget({ isVisible, onComplete }: OnboardingWi
                 value={goalText}
                 onChange={(e) => setGoalText(e.target.value)}
                 placeholder="Bijvoorbeeld: 10% lichaamsvet bereiken, €50k sparen, een nieuwe vaardigheid leren..."
-                className="w-full h-32 p-3 bg-[#181F17] border border-[#3A4D23] rounded-xl text-white placeholder-[#8BAE5A]/50 resize-none focus:border-[#8BAE5A] focus:outline-none"
+                className="w-full h-32 p-3 bg-[#181F17] border border-[#3A4D23] rounded-xl text-white placeholder-[#8BAE5A]/50 resize-none focus:border-[#8BAE5A] focus:outline-none relative z-10"
+                style={{ pointerEvents: 'auto' }}
               />
               <div className="flex gap-3 mt-4">
                 <button

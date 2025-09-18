@@ -146,20 +146,49 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
     
     if (isCompleted || !actualOnboardingStatus) return false;
     
-    // If item has onboardingStep defined, check if current step allows access
-    if (item.onboardingStep !== undefined) {
-      // During onboarding, only allow access to the current step and earlier completed steps
-      // But disable future steps and past steps that are not the current step
-      const isDisabled = actualCurrentStep !== item.onboardingStep;
+    // During onboarding V2, block ALL navigation except the current step
+    if (actualCurrentStep !== null && actualCurrentStep !== undefined) {
+      // Only allow access to the current onboarding step
+      const isCurrentStep = item.onboardingStep === actualCurrentStep;
       
       // Force console log to be visible
       if (typeof window !== 'undefined') {
-        console.log(`🔍 [NAV] ${item.label}: currentStep=${actualCurrentStep}, requiredStep=${item.onboardingStep}, disabled=${isDisabled}`);
+        console.log(`🔍 [MOBILE NAV BLOCK] ${item.label}: currentStep=${actualCurrentStep}, requiredStep=${item.onboardingStep}, isCurrentStep=${isCurrentStep}, disabled=${!isCurrentStep}`);
       }
-      return isDisabled;
+      
+      // Block all items except the current step
+      return !isCurrentStep;
     }
     
     return false;
+  };
+
+  // Function to handle link clicks with onboarding blocking
+  const handleMobileLinkClick = (href: string, label: string, e?: React.MouseEvent) => {
+    // During onboarding V2, block navigation to other pages
+    if (actualCurrentStep !== null && actualCurrentStep !== undefined && !actualOnboardingStatus?.onboarding_completed) {
+      // Find the menu item to check if it should be disabled
+      const menuItem = menu.find(item => item.href === href);
+      if (menuItem && isMenuItemDisabled(menuItem)) {
+        // Block navigation by preventing default
+        if (e) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+        
+        // Show a message to the user
+        if (typeof window !== 'undefined') {
+          console.log(`🚫 Mobile navigation blocked during onboarding: ${label}`);
+        }
+        
+        return;
+      }
+    }
+    
+    // Close mobile menu if it's open
+    if (onLinkClick) {
+      onLinkClick();
+    }
   };
 
   // Auto-open submenu if current page is a submenu item
@@ -182,7 +211,7 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
       {/* Mijn Dashboard Button */}
       <Link
         href="/dashboard"
-        onClick={onLinkClick}
+        onClick={(e) => handleMobileLinkClick('/dashboard', 'Dashboard', e)}
         className="flex items-center gap-3 px-4 py-3 bg-[#8BAE5A] text-black font-bold rounded-xl hover:bg-[#7A9D4A] transition-colors mb-4"
       >
         <HomeIcon className="w-5 h-5" />
@@ -333,7 +362,7 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
                  actualCurrentStep === 5 ? '/dashboard/challenges' :
                  actualCurrentStep === 6 ? '/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden' :
                  '/dashboard/welcome-video') : (item.href || '#'))}
-              onClick={item.disabled ? (e) => e.preventDefault() : onLinkClick}
+              onClick={item.disabled ? (e) => e.preventDefault() : (e) => handleMobileLinkClick(item.href || '#', item.label, e)}
               title={item.disabled ? "Binnenkort online" : undefined}
               className={`grid grid-cols-[auto_1fr] items-center gap-4 px-4 py-3 rounded-xl font-bold uppercase text-sm tracking-wide transition-all duration-500 font-figtree ${
                 item.disabled
@@ -419,28 +448,43 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
     
     if (isCompleted || !actualOnboardingStatus) return false;
     
-    // If item has onboardingStep defined, check if current step allows access
-    if (item.onboardingStep !== undefined) {
-      // During onboarding, only allow access to the current step and earlier completed steps
-      // But disable future steps and past steps that are not the current step
-      const isDisabled = actualCurrentStep !== item.onboardingStep;
+    // During onboarding V2, block ALL navigation except the current step
+    if (actualCurrentStep !== null && actualCurrentStep !== undefined) {
+      // Only allow access to the current onboarding step
+      const isCurrentStep = item.onboardingStep === actualCurrentStep;
       
       // Force console log to be visible
       if (typeof window !== 'undefined') {
-        console.log(`🔍 [NAV] ${item.label}: currentStep=${actualCurrentStep}, requiredStep=${item.onboardingStep}, disabled=${isDisabled}`);
+        console.log(`🔍 [NAV BLOCK] ${item.label}: currentStep=${actualCurrentStep}, requiredStep=${item.onboardingStep}, isCurrentStep=${isCurrentStep}, disabled=${!isCurrentStep}`);
       }
-      return isDisabled;
+      
+      // Block all items except the current step
+      return !isCurrentStep;
     }
     
     return false;
   };
 
   const handleLinkClick = (href: string, label: string, e?: React.MouseEvent) => {
-    // Don't prevent default - let the Link component handle navigation
-    // if (e) {
-    //   e.preventDefault();
-    //   e.stopPropagation();
-    // }
+    // During onboarding V2, block navigation to other pages
+    if (actualCurrentStep !== null && actualCurrentStep !== undefined && !actualOnboardingStatus?.onboarding_completed) {
+      // Find the menu item to check if it should be disabled
+      const menuItem = menu.find(item => item.href === href);
+      if (menuItem && isMenuItemDisabled(menuItem)) {
+        // Block navigation by preventing default
+        if (e) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+        
+        // Show a message to the user
+        if (typeof window !== 'undefined') {
+          console.log(`🚫 Navigation blocked during onboarding: ${label}`);
+        }
+        
+        return;
+      }
+    }
     
     // Close mobile menu if it's open (but don't block navigation)
     if (onLinkClick) {

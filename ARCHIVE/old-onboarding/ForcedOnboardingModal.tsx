@@ -438,7 +438,8 @@ export default function ForcedOnboardingModal({ isOpen, onComplete }: ForcedOnbo
                   value={mainGoal}
                   onChange={(e) => setMainGoal(e.target.value)}
                   placeholder="Bijvoorbeeld: Ik wil 10kg afvallen en mijn conditie verbeteren door 3x per week te trainen..."
-                  className="w-full bg-[#0F1410] border border-[#3A4D23] rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] resize-none"
+                  className="w-full bg-[#0F1410] border border-[#3A4D23] rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] resize-none relative z-10"
+                  style={{ pointerEvents: 'auto' }}
                   rows={4}
                 />
                 <p className="text-sm text-[#8BAE5A] mt-2">

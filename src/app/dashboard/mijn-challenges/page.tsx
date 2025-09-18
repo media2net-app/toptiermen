@@ -293,6 +293,7 @@ export default function MijnChallengesPage() {
   const [showOnboardingStep3, setShowOnboardingStep3] = useState(false);
   const [showOnboardingPopup, setShowOnboardingPopup] = useState(false);
   const [showForcedOnboarding, setShowForcedOnboarding] = useState(false);
+  const [showContinueButton, setShowContinueButton] = useState(false);
 
   // Helper function to check if mission was completed today
   const isChallengeCompletedToday = (completionDate: string | null | undefined): boolean => {
@@ -361,6 +362,13 @@ export default function MijnChallengesPage() {
         
         toast.success(`Challenge "${suggestedChallenge.title}" toegevoegd!`);
         setShowChallengeLibrary(false);
+        
+        // Check if user is in onboarding step 2 and has enough challenges
+        if (currentStep === 2 && !isCompleted && challenges.length >= 2) { // 2 because we just added one, so total will be 3
+          console.log('🔧 DEBUG: User has 3 challenges from library, showing continue button');
+          setShowContinueButton(true);
+          toast.success('Perfect! Je hebt 3 challenges toegevoegd. Klik op "Ga verder" om door te gaan.');
+        }
       } else {
         throw new Error('Failed to add mission');
       }
@@ -394,6 +402,14 @@ export default function MijnChallengesPage() {
     const shouldShowModal = currentStep !== null && currentStep === 0 && !isCompleted;
     setShowForcedOnboarding(shouldShowModal);
   }, [user?.id, currentStep, isCompleted]);
+
+  // Check if user already has 3 challenges for onboarding
+  useEffect(() => {
+    if (currentStep === 2 && !isCompleted && challenges.length >= 3) {
+      console.log('🔧 DEBUG: User already has 3 challenges, showing continue button');
+      setShowContinueButton(true);
+    }
+  }, [currentStep, isCompleted, challenges.length]);
 
   // Load challenges
   useEffect(() => {
@@ -647,29 +663,46 @@ export default function MijnChallengesPage() {
 
         // Check if user is in onboarding step 2 and has enough challenges
         if (currentStep === 2 && !isCompleted && challenges.length >= 2) { // 2 because we just added one, so total will be 3
-          console.log('🔧 DEBUG: Completing onboarding step 2 with challenges:', challenges.length + 1);
-          try {
-            await completeStep(2, { challenges: challenges.map(c => c.id).concat([newChallengeData.id]) });
-            console.log('✅ Onboarding step 2 completed');
-            
-            // Redirect based on user access
-            setTimeout(() => {
-              if (hasTrainingAccess) {
-                console.log('🔧 DEBUG: Redirecting to training schemas...');
-                window.location.href = '/dashboard/trainingsschemas';
-              } else {
-                console.log('🔧 DEBUG: Redirecting to forum intro...');
-                window.location.href = '/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden';
-              }
-            }, 1000);
-          } catch (error) {
-            console.error('❌ Error completing onboarding step 2:', error);
-          }
+          console.log('🔧 DEBUG: User has 3 challenges, showing continue button');
+          setShowContinueButton(true);
+          toast.success('Perfect! Je hebt 3 challenges toegevoegd. Klik op "Ga verder" om door te gaan.');
         }
       }
     } catch (err) {
       console.error('Error creating mission:', err);
       toast.error('Fout bij het toevoegen van de challenge');
+    }
+  };
+
+  // Complete onboarding step 2
+  const completeOnboardingStep2 = async () => {
+    if (!user?.id || currentStep !== 2 || isCompleted) return;
+    
+    try {
+      console.log('🔧 DEBUG: Completing onboarding step 2 with challenges:', challenges.length);
+      
+      // For basic tier users, set completeOnboarding flag to complete the entire onboarding
+      const stepData = { 
+        challenges: challenges.map(c => c.id),
+        completeOnboarding: !hasTrainingAccess && !hasNutritionAccess
+      };
+      
+      await completeStep(2, stepData);
+      console.log('✅ Onboarding step 2 completed');
+      
+      // Redirect based on user access
+      setTimeout(() => {
+        if (hasTrainingAccess) {
+          console.log('🔧 DEBUG: Redirecting to training schemas...');
+          window.location.href = '/dashboard/trainingsschemas';
+        } else {
+          console.log('🔧 DEBUG: Redirecting to forum intro...');
+          window.location.href = '/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden';
+        }
+      }, 1000);
+    } catch (error) {
+      console.error('❌ Error completing onboarding step 2:', error);
+      toast.error('Er is een fout opgetreden bij het voltooien van de stap.');
     }
   };
 
@@ -1100,6 +1133,23 @@ export default function MijnChallengesPage() {
                 </div>
               ))}
             </div>
+          </div>
+        )}
+
+        {/* Onboarding Continue Button */}
+        {showContinueButton && currentStep === 2 && !isCompleted && (
+          <div className="bg-gradient-to-r from-[#8BAE5A]/20 to-[#FFD700]/20 border border-[#8BAE5A]/30 rounded-2xl p-6 mb-8 text-center">
+            <div className="text-4xl mb-4">🎯</div>
+            <h3 className="text-2xl font-bold text-white mb-2">Perfect! Je hebt 3 challenges toegevoegd</h3>
+            <p className="text-[#8BAE5A] mb-6">
+              Je bent klaar voor de volgende stap. Klik op "Ga verder" om door te gaan met je onboarding.
+            </p>
+            <button
+              onClick={completeOnboardingStep2}
+              className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] hover:from-[#7A9E4A] hover:to-[#E6C200] text-[#181F17] font-bold px-8 py-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg"
+            >
+              🚀 Ga verder
+            </button>
           </div>
         )}
 

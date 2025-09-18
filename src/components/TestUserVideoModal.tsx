@@ -37,14 +37,13 @@ export default function TestUserVideoModal({ isOpen, onComplete }: TestUserVideo
     try {
       if (user?.id) {
         // Mark test video as watched by setting current_step to 1
-        const response = await fetch('/api/onboarding', {
+        const response = await fetch('/api/onboarding-v2', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            userId: user.id,
-            action: 'watch_welcome_video',
+            action: 'complete_step',
             step: 0
           }),
         });
