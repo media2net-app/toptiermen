@@ -456,13 +456,13 @@ export default function OnboardingV2Modal({ isOpen, onClose }: OnboardingV2Modal
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
-      <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-700">
+      <div className="bg-gradient-to-br from-[#1a2e1a] via-[#2d4a2d] to-[#1a2e1a] rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-[#8BAE5A]">
         <div className="p-8">
           <div className="flex justify-between items-center mb-8">
             <h1 className="text-2xl font-bold text-white">Onboarding</h1>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-white transition-colors p-2 hover:bg-gray-700 rounded-full"
+              className="text-gray-400 hover:text-white transition-colors p-2 hover:bg-[#8BAE5A] hover:bg-opacity-20 rounded-full"
             >
               <XMarkIcon className="w-6 h-6" />
             </button>
