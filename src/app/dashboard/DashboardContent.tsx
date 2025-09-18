@@ -847,12 +847,12 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
       // Check if user is a test user (email contains @toptiermen.test)
       const isTestUser = user?.email?.includes('@toptiermen.test') || false;
       
-      if (isTestUser && !onboardingStatus.welcome_video_watched) {
+      if (isTestUser && !onboardingStatus.welcome_video_shown) {
         // Show test video first for test users who haven't watched the welcome video
         setShowTestUserVideo(true);
         setShowForcedOnboarding(false);
-      } else if (onboardingStatus.current_step <= 2 && !onboardingStatus.step_2_completed) {
-        // Show normal onboarding if step 2 (challenges) is not completed yet
+      } else if (!onboardingStatus.goal_set || !onboardingStatus.missions_selected) {
+        // Show normal onboarding if goal is not set or missions are not selected yet
         setShowForcedOnboarding(true);
         setShowTestUserVideo(false);
       } else {

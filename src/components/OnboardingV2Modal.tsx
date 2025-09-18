@@ -142,20 +142,22 @@ const SetGoalStep = ({ onComplete }: { onComplete: (goal: string) => void }) => 
         Beschrijf in één zin wat je wilt bereiken met Top Tier Men.
       </p>
       
-      <div className="mb-6">
+      <div className="mb-6 relative z-[9999]" style={{ zIndex: 9999 }}>
         <textarea
           value={goal}
           onChange={(e) => setGoal(e.target.value)}
           placeholder="Bijvoorbeeld: Ik wil 10kg afvallen en sterker worden..."
-          className="w-full h-32 p-4 bg-[#1a2e1a] border border-[#8BAE5A] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-[#8BAE5A] focus:ring-2 focus:ring-[#8BAE5A] focus:ring-opacity-50 resize-none relative z-10"
-          style={{ pointerEvents: 'auto' }}
+          className="w-full h-32 p-4 bg-[#1a2e1a] border border-[#8BAE5A] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-[#8BAE5A] focus:ring-2 focus:ring-[#8BAE5A] focus:ring-opacity-50 resize-none relative z-[9999]"
+          style={{ pointerEvents: 'auto', zIndex: 9999 }}
+          autoFocus
         />
       </div>
 
       <button
         onClick={handleSubmit}
         disabled={!goal.trim()}
-        className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] hover:from-[#7A9E4A] hover:to-[#E6C200] disabled:from-gray-600 disabled:to-gray-600 disabled:cursor-not-allowed text-white px-8 py-4 rounded-lg font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-lg"
+        className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] hover:from-[#7A9E4A] hover:to-[#E6C200] disabled:from-gray-600 disabled:to-gray-600 disabled:cursor-not-allowed text-white px-8 py-4 rounded-lg font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-lg relative z-[9999]"
+        style={{ pointerEvents: 'auto', zIndex: 9999 }}
       >
         Doel opslaan →
       </button>
@@ -514,13 +516,15 @@ export default function OnboardingV2Modal({ isOpen }: OnboardingV2ModalProps) {
 
   return (
     <div 
-      className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4"
+      className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-[9999] p-4"
       onClick={(e) => e.preventDefault()}
       onMouseDown={(e) => e.preventDefault()}
+      style={{ zIndex: 9999 }}
     >
       <div 
-        className="bg-gradient-to-br from-[#1a2e1a] via-[#2d4a2d] to-[#1a2e1a] rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-[#8BAE5A]"
+        className="bg-gradient-to-br from-[#1a2e1a] via-[#2d4a2d] to-[#1a2e1a] rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-[#8BAE5A] relative z-[9999]"
         onClick={(e) => e.stopPropagation()}
+        style={{ zIndex: 9999 }}
       >
         <div className="p-8">
           <div className="flex justify-between items-center mb-8">
