@@ -1299,9 +1299,6 @@ export default function MijnChallengesPage() {
         {/* OnboardingV2Modal for users in onboarding */}
         <OnboardingV2Modal 
           isOpen={showForcedOnboarding}
-          onClose={() => {
-            setShowForcedOnboarding(false);
-          }}
         />
       </div>
     </ClientLayout>

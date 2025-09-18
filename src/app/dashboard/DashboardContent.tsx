@@ -1154,9 +1154,6 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
         {/* Modals and Components */}
         <OnboardingV2Modal 
           isOpen={showForcedOnboarding}
-          onClose={() => {
-            setShowForcedOnboarding(false);
-          }}
         />
 
         <TestUserVideoModal 

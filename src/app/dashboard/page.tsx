@@ -605,7 +605,6 @@ export default function Dashboard() {
       {/* Onboarding V2 Modal */}
       <OnboardingV2Modal 
         isOpen={!isCompleted && (currentStep === 0 || currentStep === 1)}
-        onClose={() => {}} // Modal cannot be closed during onboarding
       />
     </div>
   );

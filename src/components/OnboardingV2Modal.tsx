@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { 
-  XMarkIcon, 
   PlayIcon, 
   CheckIcon,
   ArrowRightIcon,
@@ -21,7 +20,6 @@ import { toast } from 'react-hot-toast';
 
 interface OnboardingV2ModalProps {
   isOpen: boolean;
-  onClose: () => void;
 }
 
 // Step components
@@ -381,7 +379,7 @@ const ForumIntroStep = ({ onComplete }: { onComplete: () => void }) => {
   );
 };
 
-export default function OnboardingV2Modal({ isOpen, onClose }: OnboardingV2ModalProps) {
+export default function OnboardingV2Modal({ isOpen }: OnboardingV2ModalProps) {
   const { 
     isLoading, 
     isCompleted, 
@@ -407,7 +405,6 @@ export default function OnboardingV2Modal({ isOpen, onClose }: OnboardingV2Modal
       } else if (step === 1) { // Goal step -> redirect to challenges
         router.push('/dashboard/mijn-challenges');
       } else if (step === 5) { // Forum intro step -> complete onboarding
-        onClose();
         router.push('/dashboard');
       }
     }
@@ -506,12 +503,6 @@ export default function OnboardingV2Modal({ isOpen, onClose }: OnboardingV2Modal
               </div>
               <p className="text-xs text-gray-400">{stepInfo.stepName}</p>
             </div>
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-white transition-colors p-2 hover:bg-[#8BAE5A] hover:bg-opacity-20 rounded-full ml-4"
-            >
-              <XMarkIcon className="w-6 h-6" />
-            </button>
           </div>
           
           {renderStep()}
