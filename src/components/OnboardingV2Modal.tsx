@@ -427,7 +427,12 @@ export default function OnboardingV2Modal({ isOpen }: OnboardingV2ModalProps) {
   const handleStepSkip = async (step: number) => {
     const success = await skipStep(step);
     if (success) {
-      // Continue to next step
+      // After skipping, redirect to next step or complete onboarding
+      if (step === 3) { // Training step skipped
+        router.push('/dashboard/voedingsplannen-v2');
+      } else if (step === 4) { // Nutrition step skipped
+        router.push('/dashboard');
+      }
     }
   };
 

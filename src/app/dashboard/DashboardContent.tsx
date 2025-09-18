@@ -404,6 +404,18 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
   
   // Use onboardingStatus from props if available, otherwise fallback to context
   const actualOnboardingStatus = onboardingStatus || { current_step: currentStep, onboarding_completed: isCompleted };
+  
+  // Debug log to see onboarding status
+  useEffect(() => {
+    console.log('🔍 [SIDEBAR DEBUG] Onboarding Status:', {
+      onboardingStatusFromProps: onboardingStatus,
+      actualOnboardingStatus,
+      isCompleted,
+      currentStep,
+      onboarding_completed: actualOnboardingStatus?.onboarding_completed
+    });
+  }, [onboardingStatus, actualOnboardingStatus, isCompleted, currentStep]);
+  
   // const { trackFeatureUsage } = useV2Monitoring();
   const { user, isAdmin } = useSupabaseAuth();
   const { hasAccess } = useSubscription();
@@ -731,6 +743,20 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
   const [showForcedOnboarding, setShowForcedOnboarding] = useState(false);
   const [showTestUserVideo, setShowTestUserVideo] = useState(false);
   const [isLoadingLocal, setIsLoadingLocal] = useState(false); // DISABLED TO FIX FLICKERING
+  
+  // Get onboarding status from context
+  const { isCompleted: contextIsCompleted, currentStep: contextCurrentStep } = useOnboardingV2();
+  
+  // Sync onboardingStatus with context changes
+  useEffect(() => {
+    if (contextIsCompleted !== undefined && contextCurrentStep !== undefined) {
+      setOnboardingStatus(prev => ({
+        ...prev,
+        onboarding_completed: contextIsCompleted,
+        current_step: contextCurrentStep
+      }));
+    }
+  }, [contextIsCompleted, contextCurrentStep]);
 
   // 2.0.1: Cache busting for existing users
   useEffect(() => {

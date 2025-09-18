@@ -170,6 +170,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
     }
 
+    // Determine user access levels
+    const packageType = profile.package_type || 'Basic Tier';
+    const isAdmin = profile.role === 'admin';
+    const hasTrainingAccess = isAdmin || packageType === 'Premium Tier' || packageType === 'Lifetime Tier' || packageType === 'Lifetime Access';
+    const hasNutritionAccess = isAdmin || packageType === 'Premium Tier' || packageType === 'Lifetime Tier' || packageType === 'Lifetime Access';
+
     // Get current onboarding status
     const { data: onboardingRecords, error: onboardingError } = await supabase
       .from('user_onboarding_status')
@@ -217,11 +223,6 @@ export async function POST(request: NextRequest) {
             
             // For Basic tier users, only complete onboarding if explicitly requested
             // This allows them to see the "Ga verder" button first
-            const packageType = profile.package_type || 'Basic Tier';
-            const isAdmin = profile.role === 'admin';
-            const hasTrainingAccess = isAdmin || packageType === 'Premium Tier' || packageType === 'Lifetime Tier' || packageType === 'Lifetime Access';
-            const hasNutritionAccess = isAdmin || packageType === 'Premium Tier' || packageType === 'Lifetime Tier' || packageType === 'Lifetime Access';
-            
             // Only auto-complete for basic tier if explicitly requested via data.completeOnboarding
             if (!hasTrainingAccess && !hasNutritionAccess && data?.completeOnboarding) {
               updateData.onboarding_completed = true;
@@ -248,6 +249,10 @@ export async function POST(request: NextRequest) {
             break;
           case ONBOARDING_STEPS.SELECT_NUTRITION.id:
             updateData.nutrition_plan_selected = true;
+            // For basic tier users, complete onboarding after skipping nutrition step
+            if (!hasTrainingAccess && !hasNutritionAccess) {
+              updateData.onboarding_completed = true;
+            }
             break;
         }
         break;

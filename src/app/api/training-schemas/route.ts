@@ -12,49 +12,35 @@ export async function GET() {
     
     console.log('🔍 [TRAINING-SCHEMAS-FIXED] Fetching ONLY the 24 real training schemas...');
     
-    // Direct query to training_schemas table with training_schema_days - our source of truth
-    // First get all schemas without the join to avoid any caching issues
-    const { data: allSchemas, error: allSchemasError } = await supabase
+    // OPTIMIZED: Single efficient query with join to avoid N+1 problem
+    console.log('⚡ [PERFORMANCE] Using optimized single query with join...');
+    const startTime = Date.now();
+    
+    const { data: realSchemas, error: allSchemasError } = await supabase
       .from('training_schemas')
-      .select('*')
+      .select(`
+        *,
+        training_schema_days (
+          id,
+          day_number,
+          name,
+          description,
+          focus_area,
+          order_index
+        )
+      `)
       .eq('status', 'published')
       .order('created_at', { ascending: false })
       .limit(1000);
+    
+    const queryTime = Date.now() - startTime;
+    console.log(`⚡ [PERFORMANCE] Query completed in ${queryTime}ms`);
     
     if (allSchemasError) {
       console.error('❌ [TRAINING-SCHEMAS-FIXED] Error fetching schemas:', allSchemasError);
       return NextResponse.json({ 
         success: false, 
         error: 'Failed to fetch training schemas' 
-      }, { status: 500 });
-    }
-    
-    // Then get the days for each schema separately to avoid join issues
-    const realSchemas: any[] = [];
-    for (const schema of allSchemas || []) {
-      const { data: days, error: daysError } = await supabase
-        .from('training_schema_days')
-        .select('id, day_number, name, description, focus_area, order_index')
-        .eq('schema_id', schema.id)
-        .order('order_index');
-      
-      realSchemas.push({
-        ...schema,
-        training_schema_days: days || []
-      });
-    }
-    
-    const error: any = null; // No error since we handled it above
-    
-    
-    console.log('🔍 [TRAINING-SCHEMAS-FIXED] Query executed, checking for specific schemas...');
-    
-    
-    if (error) {
-      console.error('❌ [TRAINING-SCHEMAS-FIXED] Database error:', error);
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Database error' 
       }, { status: 500 });
     }
     

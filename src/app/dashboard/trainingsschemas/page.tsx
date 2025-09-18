@@ -239,9 +239,10 @@ function TrainingschemasContent() {
       setTrainingLoading(true);
       setTrainingError(null);
       
-      console.log('🔍 Fetching training schemas for user:', user?.email);
+      console.log('⚡ [PERFORMANCE] Fetching training schemas for user:', user?.email);
+      const startTime = Date.now();
       
-      // Use the same direct Supabase query as the admin dashboard, including days
+      // OPTIMIZED: Use direct Supabase query with performance timing
       const { data, error } = await supabase
         .from('training_schemas')
         .select(`
@@ -254,6 +255,9 @@ function TrainingschemasContent() {
         `)
         .eq('status', 'published')
         .order('created_at', { ascending: false });
+      
+      const queryTime = Date.now() - startTime;
+      console.log(`⚡ [PERFORMANCE] Training schemas query completed in ${queryTime}ms`);
       
       if (error) {
         console.error('❌ Error fetching training schemas:', error);
@@ -296,7 +300,8 @@ function TrainingschemasContent() {
       return;
     }
     
-    console.log('🚀 Starting parallel data loading for user:', user.email);
+    console.log('⚡ [PERFORMANCE] Starting parallel data loading for user:', user.email);
+    const totalStartTime = Date.now();
     console.log('🔍 Current state before loading:', {
       profileLoading,
       trainingLoading,
@@ -456,6 +461,8 @@ function TrainingschemasContent() {
       console.error('❌ Parallel loading error:', error);
       setTrainingError('Failed to load data');
     } finally {
+      const totalTime = Date.now() - totalStartTime;
+      console.log(`⚡ [PERFORMANCE] Total loading time: ${totalTime}ms`);
       console.log('🏁 Loading completed, setting loading states to false');
       setTrainingLoading(false);
       setProfileLoading(false);
