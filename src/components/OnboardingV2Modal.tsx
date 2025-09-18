@@ -79,10 +79,19 @@ const WelcomeVideoStep = ({ onComplete }: { onComplete: () => void }) => {
           onEnded={handleVideoEnd}
           onPause={handlePause}
           onPlay={handlePlayEvent}
+          onError={(e) => {
+            console.log('Video error, trying fallback:', e);
+            const video = e.target as HTMLVideoElement;
+            if (video.src !== '/videos/welcome-video.mp4') {
+              video.src = '/videos/welcome-video.mp4';
+            }
+          }}
           controls
           preload="metadata"
         >
           <source src="/onboarding-v2-video.mp4" type="video/mp4" />
+          <source src="/videos/welcome-video.mp4" type="video/mp4" />
+          <source src="/testgebruikers-v2.mp4" type="video/mp4" />
           Je browser ondersteunt geen video element.
         </video>
         
