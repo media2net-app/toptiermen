@@ -1274,7 +1274,7 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
 
           {/* Page Content */}
           <div className="p-3 sm:p-4 md:p-6 lg:p-8">
-            <div className={`transition-all duration-300 ${onboardingLoading && actualCurrentStep !== 5 ? 'opacity-50 scale-95' : 'opacity-100 scale-100'}`}>
+            <div className={`transition-all duration-300 ${onboardingLoading && contextCurrentStep !== 5 ? 'opacity-50 scale-95' : 'opacity-100 scale-100'}`}>
               {children}
             </div>
           </div>
