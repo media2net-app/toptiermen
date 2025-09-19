@@ -54,7 +54,7 @@ const WorkoutWidget = () => {
 const SubscriptionTier = () => {
   const { subscription, loading, error } = useSubscription();
   
-  console.log('🔍 SubscriptionTier render:', { subscription, loading, error });
+  // console.log('🔍 SubscriptionTier render:', { subscription, loading, error });
   
   if (loading) return <span className="text-gray-400 text-xs">Loading...</span>;
   if (error) return <span className="text-red-400 text-xs">Error</span>;
@@ -518,7 +518,7 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
         if (actualCurrentStep === 5) {
           console.log(`🔍 [STEP 5 DEBUG] ${item.label}: parent=${item.parent}, disabled=${!isCurrentStep}, onboarding_completed=${actualOnboardingStatus?.onboarding_completed}`);
         } else {
-          console.log(`🔍 [NAV BLOCK] ${item.label}: currentStep=${actualCurrentStep}, requiredStep=${item.onboardingStep}, isCurrentStep=${isCurrentStep}, disabled=${!isCurrentStep}, onboarding_completed=${actualOnboardingStatus?.onboarding_completed}`);
+          // console.log(`🔍 [NAV BLOCK] ${item.label}: currentStep=${actualCurrentStep}, requiredStep=${item.onboardingStep}, isCurrentStep=${isCurrentStep}, disabled=${!isCurrentStep}, onboarding_completed=${actualOnboardingStatus?.onboarding_completed}`);
         }
       }
       
@@ -795,13 +795,13 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
   // Get onboarding status from context
   const { isCompleted: contextIsCompleted, currentStep: contextCurrentStep, refreshStatus } = useOnboardingV2();
   
-  // Refresh onboarding status on mount
+  // Refresh onboarding status on mount (only once)
   useEffect(() => {
     if (refreshStatus) {
       console.log('🔄 [DASHBOARD] Refreshing onboarding status on mount...');
       refreshStatus();
     }
-  }, [refreshStatus]);
+  }, []); // Empty dependency array to run only once
 
   // Sync onboardingStatus with context changes
   useEffect(() => {
@@ -810,10 +810,10 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
         onboarding_completed: contextIsCompleted,
         current_step: contextCurrentStep
       });
-      console.log('🔄 [DASHBOARD] Syncing onboarding status:', {
-        contextIsCompleted,
-        contextCurrentStep
-      });
+      // console.log('🔄 [DASHBOARD] Syncing onboarding status:', {
+      //   contextIsCompleted,
+      //   contextCurrentStep
+      // });
     }
   }, [contextIsCompleted, contextCurrentStep]);
 

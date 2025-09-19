@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 
 interface OnboardingStep {
@@ -159,10 +159,10 @@ export function OnboardingV2Provider({ children }: { children: React.ReactNode }
     }
   };
 
-  // Refresh status
-  const refreshStatus = async () => {
+  // Refresh status (memoized to prevent infinite loops)
+  const refreshStatus = useCallback(async () => {
     await loadOnboardingStatus();
-  };
+  }, [user?.email]);
 
   // Get next step
   const getNextStep = (): number | null => {
