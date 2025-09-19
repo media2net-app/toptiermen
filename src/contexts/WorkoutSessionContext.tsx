@@ -140,14 +140,19 @@ export function WorkoutSessionProvider({ children }: { children: ReactNode }) {
   const pauseWorkout = () => {
     if (session) {
       setSession(prev => prev ? { ...prev, isActive: false } : null);
-      setIsWorkoutTimerRunning(false);
+      // Don't pause workout timer - only pause rest timer
+      setIsRestTimerRunning(false);
     }
   };
 
   const resumeWorkout = () => {
     if (session) {
       setSession(prev => prev ? { ...prev, isActive: true } : null);
-      setIsWorkoutTimerRunning(true);
+      // Don't resume workout timer - it should always run
+      // Only resume rest timer if there's rest time
+      if (restTime > 0) {
+        setIsRestTimerRunning(true);
+      }
     }
   };
 
