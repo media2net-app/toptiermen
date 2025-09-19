@@ -778,9 +778,7 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { user, profile, isAdmin, logoutAndRedirect } = useSupabaseAuth();
   const { showDebug, toggleDebug } = useDebug();
-  // const { isCompleted, isLoading: onboardingLoading } = useOnboardingV2();
-  const isCompleted = false;
-  const onboardingLoading = false;
+  const { isCompleted, isLoading: onboardingLoading } = useOnboardingV2();
   const isTestUser = useTestUser();
   // const { addNotification, setLoadingState } = useV2State();
   // const { trackFeatureUsage } = useV2Monitoring();
@@ -805,8 +803,26 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
         onboarding_completed: contextIsCompleted,
         current_step: contextCurrentStep
       }));
+      console.log('🔄 [DASHBOARD] Syncing onboarding status:', {
+        contextIsCompleted,
+        contextCurrentStep
+      });
     }
   }, [contextIsCompleted, contextCurrentStep]);
+
+  // Initialize onboardingStatus if not set
+  useEffect(() => {
+    if (!onboardingStatus && contextIsCompleted !== undefined && contextCurrentStep !== undefined) {
+      setOnboardingStatus({
+        onboarding_completed: contextIsCompleted,
+        current_step: contextCurrentStep
+      });
+      console.log('🔄 [DASHBOARD] Initializing onboarding status:', {
+        contextIsCompleted,
+        contextCurrentStep
+      });
+    }
+  }, [onboardingStatus, contextIsCompleted, contextCurrentStep]);
 
   // 2.0.1: Cache busting for existing users
   useEffect(() => {

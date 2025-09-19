@@ -231,7 +231,7 @@ export default function MijnTrainingen() {
         
         // Reload data after a short delay to ensure API call is processed
         setTimeout(() => {
-          loadTrainingData();
+        loadTrainingData();
         }, 500);
         
         toast.success(`Week ${weekCompletionData.week} voltooid! Nieuwe week gestart.`);
@@ -458,7 +458,7 @@ export default function MijnTrainingen() {
             >
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className="text-2xl font-bold text-white">Trainingsdagen</h2>
+                <h2 className="text-2xl font-bold text-white">Trainingsdagen</h2>
                   <p className="text-[#8BAE5A] text-sm mt-1">
                     Huidige Week: {completedWeeks.length + 1}/8
                   </p>
@@ -846,7 +846,7 @@ export default function MijnTrainingen() {
               </div>
             </motion.div>
           </motion.div>
-        )}
+      )}
       </AnimatePresence>
     </PageLayout>
   );
