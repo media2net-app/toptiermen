@@ -139,8 +139,8 @@ export default function MijnTrainingen() {
         console.log('✅ Active schema found, current day:', data.progress.current_day);
       }
 
-      // Check if all days are completed and handle week progression
-      if (data.hasActiveSchema && data.days) {
+      // Check if all days are completed and handle week progression (only if modal is not open)
+      if (data.hasActiveSchema && data.days && !showWeekCompletionModal) {
         checkWeekCompletion(data.days);
       }
     } catch (error) {
@@ -153,6 +153,12 @@ export default function MijnTrainingen() {
 
   // Function to check if all days are completed and handle week progression
   const checkWeekCompletion = (days: any[]) => {
+    // Don't check if modal is already open
+    if (showWeekCompletionModal) {
+      console.log('⏸️ Week completion modal already open, skipping check');
+      return;
+    }
+    
     const allDaysCompleted = days.every(day => day.isCompleted);
     
     if (allDaysCompleted) {
@@ -188,6 +194,19 @@ export default function MijnTrainingen() {
       // Add completed week to the list
       setCompletedWeeks(prev => [...prev, weekCompletionData]);
       
+      // Update current week first
+      const nextWeekNumber = weekCompletionData.week + 1;
+      if (nextWeekNumber <= 8) {
+        setCurrentWeek(nextWeekNumber);
+      } else {
+        console.log('🏆 All 8 weeks completed! Congratulations!');
+        setCurrentWeek(8);
+      }
+      
+      // Close modal immediately to prevent re-triggering
+      setShowWeekCompletionModal(false);
+      setWeekCompletionData(null);
+      
       // Call API to reset all days
       const response = await fetch('/api/reset-training-week', {
         method: 'POST',
@@ -201,19 +220,10 @@ export default function MijnTrainingen() {
       if (response.ok) {
         console.log('✅ Days reset for new week');
         
-        // Update current week
-        const nextWeekNumber = weekCompletionData.week + 1;
-        if (nextWeekNumber <= 8) {
-          setCurrentWeek(nextWeekNumber);
-        } else {
-          console.log('🏆 All 8 weeks completed! Congratulations!');
-          setCurrentWeek(8);
-        }
-        
-        // Close modal and reload data
-        setShowWeekCompletionModal(false);
-        setWeekCompletionData(null);
-        loadTrainingData();
+        // Reload data after a short delay to ensure API call is processed
+        setTimeout(() => {
+          loadTrainingData();
+        }, 500);
         
         toast.success(`Week ${weekCompletionData.week} voltooid! Nieuwe week gestart.`);
       } else {
