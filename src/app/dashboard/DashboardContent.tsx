@@ -96,7 +96,7 @@ const menu = [
   { label: 'Mind & Focus (binnenkort online)', icon: ChartBarIcon, href: null, onboardingStep: 7, disabled: true },
   { label: 'Brotherhood', icon: UsersIcon, href: '/dashboard/brotherhood', onboardingStep: 7 },
   { label: 'Social Feed', icon: ChatBubbleLeftRightIcon, parent: 'Brotherhood', href: '/dashboard/brotherhood/social-feed', isSub: true, onboardingStep: 7 },
-  { label: 'Forum', icon: FireIcon, parent: 'Brotherhood', href: '/dashboard/brotherhood/forum', isSub: true, onboardingStep: 6 },
+  { label: 'Forum', icon: FireIcon, parent: 'Brotherhood', href: '/dashboard/brotherhood/forum', isSub: true, onboardingStep: 5 },
   { label: 'Leden', icon: UsersIcon, parent: 'Brotherhood', href: '/dashboard/brotherhood/leden', isSub: true, onboardingStep: 7 },
   { label: 'Boekenkamer (binnenkort online)', icon: BookOpenIcon, href: null, onboardingStep: 7, disabled: true },
   { label: 'Badges & Rangen', icon: StarIcon, href: '/dashboard/badges-en-rangen', onboardingStep: 7 },
@@ -171,7 +171,7 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
       
       // Force console log to be visible
       if (typeof window !== 'undefined') {
-        console.log(`🔍 [MOBILE NAV BLOCK] ${item.label}: currentStep=${actualCurrentStep}, requiredStep=${item.onboardingStep}, isCurrentStep=${isCurrentStep}, disabled=${!isCurrentStep}`);
+        console.log(`🔍 [MOBILE NAV BLOCK] ${item.label}: currentStep=${actualCurrentStep}, requiredStep=${item.onboardingStep}, isCurrentStep=${isCurrentStep}, disabled=${!isCurrentStep}, onboarding_completed=${actualOnboardingStatus?.onboarding_completed}`);
       }
       
       // Block all items except the current step
@@ -486,7 +486,7 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
       
       // Force console log to be visible
       if (typeof window !== 'undefined') {
-        console.log(`🔍 [NAV BLOCK] ${item.label}: currentStep=${actualCurrentStep}, requiredStep=${item.onboardingStep}, isCurrentStep=${isCurrentStep}, disabled=${!isCurrentStep}`);
+        console.log(`🔍 [NAV BLOCK] ${item.label}: currentStep=${actualCurrentStep}, requiredStep=${item.onboardingStep}, isCurrentStep=${isCurrentStep}, disabled=${!isCurrentStep}, onboarding_completed=${actualOnboardingStatus?.onboarding_completed}`);
       }
       
       // Block all items except the current step
