@@ -5,7 +5,6 @@ import {
   XMarkIcon, 
   PlayIcon, 
   CheckIcon,
-  ClockIcon,
   FireIcon,
   StarIcon,
   ExclamationTriangleIcon
@@ -175,15 +174,9 @@ export default function PreWorkoutModal({
 
         {/* Training Info */}
         <div className="bg-[#0F1419]/50 rounded-xl p-6 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <h3 className="text-lg font-semibold text-white mb-2">{schemaName}</h3>
-              <p className="text-[#8BAE5A] text-sm">{focusArea}</p>
-            </div>
-            <div className="flex items-center">
-              <ClockIcon className="w-5 h-5 text-[#8BAE5A] mr-2" />
-              <span className="text-white">{estimatedDuration}</span>
-            </div>
+          <div>
+            <h3 className="text-lg font-semibold text-white mb-2">{schemaName}</h3>
+            <p className="text-[#8BAE5A] text-sm">{focusArea}</p>
           </div>
         </div>
 
