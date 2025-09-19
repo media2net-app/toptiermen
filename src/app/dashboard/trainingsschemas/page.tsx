@@ -150,6 +150,7 @@ function TrainingschemasContent() {
   const [unlockedSchemas, setUnlockedSchemas] = useState<{ [key: number]: boolean }>({ 1: true, 2: false, 3: false });
   const [showRequiredProfile, setShowRequiredProfile] = useState(false);
   const [showCalculator, setShowCalculator] = useState(false);
+  const [showWarningModal, setShowWarningModal] = useState(false);
   const [showAllSchemas, setShowAllSchemas] = useState(false);
   const [selectedSchemaDetail, setSelectedSchemaDetail] = useState<TrainingSchema | null>(null);
   const [profileLoading, setProfileLoading] = useState(true);
@@ -777,6 +778,24 @@ function TrainingschemasContent() {
       return;
     }
 
+    // Check if profile has changed
+    const hasChanged = 
+      userTrainingProfile?.training_goal !== training_goal ||
+      userTrainingProfile?.training_frequency !== parseInt(training_frequency) ||
+      userTrainingProfile?.equipment_type !== equipment_type;
+    
+    if (!hasChanged) {
+      toast.success('Je profiel is al up-to-date');
+      setShowCalculator(false);
+      return;
+    }
+
+    // Check if user has an active schema period (within 8 weeks)
+    if (currentSchemaPeriod && hasChanged) {
+      setShowWarningModal(true);
+      return;
+    }
+
     const profile = {
       training_goal,
       training_frequency: parseInt(training_frequency),
@@ -785,6 +804,20 @@ function TrainingschemasContent() {
 
     console.log('💾 Saving profile:', profile);
     saveTrainingProfile(profile);
+  };
+
+  const confirmProfileChange = () => {
+    const { training_goal, training_frequency, equipment_type } = calculatorData;
+    
+    const profile = {
+      training_goal,
+      training_frequency: parseInt(training_frequency),
+      equipment_type
+    };
+
+    console.log('💾 Confirming profile change despite warning:', profile);
+    saveTrainingProfile(profile);
+    setShowWarningModal(false);
   };
 
   const selectTrainingSchema = useCallback(async (schemaId: string) => {
@@ -2157,6 +2190,53 @@ function TrainingschemasContent() {
           )}
         </AnimatePresence>
       </div>
+
+      {/* Warning Modal for Profile Changes */}
+      <AnimatePresence>
+        {showWarningModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-[#1A1A1A] border border-gray-700 rounded-xl p-6 max-w-md w-full"
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 bg-yellow-500/20 rounded-full flex items-center justify-center">
+                  <svg className="w-5 h-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-semibold text-white">Let op!</h3>
+              </div>
+              
+              <p className="text-gray-300 mb-6 leading-relaxed">
+                Het is niet aanbevolen tussentijds van schema te wijzigen. Wij adviseren minimaal 8 weken een schema te volgen, consistentie is de sleutel van succes.
+              </p>
+              
+              <div className="flex gap-3 justify-end">
+                <button
+                  onClick={() => setShowWarningModal(false)}
+                  className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
+                >
+                  Annuleren
+                </button>
+                <button
+                  onClick={confirmProfileChange}
+                  className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors font-medium"
+                >
+                  Ja, toch wijzigen
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </PageLayout>
   );
 }
