@@ -850,6 +850,117 @@ Het Top Tier Men Team
 Dit is een automatisch gegenereerde email. Reageer niet op dit bericht.
 Voor vragen kun je contact opnemen via het platform.
         `
+      },
+      'platform-accessible': {
+        subject: '🎯 Platform Toegankelijk - Top Tier Men is weer live!',
+        html: `
+          <div style="background: linear-gradient(135deg, #0F1419 0%, #1F2D17 100%); min-height: 100vh; padding: 40px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+            <div style="max-width: 600px; margin: 0 auto; background: #0F1419; border-radius: 16px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.3);">
+              
+              <!-- Header -->
+              <div style="background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%); padding: 40px 30px; text-align: center;">
+                <img src="https://platform.toptiermen.eu/logo_white-full.svg" alt="Top Tier Men Logo" style="width: 200px; height: auto; margin-bottom: 20px;">
+                <h1 style="color: white; font-size: 32px; font-weight: 700; margin: 0; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+                  PLATFORM TOEGANKELIJK
+                </h1>
+                <p style="color: rgba(255,255,255,0.95); font-size: 18px; margin: 12px 0 0 0; font-weight: 500;">
+                  We zijn weer live en klaar voor jouw succes
+                </p>
+              </div>
+
+              <!-- Content -->
+              <div style="padding: 40px 30px; color: #E5E7EB;">
+                <p style="font-size: 18px; color: #8BAE5A; font-weight: 600; margin: 0 0 24px 0;">
+                  Beste \${name},
+                </p>
+                
+                <p style="font-size: 16px; line-height: 1.6; margin: 0 0 24px 0;">
+                  We hebben afgelopen week druk gewerkt aan het oplossen van bugs en het verbeteren van het platform. 
+                  Het Top Tier Men platform is nu weer volledig toegankelijk en klaar voor jouw training en ontwikkeling.
+                </p>
+
+                <div style="background: rgba(139, 174, 90, 0.1); border-left: 4px solid #8BAE5A; padding: 20px; margin: 24px 0; border-radius: 0 8px 8px 0;">
+                  <h3 style="color: #8BAE5A; font-size: 18px; font-weight: 700; margin: 0 0 12px 0;">
+                    🔐 WACHTWOORD RESET
+                  </h3>
+                  <p style="font-size: 15px; line-height: 1.5; margin: 0 0 12px 0; color: #D1D5DB;">
+                    Voor mensen die hun wachtwoord willen resetten: ga naar de login pagina en klik op "Wachtwoord vergeten". 
+                    Je ontvangt dan direct in je mailbox een nieuw wachtwoord.
+                  </p>
+                </div>
+
+                <div style="background: rgba(255, 193, 7, 0.1); border-left: 4px solid #FFC107; padding: 20px; margin: 24px 0; border-radius: 0 8px 8px 0;">
+                  <h3 style="color: #FFC107; font-size: 18px; font-weight: 700; margin: 0 0 12px 0;">
+                    🙏 ONZE EXCUSES
+                  </h3>
+                  <p style="font-size: 15px; line-height: 1.5; margin: 0; color: #D1D5DB;">
+                    Onze excuses voor de vertraging. We waarderen je begrip en loyaliteit enorm. 
+                    Jouw succes is onze prioriteit en we zijn er om je te ondersteunen.
+                  </p>
+                </div>
+
+                <!-- CTA Button -->
+                <div style="text-align: center; margin: 32px 0;">
+                  <a href="https://platform.toptiermen.eu/login" style="display: inline-block; background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%); color: white; text-decoration: none; padding: 16px 32px; border-radius: 12px; font-weight: 700; font-size: 16px; box-shadow: 0 8px 20px rgba(139, 174, 90, 0.3); transition: all 0.3s ease;">
+                    🚀 GA NAAR HET PLATFORM
+                  </a>
+                </div>
+
+                <div style="text-align: center; margin: 32px 0; padding: 20px; background: rgba(139, 174, 90, 0.1); border-radius: 12px;">
+                  <h3 style="color: #8BAE5A; font-size: 20px; font-weight: 700; margin: 0 0 12px 0;">
+                    🎯 VEEL SUCCES MET HET BEHALEN VAN DE STATUS TOP TIER MEN
+                  </h3>
+                  <p style="font-size: 16px; line-height: 1.5; margin: 0; color: #D1D5DB;">
+                    Jouw reis naar excellentie gaat door. We zijn er om je te ondersteunen bij elke stap.
+                  </p>
+                </div>
+
+                <p style="font-size: 14px; color: #9CA3AF; text-align: center; margin: 32px 0 0 0; line-height: 1.5;">
+                  Met vriendelijke groet,<br>
+                  <strong style="color: #8BAE5A;">Het Top Tier Men Team</strong>
+                </p>
+              </div>
+
+              <!-- Footer -->
+              <div style="background: #1A1A1A; padding: 30px; text-align: center; border-top: 1px solid #374151;">
+                <p style="color: #9CA3AF; font-size: 14px; margin: 0 0 16px 0;">
+                  © 2024 Top Tier Men - Exclusieve Broederschap voor Top Performers
+                </p>
+                <div style="display: flex; justify-content: center; gap: 24px; flex-wrap: wrap;">
+                  <a href="https://platform.toptiermen.eu" style="color: #8BAE5A; text-decoration: none; font-size: 14px;">Website</a>
+                  <a href="mailto:platform@toptiermen.eu" style="color: #8BAE5A; text-decoration: none; font-size: 14px;">Contact</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        `,
+        text: `
+Platform Toegankelijk - Top Tier Men is weer live!
+
+Beste \${name},
+
+We hebben afgelopen week druk gewerkt aan het oplossen van bugs en het verbeteren van het platform. 
+Het Top Tier Men platform is nu weer volledig toegankelijk en klaar voor jouw training en ontwikkeling.
+
+WACHTWOORD RESET:
+Voor mensen die hun wachtwoord willen resetten: ga naar de login pagina en klik op "Wachtwoord vergeten". 
+Je ontvangt dan direct in je mailbox een nieuw wachtwoord.
+
+ONZE EXCUSES:
+Onze excuses voor de vertraging. We waarderen je begrip en loyaliteit enorm. 
+Jouw succes is onze prioriteit en we zijn er om je te ondersteunen.
+
+VEEL SUCCES MET HET BEHALEN VAN DE STATUS TOP TIER MEN
+Jouw reis naar excellentie gaat door. We zijn er om je te ondersteunen bij elke stap.
+
+Ga naar het platform: https://platform.toptiermen.eu/login
+
+Met vriendelijke groet,
+Het Top Tier Men Team
+
+Website: https://platform.toptiermen.eu
+Contact: platform@toptiermen.eu
+        `
       }
     };
 
