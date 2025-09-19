@@ -310,7 +310,7 @@ const VoorstellenTopicPage = () => {
             Terug naar Forum
           </Link>
           
-          <div className="bg-[#232D1A]/90 rounded-2xl shadow-xl border border-[#3A4D23]/40 p-6">
+          <div className="bg-[#232D1A] rounded-2xl shadow-xl border border-[#3A4D23] p-6">
             <div className="flex items-start justify-between mb-4">
               <div>
                 <h1 className="text-2xl font-bold text-white mb-2">{topic.title}</h1>
@@ -348,7 +348,7 @@ const VoorstellenTopicPage = () => {
               key={post.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-[#232D1A]/90 rounded-2xl shadow-xl border border-[#3A4D23]/40 p-6"
+              className="bg-[#232D1A] rounded-2xl shadow-xl border border-[#3A4D23] p-6"
             >
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center">
@@ -376,7 +376,7 @@ const VoorstellenTopicPage = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-[#232D1A]/90 rounded-2xl shadow-xl border border-[#3A4D23]/40 p-6"
+            className="bg-[#232D1A] rounded-2xl shadow-xl border border-[#3A4D23] p-6"
           >
             <h2 className="text-lg font-semibold text-white mb-4 flex items-center">
               <PlusIcon className="w-5 h-5 mr-2 text-[#FFD700]" />
