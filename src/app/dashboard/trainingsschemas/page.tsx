@@ -495,59 +495,80 @@ function TrainingschemasContent() {
     
     console.log(`🎯 Mapping frontend goal "${profile.training_goal}" to database goal "${dbGoal}"`);
     
-    // NEW APPROACH: Always show all 3 schemas for goal + equipment combination
-    // Filter by goal + equipment (ignore frequency for now)
-    const goalEquipmentMatches = schemas.filter(schema => {
+    // IMPROVED APPROACH: Filter by goal + equipment + frequency, but show all available schemas
+    // First, find schemas that match goal + equipment + frequency (exact match)
+    const exactMatches = schemas.filter(schema => {
       const goalMatch = schema.training_goal === dbGoal;
       const equipmentMatch = schema.equipment_type === profile.equipment_type;
+      const frequencyMatch = (schema.training_schema_days?.length || 0) === profile.training_frequency;
       
-      console.log(`🔍 Schema "${schema.name}": goal=${goalMatch}, equipment=${equipmentMatch} (${schema.training_goal} vs ${dbGoal}, ${schema.equipment_type} vs ${profile.equipment_type})`);
+      console.log(`🔍 Schema "${schema.name}": goal=${goalMatch}, equipment=${equipmentMatch}, frequency=${frequencyMatch} (${schema.training_goal} vs ${dbGoal}, ${schema.equipment_type} vs ${profile.equipment_type}, ${schema.training_schema_days?.length || 0} days vs ${profile.training_frequency})`);
       
-      return goalMatch && equipmentMatch;
+      return goalMatch && equipmentMatch && frequencyMatch;
     });
     
-    console.log(`🎯 Goal + equipment matches: ${goalEquipmentMatches.length}`);
-    goalEquipmentMatches.forEach(schema => {
+    console.log(`🎯 Exact matches (goal + equipment + frequency): ${exactMatches.length}`);
+    exactMatches.forEach(schema => {
       console.log(`  ✅ "${schema.name}" - Schema ${schema.schema_nummer} (${schema.training_goal}, ${schema.equipment_type}, ${schema.training_schema_days?.length || 0} days)`);
     });
     
-    // Sort by schema number to ensure consistent order
-    const sortedSchemas = goalEquipmentMatches.sort((a, b) => {
-      const aNum = a.schema_nummer || 0;
-      const bNum = b.schema_nummer || 0;
-      return aNum - bNum;
-    });
+    // If we have exact matches, use those and ensure we have 3 schemas
+    let result: TrainingSchema[] = [];
     
-    // If we have less than 3 schemas, create placeholder schemas for missing numbers
-    const result: TrainingSchema[] = [];
-    const existingSchemaNumbers = sortedSchemas.map(s => s.schema_nummer || 0);
-    
-    for (let i = 1; i <= 3; i++) {
-      const existingSchema = sortedSchemas.find(s => s.schema_nummer === i);
-      if (existingSchema) {
-        result.push(existingSchema);
-      } else {
-        // Create a placeholder schema for missing schema numbers
-        const placeholderSchema: TrainingSchema = {
-          id: `placeholder-${dbGoal}-${profile.equipment_type}-${i}`,
-          name: `${profile.training_goal} ${profile.training_frequency}x per week Schema ${i}`,
-          description: `Schema ${i} voor ${profile.training_goal} met ${profile.equipment_type} - Binnenkort beschikbaar`,
-          category: 'Gym',
-          cover_image: null,
-          status: 'coming_soon',
-          difficulty: 'Intermediate',
-          estimated_duration: '30 min',
-          target_audience: null,
-          training_goal: dbGoal,
-          rep_range: '',
-          rest_time_seconds: 0,
-          equipment_type: profile.equipment_type,
-          schema_nummer: i,
-          training_schema_days: []
-        };
-        result.push(placeholderSchema);
-        console.log(`  📝 Created placeholder for Schema ${i}`);
+    if (exactMatches.length > 0) {
+      // Sort by schema number
+      const sortedExactMatches = exactMatches.sort((a, b) => {
+        const aNum = a.schema_nummer || 0;
+        const bNum = b.schema_nummer || 0;
+        return aNum - bNum;
+      });
+      
+      // Ensure we have exactly 3 schemas
+      for (let i = 1; i <= 3; i++) {
+        const existingSchema = sortedExactMatches.find(s => s.schema_nummer === i);
+        if (existingSchema) {
+          result.push(existingSchema);
+        } else {
+          // Create placeholder for missing schema
+          const placeholderSchema: TrainingSchema = {
+            id: `placeholder-${dbGoal}-${profile.equipment_type}-${profile.training_frequency}-${i}`,
+            name: `${profile.training_goal} ${profile.training_frequency}x per week Schema ${i}`,
+            description: `Schema ${i} voor ${profile.training_goal} met ${profile.equipment_type} - Binnenkort beschikbaar`,
+            category: 'Gym',
+            cover_image: null,
+            status: 'coming_soon',
+            difficulty: 'Intermediate',
+            estimated_duration: '30 min',
+            target_audience: null,
+            training_goal: dbGoal,
+            rep_range: '',
+            rest_time_seconds: 0,
+            equipment_type: profile.equipment_type,
+            schema_nummer: i,
+            training_schema_days: []
+          };
+          result.push(placeholderSchema);
+          console.log(`  📝 Created placeholder for Schema ${i}`);
+        }
       }
+    } else {
+      // No exact matches, fall back to goal + equipment (any frequency)
+      const goalEquipmentMatches = schemas.filter(schema => {
+        const goalMatch = schema.training_goal === dbGoal;
+        const equipmentMatch = schema.equipment_type === profile.equipment_type;
+        return goalMatch && equipmentMatch;
+      });
+      
+      console.log(`🎯 Fallback: Goal + equipment matches: ${goalEquipmentMatches.length}`);
+      
+      // Sort by schema number and take first 3
+      const sortedSchemas = goalEquipmentMatches.sort((a, b) => {
+        const aNum = a.schema_nummer || 0;
+        const bNum = b.schema_nummer || 0;
+        return aNum - bNum;
+      });
+      
+      result = sortedSchemas.slice(0, 3);
     }
     
     console.log('✅ Final filtered schemas (always 3):', result.length);
