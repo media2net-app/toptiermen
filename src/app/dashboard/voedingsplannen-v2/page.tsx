@@ -316,26 +316,59 @@ export default function VoedingsplannenV2Page() {
     const goalAdjustment = goalAdjustments[planGoal] || 0;
     const targetCalories = Math.round(baseCalories + goalAdjustment);
 
-    // Calculate macro targets based on plan type and percentages
-    const isCarnivore = plan.name.toLowerCase().includes('carnivoor');
-    
+    // Use macro percentages from database if available, otherwise fallback to hardcoded
     let proteinPercentage, carbsPercentage, fatPercentage;
     
-    if (isCarnivore) {
-      // Carnivore plans: higher protein, lower carbs
-      proteinPercentage = 35;
-      carbsPercentage = 5;
-      fatPercentage = 60;
+    if (plan.protein_percentage && plan.carbs_percentage && plan.fat_percentage) {
+      // Use database percentages
+      proteinPercentage = plan.protein_percentage;
+      carbsPercentage = plan.carbs_percentage;
+      fatPercentage = plan.fat_percentage;
+      
+      console.log('🎯 Using database macro percentages:', {
+        protein_percentage: proteinPercentage,
+        carbs_percentage: carbsPercentage,
+        fat_percentage: fatPercentage
+      });
     } else {
-      // Regular plans: CORRECTED percentages for onderhoud (35%, 40%, 25%)
-      proteinPercentage = 35;  // 35% for onderhoud
-      carbsPercentage = 40;    // 40% for onderhoud
-      fatPercentage = 25;      // 25% for onderhoud
+      // Fallback to hardcoded percentages based on plan type
+      const isCarnivore = plan.name.toLowerCase().includes('carnivoor');
+      
+      if (isCarnivore) {
+        // Carnivore plans: higher protein, lower carbs
+        proteinPercentage = 35;
+        carbsPercentage = 5;
+        fatPercentage = 60;
+      } else {
+        // Regular plans: CORRECTED percentages for onderhoud (35%, 40%, 25%)
+        proteinPercentage = 35;  // 35% for onderhoud
+        carbsPercentage = 40;    // 40% for onderhoud
+        fatPercentage = 25;      // 25% for onderhoud
+      }
+      
+      console.log('🎯 Using fallback hardcoded percentages:', {
+        proteinPercentage,
+        carbsPercentage,
+        fatPercentage
+      });
     }
 
     const targetProtein = Math.round((targetCalories * proteinPercentage / 100) / 4); // 4 kcal per gram protein
     const targetCarbs = Math.round((targetCalories * carbsPercentage / 100) / 4);     // 4 kcal per gram carbs
     const targetFat = Math.round((targetCalories * fatPercentage / 100) / 9);         // 9 kcal per gram fat
+
+    console.log('🧮 Macro calculation details:', {
+      targetCalories,
+      proteinPercentage,
+      carbsPercentage,
+      fatPercentage,
+      proteinCalories: targetCalories * proteinPercentage / 100,
+      carbsCalories: targetCalories * carbsPercentage / 100,
+      fatCalories: targetCalories * fatPercentage / 100,
+      targetProtein,
+      targetCarbs,
+      targetFat
+    });
 
     return {
       targetCalories,
