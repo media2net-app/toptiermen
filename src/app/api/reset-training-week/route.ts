@@ -5,7 +5,13 @@ export async function POST(request: NextRequest) {
   try {
     const { userId, schemaId } = await request.json();
     
-    console.log('🔍 [RESET API] Request received:', { userId, schemaId });
+    console.log('🔍 [RESET API] Request received:', { 
+      userId, 
+      schemaId,
+      userIdType: typeof userId,
+      schemaIdType: typeof schemaId,
+      timestamp: new Date().toISOString()
+    });
     
     if (!userId || !schemaId) {
       console.log('❌ [RESET API] Missing required parameters');
@@ -50,7 +56,11 @@ export async function POST(request: NextRequest) {
       .in('schema_day_id', schemaDayIds);
     
     if (dayProgressError) {
-      console.log('⚠️ user_training_day_progress table not found, trying user_training_progress:', dayProgressError.message);
+      console.log('⚠️ [RESET API] user_training_day_progress table not found, trying user_training_progress:', {
+        error: dayProgressError.message,
+        code: dayProgressError.code,
+        details: dayProgressError.details
+      });
       
       // Fallback to user_training_progress table
       const { error: progressError } = await supabase
@@ -72,7 +82,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to reset training week' }, { status: 500 });
     }
 
-    console.log('✅ Training week reset successfully');
+    console.log('✅ [RESET API] Training week reset successfully for user:', userId, 'schema:', schemaId);
 
     return NextResponse.json({ 
       success: true,
