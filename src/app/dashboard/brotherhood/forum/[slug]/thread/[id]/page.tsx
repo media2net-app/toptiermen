@@ -55,6 +55,7 @@ const ThreadPage = ({ params }: { params: { slug: string; id: string } }) => {
   const [newReply, setNewReply] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [showOnboardingCompletion, setShowOnboardingCompletion] = useState(false);
 
   useEffect(() => {
     console.log('🔄 Thread page mounted, fetching data for category:', params.slug, 'topic ID:', params.id);
@@ -76,6 +77,26 @@ const ThreadPage = ({ params }: { params: { slug: string; id: string } }) => {
     // Cleanup subscription
     return () => subscription.unsubscribe();
   }, [params.slug, params.id]);
+
+  // Check for onboarding completion anchor in URL on page load
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.hash === '#onboarding-completion-popup') {
+      console.log('🎉 Onboarding completion anchor found in URL, showing popup...');
+      setShowOnboardingCompletion(true);
+      
+      // Scroll to the popup
+      setTimeout(() => {
+        const popupElement = document.getElementById('onboarding-completion-popup');
+        if (popupElement) {
+          popupElement.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'start',
+            inline: 'nearest'
+          });
+        }
+      }, 1000); // Longer delay to ensure page is fully loaded
+    }
+  }, []);
 
   const fetchCurrentUser = async () => {
     try {
@@ -430,6 +451,32 @@ const ThreadPage = ({ params }: { params: { slug: string; id: string } }) => {
         console.log('✅ Post created successfully via API:', result.post);
         setNewReply('');
         await fetchThreadData();
+        
+        // Check if this is the introduction topic (topic_id 19) and user completed onboarding
+        if (topic.id === 19) {
+          console.log('🎉 User posted in introduction topic, checking for onboarding completion...');
+          
+          // Add anchor to URL and scroll to popup
+          window.history.pushState(null, '', '#onboarding-completion-popup');
+          
+          // Show the onboarding completion popup
+          setShowOnboardingCompletion(true);
+          
+          // Scroll to the popup anchor with smooth behavior
+          setTimeout(() => {
+            const popupElement = document.getElementById('onboarding-completion-popup');
+            if (popupElement) {
+              popupElement.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'start',
+                inline: 'nearest'
+              });
+              
+              // Show a toast notification
+              console.log('🎉 Onboarding completed! Showing completion popup...');
+            }
+          }, 500); // Small delay to ensure the page has updated
+        }
         return;
       } else {
         console.error('❌ API submission failed:', result.error);
@@ -473,6 +520,32 @@ const ThreadPage = ({ params }: { params: { slug: string; id: string } }) => {
           console.log('✅ Post created via direct database:', post);
           setNewReply('');
           await fetchThreadData();
+          
+          // Check if this is the introduction topic (topic_id 19) and user completed onboarding
+          if (topic.id === 19) {
+            console.log('🎉 User posted in introduction topic via direct DB, checking for onboarding completion...');
+            
+            // Add anchor to URL and scroll to popup
+            window.history.pushState(null, '', '#onboarding-completion-popup');
+            
+            // Show the onboarding completion popup
+            setShowOnboardingCompletion(true);
+            
+            // Scroll to the popup anchor with smooth behavior
+            setTimeout(() => {
+              const popupElement = document.getElementById('onboarding-completion-popup');
+              if (popupElement) {
+                popupElement.scrollIntoView({ 
+                  behavior: 'smooth', 
+                  block: 'start',
+                  inline: 'nearest'
+                });
+                
+                // Show a toast notification
+                console.log('🎉 Onboarding completed! Showing completion popup...');
+              }
+            }, 500); // Small delay to ensure the page has updated
+          }
           return;
         }
       }
@@ -575,6 +648,9 @@ const ThreadPage = ({ params }: { params: { slug: string; id: string } }) => {
 
   return (
     <div className="px-2 sm:px-4 md:px-8 lg:px-12">
+      {/* Onboarding Completion Popup Anchor */}
+      <div id="onboarding-completion-popup" className="scroll-mt-20"></div>
+      
       {/* Debug Info */}
       <div className="mb-3 sm:mb-4 p-3 sm:p-4 bg-[#232D1A]/50 rounded-lg">
         <p className="text-xs sm:text-sm text-[#8BAE5A]">
@@ -690,6 +766,74 @@ const ThreadPage = ({ params }: { params: { slug: string; id: string } }) => {
           </>
         )}
       </div>
+
+      {/* Onboarding Completion Popup */}
+      {showOnboardingCompletion && (
+        <div className="fixed inset-0 bg-black bg-opacity-80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-[#232D1A] rounded-2xl border border-[#8BAE5A] p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="text-center">
+              <div className="text-6xl mb-6">🎉</div>
+              <h2 className="text-3xl font-bold text-white mb-4">
+                GEFELICITEERD!
+              </h2>
+              <p className="text-xl text-[#8BAE5A] mb-6">
+                Je hebt de onboarding succesvol voltooid!
+              </p>
+              
+              <div className="bg-[#181F17] border border-[#3A4D23] rounded-lg p-6 mb-6">
+                <h3 className="text-white font-semibold mb-3">Wat je hebt bereikt:</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                  <div className="flex items-center gap-2 text-[#8BAE5A]">
+                    <span className="text-[#FFD700]">✅</span>
+                    <span>Welkomstvideo bekeken</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-[#8BAE5A]">
+                    <span className="text-[#FFD700]">✅</span>
+                    <span>Hoofddoel gedefinieerd</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-[#8BAE5A]">
+                    <span className="text-[#FFD700]">✅</span>
+                    <span>Missies geselecteerd</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-[#8BAE5A]">
+                    <span className="text-[#FFD700]">✅</span>
+                    <span>Forum introductie geplaatst</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-[#8BAE5A] to-[#FFD700] rounded-lg p-6 mb-6">
+                <div className="text-4xl mb-3">🏆</div>
+                <h3 className="text-[#0A0F0A] font-bold text-lg mb-2">
+                  Je hebt de 'Initiatie' Badge ontgrendeld!
+                </h3>
+                <p className="text-[#0A0F0A] text-sm">
+                  Deze badge symboliseert je eerste stap naar een betere versie van jezelf.
+                </p>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <button
+                  onClick={() => {
+                    setShowOnboardingCompletion(false);
+                    window.location.href = '/dashboard';
+                  }}
+                  className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#0A0F0A] px-6 py-3 rounded-xl font-bold text-lg hover:from-[#A6C97B] hover:to-[#FFE55C] transition-all duration-200 flex items-center justify-center gap-2"
+                >
+                  <span>Start je reis</span>
+                  <span>→</span>
+                </button>
+                <button
+                  onClick={() => setShowOnboardingCompletion(false)}
+                  className="bg-[#3A4D23] text-white px-6 py-3 rounded-xl font-bold text-lg hover:bg-[#4A5D33] transition-all duration-200"
+                >
+                  Blijf hier
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -115,7 +115,7 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
   const [openBrotherhood, setOpenBrotherhood] = useState(true); // Default expanded
   const [openDashboard, setOpenDashboard] = useState(true); // Default expanded
   const [showOnboardingCompletion, setShowOnboardingCompletion] = useState(false);
-  const { isCompleted, currentStep } = useOnboardingV2();
+  const { isCompleted, currentStep, hasTrainingAccess, hasNutritionAccess } = useOnboardingV2();
   
   // Use onboardingStatus from props if available, otherwise fallback to context
   const actualOnboardingStatus = onboardingStatus || { current_step: currentStep, onboarding_completed: isCompleted };
@@ -166,8 +166,12 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
     
     // During onboarding V2, block navigation based on current step
     if (actualCurrentStep !== null && actualCurrentStep !== undefined) {
-      // Special case for step 5 (Forum intro): Only allow Brotherhood > Forum
-      if (actualCurrentStep === 5) {
+      // Determine if this is the last step for the current user tier
+      const isBasicTier = !hasTrainingAccess && !hasNutritionAccess;
+      const isLastStep = isBasicTier ? actualCurrentStep === 5 : actualCurrentStep === 5;
+      
+      // Special case for last step (Forum intro): Only allow Brotherhood > Forum
+      if (isLastStep) {
         // Allow Brotherhood parent item (so it can be expanded)
         if (item.label === 'Brotherhood') {
           return false; // Not disabled - allow expansion
@@ -431,7 +435,7 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
   const [openBrotherhood, setOpenBrotherhood] = useState(false);
   const [openDashboard, setOpenDashboard] = useState(false);
   const [showOnboardingCompletion, setShowOnboardingCompletion] = useState(false);
-  const { isCompleted, currentStep } = useOnboardingV2();
+  const { isCompleted, currentStep, hasTrainingAccess, hasNutritionAccess } = useOnboardingV2();
   
   // Use onboardingStatus from props if available, otherwise fallback to context
   const actualOnboardingStatus = onboardingStatus || { current_step: currentStep, onboarding_completed: isCompleted };
@@ -496,8 +500,12 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
     
     // During onboarding V2, block navigation based on current step
     if (actualCurrentStep !== null && actualCurrentStep !== undefined) {
-      // Special case for step 5 (Forum intro): Only allow Brotherhood > Forum
-      if (actualCurrentStep === 5) {
+      // Determine if this is the last step for the current user tier
+      const isBasicTier = !hasTrainingAccess && !hasNutritionAccess;
+      const isLastStep = isBasicTier ? actualCurrentStep === 5 : actualCurrentStep === 5;
+      
+      // Special case for last step (Forum intro): Only allow Brotherhood > Forum
+      if (isLastStep) {
         // Allow Brotherhood parent item (so it can be expanded)
         if (item.label === 'Brotherhood') {
           return false; // Not disabled - allow expansion
