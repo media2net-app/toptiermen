@@ -82,8 +82,8 @@ export async function GET(request: NextRequest) {
           isCompleted = true;
         }
         
-        // For Basic tier users, complete onboarding after challenges (step 2)
-        if (!hasTrainingAccess && !hasNutritionAccess && onboardingStatus.missions_selected) {
+        // For Basic tier users, complete onboarding after forum intro (step 5)
+        if (!hasTrainingAccess && !hasNutritionAccess && onboardingStatus.missions_selected && onboardingStatus.challenge_started) {
           currentStep = null;
           isCompleted = true;
         }

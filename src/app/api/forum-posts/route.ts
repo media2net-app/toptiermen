@@ -44,6 +44,30 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ API: Post created successfully:', data);
 
+    // Check if this is a post in the "Voorstellen - Nieuwe Leden" topic (topic_id 19)
+    // If so, complete the onboarding for the user
+    if (topic_id === 19) {
+      console.log('🎉 User posted in introduction topic, completing onboarding...');
+      
+      try {
+        const { error: onboardingError } = await supabase
+          .from('user_onboarding_status')
+          .update({ 
+            challenge_started: true,
+            onboarding_completed: true
+          })
+          .eq('user_id', author_id);
+        
+        if (onboardingError) {
+          console.error('❌ API: Error completing onboarding:', onboardingError);
+        } else {
+          console.log('✅ API: Onboarding completed for user:', author_id);
+        }
+      } catch (error) {
+        console.error('❌ API: Error in onboarding completion:', error);
+      }
+    }
+
     // Update the topic's reply count (skip for now to avoid errors)
     // const { error: updateError } = await supabase
     //   .from('forum_topics')
