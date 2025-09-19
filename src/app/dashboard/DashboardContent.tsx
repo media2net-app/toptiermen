@@ -168,6 +168,10 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
     if (actualCurrentStep !== null && actualCurrentStep !== undefined) {
       // Special case for step 5 (Forum intro): Only allow Brotherhood > Forum
       if (actualCurrentStep === 5) {
+        // Allow Brotherhood parent item (so it can be expanded)
+        if (item.label === 'Brotherhood') {
+          return false; // Not disabled - allow expansion
+        }
         // Allow Brotherhood > Forum access
         if (item.label === 'Forum' && item.parent === 'Brotherhood') {
           return false; // Not disabled
@@ -493,6 +497,10 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
     if (actualCurrentStep !== null && actualCurrentStep !== undefined) {
       // Special case for step 5 (Forum intro): Only allow Brotherhood > Forum
       if (actualCurrentStep === 5) {
+        // Allow Brotherhood parent item (so it can be expanded)
+        if (item.label === 'Brotherhood') {
+          return false; // Not disabled - allow expansion
+        }
         // Allow Brotherhood > Forum access
         if (item.label === 'Forum' && item.parent === 'Brotherhood') {
           return false; // Not disabled
@@ -504,9 +512,13 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
       // For other steps, only allow access to the current onboarding step
       const isCurrentStep = item.onboardingStep === actualCurrentStep;
       
-      // Force console log to be visible
+      // Enhanced debug logging for step 5
       if (typeof window !== 'undefined') {
-        console.log(`🔍 [NAV BLOCK] ${item.label}: currentStep=${actualCurrentStep}, requiredStep=${item.onboardingStep}, isCurrentStep=${isCurrentStep}, disabled=${!isCurrentStep}, onboarding_completed=${actualOnboardingStatus?.onboarding_completed}`);
+        if (actualCurrentStep === 5) {
+          console.log(`🔍 [STEP 5 DEBUG] ${item.label}: parent=${item.parent}, disabled=${!isCurrentStep}, onboarding_completed=${actualOnboardingStatus?.onboarding_completed}`);
+        } else {
+          console.log(`🔍 [NAV BLOCK] ${item.label}: currentStep=${actualCurrentStep}, requiredStep=${item.onboardingStep}, isCurrentStep=${isCurrentStep}, disabled=${!isCurrentStep}, onboarding_completed=${actualOnboardingStatus?.onboarding_completed}`);
+        }
       }
       
       // Block all items except the current step
