@@ -51,7 +51,9 @@ export default function WorkoutPage() {
     updateSession, 
     updateRestTimer, 
     updateProgress,
-    stopWorkout 
+    stopWorkout,
+    pauseWorkout,
+    resumeWorkout
   } = useWorkoutSession();
   
   const schemaId = params?.schemaId as string;
@@ -64,8 +66,6 @@ export default function WorkoutPage() {
   const [isWorkoutActive, setIsWorkoutActive] = useState(false);
   const [timer, setTimer] = useState(0);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
-  const [restTimer, setRestTimer] = useState(0);
-  const [isRestTimerRunning, setIsRestTimerRunning] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showVideoModal, setShowVideoModal] = useState(false);
   // const [showWorkoutPlayerModal, setShowWorkoutPlayerModal] = useState(false); // Removed - component doesn't exist
@@ -305,23 +305,6 @@ export default function WorkoutPage() {
     return () => clearInterval(interval);
   }, [isTimerRunning]);
 
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    
-    if (isRestTimerRunning && restTimer > 0) {
-      interval = setInterval(() => {
-        setRestTimer(prev => {
-          if (prev <= 1) {
-            setIsRestTimerRunning(false);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    }
-
-    return () => clearInterval(interval);
-  }, [isRestTimerRunning, restTimer]);
 
   const loadSession = async () => {
     if (!sessionId) return;
@@ -374,13 +357,17 @@ export default function WorkoutPage() {
     toast.success('Workout gestart! 💪');
   };
 
-  const pauseWorkout = () => {
+  const pauseWorkoutLocal = () => {
     setIsTimerRunning(false);
+    // Also pause the global session
+    pauseWorkout();
     toast('Workout gepauzeerd');
   };
 
-  const resumeWorkout = () => {
+  const resumeWorkoutLocal = () => {
     setIsTimerRunning(true);
+    // Also resume the global session
+    resumeWorkout();
     toast.success('Workout hervat!');
   };
 
@@ -471,9 +458,6 @@ export default function WorkoutPage() {
             } else {
               restTime = parseInt(exercise.rest) || 120; // Default to 2 minutes
             }
-            setRestTimer(restTime);
-            setIsRestTimerRunning(true);
-            
             // Update global session with rest timer
             updateRestTimer(restTime, true);
           } else {
@@ -489,9 +473,6 @@ export default function WorkoutPage() {
               } else {
                 restTime = parseInt(nextExercise.rest) || 120; // Default to 2 minutes
               }
-              setRestTimer(restTime);
-              setIsRestTimerRunning(true);
-              
               // Update global session with rest timer
               updateRestTimer(restTime, true);
             }
@@ -516,15 +497,12 @@ export default function WorkoutPage() {
   const nextExercise = () => {
     if (currentExerciseIndex < exercises.length - 1) {
       setCurrentExerciseIndex(prev => prev + 1);
-      setIsRestTimerRunning(false);
-      setRestTimer(0);
+      // Update global session
+      updateRestTimer(0, false);
     }
   };
 
   const skipRest = () => {
-    setIsRestTimerRunning(false);
-    setRestTimer(0);
-    
     // Update global session
     updateRestTimer(0, false);
     
@@ -627,7 +605,7 @@ export default function WorkoutPage() {
 
             <div className="text-right">
               <div className="text-2xl font-bold text-[#FFD700]">
-                {formatTime(timer)}
+                {formatTime(globalSession?.workoutTime || 0)}
               </div>
               <div className="text-sm text-gray-400">Workout tijd</div>
             </div>
@@ -661,9 +639,9 @@ export default function WorkoutPage() {
             </div>
           ) : (
             <div className="flex justify-center gap-4 mb-8">
-              {isTimerRunning ? (
+              {globalSession?.isActive ? (
                 <button
-                  onClick={pauseWorkout}
+                  onClick={pauseWorkoutLocal}
                   className="px-6 py-3 bg-[#f0a14f] text-white font-semibold rounded-lg hover:bg-[#e0903f] transition-colors"
                 >
                   <PauseIcon className="w-5 h-5 inline mr-2" />
@@ -671,7 +649,7 @@ export default function WorkoutPage() {
                 </button>
               ) : (
                 <button
-                  onClick={resumeWorkout}
+                  onClick={resumeWorkoutLocal}
                   className="px-6 py-3 bg-[#8BAE5A] text-white font-semibold rounded-lg hover:bg-[#7A9D4A] transition-colors"
                 >
                   <PlayIcon className="w-5 h-5 inline mr-2" />
@@ -704,14 +682,14 @@ export default function WorkoutPage() {
           </div>
 
           {/* Rest Timer */}
-          {isRestTimerRunning && (
+          {globalSession?.isRestActive && globalSession?.restTime > 0 && (
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               className="mb-6 p-4 bg-[#f0a14f]/10 border border-[#f0a14f]/30 rounded-lg text-center"
             >
               <div className="text-2xl font-bold text-[#f0a14f] mb-2">
-                {formatTime(restTimer)}
+                {formatTime(globalSession.restTime)}
               </div>
               <p className="text-[#f0a14f] mb-4">Rust voor volgende oefening</p>
               <button
