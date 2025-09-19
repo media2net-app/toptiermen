@@ -39,11 +39,11 @@ export function WorkoutSessionProvider({ children }: { children: ReactNode }) {
   const [restTime, setRestTime] = useState(0);
   const [isRestTimerRunning, setIsRestTimerRunning] = useState(false);
 
-  // Workout timer
+  // Workout timer - only depends on isWorkoutTimerRunning, not session
   useEffect(() => {
     let interval: NodeJS.Timeout;
     
-    if (isWorkoutTimerRunning && session) {
+    if (isWorkoutTimerRunning) {
       interval = setInterval(() => {
         setWorkoutTime(prev => prev + 1);
       }, 1000);
@@ -54,7 +54,7 @@ export function WorkoutSessionProvider({ children }: { children: ReactNode }) {
         clearInterval(interval);
       }
     };
-  }, [isWorkoutTimerRunning, session]);
+  }, [isWorkoutTimerRunning]);
 
   // Rest timer
   useEffect(() => {
@@ -140,7 +140,7 @@ export function WorkoutSessionProvider({ children }: { children: ReactNode }) {
   const pauseWorkout = () => {
     if (session) {
       setSession(prev => prev ? { ...prev, isActive: false } : null);
-      // Don't pause workout timer - only pause rest timer
+      // Only pause rest timer, never pause workout timer
       setIsRestTimerRunning(false);
     }
   };
@@ -148,8 +148,8 @@ export function WorkoutSessionProvider({ children }: { children: ReactNode }) {
   const resumeWorkout = () => {
     if (session) {
       setSession(prev => prev ? { ...prev, isActive: true } : null);
-      // Don't resume workout timer - it should always run
       // Only resume rest timer if there's rest time
+      // Workout timer should always run and is not affected by pause/resume
       if (restTime > 0) {
         setIsRestTimerRunning(true);
       }
