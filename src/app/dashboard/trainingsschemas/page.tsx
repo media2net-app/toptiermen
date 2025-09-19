@@ -2008,7 +2008,6 @@ function TrainingschemasContent() {
                               </span>
                             )}
                           </h3>
-                          <p className={`text-xs sm:text-sm ${isLocked ? 'text-gray-500' : 'text-gray-400'}`}>{schema.difficulty}</p>
                         </div>
                       </div>
                       {!isLocked && selectedTrainingSchema === schema.id && (
