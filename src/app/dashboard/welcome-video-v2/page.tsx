@@ -10,6 +10,8 @@ export default function WelcomeVideoV2Page() {
   const router = useRouter();
   const [videoWatched, setVideoWatched] = useState(false);
   const [showOverlay, setShowOverlay] = useState(true);
+  const [videoLoading, setVideoLoading] = useState(true);
+  const [videoError, setVideoError] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   // Redirect if not on welcome video step
@@ -41,6 +43,17 @@ export default function WelcomeVideoV2Page() {
     if (videoRef.current) {
       videoRef.current.play();
     }
+  };
+
+  const handleVideoLoad = () => {
+    setVideoLoading(false);
+    setVideoError(false);
+  };
+
+  const handleVideoError = () => {
+    setVideoLoading(false);
+    setVideoError(true);
+    console.error('Video loading error');
   };
 
   const handleComplete = async () => {
@@ -91,13 +104,39 @@ export default function WelcomeVideoV2Page() {
               ref={videoRef}
               className="w-full h-96 object-cover"
               onEnded={handleVideoEnd}
-              poster="/api/placeholder/800/400"
+              onLoadedData={handleVideoLoad}
+              onError={handleVideoError}
+              preload="metadata"
             >
               <source src="/videos/welcome-video.mp4" type="video/mp4" />
               Je browser ondersteunt geen video element.
             </video>
             
-            {showOverlay && (
+            {videoLoading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
+                  <p className="text-white">Video laden...</p>
+                </div>
+              </div>
+            )}
+            
+            {videoError && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                <div className="text-center">
+                  <div className="text-red-500 text-6xl mb-4">⚠️</div>
+                  <p className="text-white mb-4">Video kon niet geladen worden</p>
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="bg-[#8BAE5A] hover:bg-[#7A9E4A] text-white px-4 py-2 rounded-lg transition-colors"
+                  >
+                    Pagina herladen
+                  </button>
+                </div>
+              </div>
+            )}
+            
+            {showOverlay && !videoLoading && !videoError && (
               <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
                 <button
                   onClick={handlePlay}
