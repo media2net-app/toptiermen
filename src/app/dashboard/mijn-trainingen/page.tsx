@@ -208,13 +208,17 @@ export default function MijnTrainingen() {
       setWeekCompletionData(null);
       
       // Call API to reset all days
+      const requestBody = {
+        userId: user.id,
+        schemaId: trainingData.schema.id
+      };
+      
+      console.log('🔍 [FRONTEND] Sending reset request:', requestBody);
+      
       const response = await fetch('/api/reset-training-week', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: user.id,
-          schemaId: trainingData.schema.id
-        })
+        body: JSON.stringify(requestBody)
       });
       
       if (response.ok) {
@@ -227,8 +231,9 @@ export default function MijnTrainingen() {
         
         toast.success(`Week ${weekCompletionData.week} voltooid! Nieuwe week gestart.`);
       } else {
-        console.error('❌ Failed to reset days for new week');
-        toast.error('Fout bij het starten van nieuwe week');
+        const errorData = await response.json();
+        console.error('❌ Failed to reset days for new week:', errorData);
+        toast.error(`Fout bij het starten van nieuwe week: ${errorData.error || 'Onbekende fout'}`);
       }
     } catch (error) {
       console.error('❌ Error starting new week:', error);
