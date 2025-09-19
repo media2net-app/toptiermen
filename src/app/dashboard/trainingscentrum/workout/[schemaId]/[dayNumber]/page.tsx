@@ -16,6 +16,7 @@ import {
 } from '@heroicons/react/24/outline';
 import ClientLayout from '../../../../../components/ClientLayout';
 import WorkoutVideoModal from '@/components/WorkoutVideoModal';
+import WorkoutCompletionModal from '@/components/WorkoutCompletionModal';
 // import WorkoutPlayerModal from '../../WorkoutPlayerModal'; // Removed - file doesn't exist
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { useWorkoutSession } from '@/contexts/WorkoutSessionContext';
@@ -68,6 +69,7 @@ export default function WorkoutPage() {
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showVideoModal, setShowVideoModal] = useState(false);
+  const [showCompletionModal, setShowCompletionModal] = useState(false);
   // const [showWorkoutPlayerModal, setShowWorkoutPlayerModal] = useState(false); // Removed - component doesn't exist
 
   // Sample exercises - in real app, fetch from API
@@ -458,8 +460,8 @@ export default function WorkoutPage() {
   };
 
   const completeSet = (exerciseId: string) => {
-    setExercises(prev => 
-      prev.map(exercise => {
+    setExercises(prev => {
+      const updatedExercises = prev.map(exercise => {
         if (exercise.id === exerciseId) {
           const newCurrentSet = exercise.currentSet + 1;
           const isCompleted = newCurrentSet >= exercise.sets;
@@ -508,8 +510,20 @@ export default function WorkoutPage() {
           };
         }
         return exercise;
-      })
-    );
+      });
+
+      // Check if all exercises are completed
+      const allCompleted = updatedExercises.every(exercise => exercise.completed);
+      if (allCompleted && isWorkoutActive) {
+        // All exercises completed - stop workout timer and show completion modal
+        stopWorkout(); // Stop the global workout timer
+        setTimeout(() => {
+          setShowCompletionModal(true);
+        }, 1000); // Small delay to let the last set completion animation finish
+      }
+
+      return updatedExercises;
+    });
 
     toast.success('Set voltooid! 🔥');
   };
@@ -539,7 +553,7 @@ export default function WorkoutPage() {
         body: JSON.stringify({
           sessionId: sessionId,
           rating: 5,
-          notes: `Completed workout in ${Math.floor(timer / 60)}:${(timer % 60).toString().padStart(2, '0')}`,
+          notes: `Completed workout in ${Math.floor((globalSession?.workoutTime || 0) / 60)}:${((globalSession?.workoutTime || 0) % 60).toString().padStart(2, '0')}`,
           exercises: exercises.map(ex => ({
             name: ex.name,
             sets: ex.currentSet,
@@ -550,8 +564,8 @@ export default function WorkoutPage() {
       });
 
       if (response.ok) {
-        // Stop global workout session
-        stopWorkout();
+        // Close completion modal
+        setShowCompletionModal(false);
         
         toast.success('Workout voltooid! 🎉');
         router.push('/dashboard/mijn-trainingen');
@@ -841,6 +855,16 @@ export default function WorkoutPage() {
           rest: currentExercise.rest,
           notes: currentExercise.notes
         } : undefined}
+      />
+
+      {/* Workout Completion Modal */}
+      <WorkoutCompletionModal
+        isOpen={showCompletionModal}
+        onClose={() => setShowCompletionModal(false)}
+        onComplete={completeWorkout}
+        workoutTime={globalSession?.workoutTime || 0}
+        totalExercises={exercises.length}
+        completedExercises={exercises.filter(ex => ex.completed).length}
       />
 
       {/* Workout Player Modal - Removed - component doesn't exist */}
