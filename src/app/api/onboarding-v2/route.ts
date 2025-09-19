@@ -49,10 +49,10 @@ export async function GET(request: NextRequest) {
     const onboardingStatus = onboardingRecords && onboardingRecords.length > 0 ? onboardingRecords[0] : null;
 
     // Determine access control
-    const packageType = profile.package_type || 'Basic Tier';
+    const packageType = profile.package_type || 'basic';
     const isAdmin = profile.role === 'admin';
-    const hasTrainingAccess = isAdmin || packageType === 'Premium Tier' || packageType === 'Lifetime Tier' || packageType === 'Lifetime Access';
-    const hasNutritionAccess = isAdmin || packageType === 'Premium Tier' || packageType === 'Lifetime Tier' || packageType === 'Lifetime Access';
+    const hasTrainingAccess = isAdmin || packageType === 'premium' || packageType === 'lifetime' || packageType === 'Premium Tier' || packageType === 'Lifetime Tier' || packageType === 'Lifetime Access';
+    const hasNutritionAccess = isAdmin || packageType === 'premium' || packageType === 'lifetime' || packageType === 'Premium Tier' || packageType === 'Lifetime Tier' || packageType === 'Lifetime Access';
 
     // Calculate current step
     let currentStep: number | null = null;
@@ -141,7 +141,7 @@ export async function GET(request: NextRequest) {
         hasTrainingAccess,
         hasNutritionAccess,
         isAdmin,
-        isBasic: packageType === 'Basic Tier'
+        isBasic: packageType === 'basic' || packageType === 'Basic Tier'
       }
     };
 
@@ -186,10 +186,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Determine user access levels
-    const packageType = profile.package_type || 'Basic Tier';
+    const packageType = profile.package_type || 'basic';
     const isAdmin = profile.role === 'admin';
-    const hasTrainingAccess = isAdmin || packageType === 'Premium Tier' || packageType === 'Lifetime Tier' || packageType === 'Lifetime Access';
-    const hasNutritionAccess = isAdmin || packageType === 'Premium Tier' || packageType === 'Lifetime Tier' || packageType === 'Lifetime Access';
+    const hasTrainingAccess = isAdmin || packageType === 'premium' || packageType === 'lifetime' || packageType === 'Premium Tier' || packageType === 'Lifetime Tier' || packageType === 'Lifetime Access';
+    const hasNutritionAccess = isAdmin || packageType === 'premium' || packageType === 'lifetime' || packageType === 'Premium Tier' || packageType === 'Lifetime Tier' || packageType === 'Lifetime Access';
 
     // Get current onboarding status
     const { data: onboardingRecords, error: onboardingError } = await supabase

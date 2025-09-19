@@ -278,22 +278,35 @@ const ThreadPage = ({ params }: { params: { slug: string; id: string } }) => {
 
       console.log('✅ Topic data received:', topicData);
 
-      // Fetch posts
-      const { data: postsData, error: postsError } = await supabase
-        .from('forum_posts')
-        .select(`
-          id,
-          content,
-          created_at,
-          author_id
-        `)
-        .eq('topic_id', topicId)
-        .order('created_at', { ascending: true });
+      // Fetch posts using the API endpoint instead of direct Supabase
+      console.log('📝 Fetching posts via API...');
+      const postsResponse = await fetch(`/api/forum-posts?topic_id=${topicId}`);
+      const postsResult = await postsResponse.json();
+      
+      let postsData = [];
+      if (postsResult.success && postsResult.posts) {
+        postsData = postsResult.posts;
+        console.log('✅ Posts fetched via API:', postsData);
+      } else {
+        console.error('❌ Error fetching posts via API:', postsResult.error);
+        // Fallback to direct Supabase query
+        const { data: fallbackPosts, error: postsError } = await supabase
+          .from('forum_posts')
+          .select(`
+            id,
+            content,
+            created_at,
+            author_id
+          `)
+          .eq('topic_id', topicId)
+          .order('created_at', { ascending: true });
 
-      if (postsError) {
-        console.error('❌ Error fetching posts:', postsError);
-        // Don't fail completely, continue with empty posts
-        console.log('⚠️ Continuing with empty posts due to error');
+        if (postsError) {
+          console.error('❌ Error fetching posts:', postsError);
+          console.log('⚠️ Continuing with empty posts due to error');
+        } else {
+          postsData = fallbackPosts || [];
+        }
       }
 
       console.log('✅ Posts data received:', postsData);
@@ -342,13 +355,35 @@ const ThreadPage = ({ params }: { params: { slug: string; id: string } }) => {
       };
 
       // Process posts
-      const processedPosts = (postsData || []).map((post: any) => ({
-        id: post.id,
-        content: post.content,
-        created_at: post.created_at,
-        author_id: post.author_id,
-        author: getAuthorInfo(post.author_id)
-      }));
+      const processedPosts = (postsData || []).map((post: any) => {
+        // If post has profiles data from API, use it
+        if (post.profiles) {
+          return {
+            id: post.id,
+            content: post.content,
+            created_at: post.created_at,
+            author_id: post.author_id,
+            author: {
+              first_name: post.profiles.full_name?.split(' ')[0] || 'User',
+              last_name: post.profiles.full_name?.split(' ').slice(1).join(' ') || '',
+              avatar_url: undefined
+            }
+          };
+        }
+        
+        // Fallback for posts without profile data
+        return {
+          id: post.id,
+          content: post.content,
+          created_at: post.created_at,
+          author_id: post.author_id,
+          author: {
+            first_name: 'Unknown',
+            last_name: 'User',
+            avatar_url: undefined
+          }
+        };
+      });
 
       console.log('✅ Processed topic:', processedTopic);
       console.log('✅ Processed posts:', processedPosts);
@@ -377,19 +412,46 @@ const ThreadPage = ({ params }: { params: { slug: string; id: string } }) => {
       console.log('📝 Author ID:', authorId);
       setSubmitting(true);
 
-      // Try to submit to database first
-      const { data: post, error } = await supabase
-        .from('forum_posts')
-        .insert({
+      // Try to submit via API first
+      console.log('📝 Submitting reply via API...');
+      const response = await fetch('/api/forum-posts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           topic_id: topic.id,
-          content: newReply.trim(),
-          author_id: authorId
-        })
-        .select('id, content, created_at, author_id')
-        .single();
+          author_id: authorId,
+          content: newReply.trim()
+        }),
+      });
 
-      if (error) {
-        console.error('❌ Error submitting reply:', error);
+      const result = await response.json();
+      console.log('💬 API response:', result);
+
+      if (result.success) {
+        console.log('✅ Post created successfully via API:', result.post);
+        setNewReply('');
+        await fetchThreadData();
+        return;
+      } else {
+        console.error('❌ API submission failed:', result.error);
+        
+        // Fallback to direct database submission
+        console.log('🔄 API failed, trying direct database submission...');
+        
+        const { data: post, error } = await supabase
+          .from('forum_posts')
+          .insert({
+            topic_id: topic.id,
+            content: newReply.trim(),
+            author_id: authorId
+          })
+          .select('id, content, created_at, author_id')
+          .single();
+
+        if (error) {
+          console.error('❌ Direct database submission also failed:', error);
         
         // Handle specific permission errors
         if (error.message.includes('permission denied')) {
