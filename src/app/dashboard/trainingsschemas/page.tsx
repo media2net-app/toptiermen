@@ -470,6 +470,19 @@ function TrainingschemasContent() {
     }
   };
 
+  // Function to convert database field names to user-friendly names
+  const getDisplayName = (dbValue: string): string => {
+    const displayMapping: { [key: string]: string } = {
+      'spiermassa': 'Spiermassa',
+      'power_kracht': 'Power & Kracht',
+      'kracht_uithouding': 'Kracht & Uithouding',
+      'gym': 'Gym',
+      'home': 'Thuis',
+      'outdoor': 'Buiten'
+    };
+    return displayMapping[dbValue] || dbValue;
+  };
+
   const filterSchemasByProfile = (schemas: TrainingSchema[], profile: TrainingProfile) => {
     console.log('🔍 Filtering schemas for profile:', profile);
     console.log('📊 Total schemas before filtering:', schemas.length);
@@ -531,10 +544,12 @@ function TrainingschemasContent() {
           result.push(existingSchema);
       } else {
           // Create placeholder for missing schema
+          const displayGoal = getDisplayName(dbGoal);
+          const displayEquipment = getDisplayName(profile.equipment_type);
           const placeholderSchema: TrainingSchema = {
             id: `placeholder-${dbGoal}-${profile.equipment_type}-${profile.training_frequency}-${i}`,
-            name: `${profile.training_goal} ${profile.training_frequency}x per week Schema ${i}`,
-            description: `Schema ${i} voor ${profile.training_goal} met ${profile.equipment_type} - Binnenkort beschikbaar`,
+            name: `${displayGoal} ${profile.training_frequency}x per week Schema ${i}`,
+            description: `Schema ${i} voor ${displayGoal} met ${displayEquipment} - Binnenkort beschikbaar`,
             category: 'Gym',
             cover_image: null,
             status: 'coming_soon',
@@ -2037,7 +2052,7 @@ function TrainingschemasContent() {
                   // Progressive unlocking: Schema 1 is always unlocked, Schema 2 unlocks after 8 weeks of Schema 1, Schema 3 unlocks after 8 weeks of Schema 2
                   // Placeholder schemas are always locked
                   const isPlaceholder = schema.status === 'coming_soon';
-                  const isLocked = isPlaceholder || !unlockedSchemas[schema.schema_nummer || 1];
+                  const isLocked = isPlaceholder || (schema.schema_nummer !== 1 && !unlockedSchemas[schema.schema_nummer || 1]);
                   
                   return (
                     <motion.div
