@@ -595,7 +595,7 @@ export default function MijnTrainingen() {
                 </thead>
                 <tbody>
                   {completedWeeks.map((week, index) => (
-                    <tr key={week.week} className="border-b border-[#3A4D23]/50 hover:bg-[#1A1A1A]/50">
+                    <tr key={`completed-week-${week.week}-${index}`} className="border-b border-[#3A4D23]/50 hover:bg-[#1A1A1A]/50">
                       <td className="py-4 px-4">
                         <div className="flex items-center gap-2">
                           <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
@@ -645,7 +645,7 @@ export default function MijnTrainingen() {
                   
                   {/* Show current week row if not completed */}
                   {completedWeeks.length < 8 && (
-                    <tr className="border-b border-[#3A4D23]/50">
+                    <tr key={`current-week-${completedWeeks.length + 1}`} className="border-b border-[#3A4D23]/50">
                       <td className="py-4 px-4">
                         <div className="flex items-center gap-2">
                           <div className="w-8 h-8 bg-[#8BAE5A] rounded-full flex items-center justify-center">

@@ -5,7 +5,10 @@ export async function POST(request: NextRequest) {
   try {
     const { userId, schemaId } = await request.json();
     
+    console.log('🔍 [RESET API] Request received:', { userId, schemaId });
+    
     if (!userId || !schemaId) {
+      console.log('❌ [RESET API] Missing required parameters');
       return NextResponse.json({ error: 'Missing userId or schemaId' }, { status: 400 });
     }
 
