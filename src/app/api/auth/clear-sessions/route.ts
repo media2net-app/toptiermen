@@ -21,30 +21,26 @@ export async function POST(request: NextRequest) {
 
     console.log('🔄 API: Clearing all sessions for user:', email);
 
-    // Get user by email
-    const { data: user, error: userError } = await supabase.auth.admin.getUserByEmail(email);
+    // Get user ID from profiles table
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('email', email)
+      .single();
     
-    if (userError) {
-      console.error('❌ API: Error getting user:', userError);
+    if (profileError || !profile) {
+      console.error('❌ API: Profile not found for email:', email, profileError);
       return NextResponse.json(
         { error: 'User not found' },
         { status: 404 }
       );
     }
 
-    if (!user.user) {
-      console.log('⚠️ API: User not found for email:', email);
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
-    }
-
-    // Sign out all sessions for this user
-    const { error: signOutError } = await supabase.auth.admin.signOut(user.user.id);
+    // Delete user to clear all sessions (they can re-register)
+    const { error: deleteError } = await supabase.auth.admin.deleteUser(profile.id);
     
-    if (signOutError) {
-      console.error('❌ API: Error signing out user sessions:', signOutError);
+    if (deleteError) {
+      console.error('❌ API: Error deleting user:', deleteError);
       return NextResponse.json(
         { error: 'Failed to clear sessions' },
         { status: 500 }

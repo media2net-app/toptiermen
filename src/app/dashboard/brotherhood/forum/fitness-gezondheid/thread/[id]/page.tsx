@@ -259,7 +259,7 @@ const ThreadPage = ({ params }: { params: { id: string } }) => {
       const postsResponse = await fetch(`/api/forum-posts?topic_id=${topicId}`);
       const postsResult = await postsResponse.json();
       
-      let postsData = [];
+      let postsData: any[] = [];
       if (postsResult.success && postsResult.posts) {
         postsData = postsResult.posts;
         console.log('✅ Posts fetched via API:', postsData);
