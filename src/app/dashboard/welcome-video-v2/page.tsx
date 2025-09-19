@@ -94,36 +94,56 @@ export default function WelcomeVideoV2Page() {
   };
 
   const handleVideoProgress = () => {
-    if (videoRef.current) {
-      const bufferedEnd = videoRef.current.buffered.length > 0 
-        ? videoRef.current.buffered.end(videoRef.current.buffered.length - 1) 
-        : 0;
-      setBuffered(bufferedEnd);
+    try {
+      if (videoRef.current) {
+        const bufferedEnd = videoRef.current.buffered.length > 0 
+          ? videoRef.current.buffered.end(videoRef.current.buffered.length - 1) 
+          : 0;
+        setBuffered(bufferedEnd);
+        console.log('📊 Video progress updated:', { buffered: bufferedEnd, duration: videoRef.current.duration });
+      }
+    } catch (error) {
+      console.error('❌ Error in handleVideoProgress:', error);
     }
   };
 
   const handleTimeUpdate = () => {
-    if (videoRef.current) {
-      setCurrentTime(videoRef.current.currentTime);
+    try {
+      if (videoRef.current) {
+        setCurrentTime(videoRef.current.currentTime);
+      }
+    } catch (error) {
+      console.error('❌ Error in handleTimeUpdate:', error);
     }
   };
 
   const handleSeek = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (videoRef.current && duration > 0) {
-      const rect = e.currentTarget.getBoundingClientRect();
-      const clickX = e.clientX - rect.left;
-      const percentage = clickX / rect.width;
-      const newTime = percentage * duration;
-      
-      videoRef.current.currentTime = newTime;
-      setCurrentTime(newTime);
+    try {
+      if (videoRef.current && duration > 0) {
+        const rect = e.currentTarget.getBoundingClientRect();
+        const clickX = e.clientX - rect.left;
+        const percentage = clickX / rect.width;
+        const newTime = percentage * duration;
+        
+        videoRef.current.currentTime = newTime;
+        setCurrentTime(newTime);
+        console.log('⏭️ Video seeked to:', newTime);
+      }
+    } catch (error) {
+      console.error('❌ Error in handleSeek:', error);
     }
   };
 
   const handleComplete = async () => {
-    const success = await completeStep(0);
-    if (success) {
-      router.push('/dashboard/profiel');
+    try {
+      console.log('🎯 Completing welcome video step...');
+      const success = await completeStep(0);
+      console.log('✅ Step completion result:', success);
+      if (success) {
+        router.push('/dashboard/profiel');
+      }
+    } catch (error) {
+      console.error('❌ Error in handleComplete:', error);
     }
   };
 
