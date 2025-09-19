@@ -38,6 +38,17 @@ export default function WelcomeVideoV2Page() {
         setVideoLoading(false);
         setVideoReady(true);
       });
+      
+      // Fallback timeout - if video doesn't load within 15 seconds, show error
+      const loadingTimeout = setTimeout(() => {
+        if (videoLoading) {
+          console.log('⏰ Video loading timeout - showing error state');
+          setVideoLoading(false);
+          setVideoError(true);
+        }
+      }, 15000);
+      
+      return () => clearTimeout(loadingTimeout);
     }
   }, []);
 
@@ -82,6 +93,14 @@ export default function WelcomeVideoV2Page() {
     console.error('❌ Video loading error:', e);
     setVideoLoading(false);
     setVideoError(true);
+    
+    // Auto-complete step if video fails to load after 10 seconds
+    setTimeout(() => {
+      if (videoError) {
+        console.log('🔄 Auto-completing step due to video loading failure');
+        handleVideoEnd();
+      }
+    }, 10000);
   };
 
   const handleVideoCanPlay = () => {
@@ -207,7 +226,13 @@ export default function WelcomeVideoV2Page() {
               <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
                 <div className="text-center">
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
-                  <p className="text-white">Video laden...</p>
+                  <p className="text-white mb-4">Video laden...</p>
+                  <button
+                    onClick={handleVideoEnd}
+                    className="bg-[#8BAE5A] text-white px-4 py-2 rounded-lg hover:bg-[#A6C97B] transition-colors text-sm"
+                  >
+                    Video overslaan
+                  </button>
                 </div>
               </div>
             )}
@@ -218,6 +243,12 @@ export default function WelcomeVideoV2Page() {
                   <div className="text-red-500 text-6xl mb-4">⚠️</div>
                   <p className="text-white mb-4">Video kon niet geladen worden</p>
                   <p className="text-gray-300 text-sm mb-4">Controleer of het bestand bestaat: /videos/welcome-video.mp4</p>
+                  <button
+                    onClick={handleVideoEnd}
+                    className="bg-[#8BAE5A] text-white px-6 py-3 rounded-lg hover:bg-[#A6C97B] transition-colors"
+                  >
+                    Video overslaan en doorgaan
+                  </button>
                   <div className="space-y-2">
                     <button
                       onClick={() => {
