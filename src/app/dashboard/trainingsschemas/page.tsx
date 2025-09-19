@@ -495,65 +495,64 @@ function TrainingschemasContent() {
     
     console.log(`🎯 Mapping frontend goal "${profile.training_goal}" to database goal "${dbGoal}"`);
     
-    // SIMPLIFIED FILTERING: Filter by goal, equipment, and frequency
-    // Priority: exact frequency match > equipment match > goal match
-      
-    // Step 1: Find schemas that match goal + equipment + frequency (perfect match)
-    const perfectMatches = schemas.filter(schema => {
+    // NEW APPROACH: Always show all 3 schemas for goal + equipment combination
+    // Filter by goal + equipment (ignore frequency for now)
+    const goalEquipmentMatches = schemas.filter(schema => {
       const goalMatch = schema.training_goal === dbGoal;
       const equipmentMatch = schema.equipment_type === profile.equipment_type;
-      const frequencyMatch = (schema.training_schema_days?.length || 0) === profile.training_frequency;
       
-      console.log(`🔍 Schema "${schema.name}": goal=${goalMatch}, equipment=${equipmentMatch}, frequency=${frequencyMatch} (${schema.training_schema_days?.length || 0} days vs ${profile.training_frequency})`);
-      
-      return goalMatch && equipmentMatch && frequencyMatch;
-    });
-    
-    console.log(`🎯 Perfect matches (goal + equipment + frequency): ${perfectMatches.length}`);
-    perfectMatches.forEach(schema => {
-      console.log(`  ✅ "${schema.name}" - ${schema.training_schema_days?.length || 0} dagen (${schema.schema_nummer})`);
-    });
-    
-    // Step 2: If no perfect matches, find goal + frequency matches (any equipment)
-    const goalFrequencyMatches = perfectMatches.length > 0 ? perfectMatches : schemas.filter(schema => {
-      const goalMatch = schema.training_goal === dbGoal;
-      const frequencyMatch = (schema.training_schema_days?.length || 0) === profile.training_frequency;
-      
-      return goalMatch && frequencyMatch;
-    });
-    
-    console.log(`🎯 Goal + frequency matches: ${goalFrequencyMatches.length}`);
-    
-    // Step 3: If still no matches, find goal + equipment matches (any frequency)
-    const goalEquipmentMatches = goalFrequencyMatches.length > 0 ? goalFrequencyMatches : schemas.filter(schema => {
-      const goalMatch = schema.training_goal === dbGoal;
-      const equipmentMatch = schema.equipment_type === profile.equipment_type;
+      console.log(`🔍 Schema "${schema.name}": goal=${goalMatch}, equipment=${equipmentMatch} (${schema.training_goal} vs ${dbGoal}, ${schema.equipment_type} vs ${profile.equipment_type})`);
       
       return goalMatch && equipmentMatch;
     });
     
     console.log(`🎯 Goal + equipment matches: ${goalEquipmentMatches.length}`);
-    
-    // Step 4: Final fallback - just goal matches
-    const finalMatches = goalEquipmentMatches.length > 0 ? goalEquipmentMatches : schemas.filter(schema => {
-      return schema.training_goal === dbGoal;
+    goalEquipmentMatches.forEach(schema => {
+      console.log(`  ✅ "${schema.name}" - Schema ${schema.schema_nummer} (${schema.training_goal}, ${schema.equipment_type}, ${schema.training_schema_days?.length || 0} days)`);
     });
     
-    console.log(`🎯 Final matches: ${finalMatches.length}`);
-    
-    // Step 5: Sort by schema number and return up to 3 schemas
-    const sortedSchemas = finalMatches.sort((a, b) => {
+    // Sort by schema number to ensure consistent order
+    const sortedSchemas = goalEquipmentMatches.sort((a, b) => {
       const aNum = a.schema_nummer || 0;
       const bNum = b.schema_nummer || 0;
       return aNum - bNum;
     });
     
-    // Return first 3 schemas
-    const result = sortedSchemas.slice(0, 3);
+    // If we have less than 3 schemas, create placeholder schemas for missing numbers
+    const result: TrainingSchema[] = [];
+    const existingSchemaNumbers = sortedSchemas.map(s => s.schema_nummer || 0);
     
-    console.log('✅ Final filtered schemas:', result.length);
+    for (let i = 1; i <= 3; i++) {
+      const existingSchema = sortedSchemas.find(s => s.schema_nummer === i);
+      if (existingSchema) {
+        result.push(existingSchema);
+      } else {
+        // Create a placeholder schema for missing schema numbers
+        const placeholderSchema: TrainingSchema = {
+          id: `placeholder-${dbGoal}-${profile.equipment_type}-${i}`,
+          name: `${profile.training_goal} ${profile.training_frequency}x per week Schema ${i}`,
+          description: `Schema ${i} voor ${profile.training_goal} met ${profile.equipment_type} - Binnenkort beschikbaar`,
+          category: 'Gym',
+          cover_image: null,
+          status: 'coming_soon',
+          difficulty: 'Intermediate',
+          estimated_duration: '30 min',
+          target_audience: null,
+          training_goal: dbGoal,
+          rep_range: '',
+          rest_time_seconds: 0,
+          equipment_type: profile.equipment_type,
+          schema_nummer: i,
+          training_schema_days: []
+        };
+        result.push(placeholderSchema);
+        console.log(`  📝 Created placeholder for Schema ${i}`);
+      }
+    }
+    
+    console.log('✅ Final filtered schemas (always 3):', result.length);
     result.forEach((schema, index) => {
-      console.log(`  ${index + 1}. Schema ${schema.schema_nummer}: "${schema.name}" (${schema.training_goal}, ${schema.equipment_type}, ${schema.training_schema_days?.length || 0} days)`);
+      console.log(`  ${index + 1}. Schema ${schema.schema_nummer}: "${schema.name}" (${schema.training_goal}, ${schema.equipment_type}, ${schema.training_schema_days?.length || 0} days) - Status: ${schema.status}`);
     });
     
     return result;
@@ -1954,7 +1953,9 @@ function TrainingschemasContent() {
                   const isSchema3 = schema.schema_nummer === 3;
                   
                   // Progressive unlocking: Schema 1 is always unlocked, Schema 2 unlocks after 8 weeks of Schema 1, Schema 3 unlocks after 8 weeks of Schema 2
-                  const isLocked = !unlockedSchemas[schema.schema_nummer || 1];
+                  // Placeholder schemas are always locked
+                  const isPlaceholder = schema.status === 'coming_soon';
+                  const isLocked = isPlaceholder || !unlockedSchemas[schema.schema_nummer || 1];
                   
                   return (
                     <motion.div
@@ -2010,7 +2011,9 @@ function TrainingschemasContent() {
                         <div className="flex items-center gap-2 text-gray-400 text-xs sm:text-sm">
                           <span className="text-yellow-500">🔒</span>
                           <span>
-                            {isSchema2 
+                            {isPlaceholder
+                              ? 'Binnenkort beschikbaar'
+                              : isSchema2 
                               ? 'Vergrendeld - Voltooi Schema 1 eerst'
                               : isSchema3 
                               ? 'Vergrendeld - Voltooi Schema 2 eerst'
@@ -2047,7 +2050,7 @@ function TrainingschemasContent() {
                               : 'bg-[#3A4D23] text-white hover:bg-[#4A5D33]'
                           }`}
                         >
-                          {isLocked ? 'Vergrendeld' : selectedTrainingSchema === schema.id ? 'Geselecteerd' : 'Selecteer'}
+                          {isPlaceholder ? 'Binnenkort' : isLocked ? 'Vergrendeld' : selectedTrainingSchema === schema.id ? 'Geselecteerd' : 'Selecteer'}
                         </button>
                         <button
                           onClick={() => !isLocked && handlePrintSchema(schema.id)}
@@ -2057,7 +2060,7 @@ function TrainingschemasContent() {
                               ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
                               : 'bg-[#1E3A8A] text-white hover:bg-[#1E40AF]'
                           }`}
-                          title={isLocked ? 'Vergrendeld' : 'Print schema'}
+                          title={isPlaceholder ? 'Binnenkort beschikbaar' : isLocked ? 'Vergrendeld' : 'Print schema'}
                         >
                           <PrinterIcon className="w-4 h-4" />
                         </button>
