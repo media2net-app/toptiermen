@@ -335,7 +335,7 @@ function TrainingschemasContent() {
         fetch(`/api/training-profile?userId=${user.email}`),
         
         // Load current schema period
-        fetch(`/api/user/schema-periods?userId=${user.id}`),
+        fetch(`/api/training-schema-period?userId=${user.id}`),
         
         // Load schema progress
         fetch(`/api/user/schema-progress?userId=${user.id}`)
@@ -843,14 +843,17 @@ function TrainingschemasContent() {
         }
       }
       
-      const response = await fetch('/api/training-schema-selection', {
+      // Create schema period with start date (8 weeks)
+      const startDate = new Date().toISOString().split('T')[0]; // Today's date
+      const response = await fetch('/api/training-schema-period', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           userId: actualUserId,
-          schemaId: schemaId
+          schemaId: schemaId,
+          startDate: startDate
         }),
       });
 
@@ -858,49 +861,21 @@ function TrainingschemasContent() {
       
       if (response.ok && data.success) {
         setSelectedTrainingSchema(schemaId);
+        setCurrentSchemaPeriod(data.data);
+        console.log('✅ Schema period created:', data.data);
         
-        // Create schema period (8 weeks)
-        const startDate = new Date().toISOString().split('T')[0]; // Today's date
-        const createPeriodResponse = await fetch('/api/user/schema-periods', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            userId: actualUserId,
-            trainingSchemaId: schemaId,
-            startDate: startDate
-          }),
-        });
-
-        if (createPeriodResponse.ok) {
-          const periodData = await createPeriodResponse.json();
-          setCurrentSchemaPeriod(periodData.data);
-          console.log('✅ Schema period created:', periodData.data);
-          toast.success(`Trainingsschema geselecteerd! 8-weken periode gestart: ${new Date(periodData.data.start_date).toLocaleDateString('nl-NL')} - ${new Date(periodData.data.end_date).toLocaleDateString('nl-NL')}`);
-          
-          // Only redirect to Mijn trainingen if NOT in onboarding
-          if (isCompleted && !showOnboardingStep3) {
+        const startDate = new Date(data.data.schema_start_date).toLocaleDateString('nl-NL');
+        const endDate = new Date(data.data.schema_end_date).toLocaleDateString('nl-NL');
+        toast.success(`Trainingsschema geselecteerd! 8-weken periode gestart: ${startDate} - ${endDate}`);
+        
+        // Only redirect to Mijn trainingen if NOT in onboarding
+        if (isCompleted && !showOnboardingStep3) {
           console.log('🔄 Redirecting to Mijn trainingen...');
           setTimeout(() => {
             router.push('/dashboard/mijn-trainingen');
           }, 1500); // Small delay to show the success message
-          } else {
-            console.log('🎯 Onboarding active - NOT redirecting to Mijn trainingen');
-          }
         } else {
-          console.error('❌ Failed to create schema period');
-          toast.success('Trainingsschema geselecteerd!');
-          
-          // Still redirect even if period creation failed, but only if NOT in onboarding
-          if (isCompleted && !showOnboardingStep3) {
-          console.log('🔄 Redirecting to Mijn trainingen...');
-          setTimeout(() => {
-            router.push('/dashboard/mijn-trainingen');
-          }, 1500);
-          } else {
-            console.log('🎯 Onboarding active - NOT redirecting to Mijn trainingen');
-          }
+          console.log('🎯 Onboarding active - NOT redirecting to Mijn trainingen');
         }
         
         // Complete onboarding step if needed
