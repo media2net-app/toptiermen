@@ -123,12 +123,12 @@ const equipmentTypes = [
 ];
 
 const trainingFrequencies = [
-  { id: 1, name: '1x per week', description: 'Minimale training' },
-  { id: 2, name: '2x per week', description: 'Basis training' },
-  { id: 3, name: '3x per week', description: 'Perfect voor beginners' },
-  { id: 4, name: '4x per week', description: 'Ideaal voor consistentie' },
-  { id: 5, name: '5x per week', description: 'Voor gevorderden' },
-  { id: 6, name: '6x per week', description: 'Maximale intensiteit' }
+  { id: 1, name: '1x per week' },
+  { id: 2, name: '2x per week' },
+  { id: 3, name: '3x per week' },
+  { id: 4, name: '4x per week' },
+  { id: 5, name: '5x per week' },
+  { id: 6, name: '6x per week' }
 ];
 
 function TrainingschemasContent() {
@@ -1802,7 +1802,6 @@ function TrainingschemasContent() {
                               <CalendarDaysIcon className="h-4 w-4 md:h-5 md:w-5 text-[#8BAE5A]" />
                               <div className="text-white font-semibold text-sm md:text-base">{freq.name}</div>
                             </div>
-                            <div className="text-xs md:text-sm text-gray-300">{freq.description}</div>
                           </div>
                         </label>
                       ))}
