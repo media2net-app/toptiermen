@@ -787,7 +787,10 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const [onboardingStatus, setOnboardingStatus] = useState<any>(null);
+  const [onboardingStatus, setOnboardingStatus] = useState<any>({
+    onboarding_completed: false,
+    current_step: null
+  });
   const [showForcedOnboarding, setShowForcedOnboarding] = useState(false);
   const [showTestUserVideo, setShowTestUserVideo] = useState(false);
   const [isLoadingLocal, setIsLoadingLocal] = useState(false); // DISABLED TO FIX FLICKERING
@@ -809,20 +812,6 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
       });
     }
   }, [contextIsCompleted, contextCurrentStep]);
-
-  // Initialize onboardingStatus if not set
-  useEffect(() => {
-    if (!onboardingStatus && contextIsCompleted !== undefined && contextCurrentStep !== undefined) {
-      setOnboardingStatus({
-        onboarding_completed: contextIsCompleted,
-        current_step: contextCurrentStep
-      });
-      console.log('🔄 [DASHBOARD] Initializing onboarding status:', {
-        contextIsCompleted,
-        contextCurrentStep
-      });
-    }
-  }, [onboardingStatus, contextIsCompleted, contextCurrentStep]);
 
   // 2.0.1: Cache busting for existing users
   useEffect(() => {
