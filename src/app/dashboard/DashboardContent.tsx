@@ -787,10 +787,7 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const [onboardingStatus, setOnboardingStatus] = useState<any>({
-    onboarding_completed: false,
-    current_step: null
-  });
+  const [onboardingStatus, setOnboardingStatus] = useState<any>(null);
   const [showForcedOnboarding, setShowForcedOnboarding] = useState(false);
   const [showTestUserVideo, setShowTestUserVideo] = useState(false);
   const [isLoadingLocal, setIsLoadingLocal] = useState(false); // DISABLED TO FIX FLICKERING
@@ -809,11 +806,10 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
   // Sync onboardingStatus with context changes
   useEffect(() => {
     if (contextIsCompleted !== undefined && contextCurrentStep !== undefined) {
-      setOnboardingStatus(prev => ({
-        ...prev,
+      setOnboardingStatus({
         onboarding_completed: contextIsCompleted,
         current_step: contextCurrentStep
-      }));
+      });
       console.log('🔄 [DASHBOARD] Syncing onboarding status:', {
         contextIsCompleted,
         contextCurrentStep
