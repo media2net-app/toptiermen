@@ -50,6 +50,7 @@ export async function POST(request: NextRequest) {
       console.log('🎉 User posted in introduction topic, completing onboarding...');
       
       try {
+        // Update user_onboarding_status table
         const { error: onboardingError } = await supabase
           .from('user_onboarding_status')
           .update({ 
@@ -59,9 +60,23 @@ export async function POST(request: NextRequest) {
           .eq('user_id', author_id);
         
         if (onboardingError) {
-          console.error('❌ API: Error completing onboarding:', onboardingError);
+          console.error('❌ API: Error completing onboarding in user_onboarding_status:', onboardingError);
         } else {
-          console.log('✅ API: Onboarding completed for user:', author_id);
+          console.log('✅ API: Onboarding completed in user_onboarding_status for user:', author_id);
+        }
+
+        // Also update profiles table to mark onboarding as completed
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({ 
+            onboarding_completed: true
+          })
+          .eq('id', author_id);
+        
+        if (profileError) {
+          console.error('❌ API: Error completing onboarding in profiles:', profileError);
+        } else {
+          console.log('✅ API: Onboarding completed in profiles for user:', author_id);
         }
       } catch (error) {
         console.error('❌ API: Error in onboarding completion:', error);

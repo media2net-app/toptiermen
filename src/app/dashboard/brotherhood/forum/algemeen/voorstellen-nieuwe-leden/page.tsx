@@ -508,12 +508,12 @@ const VoorstellenTopicPage = () => {
               transition={{ delay: 0.5 }}
             >
               <Link
-                href="/dashboard"
+                href="/dashboard/onboarding-completion"
                 className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-bold rounded-xl hover:from-[#B6C948] hover:to-[#8BAE5A] transition-all transform hover:scale-105"
                 onClick={() => setShowSuccessModal(false)}
               >
                 <CheckCircleIcon className="w-5 h-5 mr-2" />
-                Bekijk mijn persoonlijke dashboard
+                Onboarding voltooid - Ga naar dashboard
               </Link>
             </motion.div>
           </motion.div>

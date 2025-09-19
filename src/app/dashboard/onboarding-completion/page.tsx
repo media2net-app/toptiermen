@@ -42,7 +42,7 @@ export default function OnboardingCompletion() {
     if (!user) return;
 
     try {
-      const response = await fetch(`/api/onboarding-v2`);
+      const response = await fetch(`/api/onboarding-v2?email=${user.email}`);
       const data = await response.json();
 
       if (response.ok) {
