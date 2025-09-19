@@ -115,10 +115,12 @@ export default function Dashboard() {
         // For step 1, stay on dashboard and show modal
         return;
       } else if (currentStep === 2) {
-        redirectPath = '/dashboard/trainingsschemas';
+        redirectPath = '/dashboard/mijn-challenges';
       } else if (currentStep === 3) {
-        redirectPath = '/dashboard/voedingsplannen-v2';
+        redirectPath = '/dashboard/trainingsschemas';
       } else if (currentStep === 4) {
+        redirectPath = '/dashboard/voedingsplannen-v2';
+      } else if (currentStep === 5) {
         redirectPath = '/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden';
       }
       
