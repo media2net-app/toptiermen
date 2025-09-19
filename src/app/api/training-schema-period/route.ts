@@ -19,6 +19,7 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('📅 Creating training schema period:', { userId, schemaId, startDate });
+    console.log('📅 Request body:', body);
 
     // Check if userId is an email and convert to UUID if needed
     let actualUserId = userId;
@@ -35,7 +36,7 @@ export async function POST(request: NextRequest) {
           actualUserId = uuid;
           console.log('✅ Converted email to UUID for schema period:', actualUserId);
         } else {
-          console.log('❌ Failed to convert email to UUID');
+          console.log('❌ Failed to convert email to UUID, response status:', response.status);
           return NextResponse.json({ 
             error: 'User not found' 
           }, { status: 404 });

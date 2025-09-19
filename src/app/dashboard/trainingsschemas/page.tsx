@@ -822,7 +822,11 @@ function TrainingschemasContent() {
 
   const selectTrainingSchema = useCallback(async (schemaId: string) => {
     try {
-      if (!user?.id) return;
+      console.log('🎯 selectTrainingSchema called with:', { schemaId, userId: user?.id, userEmail: user?.email });
+      if (!user?.id) {
+        console.log('❌ No user ID available');
+        return;
+      }
       
       // Check if user.id is an email and convert to UUID if needed
       let actualUserId = user.id;
@@ -858,6 +862,7 @@ function TrainingschemasContent() {
       });
 
       const data = await response.json();
+      console.log('📡 Schema selection API response:', { status: response.status, data });
       
       if (response.ok && data.success) {
         setSelectedTrainingSchema(schemaId);
