@@ -305,6 +305,27 @@ export default function WorkoutPage() {
     return () => clearInterval(interval);
   }, [isTimerRunning]);
 
+  // Initialize WorkoutSessionContext when exercises are loaded and session exists
+  useEffect(() => {
+    if (session && exercises.length > 0 && !globalSession) {
+      console.log('🔄 Initializing WorkoutSessionContext with loaded session...');
+      const currentExercise = exercises[currentExerciseIndex];
+      startWorkout({
+        id: session.id,
+        schemaId: schemaId,
+        dayNumber: dayNumber,
+        exerciseName: currentExercise.name,
+        currentSet: currentExercise.currentSet,
+        totalSets: currentExercise.sets,
+        restTime: 0,
+        isRestActive: false,
+        currentExerciseIndex: currentExerciseIndex,
+        totalExercises: exercises.length
+      });
+      setIsWorkoutActive(true);
+      setIsTimerRunning(true);
+    }
+  }, [session, exercises, currentExerciseIndex, globalSession, startWorkout]);
 
   const loadSession = async () => {
     if (!sessionId) return;
