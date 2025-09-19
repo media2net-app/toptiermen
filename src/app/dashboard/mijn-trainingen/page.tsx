@@ -376,18 +376,10 @@ export default function MijnTrainingen() {
                   )}
                 </div>
                 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                <div className="grid grid-cols-2 gap-4 text-sm">
                   <div className="bg-[#0F1419]/50 rounded-lg p-3">
                     <span className="text-[#8BAE5A] font-semibold">Categorie</span>
                     <p className="text-white">{schema?.category}</p>
-                  </div>
-                  <div className="bg-[#0F1419]/50 rounded-lg p-3">
-                    <span className="text-[#FFD700] font-semibold">Niveau</span>
-                    <p className="text-white">{schema?.difficulty}</p>
-                  </div>
-                  <div className="bg-[#0F1419]/50 rounded-lg p-3">
-                    <span className="text-[#f0a14f] font-semibold">Duur</span>
-                    <p className="text-white">{schema?.estimated_duration}</p>
                   </div>
                   <div className="bg-[#0F1419]/50 rounded-lg p-3">
                     <span className="text-[#8BAE5A] font-semibold">Doel</span>
@@ -702,7 +694,6 @@ export default function MijnTrainingen() {
           dayNumber={selectedDayForWorkout}
           schemaName={trainingData.schema.name}
           focusArea={trainingData.days?.find(d => d.day_number === selectedDayForWorkout)?.focus_area || 'Training'}
-          estimatedDuration={trainingData.schema.estimated_duration}
         />
       )}
       </AnimatePresence>
