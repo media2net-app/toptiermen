@@ -443,7 +443,12 @@ export default function MijnTrainingen() {
               className="mb-8"
             >
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-white">Trainingsdagen</h2>
+                <div>
+                  <h2 className="text-2xl font-bold text-white">Trainingsdagen</h2>
+                  <p className="text-[#8BAE5A] text-sm mt-1">
+                    Huidige Week: {completedWeeks.length + 1}/8
+                  </p>
+                </div>
                 <button
                   onClick={viewSchemaDetails}
                   className="flex items-center px-4 py-2 bg-[#3A4D23] text-[#8BAE5A] rounded-lg hover:bg-[#4A5D33] transition-colors"

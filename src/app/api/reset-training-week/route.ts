@@ -13,15 +13,34 @@ export async function POST(request: NextRequest) {
 
     const supabase = createClient();
 
+    // First get all schema day IDs for this schema
+    const { data: schemaDays, error: schemaDaysError } = await supabase
+      .from('training_schema_days')
+      .select('id')
+      .eq('schema_id', schemaId);
+
+    if (schemaDaysError) {
+      console.error('❌ Error fetching schema days:', schemaDaysError);
+      return NextResponse.json({ error: 'Failed to fetch schema days' }, { status: 500 });
+    }
+
+    if (!schemaDays || schemaDays.length === 0) {
+      console.log('⚠️ No schema days found for schema:', schemaId);
+      return NextResponse.json({ error: 'No schema days found' }, { status: 404 });
+    }
+
+    const schemaDayIds = schemaDays.map(day => day.id);
+    console.log('📋 Found schema day IDs:', schemaDayIds);
+
     // Reset all training days for the user's active schema
     const { error } = await supabase
-      .from('user_training_progress')
+      .from('user_training_day_progress')
       .update({ 
-        is_completed: false,
+        completed: false,
         completed_at: null
       })
       .eq('user_id', userId)
-      .eq('schema_id', schemaId);
+      .in('schema_day_id', schemaDayIds);
 
     if (error) {
       console.error('❌ Error resetting training week:', error);
