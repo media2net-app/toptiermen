@@ -36,7 +36,11 @@ export async function POST(request: NextRequest) {
     console.log('📋 Found schema day IDs:', schemaDayIds);
 
     // Reset all training days for the user's active schema
-    const { error } = await supabase
+    // Try user_training_day_progress first, fallback to user_training_progress
+    let resetError = null;
+    
+    // First try user_training_day_progress (if it exists)
+    const { error: dayProgressError } = await supabase
       .from('user_training_day_progress')
       .update({ 
         completed: false,
@@ -44,9 +48,27 @@ export async function POST(request: NextRequest) {
       })
       .eq('user_id', userId)
       .in('schema_day_id', schemaDayIds);
+    
+    if (dayProgressError) {
+      console.log('⚠️ user_training_day_progress table not found, trying user_training_progress:', dayProgressError.message);
+      
+      // Fallback to user_training_progress table
+      const { error: progressError } = await supabase
+        .from('user_training_progress')
+        .update({ 
+          completed: false,
+          completed_at: null
+        })
+        .eq('user_id', userId)
+        .in('training_schema_id', schemaId);
+      
+      resetError = progressError;
+    } else {
+      resetError = dayProgressError;
+    }
 
-    if (error) {
-      console.error('❌ Error resetting training week:', error);
+    if (resetError) {
+      console.error('❌ Error resetting training week:', resetError);
       return NextResponse.json({ error: 'Failed to reset training week' }, { status: 500 });
     }
 
