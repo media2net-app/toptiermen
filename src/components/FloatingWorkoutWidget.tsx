@@ -79,7 +79,12 @@ export default function FloatingWorkoutWidget({
 
   const handleBackToWorkout = () => {
     if (session) {
-      router.push(`/dashboard/trainingscentrum/workout/${session.schemaId}/${session.dayNumber}?sessionId=${session.id}`);
+      console.log('🔄 Navigating back to workout with session:', session);
+      const url = `/dashboard/trainingscentrum/workout/${session.schemaId}/${session.dayNumber}?sessionId=${session.id}`;
+      console.log('🔄 Navigation URL:', url);
+      router.push(url);
+    } else {
+      console.log('❌ No session available for navigation');
     }
   };
 
