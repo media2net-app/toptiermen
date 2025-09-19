@@ -12,7 +12,16 @@ export default function WelcomeVideoV2Page() {
   const [showOverlay, setShowOverlay] = useState(true);
   const [videoLoading, setVideoLoading] = useState(true);
   const [videoError, setVideoError] = useState(false);
+  const [videoReady, setVideoReady] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Initialize video when component mounts
+  useEffect(() => {
+    if (videoRef.current) {
+      console.log('🎥 Initializing video element');
+      videoRef.current.load();
+    }
+  }, []);
 
   // Redirect if not on welcome video step
   useEffect(() => {
@@ -46,14 +55,21 @@ export default function WelcomeVideoV2Page() {
   };
 
   const handleVideoLoad = () => {
+    console.log('✅ Video loaded successfully');
     setVideoLoading(false);
     setVideoError(false);
   };
 
-  const handleVideoError = () => {
+  const handleVideoError = (e: any) => {
+    console.error('❌ Video loading error:', e);
     setVideoLoading(false);
     setVideoError(true);
-    console.error('Video loading error');
+  };
+
+  const handleVideoCanPlay = () => {
+    console.log('🎬 Video can play');
+    setVideoLoading(false);
+    setVideoReady(true);
   };
 
   const handleComplete = async () => {
@@ -105,8 +121,11 @@ export default function WelcomeVideoV2Page() {
               className="w-full h-96 object-cover"
               onEnded={handleVideoEnd}
               onLoadedData={handleVideoLoad}
+              onCanPlay={handleVideoCanPlay}
               onError={handleVideoError}
-              preload="metadata"
+              preload="auto"
+              controls={false}
+              playsInline
             >
               <source src="/videos/welcome-video.mp4" type="video/mp4" />
               Je browser ondersteunt geen video element.
@@ -126,17 +145,32 @@ export default function WelcomeVideoV2Page() {
                 <div className="text-center">
                   <div className="text-red-500 text-6xl mb-4">⚠️</div>
                   <p className="text-white mb-4">Video kon niet geladen worden</p>
-                  <button
-                    onClick={() => window.location.reload()}
-                    className="bg-[#8BAE5A] hover:bg-[#7A9E4A] text-white px-4 py-2 rounded-lg transition-colors"
-                  >
-                    Pagina herladen
-                  </button>
+                  <p className="text-gray-300 text-sm mb-4">Controleer of het bestand bestaat: /videos/welcome-video.mp4</p>
+                  <div className="space-y-2">
+                    <button
+                      onClick={() => {
+                        setVideoError(false);
+                        setVideoLoading(true);
+                        if (videoRef.current) {
+                          videoRef.current.load();
+                        }
+                      }}
+                      className="bg-[#8BAE5A] hover:bg-[#7A9E4A] text-white px-4 py-2 rounded-lg transition-colors mr-2"
+                    >
+                      Opnieuw proberen
+                    </button>
+                    <button
+                      onClick={() => window.location.reload()}
+                      className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors"
+                    >
+                      Pagina herladen
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
             
-            {showOverlay && !videoLoading && !videoError && (
+            {showOverlay && !videoLoading && !videoError && videoReady && (
               <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
                 <button
                   onClick={handlePlay}
