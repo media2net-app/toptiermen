@@ -791,7 +791,13 @@ function TrainingschemasContent() {
     }
 
     // Check if user has an active schema period (within 8 weeks)
-    if (currentSchemaPeriod && hasChanged) {
+    // Only show warning if there's a valid active schema period
+    if (currentSchemaPeriod && 
+        currentSchemaPeriod.status === 'active' &&
+        currentSchemaPeriod.start_date && 
+        currentSchemaPeriod.end_date && 
+        currentSchemaPeriod.training_schemas?.name &&
+        hasChanged) {
       setShowWarningModal(true);
       return;
     }
