@@ -164,9 +164,19 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
     // If no onboarding status, allow all items
     if (!actualOnboardingStatus) return false;
     
-    // During onboarding V2, block ALL navigation except the current step
+    // During onboarding V2, block navigation based on current step
     if (actualCurrentStep !== null && actualCurrentStep !== undefined) {
-      // Only allow access to the current onboarding step
+      // Special case for step 5 (Forum intro): Only allow Brotherhood > Forum
+      if (actualCurrentStep === 5) {
+        // Allow Brotherhood > Forum access
+        if (item.label === 'Forum' && item.parent === 'Brotherhood') {
+          return false; // Not disabled
+        }
+        // Block everything else
+        return true;
+      }
+      
+      // For other steps, only allow access to the current onboarding step
       const isCurrentStep = item.onboardingStep === actualCurrentStep;
       
       // Force console log to be visible
@@ -479,9 +489,19 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
     // If no onboarding status, allow all items
     if (!actualOnboardingStatus) return false;
     
-    // During onboarding V2, block ALL navigation except the current step
+    // During onboarding V2, block navigation based on current step
     if (actualCurrentStep !== null && actualCurrentStep !== undefined) {
-      // Only allow access to the current onboarding step
+      // Special case for step 5 (Forum intro): Only allow Brotherhood > Forum
+      if (actualCurrentStep === 5) {
+        // Allow Brotherhood > Forum access
+        if (item.label === 'Forum' && item.parent === 'Brotherhood') {
+          return false; // Not disabled
+        }
+        // Block everything else
+        return true;
+      }
+      
+      // For other steps, only allow access to the current onboarding step
       const isCurrentStep = item.onboardingStep === actualCurrentStep;
       
       // Force console log to be visible
