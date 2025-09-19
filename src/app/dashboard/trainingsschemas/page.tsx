@@ -880,8 +880,22 @@ function TrainingschemasContent() {
       
       if (response.ok && data.success) {
         setSelectedTrainingSchema(schemaId);
-        setCurrentSchemaPeriod(data.data);
-        console.log('✅ Schema period created:', data.data);
+        
+        // Transform the API response to match the expected format
+        const transformedData = {
+          id: data.data.selected_schema_id,
+          user_id: actualUserId,
+          training_schema_id: data.data.selected_schema_id,
+          start_date: data.data.schema_start_date,
+          end_date: data.data.schema_end_date,
+          status: 'active' as const,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          training_schemas: data.data.training_schema
+        };
+        
+        setCurrentSchemaPeriod(transformedData);
+        console.log('✅ Schema period created:', transformedData);
         
         const startDate = new Date(data.data.schema_start_date).toLocaleDateString('nl-NL');
         const endDate = new Date(data.data.schema_end_date).toLocaleDateString('nl-NL');
