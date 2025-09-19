@@ -37,14 +37,14 @@ function LoginPageContent() {
   useEffect(() => {
     setIsClient(true);
     
-    // Fallback timeout to prevent infinite loading
+    // Fallback timeout to prevent infinite loading - reduced timeout
     const fallbackTimeout = setTimeout(() => {
       if (authLoading) {
         console.log('⚠️ Login page timeout - forcing auth loading to false');
-        // Force loading to false after 15 seconds
+        // Force loading to false after 5 seconds
         setIsLoading(false);
       }
-    }, 15000);
+    }, 5000); // Reduced from 15s to 5s
     
     return () => clearTimeout(fallbackTimeout);
   }, [authLoading]);
@@ -225,10 +225,12 @@ function LoginPageContent() {
               onClick={() => {
                 console.log('🔍 Debug info:', { authLoading, isClient, user, profile });
                 setIsLoading(false);
+                // Force refresh the page to reset auth state
+                window.location.reload();
               }}
               className="mt-4 px-4 py-2 bg-[#3A4D23] text-[#8BAE5A] rounded-lg text-sm hover:bg-[#4A5D33] transition-colors"
             >
-              Debug Info
+              🔄 Reset & Reload
             </button>
           </div>
         </div>

@@ -142,11 +142,11 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
       }
     };
 
-    // Add a timeout to prevent infinite loading - increased timeout
+    // Add a timeout to prevent infinite loading - reduced timeout for faster loading
     const initTimeout = setTimeout(() => {
       console.log('⚠️ Auth initialization timeout - forcing completion');
       setLoading(false);
-    }, 10000); // Increased from 5s to 10s
+    }, 3000); // Reduced from 10s to 3s for faster loading
 
     getInitialSession().then(() => {
       clearTimeout(initTimeout);
