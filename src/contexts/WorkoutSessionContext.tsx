@@ -43,24 +43,14 @@ export function WorkoutSessionProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let interval: NodeJS.Timeout;
     
-    console.log('⏰ Workout timer useEffect triggered:', { isWorkoutTimerRunning, session: !!session });
-    
     if (isWorkoutTimerRunning && session) {
-      console.log('⏰ Starting workout timer interval');
       interval = setInterval(() => {
-        setWorkoutTime(prev => {
-          const newTime = prev + 1;
-          console.log('⏰ Workout time updated:', newTime);
-          return newTime;
-        });
+        setWorkoutTime(prev => prev + 1);
       }, 1000);
-    } else {
-      console.log('⏰ Workout timer not running:', { isWorkoutTimerRunning, hasSession: !!session });
     }
     
     return () => {
       if (interval) {
-        console.log('⏰ Clearing workout timer interval');
         clearInterval(interval);
       }
     };
@@ -90,12 +80,22 @@ export function WorkoutSessionProvider({ children }: { children: ReactNode }) {
   // Update session with current workout time and rest time
   useEffect(() => {
     if (session) {
-      setSession(prev => prev ? { 
-        ...prev, 
-        workoutTime,
-        restTime,
-        isRestActive: isRestTimerRunning
-      } : null);
+      setSession(prev => {
+        if (!prev) return null;
+        
+        // Only update if values actually changed to prevent infinite loops
+        if (prev.workoutTime !== workoutTime || 
+            prev.restTime !== restTime || 
+            prev.isRestActive !== isRestTimerRunning) {
+          return { 
+            ...prev, 
+            workoutTime,
+            restTime,
+            isRestActive: isRestTimerRunning
+          };
+        }
+        return prev;
+      });
     }
   }, [workoutTime, restTime, isRestTimerRunning, session]);
 
@@ -127,17 +127,14 @@ export function WorkoutSessionProvider({ children }: { children: ReactNode }) {
   }, [session]);
 
   const startWorkout = (sessionData: Omit<WorkoutSession, 'workoutTime' | 'isActive'>) => {
-    console.log('🚀 WorkoutSessionContext: Starting workout with data:', sessionData);
     const newSession: WorkoutSession = {
       ...sessionData,
       workoutTime: 0,
       isActive: true
     };
-    console.log('🚀 WorkoutSessionContext: New session:', newSession);
     setSession(newSession);
     setWorkoutTime(0);
     setIsWorkoutTimerRunning(true);
-    console.log('🚀 WorkoutSessionContext: Timer started, isWorkoutTimerRunning set to true');
   };
 
   const pauseWorkout = () => {

@@ -308,12 +308,7 @@ export default function WorkoutPage() {
   // Initialize WorkoutSessionContext when exercises are loaded and session exists
   useEffect(() => {
     if (session && exercises.length > 0 && !globalSession) {
-      console.log('🔄 Initializing WorkoutSessionContext with loaded session...');
-      console.log('🔄 Session:', session);
-      console.log('🔄 Exercises length:', exercises.length);
-      console.log('🔄 Global session:', globalSession);
       const currentExercise = exercises[currentExerciseIndex];
-      console.log('🔄 Current exercise:', currentExercise);
       startWorkout({
         id: session.id,
         schemaId: schemaId,
@@ -328,7 +323,6 @@ export default function WorkoutPage() {
       });
       setIsWorkoutActive(true);
       setIsTimerRunning(true);
-      console.log('✅ WorkoutSessionContext initialized');
     }
   }, [session, exercises, currentExerciseIndex, globalSession, startWorkout]);
 
@@ -360,21 +354,12 @@ export default function WorkoutPage() {
   };
 
   const startWorkoutLocal = () => {
-    console.log('🚀 Starting workout locally...');
     setIsWorkoutActive(true);
     setIsTimerRunning(true);
     
     // Start global workout session
     if (exercises.length > 0) {
       const currentExercise = exercises[currentExerciseIndex];
-      console.log('🚀 Starting global workout session with:', {
-        id: sessionId || 'local-session',
-        schemaId: schemaId,
-        dayNumber: dayNumber,
-        exerciseName: currentExercise.name,
-        currentSet: currentExercise.currentSet,
-        totalSets: currentExercise.sets
-      });
       startWorkout({
         id: sessionId || 'local-session',
         schemaId: schemaId,
@@ -387,8 +372,6 @@ export default function WorkoutPage() {
         currentExerciseIndex: currentExerciseIndex,
         totalExercises: exercises.length
       });
-    } else {
-      console.log('❌ No exercises available to start workout');
     }
     
     toast.success('Workout gestart! 💪');
