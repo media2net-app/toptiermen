@@ -29,7 +29,7 @@ export function useSubscription(): UseSubscriptionReturn {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!user) {
+    if (!user?.id) {
       setSubscription(null);
       setLoading(false);
       return;
@@ -65,7 +65,7 @@ export function useSubscription(): UseSubscriptionReturn {
         setLoading(true);
         setError(null);
 
-        console.log('🔍 Fetching subscription for user:', user.id);
+        console.log('🔍 Fetching subscription for user:', user?.id);
 
         // Add timeout to prevent hanging
         const timeoutPromise = new Promise((_, reject) => 
@@ -75,7 +75,7 @@ export function useSubscription(): UseSubscriptionReturn {
         const fetchPromise = supabase
           .from('profiles')
           .select('subscription_tier, subscription_status, role, package_type')
-          .eq('id', user.id)
+          .eq('id', user?.id)
           .single();
 
         const { data: profile, error: profileError } = await Promise.race([
@@ -174,7 +174,7 @@ export function useSubscription(): UseSubscriptionReturn {
     };
 
     fetchSubscription();
-  }, [user]);
+  }, [user?.id]);
 
   // Computed properties
   const isPremium = subscription?.subscription_tier === 'premium' || subscription?.subscription_tier === 'premium-tier' || subscription?.subscription_tier === 'Premium Tier';
