@@ -796,8 +796,16 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
   const [isLoadingLocal, setIsLoadingLocal] = useState(false); // DISABLED TO FIX FLICKERING
   
   // Get onboarding status from context
-  const { isCompleted: contextIsCompleted, currentStep: contextCurrentStep } = useOnboardingV2();
+  const { isCompleted: contextIsCompleted, currentStep: contextCurrentStep, refreshStatus } = useOnboardingV2();
   
+  // Refresh onboarding status on mount
+  useEffect(() => {
+    if (refreshStatus) {
+      console.log('🔄 [DASHBOARD] Refreshing onboarding status on mount...');
+      refreshStatus();
+    }
+  }, [refreshStatus]);
+
   // Sync onboardingStatus with context changes
   useEffect(() => {
     if (contextIsCompleted !== undefined && contextCurrentStep !== undefined) {
