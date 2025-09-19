@@ -39,15 +39,12 @@ function LoginPageContent() {
     
     // Fallback timeout to prevent infinite loading - reduced timeout
     const fallbackTimeout = setTimeout(() => {
-      if (authLoading) {
-        console.log('⚠️ Login page timeout - forcing auth loading to false');
-        // Force loading to false after 3 seconds
-        setIsLoading(false);
-      }
-    }, 3000); // Reduced to 3s to match auth context
+      console.log('⚠️ Login page timeout - forcing completion');
+      setIsLoading(false);
+    }, 1500); // Reduced to 1.5s for faster loading
     
     return () => clearTimeout(fallbackTimeout);
-  }, [authLoading]);
+  }, []);
 
   // ✅ FIXED: Simplified admin detection
   const getRedirectPath = (user: any, profile: any, redirectTo?: string) => {
@@ -200,8 +197,8 @@ function LoginPageContent() {
     }
   }
 
-  // Hydration safety
-  if (!isClient) {
+  // Hydration safety - show loading only briefly
+  if (!isClient || (authLoading && isLoading)) {
     return (
       <div className="min-h-screen flex items-center justify-center relative px-4 py-6" style={{ backgroundColor: '#181F17' }}>
         <img src="/pattern.png" alt="pattern" className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none z-0" />

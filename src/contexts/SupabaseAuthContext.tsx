@@ -109,8 +109,6 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     const getInitialSession = async () => {
       try {
         console.log('🔍 Initializing auth session...');
-        console.log('🔍 Supabase URL:', supabaseUrl);
-        console.log('🔍 Supabase Key (first 20 chars):', supabaseAnonKey.substring(0, 20) + '...');
         setLoading(true); // Set loading to true when starting initialization
         
         // Restore session after refresh - this is normal behavior
@@ -119,6 +117,8 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
         if (error) {
           console.error('Session error:', error);
           setError(error.message);
+          setUser(null);
+          setProfile(null);
         } else if (session?.user) {
           console.log('✅ Restored session for user:', session.user.email);
           setUser(session.user);
@@ -126,8 +126,6 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
           setProfile(userProfile);
         } else {
           console.log('ℹ️ No existing session found - user will need to login');
-          // Don't immediately clear user state - wait for auth state change
-          // This prevents premature redirects during hard refresh
           setUser(null);
           setProfile(null);
         }
@@ -146,7 +144,9 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     const initTimeout = setTimeout(() => {
       console.log('⚠️ Auth initialization timeout - forcing completion');
       setLoading(false);
-    }, 2000); // Reduced to 2s for faster loading
+      setUser(null);
+      setProfile(null);
+    }, 1000); // Reduced to 1s for faster loading
 
     getInitialSession().then(() => {
       clearTimeout(initTimeout);
