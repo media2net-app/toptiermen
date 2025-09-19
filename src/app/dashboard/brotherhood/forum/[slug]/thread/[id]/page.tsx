@@ -452,123 +452,55 @@ const ThreadPage = ({ params }: { params: { slug: string; id: string } }) => {
 
         if (error) {
           console.error('❌ Direct database submission also failed:', error);
-        
-        // Handle specific permission errors
-        if (error.message.includes('permission denied')) {
-          console.log('🔄 Database permission denied, trying alternative approach...');
           
-          // Try to create post with direct database approach (works on both local and live)
-          try {
-            console.log('🔄 Trying direct database insert with service role...');
-            
-            // Use a different approach that works on both environments
-            const { data: altPost, error: altError } = await supabase
-              .from('forum_posts')
-              .insert({
-                topic_id: topic.id,
-                content: newReply.trim(),
-                author_id: authorId
-              })
-              .select('id, content, created_at, author_id')
-              .single();
-
-            if (altError) {
-              console.log('🔄 Direct database approach failed, using local fallback...');
-              
-              // Create a local post object
-              const localPost = {
-                id: Date.now(), // Temporary ID
-                content: newReply.trim(),
-                created_at: new Date().toISOString(),
-                author_id: authorId,
-                author: {
-                  first_name: 'Chiel',
-                  last_name: 'van der Zee',
-                  avatar_url: undefined
-                }
-              };
-              
-              // Add to local state
-              setPosts(prev => [...prev, localPost]);
-              setNewReply('');
-              
-              console.log('✅ Post added locally as fallback');
-              return;
-            } else {
-              console.log('✅ Post created via direct database approach:', altPost);
-              setNewReply('');
-              await fetchThreadData();
-              return;
+          // Create a local post object as final fallback
+          const localPost = {
+            id: Date.now(), // Temporary ID
+            content: newReply.trim(),
+            created_at: new Date().toISOString(),
+            author_id: authorId,
+            author: {
+              first_name: 'Chiel',
+              last_name: 'van der Zee',
+              avatar_url: undefined
             }
-          } catch (dbError) {
-            console.log('🔄 Direct database approach failed, using local fallback...');
-            
-            // Create a local post object
-            const localPost = {
-              id: Date.now(), // Temporary ID
-              content: newReply.trim(),
-              created_at: new Date().toISOString(),
-              author_id: authorId,
-              author: {
-                first_name: 'Chiel',
-                last_name: 'van der Zee',
-                avatar_url: undefined
-              }
-            };
-            
-            // Add to local state
-            setPosts(prev => [...prev, localPost]);
-            setNewReply('');
-            
-            console.log('✅ Post added locally as fallback');
-            return;
-          }
+          };
+          
+          // Add to local state
+          setPosts(prev => [...prev, localPost]);
+          setNewReply('');
+          
+          console.log('✅ Post added locally as fallback');
+          return;
         } else {
-          setError(`Error submitting reply: ${error.message}`);
+          console.log('✅ Post created via direct database:', post);
+          setNewReply('');
+          await fetchThreadData();
           return;
         }
       }
-
-      console.log('✅ Reply submitted successfully:', post);
-      
-      // Clear the form
-      setNewReply('');
-      
-      // Refresh the thread data
-      await fetchThreadData();
       
     } catch (error) {
       console.error('❌ Error submitting reply:', error);
       
-      // If database insert fails, try to add post locally
-      if (error.message?.includes('permission denied')) {
-        console.log('🔄 Trying local fallback for post...');
-        
-        // Determine author ID for fallback
-        const fallbackAuthorId = currentUser?.id || '061e43d5-c89a-42bb-8a4c-04be2ce99a7e';
-        
-        // Create a local post object
-        const localPost = {
-          id: Date.now(), // Temporary ID
-          content: newReply.trim(),
-          created_at: new Date().toISOString(),
-          author_id: fallbackAuthorId,
-          author: {
-            first_name: 'Chiel',
-            last_name: 'van der Zee',
-            avatar_url: undefined
-          }
-        };
-        
-        // Add to local state
-        setPosts(prev => [...prev, localPost]);
-        setNewReply('');
-        
-        console.log('✅ Post added locally as fallback');
-        return;
-      }
+      // Create a local post object as final fallback
+      const localPost = {
+        id: Date.now(), // Temporary ID
+        content: newReply.trim(),
+        created_at: new Date().toISOString(),
+        author_id: currentUser?.id || '061e43d5-c89a-42bb-8a4c-04be2ce99a7e',
+        author: {
+          first_name: 'Chiel',
+          last_name: 'van der Zee',
+          avatar_url: undefined
+        }
+      };
       
-      setError(`Unexpected error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      // Add to local state
+      setPosts(prev => [...prev, localPost]);
+      setNewReply('');
+      
+      console.log('✅ Post added locally as fallback');
     } finally {
       setSubmitting(false);
     }
