@@ -86,6 +86,21 @@ export async function GET(request: NextRequest) {
         if (!hasTrainingAccess && !hasNutritionAccess && onboardingStatus.missions_selected && onboardingStatus.challenge_started) {
           currentStep = null;
           isCompleted = true;
+          
+          // Update the database to mark onboarding as completed
+          const { error: updateError } = await supabase
+            .from('user_onboarding_status')
+            .update({ 
+              onboarding_completed: true,
+              updated_at: new Date().toISOString()
+            })
+            .eq('user_id', profile.id);
+          
+          if (updateError) {
+            console.error('❌ Error updating onboarding completion:', updateError);
+          } else {
+            console.log('✅ Onboarding marked as completed for Basic tier user');
+          }
         }
       }
     } else {

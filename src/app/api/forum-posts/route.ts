@@ -113,7 +113,7 @@ export async function GET(request: NextRequest) {
       .from('forum_posts')
       .select(`
         *,
-        profiles!forum_posts_author_id_fkey(
+        profiles(
           id,
           full_name,
           first_name,

@@ -443,7 +443,8 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
       actualOnboardingStatus,
       isCompleted,
       currentStep,
-      onboarding_completed: actualOnboardingStatus?.onboarding_completed
+      onboarding_completed: actualOnboardingStatus?.onboarding_completed,
+      shouldShowAllItems: actualOnboardingStatus?.onboarding_completed
     });
   }, [onboardingStatus, actualOnboardingStatus, isCompleted, currentStep]);
   
