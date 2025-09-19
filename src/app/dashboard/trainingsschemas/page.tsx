@@ -198,12 +198,24 @@ function TrainingschemasContent() {
     
     try {
       setSchemaPeriodLoading(true);
-      const response = await fetch(`/api/user/schema-periods?userId=${user.id}`);
+      const response = await fetch(`/api/training-schema-period?userId=${user.id}`);
       const result = await response.json();
       
-      if (response.ok) {
-        setCurrentSchemaPeriod(result.data);
-        console.log('✅ Current schema period loaded:', result.data);
+      if (response.ok && result.data) {
+        // Transform the API response to match the expected format
+        const transformedData = {
+          id: result.data.selected_schema_id,
+          user_id: user.id,
+          training_schema_id: result.data.selected_schema_id,
+          start_date: result.data.schema_start_date,
+          end_date: result.data.schema_end_date,
+          status: 'active' as const,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          training_schemas: result.data.training_schema
+        };
+        setCurrentSchemaPeriod(transformedData);
+        console.log('✅ Current schema period loaded:', transformedData);
       } else {
         console.log('⚠️ No active schema period found');
         setCurrentSchemaPeriod(null);
