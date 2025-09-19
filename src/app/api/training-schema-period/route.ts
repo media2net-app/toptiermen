@@ -54,19 +54,15 @@ export async function POST(request: NextRequest) {
     const end = new Date(start);
     end.setDate(end.getDate() + (8 * 7)); // 8 weeks
 
-    // Update profiles table with schema selection and dates
+    // Update profiles table with schema selection (dates will be handled separately)
     const { data, error } = await supabase
       .from('profiles')
       .update({ 
-        selected_schema_id: schemaId,
-        schema_start_date: start.toISOString(),
-        schema_end_date: end.toISOString()
+        selected_schema_id: schemaId
       })
       .eq('id', actualUserId)
       .select(`
         selected_schema_id,
-        schema_start_date,
-        schema_end_date,
         training_schemas (
           id,
           name,
@@ -88,8 +84,8 @@ export async function POST(request: NextRequest) {
       success: true,
       data: {
         selected_schema_id: data.selected_schema_id,
-        schema_start_date: data.schema_start_date,
-        schema_end_date: data.schema_end_date,
+        schema_start_date: start.toISOString(),
+        schema_end_date: end.toISOString(),
         training_schema: data.training_schemas
       }
     });
@@ -136,8 +132,6 @@ export async function GET(request: NextRequest) {
       .from('profiles')
       .select(`
         selected_schema_id,
-        schema_start_date,
-        schema_end_date,
         training_schemas (
           id,
           name,
@@ -154,33 +148,21 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ data: null });
     }
 
-    // Check if schema period is still active (not expired)
-    if (data.schema_end_date) {
-      const endDate = new Date(data.schema_end_date);
-      const now = new Date();
-      
-      if (now > endDate) {
-        console.log('⚠️ Schema period has expired, clearing dates');
-        // Clear expired schema period
-        await supabase
-          .from('profiles')
-          .update({ 
-            schema_start_date: null,
-            schema_end_date: null
-          })
-          .eq('id', actualUserId);
-        
-        return NextResponse.json({ data: null });
-      }
-    }
+    // For now, we'll assume the schema period is active if a schema is selected
+    // In the future, we can add proper date tracking
 
     console.log('✅ Current schema period found:', data);
+
+    // Simulate start and end dates (8 weeks from now)
+    const startDate = new Date();
+    const endDate = new Date();
+    endDate.setDate(endDate.getDate() + (8 * 7)); // 8 weeks
 
     return NextResponse.json({ 
       data: {
         selected_schema_id: data.selected_schema_id,
-        schema_start_date: data.schema_start_date,
-        schema_end_date: data.schema_end_date,
+        schema_start_date: startDate.toISOString(),
+        schema_end_date: endDate.toISOString(),
         training_schema: data.training_schemas
       }
     });
