@@ -170,6 +170,11 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
       const isBasicTier = !hasTrainingAccess && !hasNutritionAccess;
       const isLastStep = isBasicTier ? actualCurrentStep === 5 : actualCurrentStep === 5;
       
+      // Enhanced debug logging for step 5
+      if (typeof window !== 'undefined' && actualCurrentStep === 5) {
+        console.log(`🔍 [MOBILE STEP 5 DEBUG] ${item.label}: parent=${item.parent}, isBasicTier=${isBasicTier}, isLastStep=${isLastStep}, onboarding_completed=${actualOnboardingStatus?.onboarding_completed}`);
+      }
+      
       // Special case for last step (Forum intro): Only allow Brotherhood > Forum
       if (isLastStep) {
         // Allow Brotherhood parent item (so it can be expanded)
@@ -186,11 +191,6 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
       
       // For other steps, only allow access to the current onboarding step
       const isCurrentStep = item.onboardingStep === actualCurrentStep;
-      
-      // Force console log to be visible
-      if (typeof window !== 'undefined') {
-        console.log(`🔍 [MOBILE NAV BLOCK] ${item.label}: currentStep=${actualCurrentStep}, requiredStep=${item.onboardingStep}, isCurrentStep=${isCurrentStep}, disabled=${!isCurrentStep}, onboarding_completed=${actualOnboardingStatus?.onboarding_completed}`);
-      }
       
       // Block all items except the current step
       return !isCurrentStep;
@@ -504,6 +504,11 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
       const isBasicTier = !hasTrainingAccess && !hasNutritionAccess;
       const isLastStep = isBasicTier ? actualCurrentStep === 5 : actualCurrentStep === 5;
       
+      // Enhanced debug logging for step 5
+      if (typeof window !== 'undefined' && actualCurrentStep === 5) {
+        console.log(`🔍 [STEP 5 DEBUG] ${item.label}: parent=${item.parent}, isBasicTier=${isBasicTier}, isLastStep=${isLastStep}, onboarding_completed=${actualOnboardingStatus?.onboarding_completed}`);
+      }
+      
       // Special case for last step (Forum intro): Only allow Brotherhood > Forum
       if (isLastStep) {
         // Allow Brotherhood parent item (so it can be expanded)
@@ -520,15 +525,6 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
       
       // For other steps, only allow access to the current onboarding step
       const isCurrentStep = item.onboardingStep === actualCurrentStep;
-      
-      // Enhanced debug logging for step 5
-      if (typeof window !== 'undefined') {
-        if (actualCurrentStep === 5) {
-          console.log(`🔍 [STEP 5 DEBUG] ${item.label}: parent=${item.parent}, disabled=${!isCurrentStep}, onboarding_completed=${actualOnboardingStatus?.onboarding_completed}`);
-        } else {
-          // console.log(`🔍 [NAV BLOCK] ${item.label}: currentStep=${actualCurrentStep}, requiredStep=${item.onboardingStep}, isCurrentStep=${isCurrentStep}, disabled=${!isCurrentStep}, onboarding_completed=${actualOnboardingStatus?.onboarding_completed}`);
-        }
-      }
       
       // Block all items except the current step
       return !isCurrentStep;
