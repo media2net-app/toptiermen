@@ -41,10 +41,10 @@ function LoginPageContent() {
     const fallbackTimeout = setTimeout(() => {
       if (authLoading) {
         console.log('⚠️ Login page timeout - forcing auth loading to false');
-        // Force loading to false after 5 seconds
+        // Force loading to false after 3 seconds
         setIsLoading(false);
       }
-    }, 5000); // Reduced from 15s to 5s
+    }, 3000); // Reduced to 3s to match auth context
     
     return () => clearTimeout(fallbackTimeout);
   }, [authLoading]);
@@ -220,6 +220,8 @@ function LoginPageContent() {
               <p>Auth Loading: {authLoading ? 'true' : 'false'}</p>
               <p>Client Ready: {isClient ? 'true' : 'false'}</p>
               <p>User: {user ? user.email : 'null'}</p>
+              <p>Profile: {profile ? profile.role : 'null'}</p>
+              <p>Error: {error || 'none'}</p>
             </div>
             <button
               onClick={() => {
