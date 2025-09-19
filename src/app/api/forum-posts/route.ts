@@ -108,32 +108,56 @@ export async function GET(request: NextRequest) {
 
     console.log('📝 API: Fetching forum posts for topic:', topic_id);
 
-    // Fetch posts with author profile information using service role key (bypasses RLS)
-    const { data, error } = await supabase
+    // Fetch posts first
+    const { data: posts, error: postsError } = await supabase
       .from('forum_posts')
-      .select(`
-        *,
-        profiles(
-          id,
-          full_name,
-          first_name,
-          last_name,
-          username,
-          email
-        )
-      `)
+      .select('*')
       .eq('topic_id', topic_id)
       .order('created_at', { ascending: true });
 
-    console.log('💬 API: Posts fetch result:', { data, error });
-
-    if (error) {
-      console.error('❌ API: Error fetching posts:', error);
+    if (postsError) {
+      console.error('❌ API: Error fetching posts:', postsError);
       return NextResponse.json(
-        { error: 'Failed to fetch forum posts', details: error.message },
+        { error: 'Failed to fetch forum posts', details: postsError.message },
         { status: 500 }
       );
     }
+
+    // If no posts, return empty array
+    if (!posts || posts.length === 0) {
+      return NextResponse.json({
+        success: true,
+        posts: []
+      });
+    }
+
+    // Get unique author IDs
+    const authorIds = [...new Set(posts.map(post => post.author_id))];
+    
+    // Fetch profiles for all authors
+    const { data: profiles, error: profilesError } = await supabase
+      .from('profiles')
+      .select('id, full_name, email')
+      .in('id', authorIds);
+
+    if (profilesError) {
+      console.error('❌ API: Error fetching profiles:', profilesError);
+      return NextResponse.json(
+        { error: 'Failed to fetch author profiles', details: profilesError.message },
+        { status: 500 }
+      );
+    }
+
+    // Create a map of profiles by ID
+    const profilesMap = new Map(profiles?.map(profile => [profile.id, profile]) || []);
+
+    // Combine posts with profile data
+    const data = posts.map(post => ({
+      ...post,
+      profiles: profilesMap.get(post.author_id) || null
+    }));
+
+    console.log('💬 API: Posts fetch result:', { data });
 
     return NextResponse.json({
       success: true,
