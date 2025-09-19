@@ -30,7 +30,6 @@ interface ForumTopic {
   title: string;
   content: string;
   created_at: string;
-  like_count: number;
   author_id: string;
   author: {
     first_name: string;
@@ -263,7 +262,6 @@ const ThreadPage = ({ params }: { params: { slug: string; id: string } }) => {
           title,
           content,
           created_at,
-          like_count,
           author_id
         `)
         .eq('id', topicId)
@@ -349,7 +347,6 @@ const ThreadPage = ({ params }: { params: { slug: string; id: string } }) => {
         title: topicData.title,
         content: topicData.content,
         created_at: topicData.created_at,
-        like_count: topicData.like_count || 0,
         author_id: topicData.author_id,
         author: getAuthorInfo(topicData.author_id)
       };
@@ -611,7 +608,6 @@ const ThreadPage = ({ params }: { params: { slug: string; id: string } }) => {
             <span>{formatDate(topic.created_at)}</span>
           </div>
           <div className="flex items-center gap-3 sm:gap-4">
-            <span>❤️ {topic.like_count}</span>
             <span>💬 {posts.length} reacties</span>
           </div>
         </div>
