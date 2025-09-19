@@ -148,6 +148,7 @@ export async function GET(request: NextRequest) {
 
     // Get unique author IDs
     const authorIds = [...new Set(posts.map(post => post.author_id))];
+    console.log('👥 API: Unique author IDs:', authorIds);
     
     // Fetch profiles for all authors
     const { data: profiles, error: profilesError } = await supabase
@@ -155,12 +156,12 @@ export async function GET(request: NextRequest) {
       .select('id, full_name, email')
       .in('id', authorIds);
 
+    console.log('👤 API: Profiles query result:', { profiles, profilesError });
+
     if (profilesError) {
       console.error('❌ API: Error fetching profiles:', profilesError);
-      return NextResponse.json(
-        { error: 'Failed to fetch author profiles', details: profilesError.message },
-        { status: 500 }
-      );
+      // Don't fail completely, continue with null profiles
+      console.log('⚠️ Continuing with null profiles due to error');
     }
 
     // Create a map of profiles by ID

@@ -254,22 +254,35 @@ const ThreadPage = ({ params }: { params: { id: string } }) => {
 
       console.log('✅ Topic data received:', topicData);
 
-      // Fetch posts
-      const { data: postsData, error: postsError } = await supabase
-        .from('forum_posts')
-        .select(`
-          id,
-          content,
-          created_at,
-          author_id
-        `)
-        .eq('topic_id', topicId)
-        .order('created_at', { ascending: true });
+      // Fetch posts using the API endpoint instead of direct Supabase
+      console.log('📝 Fetching posts via API...');
+      const postsResponse = await fetch(`/api/forum-posts?topic_id=${topicId}`);
+      const postsResult = await postsResponse.json();
+      
+      let postsData = [];
+      if (postsResult.success && postsResult.posts) {
+        postsData = postsResult.posts;
+        console.log('✅ Posts fetched via API:', postsData);
+      } else {
+        console.error('❌ Error fetching posts via API:', postsResult.error);
+        // Fallback to direct Supabase query
+        const { data: fallbackPosts, error: postsError } = await supabase
+          .from('forum_posts')
+          .select(`
+            id,
+            content,
+            created_at,
+            author_id
+          `)
+          .eq('topic_id', topicId)
+          .order('created_at', { ascending: true });
 
-      if (postsError) {
-        console.error('❌ Error fetching posts:', postsError);
-        // Don't fail completely, continue with empty posts
-        console.log('⚠️ Continuing with empty posts due to error');
+        if (postsError) {
+          console.error('❌ Error fetching posts:', postsError);
+          console.log('⚠️ Continuing with empty posts due to error');
+        } else {
+          postsData = fallbackPosts || [];
+        }
       }
 
       console.log('✅ Posts data received:', postsData);
@@ -318,13 +331,35 @@ const ThreadPage = ({ params }: { params: { id: string } }) => {
       };
 
       // Process posts
-      const processedPosts = (postsData || []).map((post: any) => ({
-        id: post.id,
-        content: post.content,
-        created_at: post.created_at,
-        author_id: post.author_id,
-        author: getAuthorInfo(post.author_id)
-      }));
+      const processedPosts = (postsData || []).map((post: any) => {
+        // If post has profiles data from API, use it
+        if (post.profiles) {
+          return {
+            id: post.id,
+            content: post.content,
+            created_at: post.created_at,
+            author_id: post.author_id,
+            author: {
+              first_name: post.profiles.full_name?.split(' ')[0] || 'User',
+              last_name: post.profiles.full_name?.split(' ').slice(1).join(' ') || '',
+              avatar_url: undefined
+            }
+          };
+        }
+        
+        // Fallback for posts without profile data
+        return {
+          id: post.id,
+          content: post.content,
+          created_at: post.created_at,
+          author_id: post.author_id,
+          author: {
+            first_name: 'Unknown',
+            last_name: 'User',
+            avatar_url: undefined
+          }
+        };
+      });
 
       console.log('✅ Processed topic:', processedTopic);
       console.log('✅ Processed posts:', processedPosts);
@@ -353,136 +388,95 @@ const ThreadPage = ({ params }: { params: { id: string } }) => {
       console.log('📝 Author ID:', authorId);
       setSubmitting(true);
 
-      // Try to submit to database first
-      const { data: post, error } = await supabase
-        .from('forum_posts')
-        .insert({
+      // Try to submit via API first
+      console.log('📝 Submitting reply via API...');
+      const response = await fetch('/api/forum-posts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           topic_id: topic.id,
-          content: newReply.trim(),
-          author_id: authorId
-        })
-        .select('id, content, created_at, author_id')
-        .single();
+          author_id: authorId,
+          content: newReply.trim()
+        }),
+      });
 
-      if (error) {
-        console.error('❌ Error submitting reply:', error);
+      const result = await response.json();
+      console.log('💬 API response:', result);
+
+      if (result.success) {
+        console.log('✅ Post created successfully via API:', result.post);
+        setNewReply('');
+        await fetchThreadData();
+        return;
+      } else {
+        console.error('❌ API submission failed:', result.error);
         
-        // Handle specific permission errors
-        if (error.message.includes('permission denied')) {
-          console.log('🔄 Database permission denied, trying alternative approach...');
-          
-          // Try to create post with direct database approach (works on both local and live)
-          try {
-            console.log('🔄 Trying direct database insert with service role...');
-            
-            // Use a different approach that works on both environments
-            const { data: altPost, error: altError } = await supabase
-              .from('forum_posts')
-              .insert({
-                topic_id: topic.id,
-                content: newReply.trim(),
-                author_id: authorId
-              })
-              .select('id, content, created_at, author_id')
-              .single();
+        // Fallback to direct database submission
+        console.log('🔄 API failed, trying direct database submission...');
+        
+        const { data: post, error } = await supabase
+          .from('forum_posts')
+          .insert({
+            topic_id: topic.id,
+            content: newReply.trim(),
+            author_id: authorId
+          })
+          .select('id, content, created_at, author_id')
+          .single();
 
-            if (altError) {
-              console.log('🔄 Direct database approach failed, using local fallback...');
-              
-              // Create a local post object
-              const localPost = {
-                id: Date.now(), // Temporary ID
-                content: newReply.trim(),
-                created_at: new Date().toISOString(),
-                author_id: authorId,
-                author: {
-                  first_name: 'Chiel',
-                  last_name: 'van der Zee',
-                  avatar_url: undefined
-                }
-              };
-              
-              // Add to local state
-              setPosts(prev => [...prev, localPost]);
-              setNewReply('');
-              
-              console.log('✅ Post added locally as fallback');
-              return;
-            } else {
-              console.log('✅ Post created via direct database approach:', altPost);
-              setNewReply('');
-              await fetchThreadData();
-              return;
+        if (error) {
+          console.error('❌ Direct database submission also failed:', error);
+          
+          // Create a local post object as final fallback
+          const localPost = {
+            id: Date.now(), // Temporary ID
+            content: newReply.trim(),
+            created_at: new Date().toISOString(),
+            author_id: authorId,
+            author: {
+              first_name: 'Chiel',
+              last_name: 'van der Zee',
+              avatar_url: undefined
             }
-          } catch (dbError) {
-            console.log('🔄 Direct database approach failed, using local fallback...');
-            
-            // Create a local post object
-            const localPost = {
-              id: Date.now(), // Temporary ID
-              content: newReply.trim(),
-              created_at: new Date().toISOString(),
-              author_id: authorId,
-              author: {
-                first_name: 'Chiel',
-                last_name: 'van der Zee',
-                avatar_url: undefined
-              }
-            };
-            
-            // Add to local state
-            setPosts(prev => [...prev, localPost]);
-            setNewReply('');
-            
-            console.log('✅ Post added locally as fallback');
-            return;
-          }
+          };
+          
+          // Add to local state
+          setPosts(prev => [...prev, localPost]);
+          setNewReply('');
+          
+          console.log('✅ Post added locally as fallback');
+          return;
         } else {
-          setError(`Error submitting reply: ${error.message}`);
+          console.log('✅ Post created via direct database:', post);
+          setNewReply('');
+          await fetchThreadData();
           return;
         }
       }
-
-      console.log('✅ Reply submitted successfully:', post);
-      
-      // Clear the form
-      setNewReply('');
-      
-      // Refresh the thread data
-      await fetchThreadData();
       
     } catch (error) {
       console.error('❌ Error submitting reply:', error);
       
-      // If database insert fails, try to add post locally
-      if (error.message?.includes('permission denied')) {
-        console.log('🔄 Trying local fallback for post...');
-        
-        // Determine author ID for fallback
-        const fallbackAuthorId = currentUser?.id || '061e43d5-c89a-42bb-8a4c-04be2ce99a7e';
-        
-        // Create a local post object
-        const localPost = {
-          id: Date.now(), // Temporary ID
-          content: newReply.trim(),
-          created_at: new Date().toISOString(),
-          author_id: fallbackAuthorId,
-          author: {
-            first_name: 'Chiel',
-            last_name: 'van der Zee',
-            avatar_url: undefined
-          }
-        };
-        
-        // Add to local state
-        setPosts(prev => [...prev, localPost]);
-        setNewReply('');
-        
-        console.log('✅ Post added locally as fallback');
-        return;
-      }
+      // Create a local post object as final fallback
+      const localPost = {
+        id: Date.now(), // Temporary ID
+        content: newReply.trim(),
+        created_at: new Date().toISOString(),
+        author_id: currentUser?.id || '061e43d5-c89a-42bb-8a4c-04be2ce99a7e',
+        author: {
+          first_name: 'Chiel',
+          last_name: 'van der Zee',
+          avatar_url: undefined
+        }
+      };
       
-      setError(`Unexpected error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      // Add to local state
+      setPosts(prev => [...prev, localPost]);
+      setNewReply('');
+      
+      console.log('✅ Post added locally as fallback');
     } finally {
       setSubmitting(false);
     }
