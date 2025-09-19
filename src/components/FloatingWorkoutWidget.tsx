@@ -11,6 +11,7 @@ import {
   FireIcon,
   ArrowRightIcon
 } from '@heroicons/react/24/outline';
+import { useWorkoutSession } from '@/contexts/WorkoutSessionContext';
 
 interface WorkoutSession {
   id: string;
@@ -37,35 +38,17 @@ export default function FloatingWorkoutWidget({
   onResume 
 }: FloatingWorkoutWidgetProps) {
   const router = useRouter();
-  const [workoutTime, setWorkoutTime] = useState(0);
+  const { pauseWorkout, resumeWorkout, stopWorkout } = useWorkoutSession();
   const [restTime, setRestTime] = useState(0);
-  const [isWorkoutTimerRunning, setIsWorkoutTimerRunning] = useState(false);
   const [isRestTimerRunning, setIsRestTimerRunning] = useState(false);
 
-  // Update timers when session changes
+  // Update rest timer when session changes
   useEffect(() => {
     if (session) {
-      setWorkoutTime(session.workoutTime);
       setRestTime(session.restTime);
-      setIsWorkoutTimerRunning(session.isActive);
       setIsRestTimerRunning(session.isRestActive);
     }
   }, [session]);
-
-  // Workout timer
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    
-    if (isWorkoutTimerRunning && session) {
-      interval = setInterval(() => {
-        setWorkoutTime(prev => prev + 1);
-      }, 1000);
-    }
-    
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [isWorkoutTimerRunning, session]);
 
   // Rest timer
   useEffect(() => {
@@ -101,20 +84,16 @@ export default function FloatingWorkoutWidget({
   };
 
   const handlePauseWorkout = () => {
-    setIsWorkoutTimerRunning(false);
-    // TODO: Update session state in parent
+    pauseWorkout();
   };
 
   const handleResumeWorkout = () => {
-    setIsWorkoutTimerRunning(true);
-    // TODO: Update session state in parent
+    resumeWorkout();
   };
 
   const handleStopWorkout = () => {
-    setIsWorkoutTimerRunning(false);
-    setIsRestTimerRunning(false);
+    stopWorkout();
     onClose();
-    // TODO: End workout session
   };
 
   if (!session) return null;
@@ -152,7 +131,7 @@ export default function FloatingWorkoutWidget({
             <div className="flex items-center justify-between mb-1">
               <span className="text-xs text-gray-400">Workout Tijd</span>
               <div className="flex items-center gap-1">
-                {isWorkoutTimerRunning ? (
+                {session.isActive ? (
                   <button
                     onClick={handlePauseWorkout}
                     className="text-[#8BAE5A] hover:text-[#B6C948] transition-colors"
@@ -170,7 +149,7 @@ export default function FloatingWorkoutWidget({
               </div>
             </div>
             <div className="text-lg font-bold text-white">
-              {formatTime(workoutTime)}
+              {formatTime(session.workoutTime)}
             </div>
           </div>
 
