@@ -525,11 +525,11 @@ function TrainingschemasContent() {
       });
       
       // Ensure we have exactly 3 schemas
-      for (let i = 1; i <= 3; i++) {
+    for (let i = 1; i <= 3; i++) {
         const existingSchema = sortedExactMatches.find(s => s.schema_nummer === i);
         if (existingSchema) {
           result.push(existingSchema);
-        } else {
+      } else {
           // Create placeholder for missing schema
           const placeholderSchema: TrainingSchema = {
             id: `placeholder-${dbGoal}-${profile.equipment_type}-${profile.training_frequency}-${i}`,
@@ -567,8 +567,8 @@ function TrainingschemasContent() {
         const aNum = a.schema_nummer || 0;
         const bNum = b.schema_nummer || 0;
         return aNum - bNum;
-      });
-      
+        });
+        
       result = sortedSchemas.slice(0, 3);
     }
     
@@ -872,15 +872,15 @@ function TrainingschemasContent() {
         const startDate = new Date(data.data.schema_start_date).toLocaleDateString('nl-NL');
         const endDate = new Date(data.data.schema_end_date).toLocaleDateString('nl-NL');
         toast.success(`Trainingsschema geselecteerd! 8-weken periode gestart: ${startDate} - ${endDate}`);
-        
-        // Only redirect to Mijn trainingen if NOT in onboarding
-        if (isCompleted && !showOnboardingStep3) {
+          
+          // Only redirect to Mijn trainingen if NOT in onboarding
+          if (isCompleted && !showOnboardingStep3) {
           console.log('🔄 Redirecting to Mijn trainingen...');
           setTimeout(() => {
             router.push('/dashboard/mijn-trainingen');
           }, 1500); // Small delay to show the success message
-        } else {
-          console.log('🎯 Onboarding active - NOT redirecting to Mijn trainingen');
+          } else {
+            console.log('🎯 Onboarding active - NOT redirecting to Mijn trainingen');
         }
         
         // Complete onboarding step if needed
@@ -1662,7 +1662,6 @@ function TrainingschemasContent() {
         )}
 
         {/* Current Schema Period */}
-        {currentSchemaPeriod && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -1679,6 +1678,8 @@ function TrainingschemasContent() {
                 </div>
               </div>
               
+            {currentSchemaPeriod ? (
+              <>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                 <div className="bg-[#232D1A]/50 border border-[#3A4D23] rounded-xl p-3 sm:p-4">
                   <div className="flex items-center gap-2 mb-2">
@@ -1717,9 +1718,51 @@ function TrainingschemasContent() {
                   <span>Je volgt dit schema voor 8 weken. Na voltooiing kun je een nieuw schema selecteren.</span>
                 </div>
               </div>
+              </>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                  <div className="bg-[#232D1A]/50 border border-[#3A4D23] rounded-xl p-3 sm:p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-[#8BAE5A]">📅</span>
+                      <span className="text-sm font-medium text-gray-300">Startdatum</span>
             </div>
-          </motion.div>
-        )}
+                    <p className="text-gray-400 font-semibold">
+                      Kies eerst schema
+                    </p>
+                  </div>
+                  
+                  <div className="bg-[#232D1A]/50 border border-[#3A4D23] rounded-xl p-3 sm:p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-[#8BAE5A]">🏁</span>
+                      <span className="text-sm font-medium text-gray-300">Einddatum</span>
+                    </div>
+                    <p className="text-gray-400 font-semibold">
+                      Kies eerst schema
+                    </p>
+                  </div>
+                  
+                  <div className="bg-[#232D1A]/50 border border-[#3A4D23] rounded-xl p-3 sm:p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-[#8BAE5A]">📊</span>
+                      <span className="text-sm font-medium text-gray-300">Schema</span>
+                    </div>
+                    <p className="text-gray-400 font-semibold">
+                      Kies eerst schema
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="mt-4 p-3 bg-[#FFD700]/10 border border-[#FFD700]/30 rounded-lg">
+                  <div className="flex items-center gap-2 text-[#FFD700] text-sm">
+                    <span>💡</span>
+                    <span>Selecteer een trainingsschema hieronder om je 8-weken trainingsperiode te starten.</span>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </motion.div>
 
         {/* Training Profile Calculator */}
         <AnimatePresence>
