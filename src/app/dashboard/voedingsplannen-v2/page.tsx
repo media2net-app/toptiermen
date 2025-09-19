@@ -23,6 +23,7 @@ import {
 import { PencilIcon } from '@heroicons/react/24/outline';
 import IngredientEditModal from '@/components/IngredientEditModal';
 import { toast } from 'react-hot-toast';
+import { useSubscription } from '@/hooks/useSubscription';
 
 interface NutritionPlan {
   id: string | number;
@@ -94,11 +95,11 @@ interface UserProfile {
 export default function VoedingsplannenV2Page() {
   const { user, isAdmin, loading: authLoading } = useSupabaseAuth();
   const { completeStep, currentStep, isCompleted } = useOnboardingV2();
+  const { hasAccess, loading: subscriptionLoading } = useSubscription();
   const router = useRouter();
   
   // Check user access to nutrition plans
   const [userSubscription, setUserSubscription] = useState<any>(null);
-  const [subscriptionLoading, setSubscriptionLoading] = useState(true);
   const [plans, setPlans] = useState<NutritionPlan[]>([]);
   const [selectedPlan, setSelectedPlan] = useState<NutritionPlan | null>(null);
   const [originalPlanData, setOriginalPlanData] = useState<OriginalPlanData | null>(null);
@@ -131,8 +132,6 @@ export default function VoedingsplannenV2Page() {
         }
       } catch (error) {
         console.error('Error fetching user subscription:', error);
-      } finally {
-        setSubscriptionLoading(false);
       }
     };
     
@@ -163,13 +162,9 @@ export default function VoedingsplannenV2Page() {
   // Days of the week
   const days = ['maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag', 'zondag'];
 
-  // Check if user has access to nutrition plans
+  // Check if user has access to nutrition plans using useSubscription hook
   const hasNutritionAccess = () => {
-    if (isAdmin) return true;
-    if (!userSubscription) return false;
-    
-    const packageType = userSubscription.package_type || 'Basic Tier';
-    return packageType === 'Premium Tier' || packageType === 'Lifetime Tier' || packageType === 'Lifetime Access';
+    return hasAccess('nutrition');
   };
 
   // Function to update custom amounts
