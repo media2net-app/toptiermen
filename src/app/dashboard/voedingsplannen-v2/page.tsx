@@ -95,6 +95,10 @@ export default function VoedingsplannenV2Page() {
   const { user, isAdmin, loading: authLoading } = useSupabaseAuth();
   const { completeStep, currentStep, isCompleted } = useOnboardingV2();
   const router = useRouter();
+  
+  // Check user access to nutrition plans
+  const [userSubscription, setUserSubscription] = useState<any>(null);
+  const [subscriptionLoading, setSubscriptionLoading] = useState(true);
   const [plans, setPlans] = useState<NutritionPlan[]>([]);
   const [selectedPlan, setSelectedPlan] = useState<NutritionPlan | null>(null);
   const [originalPlanData, setOriginalPlanData] = useState<OriginalPlanData | null>(null);
@@ -112,6 +116,28 @@ export default function VoedingsplannenV2Page() {
   const [editingMealType, setEditingMealType] = useState<string>('');
   const [editingDay, setEditingDay] = useState<string>('');
   const [selectedPlanId, setSelectedPlanId] = useState<string | number | null>(null);
+
+  // Check user subscription on component mount
+  useEffect(() => {
+    const checkUserSubscription = async () => {
+      if (!user) return;
+      
+      try {
+        const response = await fetch(`/api/user-preferences?userId=${user.id}`);
+        const data = await response.json();
+        
+        if (data.success && data.preferences) {
+          setUserSubscription(data.preferences);
+        }
+      } catch (error) {
+        console.error('Error fetching user subscription:', error);
+      } finally {
+        setSubscriptionLoading(false);
+      }
+    };
+    
+    checkUserSubscription();
+  }, [user]);
 
   // Reset modal state when component mounts
   useEffect(() => {
@@ -136,6 +162,15 @@ export default function VoedingsplannenV2Page() {
 
   // Days of the week
   const days = ['maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag', 'zondag'];
+
+  // Check if user has access to nutrition plans
+  const hasNutritionAccess = () => {
+    if (isAdmin) return true;
+    if (!userSubscription) return false;
+    
+    const packageType = userSubscription.package_type || 'Basic Tier';
+    return packageType === 'Premium Tier' || packageType === 'Lifetime Tier' || packageType === 'Lifetime Access';
+  };
 
   // Function to update custom amounts
   const updateCustomAmount = (ingredientKey: string, amount: number) => {
@@ -1050,6 +1085,87 @@ export default function VoedingsplannenV2Page() {
     setScalingInfo(null);
     setShowOriginalData(true);
   };
+
+  // Show subscription loading state
+  if (subscriptionLoading) {
+    return (
+      <div className="min-h-screen bg-[#0A0F0A] flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-gradient-to-r from-[#B6C948] to-[#8BAE5A] rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse">
+            <RocketLaunchIcon className="w-8 h-8 text-[#181F17]" />
+          </div>
+          <h3 className="text-xl font-bold text-white mb-2">Laden...</h3>
+          <p className="text-[#B6C948]">Controleer toegang...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show upgrade modal for Basic Tier users
+  if (!hasNutritionAccess()) {
+    return (
+      <div className="min-h-screen bg-[#0A0F0A] flex items-center justify-center p-6">
+        <div className="max-w-2xl w-full">
+          <div className="bg-[#181F17] rounded-xl p-8 text-center border border-[#3A3D23]">
+            {/* Icon */}
+            <div className="w-20 h-20 bg-gradient-to-r from-[#B6C948] to-[#8BAE5A] rounded-full flex items-center justify-center mx-auto mb-6">
+              <RocketLaunchIcon className="w-10 h-10 text-[#181F17]" />
+            </div>
+            
+            {/* Title */}
+            <h1 className="text-3xl font-bold text-white mb-4">Voedingsplannen</h1>
+            <p className="text-[#B6C948] text-lg mb-8">
+              Upgrade naar Premium of Lifetime voor toegang tot voedingsplannen
+            </p>
+            
+            {/* Upgrade Box */}
+            <div className="bg-[#2A3A1A] rounded-lg p-6 border border-[#3A3D23]">
+              <h2 className="text-xl font-bold text-white mb-4 flex items-center justify-center gap-2">
+                🚀 Upgrade je Account
+              </h2>
+              <p className="text-gray-300 mb-6">
+                Voedingsplannen zijn alleen beschikbaar voor Premium en Lifetime leden. Upgrade nu om toegang te krijgen tot:
+              </p>
+              
+              {/* Features */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 text-white">
+                    <CheckCircleIcon className="w-5 h-5 text-[#8BAE5A]" />
+                    <span>Persoonlijke voedingsplannen</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-white">
+                    <CheckCircleIcon className="w-5 h-5 text-[#8BAE5A]" />
+                    <span>Macro tracking</span>
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 text-white">
+                    <CheckCircleIcon className="w-5 h-5 text-[#8BAE5A]" />
+                    <span>Recepten database</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-white">
+                    <CheckCircleIcon className="w-5 h-5 text-[#8BAE5A]" />
+                    <span>Voedingsadvies</span>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Upgrade Buttons */}
+              <div className="flex flex-col sm:flex-row gap-4">
+                <button className="flex-1 bg-[#8BAE5A] text-[#181F17] px-6 py-3 rounded-lg font-semibold hover:bg-[#B6C948] transition-colors">
+                  Upgrade naar Premium
+                </button>
+                <button className="flex-1 bg-[#B6C948] text-[#181F17] px-6 py-3 rounded-lg font-semibold hover:bg-[#8BAE5A] transition-colors">
+                  Upgrade naar Lifetime
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Show loading state
   if ((loading && plans.length === 0) || loadingOriginal) {
