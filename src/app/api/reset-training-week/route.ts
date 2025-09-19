@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase';
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 export async function POST(request: NextRequest) {
   try {
@@ -19,8 +24,6 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('🔄 Resetting training week for user:', userId, 'schema:', schemaId);
-
-    const supabase = createClient();
 
     // First get all schema day IDs for this schema
     const { data: schemaDays, error: schemaDaysError } = await supabase
@@ -43,7 +46,7 @@ export async function POST(request: NextRequest) {
 
     // Reset all training days for the user's active schema
     // Try user_training_day_progress first, fallback to user_training_progress
-    let resetError = null;
+    let resetError: any = null;
     
     // First try user_training_day_progress (if it exists)
     const { error: dayProgressError } = await supabase

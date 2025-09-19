@@ -215,6 +215,7 @@ export function OnboardingV2Provider({ children }: { children: React.ReactNode }
     
     // Navigation
     getNextStep,
+    getStepTitle,
     isStepAvailable
   };
 

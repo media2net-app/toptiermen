@@ -735,6 +735,7 @@ export default function MijnTrainingen() {
           dayNumber={selectedDayForWorkout}
           schemaName={trainingData.schema.name}
           focusArea={trainingData.days?.find(d => d.day_number === selectedDayForWorkout)?.focus_area || 'Training'}
+          estimatedDuration="30 min"
         />
       )}
       </AnimatePresence>
