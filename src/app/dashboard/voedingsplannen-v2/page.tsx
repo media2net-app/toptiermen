@@ -363,13 +363,13 @@ export default function VoedingsplannenV2Page() {
     } else {
       // Fallback to hardcoded percentages based on plan type
       const isCarnivore = plan.name.toLowerCase().includes('carnivoor');
-      
-      if (isCarnivore) {
-        // Carnivore plans: higher protein, lower carbs
-        proteinPercentage = 35;
-        carbsPercentage = 5;
-        fatPercentage = 60;
-      } else {
+    
+    if (isCarnivore) {
+      // Carnivore plans: higher protein, lower carbs
+      proteinPercentage = 35;
+      carbsPercentage = 5;
+      fatPercentage = 60;
+    } else {
         // Regular plans: CORRECTED percentages for onderhoud (35%, 40%, 25%)
         proteinPercentage = 35;  // 35% for onderhoud
         carbsPercentage = 40;    // 40% for onderhoud
@@ -662,8 +662,8 @@ export default function VoedingsplannenV2Page() {
       const maxIterations = 5;
       
       while (iterations < maxIterations) {
-        const dayTotals = calculateDayTotals(day, scaledPlan);
-        
+      const dayTotals = calculateDayTotals(day, scaledPlan);
+      
         // Calculate current macro percentages
         const caloriesPercent = (dayTotals.calories / targetCalories) * 100;
         const proteinPercent = (dayTotals.protein / targetProtein) * 100;
@@ -696,7 +696,7 @@ export default function VoedingsplannenV2Page() {
             meal.ingredients.forEach((ingredient: any) => {
               if (!ingredient.amount || !ingredient.unit) return;
               
-              const currentAmount = ingredient.amount;
+                const currentAmount = ingredient.amount;
               let adjustmentFactor = 1;
               
               // Determine which macro this ingredient primarily affects
@@ -767,10 +767,10 @@ export default function VoedingsplannenV2Page() {
         
         iterations++;
       }
-      
+        
       // Final day totals
       const finalDayTotals = calculateDayTotals(day, scaledPlan);
-      if (scaledPlan.meals.weekly_plan[day]) {
+        if (scaledPlan.meals.weekly_plan[day]) {
         scaledPlan.meals.weekly_plan[day].dailyTotals = finalDayTotals;
       }
       
@@ -1639,33 +1639,9 @@ export default function VoedingsplannenV2Page() {
                                       </td>
                                       <td className="py-3 text-center">
                                         <div className="flex items-center justify-center gap-2">
-                                          <input
-                                            type="number"
-                                            value={formatAmountDisplay(amount, ingredient.unit)}
-                                            onChange={(e) => {
-                                              const newValue = parseFloat(e.target.value) || 0;
-                                              let finalValue = newValue;
-                                              
-                                              // Round to whole numbers for pieces/slices and per_100g
-                                              if (ingredient.unit === 'per_piece' || ingredient.unit === 'per_plakje' || ingredient.unit === 'stuk' || ingredient.unit === 'per_100g' || ingredient.unit === 'g') {
-                                                finalValue = Math.round(newValue);
-                                              }
-                                              
-                                              updateCustomAmount(ingredientKey, finalValue);
-                                            }}
-                                            className="w-16 px-2 py-1 bg-[#232D1A] border border-[#3A4D23] rounded text-white text-center text-sm focus:border-[#B6C948] focus:outline-none"
-                                            min="0"
-                                            step={ingredient.unit === 'per_piece' || ingredient.unit === 'per_plakje' || ingredient.unit === 'stuk' || ingredient.unit === 'per_100g' || ingredient.unit === 'g' ? "1" : "0.1"}
-                                          />
-                                          {customAmount !== undefined && customAmount !== ingredient.amount && (
-                                            <button
-                                              onClick={() => updateCustomAmount(ingredientKey, ingredient.amount)}
-                                              className="text-[#8BAE5A] hover:text-[#B6C948] text-xs"
-                                              title="Reset naar origineel"
-                                            >
-                                              ↺
-                                            </button>
-                                          )}
+                                          <span className="w-16 px-2 py-1 bg-[#232D1A] border border-[#3A4D23] rounded text-white text-center text-sm">
+                                            {formatAmountDisplay(amount, ingredient.unit)}
+                                          </span>
                                         </div>
                                       </td>
                                       <td className="py-3 text-center text-gray-300 text-xs">

@@ -1009,41 +1009,9 @@ export default function NutritionPlanDetailPage() {
                                   </td>
                                   <td className="py-3 text-center">
                                     <div className="flex items-center justify-center gap-2">
-                                      <input
-                                        type="number"
-                                        value={amount}
-                                        onChange={(e) => {
-                                          const newValue = parseFloat(e.target.value) || 0;
-                                          let finalValue = newValue;
-                                          
-                                          // Round to whole numbers for pieces/slices and per_100g
-                                          if (ingredient.unit === 'per_piece' || ingredient.unit === 'per_plakje' || ingredient.unit === 'stuk' || ingredient.unit === 'per_100g' || ingredient.unit === 'g') {
-                                            finalValue = Math.round(newValue);
-                                          }
-                                          
-                                          setCustomAmounts(prev => ({
-                                            ...prev,
-                                            [ingredientKey]: finalValue
-                                          }));
-                                        }}
-                                        className="w-16 px-2 py-1 bg-[#232D1A] border border-[#3A4D23] rounded text-white text-center text-sm focus:border-[#B6C948] focus:outline-none"
-                                        min="0"
-                                        step={ingredient.unit === 'per_piece' || ingredient.unit === 'per_plakje' || ingredient.unit === 'stuk' || ingredient.unit === 'per_100g' || ingredient.unit === 'g' ? "1" : "0.1"}
-                                        disabled={true}
-                                      />
-                                      {customAmount !== undefined && customAmount !== ingredient.amount && (
-                                        <button
-                                          onClick={() => setCustomAmounts(prev => ({
-                                            ...prev,
-                                            [ingredientKey]: ingredient.amount
-                                          }))}
-                                          className="text-[#8BAE5A] hover:text-[#B6C948] text-xs"
-                                          title="Reset naar origineel"
-                                          disabled={true}
-                                        >
-                                          ↺
-                                        </button>
-                                      )}
+                                      <span className="w-16 px-2 py-1 bg-[#232D1A] border border-[#3A4D23] rounded text-white text-center text-sm">
+                                        {amount}
+                                      </span>
                 </div>
                                   </td>
                                   <td className="py-3 text-center text-gray-300 text-xs">
