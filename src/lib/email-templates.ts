@@ -735,7 +735,9 @@ export const getPlatformAccessibleTemplate = (name: string): EmailTemplate => ({
           
           <!-- Header -->
           <div style="background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%); padding: 40px 30px; text-align: center;">
-            <img src="https://platform.toptiermen.eu/logo_white-full.svg" alt="Top Tier Men Logo" style="width: 200px; height: auto; margin-bottom: 20px;">
+                   <div style="width: 200px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto; border: 2px solid rgba(255,255,255,0.2);">
+                     <span style="color: white; font-size: 24px; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">TOP TIER MEN</span>
+                   </div>
             <h1 style="color: white; font-size: 32px; font-weight: 700; margin: 0; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
               PLATFORM TOEGANKELIJK
             </h1>
@@ -750,10 +752,10 @@ export const getPlatformAccessibleTemplate = (name: string): EmailTemplate => ({
               Beste ${name},
             </p>
             
-            <p style="font-size: 16px; line-height: 1.6; margin: 0 0 24px 0;">
-              We hebben afgelopen week druk gewerkt aan het oplossen van bugs en het verbeteren van het platform. 
-              Het Top Tier Men platform is nu weer volledig toegankelijk en klaar voor jouw training en ontwikkeling.
-            </p>
+                   <p style="font-size: 16px; line-height: 1.6; margin: 0 0 24px 0;">
+                     We hebben afgelopen week druk gewerkt aan het oplossen van bugs en het verbeteren van het platform. 
+                     Het Top Tier Men platform is nu weer volledig toegankelijk en klaar voor gebruik.
+                   </p>
 
             <div style="background: rgba(139, 174, 90, 0.1); border-left: 4px solid #8BAE5A; padding: 20px; margin: 24px 0; border-radius: 0 8px 8px 0;">
               <h3 style="color: #8BAE5A; font-size: 18px; font-weight: 700; margin: 0 0 12px 0;">
@@ -799,9 +801,9 @@ export const getPlatformAccessibleTemplate = (name: string): EmailTemplate => ({
 
           <!-- Footer -->
           <div style="background: #1A1A1A; padding: 30px; text-align: center; border-top: 1px solid #374151;">
-            <p style="color: #9CA3AF; font-size: 14px; margin: 0 0 16px 0;">
-              © 2024 Top Tier Men - Exclusieve Broederschap voor Top Performers
-            </p>
+                   <p style="color: #9CA3AF; font-size: 14px; margin: 0 0 16px 0;">
+                     © 2025 Top Tier Men - Exclusieve Broederschap voor Top Performers
+                   </p>
             <div style="display: flex; justify-content: center; gap: 24px; flex-wrap: wrap;">
               <a href="https://platform.toptiermen.eu" style="color: #8BAE5A; text-decoration: none; font-size: 14px;">Website</a>
               <a href="mailto:platform@toptiermen.eu" style="color: #8BAE5A; text-decoration: none; font-size: 14px;">Contact</a>
@@ -1147,7 +1149,9 @@ export const getPlatformAccessibleTemplate = (name: string): EmailTemplate => ({
           
           <!-- Header -->
           <div style="background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%); padding: 40px 30px; text-align: center;">
-            <img src="https://platform.toptiermen.eu/logo_white-full.svg" alt="Top Tier Men Logo" style="width: 200px; height: auto; margin-bottom: 20px;">
+                   <div style="width: 200px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto; border: 2px solid rgba(255,255,255,0.2);">
+                     <span style="color: white; font-size: 24px; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">TOP TIER MEN</span>
+                   </div>
             <h1 style="color: white; font-size: 32px; font-weight: 700; margin: 0; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
               PLATFORM TOEGANKELIJK
             </h1>
@@ -1162,10 +1166,10 @@ export const getPlatformAccessibleTemplate = (name: string): EmailTemplate => ({
               Beste ${name},
             </p>
             
-            <p style="font-size: 16px; line-height: 1.6; margin: 0 0 24px 0;">
-              We hebben afgelopen week druk gewerkt aan het oplossen van bugs en het verbeteren van het platform. 
-              Het Top Tier Men platform is nu weer volledig toegankelijk en klaar voor jouw training en ontwikkeling.
-            </p>
+                   <p style="font-size: 16px; line-height: 1.6; margin: 0 0 24px 0;">
+                     We hebben afgelopen week druk gewerkt aan het oplossen van bugs en het verbeteren van het platform. 
+                     Het Top Tier Men platform is nu weer volledig toegankelijk en klaar voor gebruik.
+                   </p>
 
             <div style="background: rgba(139, 174, 90, 0.1); border-left: 4px solid #8BAE5A; padding: 20px; margin: 24px 0; border-radius: 0 8px 8px 0;">
               <h3 style="color: #8BAE5A; font-size: 18px; font-weight: 700; margin: 0 0 12px 0;">
@@ -1211,9 +1215,9 @@ export const getPlatformAccessibleTemplate = (name: string): EmailTemplate => ({
 
           <!-- Footer -->
           <div style="background: #1A1A1A; padding: 30px; text-align: center; border-top: 1px solid #374151;">
-            <p style="color: #9CA3AF; font-size: 14px; margin: 0 0 16px 0;">
-              © 2024 Top Tier Men - Exclusieve Broederschap voor Top Performers
-            </p>
+                   <p style="color: #9CA3AF; font-size: 14px; margin: 0 0 16px 0;">
+                     © 2025 Top Tier Men - Exclusieve Broederschap voor Top Performers
+                   </p>
             <div style="display: flex; justify-content: center; gap: 24px; flex-wrap: wrap;">
               <a href="https://platform.toptiermen.eu" style="color: #8BAE5A; text-decoration: none; font-size: 14px;">Website</a>
               <a href="mailto:platform@toptiermen.eu" style="color: #8BAE5A; text-decoration: none; font-size: 14px;">Contact</a>
@@ -1690,7 +1694,9 @@ export const getPlatformAccessibleTemplate = (name: string): EmailTemplate => ({
           
           <!-- Header -->
           <div style="background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%); padding: 40px 30px; text-align: center;">
-            <img src="https://platform.toptiermen.eu/logo_white-full.svg" alt="Top Tier Men Logo" style="width: 200px; height: auto; margin-bottom: 20px;">
+                   <div style="width: 200px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto; border: 2px solid rgba(255,255,255,0.2);">
+                     <span style="color: white; font-size: 24px; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">TOP TIER MEN</span>
+                   </div>
             <h1 style="color: white; font-size: 32px; font-weight: 700; margin: 0; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
               PLATFORM TOEGANKELIJK
             </h1>
@@ -1705,10 +1711,10 @@ export const getPlatformAccessibleTemplate = (name: string): EmailTemplate => ({
               Beste ${name},
             </p>
             
-            <p style="font-size: 16px; line-height: 1.6; margin: 0 0 24px 0;">
-              We hebben afgelopen week druk gewerkt aan het oplossen van bugs en het verbeteren van het platform. 
-              Het Top Tier Men platform is nu weer volledig toegankelijk en klaar voor jouw training en ontwikkeling.
-            </p>
+                   <p style="font-size: 16px; line-height: 1.6; margin: 0 0 24px 0;">
+                     We hebben afgelopen week druk gewerkt aan het oplossen van bugs en het verbeteren van het platform. 
+                     Het Top Tier Men platform is nu weer volledig toegankelijk en klaar voor gebruik.
+                   </p>
 
             <div style="background: rgba(139, 174, 90, 0.1); border-left: 4px solid #8BAE5A; padding: 20px; margin: 24px 0; border-radius: 0 8px 8px 0;">
               <h3 style="color: #8BAE5A; font-size: 18px; font-weight: 700; margin: 0 0 12px 0;">
@@ -1754,9 +1760,9 @@ export const getPlatformAccessibleTemplate = (name: string): EmailTemplate => ({
 
           <!-- Footer -->
           <div style="background: #1A1A1A; padding: 30px; text-align: center; border-top: 1px solid #374151;">
-            <p style="color: #9CA3AF; font-size: 14px; margin: 0 0 16px 0;">
-              © 2024 Top Tier Men - Exclusieve Broederschap voor Top Performers
-            </p>
+                   <p style="color: #9CA3AF; font-size: 14px; margin: 0 0 16px 0;">
+                     © 2025 Top Tier Men - Exclusieve Broederschap voor Top Performers
+                   </p>
             <div style="display: flex; justify-content: center; gap: 24px; flex-wrap: wrap;">
               <a href="https://platform.toptiermen.eu" style="color: #8BAE5A; text-decoration: none; font-size: 14px;">Website</a>
               <a href="mailto:platform@toptiermen.eu" style="color: #8BAE5A; text-decoration: none; font-size: 14px;">Contact</a>
