@@ -87,6 +87,8 @@ export default function MijnTrainingen() {
   const [showSchemaDetails, setShowSchemaDetails] = useState(false);
   const [currentWeek, setCurrentWeek] = useState<number>(1);
   const [completedWeeks, setCompletedWeeks] = useState<any[]>([]);
+  const [showWeekCompletionModal, setShowWeekCompletionModal] = useState(false);
+  const [weekCompletionData, setWeekCompletionData] = useState<any>(null);
 
   useEffect(() => {
     if (user) {
@@ -154,12 +156,12 @@ export default function MijnTrainingen() {
     const allDaysCompleted = days.every(day => day.isCompleted);
     
     if (allDaysCompleted) {
-      console.log('🎉 All days completed! Starting new week...');
+      console.log('🎉 All days completed! Showing week completion modal...');
       
       // Calculate the correct week number based on completed weeks
       const nextWeekNumber = completedWeeks.length + 1;
       
-      // Add current week to completed weeks
+      // Prepare week completion data
       const weekData = {
         week: nextWeekNumber,
         completedAt: new Date().toISOString(),
@@ -170,27 +172,21 @@ export default function MijnTrainingen() {
         }))
       };
       
-      setCompletedWeeks(prev => [...prev, weekData]);
-      
-      // Reset all days for new week
-      resetDaysForNewWeek();
-      
-      // Update current week
-      if (nextWeekNumber < 8) {
-        setCurrentWeek(nextWeekNumber + 1);
-      } else {
-        console.log('🏆 All 8 weeks completed! Congratulations!');
-        setCurrentWeek(8);
-      }
+      // Show the completion modal instead of automatically progressing
+      setWeekCompletionData(weekData);
+      setShowWeekCompletionModal(true);
     }
   };
 
-  // Function to reset all days for a new week
-  const resetDaysForNewWeek = async () => {
-    if (!user || !trainingData?.schema?.id) return;
+  // Function to start a new week
+  const startNewWeek = async () => {
+    if (!user || !trainingData?.schema?.id || !weekCompletionData) return;
     
     try {
-      console.log('🔄 Resetting days for new week...');
+      console.log('🔄 Starting new week...');
+      
+      // Add completed week to the list
+      setCompletedWeeks(prev => [...prev, weekCompletionData]);
       
       // Call API to reset all days
       const response = await fetch('/api/reset-training-week', {
@@ -204,13 +200,29 @@ export default function MijnTrainingen() {
       
       if (response.ok) {
         console.log('✅ Days reset for new week');
-        // Reload training data to reflect changes
+        
+        // Update current week
+        const nextWeekNumber = weekCompletionData.week + 1;
+        if (nextWeekNumber <= 8) {
+          setCurrentWeek(nextWeekNumber);
+        } else {
+          console.log('🏆 All 8 weeks completed! Congratulations!');
+          setCurrentWeek(8);
+        }
+        
+        // Close modal and reload data
+        setShowWeekCompletionModal(false);
+        setWeekCompletionData(null);
         loadTrainingData();
+        
+        toast.success(`Week ${weekCompletionData.week} voltooid! Nieuwe week gestart.`);
       } else {
         console.error('❌ Failed to reset days for new week');
+        toast.error('Fout bij het starten van nieuwe week');
       }
     } catch (error) {
-      console.error('❌ Error resetting days:', error);
+      console.error('❌ Error starting new week:', error);
+      toast.error('Fout bij het starten van nieuwe week');
     }
   };
 
@@ -696,6 +708,116 @@ export default function MijnTrainingen() {
           focusArea={trainingData.days?.find(d => d.day_number === selectedDayForWorkout)?.focus_area || 'Training'}
         />
       )}
+      </AnimatePresence>
+
+      {/* Week Completion Modal */}
+      <AnimatePresence>
+        {showWeekCompletionModal && weekCompletionData && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-2xl p-8 max-w-2xl w-full shadow-2xl"
+            >
+              <div className="text-center">
+                {/* Success Icon */}
+                <div className="w-20 h-20 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] rounded-full flex items-center justify-center mx-auto mb-6">
+                  <TrophyIcon className="w-10 h-10 text-[#181F17]" />
+                </div>
+                
+                {/* Title */}
+                <h2 className="text-3xl font-bold text-white mb-4">
+                  🎉 Week {weekCompletionData.week} Voltooid!
+                </h2>
+                
+                {/* Description */}
+                <p className="text-gray-300 text-lg mb-6">
+                  Gefeliciteerd! Je hebt alle trainingsdagen van week {weekCompletionData.week} succesvol voltooid.
+                </p>
+                
+                {/* Week Stats */}
+                <div className="bg-[#0F1419]/50 rounded-xl p-6 mb-6">
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="text-[#8BAE5A] font-semibold">Voltooide Dagen</span>
+                      <p className="text-white text-2xl font-bold">{weekCompletionData.days.length}</p>
+                    </div>
+                    <div>
+                      <span className="text-[#8BAE5A] font-semibold">Voltooid Op</span>
+                      <p className="text-white">
+                        {new Date(weekCompletionData.completedAt).toLocaleDateString('nl-NL', {
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: 'numeric'
+                        })}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Completed Days List */}
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold text-white mb-3">Voltooide Trainingen</h3>
+                  <div className="space-y-2">
+                    {weekCompletionData.days.map((day: any) => (
+                      <div key={day.day} className="flex items-center justify-between bg-[#0F1419]/30 rounded-lg p-3">
+                        <div className="flex items-center gap-3">
+                          <CheckIcon className="w-5 h-5 text-green-400" />
+                          <span className="text-white font-medium">Dag {day.day}: {day.name}</span>
+                        </div>
+                        <span className="text-green-400 text-sm">
+                          {day.completedAt && new Date(day.completedAt).toLocaleTimeString('nl-NL', {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* Progress Info */}
+                <div className="bg-[#8BAE5A]/10 rounded-lg p-4 mb-6">
+                  <p className="text-[#8BAE5A] font-semibold">
+                    Voortgang: {completedWeeks.length + 1}/8 weken
+                  </p>
+                  <p className="text-gray-300 text-sm">
+                    {completedWeeks.length + 1 < 8 
+                      ? `Nog ${8 - (completedWeeks.length + 1)} weken te gaan!`
+                      : 'Je hebt alle weken voltooid! 🏆'
+                    }
+                  </p>
+                </div>
+                
+                {/* Action Buttons */}
+                <div className="flex gap-4 justify-center">
+                  <button
+                    onClick={startNewWeek}
+                    className="px-8 py-4 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-bold text-lg rounded-xl hover:from-[#7A9D4A] hover:to-[#e0903f] transition-all duration-200 shadow-lg hover:shadow-xl"
+                  >
+                    Start Nieuwe Week
+                  </button>
+                  
+                  <button
+                    onClick={() => {
+                      setShowWeekCompletionModal(false);
+                      setWeekCompletionData(null);
+                    }}
+                    className="px-8 py-4 bg-[#3A4D23] text-[#8BAE5A] font-semibold text-lg rounded-xl hover:bg-[#4A5D33] transition-colors"
+                  >
+                    Later
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
       </AnimatePresence>
     </PageLayout>
   );
