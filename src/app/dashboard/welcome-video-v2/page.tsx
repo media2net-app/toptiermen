@@ -13,6 +13,9 @@ export default function WelcomeVideoV2Page() {
   const [videoLoading, setVideoLoading] = useState(true);
   const [videoError, setVideoError] = useState(false);
   const [videoReady, setVideoReady] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [buffered, setBuffered] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   // Initialize video when component mounts
@@ -20,6 +23,21 @@ export default function WelcomeVideoV2Page() {
     if (videoRef.current) {
       console.log('🎥 Initializing video element');
       videoRef.current.load();
+      
+      // Preload more aggressively
+      videoRef.current.preload = 'auto';
+      
+      // Set up better buffering
+      const video = videoRef.current;
+      video.addEventListener('loadstart', () => {
+        console.log('🔄 Video load started');
+      });
+      
+      video.addEventListener('canplaythrough', () => {
+        console.log('✅ Video can play through');
+        setVideoLoading(false);
+        setVideoReady(true);
+      });
     }
   }, []);
 
@@ -70,6 +88,36 @@ export default function WelcomeVideoV2Page() {
     console.log('🎬 Video can play');
     setVideoLoading(false);
     setVideoReady(true);
+    if (videoRef.current) {
+      setDuration(videoRef.current.duration);
+    }
+  };
+
+  const handleVideoProgress = () => {
+    if (videoRef.current) {
+      const bufferedEnd = videoRef.current.buffered.length > 0 
+        ? videoRef.current.buffered.end(videoRef.current.buffered.length - 1) 
+        : 0;
+      setBuffered(bufferedEnd);
+    }
+  };
+
+  const handleTimeUpdate = () => {
+    if (videoRef.current) {
+      setCurrentTime(videoRef.current.currentTime);
+    }
+  };
+
+  const handleSeek = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (videoRef.current && duration > 0) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const percentage = clickX / rect.width;
+      const newTime = percentage * duration;
+      
+      videoRef.current.currentTime = newTime;
+      setCurrentTime(newTime);
+    }
   };
 
   const handleComplete = async () => {
@@ -123,9 +171,13 @@ export default function WelcomeVideoV2Page() {
               onLoadedData={handleVideoLoad}
               onCanPlay={handleVideoCanPlay}
               onError={handleVideoError}
+              onProgress={handleVideoProgress}
+              onTimeUpdate={handleTimeUpdate}
               preload="auto"
               controls={false}
               playsInline
+              crossOrigin="anonymous"
+              muted={false}
             >
               <source src="/videos/welcome-video.mp4" type="video/mp4" />
               Je browser ondersteunt geen video element.
@@ -189,12 +241,24 @@ export default function WelcomeVideoV2Page() {
                 <span className="text-white text-sm">Klik om video af te spelen</span>
               </div>
               <div className="text-white text-sm">
-                0:00 / 1:00
+                {Math.floor(currentTime / 60)}:{(currentTime % 60).toFixed(0).padStart(2, '0')} / {Math.floor(duration / 60)}:{(duration % 60).toFixed(0).padStart(2, '0')}
               </div>
             </div>
 
-            <div className="w-full bg-gray-700 rounded-full h-2 mb-4">
-              <div className="bg-[#8BAE5A] h-2 rounded-full" style={{ width: '0%' }}></div>
+            <div 
+              className="w-full bg-gray-700 rounded-full h-2 mb-4 relative cursor-pointer hover:h-3 transition-all"
+              onClick={handleSeek}
+            >
+              {/* Buffered progress */}
+              <div 
+                className="bg-gray-500 h-2 rounded-full absolute top-0 left-0" 
+                style={{ width: `${duration > 0 ? (buffered / duration) * 100 : 0}%` }}
+              ></div>
+              {/* Current progress */}
+              <div 
+                className="bg-[#8BAE5A] h-2 rounded-full relative z-10" 
+                style={{ width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%` }}
+              ></div>
             </div>
 
             <div className="flex items-center justify-between">
