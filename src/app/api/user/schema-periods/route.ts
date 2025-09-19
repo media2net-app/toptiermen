@@ -16,20 +16,29 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
     }
 
+    // First check if user has a selected schema in profiles table
+    const { data: profileData, error: profileError } = await supabase
+      .from('profiles')
+      .select('selected_schema_id')
+      .eq('id', userId)
+      .single();
+
+    if (profileError || !profileData?.selected_schema_id) {
+      console.log('⚠️ No active schema period found');
+      return NextResponse.json({ data: null });
+    }
+
+    // Get the selected schema details
     const { data, error } = await supabase
-      .from('user_schema_selections')
+      .from('training_schemas')
       .select(`
-        *,
-        training_schemas (
-          id,
-          name,
-          description,
-          difficulty,
-          schema_nummer
-        )
+        id,
+        name,
+        description,
+        difficulty,
+        schema_nummer
       `)
-      .eq('user_id', userId)
-      .eq('status', 'active')
+      .eq('id', profileData.selected_schema_id)
       .single();
 
     if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
@@ -56,24 +65,13 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    // First, deactivate any existing active periods for this user
-    await supabase
-      .from('user_schema_selections')
-      .update({ status: 'completed' })
-      .eq('user_id', userId)
-      .eq('status', 'active');
-
-    // Create new schema period
+    // Update the selected schema in profiles table
     const { data, error } = await supabase
-      .from('user_schema_selections')
-      .insert({
-        user_id: userId,
-        training_schema_id: trainingSchemaId,
-        start_date: startDate,
-        status: 'active'
-      })
+      .from('profiles')
+      .update({ selected_schema_id: trainingSchemaId })
+      .eq('id', userId)
       .select(`
-        *,
+        selected_schema_id,
         training_schemas (
           id,
           name,
@@ -108,12 +106,13 @@ export async function PUT(request: NextRequest) {
       }, { status: 400 });
     }
 
+    // For now, we'll just clear the selected schema (set to null)
     const { data, error } = await supabase
-      .from('user_schema_selections')
-      .update({ status })
+      .from('profiles')
+      .update({ selected_schema_id: null })
       .eq('id', periodId)
       .select(`
-        *,
+        selected_schema_id,
         training_schemas (
           id,
           name,
