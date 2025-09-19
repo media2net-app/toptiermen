@@ -12,6 +12,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     autoRefreshToken: true,
     persistSession: true, // ENABLED: Keep users logged in after refresh
     detectSessionInUrl: true,
+    flowType: 'pkce', // Use PKCE flow for better security and session management
   }
 });
 
@@ -238,6 +239,30 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     }
   };
 
+  // Helper function to clear all sessions for a user
+  const clearAllUserSessions = async (email: string) => {
+    try {
+      console.log('🔄 Clearing all sessions for user:', email);
+      
+      // Call our API to clear all sessions for this user
+      const response = await fetch('/api/auth/clear-sessions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+      
+      if (response.ok) {
+        console.log('✅ All sessions cleared for user');
+      } else {
+        console.log('⚠️ Failed to clear sessions via API (continuing anyway)');
+      }
+    } catch (error) {
+      console.log('⚠️ Error clearing sessions via API (continuing anyway):', error);
+    }
+  };
+
   // Sign in method - IMPROVED WITH BETTER ERROR HANDLING AND LOGGING
   const signIn = async (email: string, password: string) => {
     try {
@@ -249,6 +274,18 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
       
       setLoading(true);
       setError(null);
+
+      // First, clear all existing sessions for this user to prevent conflicts
+      console.log('🔄 Clearing all existing sessions for user...');
+      await clearAllUserSessions(email);
+      
+      // Also sign out any local sessions
+      try {
+        await supabase.auth.signOut();
+        console.log('✅ Local sessions cleared');
+      } catch (signOutError) {
+        console.log('⚠️ Error clearing local sessions (continuing anyway):', signOutError);
+      }
 
       console.log('🔐 Calling supabase.auth.signInWithPassword...');
       const { data, error } = await supabase.auth.signInWithPassword({
