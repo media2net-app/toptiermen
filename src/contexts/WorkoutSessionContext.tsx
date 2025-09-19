@@ -36,6 +36,8 @@ export function WorkoutSessionProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<WorkoutSession | null>(null);
   const [workoutTime, setWorkoutTime] = useState(0);
   const [isWorkoutTimerRunning, setIsWorkoutTimerRunning] = useState(false);
+  const [restTime, setRestTime] = useState(0);
+  const [isRestTimerRunning, setIsRestTimerRunning] = useState(false);
 
   // Workout timer
   useEffect(() => {
@@ -52,12 +54,38 @@ export function WorkoutSessionProvider({ children }: { children: ReactNode }) {
     };
   }, [isWorkoutTimerRunning, session]);
 
-  // Update session with current workout time
+  // Rest timer
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    
+    if (isRestTimerRunning && restTime > 0) {
+      interval = setInterval(() => {
+        setRestTime(prev => {
+          if (prev <= 1) {
+            setIsRestTimerRunning(false);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isRestTimerRunning, restTime]);
+
+  // Update session with current workout time and rest time
   useEffect(() => {
     if (session) {
-      setSession(prev => prev ? { ...prev, workoutTime } : null);
+      setSession(prev => prev ? { 
+        ...prev, 
+        workoutTime,
+        restTime,
+        isRestActive: isRestTimerRunning
+      } : null);
     }
-  }, [workoutTime, session]);
+  }, [workoutTime, restTime, isRestTimerRunning, session]);
 
   // Load session from localStorage on mount
   useEffect(() => {
@@ -68,6 +96,8 @@ export function WorkoutSessionProvider({ children }: { children: ReactNode }) {
         setSession(parsedSession);
         setWorkoutTime(parsedSession.workoutTime || 0);
         setIsWorkoutTimerRunning(parsedSession.isActive || false);
+        setRestTime(parsedSession.restTime || 0);
+        setIsRestTimerRunning(parsedSession.isRestActive || false);
       } catch (error) {
         console.error('Error loading saved workout session:', error);
         localStorage.removeItem('activeWorkoutSession');
@@ -113,6 +143,8 @@ export function WorkoutSessionProvider({ children }: { children: ReactNode }) {
     setSession(null);
     setWorkoutTime(0);
     setIsWorkoutTimerRunning(false);
+    setRestTime(0);
+    setIsRestTimerRunning(false);
   };
 
   const updateSession = (updates: Partial<WorkoutSession>) => {
@@ -121,14 +153,9 @@ export function WorkoutSessionProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const updateRestTimer = (restTime: number, isActive: boolean) => {
-    if (session) {
-      setSession(prev => prev ? { 
-        ...prev, 
-        restTime, 
-        isRestActive: isActive 
-      } : null);
-    }
+  const updateRestTimer = (newRestTime: number, isActive: boolean) => {
+    setRestTime(newRestTime);
+    setIsRestTimerRunning(isActive);
   };
 
   const updateProgress = (currentSet: number, exerciseName: string, currentExerciseIndex: number) => {
