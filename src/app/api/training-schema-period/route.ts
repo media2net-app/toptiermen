@@ -148,6 +148,12 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ data: null });
     }
 
+    // Only return data if a schema is actually selected
+    if (!data.selected_schema_id) {
+      console.log('⚠️ No schema selected for user');
+      return NextResponse.json({ data: null });
+    }
+
     // For now, we'll assume the schema period is active if a schema is selected
     // In the future, we can add proper date tracking
 
