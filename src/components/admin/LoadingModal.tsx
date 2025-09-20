@@ -25,8 +25,8 @@ export default function LoadingModal({ isOpen, message = "Gegevens laden..." }: 
             className="bg-[#232D1A] rounded-xl p-8 border border-[#B6C948] shadow-2xl max-w-md w-full mx-4"
           >
             <div className="text-center">
-              <div className="w-16 h-16 bg-[#B6C948] rounded-full flex items-center justify-center mx-auto mb-6">
-                <ArrowPathIcon className="w-8 h-8 text-[#181F17] animate-spin" />
+              <div className="w-12 h-12 bg-[#B6C948] rounded-full flex items-center justify-center mx-auto mb-6">
+                <ArrowPathIcon className="w-6 h-6 text-[#181F17] animate-spin" />
               </div>
               
               <h3 className="text-xl font-bold text-white mb-2">

@@ -969,6 +969,136 @@ Het Top Tier Men Team
 Website: https://platform.toptiermen.eu
 Contact: platform@toptiermen.eu
         `
+      },
+      platform_update: {
+        subject: '📢 Platform Werkzaamheden Update - Top Tier Men',
+        html: `
+          <!DOCTYPE html>
+          <html lang="nl">
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Platform Werkzaamheden Update - Top Tier Men</title>
+          </head>
+          <body style="margin: 0; padding: 0; background-color: #0F1419; font-family: Arial, sans-serif;">
+            <div style="background: linear-gradient(135deg, #0F1419 0%, #1F2D17 100%); min-height: 100vh; padding: 40px 0;">
+              <div style="max-width: 600px; margin: 0 auto; background: #0F1419; border-radius: 16px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.3);">
+                
+                <!-- Header -->
+                <div style="background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%); padding: 40px 30px; text-align: center;">
+                  <img src="https://platform.toptiermen.eu/logo_white-full.svg" alt="Top Tier Men Logo" style="width: 200px; height: auto; margin-bottom: 20px; display: block; margin-left: auto; margin-right: auto; max-width: 100%;">
+                  <h1 style="color: white; font-size: 28px; font-weight: 700; margin: 0; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+                    📢 PLATFORM UPDATE
+                  </h1>
+                  <p style="color: rgba(255,255,255,0.95); font-size: 16px; margin: 12px 0 0 0; font-weight: 500;">
+                    Belangrijke mededeling over het platform
+                  </p>
+                </div>
+
+              <!-- Content -->
+              <div style="padding: 40px 30px; color: #E5E7EB;">
+                <p style="font-size: 18px; color: #8BAE5A; font-weight: 600; margin: 0 0 24px 0;">
+                  Beste brothers,
+                </p>
+                
+                <p style="font-size: 16px; line-height: 1.6; margin: 0 0 24px 0;">
+                  We zijn inmiddels 10 dagen verder sinds livegang van het platform.
+                </p>
+
+                <div style="background: rgba(220, 38, 38, 0.1); border-left: 4px solid #DC2626; padding: 20px; margin: 24px 0; border-radius: 0 8px 8px 0;">
+                  <h3 style="color: #DC2626; font-size: 18px; font-weight: 700; margin: 0 0 12px 0;">
+                    ⚠️ HUIDIGE SITUATIE
+                  </h3>
+                  <p style="font-size: 15px; line-height: 1.5; margin: 0 0 12px 0; color: #D1D5DB;">
+                    Helaas ervaren we sinds de lancering problemen op het platform met het onboarden, het versturen van accountgegevens en andere functies die niet 100% werkend zijn.
+                  </p>
+                  <p style="font-size: 15px; line-height: 1.5; margin: 0; color: #D1D5DB;">
+                    Wij willen je laten weten dat we dag en nacht bezig zijn met het oplossen van deze bugs, helaas is het tot op heden nog niet gelukt het platform 100% werkend te hebben zonder deze problemen.
+                  </p>
+                </div>
+
+                <div style="background: rgba(139, 174, 90, 0.1); border-left: 4px solid #8BAE5A; padding: 20px; margin: 24px 0; border-radius: 0 8px 8px 0;">
+                  <h3 style="color: #8BAE5A; font-size: 18px; font-weight: 700; margin: 0 0 12px 0;">
+                    🙏 ONZE EXCUSES
+                  </h3>
+                  <p style="font-size: 15px; line-height: 1.5; margin: 0; color: #D1D5DB;">
+                    Wij willen hier oprecht onze excuses voor aanbieden, dit is niet de kwaliteit die we als Top Tier Men platform willen uitstralen, maar helaas worden we door onmacht getroffen en doen we er alles aan om het platform tip top werkend te maken.
+                  </p>
+                </div>
+
+                <div style="background: rgba(59, 130, 246, 0.1); border-left: 4px solid #3B82F6; padding: 20px; margin: 24px 0; border-radius: 0 8px 8px 0;">
+                  <h3 style="color: #3B82F6; font-size: 18px; font-weight: 700; margin: 0 0 12px 0;">
+                    📧 VOORTGANGS UPDATES
+                  </h3>
+                  <p style="font-size: 15px; line-height: 1.5; margin: 0; color: #D1D5DB;">
+                    We blijven jullie vanaf nu tussentijds updaten per e-mail over de voortgang en hopen zo snel mogelijk het platform toegankelijk te maken voor iedereen.
+                  </p>
+                </div>
+
+                <div style="background: rgba(139, 174, 90, 0.1); border-left: 4px solid #8BAE5A; padding: 20px; margin: 24px 0; border-radius: 0 8px 8px 0;">
+                  <h3 style="color: #8BAE5A; font-size: 18px; font-weight: 700; margin: 0 0 12px 0;">
+                    📅 ABONNEMENT VERPLAATSING
+                  </h3>
+                  <p style="font-size: 15px; line-height: 1.5; margin: 0; color: #D1D5DB;">
+                    Gezien het platform niet werkend is voor gebruik zullen we uiteraard de ingangs datum verplaatsen van elk abonnement naar de datum van een 100% werkend platform.
+                  </p>
+                </div>
+
+                <div style="text-align: center; margin: 32px 0; padding: 24px; background: rgba(139, 174, 90, 0.05); border-radius: 12px; border: 1px solid rgba(139, 174, 90, 0.2);">
+                  <p style="font-size: 16px; line-height: 1.6; margin: 0 0 16px 0; color: #8BAE5A; font-weight: 600;">
+                    We willen jullie bedanken voor jullie begrip en loyaliteit, nog even geduld en dan start jouw reis naar het worden van een Top Tier Man.
+                  </p>
+                </div>
+
+                <p style="font-size: 15px; line-height: 1.6; margin: 24px 0 0 0; color: #8BAE5A;">
+                  Met respect en waardering,<br>
+                  <strong>Rick Cuijpers & Het Top Tier Men Team</strong>
+                </p>
+              </div>
+
+              <!-- Footer -->
+              <div style="background: rgba(139, 174, 90, 0.1); padding: 30px; text-align: center; border-top: 1px solid rgba(139, 174, 90, 0.2);">
+                <img src="https://platform.toptiermen.eu/logo_white-full.svg" alt="Top Tier Men Logo" style="width: 150px; height: auto; margin-bottom: 15px; opacity: 0.8; max-width: 100%;">
+                <p style="color: #8BAE5A; font-size: 14px; font-weight: 600; margin: 0 0 8px 0;">
+                  © 2025 Top Tier Men - Exclusieve Broederschap voor Top Performers
+                </p>
+                <p style="color: #D1D5DB; font-size: 12px; margin: 0;">
+                  Website: <a href="https://platform.toptiermen.eu" style="color: #8BAE5A; text-decoration: none;">platform.toptiermen.eu</a> | 
+                  Contact: <a href="mailto:platform@toptiermen.eu" style="color: #8BAE5A; text-decoration: none;">platform@toptiermen.eu</a>
+                </p>
+              </div>
+            </div>
+          </div>
+          </body>
+          </html>
+        `,
+        text: `
+PLATFORM UPDATE - TOP TIER MEN
+
+Beste brothers,
+
+We zijn inmiddels 10 dagen verder sinds livegang van het platform.
+
+Helaas ervaren we sinds de lancering problemen op het platform met het onboarden, het versturen van accountgegevens en andere functies die niet 100% werkend zijn.
+
+Wij willen je laten weten dat we dag en nacht bezig zijn met het oplossen van deze bugs, helaas is het tot op heden nog niet gelukt het platform 100% werkend te hebben zonder deze problemen.
+
+Wij willen hier oprecht onze excuses voor aanbieden, dit is niet de kwaliteit die we als Top Tier Men platform willen uitstralen, maar helaas worden we door onmacht getroffen en doen we er alles aan om het platform tip top werkend te maken.
+
+We blijven jullie vanaf nu tussentijds updaten per e-mail over de voortgang en hopen zo snel mogelijk het platform toegankelijk te maken voor iedereen.
+
+Gezien het platform niet werkend is voor gebruik zullen we uiteraard de ingangs datum verplaatsen van elk abonnement naar de datum van een 100% werkend platform.
+
+We willen jullie bedanken voor jullie begrip en loyaliteit, nog even geduld en dan start jouw reis naar het worden van een Top Tier Man.
+
+Met respect en waardering,
+Rick Cuijpers & Het Top Tier Men Team
+
+---
+© 2025 Top Tier Men - Exclusieve Broederschap voor Top Performers
+Website: platform.toptiermen.eu
+Contact: platform@toptiermen.eu
+        `
       }
     };
 

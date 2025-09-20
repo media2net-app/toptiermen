@@ -141,6 +141,7 @@ function AdminDashboardContent() {
   const [isClient, setIsClient] = useState(false);
   
   useEffect(() => {
+    // Set client state immediately to prevent long loading
     setIsClient(true);
   }, []);
 
@@ -238,7 +239,14 @@ function AdminDashboardContent() {
 
       console.log('📊 Fetching admin dashboard data for period:', selectedPeriod);
       
-      const response = await fetch(`/api/admin/dashboard-stats?period=${selectedPeriod}`);
+      // Add timeout to prevent infinite loading
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Request timeout')), 10000)
+      );
+      
+      const fetchPromise = fetch(`/api/admin/dashboard-stats?period=${selectedPeriod}`);
+      
+      const response = await Promise.race([fetchPromise, timeoutPromise]) as Response;
       
       // Check if response is JSON
       const contentType = response.headers.get('content-type');
@@ -258,6 +266,8 @@ function AdminDashboardContent() {
     } catch (error) {
       console.error('❌ Error fetching admin dashboard data:', error);
       setError(error instanceof Error ? error.message : 'Unknown error');
+      // Set dataLoaded to true even on error to prevent infinite loading
+      setDataLoaded(true);
     } finally {
       setLoading(false);
     }
@@ -267,6 +277,17 @@ function AdminDashboardContent() {
   useEffect(() => {
     // Start data loading immediately to show UI first
     fetchDashboardData();
+    
+    // Fallback timeout to prevent infinite loading
+    const fallbackTimeout = setTimeout(() => {
+      if (loading && !dataLoaded) {
+        console.log('⚠️ Admin dashboard loading timeout - forcing completion');
+        setLoading(false);
+        setDataLoaded(true);
+      }
+    }, 15000); // 15 second timeout
+    
+    return () => clearTimeout(fallbackTimeout);
   }, [user, selectedPeriod]);
 
   // Fetch session data when session-logs tab is active
@@ -302,7 +323,7 @@ function AdminDashboardContent() {
     return (
       <div className="min-h-screen bg-[#181F17] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
           <p className="text-[#8BAE5A] text-lg">Admin Dashboard laden...</p>
         </div>
       </div>
@@ -312,7 +333,7 @@ function AdminDashboardContent() {
   return (
     <>
       <LoadingModal 
-        isOpen={loading && !dataLoaded && pathname === '/dashboard-admin' && !dashboardStats} 
+        isOpen={loading && !dataLoaded} 
         message="Admin dashboard statistieken worden geladen..."
       />
       

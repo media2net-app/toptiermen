@@ -240,7 +240,7 @@ export default function DatabaseViewPage() {
             📊 Database View - Prelaunch Pakketten
           </h1>
           <p className="text-gray-400">
-            Directe weergave van alle database entries
+            Weergave van betaalde entries + Ivo Hortulanus (test entries uitgefilterd)
           </p>
         </div>
 
@@ -248,9 +248,13 @@ export default function DatabaseViewPage() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="bg-blue-900/20 border border-blue-500 rounded-lg p-6 text-center">
             <div className="text-3xl font-bold text-blue-400 mb-2">
-              {packages.length}
+              {packages.filter((pkg) => {
+                const isIvoHortulanus = pkg.email === 'hortulanusglobalservices@gmail.com';
+                const isPaid = pkg.payment_status === 'paid';
+                return isPaid || isIvoHortulanus;
+              }).length}
             </div>
-            <div className="text-blue-300">Totaal Aankopen</div>
+            <div className="text-blue-300">Gefilterde Aankopen</div>
           </div>
           <div className="bg-green-900/20 border border-green-500 rounded-lg p-6 text-center">
             <div className="text-3xl font-bold text-green-400 mb-2">
@@ -260,22 +264,33 @@ export default function DatabaseViewPage() {
           </div>
           <div className="bg-yellow-900/20 border border-yellow-500 rounded-lg p-6 text-center">
             <div className="text-3xl font-bold text-yellow-400 mb-2">
-              {packages.filter(p => p.payment_status === 'pending').length}
+              {packages.filter((pkg) => {
+                const isIvoHortulanus = pkg.email === 'hortulanusglobalservices@gmail.com';
+                return isIvoHortulanus;
+              }).length}
             </div>
-            <div className="text-yellow-300">In Behandeling</div>
+            <div className="text-yellow-300">Speciale Entries</div>
           </div>
           <div className="bg-purple-900/20 border border-purple-500 rounded-lg p-6 text-center">
             <div className="text-3xl font-bold text-purple-400 mb-2">
-              {packages.filter(p => p.is_test_payment).length}
+              {packages.filter((pkg) => {
+                const isIvoHortulanus = pkg.email === 'hortulanusglobalservices@gmail.com';
+                const isPaid = pkg.payment_status === 'paid';
+                return (isPaid || isIvoHortulanus) && pkg.is_test_payment;
+              }).length}
             </div>
-            <div className="text-purple-300">Test Betalingen</div>
+            <div className="text-purple-300">Test in Filter</div>
           </div>
         </div>
 
         {/* Controls */}
         <div className="mb-6 flex justify-between items-center">
           <div className="text-white">
-            {loading ? 'Laden...' : `${packages.length} pakketten gevonden`}
+            {loading ? 'Laden...' : `${packages.filter((pkg) => {
+              const isIvoHortulanus = pkg.email === 'hortulanusglobalservices@gmail.com';
+              const isPaid = pkg.payment_status === 'paid';
+              return isPaid || isIvoHortulanus;
+            }).length} gefilterde pakketten gevonden`}
             {autoRefresh && (
               <span className="ml-3 text-sm text-green-400">
                 🔄 Auto-refresh actief (30s)
@@ -398,7 +413,14 @@ export default function DatabaseViewPage() {
                     </td>
                   </tr>
                 ) : (
-                  packages.map((pkg) => (
+                  packages
+                    .filter((pkg) => {
+                      // Show only paid entries, but always include Ivo Hortulanus
+                      const isIvoHortulanus = pkg.email === 'hortulanusglobalservices@gmail.com';
+                      const isPaid = pkg.payment_status === 'paid';
+                      return isPaid || isIvoHortulanus;
+                    })
+                    .map((pkg) => (
                     <tr key={pkg.id} className="hover:bg-gray-700/30">
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
                         #{pkg.id}

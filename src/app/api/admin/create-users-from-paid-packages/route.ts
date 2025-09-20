@@ -95,7 +95,6 @@ export async function POST(request: NextRequest) {
             full_name: packageData.full_name,
             username: packageData.email.split('@')[0],
             rank: 'Beginner',
-            status: 'active',
             subscription_tier: packageData.package_name,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()

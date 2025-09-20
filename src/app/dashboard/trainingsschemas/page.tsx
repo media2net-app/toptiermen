@@ -521,104 +521,82 @@ function TrainingschemasContent() {
     
     console.log(`🎯 Mapping frontend goal "${profile.training_goal}" to database goal "${dbGoal}"`);
     
-    // FIXED APPROACH: Filter schemas based on goal, equipment, and frequency
-    // The key fix: Check schema name for frequency instead of relying on training_schema_days length
-    
-    const goalEquipmentFrequencyMatches = schemas.filter(schema => {
+    // IMPROVED APPROACH: Filter by goal + equipment + frequency, but show all available schemas
+    // First, find schemas that match goal + equipment + frequency (exact match)
+    const exactMatches = schemas.filter(schema => {
       const goalMatch = schema.training_goal === dbGoal;
       const equipmentMatch = schema.equipment_type === profile.equipment_type;
+      const frequencyMatch = (schema.training_schema_days?.length || 0) === profile.training_frequency;
       
-      // FIXED: Check frequency from schema name instead of training_schema_days length
-      // Look for patterns like "1 dag per week", "2x per week", etc.
-      let frequencyMatch = false;
-      const schemaName = schema.name.toLowerCase();
-      
-      if (profile.training_frequency === 1) {
-        frequencyMatch = schemaName.includes('1 dag') || schemaName.includes('1x') || schemaName.includes('één keer');
-      } else if (profile.training_frequency === 2) {
-        frequencyMatch = schemaName.includes('2 dag') || schemaName.includes('2x') || schemaName.includes('twee keer');
-      } else if (profile.training_frequency === 3) {
-        frequencyMatch = schemaName.includes('3 dag') || schemaName.includes('3x') || schemaName.includes('drie keer');
-      } else if (profile.training_frequency === 4) {
-        frequencyMatch = schemaName.includes('4 dag') || schemaName.includes('4x') || schemaName.includes('vier keer');
-      } else if (profile.training_frequency === 5) {
-        frequencyMatch = schemaName.includes('5 dag') || schemaName.includes('5x') || schemaName.includes('vijf keer');
-      } else if (profile.training_frequency === 6) {
-        frequencyMatch = schemaName.includes('6 dag') || schemaName.includes('6x') || schemaName.includes('zes keer');
-      }
-      
-      console.log(`🔍 Schema "${schema.name}": goal=${goalMatch}, equipment=${equipmentMatch}, frequency=${frequencyMatch} (${schema.training_goal} vs ${dbGoal}, ${schema.equipment_type} vs ${profile.equipment_type}, name contains frequency: ${frequencyMatch})`);
+      console.log(`🔍 Schema "${schema.name}": goal=${goalMatch}, equipment=${equipmentMatch}, frequency=${frequencyMatch} (${schema.training_goal} vs ${dbGoal}, ${schema.equipment_type} vs ${profile.equipment_type}, ${schema.training_schema_days?.length || 0} days vs ${profile.training_frequency})`);
       
       return goalMatch && equipmentMatch && frequencyMatch;
     });
     
-    console.log(`🎯 Goal + equipment + frequency matches: ${goalEquipmentFrequencyMatches.length}`);
-    goalEquipmentFrequencyMatches.forEach(schema => {
+    console.log(`🎯 Exact matches (goal + equipment + frequency): ${exactMatches.length}`);
+    exactMatches.forEach(schema => {
       console.log(`  ✅ "${schema.name}" - Schema ${schema.schema_nummer} (${schema.training_goal}, ${schema.equipment_type}, ${schema.training_schema_days?.length || 0} days)`);
     });
     
-    // Sort by schema number
-    const sortedSchemas = goalEquipmentFrequencyMatches.sort((a, b) => {
-      const aNum = a.schema_nummer || 0;
-      const bNum = b.schema_nummer || 0;
-      return aNum - bNum;
-    });
-    
-    // Ensure we have exactly 3 schemas
+    // If we have exact matches, use those and ensure we have 3 schemas
     let result: TrainingSchema[] = [];
     
+    if (exactMatches.length > 0) {
+      // Sort by schema number
+      const sortedExactMatches = exactMatches.sort((a, b) => {
+        const aNum = a.schema_nummer || 0;
+        const bNum = b.schema_nummer || 0;
+        return aNum - bNum;
+      });
+      
+      // Ensure we have exactly 3 schemas
     for (let i = 1; i <= 3; i++) {
-      const existingSchema = sortedSchemas.find(s => s.schema_nummer === i);
-      if (existingSchema) {
-        result.push(existingSchema);
-        console.log(`  ✅ Found existing Schema ${i}: "${existingSchema.name}"`);
+        const existingSchema = sortedExactMatches.find(s => s.schema_nummer === i);
+        if (existingSchema) {
+          result.push(existingSchema);
       } else {
-        // Create placeholder for missing schema
-        const displayGoal = getDisplayName(dbGoal);
-        const displayEquipment = getDisplayName(profile.equipment_type);
-        
-        // FIXED: Schema 1 is always available, other schemas are coming soon or locked
-        let schemaStatus = 'coming_soon';
-        let schemaDescription = `Schema ${i} voor ${displayGoal} met ${displayEquipment} - Binnenkort beschikbaar`;
-        let schemaAction = 'Binnenkort';
-        
-        if (i === 1) {
-          // Schema 1 is always available
-          schemaStatus = 'published';
-          schemaDescription = `Schema 1 voor ${displayGoal} met ${displayEquipment} - Direct beschikbaar`;
-          schemaAction = 'Selecteer Schema';
-        } else if (i === 2) {
-          // Schema 2 is coming soon (unlocked after completing schema 1)
-          schemaStatus = 'coming_soon';
-          schemaDescription = `Schema 2 voor ${displayGoal} met ${displayEquipment} - Binnenkort beschikbaar`;
-          schemaAction = 'Binnenkort';
-        } else if (i === 3) {
-          // Schema 3 is locked (unlocked after completing schema 2)
-          schemaStatus = 'locked';
-          schemaDescription = `Schema 3 voor ${displayGoal} met ${displayEquipment} - Vergrendeld`;
-          schemaAction = 'Vergrendeld';
+          // Create placeholder for missing schema
+          const displayGoal = getDisplayName(dbGoal);
+          const displayEquipment = getDisplayName(profile.equipment_type);
+          const placeholderSchema: TrainingSchema = {
+            id: `placeholder-${dbGoal}-${profile.equipment_type}-${profile.training_frequency}-${i}`,
+            name: `${displayGoal} ${profile.training_frequency}x per week Schema ${i}`,
+            description: `Schema ${i} voor ${displayGoal} met ${displayEquipment} - Binnenkort beschikbaar`,
+            category: 'Gym',
+            cover_image: null,
+            status: 'coming_soon',
+            difficulty: 'Intermediate',
+            estimated_duration: '30 min',
+            target_audience: null,
+            training_goal: dbGoal,
+            rep_range: '',
+            rest_time_seconds: 0,
+            equipment_type: profile.equipment_type,
+            schema_nummer: i,
+            training_schema_days: []
+          };
+          result.push(placeholderSchema);
+          console.log(`  📝 Created placeholder for Schema ${i}`);
         }
-        
-        const placeholderSchema: TrainingSchema = {
-          id: i === 1 ? `schema-${dbGoal}-${profile.equipment_type}-${profile.training_frequency}-${i}` : `placeholder-${dbGoal}-${profile.equipment_type}-${profile.training_frequency}-${i}`,
-          name: `${displayGoal} ${profile.training_frequency}x per week Schema ${i}`,
-          description: schemaDescription,
-          category: 'Gym',
-          cover_image: null,
-          status: schemaStatus,
-          difficulty: 'Intermediate',
-          estimated_duration: '30 min',
-          target_audience: null,
-          training_goal: dbGoal,
-          rep_range: '',
-          rest_time_seconds: 0,
-          equipment_type: profile.equipment_type,
-          schema_nummer: i,
-          training_schema_days: []
-        };
-        result.push(placeholderSchema);
-        console.log(`  📝 Created ${schemaStatus} Schema ${i}: "${placeholderSchema.name}"`);
       }
+    } else {
+      // No exact matches, fall back to goal + equipment (any frequency)
+      const goalEquipmentMatches = schemas.filter(schema => {
+        const goalMatch = schema.training_goal === dbGoal;
+        const equipmentMatch = schema.equipment_type === profile.equipment_type;
+        return goalMatch && equipmentMatch;
+      });
+      
+      console.log(`🎯 Fallback: Goal + equipment matches: ${goalEquipmentMatches.length}`);
+      
+      // Sort by schema number and take first 3
+      const sortedSchemas = goalEquipmentMatches.sort((a, b) => {
+        const aNum = a.schema_nummer || 0;
+        const bNum = b.schema_nummer || 0;
+        return aNum - bNum;
+        });
+        
+      result = sortedSchemas.slice(0, 3);
     }
     
     console.log('✅ Final filtered schemas (always 3):', result.length);
@@ -878,14 +856,6 @@ function TrainingschemasContent() {
   const selectTrainingSchema = useCallback(async (schemaId: string) => {
     try {
       console.log('🎯 selectTrainingSchema called with:', { schemaId, userId: user?.id, userEmail: user?.email });
-      
-      // Check if this is a placeholder schema
-      if (schemaId.startsWith('placeholder-')) {
-        console.log('⚠️ Cannot select placeholder schema:', schemaId);
-        toast.error('Dit schema is nog niet beschikbaar. Probeer een ander schema of wacht tot dit schema wordt toegevoegd.');
-        return;
-      }
-      
       if (!user?.id) {
         console.log('❌ No user ID available');
         return;
@@ -928,37 +898,22 @@ function TrainingschemasContent() {
       console.log('📡 Schema selection API response:', { status: response.status, data });
       
       if (response.ok && data.success) {
-        console.log('✅ Schema selection successful, proceeding with redirect...');
         setSelectedTrainingSchema(schemaId);
-        
-        // Transform the API response to match the expected format
-        const transformedData = {
-          id: data.data.selected_schema_id,
-          user_id: actualUserId,
-          training_schema_id: data.data.selected_schema_id,
-          start_date: data.data.schema_start_date,
-          end_date: data.data.schema_end_date,
-          status: 'active' as const,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          training_schemas: data.data.training_schema
-        };
-        
-        setCurrentSchemaPeriod(transformedData);
-        console.log('✅ Schema period created:', transformedData);
+        setCurrentSchemaPeriod(data.data);
+        console.log('✅ Schema period created:', data.data);
         
         const startDate = new Date(data.data.schema_start_date).toLocaleDateString('nl-NL');
         const endDate = new Date(data.data.schema_end_date).toLocaleDateString('nl-NL');
         toast.success(`Trainingsschema geselecteerd! 8-weken periode gestart: ${startDate} - ${endDate}`);
           
-        // Only redirect to Mijn trainingen if NOT in onboarding
-        if (isCompleted || onboardingStep !== 3) {
-          console.log('🔄 Redirecting to Mijn trainingen (not in onboarding)...');
+          // Only redirect to Mijn trainingen if NOT in onboarding
+          if (isCompleted && !showOnboardingStep3) {
+          console.log('🔄 Redirecting to Mijn trainingen...');
           setTimeout(() => {
             router.push('/dashboard/mijn-trainingen');
           }, 1500); // Small delay to show the success message
-        } else {
-          console.log('🎯 In onboarding step 3 - staying on page for next step');
+          } else {
+            console.log('🎯 Onboarding active - NOT redirecting to Mijn trainingen');
         }
         
         // Complete onboarding step if needed
@@ -992,11 +947,10 @@ function TrainingschemasContent() {
           // Don't auto-complete, let user click "Volgende Stap" button
         }
       } else {
-        console.error('❌ Schema selection failed:', data.error);
         toast.error(data.error || 'Failed to select training schema');
       }
     } catch (error) {
-      console.error('❌ Error selecting training schema:', error);
+      console.error('Error selecting training schema:', error);
       toast.error('Failed to select training schema');
     }
   }, [user?.id, isCompleted, onboardingStep, showOnboardingStep3]); // Removed completeStep from dependencies
@@ -1458,6 +1412,10 @@ function TrainingschemasContent() {
             <p className="text-gray-300">Even geduld, we controleren je inloggegevens</p>
           </div>
         </div>
+      </PageLayout>
+    );
+  }
+
   // Check if user is authenticated
   if (!user) {
     return (
@@ -1479,6 +1437,10 @@ function TrainingschemasContent() {
             </button>
           </div>
         </div>
+      </PageLayout>
+    );
+  }
+
   // Check subscription loading
   if (subscriptionLoading) {
     return (
@@ -1517,6 +1479,10 @@ function TrainingschemasContent() {
             </div>
           </div>
         </div>
+      </PageLayout>
+    );
+  }
+
   // Check access permissions for training schemas
   if (!hasAccess('training')) {
     return (
@@ -1580,6 +1546,10 @@ function TrainingschemasContent() {
             </div>
           </div>
         </div>
+      </PageLayout>
+    );
+  }
+
   return (
     <PageLayout title="Trainingsschemas">
       <OnboardingV2Progress />
@@ -2092,9 +2062,9 @@ function TrainingschemasContent() {
                   const isSchema3 = schema.schema_nummer === 3;
                   
                   // Progressive unlocking: Schema 1 is always unlocked, Schema 2 unlocks after 8 weeks of Schema 1, Schema 3 unlocks after 8 weeks of Schema 2
-                  // FIXED: Schema 1 is always unlocked, even if it's a placeholder
+                  // Schema 1 is always unlocked, even if it's a placeholder
                   const isPlaceholder = schema.status === 'coming_soon';
-                  const isLocked = (schema.schema_nummer === 1) ? false : (isPlaceholder || (schema.schema_nummer !== 1 && !unlockedSchemas[schema.schema_nummer || 1]));
+                  const isLocked = schema.schema_nummer === 1 ? false : (isPlaceholder || !unlockedSchemas[schema.schema_nummer || 1]);
                   
                   return (
                     <motion.div
@@ -2149,7 +2119,7 @@ function TrainingschemasContent() {
                         <div className="flex items-center gap-2 text-gray-400 text-xs sm:text-sm">
                           <span className="text-yellow-500">🔒</span>
                           <span>
-                            {(isPlaceholder && schema.schema_nummer !== 1)
+                            {isPlaceholder
                               ? 'Binnenkort beschikbaar'
                               : isSchema2 
                               ? 'Vergrendeld - Voltooi Schema 1 eerst'
@@ -2179,29 +2149,21 @@ function TrainingschemasContent() {
                       <div className="flex gap-2">
                         <button
                           onClick={() => {
-                            console.log('🔘 Select button clicked:', { schemaId: schema.id, isLocked, schemaName: schema.name, schemaStatus: schema.status, isPlaceholder: schema.id.startsWith('placeholder-') });
+                            console.log('🔘 Select button clicked:', { schemaId: schema.id, isLocked, schemaName: schema.name });
                             if (!isLocked) {
-                              if (schema.id.startsWith('placeholder-') && schema.schema_nummer !== 1) {
-                                console.log('⚠️ Cannot select placeholder schema');
-                                toast.error('Dit schema is nog niet beschikbaar. Probeer een ander schema.');
-                              } else {
-                                console.log('🚀 Calling selectTrainingSchema with ID:', schema.id);
-                                selectTrainingSchema(schema.id);
-                              }
-                            } else {
-                              console.log('⚠️ Button is locked, not calling selectTrainingSchema');
+                              selectTrainingSchema(schema.id);
                             }
                           }}
-                          disabled={isLocked || (schema.id.startsWith('placeholder-') && schema.schema_nummer !== 1)}
+                          disabled={isLocked}
                           className={`flex-1 py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium transition-colors text-xs sm:text-sm ${
-                            isLocked || (schema.id.startsWith('placeholder-') && schema.schema_nummer !== 1)
+                            isLocked
                               ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
                               : selectedTrainingSchema === schema.id
                               ? 'bg-[#8BAE5A] text-[#232D1A] shadow-lg shadow-[#8BAE5A]/20'
                               : 'bg-[#3A4D23] text-white hover:bg-[#4A5D33]'
                           }`}
                         >
-                          {(isPlaceholder && schema.schema_nummer !== 1) ? 'Binnenkort' : schema.id.startsWith('placeholder-') ? 'Niet beschikbaar' : isLocked ? 'Vergrendeld' : selectedTrainingSchema === schema.id ? 'Geselecteerd' : (schema.schema_nummer === 1) ? (showOnboardingStep3 ? 'Selecteer Schema' : 'Start Schema') : 'Selecteer'}
+                          {isPlaceholder ? 'Binnenkort' : isLocked ? 'Vergrendeld' : selectedTrainingSchema === schema.id ? 'Geselecteerd' : 'Selecteer'}
                         </button>
                         <button
                           onClick={() => !isLocked && handlePrintSchema(schema.id)}
@@ -2220,47 +2182,6 @@ function TrainingschemasContent() {
                   );
                 })}
               </div>
-              
-              {/* Onboarding Next Step Button */}
-              {showOnboardingStep3 && selectedTrainingSchema && (
-                <div className="mt-6 flex justify-center">
-                  <button
-                    onClick={async () => {
-                      console.log('🎯 Onboarding: Proceeding to next step after schema selection');
-                      try {
-                        // Complete onboarding step 3
-                        const response = await fetch('/api/onboarding-v2/complete', {
-                          method: 'POST',
-                          headers: {
-                            'Content-Type': 'application/json',
-                          },
-                          body: JSON.stringify({
-                            step: 3,
-                            schemaId: selectedTrainingSchema
-                          }),
-                        });
-
-                        if (response.ok) {
-                          console.log('✅ Onboarding step 3 completed');
-                          toast.success('Trainingsschema geselecteerd! Ga door naar de volgende stap.');
-                          
-                          // Redirect to next step (nutrition plans)
-                          window.location.href = '/dashboard/voedingsplannen-v2';
-                        } else {
-                          console.error('❌ Error completing onboarding step 3');
-                          toast.error('Er is een fout opgetreden. Probeer het opnieuw.');
-                        }
-                      } catch (error) {
-                        console.error('❌ Error completing onboarding step 3:', error);
-                        toast.error('Er is een fout opgetreden. Probeer het opnieuw.');
-                      }
-                    }}
-                    className="px-8 py-4 bg-gradient-to-r from-[#8BAE5A] to-[#7A9D4A] text-[#232D1A] rounded-xl font-bold text-lg shadow-lg shadow-[#8BAE5A]/20 hover:shadow-[#8BAE5A]/30 transition-all duration-300 hover:scale-105"
-                  >
-                    🎯 Volgende Stap: Voedingsplan Kiezen
-                  </button>
-                </div>
-              )}
             )}
             </div>
           </motion.div>

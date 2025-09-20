@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
     // Get all user profiles
     const { data: profiles, error: profilesError } = await supabase
       .from('profiles')
-      .select('id, email, full_name, package_type, role, created_at')
+      .select('id, email, full_name, subscription_tier, role, created_at')
       .order('created_at', { ascending: false });
 
     if (profilesError) {
@@ -40,8 +40,8 @@ export async function GET(request: NextRequest) {
       /final.*tester/i
     ];
 
-    const testUsers = [];
-    const realUsers = [];
+    const testUsers: any[] = [];
+    const realUsers: any[] = [];
 
     profiles.forEach(profile => {
       const isTestUser = testUserPatterns.some(pattern => 
@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
           id: profile.id,
           email: profile.email,
           full_name: profile.full_name,
-          package_type: profile.package_type,
+          package_type: profile.subscription_tier,
           role: profile.role,
           created_at: profile.created_at,
           reason: getTestUserReason(profile)
@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
           id: profile.id,
           email: profile.email,
           full_name: profile.full_name,
-          package_type: profile.package_type,
+          package_type: profile.subscription_tier,
           role: profile.role,
           created_at: profile.created_at
         });
@@ -106,7 +106,7 @@ export async function GET(request: NextRequest) {
 }
 
 function getTestUserReason(profile: any): string {
-  const reasons = [];
+  const reasons: string[] = [];
   
   if (profile.email.includes('test')) reasons.push('Email contains "test"');
   if (profile.email.includes('onboarding')) reasons.push('Email contains "onboarding"');
