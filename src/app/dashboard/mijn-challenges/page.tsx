@@ -768,6 +768,7 @@ export default function MijnChallengesPage() {
   const deleteChallenge = async (missionId: string) => {
     if (!user?.id) return;
 
+    console.log('🗑️ Deleting challenge:', missionId, 'for user:', user.id);
     try {
       const response = await fetch('/api/missions-simple', {
         method: 'POST',
@@ -810,6 +811,7 @@ export default function MijnChallengesPage() {
 
   // Handle delete confirmation
   const handleDeleteClick = (mission: Challenge) => {
+    console.log('🗑️ Delete button clicked for mission:', mission.title, mission.id);
     setChallengeToDelete(mission);
     setShowDeleteConfirm(true);
   };
@@ -1179,10 +1181,10 @@ export default function MijnChallengesPage() {
                         </button>
                         <button
                           onClick={() => handleDeleteClick(mission)}
-                          className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold px-2 sm:px-3 py-2 rounded-lg transition-all duration-200 text-xs sm:text-sm"
+                          className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold px-3 sm:px-4 py-2 rounded-lg transition-all duration-200 text-sm sm:text-base flex items-center gap-1"
                           title="Verwijder challenge"
                         >
-                          🗑️
+                          🗑️ <span className="hidden sm:inline">Verwijder</span>
                         </button>
                       </div>
                     </div>
@@ -1241,10 +1243,10 @@ export default function MijnChallengesPage() {
                         </button>
                         <button
                           onClick={() => handleDeleteClick(mission)}
-                          className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold px-2 sm:px-3 py-2 rounded-lg transition-all duration-200 text-xs sm:text-sm"
+                          className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold px-3 sm:px-4 py-2 rounded-lg transition-all duration-200 text-sm sm:text-base flex items-center gap-1"
                           title="Verwijder challenge"
                         >
-                          🗑️
+                          🗑️ <span className="hidden sm:inline">Verwijder</span>
                         </button>
                       </div>
                     </div>

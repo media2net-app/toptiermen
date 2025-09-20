@@ -668,31 +668,7 @@ const ThreadPage = ({ params }: { params: { slug: string; id: string } }) => {
         </div>
       </div>
 
-      {/* Posts */}
-      <div className="space-y-4 sm:space-y-6">
-        <h2 className="text-lg sm:text-xl font-bold text-white">Reacties ({posts.length})</h2>
-        {posts.map((post) => (
-          <div key={post.id} className="bg-[#232D1A]/70 rounded-lg lg:rounded-xl p-4 sm:p-6 border border-[#3A4D23]/30">
-            <div className="prose prose-invert max-w-none mb-3 sm:mb-4">
-              <p className="text-[#E5E5E5] whitespace-pre-wrap text-sm sm:text-base">{post.content}</p>
-            </div>
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-4 text-xs sm:text-sm text-[#8BAE5A]">
-              <span>Door {post.author.first_name} {post.author.last_name}</span>
-              <span>{formatDate(post.created_at)}</span>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {posts.length === 0 && (
-        <div className="text-center text-white py-8 sm:py-12">
-          <div className="text-3xl sm:text-4xl mb-3 sm:mb-4">💬</div>
-          <h3 className="text-base sm:text-lg font-bold mb-2">Nog geen reacties</h3>
-          <p className="text-[#8BAE5A] text-sm sm:text-base">Wees de eerste om te reageren op dit topic!</p>
-        </div>
-      )}
-
-      {/* Reply Form */}
+      {/* Reply Form - Moved to top for better UX */}
       <div className="mt-6 sm:mt-8 bg-[#232D1A]/90 rounded-xl lg:rounded-2xl p-4 sm:p-6 border border-[#3A4D23]/40">
         <h3 className="text-base sm:text-lg font-bold text-white mb-3 sm:mb-4">Plaats een reactie</h3>
         {!currentUser ? (
@@ -745,6 +721,30 @@ const ThreadPage = ({ params }: { params: { slug: string; id: string } }) => {
           </>
         )}
       </div>
+
+      {/* Posts */}
+      <div className="space-y-4 sm:space-y-6 mt-6 sm:mt-8">
+        <h2 className="text-lg sm:text-xl font-bold text-white">Reacties ({posts.length})</h2>
+        {posts.map((post) => (
+          <div key={post.id} className="bg-[#232D1A]/70 rounded-lg lg:rounded-xl p-4 sm:p-6 border border-[#3A4D23]/30">
+            <div className="prose prose-invert max-w-none mb-3 sm:mb-4">
+              <p className="text-[#E5E5E5] whitespace-pre-wrap text-sm sm:text-base">{post.content}</p>
+            </div>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-4 text-xs sm:text-sm text-[#8BAE5A]">
+              <span>Door {post.author.first_name} {post.author.last_name}</span>
+              <span>{formatDate(post.created_at)}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {posts.length === 0 && (
+        <div className="text-center text-white py-8 sm:py-12">
+          <div className="text-3xl sm:text-4xl mb-3 sm:mb-4">💬</div>
+          <h3 className="text-base sm:text-lg font-bold mb-2">Nog geen reacties</h3>
+          <p className="text-[#8BAE5A] text-sm sm:text-base">Wees de eerste om te reageren op dit topic!</p>
+        </div>
+      )}
 
       {/* Onboarding Completion Popup - Sticky Top */}
       {showOnboardingCompletion && (

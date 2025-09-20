@@ -94,7 +94,7 @@ const menu = [
   { label: 'Trainingsschemas', icon: AcademicCapIcon, href: '/dashboard/trainingsschemas', onboardingStep: 3 },
   { label: 'Voedingsplannen', icon: RocketLaunchIcon, href: '/dashboard/voedingsplannen-v2', onboardingStep: 4 },
   { label: 'Mind & Focus (binnenkort online)', icon: ChartBarIcon, href: null, onboardingStep: 7, disabled: true },
-  { label: 'Brotherhood', icon: UsersIcon, href: '/dashboard/brotherhood', onboardingStep: 7 },
+  { label: 'Brotherhood', icon: UsersIcon, href: '/dashboard/brotherhood', onboardingStep: 5 },
   { label: 'Social Feed', icon: ChatBubbleLeftRightIcon, parent: 'Brotherhood', href: '/dashboard/brotherhood/social-feed', isSub: true, onboardingStep: 7 },
   { label: 'Forum', icon: FireIcon, parent: 'Brotherhood', href: '/dashboard/brotherhood/forum', isSub: true, onboardingStep: 5 },
   { label: 'Leden', icon: UsersIcon, parent: 'Brotherhood', href: '/dashboard/brotherhood/leden', isSub: true, onboardingStep: 7 },
@@ -185,7 +185,7 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
         if (item.label === 'Forum' && item.parent === 'Brotherhood') {
           return false; // Not disabled
         }
-        // Block everything else
+        // Block everything else during step 5
         return true;
       }
       
@@ -523,7 +523,7 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
         if (item.label === 'Forum' && item.parent === 'Brotherhood') {
           return false; // Not disabled
         }
-        // Block everything else
+        // Block everything else during step 5
         return true;
       }
       

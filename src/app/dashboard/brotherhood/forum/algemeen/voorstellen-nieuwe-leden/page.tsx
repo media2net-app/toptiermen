@@ -201,15 +201,15 @@ const VoorstellenTopicPage = () => {
         
         // Show success modal
         setShowSuccessModal(true);
-
-        // Scroll to top of page to show the sticky banner
+        console.log('🎉 Onboarding completed! Showing completion modal...');
+        
+        // Scroll to top to ensure modal is visible
         setTimeout(() => {
           window.scrollTo({
             top: 0,
             behavior: 'smooth'
           });
-          console.log('🎉 Onboarding completed! Showing completion banner at top of page...');
-        }, 300); // Small delay to ensure the banner is rendered
+        }, 100);
       }
 
     } catch (error) {
@@ -307,6 +307,64 @@ const VoorstellenTopicPage = () => {
 
   return (
     <div className="flex flex-col md:flex-row gap-8 md:gap-12 max-w-7xl mx-auto w-full px-2 sm:px-4 md:px-0">
+      {/* Success Modal - Fixed at top */}
+      {showSuccessModal && (
+        <>
+          {/* Full screen overlay */}
+          <div className="fixed inset-0 bg-black bg-opacity-90 z-[9998]" />
+          
+          {/* Centered modal */}
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: -20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              className="bg-[#232D1A] rounded-2xl shadow-2xl border border-[#3A4D23]/40 p-8 max-w-md w-full text-center"
+            >
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+                className="w-16 h-16 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] rounded-full flex items-center justify-center mx-auto mb-6"
+              >
+                <CheckCircleIcon className="w-8 h-8 text-[#181F17]" />
+              </motion.div>
+              
+              <motion.h2
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="text-2xl font-bold text-white mb-4"
+              >
+                Welkom bij de community! 🎉
+              </motion.h2>
+              
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="text-[#E5E5E5] mb-8 leading-relaxed"
+              >
+                Je hebt je succesvol voorgesteld aan de Top Tier Men community. Andere leden kunnen nu reageren op je introductie.
+              </motion.p>
+              
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+              >
+                <Link
+                  href="/dashboard/onboarding-completion"
+                  className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-bold rounded-xl hover:from-[#B6C948] hover:to-[#8BAE5A] transition-all transform hover:scale-105"
+                  onClick={() => setShowSuccessModal(false)}
+                >
+                  <CheckCircleIcon className="w-5 h-5 mr-2" />
+                  Onboarding voltooid - Ga naar dashboard
+                </Link>
+              </motion.div>
+            </motion.div>
+          </div>
+        </>
+      )}
       {/* Linkerkolom: Content */}
       <div className="flex-1">
         {/* Header */}
@@ -350,42 +408,12 @@ const VoorstellenTopicPage = () => {
           </div>
         </div>
 
-        {/* Posts */}
-        <div className="space-y-4 mb-8">
-          {posts.map((post) => (
-            <motion.div
-              key={post.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-[#232D1A] rounded-2xl shadow-xl border border-[#3A4D23] p-6"
-            >
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center">
-                  <div className="w-8 h-8 bg-[#3A4D23]/60 rounded-full flex items-center justify-center mr-3">
-                    <UserIcon className="w-4 h-4 text-[#8BAE5A]" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-white">{getAuthorName(post)}</p>
-                    <p className="text-sm text-[#8BAE5A]">{formatDate(post.created_at)}</p>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="prose prose-invert max-w-none">
-                <div className="whitespace-pre-wrap text-[#8BAE5A]">
-                  {post.content}
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* New Post Form */}
+        {/* New Post Form - Moved to top for better UX */}
         {user && !hasPosted && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-[#232D1A] rounded-2xl shadow-xl border border-[#3A4D23] p-6"
+            className="bg-[#232D1A] rounded-2xl shadow-xl border border-[#3A4D23] p-6 mb-8"
           >
             <h2 className="text-lg font-semibold text-white mb-4 flex items-center">
               <PlusIcon className="w-5 h-5 mr-2 text-[#FFD700]" />
@@ -423,6 +451,36 @@ const VoorstellenTopicPage = () => {
             </form>
           </motion.div>
         )}
+
+        {/* Posts */}
+        <div className="space-y-4 mb-8">
+          {posts.map((post) => (
+            <motion.div
+              key={post.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-[#232D1A] rounded-2xl shadow-xl border border-[#3A4D23] p-6"
+            >
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex items-center">
+                  <div className="w-8 h-8 bg-[#3A4D23]/60 rounded-full flex items-center justify-center mr-3">
+                    <UserIcon className="w-4 h-4 text-[#8BAE5A]" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-white">{getAuthorName(post)}</p>
+                    <p className="text-sm text-[#8BAE5A]">{formatDate(post.created_at)}</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="prose prose-invert max-w-none">
+                <div className="whitespace-pre-wrap text-[#8BAE5A]">
+                  {post.content}
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
 
         {user && hasPosted && (
           <motion.div
@@ -475,65 +533,6 @@ const VoorstellenTopicPage = () => {
         </div>
       </aside>
 
-      {/* Success Modal - Centered */}
-      {showSuccessModal && (
-        <>
-          {/* Full screen overlay */}
-          <div className="fixed inset-0 bg-black bg-opacity-90 z-[9998]" />
-          
-          {/* Centered modal */}
-          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: -20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              className="bg-[#232D1A] rounded-2xl shadow-2xl border border-[#3A4D23]/40 p-8 max-w-md w-full text-center"
-            >
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-              className="w-16 h-16 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] rounded-full flex items-center justify-center mx-auto mb-6"
-            >
-              <CheckCircleIcon className="w-8 h-8 text-[#181F17]" />
-            </motion.div>
-            
-            <motion.h2
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="text-2xl font-bold text-white mb-4"
-            >
-              Welkom bij de community! 🎉
-            </motion.h2>
-            
-            <motion.p
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="text-[#8BAE5A] mb-6"
-            >
-              Je hebt je succesvol voorgesteld aan de Top Tier Men community. 
-              Andere leden kunnen nu reageren op je introductie.
-            </motion.p>
-            
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-            >
-              <Link
-                href="/dashboard/onboarding-completion"
-                className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-bold rounded-xl hover:from-[#B6C948] hover:to-[#8BAE5A] transition-all transform hover:scale-105"
-                onClick={() => setShowSuccessModal(false)}
-              >
-                <CheckCircleIcon className="w-5 h-5 mr-2" />
-                Onboarding voltooid - Ga naar dashboard
-              </Link>
-            </motion.div>
-          </motion.div>
-        </div>
-        </>
-      )}
     </div>
   );
 };

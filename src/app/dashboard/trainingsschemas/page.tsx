@@ -951,11 +951,15 @@ function TrainingschemasContent() {
         const endDate = new Date(data.data.schema_end_date).toLocaleDateString('nl-NL');
         toast.success(`Trainingsschema geselecteerd! 8-weken periode gestart: ${startDate} - ${endDate}`);
           
-        // Always redirect to Mijn trainingen after schema selection
-        console.log('🔄 Redirecting to Mijn trainingen...');
-        setTimeout(() => {
-          router.push('/dashboard/mijn-trainingen');
-        }, 1500); // Small delay to show the success message
+        // Only redirect to Mijn trainingen if NOT in onboarding
+        if (isCompleted || onboardingStep !== 3) {
+          console.log('🔄 Redirecting to Mijn trainingen (not in onboarding)...');
+          setTimeout(() => {
+            router.push('/dashboard/mijn-trainingen');
+          }, 1500); // Small delay to show the success message
+        } else {
+          console.log('🎯 In onboarding step 3 - staying on page for next step');
+        }
         
         // Complete onboarding step if needed
         if (!isCompleted && onboardingStep === 3) {
