@@ -189,6 +189,12 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
         return true;
       }
       
+      // Special case for step 0 (video step): Only allow Onboarding menu item
+      if (actualCurrentStep === 0) {
+        // Only allow the Onboarding menu item during video step
+        return !item.isOnboardingItem;
+      }
+      
       // For other steps, only allow access to the current onboarding step
       const isCurrentStep = item.onboardingStep === actualCurrentStep;
       
@@ -525,6 +531,12 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
         }
         // Block everything else during step 5
         return true;
+      }
+      
+      // Special case for step 0 (video step): Only allow Onboarding menu item
+      if (actualCurrentStep === 0) {
+        // Only allow the Onboarding menu item during video step
+        return !item.isOnboardingItem;
       }
       
       // For other steps, only allow access to the current onboarding step
