@@ -1458,10 +1458,6 @@ function TrainingschemasContent() {
             <p className="text-gray-300">Even geduld, we controleren je inloggegevens</p>
           </div>
         </div>
-      </PageLayout>
-    );
-  }
-
   // Check if user is authenticated
   if (!user) {
     return (
@@ -1483,10 +1479,6 @@ function TrainingschemasContent() {
             </button>
           </div>
         </div>
-      </PageLayout>
-    );
-  }
-
   // Check subscription loading
   if (subscriptionLoading) {
     return (
@@ -1525,10 +1517,6 @@ function TrainingschemasContent() {
             </div>
           </div>
         </div>
-      </PageLayout>
-    );
-  }
-
   // Check access permissions for training schemas
   if (!hasAccess('training')) {
     return (
@@ -1592,10 +1580,6 @@ function TrainingschemasContent() {
             </div>
           </div>
         </div>
-      </PageLayout>
-    );
-  }
-
   return (
     <PageLayout title="Trainingsschemas">
       <OnboardingV2Progress />
@@ -2277,6 +2261,7 @@ function TrainingschemasContent() {
                   </button>
                 </div>
               )}
+            )}
             </div>
           </motion.div>
         )}
