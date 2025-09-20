@@ -600,7 +600,7 @@ function TrainingschemasContent() {
         }
         
         const placeholderSchema: TrainingSchema = {
-          id: `placeholder-${dbGoal}-${profile.equipment_type}-${profile.training_frequency}-${i}`,
+          id: i === 1 ? `schema-${dbGoal}-${profile.equipment_type}-${profile.training_frequency}-${i}` : `placeholder-${dbGoal}-${profile.equipment_type}-${profile.training_frequency}-${i}`,
           name: `${displayGoal} ${profile.training_frequency}x per week Schema ${i}`,
           description: schemaDescription,
           category: 'Gym',
@@ -2197,7 +2197,7 @@ function TrainingschemasContent() {
                           onClick={() => {
                             console.log('🔘 Select button clicked:', { schemaId: schema.id, isLocked, schemaName: schema.name, schemaStatus: schema.status, isPlaceholder: schema.id.startsWith('placeholder-') });
                             if (!isLocked) {
-                              if (schema.id.startsWith('placeholder-')) {
+                              if (schema.id.startsWith('placeholder-') && schema.schema_nummer !== 1) {
                                 console.log('⚠️ Cannot select placeholder schema');
                                 toast.error('Dit schema is nog niet beschikbaar. Probeer een ander schema.');
                               } else {
@@ -2208,9 +2208,9 @@ function TrainingschemasContent() {
                               console.log('⚠️ Button is locked, not calling selectTrainingSchema');
                             }
                           }}
-                          disabled={isLocked || schema.id.startsWith('placeholder-')}
+                          disabled={isLocked || (schema.id.startsWith('placeholder-') && schema.schema_nummer !== 1)}
                           className={`flex-1 py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium transition-colors text-xs sm:text-sm ${
-                            isLocked || schema.id.startsWith('placeholder-')
+                            isLocked || (schema.id.startsWith('placeholder-') && schema.schema_nummer !== 1)
                               ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
                               : selectedTrainingSchema === schema.id
                               ? 'bg-[#8BAE5A] text-[#232D1A] shadow-lg shadow-[#8BAE5A]/20'
