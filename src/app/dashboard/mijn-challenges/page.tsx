@@ -806,6 +806,11 @@ export default function MijnChallengesPage() {
     console.log('🗑️ Delete button clicked for mission:', mission.title, mission.id);
     setChallengeToDelete(mission);
     setShowDeleteConfirm(true);
+    
+    // Scroll to top to ensure modal is visible
+    setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 100);
   };
 
   // Handle ESC key to close modal
@@ -1354,8 +1359,17 @@ export default function MijnChallengesPage() {
         {/* Delete Confirmation Modal */}
         {showDeleteConfirm && missionToDelete && (
           <div 
-            className="fixed inset-0 bg-black bg-opacity-50 z-[9999] flex items-center justify-center p-4"
-            style={{ backdropFilter: 'blur(4px)' }}
+            className="fixed top-0 left-0 right-0 bottom-0 bg-black bg-opacity-50 z-[9999] flex items-center justify-center p-4"
+            style={{ 
+              backdropFilter: 'blur(4px)',
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              width: '100vw',
+              height: '100vh'
+            }}
             onClick={() => {
               setShowDeleteConfirm(false);
               setChallengeToDelete(null);
