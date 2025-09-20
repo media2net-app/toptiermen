@@ -191,6 +191,10 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
       
       // Special case for step 0 (video step): Only allow Onboarding menu item
       if (actualCurrentStep === 0) {
+        // Debug logging for step 0
+        if (typeof window !== 'undefined') {
+          console.log(`🔍 [STEP 0 DEBUG] ${item.label}: isOnboardingItem=${item.isOnboardingItem}, shouldDisable=${!item.isOnboardingItem}`);
+        }
         // Only allow the Onboarding menu item during video step
         return !item.isOnboardingItem;
       }
@@ -535,6 +539,10 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
       
       // Special case for step 0 (video step): Only allow Onboarding menu item
       if (actualCurrentStep === 0) {
+        // Debug logging for step 0
+        if (typeof window !== 'undefined') {
+          console.log(`🔍 [DESKTOP STEP 0 DEBUG] ${item.label}: isOnboardingItem=${item.isOnboardingItem}, shouldDisable=${!item.isOnboardingItem}`);
+        }
         // Only allow the Onboarding menu item during video step
         return !item.isOnboardingItem;
       }
