@@ -807,10 +807,10 @@ export default function MijnChallengesPage() {
     setChallengeToDelete(mission);
     setShowDeleteConfirm(true);
     
-    // Scroll to top to ensure modal is visible
+    // Scroll to top to ensure modal is visible and centered
     setTimeout(() => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, 100);
+    }, 50);
   };
 
   // Handle ESC key to close modal
@@ -1359,7 +1359,7 @@ export default function MijnChallengesPage() {
         {/* Delete Confirmation Modal */}
         {showDeleteConfirm && missionToDelete && (
           <div 
-            className="fixed top-0 left-0 right-0 bottom-0 bg-black bg-opacity-50 z-[9999] flex items-center justify-center p-4"
+            className="fixed inset-0 bg-black bg-opacity-50 z-[9999] flex items-center justify-center p-4"
             style={{ 
               backdropFilter: 'blur(4px)',
               position: 'fixed',
@@ -1368,7 +1368,10 @@ export default function MijnChallengesPage() {
               right: 0,
               bottom: 0,
               width: '100vw',
-              height: '100vh'
+              height: '100vh',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
             }}
             onClick={() => {
               setShowDeleteConfirm(false);
@@ -1376,7 +1379,11 @@ export default function MijnChallengesPage() {
             }}
           >
             <div 
-              className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border-2 border-red-600 rounded-2xl p-8 max-w-md w-full shadow-2xl relative z-[10000] max-h-[90vh] overflow-y-auto"
+              className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border-2 border-red-600 rounded-2xl p-8 max-w-md w-full shadow-2xl relative z-[10000] max-h-[90vh] overflow-y-auto mx-auto"
+              style={{
+                transform: 'translateY(0)',
+                margin: 'auto'
+              }}
               onClick={(e) => e.stopPropagation()}
             >
               <div className="text-center">
