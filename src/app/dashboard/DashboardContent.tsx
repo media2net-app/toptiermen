@@ -185,7 +185,7 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
         if (item.label === 'Forum' && item.parent === 'Brotherhood') {
           return false; // Not disabled
         }
-        // Block everything else during step 5
+        // Block everything else during step 5 - including Dashboard and its subitems
         return true;
       }
       
