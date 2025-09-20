@@ -630,7 +630,6 @@ const ThreadPage = ({ params }: { params: { slug: string; id: string } }) => {
 
   return (
     <div className="px-2 sm:px-4 md:px-8 lg:px-12">
-      
       {/* Debug Info */}
       <div className="mb-3 sm:mb-4 p-3 sm:p-4 bg-[#232D1A]/50 rounded-lg">
         <p className="text-xs sm:text-sm text-[#8BAE5A]">
@@ -749,52 +748,58 @@ const ThreadPage = ({ params }: { params: { slug: string; id: string } }) => {
 
       {/* Onboarding Completion Popup - Sticky Top */}
       {showOnboardingCompletion && (
-        <div className="fixed top-0 left-0 right-0 bg-black bg-opacity-95 backdrop-blur-sm z-50 p-4">
-          <div className="bg-[#232D1A] rounded-2xl border border-[#8BAE5A] p-6 max-w-4xl mx-auto">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="text-4xl">🎉</div>
-                <div>
-                  <h2 className="text-2xl font-bold text-white mb-1">
-                    GEFELICITEERD!
-                  </h2>
-                  <p className="text-[#8BAE5A] text-sm">
-                    Je hebt de onboarding succesvol voltooid!
-                  </p>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-3">
-                <div className="bg-gradient-to-br from-[#8BAE5A] to-[#FFD700] rounded-lg px-4 py-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">🏆</span>
-                    <span className="text-[#0A0F0A] font-bold text-sm">
-                      'Initiatie' Badge ontgrendeld!
-                    </span>
+        <>
+          {/* Full screen overlay */}
+          <div className="fixed inset-0 bg-black bg-opacity-90 z-[9998]" />
+          
+          {/* Sticky banner */}
+          <div className="fixed top-0 left-0 right-0 z-[9999] p-4">
+            <div className="bg-[#232D1A] rounded-2xl border border-[#8BAE5A] p-6 max-w-4xl mx-auto shadow-2xl">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="text-4xl">🎉</div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-white mb-1">
+                      GEFELICITEERD!
+                    </h2>
+                    <p className="text-[#8BAE5A] text-sm">
+                      Je hebt de onboarding succesvol voltooid!
+                    </p>
                   </div>
                 </div>
                 
-                <button
-                  onClick={() => {
-                    setShowOnboardingCompletion(false);
-                    window.location.href = '/dashboard';
-                  }}
-                  className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#0A0F0A] px-4 py-2 rounded-lg font-bold text-sm hover:from-[#A6C97B] hover:to-[#FFE55C] transition-all duration-200 flex items-center gap-2"
-                >
-                  <span>Start je reis</span>
-                  <span>→</span>
-                </button>
-                
-                <button
-                  onClick={() => setShowOnboardingCompletion(false)}
-                  className="bg-[#3A4D23] text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-[#4A5D33] transition-all duration-200"
-                >
-                  ✕
-                </button>
+                <div className="flex items-center gap-3">
+                  <div className="bg-gradient-to-br from-[#8BAE5A] to-[#FFD700] rounded-lg px-4 py-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">🏆</span>
+                      <span className="text-[#0A0F0A] font-bold text-sm">
+                        'Initiatie' Badge ontgrendeld!
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <button
+                    onClick={() => {
+                      setShowOnboardingCompletion(false);
+                      window.location.href = '/dashboard';
+                    }}
+                    className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#0A0F0A] px-4 py-2 rounded-lg font-bold text-sm hover:from-[#A6C97B] hover:to-[#FFE55C] transition-all duration-200 flex items-center gap-2"
+                  >
+                    <span>Start je reis</span>
+                    <span>→</span>
+                  </button>
+                  
+                  <button
+                    onClick={() => setShowOnboardingCompletion(false)}
+                    className="bg-[#3A4D23] text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-[#4A5D33] transition-all duration-200"
+                  >
+                    ✕
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   );

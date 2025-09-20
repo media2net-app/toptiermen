@@ -43,33 +43,36 @@ export function useChatNotifications(
           
           const newMessage = payload.new;
           
-          // Check if this message is for a conversation this user is part of
-          const { data: conversation } = await supabase
-            .from('chat_conversations')
-            .select('participant1_id, participant2_id')
-            .eq('id', newMessage.conversation_id)
-            .eq('is_active', true)
-            .single();
-
-          if (!conversation) return;
-
-          // Check if current user is part of this conversation
-          const isParticipant = conversation.participant1_id === user.id || conversation.participant2_id === user.id;
-          if (!isParticipant) return;
-
-          // Don't notify for own messages
+          // Don't notify for own messages (check first to avoid unnecessary queries)
           if (newMessage.sender_id === user.id) {
             return;
           }
 
-          // Get sender profile
-          const { data: senderProfile } = await supabase
-            .from('profiles')
-            .select('display_name, full_name')
-            .eq('id', newMessage.sender_id)
+          // OPTIMIZED: Single query to get conversation + sender info with join
+          const { data: conversationWithSender } = await supabase
+            .from('chat_conversations')
+            .select(`
+              participant1_id, 
+              participant2_id,
+              profiles!chat_conversations_participant1_id_fkey(display_name, full_name),
+              profiles!chat_conversations_participant2_id_fkey(display_name, full_name)
+            `)
+            .eq('id', newMessage.conversation_id)
+            .eq('is_active', true)
             .single();
 
-          const senderName = senderProfile?.display_name || senderProfile?.full_name || 'Onbekende gebruiker';
+          if (!conversationWithSender) return;
+
+          // Check if current user is part of this conversation
+          const isParticipant = conversationWithSender.participant1_id === user.id || conversationWithSender.participant2_id === user.id;
+          if (!isParticipant) return;
+
+          // Get sender name from the joined data
+          const senderProfile = newMessage.sender_id === conversationWithSender.participant1_id 
+            ? conversationWithSender.profiles 
+            : conversationWithSender.profiles;
+          
+          const senderName = (senderProfile as any)?.display_name || (senderProfile as any)?.full_name || 'Onbekende gebruiker';
 
           const notification: ChatNotification = {
             id: newMessage.id,

@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
       }, { status: 403 });
     }
 
-    // Fetch messages
+    // Fetch messages with pagination (limit to last 50 messages for performance)
     const { data: messages, error: msgError } = await supabase
       .from('chat_messages')
       .select(`
@@ -52,7 +52,8 @@ export async function GET(request: NextRequest) {
         sender_id
       `)
       .eq('conversation_id', conversationId)
-      .order('created_at', { ascending: true });
+      .order('created_at', { ascending: true })
+      .limit(50); // PERFORMANCE: Limit to last 50 messages
 
     if (msgError) {
       console.error('Error fetching messages:', msgError);

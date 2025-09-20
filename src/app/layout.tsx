@@ -89,9 +89,9 @@ export default function RootLayout({
           {/* <CacheBuster version="3.0.0" forceRefresh={true} /> - DISABLED TO PREVENT LOGOUT */}
           {/* <V2StateProvider> */}
           <SupabaseAuthProvider>
-            <OnboardingV2Provider>
-              {children}
-            </OnboardingV2Provider>
+        <OnboardingV2Provider>
+          {children}
+        </OnboardingV2Provider>
           </SupabaseAuthProvider>
           {/* </V2StateProvider> */}
           <SpeedInsights />

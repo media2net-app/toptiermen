@@ -168,7 +168,7 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
     if (actualCurrentStep !== null && actualCurrentStep !== undefined) {
       // Determine if this is the last step for the current user tier
       const isBasicTier = !hasTrainingAccess && !hasNutritionAccess;
-      const isLastStep = isBasicTier ? actualCurrentStep === 5 : actualCurrentStep === 5;
+      const isLastStep = actualCurrentStep === 5; // Forum intro is always the last step
       
       // Enhanced debug logging for step 5
       if (typeof window !== 'undefined' && actualCurrentStep === 5) {
@@ -267,8 +267,10 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
         
         if (!item.parent) {
           // During onboarding, only the current step should be active
+          // Special case for step 5: Brotherhood should be active when on forum pages
           const isActive = !isCompleted 
-            ? (safePathname === item.href && item.onboardingStep === actualCurrentStep)
+            ? (safePathname === item.href && item.onboardingStep === actualCurrentStep) ||
+              (actualCurrentStep === 5 && item.label === 'Brotherhood' && safePathname.includes('/brotherhood/forum'))
             : safePathname === item.href;
           const hasSubmenu = menu.some(sub => sub.parent === item.label);
 
@@ -278,7 +280,8 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
             const subItems = menu.filter(sub => sub.parent === item.label);
             const hasActiveSubItem = subItems.some(sub => 
               !isCompleted 
-                ? (sub.href === safePathname && sub.onboardingStep === actualCurrentStep)
+                ? (sub.href === safePathname && sub.onboardingStep === actualCurrentStep) ||
+                  (actualCurrentStep === 5 && sub.label === 'Forum' && safePathname.includes('/brotherhood/forum'))
                 : sub.href === safePathname
             );
             const allSubItemsDisabled = subItems.every(sub => isMenuItemDisabled(sub));
@@ -320,7 +323,8 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
                     >
                       {subItems.map(sub => {
                         const isSubActive = !isCompleted 
-                          ? (safePathname === sub.href && sub.onboardingStep === actualCurrentStep)
+                          ? (safePathname === sub.href && sub.onboardingStep === actualCurrentStep) ||
+                            (actualCurrentStep === 5 && sub.label === 'Forum' && safePathname.includes('/brotherhood/forum'))
                           : safePathname === sub.href;
                         const isHighlighted = false; // highlightedMenu not available in V2
                         const isDisabled = isMenuItemDisabled(sub);
@@ -502,7 +506,7 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
     if (actualCurrentStep !== null && actualCurrentStep !== undefined) {
       // Determine if this is the last step for the current user tier
       const isBasicTier = !hasTrainingAccess && !hasNutritionAccess;
-      const isLastStep = isBasicTier ? actualCurrentStep === 5 : actualCurrentStep === 5;
+      const isLastStep = actualCurrentStep === 5; // Forum intro is always the last step
       
       // Enhanced debug logging for step 5
       if (typeof window !== 'undefined' && actualCurrentStep === 5) {
@@ -595,8 +599,10 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
         
         if (!item.parent) {
           // During onboarding, only the current step should be active
+          // Special case for step 5: Brotherhood should be active when on forum pages
           const isActive = !isCompleted 
-            ? (safePathname === item.href && item.onboardingStep === actualCurrentStep)
+            ? (safePathname === item.href && item.onboardingStep === actualCurrentStep) ||
+              (actualCurrentStep === 5 && item.label === 'Brotherhood' && safePathname.includes('/brotherhood/forum'))
             : safePathname === item.href;
           const hasSubmenu = menu.some(sub => sub.parent === item.label);
 
@@ -606,7 +612,8 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
             const subItems = menu.filter(sub => sub.parent === item.label);
             const hasActiveSubItem = subItems.some(sub => 
               !isCompleted 
-                ? (sub.href === safePathname && sub.onboardingStep === actualCurrentStep)
+                ? (sub.href === safePathname && sub.onboardingStep === actualCurrentStep) ||
+                  (actualCurrentStep === 5 && sub.label === 'Forum' && safePathname.includes('/brotherhood/forum'))
                 : sub.href === safePathname
             );
             const allSubItemsDisabled = subItems.every(sub => isMenuItemDisabled(sub));
@@ -653,7 +660,8 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
                     >
                       {subItems.map(sub => {
                         const isSubActive = !isCompleted 
-                          ? (safePathname === sub.href && sub.onboardingStep === actualCurrentStep)
+                          ? (safePathname === sub.href && sub.onboardingStep === actualCurrentStep) ||
+                            (actualCurrentStep === 5 && sub.label === 'Forum' && safePathname.includes('/brotherhood/forum'))
                           : safePathname === sub.href;
                         const isHighlighted = false; // highlightedMenu not available in V2
                         const isDisabled = isMenuItemDisabled(sub);
@@ -891,12 +899,14 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
       const data = await response.json();
 
       if (response.ok && data.success) {
-        // Transform Onboarding V2 API response to match expected format
+        // Transform Onboarding V3 API response to match expected format
         const transformedData = {
-          onboarding_completed: data.onboarding.status?.onboarding_completed || data.onboarding.isCompleted,
-          current_step: data.onboarding.currentStep,
+          onboarding_completed: data.onboardingCompleted || false,
+          current_step: data.currentStep,
           user_id: user.id,
-          ...data.onboarding.status // Include the full status object if available
+          userTier: data.userTier,
+          completedSteps: data.completedSteps,
+          progress: data.progress
         };
         setOnboardingStatus(transformedData);
         // trackFeatureUsage('onboarding-status-check', user.id);
@@ -1287,9 +1297,7 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
         {/* Onboarding Banner - Removed */}
 
         {/* Modals and Components */}
-        <OnboardingV2Modal 
-          isOpen={showForcedOnboarding}
-        />
+        {/* OnboardingV2Modal moved to individual pages to prevent conflicts */}
 
         <TestUserVideoModal 
           isOpen={showTestUserVideo}

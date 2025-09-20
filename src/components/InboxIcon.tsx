@@ -38,7 +38,7 @@ export default function InboxIcon() {
       fetchMessages();
       
       // Set up polling for new messages every 30 seconds
-      const interval = setInterval(fetchMessages, 30000);
+      const interval = setInterval(fetchMessages, 120000); // OPTIMIZED: Changed from 30s to 2min
       return () => clearInterval(interval);
     }
   }, [user?.id]);

@@ -55,24 +55,24 @@ export async function middleware(req: NextRequest) {
           isCompleted = true;
           currentStep = null;
         } else {
-          // Determine current step based on completed flags
-          if (!onboardingStatus.welcome_video_shown) {
-            currentStep = 0; // Welcome video
-          } else if (!onboardingStatus.goal_set) {
-            currentStep = 1; // Set goal
-          } else if (!onboardingStatus.missions_selected) {
-            currentStep = 2; // Select challenges
-          } else if (hasTrainingAccess && !onboardingStatus.training_schema_selected) {
-            currentStep = 3; // Select training
-          } else if (hasNutritionAccess && !onboardingStatus.nutrition_plan_selected) {
-            currentStep = 4; // Select nutrition
-          } else if (!onboardingStatus.challenge_started) {
-            currentStep = 5; // Forum intro
-          } else {
-            // All steps completed, mark as completed
-            currentStep = null;
-            isCompleted = true;
-          }
+        // Determine current step based on completed flags (V2 logic)
+        if (!onboardingStatus.welcome_video_shown) {
+          currentStep = 0; // Welcome video
+        } else if (!onboardingStatus.goal_set) {
+          currentStep = 1; // Set goal
+        } else if (!onboardingStatus.missions_selected) {
+          currentStep = 2; // Select challenges
+        } else if (hasTrainingAccess && !onboardingStatus.training_schema_selected) {
+          currentStep = 3; // Select training
+        } else if (hasNutritionAccess && !onboardingStatus.nutrition_plan_selected) {
+          currentStep = 4; // Select nutrition
+        } else if (!onboardingStatus.challenge_started) {
+          currentStep = 5; // Forum intro
+        } else {
+          // All steps completed, mark as completed
+          currentStep = null;
+          isCompleted = true;
+        }
         }
       } else {
         // No onboarding data, start at step 0
@@ -95,8 +95,8 @@ export async function middleware(req: NextRequest) {
           case 0:
             redirectPath = '/dashboard/welcome-video';
             break;
-          case 1:
-            redirectPath = '/dashboard/profiel';
+          case 1: // Goal setting - stay on dashboard (modal will show)
+            redirectPath = '/dashboard';
             break;
           case 2:
             redirectPath = '/dashboard/mijn-challenges';
@@ -113,19 +113,20 @@ export async function middleware(req: NextRequest) {
         }
 
         // Special case: If user tries to access main dashboard during onboarding, redirect to current step
-        if (req.nextUrl.pathname === '/dashboard') {
+        // BUT allow dashboard access for step 1 (goal setting modal will show)
+        if (req.nextUrl.pathname === '/dashboard' && currentStep !== 1) {
           console.log(`🚫 Dashboard access blocked during onboarding: ${req.nextUrl.pathname} -> ${redirectPath} (step ${currentStep})`);
           return NextResponse.redirect(new URL(redirectPath, req.url));
         }
 
-        // Check if current path is allowed for this step
+        // Check if current path is allowed for this step (V2 logic)
         const allowedPaths = {
           0: ['/dashboard/welcome-video'],
-          1: ['/dashboard/welcome-video', '/dashboard/profiel'],
-          2: ['/dashboard/welcome-video', '/dashboard/profiel', '/dashboard/mijn-challenges'],
-          3: ['/dashboard/welcome-video', '/dashboard/profiel', '/dashboard/mijn-challenges', '/dashboard/trainingsschemas'],
-          4: ['/dashboard/welcome-video', '/dashboard/profiel', '/dashboard/mijn-challenges', '/dashboard/trainingsschemas', '/dashboard/voedingsplannen', '/dashboard/voedingsplannen-v2'],
-          5: ['/dashboard/welcome-video', '/dashboard/profiel', '/dashboard/mijn-challenges', '/dashboard/trainingsschemas', '/dashboard/voedingsplannen', '/dashboard/voedingsplannen-v2', '/dashboard/brotherhood/forum', '/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden']
+          1: ['/dashboard'], // Goal setting modal on dashboard
+          2: ['/dashboard/welcome-video', '/dashboard/profiel', '/dashboard/mijn-challenges', '/dashboard'],
+          3: ['/dashboard/welcome-video', '/dashboard/profiel', '/dashboard/mijn-challenges', '/dashboard/trainingsschemas', '/dashboard'], // Only premium
+          4: ['/dashboard/welcome-video', '/dashboard/profiel', '/dashboard/mijn-challenges', '/dashboard/trainingsschemas', '/dashboard/voedingsplannen', '/dashboard/voedingsplannen-v2', '/dashboard'], // Only premium
+          5: ['/dashboard/welcome-video', '/dashboard/profiel', '/dashboard/mijn-challenges', '/dashboard/trainingsschemas', '/dashboard/voedingsplannen', '/dashboard/voedingsplannen-v2', '/dashboard/brotherhood/forum', '/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden', '/dashboard']
         };
 
         const isAllowedPath = allowedPaths[currentStep]?.some(allowedPath => 

@@ -99,29 +99,39 @@ export default function Dashboard() {
   const { isCompleted, currentStep } = useOnboardingV2();
   const router = useRouter();
 
-  // Onboarding V2 redirect logic - redirect users to correct onboarding step
+  // Onboarding V2 redirect logic
   useEffect(() => {
     if (!user || !user.email) return;
     
     // If onboarding is not completed, redirect to the current step
     if (!isCompleted && currentStep !== null) {
-      console.log(`🔄 Onboarding V2 Dashboard Redirect: User on step ${currentStep}, redirecting...`);
+      console.log(`🔄 Onboarding V2 Dashboard Redirect: User on step ${currentStep}`);
       
-      let redirectPath = '/dashboard/welcome-video-v2';
+      let redirectPath = '/dashboard/welcome-video';
       
-      if (currentStep === 0) {
-        redirectPath = '/dashboard/welcome-video-v2';
-      } else if (currentStep === 1) {
-        // For step 1, stay on dashboard and show modal
-        return;
-      } else if (currentStep === 2) {
-        redirectPath = '/dashboard/mijn-challenges';
-      } else if (currentStep === 3) {
-        redirectPath = '/dashboard/trainingsschemas';
-      } else if (currentStep === 4) {
-        redirectPath = '/dashboard/voedingsplannen-v2';
-      } else if (currentStep === 5) {
-        redirectPath = '/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden';
+      // Map currentStep to correct redirect path
+      switch (currentStep) {
+        case 0: // Welcome video
+          redirectPath = '/dashboard/welcome-video';
+          break;
+        case 1: // Goal setting - stay on dashboard (modal will show)
+          console.log(`✅ Staying on dashboard for step 1 (goal setting modal)`);
+          return;
+        case 2: // Challenges
+          redirectPath = '/dashboard/mijn-challenges';
+          break;
+        case 3: // Training - only premium users
+          redirectPath = '/dashboard/trainingsschemas';
+          break;
+        case 4: // Nutrition - only premium users
+          redirectPath = '/dashboard/voedingsplannen-v2';
+          break;
+        case 5: // Forum intro
+          redirectPath = '/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden';
+          break;
+        default:
+          console.log(`⚠️ Unknown step ${currentStep}, staying on dashboard`);
+          return;
       }
       
       console.log(`🔄 Redirecting to: ${redirectPath}`);
@@ -129,7 +139,7 @@ export default function Dashboard() {
     }
   }, [user, isCompleted, currentStep, router]);
 
-  // 2.0.1: Fetch real dashboard data from database
+  // 2.0.1: Fetch real dashboard data from database - FIXED INFINITE LOOP + DEBOUNCED
   useEffect(() => {
     const fetchDashboardData = async () => {
       if (!user?.id) {
@@ -202,8 +212,13 @@ export default function Dashboard() {
       }
     };
 
-    fetchDashboardData();
-  }, [user?.id, authLoading, isCompleted]);
+    // OPTIMIZED: Debounce the API call to prevent excessive requests
+    const timeoutId = setTimeout(() => {
+      fetchDashboardData();
+    }, 500); // 500ms debounce
+
+    return () => clearTimeout(timeoutId);
+  }, [user?.id, authLoading]); // REMOVED isCompleted dependency to fix infinite loop
 
   // Check for onboarding completion badge unlock
   const checkOnboardingCompletionBadge = async (userId: string) => {
@@ -576,7 +591,7 @@ export default function Dashboard() {
 
       {/* Onboarding V2 Modal */}
       <OnboardingV2Modal 
-        isOpen={!isCompleted && (currentStep === 0 || currentStep === 1)}
+        isOpen={!isCompleted && currentStep !== null}
       />
     </div>
   );

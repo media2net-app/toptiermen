@@ -201,6 +201,15 @@ const VoorstellenTopicPage = () => {
         
         // Show success modal
         setShowSuccessModal(true);
+
+        // Scroll to top of page to show the sticky banner
+        setTimeout(() => {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+          console.log('🎉 Onboarding completed! Showing completion banner at top of page...');
+        }, 300); // Small delay to ensure the banner is rendered
       }
 
     } catch (error) {
@@ -466,14 +475,19 @@ const VoorstellenTopicPage = () => {
         </div>
       </aside>
 
-      {/* Success Modal */}
+      {/* Success Modal - Centered */}
       {showSuccessModal && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[9999] p-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            className="bg-[#232D1A] rounded-2xl shadow-2xl border border-[#3A4D23]/40 p-8 max-w-md w-full text-center"
-          >
+        <>
+          {/* Full screen overlay */}
+          <div className="fixed inset-0 bg-black bg-opacity-90 z-[9998]" />
+          
+          {/* Centered modal */}
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: -20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              className="bg-[#232D1A] rounded-2xl shadow-2xl border border-[#3A4D23]/40 p-8 max-w-md w-full text-center"
+            >
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
@@ -518,6 +532,7 @@ const VoorstellenTopicPage = () => {
             </motion.div>
           </motion.div>
         </div>
+        </>
       )}
     </div>
   );

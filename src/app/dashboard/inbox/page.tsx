@@ -85,13 +85,32 @@ export default function Inbox() {
         setChatMessages(prev => [...prev, newMessage]);
       }
       
-      // Update conversation list to show new message
-      fetchConversations();
+      // OPTIMIZED: Update specific conversation instead of refetching all
+      setConversations(prev => prev.map(conv => {
+        if (conv.id === notification.conversationId) {
+          return {
+            ...conv,
+            lastMessage: {
+              content: notification.content,
+              time: notification.timestamp,
+              fromMe: false
+            },
+            updatedAt: notification.timestamp,
+            unreadCount: conv.id === selectedConversation?.id ? conv.unreadCount : conv.unreadCount + 1
+          };
+        }
+        return conv;
+      }));
     },
     // onConversationUpdate callback
     (conversationId) => {
       console.log('💬 Conversation updated:', conversationId);
-      fetchConversations();
+      // OPTIMIZED: Only refetch if really necessary, use debounced approach
+      const timeoutId = setTimeout(() => {
+        fetchConversations();
+      }, 1000); // Debounce by 1 second
+      
+      return () => clearTimeout(timeoutId);
     }
   );
 
