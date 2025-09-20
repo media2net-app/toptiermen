@@ -297,9 +297,7 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
           // Special case for step 5: Brotherhood should be active when on forum pages
           const isActive = !isCompleted 
             ? (safePathname === item.href && item.onboardingStep === actualCurrentStep) ||
-              (actualCurrentStep === 5 && item.label === 'Brotherhood' && safePathname.includes('/brotherhood/forum')) ||
-              // Special case: If user is on trainingsschemas page during step 5, keep Trainingsschemas active
-              (actualCurrentStep === 5 && item.label === 'Trainingsschemas' && safePathname.includes('/trainingsschemas'))
+              (actualCurrentStep === 5 && item.label === 'Brotherhood' && safePathname.includes('/brotherhood/forum'))
             : safePathname === item.href;
           const hasSubmenu = menu.some(sub => sub.parent === item.label);
 
@@ -310,9 +308,7 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
             const hasActiveSubItem = subItems.some(sub => 
               !isCompleted 
                 ? (sub.href === safePathname && sub.onboardingStep === actualCurrentStep) ||
-                  (actualCurrentStep === 5 && sub.label === 'Forum' && safePathname.includes('/brotherhood/forum')) ||
-                  // Special case: If user is on trainingsschemas page during step 5, keep Trainingsschemas active
-                  (actualCurrentStep === 5 && sub.label === 'Trainingsschemas' && safePathname.includes('/trainingsschemas'))
+                  (actualCurrentStep === 5 && sub.label === 'Forum' && safePathname.includes('/brotherhood/forum'))
                 : sub.href === safePathname
             );
             const allSubItemsDisabled = subItems.every(sub => isMenuItemDisabled(sub));
@@ -660,9 +656,7 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
           // Special case for step 5: Brotherhood should be active when on forum pages
           const isActive = !isCompleted 
             ? (safePathname === item.href && item.onboardingStep === actualCurrentStep) ||
-              (actualCurrentStep === 5 && item.label === 'Brotherhood' && safePathname.includes('/brotherhood/forum')) ||
-              // Special case: If user is on trainingsschemas page during step 5, keep Trainingsschemas active
-              (actualCurrentStep === 5 && item.label === 'Trainingsschemas' && safePathname.includes('/trainingsschemas'))
+              (actualCurrentStep === 5 && item.label === 'Brotherhood' && safePathname.includes('/brotherhood/forum'))
             : safePathname === item.href;
           const hasSubmenu = menu.some(sub => sub.parent === item.label);
 
@@ -673,9 +667,7 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
             const hasActiveSubItem = subItems.some(sub => 
               !isCompleted 
                 ? (sub.href === safePathname && sub.onboardingStep === actualCurrentStep) ||
-                  (actualCurrentStep === 5 && sub.label === 'Forum' && safePathname.includes('/brotherhood/forum')) ||
-                  // Special case: If user is on trainingsschemas page during step 5, keep Trainingsschemas active
-                  (actualCurrentStep === 5 && sub.label === 'Trainingsschemas' && safePathname.includes('/trainingsschemas'))
+                  (actualCurrentStep === 5 && sub.label === 'Forum' && safePathname.includes('/brotherhood/forum'))
                 : sub.href === safePathname
             );
             const allSubItemsDisabled = subItems.every(sub => isMenuItemDisabled(sub));
