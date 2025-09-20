@@ -375,7 +375,6 @@ export default function MijnChallengesPage() {
         
         // Check if user is in onboarding step 2 or 3 and has enough challenges
         if ((currentStep === 2 || currentStep === 3) && !isCompleted && challenges.length >= 2) { // 2 because we just added one, so total will be 3
-          console.log('🔧 DEBUG: User has 3 challenges from library, showing continue button');
           setShowContinueButton(true);
           toast.success('Perfect! Je hebt 3 challenges toegevoegd. Klik op "Ga verder" om door te gaan.');
         }
@@ -398,7 +397,6 @@ export default function MijnChallengesPage() {
     
     // For onboarding V2 users on step 2 or 3, show the challenge library and guidance
     if (isOnboardingStep2Or3 && !isCompleted) {
-      console.log('🔧 DEBUG: User is on onboarding step', currentStep, ', showing challenge library');
       // Only show popup once per session - check localStorage
       const hasSeenPopup = localStorage.getItem('challenges-popup-seen');
       if (!hasSeenPopup) {
@@ -433,7 +431,6 @@ export default function MijnChallengesPage() {
     
     // Show continue button if user is on step 2 or 3 and has 3+ challenges
     if ((currentStep === 2 || currentStep === 3) && !isCompleted && challenges.length >= 3) {
-      console.log('🔧 DEBUG: User already has 3 challenges, showing continue button');
       setShowContinueButton(true);
     } else {
       setShowContinueButton(false);
@@ -692,7 +689,6 @@ export default function MijnChallengesPage() {
 
         // Check if user is in onboarding step 2 or 3 and has enough challenges
         if ((currentStep === 2 || currentStep === 3) && !isCompleted && challenges.length >= 2) { // 2 because we just added one, so total will be 3
-          console.log('🔧 DEBUG: User has 3 challenges, showing continue button');
           setShowContinueButton(true);
           toast.success('Perfect! Je hebt 3 challenges toegevoegd. Klik op "Ga verder" om door te gaan.');
         }
@@ -708,8 +704,6 @@ export default function MijnChallengesPage() {
     if (!user?.id || isCompleted) return;
     
     try {
-      console.log('🔧 DEBUG: Completing onboarding step with currentStep:', currentStep, 'challenges:', challenges.length);
-      
       // Determine which step to complete based on current state
       let stepToComplete = currentStep;
       let stepData: any = {};
@@ -724,13 +718,11 @@ export default function MijnChallengesPage() {
         };
       } else if (currentStep === 3) {
         // User is on step 3 (challenges)
-        console.log('🔧 DEBUG: User on step 3, completing step 3');
         stepData = { 
           challenges: challenges.map(c => c.id),
           completeOnboarding: !hasTrainingAccess && !hasNutritionAccess
         };
       } else {
-        console.log('🔧 DEBUG: Invalid current step for completion:', currentStep);
         return;
       }
       
@@ -901,14 +893,6 @@ export default function MijnChallengesPage() {
         <OnboardingNotice />
 
         {/* DEBUG: Show current state */}
-        {(currentStep === 2 || currentStep === 3) && !isCompleted && (
-          <div className="bg-blue-500/20 border border-blue-500/30 rounded-xl p-4 mb-4 text-center">
-            <p className="text-white text-sm">
-              🔧 DEBUG: currentStep={currentStep}, isCompleted={isCompleted ? 'true' : 'false'}, 
-              challenges={challenges.length}, showContinueButton={showContinueButton ? 'true' : 'false'}
-            </p>
-          </div>
-        )}
 
         {/* Onboarding Continue Button - Shows when user has 3+ challenges */}
         {showContinueButton && (currentStep === 2 || currentStep === 3) && !isCompleted && (
@@ -927,33 +911,6 @@ export default function MijnChallengesPage() {
           </div>
         )}
 
-        {/* Onboarding Step 2 & 3 - General Continue Button (shows even without 3 challenges) */}
-        {(currentStep === 2 || currentStep === 3) && !isCompleted && !showContinueButton && (
-          <div className="bg-gradient-to-r from-[#8BAE5A]/10 to-[#FFD700]/10 border border-[#8BAE5A]/20 rounded-2xl p-6 mb-8 text-center">
-            <div className="text-4xl mb-4">🔥</div>
-            <h3 className="text-2xl font-bold text-white mb-2">Uitdagingen Selecteren</h3>
-            <p className="text-[#8BAE5A] mb-4">
-              Voeg 3 uitdagingen toe die je dagelijks wilt voltooien. Je kunt kiezen uit onze bibliotheek of je eigen challenges maken.
-            </p>
-            <p className="text-gray-300 text-sm mb-6">
-              Huidige challenges: {challenges.length} / 3 aanbevolen
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button
-                onClick={() => setShowChallengeLibrary(true)}
-                className="bg-gradient-to-r from-[#8BAE5A] to-[#6B8E3A] hover:from-[#7A9E4A] hover:to-[#5A7A2F] text-white font-semibold px-6 py-3 rounded-xl transition-all duration-300"
-              >
-                📚 Challenge Bibliotheek
-              </button>
-              <button
-                onClick={completeOnboardingStep}
-                className="bg-gradient-to-r from-[#FFD700] to-[#FFA500] hover:from-[#E6C200] hover:to-[#FF8C00] text-[#181F17] font-semibold px-6 py-3 rounded-xl transition-all duration-300"
-              >
-                ➡️ Opslaan en door naar volgende stap
-              </button>
-            </div>
-          </div>
-        )}
 
         {/* Onboarding Popup - Positioned at top for challenges page */}
         {showOnboardingPopup && (
