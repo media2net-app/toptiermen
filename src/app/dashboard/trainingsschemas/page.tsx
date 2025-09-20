@@ -586,7 +586,7 @@ function TrainingschemasContent() {
           // Schema 1 is always available
           schemaStatus = 'published';
           schemaDescription = `Schema 1 voor ${displayGoal} met ${displayEquipment} - Direct beschikbaar`;
-          schemaAction = 'Start Schema';
+          schemaAction = 'Selecteer Schema';
         } else if (i === 2) {
           // Schema 2 is coming soon (unlocked after completing schema 1)
           schemaStatus = 'coming_soon';
@@ -2217,7 +2217,7 @@ function TrainingschemasContent() {
                               : 'bg-[#3A4D23] text-white hover:bg-[#4A5D33]'
                           }`}
                         >
-                          {(isPlaceholder && schema.schema_nummer !== 1) ? 'Binnenkort' : schema.id.startsWith('placeholder-') ? 'Niet beschikbaar' : isLocked ? 'Vergrendeld' : selectedTrainingSchema === schema.id ? 'Geselecteerd' : (schema.schema_nummer === 1) ? 'Start Schema' : 'Selecteer'}
+                          {(isPlaceholder && schema.schema_nummer !== 1) ? 'Binnenkort' : schema.id.startsWith('placeholder-') ? 'Niet beschikbaar' : isLocked ? 'Vergrendeld' : selectedTrainingSchema === schema.id ? 'Geselecteerd' : (schema.schema_nummer === 1) ? (showOnboardingStep3 ? 'Selecteer Schema' : 'Start Schema') : 'Selecteer'}
                         </button>
                         <button
                           onClick={() => !isLocked && handlePrintSchema(schema.id)}
@@ -2236,6 +2236,47 @@ function TrainingschemasContent() {
                   );
                 })}
               </div>
+              
+              {/* Onboarding Next Step Button */}
+              {showOnboardingStep3 && selectedTrainingSchema && (
+                <div className="mt-6 flex justify-center">
+                  <button
+                    onClick={async () => {
+                      console.log('🎯 Onboarding: Proceeding to next step after schema selection');
+                      try {
+                        // Complete onboarding step 3
+                        const response = await fetch('/api/onboarding-v2/complete', {
+                          method: 'POST',
+                          headers: {
+                            'Content-Type': 'application/json',
+                          },
+                          body: JSON.stringify({
+                            step: 3,
+                            schemaId: selectedTrainingSchema
+                          }),
+                        });
+
+                        if (response.ok) {
+                          console.log('✅ Onboarding step 3 completed');
+                          toast.success('Trainingsschema geselecteerd! Ga door naar de volgende stap.');
+                          
+                          // Redirect to next step (nutrition plans)
+                          window.location.href = '/dashboard/voedingsplannen-v2';
+                        } else {
+                          console.error('❌ Error completing onboarding step 3');
+                          toast.error('Er is een fout opgetreden. Probeer het opnieuw.');
+                        }
+                      } catch (error) {
+                        console.error('❌ Error completing onboarding step 3:', error);
+                        toast.error('Er is een fout opgetreden. Probeer het opnieuw.');
+                      }
+                    }}
+                    className="px-8 py-4 bg-gradient-to-r from-[#8BAE5A] to-[#7A9D4A] text-[#232D1A] rounded-xl font-bold text-lg shadow-lg shadow-[#8BAE5A]/20 hover:shadow-[#8BAE5A]/30 transition-all duration-300 hover:scale-105"
+                  >
+                    🎯 Volgende Stap: Voedingsplan Kiezen
+                  </button>
+                </div>
+              )}
             )}
             </div>
           </motion.div>
