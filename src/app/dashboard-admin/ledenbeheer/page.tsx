@@ -676,6 +676,7 @@ export default function Ledenbeheer() {
     }
 
     // Show live logs popup
+    console.log('🔄 Setting popup state to true');
     setShowResetLogs(true);
     setResetLogs([]);
     setIsResetting(true);
@@ -1888,6 +1889,7 @@ export default function Ledenbeheer() {
       )}
 
       {/* Reset Logs Popup */}
+      {console.log('🔍 Popup render check - showResetLogs:', showResetLogs)}
       {showResetLogs && (
         <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-[9999] p-4">
           <div className="bg-[#181F17] border border-[#3A4D23] rounded-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden shadow-2xl">
