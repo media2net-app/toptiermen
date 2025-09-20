@@ -1592,6 +1592,10 @@ function TrainingschemasContent() {
             </div>
           </div>
         </div>
+      </PageLayout>
+    );
+  }
+
   return (
     <PageLayout title="Trainingsschemas">
       <OnboardingV2Progress />
@@ -2273,7 +2277,6 @@ function TrainingschemasContent() {
                   </button>
                 </div>
               )}
-            )}
             </div>
           </motion.div>
         )}
