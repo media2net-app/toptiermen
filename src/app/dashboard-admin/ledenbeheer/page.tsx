@@ -79,6 +79,9 @@ export default function Ledenbeheer() {
   const [loadingMembers, setLoadingMembers] = useState(false);
   const [showAddUserModal, setShowAddUserModal] = useState(false);
   const [addingUser, setAddingUser] = useState(false);
+  const [showResetLogs, setShowResetLogs] = useState(false);
+  const [resetLogs, setResetLogs] = useState<Array<{message: string, timestamp: string, type: 'info' | 'success' | 'error'}>>([]);
+  const [isResetting, setIsResetting] = useState(false);
   const [newUserData, setNewUserData] = useState({
     email: '',
     full_name: '',
@@ -672,44 +675,99 @@ export default function Ledenbeheer() {
       return;
     }
 
+    // Show live logs popup
+    setShowResetLogs(true);
+    setResetLogs([]);
+    setIsResetting(true);
+
     try {
-      setIsLoading(true);
-      
-      const response = await fetch('/api/admin/reset-onboarding', {
+      const response = await fetch('/api/admin/reset-onboarding-live', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          userId: editingMember.id
+          userId: editingMember.id,
+          email: editingMember.email
         }),
       });
 
-      const data = await response.json();
+      if (!response.ok) {
+        throw new Error('Failed to start reset process');
+      }
 
-      if (response.ok) {
-        toast.success('✅ Gebruiker volledig gereset! Alle data gewist. Gebruiker kan nu vanaf stap 0 beginnen.', {
-          position: "top-right",
-          duration: 5000,
-        });
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+
+      if (!reader) {
+        throw new Error('No response body');
+      }
+
+      while (true) {
+        const { done, value } = await reader.read();
         
-        // Refresh members list
-        fetchMembers();
-        setShowEditModal(false);
-      } else {
-        toast.error(data.error || 'Er is een fout opgetreden bij het resetten', {
-          position: "top-right",
-          duration: 3000,
-        });
+        if (done) break;
+
+        const chunk = decoder.decode(value);
+        const lines = chunk.split('\n');
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const data = JSON.parse(line.slice(6));
+              
+              if (data.completed) {
+                setResetLogs(prev => [...prev, { message: data.message, timestamp: data.timestamp, type: 'success' }]);
+                setIsResetting(false);
+                
+                // Show success toast
+                toast.success('✅ Gebruiker volledig gereset! Alle data gewist. Gebruiker kan nu vanaf stap 0 beginnen.', {
+                  position: "top-right",
+                  duration: 5000,
+                });
+                
+                // Refresh members list
+                fetchMembers();
+                setShowEditModal(false);
+                
+                // Close logs popup after 3 seconds
+                setTimeout(() => {
+                  setShowResetLogs(false);
+                }, 3000);
+                
+                return;
+              } else if (data.error) {
+                setResetLogs(prev => [...prev, { message: data.message, timestamp: data.timestamp, type: 'error' }]);
+                setIsResetting(false);
+                
+                toast.error(`❌ Reset failed: ${data.message}`, {
+                  position: "top-right",
+                  duration: 5000,
+                });
+                
+                return;
+              } else if (data.message) {
+                setResetLogs(prev => [...prev, { message: data.message, timestamp: data.timestamp, type: 'info' }]);
+              }
+            } catch (e) {
+              // Ignore malformed JSON
+            }
+          }
+        }
       }
     } catch (error) {
       console.error('Error resetting onboarding:', error);
+      setResetLogs(prev => [...prev, { 
+        message: `❌ Error: ${error instanceof Error ? error.message : 'Unknown error'}`, 
+        timestamp: new Date().toISOString(), 
+        type: 'error' 
+      }]);
+      setIsResetting(false);
+      
       toast.error('Er is een fout opgetreden bij het resetten', {
         position: "top-right",
         duration: 3000,
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -1824,6 +1882,73 @@ export default function Ledenbeheer() {
               >
                 Gebruiker Aanmaken
               </AdminButton>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reset Logs Popup */}
+      {showResetLogs && (
+        <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-[9999] p-4">
+          <div className="bg-[#181F17] border border-[#3A4D23] rounded-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden shadow-2xl">
+            <div className="p-6 border-b border-[#3A4D23]">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-bold text-white">
+                  🔄 Onboarding Reset - Live Logs
+                </h3>
+                <button
+                  onClick={() => setShowResetLogs(false)}
+                  className="text-gray-400 hover:text-white transition-colors"
+                  disabled={isResetting}
+                >
+                  <XMarkIcon className="w-6 h-6" />
+                </button>
+              </div>
+              <p className="text-sm text-gray-400 mt-2">
+                Resetting onboarding for: {editingMember?.email}
+              </p>
+            </div>
+            
+            <div className="p-6">
+              <div className="bg-black rounded-lg p-4 h-96 overflow-y-auto font-mono text-sm">
+                {resetLogs.length === 0 ? (
+                  <div className="text-gray-500 flex items-center gap-2">
+                    <div className="animate-spin w-4 h-4 border-2 border-[#8BAE5A] border-t-transparent rounded-full"></div>
+                    Starting reset process...
+                  </div>
+                ) : (
+                  <div className="space-y-1">
+                    {resetLogs.map((log, index) => (
+                      <div key={index} className={`flex items-start gap-2 ${
+                        log.type === 'error' ? 'text-red-400' :
+                        log.type === 'success' ? 'text-green-400' :
+                        'text-gray-300'
+                      }`}>
+                        <span className="text-gray-500 text-xs mt-0.5 min-w-[60px]">
+                          {new Date(log.timestamp).toLocaleTimeString()}
+                        </span>
+                        <span className="flex-1">{log.message}</span>
+                      </div>
+                    ))}
+                    {isResetting && (
+                      <div className="text-gray-500 flex items-center gap-2 mt-2">
+                        <div className="animate-spin w-4 h-4 border-2 border-[#8BAE5A] border-t-transparent rounded-full"></div>
+                        Processing...
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+              
+              <div className="mt-4 flex justify-end">
+                <button
+                  onClick={() => setShowResetLogs(false)}
+                  className="px-4 py-2 bg-[#3A4D23] text-white rounded-lg hover:bg-[#4A5D33] transition-colors"
+                  disabled={isResetting}
+                >
+                  {isResetting ? 'Processing...' : 'Close'}
+                </button>
+              </div>
             </div>
           </div>
         </div>
