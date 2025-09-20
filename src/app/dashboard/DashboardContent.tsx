@@ -159,7 +159,24 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
     if (item.disabled) return true;
     
     // If onboarding is completed, no items should be disabled (except explicitly disabled ones)
-    if (actualOnboardingStatus?.onboarding_completed) return false;
+    // BUT: If user is still on step 5 (Forum intro), only allow Brotherhood > Forum
+    if (actualOnboardingStatus?.onboarding_completed) {
+      // Special case: If user completed onboarding but is still on forum intro step
+      // Only allow Brotherhood > Forum access
+      if (actualCurrentStep === 5 || safePathname.includes('/brotherhood/forum')) {
+        // Allow Brotherhood parent item (so it can be expanded)
+        if (item.label === 'Brotherhood') {
+          return false; // Not disabled - allow expansion
+        }
+        // Allow Brotherhood > Forum access
+        if (item.label === 'Forum' && item.parent === 'Brotherhood') {
+          return false; // Not disabled
+        }
+        // Block everything else during forum intro
+        return true;
+      }
+      return false;
+    }
     
     // If no onboarding status, allow all items
     if (!actualOnboardingStatus) return false;
@@ -507,7 +524,24 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
     if (item.disabled) return true;
     
     // If onboarding is completed, no items should be disabled (except explicitly disabled ones)
-    if (actualOnboardingStatus?.onboarding_completed) return false;
+    // BUT: If user is still on step 5 (Forum intro), only allow Brotherhood > Forum
+    if (actualOnboardingStatus?.onboarding_completed) {
+      // Special case: If user completed onboarding but is still on forum intro step
+      // Only allow Brotherhood > Forum access
+      if (actualCurrentStep === 5 || safePathname.includes('/brotherhood/forum')) {
+        // Allow Brotherhood parent item (so it can be expanded)
+        if (item.label === 'Brotherhood') {
+          return false; // Not disabled - allow expansion
+        }
+        // Allow Brotherhood > Forum access
+        if (item.label === 'Forum' && item.parent === 'Brotherhood') {
+          return false; // Not disabled
+        }
+        // Block everything else during forum intro
+        return true;
+      }
+      return false;
+    }
     
     // If no onboarding status, allow all items
     if (!actualOnboardingStatus) return false;
