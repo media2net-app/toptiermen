@@ -62,15 +62,27 @@ export async function POST(request: Request) {
 
     // Insert exercises if provided
     if (exercises.length > 0) {
-      const exerciseData = exercises.map((exercise: any) => ({
-        session_id: sessionId,
-        exercise_name: exercise.name,
-        sets_completed: exercise.sets || 0,
-        reps_completed: exercise.reps || 0,
-        weight_kg: exercise.weight || null,
-        rest_time_seconds: exercise.restTime || 0,
-        notes: exercise.notes || null
-      }));
+      const exerciseData = exercises.map((exercise: any) => {
+        // Parse reps - handle both "3-6" format and numeric values
+        let repsCompleted = 0;
+        if (typeof exercise.reps === 'string') {
+          // Extract first number from "3-6" format
+          const match = exercise.reps.match(/(\d+)/);
+          repsCompleted = match ? parseInt(match[1]) : 0;
+        } else if (typeof exercise.reps === 'number') {
+          repsCompleted = exercise.reps;
+        }
+
+        return {
+          session_id: sessionId,
+          exercise_name: exercise.name,
+          sets_completed: exercise.sets || 0,
+          reps_completed: repsCompleted,
+          weight_kg: exercise.weight || null,
+          rest_time_seconds: exercise.restTime || 0,
+          notes: exercise.notes || null
+        };
+      });
 
       const { error: exerciseError } = await supabase
         .from('workout_exercises')
@@ -107,6 +119,8 @@ export async function POST(request: Request) {
             schema_day_id: dayData.id,
             completed: true,
             completed_at: new Date().toISOString()
+          }, {
+            onConflict: 'user_id,schema_day_id'
           });
 
         if (dayProgressError) {
@@ -123,7 +137,7 @@ export async function POST(request: Request) {
           user_id: sessionData.user_id,
           schema_id: sessionData.schema_id,
           current_day: sessionData.day_number + 1,
-          completed_days: sessionData.day_number,
+          days_completed: sessionData.day_number,
           updated_at: new Date().toISOString()
         }, {
           onConflict: 'user_id,schema_id'

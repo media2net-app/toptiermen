@@ -38,13 +38,18 @@ import SupportButton from '@/components/SupportButton';
 // Workout Widget Component
 const WorkoutWidget = () => {
   const { session, stopWorkout } = useWorkoutSession();
+  const pathname = usePathname();
   
   if (!session) return null;
+  
+  // Hide the global widget if we're on a workout page (they have their own widget with completion callback)
+  if (pathname?.includes('/trainingscentrum/workout/')) {
+    return null;
+  }
   
   return (
     <FloatingWorkoutWidget
       session={session}
-      onClose={stopWorkout}
       onResume={() => {}}
     />
   );

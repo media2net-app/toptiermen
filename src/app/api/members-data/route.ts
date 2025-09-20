@@ -111,8 +111,26 @@ export async function GET() {
       });
     }
 
-    // Step 5: Enrich ALL profiles with data
-    const enrichedMembers = (allProfiles || []).map(profile => {
+    // Step 5: Filter out test users (same logic as Admin Ledenbeheer)
+    const isTestUser = (profile: any) => {
+      return profile.email?.includes('test') || 
+             profile.full_name?.toLowerCase().includes('test') ||
+             profile.email?.includes('onboarding.') ||
+             profile.email?.includes('final.') ||
+             profile.email?.includes('premium.test') ||
+             profile.email?.includes('basic.test') ||
+             profile.email?.includes('v2.test') ||
+             profile.email?.includes('v3.test');
+    };
+
+    // Filter out test users
+    const realProfiles = (allProfiles || []).filter(profile => !isTestUser(profile));
+    const testUsersCount = (allProfiles || []).length - realProfiles.length;
+    
+    console.log(`🔍 Filtered out ${testUsersCount} test users, ${realProfiles.length} real members remaining`);
+
+    // Step 6: Enrich real profiles with data
+    const enrichedMembers = realProfiles.map(profile => {
       const xpInfo = xpMap.get(profile.id);
       const badgeCount = badgeCounts.get(profile.id) || 0;
       const onlineInfo = onlineMap.get(profile.id);
@@ -130,7 +148,13 @@ export async function GET() {
 
     console.log(`✅ Returning ${enrichedMembers.length} enriched members`);
 
-    return NextResponse.json({ members: enrichedMembers });
+    // Add cache control headers to prevent caching
+    const response = NextResponse.json({ members: enrichedMembers });
+    response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+    response.headers.set('Pragma', 'no-cache');
+    response.headers.set('Expires', '0');
+    
+    return response;
   } catch (error) {
     console.error('Error in members-data API:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

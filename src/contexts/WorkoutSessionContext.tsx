@@ -140,7 +140,8 @@ export function WorkoutSessionProvider({ children }: { children: ReactNode }) {
   const pauseWorkout = () => {
     if (session) {
       setSession(prev => prev ? { ...prev, isActive: false } : null);
-      // Only pause rest timer, never pause workout timer
+      // Pause both workout timer and rest timer
+      setIsWorkoutTimerRunning(false);
       setIsRestTimerRunning(false);
     }
   };
@@ -148,8 +149,8 @@ export function WorkoutSessionProvider({ children }: { children: ReactNode }) {
   const resumeWorkout = () => {
     if (session) {
       setSession(prev => prev ? { ...prev, isActive: true } : null);
-      // Only resume rest timer if there's rest time
-      // Workout timer should always run and is not affected by pause/resume
+      // Resume workout timer and rest timer if there's rest time
+      setIsWorkoutTimerRunning(true);
       if (restTime > 0) {
         setIsRestTimerRunning(true);
       }

@@ -17,6 +17,7 @@ import {
 import ClientLayout from '../../../../../components/ClientLayout';
 import WorkoutVideoModal from '@/components/WorkoutVideoModal';
 import WorkoutCompletionModal from '@/components/WorkoutCompletionModal';
+import FloatingWorkoutWidget from '@/components/FloatingWorkoutWidget';
 // import WorkoutPlayerModal from '../../WorkoutPlayerModal'; // Removed - file doesn't exist
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { useWorkoutSession } from '@/contexts/WorkoutSessionContext';
@@ -70,6 +71,7 @@ export default function WorkoutPage() {
   const [loading, setLoading] = useState(true);
   const [showVideoModal, setShowVideoModal] = useState(false);
   const [showCompletionModal, setShowCompletionModal] = useState(false);
+  const [workoutEndTime, setWorkoutEndTime] = useState(0); // Store the final workout time when completed
   // const [showWorkoutPlayerModal, setShowWorkoutPlayerModal] = useState(false); // Removed - component doesn't exist
 
   // Sample exercises - in real app, fetch from API
@@ -328,6 +330,70 @@ export default function WorkoutPage() {
     }
   }, [session, exercises, currentExerciseIndex, globalSession, startWorkout]);
 
+  // Sync local state with global session when returning to workout page
+  useEffect(() => {
+    if (globalSession && exercises.length > 0) {
+      console.log('🔄 Syncing local state with global session:', globalSession);
+      
+      // Update current exercise index from global session
+      if (globalSession.currentExerciseIndex !== undefined && globalSession.currentExerciseIndex !== currentExerciseIndex) {
+        console.log('🔄 Updating current exercise index from', currentExerciseIndex, 'to', globalSession.currentExerciseIndex);
+        setCurrentExerciseIndex(globalSession.currentExerciseIndex);
+      }
+      
+      // Update workout timer from global session
+      if (globalSession.workoutTime !== undefined && globalSession.workoutTime !== timer) {
+        console.log('🔄 Updating timer from', timer, 'to', globalSession.workoutTime);
+        setTimer(globalSession.workoutTime);
+      }
+      
+      // Update workout active state
+      if (globalSession.isActive !== isWorkoutActive) {
+        console.log('🔄 Updating workout active state from', isWorkoutActive, 'to', globalSession.isActive);
+        setIsWorkoutActive(globalSession.isActive);
+        setIsTimerRunning(globalSession.isActive);
+      }
+      
+      // Update exercise progress from global session
+      if (globalSession.currentSet !== undefined && globalSession.exerciseName) {
+        const exerciseIndex = exercises.findIndex(ex => ex.name === globalSession.exerciseName);
+        if (exerciseIndex !== -1) {
+          console.log('🔄 Updating exercise progress for', globalSession.exerciseName, 'set', globalSession.currentSet);
+          setExercises(prev => prev.map((ex, index) => 
+            index === exerciseIndex 
+              ? { ...ex, currentSet: globalSession.currentSet || 0 }
+              : ex
+          ));
+        }
+      }
+    }
+  }, [globalSession, exercises, currentExerciseIndex, timer, isWorkoutActive]);
+
+  const checkActiveSession = async () => {
+    if (!user?.id) return null;
+
+    try {
+      console.log('🔍 Checking for active workout sessions...');
+      const response = await fetch(`/api/workout-sessions?userId=${user.id}`);
+      const data = await response.json();
+      
+      if (data.success && data.sessions.length > 0) {
+        // Find the most recent active session (not completed)
+        const activeSession = data.sessions.find((s: any) => !s.completed_at);
+        if (activeSession) {
+          console.log('⚠️ Found active session:', activeSession.id);
+          return activeSession;
+        }
+      }
+      
+      console.log('✅ No active sessions found');
+      return null;
+    } catch (error) {
+      console.error('❌ Error checking active sessions:', error);
+      return null;
+    }
+  };
+
   const loadSession = async () => {
     if (!sessionId) return;
 
@@ -355,7 +421,16 @@ export default function WorkoutPage() {
     }
   };
 
-  const startWorkoutLocal = () => {
+  const startWorkoutLocal = async () => {
+    // First check if there's already an active session
+    const activeSession = await checkActiveSession();
+    if (activeSession) {
+      console.log('⚠️ Active session found, redirecting to existing session...');
+      toast.error('Er is al een actieve workout sessie. Ga naar de bestaande sessie.');
+      router.push(`/dashboard/trainingscentrum/workout/${activeSession.schema_id}/${activeSession.day_number}?sessionId=${activeSession.id}`);
+      return;
+    }
+
     setIsWorkoutActive(true);
     setIsTimerRunning(true);
     
@@ -483,9 +558,14 @@ export default function WorkoutPage() {
             // Update global session with rest timer
             updateRestTimer(restTime, true);
           } else {
-            // Exercise completed - start rest timer for next exercise
+            // Exercise completed - move to next exercise and start rest timer
             if (currentExerciseIndex < exercises.length - 1) {
-              const nextExercise = exercises[currentExerciseIndex + 1];
+              const nextExerciseIndex = currentExerciseIndex + 1;
+              const nextExercise = exercises[nextExerciseIndex];
+              
+              // Update current exercise index
+              setCurrentExerciseIndex(nextExerciseIndex);
+              
               // Parse rest time correctly - handle both "2 min" and "120s" formats
               let restTime: number;
               if (nextExercise.rest.includes('min')) {
@@ -495,7 +575,9 @@ export default function WorkoutPage() {
               } else {
                 restTime = parseInt(nextExercise.rest) || 120; // Default to 2 minutes
               }
-              // Update global session with rest timer
+              
+              // Update global session with next exercise and rest timer
+              updateProgress(0, nextExercise.name, nextExerciseIndex);
               updateRestTimer(restTime, true);
             }
           }
@@ -516,7 +598,11 @@ export default function WorkoutPage() {
       const allCompleted = updatedExercises.every(exercise => exercise.completed);
       if (allCompleted && isWorkoutActive) {
         // All exercises completed - stop workout timer and show completion modal
+        const finalTime = globalSession?.workoutTime || timer; // Use global session time or local timer
+        setWorkoutEndTime(finalTime); // Store the final workout time
         stopWorkout(); // Stop the global workout timer
+        setIsTimerRunning(false); // Stop local timer
+        setIsWorkoutActive(false); // Mark workout as inactive
         setTimeout(() => {
           setShowCompletionModal(true);
         }, 1000); // Small delay to let the last set completion animation finish
@@ -530,7 +616,15 @@ export default function WorkoutPage() {
 
   const nextExercise = () => {
     if (currentExerciseIndex < exercises.length - 1) {
-      setCurrentExerciseIndex(prev => prev + 1);
+      const newIndex = currentExerciseIndex + 1;
+      setCurrentExerciseIndex(newIndex);
+      
+      // Update global session with new exercise
+      const nextExercise = exercises[newIndex];
+      if (nextExercise) {
+        updateProgress(0, nextExercise.name, newIndex);
+      }
+      
       // Update global session
       updateRestTimer(0, false);
     }
@@ -543,17 +637,33 @@ export default function WorkoutPage() {
     toast.success('Rust overgeslagen! 💪');
   };
 
+  const showWorkoutCompletion = () => {
+    // Store the current workout time when manually completing
+    const currentTime = globalSession?.workoutTime || timer;
+    setWorkoutEndTime(currentTime);
+    
+    // Stop the workout timers
+    stopWorkout();
+    setIsTimerRunning(false);
+    setIsWorkoutActive(false);
+    
+    // Show completion modal
+    setShowCompletionModal(true);
+  };
+
   const completeWorkout = async () => {
     if (!sessionId) return;
 
     try {
+      console.log('🏁 Starting workout completion for session:', sessionId);
+      
       const response = await fetch('/api/workout-sessions/complete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           sessionId: sessionId,
           rating: 5,
-          notes: `Completed workout in ${Math.floor((globalSession?.workoutTime || 0) / 60)}:${((globalSession?.workoutTime || 0) % 60).toString().padStart(2, '0')}`,
+          notes: `Completed workout in ${Math.floor((workoutEndTime || globalSession?.workoutTime || 0) / 60)}:${((workoutEndTime || globalSession?.workoutTime || 0) % 60).toString().padStart(2, '0')}`,
           exercises: exercises.map(ex => ({
             name: ex.name,
             sets: ex.currentSet,
@@ -563,16 +673,34 @@ export default function WorkoutPage() {
         })
       });
 
-      if (response.ok) {
+      const responseData = await response.json();
+      console.log('🏁 Workout completion response:', responseData);
+
+      if (response.ok && responseData.success) {
+        console.log('✅ Workout completed successfully, stopping session and navigating...');
+        
+        // Stop the global workout session completely
+        stopWorkout();
+        
         // Close completion modal
         setShowCompletionModal(false);
         
         toast.success('Workout voltooid! 🎉');
+        
+        // Navigate to training overview
         router.push('/dashboard/mijn-trainingen');
+        
+        // Force refresh to show updated progress
+        setTimeout(() => {
+          window.location.reload();
+        }, 100);
+      } else {
+        console.error('❌ Workout completion failed:', responseData);
+        toast.error('Fout bij voltooien workout: ' + (responseData.error || 'Onbekende fout'));
       }
     } catch (error) {
-      console.error('Error completing workout:', error);
-      toast.error('Fout bij voltooien workout');
+      console.error('❌ Error completing workout:', error);
+      toast.error('Fout bij voltooien workout: ' + error.message);
     }
   };
 
@@ -692,7 +820,7 @@ export default function WorkoutPage() {
               )}
               
               <button
-                onClick={completeWorkout}
+                onClick={showWorkoutCompletion}
                 className="px-6 py-3 bg-gradient-to-r from-[#FFD700] to-[#f0a14f] text-[#181F17] font-semibold rounded-lg hover:from-[#e0903f] hover:to-[#d0802f] transition-all duration-200"
               >
                 <TrophyIcon className="w-5 h-5 inline mr-2" />
@@ -862,12 +990,21 @@ export default function WorkoutPage() {
         isOpen={showCompletionModal}
         onClose={() => setShowCompletionModal(false)}
         onComplete={completeWorkout}
-        workoutTime={globalSession?.workoutTime || 0}
+        workoutTime={workoutEndTime || globalSession?.workoutTime || 0}
         totalExercises={exercises.length}
         completedExercises={exercises.filter(ex => ex.completed).length}
       />
 
       {/* Workout Player Modal - Removed - component doesn't exist */}
+
+      {/* Floating Workout Widget with completion callback */}
+      {globalSession && (
+        <FloatingWorkoutWidget
+          session={globalSession}
+          onResume={() => {}}
+          onShowCompletion={showWorkoutCompletion}
+        />
+      )}
     </ClientLayout>
   );
 } 

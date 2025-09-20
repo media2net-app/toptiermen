@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation';
 import { 
   PlayIcon, 
   PauseIcon, 
-  StopIcon,
   ClockIcon,
   FireIcon,
   ArrowRightIcon
@@ -28,14 +27,14 @@ interface WorkoutSession {
 
 interface FloatingWorkoutWidgetProps {
   session: WorkoutSession | null;
-  onClose: () => void;
   onResume: () => void;
+  onShowCompletion?: () => void; // Optional callback to show completion modal
 }
 
 export default function FloatingWorkoutWidget({ 
   session, 
-  onClose, 
-  onResume 
+  onResume,
+  onShowCompletion 
 }: FloatingWorkoutWidgetProps) {
   const router = useRouter();
   const { pauseWorkout, resumeWorkout, stopWorkout } = useWorkoutSession();
@@ -97,8 +96,13 @@ export default function FloatingWorkoutWidget({
   };
 
   const handleStopWorkout = () => {
-    stopWorkout();
-    onClose();
+    // If we have a completion callback (we're on a workout page), show completion modal
+    if (onShowCompletion) {
+      onShowCompletion();
+    } else {
+      // Otherwise, just stop the workout (we're on a different page)
+      stopWorkout();
+    }
   };
 
   if (!session) return null;
@@ -111,24 +115,18 @@ export default function FloatingWorkoutWidget({
         exit={{ opacity: 0, x: 100 }}
         className="fixed bottom-4 right-4 z-50"
       >
-        <div className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23] rounded-xl p-4 shadow-2xl min-w-[280px]">
+        <div className={`bg-gradient-to-br ${session.isActive ? 'from-[#181F17] to-[#232D1A] border-[#3A4D23]' : 'from-[#2D1A0F] to-[#3D2415] border-[#D97706]'} border rounded-xl p-4 shadow-2xl min-w-[280px]`}>
           {/* Header */}
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2 mb-3">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-[#8BAE5A] to-[#7A9D4A] rounded-lg flex items-center justify-center">
+              <div className={`w-8 h-8 ${session.isActive ? 'bg-gradient-to-r from-[#8BAE5A] to-[#7A9D4A]' : 'bg-gradient-to-r from-[#D97706] to-[#B45309]'} rounded-lg flex items-center justify-center`}>
                 <FireIcon className="w-4 h-4 text-white" />
               </div>
               <div>
-                <h3 className="text-sm font-semibold text-white">Workout Actief</h3>
+                <h3 className="text-sm font-semibold text-white">{session.isActive ? 'Workout Actief' : 'Workout Gepauzeerd'}</h3>
                 <p className="text-xs text-gray-400">{session.exerciseName}</p>
               </div>
             </div>
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-white transition-colors"
-            >
-              <StopIcon className="w-4 h-4" />
-            </button>
           </div>
 
           {/* Workout Timer */}
@@ -146,7 +144,7 @@ export default function FloatingWorkoutWidget({
                 ) : (
                   <button
                     onClick={handleResumeWorkout}
-                    className="text-[#8BAE5A] hover:text-[#B6C948] transition-colors"
+                    className="text-[#D97706] hover:text-[#F59E0B] transition-colors"
                   >
                     <PlayIcon className="w-3 h-3" />
                   </button>
@@ -166,9 +164,9 @@ export default function FloatingWorkoutWidget({
                 Set {session.currentSet}/{session.totalSets}
               </span>
             </div>
-            <div className="w-full h-2 bg-[#3A4D23] rounded-full">
+            <div className={`w-full h-2 ${session.isActive ? 'bg-[#3A4D23]' : 'bg-[#451A03]'} rounded-full`}>
               <div 
-                className="h-2 bg-gradient-to-r from-[#8BAE5A] to-[#7A9D4A] rounded-full transition-all duration-300"
+                className={`h-2 ${session.isActive ? 'bg-gradient-to-r from-[#8BAE5A] to-[#7A9D4A]' : 'bg-gradient-to-r from-[#D97706] to-[#B45309]'} rounded-full transition-all duration-300`}
                 style={{ width: `${(session.currentSet / session.totalSets) * 100}%` }}
               />
             </div>
@@ -194,7 +192,7 @@ export default function FloatingWorkoutWidget({
           {/* Back to Workout Button */}
           <motion.button
             onClick={handleBackToWorkout}
-            className="w-full bg-gradient-to-r from-[#8BAE5A] to-[#7A9D4A] text-white py-2 px-4 rounded-lg font-medium text-sm flex items-center justify-center gap-2 hover:from-[#7A9D4A] hover:to-[#6B8D3A] transition-all duration-200"
+            className={`w-full ${session.isActive ? 'bg-gradient-to-r from-[#8BAE5A] to-[#7A9D4A] hover:from-[#7A9D4A] hover:to-[#6B8D3A]' : 'bg-gradient-to-r from-[#D97706] to-[#B45309] hover:from-[#B45309] hover:to-[#92400E]'} text-white py-2 px-4 rounded-lg font-medium text-sm flex items-center justify-center gap-2 transition-all duration-200`}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >

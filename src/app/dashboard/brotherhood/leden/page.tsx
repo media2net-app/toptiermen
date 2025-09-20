@@ -187,6 +187,7 @@ export default function LedenOverzicht() {
   const [notification, setNotification] = useState<string | null>(null);
   const notificationTimeout = useRef<NodeJS.Timeout | null>(null);
   const [onlineCount, setOnlineCount] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
 
   // Fetch real members data
   useEffect(() => {
@@ -212,7 +213,7 @@ export default function LedenOverzicht() {
         (payload) => {
           console.log('Presence change:', payload);
           // Refresh members data when presence changes
-          fetchMembers();
+          fetchMembers(true);
         }
       )
       .subscribe();
@@ -261,13 +262,23 @@ export default function LedenOverzicht() {
     }
   };
 
-  const fetchMembers = async () => {
+  const fetchMembers = async (isRefresh = false) => {
     try {
-      setLoading(true);
+      if (isRefresh) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
       setError(null);
 
       // Use the API endpoint to get enriched members data
-      const response = await fetch('/api/members-data');
+      const response = await fetch('/api/members-data', {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      });
       if (!response.ok) {
         throw new Error('Failed to fetch members data');
       }
@@ -326,6 +337,7 @@ export default function LedenOverzicht() {
       setError('Er is een fout opgetreden bij het laden van de leden.');
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
@@ -385,7 +397,7 @@ export default function LedenOverzicht() {
 
   if (loading) {
     return (
-      <div className="px-4 md:px-12">
+      <div className="w-full px-6 sm:px-8">
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-white mb-1">De Broeders</h2>
           <p className="text-[#8BAE5A] text-lg mb-2">Vind, connect en leer van de andere leden van Top Tier Men.</p>
@@ -399,7 +411,7 @@ export default function LedenOverzicht() {
 
   if (error) {
     return (
-      <div className="px-4 md:px-12">
+      <div className="w-full px-6 sm:px-8">
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-white mb-1">De Broeders</h2>
           <p className="text-[#8BAE5A] text-lg mb-2">Vind, connect en leer van de andere leden van Top Tier Men.</p>
@@ -412,22 +424,41 @@ export default function LedenOverzicht() {
   }
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+    <div className="w-full px-6 sm:px-8">
       {/* Header */}
       <div className="mb-4 sm:mb-6 md:mb-8">
-        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-1">De Broeders</h2>
-        <p className="text-[#8BAE5A] text-sm sm:text-base md:text-lg mb-2">Vind, connect en leer van de andere leden van Top Tier Men.</p>
-        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-[#FFD700] text-xs sm:text-sm font-semibold">
-          <span>Momenteel {members.length} actieve leden</span>
-          <span className="flex items-center gap-1">
-            <span 
-              className="w-2 h-2 bg-[#8BAE5A] rounded-full"
-              style={{
-                animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
-              }}
-            ></span>
-            {onlineCount} online nu
-          </span>
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+          <div>
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-1">De Broeders</h2>
+            <p className="text-[#8BAE5A] text-sm sm:text-base md:text-lg mb-2">Vind, connect en leer van de andere leden van Top Tier Men.</p>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-[#FFD700] text-xs sm:text-sm font-semibold">
+              <span>Momenteel {members.length} actieve leden</span>
+              <span className="flex items-center gap-1">
+                <span 
+                  className="w-2 h-2 bg-[#8BAE5A] rounded-full"
+                  style={{
+                    animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+                  }}
+                ></span>
+                {onlineCount} online nu
+              </span>
+            </div>
+          </div>
+          <button
+            onClick={() => fetchMembers(true)}
+            disabled={refreshing}
+            className="flex items-center gap-2 px-4 py-2 bg-[#8BAE5A] hover:bg-[#7A9D4A] disabled:bg-[#3A4D23] disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors text-sm"
+          >
+            <svg 
+              className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} 
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            {refreshing ? 'Verversen...' : 'Verversen'}
+          </button>
         </div>
       </div>
       {/* Filters & Search */}

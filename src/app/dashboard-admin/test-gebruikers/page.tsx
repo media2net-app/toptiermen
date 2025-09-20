@@ -94,11 +94,10 @@ export default function TestGebruikers() {
 
   const fetchTestData = async () => {
     try {
-      // Fetch users from profiles table (all users with role 'user')
+      // Fetch all profiles first
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
         .select('*')
-        .eq('role', 'user')
         .order('created_at', { ascending: false });
 
       if (profilesError) {
@@ -107,8 +106,24 @@ export default function TestGebruikers() {
         return;
       }
 
-      // Convert profiles to test users format
-      const mockTestUsers: TestUser[] = (profiles || []).map(profile => ({
+      // Filter for test users only (same logic as list-test-users API)
+      const isTestUser = (profile: any) => {
+        return profile.email?.includes('test') || 
+               profile.full_name?.toLowerCase().includes('test') ||
+               profile.email?.includes('onboarding.') ||
+               profile.email?.includes('final.') ||
+               profile.email?.includes('premium.test') ||
+               profile.email?.includes('basic.test') ||
+               profile.email?.includes('v2.test') ||
+               profile.email?.includes('v3.test') ||
+               profile.email?.includes('toptiermen.eu');
+      };
+
+      const testProfiles = (profiles || []).filter(profile => isTestUser(profile));
+      console.log(`🔍 Filtered ${testProfiles.length} test users from ${profiles?.length || 0} total profiles`);
+
+      // Convert test profiles to test users format
+      const mockTestUsers: TestUser[] = testProfiles.map(profile => ({
         id: profile.id,
         user_id: profile.id,
         name: profile.full_name || 'Onbekend',

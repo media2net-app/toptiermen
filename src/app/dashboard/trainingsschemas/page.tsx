@@ -1401,6 +1401,14 @@ function TrainingschemasContent() {
     }
   }, [showOnboardingStep3]);
 
+  // Set selectedTrainingSchema when currentSchemaPeriod is loaded
+  useEffect(() => {
+    if (currentSchemaPeriod && currentSchemaPeriod.training_schema_id) {
+      console.log('🔄 Setting selectedTrainingSchema from currentSchemaPeriod:', currentSchemaPeriod.training_schema_id);
+      setSelectedTrainingSchema(currentSchemaPeriod.training_schema_id);
+    }
+  }, [currentSchemaPeriod]);
+
   // Progressieve loading states
   if (authLoading) {
     return (
@@ -2150,20 +2158,20 @@ function TrainingschemasContent() {
                         <button
                           onClick={() => {
                             console.log('🔘 Select button clicked:', { schemaId: schema.id, isLocked, schemaName: schema.name });
-                            if (!isLocked) {
+                            if (!isLocked && !(selectedTrainingSchema === schema.id && currentSchemaPeriod?.status === 'active')) {
                               selectTrainingSchema(schema.id);
                             }
                           }}
-                          disabled={isLocked}
+                          disabled={isLocked || (selectedTrainingSchema === schema.id && currentSchemaPeriod?.status === 'active')}
                           className={`flex-1 py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium transition-colors text-xs sm:text-sm ${
-                            isLocked
+                            isLocked || (selectedTrainingSchema === schema.id && currentSchemaPeriod?.status === 'active')
                               ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
                               : selectedTrainingSchema === schema.id
                               ? 'bg-[#8BAE5A] text-[#232D1A] shadow-lg shadow-[#8BAE5A]/20'
                               : 'bg-[#3A4D23] text-white hover:bg-[#4A5D33]'
                           }`}
                         >
-                          {isPlaceholder ? 'Binnenkort' : isLocked ? 'Vergrendeld' : selectedTrainingSchema === schema.id ? 'Geselecteerd' : 'Selecteer'}
+                          {isPlaceholder ? 'Binnenkort' : isLocked ? 'Vergrendeld' : selectedTrainingSchema === schema.id ? (currentSchemaPeriod?.status === 'active' ? 'Actief' : 'Geselecteerd') : 'Selecteer'}
                         </button>
                         <button
                           onClick={() => !isLocked && handlePrintSchema(schema.id)}

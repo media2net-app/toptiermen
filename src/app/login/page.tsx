@@ -27,6 +27,42 @@ function LoginPageContent() {
   const [rememberMe, setRememberMe] = useState(false);
   const [isClient, setIsClient] = useState(false); // Start with false to prevent hydration mismatch
   
+  // Loading overlay states
+  const [showLoadingOverlay, setShowLoadingOverlay] = useState(false);
+  const [loadingStep, setLoadingStep] = useState(0);
+  const [loadingText, setLoadingText] = useState("");
+  
+  // Loading steps configuration
+  const loadingSteps = [
+    { text: "Inloggegevens checken...", duration: 1500 },
+    { text: "Platform laden...", duration: 2000 },
+    { text: "Welkom terug op het platform", duration: 1000 }
+  ];
+  
+  // Function to handle loading steps
+  const startLoadingSequence = () => {
+    setShowLoadingOverlay(true);
+    setLoadingStep(0);
+    setLoadingText(loadingSteps[0].text);
+    
+    let currentStep = 0;
+    const totalDuration = loadingSteps.reduce((sum, step) => sum + step.duration, 0);
+    
+    // Progress through each step
+    loadingSteps.forEach((step, index) => {
+      setTimeout(() => {
+        setLoadingStep(index);
+        setLoadingText(step.text);
+      }, loadingSteps.slice(0, index).reduce((sum, s) => sum + s.duration, 0));
+    });
+    
+    // Hide overlay and trigger redirect after all steps complete
+    setTimeout(() => {
+      setShowLoadingOverlay(false);
+      // The useEffect will handle the redirect once showLoadingOverlay becomes false
+    }, totalDuration);
+  };
+  
   // Forgot password states
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
@@ -88,9 +124,9 @@ function LoginPageContent() {
 
   // ✅ FIXED: Single useEffect for authentication redirect with better loading handling
   useEffect(() => {
-    // Don't redirect while auth is still loading or form is submitting
-    if (loading || isLoading) {
-      console.log('⏳ Auth or form still loading, waiting...', { loading, isLoading });
+    // Don't redirect while auth is still loading, form is submitting, or overlay is showing
+    if (loading || isLoading || showLoadingOverlay) {
+      console.log('⏳ Auth, form, or overlay still loading, waiting...', { loading, isLoading, showLoadingOverlay });
       return;
     }
 
@@ -107,7 +143,7 @@ function LoginPageContent() {
     } else if (!user && !loading) {
       console.log('ℹ️ No authenticated user found, staying on login page');
     }
-  }, [loading, user, profile, router, searchParams, isLoading]);
+  }, [loading, user, profile, router, searchParams, isLoading, showLoadingOverlay]);
 
   // ✅ FIXED: Enhanced login handler with detailed debugging
   async function handleLogin(e: React.FormEvent) {
@@ -132,6 +168,9 @@ function LoginPageContent() {
     setIsLoading(true);
     setError("");
     
+    // Start the loading sequence
+    startLoadingSequence();
+    
     try {
       console.log('🔐 Calling signIn function...');
       const result = await signIn(email, password);
@@ -141,6 +180,7 @@ function LoginPageContent() {
         console.error('❌ Login failed:', result.error);
         setError(result.error || "Ongeldige inloggegevens");
         setIsLoading(false);
+        setShowLoadingOverlay(false);
         return;
       }
 
@@ -152,6 +192,7 @@ function LoginPageContent() {
       console.error('❌ Login exception:', error);
       setError(error.message || "Er is een fout opgetreden bij het inloggen");
       setIsLoading(false);
+      setShowLoadingOverlay(false);
     }
   }
 
@@ -197,8 +238,8 @@ function LoginPageContent() {
     }
   }
 
-  // Hydration safety - show loading only briefly
-  if (!isClient || (authLoading && isLoading)) {
+  // Hydration safety - only show brief loading for hydration, not for auth
+  if (!isClient) {
     return (
       <div className="min-h-screen flex items-center justify-center relative px-4 py-6" style={{ backgroundColor: '#181F17' }}>
         <img src="/pattern.png" alt="pattern" className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none z-0" />
@@ -212,25 +253,7 @@ function LoginPageContent() {
           </div>
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#B6C948] mx-auto mb-4"></div>
-            <p className="text-[#B6C948] text-lg">Laden...</p>
-            <div className="mt-4 text-xs text-gray-500">
-              <p>Auth Loading: {authLoading ? 'true' : 'false'}</p>
-              <p>Client Ready: {isClient ? 'true' : 'false'}</p>
-              <p>User: {user ? user.email : 'null'}</p>
-              <p>Profile: {profile ? profile.role : 'null'}</p>
-              <p>Error: {error || 'none'}</p>
-            </div>
-            <button
-              onClick={() => {
-                console.log('🔍 Debug info:', { authLoading, isClient, user, profile });
-                setIsLoading(false);
-                // Force refresh the page to reset auth state
-                window.location.reload();
-              }}
-              className="mt-4 px-4 py-2 bg-[#3A4D23] text-[#8BAE5A] rounded-lg text-sm hover:bg-[#4A5D33] transition-colors"
-            >
-              🔄 Reset & Reload
-            </button>
+            <p className="text-[#B6C948] text-lg">Initialiseren...</p>
           </div>
         </div>
       </div>
@@ -287,11 +310,11 @@ function LoginPageContent() {
               type="email"
               value={email}
               onChange={e => setEmail(e.target.value)}
-              className={`w-full pl-10 pr-4 py-3 rounded-xl bg-[#181F17] text-[#B6C948] placeholder-[#B6C948] focus:outline-none focus:ring-2 focus:ring-[#B6C948] transition shadow-inner border border-[#3A4D23] font-figtree ${isLoading ? 'cursor-wait opacity-75' : 'cursor-text'}`}
+              className={`w-full pl-10 pr-4 py-3 rounded-xl bg-[#181F17] text-[#B6C948] placeholder-[#B6C948] focus:outline-none focus:ring-2 focus:ring-[#B6C948] transition shadow-inner border border-[#3A4D23] font-figtree ${isLoading || showLoadingOverlay ? 'cursor-wait opacity-75' : 'cursor-text'}`}
               placeholder="E-mailadres"
               autoComplete="email"
               required
-              disabled={isLoading}
+              disabled={isLoading || showLoadingOverlay}
             />
           </div>
           <div className="relative">
@@ -300,17 +323,17 @@ function LoginPageContent() {
               type={showPassword ? "text" : "password"}
               value={password}
               onChange={e => setPassword(e.target.value)}
-              className={`w-full pl-10 pr-12 py-3 rounded-xl bg-[#181F17] text-[#B6C948] placeholder-[#B6C948] focus:outline-none focus:ring-2 focus:ring-[#B6C948] transition shadow-inner border border-[#3A4D23] font-figtree ${isLoading ? 'cursor-wait opacity-75' : 'cursor-text'}`}
+              className={`w-full pl-10 pr-12 py-3 rounded-xl bg-[#181F17] text-[#B6C948] placeholder-[#B6C948] focus:outline-none focus:ring-2 focus:ring-[#B6C948] transition shadow-inner border border-[#3A4D23] font-figtree ${isLoading || showLoadingOverlay ? 'cursor-wait opacity-75' : 'cursor-text'}`}
               placeholder="Wachtwoord"
               autoComplete="current-password"
               required
-              disabled={isLoading}
+              disabled={isLoading || showLoadingOverlay}
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-[#B6C948] hover:text-white transition-colors focus:outline-none focus:text-white"
-              disabled={isLoading}
+              disabled={isLoading || showLoadingOverlay}
               aria-label={showPassword ? "Wachtwoord verbergen" : "Wachtwoord tonen"}
             >
               {showPassword ? (
@@ -329,7 +352,7 @@ function LoginPageContent() {
                 checked={rememberMe}
                 onChange={e => setRememberMe(e.target.checked)}
                 className="w-4 h-4 text-[#B6C948] bg-[#181F17] border-[#3A4D23] rounded focus:ring-[#B6C948] focus:ring-2"
-                disabled={isLoading}
+                disabled={isLoading || showLoadingOverlay}
               />
               <span className="ml-2 text-[#B6C948] text-sm font-figtree">Ingelogd blijven</span>
             </label>
@@ -337,8 +360,8 @@ function LoginPageContent() {
             <button
               type="button"
               onClick={() => setShowForgotPassword(true)}
-              className={`text-[#8BAE5A] hover:text-[#B6C948] text-sm underline font-figtree ${isLoading ? 'cursor-wait opacity-75' : 'cursor-pointer'}`}
-              disabled={isLoading}
+              className={`text-[#8BAE5A] hover:text-[#B6C948] text-sm underline font-figtree ${isLoading || showLoadingOverlay ? 'cursor-wait opacity-75' : 'cursor-pointer'}`}
+              disabled={isLoading || showLoadingOverlay}
             >
               Wachtwoord vergeten?
             </button>
@@ -352,14 +375,14 @@ function LoginPageContent() {
           
           <button
             type="submit"
-            disabled={isLoading}
+            disabled={isLoading || showLoadingOverlay}
             className={`w-full py-3 sm:py-4 rounded-xl bg-gradient-to-r from-[#B6C948] to-[#3A4D23] text-[#181F17] font-semibold text-base sm:text-lg shadow-lg hover:from-[#B6C948] hover:to-[#B6C948] transition-all duration-200 border border-[#B6C948] font-figtree ${
-              isLoading
+              isLoading || showLoadingOverlay
                 ? 'opacity-75 cursor-wait' 
                 : 'cursor-pointer hover:opacity-90'
             }`}
           >
-            {isLoading ? (
+            {isLoading || showLoadingOverlay ? (
               <div className="flex items-center justify-center">
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#181F17] mr-2"></div>
                 <span>Inloggen...</span>
@@ -405,6 +428,60 @@ function LoginPageContent() {
           </div>
         </div>
       </div>
+
+      {/* Loading Overlay */}
+      {showLoadingOverlay && (
+        <div className="fixed inset-0 bg-[#181F17]/95 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="text-center">
+            {/* Logo */}
+            <div className="mb-8">
+              <img 
+                src="/logo_white-full.svg" 
+                alt="Top Tier Men Logo" 
+                className="h-20 w-auto mx-auto opacity-90"
+              />
+            </div>
+            
+            {/* Loading Spinner */}
+            <div className="mb-6">
+              <div className="animate-spin rounded-full h-16 w-16 border-4 border-[#3A4D23] border-t-[#8BAE5A] mx-auto"></div>
+            </div>
+            
+            {/* Loading Text with Fade Animation */}
+            <div className="mb-4">
+              <p className="text-[#8BAE5A] text-xl font-semibold animate-pulse">
+                {loadingText}
+              </p>
+            </div>
+            
+            {/* Progress Dots */}
+            <div className="flex justify-center space-x-2">
+              {loadingSteps.map((_, index) => (
+                <div
+                  key={index}
+                  className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                    index <= loadingStep 
+                      ? 'bg-[#8BAE5A] scale-110' 
+                      : 'bg-[#3A4D23]'
+                  }`}
+                />
+              ))}
+            </div>
+            
+            {/* Progress Bar */}
+            <div className="mt-6 w-64 mx-auto">
+              <div className="w-full bg-[#3A4D23] rounded-full h-2">
+                <div 
+                  className="bg-gradient-to-r from-[#8BAE5A] to-[#B6C948] h-2 rounded-full transition-all duration-500 ease-out"
+                  style={{ 
+                    width: `${((loadingStep + 1) / loadingSteps.length) * 100}%` 
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ✅ FIXED: Simplified forgot password modal */}
       {showForgotPassword && (
