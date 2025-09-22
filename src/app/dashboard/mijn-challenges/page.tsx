@@ -365,14 +365,6 @@ export default function MijnChallengesPage() {
         toast.success(`Challenge "${suggestedChallenge.title}" toegevoegd!`);
         setShowChallengeLibrary(false);
         
-        // Update summary to include the new daily mission
-        if ((suggestedChallenge.type || 'Dagelijks') === 'Dagelijks') {
-          setSummary(prev => ({
-            ...prev,
-            totalToday: prev.totalToday + 1
-          }));
-        }
-        
         // Check if user is in onboarding step 2 or 3 and has enough challenges
         if ((currentStep === 2 || currentStep === 3) && !isCompleted && challenges.length >= 2) { // 2 because we just added one, so total will be 3
           setShowContinueButton(true);
@@ -607,32 +599,18 @@ export default function MijnChallengesPage() {
       const data = await response.json();
 
       if (data.success) {
-        // Update challenges state
-        setChallenges(prevChallenges => 
-          prevChallenges.map(mission => {
-            if (mission.id === missionId) {
-              const isCompleted = data.completed;
-              return {
-                ...mission,
-                done: isCompleted,
-                last_completion_date: data.completionDate || null
-              };
-            }
-            return mission;
-          })
-        );
-
-        // Update summary
-        if (data.completed) {
-          setSummary(prev => ({
-            ...prev,
-            completedToday: prev.completedToday + 1
+        // Reload challenges to get updated summary
+        const updatedResponse = await fetch(`/api/missions-simple?userId=${user.id}`);
+        if (updatedResponse.ok) {
+          const updatedData = await updatedResponse.json();
+          const updatedChallenges = updatedData.missions.map((mission: Challenge) => ({
+            ...mission,
+            done: mission.type === 'Dagelijks' 
+              ? isChallengeCompletedToday(mission.last_completion_date)
+              : mission.done
           }));
-        } else {
-          setSummary(prev => ({
-            ...prev,
-            completedToday: Math.max(0, prev.completedToday - 1)
-          }));
+          setChallenges(updatedChallenges);
+          setSummary(updatedData.summary);
         }
 
         // Show success message
@@ -672,16 +650,18 @@ export default function MijnChallengesPage() {
       const data = await response.json();
 
       if (data.success) {
-                // Add the new mission to the list
-        const newChallengeData = data.mission;
-        setChallenges(prev => [...prev, newChallengeData]);
-
-        // Update summary to include the new daily mission
-        if (newChallengeData.type === 'Dagelijks') {
-          setSummary(prev => ({
-            ...prev,
-            totalToday: prev.totalToday + 1
+        // Reload challenges to get updated summary
+        const updatedResponse = await fetch(`/api/missions-simple?userId=${user.id}`);
+        if (updatedResponse.ok) {
+          const updatedData = await updatedResponse.json();
+          const updatedChallenges = updatedData.missions.map((mission: Challenge) => ({
+            ...mission,
+            done: mission.type === 'Dagelijks' 
+              ? isChallengeCompletedToday(mission.last_completion_date)
+              : mission.done
           }));
+          setChallenges(updatedChallenges);
+          setSummary(updatedData.summary);
         }
         
         setNewChallenge({ title: '', type: 'Dagelijks' });
@@ -714,13 +694,13 @@ export default function MijnChallengesPage() {
         console.log('🔧 DEBUG: User on step 2, completing step 2 first');
         stepData = { 
           goal: 'Challenges selected', // Default goal since user skipped goal setting
-          completeOnboarding: !hasTrainingAccess && !hasNutritionAccess && challenges.length >= 3
+          completeOnboarding: false // Don't auto-complete onboarding for Basic tier
         };
       } else if (currentStep === 3) {
         // User is on step 3 (challenges)
         stepData = { 
           challenges: challenges.map(c => c.id),
-          completeOnboarding: !hasTrainingAccess && !hasNutritionAccess
+          completeOnboarding: false // Don't auto-complete onboarding for Basic tier
         };
       } else {
         return;
@@ -736,7 +716,7 @@ export default function MijnChallengesPage() {
         console.log('🔧 DEBUG: Auto-completing step 3 after step 2');
         await completeStep(3, { 
           challenges: challenges.map(c => c.id),
-          completeOnboarding: !hasTrainingAccess && !hasNutritionAccess
+          completeOnboarding: false // Don't auto-complete onboarding for Basic tier
         });
       }
       
@@ -744,6 +724,7 @@ export default function MijnChallengesPage() {
       setTimeout(() => {
         if (hasTrainingAccess) {
           console.log('🔧 DEBUG: Redirecting to training schemas...');
+          // Use router.push instead of window.location.href for better navigation
           window.location.href = '/dashboard/trainingsschemas';
         } else {
           console.log('🔧 DEBUG: Redirecting to forum intro...');
@@ -779,16 +760,18 @@ export default function MijnChallengesPage() {
       const data = await response.json();
 
       if (data.success) {
-        // Remove mission from state
-        setChallenges(prev => prev.filter(mission => mission.id !== missionId));
-        
-        // Update summary if it was a daily mission
-        if (missionToDelete?.type === 'Dagelijks') {
-          setSummary(prev => ({
-            ...prev,
-            totalToday: Math.max(0, prev.totalToday - 1),
-            completedToday: missionToDelete.done ? Math.max(0, prev.completedToday - 1) : prev.completedToday
+        // Reload challenges to get updated summary
+        const updatedResponse = await fetch(`/api/missions-simple?userId=${user.id}`);
+        if (updatedResponse.ok) {
+          const updatedData = await updatedResponse.json();
+          const updatedChallenges = updatedData.missions.map((mission: Challenge) => ({
+            ...mission,
+            done: mission.type === 'Dagelijks' 
+              ? isChallengeCompletedToday(mission.last_completion_date)
+              : mission.done
           }));
+          setChallenges(updatedChallenges);
+          setSummary(updatedData.summary);
         }
         
         setShowDeleteConfirm(false);

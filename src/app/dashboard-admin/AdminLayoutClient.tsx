@@ -168,6 +168,7 @@ const SidebarContent = ({ pathname }: { pathname: string }) => {
           href: '/dashboard-admin/onboarding-status-v2',
           badge: 'NEW'
         },
+        { label: 'Leden Activiteiten', icon: ClockIcon, href: '/dashboard-admin/leden-activiteiten', badge: 'NEW' },
         { label: 'Taken', icon: ListBulletIcon, href: '/dashboard-admin/taken', badge: 'NEW' }
       ]
     },

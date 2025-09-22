@@ -82,25 +82,11 @@ export async function GET(request: NextRequest) {
           isCompleted = true;
         }
         
-        // For Basic tier users, complete onboarding after forum intro (step 5)
-        if (!hasTrainingAccess && !hasNutritionAccess && onboardingStatus.missions_selected && onboardingStatus.challenge_started) {
-          currentStep = null;
-          isCompleted = true;
-          
-          // Update the database to mark onboarding as completed
-          const { error: updateError } = await supabase
-            .from('user_onboarding_status')
-            .update({ 
-              onboarding_completed: true,
-              updated_at: new Date().toISOString()
-            })
-            .eq('user_id', profile.id);
-          
-          if (updateError) {
-            console.error('❌ Error updating onboarding completion:', updateError);
-          } else {
-            console.log('✅ Onboarding marked as completed for Basic tier user');
-          }
+        // For Basic tier users, only complete onboarding after forum intro (step 5)
+        // Don't auto-complete based on missions_selected alone
+        if (!hasTrainingAccess && !hasNutritionAccess && onboardingStatus.missions_selected && !onboardingStatus.challenge_started) {
+          // User has completed challenges but not forum intro yet
+          currentStep = ONBOARDING_STEPS.FORUM_INTRO.id;
         }
       }
     } else {
@@ -239,8 +225,11 @@ export async function POST(request: NextRequest) {
             // For Basic tier users, only complete onboarding if explicitly requested
             // This allows them to see the "Ga verder" button first
             // Only auto-complete for basic tier if explicitly requested via data.completeOnboarding
-            if (!hasTrainingAccess && !hasNutritionAccess && data?.completeOnboarding) {
+            if (!hasTrainingAccess && !hasNutritionAccess && data?.completeOnboarding === true) {
               updateData.onboarding_completed = true;
+            } else if (data?.resetOnboarding === true) {
+              // Reset onboarding completion status
+              updateData.onboarding_completed = false;
             }
             break;
           case ONBOARDING_STEPS.SELECT_TRAINING.id:

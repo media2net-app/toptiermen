@@ -36,7 +36,7 @@ interface AuthContextType {
   profile: Profile | null;
   loading: boolean;
   error: string | null;
-  signIn: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  signIn: (email: string, password: string, onProgress?: (progress: number, text: string) => void) => Promise<{ success: boolean; error?: string }>;
   signUp: (email: string, password: string, fullName?: string) => Promise<{ success: boolean; error?: string }>;
   signOut: () => Promise<{ success: boolean; error?: string }>;
   logoutAndRedirect: (redirectUrl?: string) => Promise<void>;
@@ -50,7 +50,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [loading, setLoading] = useState(true); // Start with true to prevent premature redirects during refresh
+  const [loading, setLoading] = useState(false); // Start with false to prevent infinite loading
   const [error, setError] = useState<string | null>(null);
 
   // Fetch user profile - IMPROVED WITH EMAIL FALLBACK
@@ -147,7 +147,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
       setLoading(false);
       setUser(null);
       setProfile(null);
-    }, 1000); // Reduced to 1s for faster loading
+    }, 2000); // 2 second timeout for auth initialization
 
     getInitialSession().then(() => {
       clearTimeout(initTimeout);
@@ -239,32 +239,9 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     }
   };
 
-  // Helper function to clear all sessions for a user
-  const clearAllUserSessions = async (email: string) => {
-    try {
-      console.log('🔄 Clearing all sessions for user:', email);
-      
-      // Call our API to clear all sessions for this user
-      const response = await fetch('/api/auth/clear-sessions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email }),
-      });
-      
-      if (response.ok) {
-        console.log('✅ All sessions cleared for user');
-      } else {
-        console.log('⚠️ Failed to clear sessions via API (continuing anyway)');
-      }
-    } catch (error) {
-      console.log('⚠️ Error clearing sessions via API (continuing anyway):', error);
-    }
-  };
 
   // Sign in method - IMPROVED WITH BETTER ERROR HANDLING AND LOGGING
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (email: string, password: string, onProgress?: (progress: number, text: string) => void) => {
     try {
       console.log('🔐 SupabaseAuthContext: Starting login process');
       console.log('📧 Email:', email);
@@ -275,17 +252,19 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
       setLoading(true);
       setError(null);
 
-      // First, clear all existing sessions for this user to prevent conflicts
-      console.log('🔄 Clearing all existing sessions for user...');
-      await clearAllUserSessions(email);
-      
-      // Also sign out any local sessions
+      // Progress: 10% - Starting login
+      onProgress?.(10, "Inloggegevens controleren...");
+
+      // Clear any local sessions before login
       try {
         await supabase.auth.signOut();
         console.log('✅ Local sessions cleared');
       } catch (signOutError) {
         console.log('⚠️ Error clearing local sessions (continuing anyway):', signOutError);
       }
+
+      // Progress: 30% - Authenticating
+      onProgress?.(30, "Authenticeren...");
 
       console.log('🔐 Calling supabase.auth.signInWithPassword...');
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -313,21 +292,45 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
         console.log('👤 User ID:', data.user.id);
         setUser(data.user);
         
+        // Progress: 60% - Authentication successful
+        onProgress?.(60, "Profiel laden...");
+        
         // Log successful login attempt
         await logLoginAttempt(email, true, undefined, data.user.id);
         
-        // Fetch profile with email fallback
-        console.log('🔍 Fetching user profile...');
-        const userProfile = await fetchProfile(data.user.id, data.user.email);
-        if (userProfile) {
-          console.log('✅ Profile loaded:', userProfile.role);
-          setProfile(userProfile);
-        } else {
-          console.warn('⚠️ Profile not found, but login successful');
-          // Don't fail login if profile is missing - let admin check handle it
+        // ✅ PHASE 1.3: Fetch all login data in parallel
+        console.log('🔍 Fetching login data in parallel...');
+        try {
+          const response = await fetch(`/api/auth/login-data?userId=${data.user.id}`);
+          const result = await response.json();
+          
+          if (result.success) {
+            console.log('✅ Login data loaded:', result.data.profile.email);
+            setProfile(result.data.profile);
+            
+            // Progress: 90% - All data loaded
+            onProgress?.(90, "Sessie voorbereiden...");
+          } else {
+            console.warn('⚠️ Login data API failed, falling back to individual fetch');
+            // Fallback to individual profile fetch
+            const userProfile = await fetchProfile(data.user.id, data.user.email);
+            if (userProfile) {
+              setProfile(userProfile);
+            }
+          }
+        } catch (apiError) {
+          console.warn('⚠️ Login data API error, falling back to individual fetch:', apiError);
+          // Fallback to individual profile fetch
+          const userProfile = await fetchProfile(data.user.id, data.user.email);
+          if (userProfile) {
+            setProfile(userProfile);
+          }
         }
       }
 
+      // Progress: 100% - Complete
+      onProgress?.(100, "Welkom terug!");
+      
       console.log('✅ SignIn process completed successfully');
       return { success: true };
     } catch (err) {
@@ -378,7 +381,13 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
       console.log('🚪 Starting enhanced logout process...');
       setLoading(true);
       
-      // 1. Clear all browser storage first
+      // 1. Reset React state immediately to prevent UI blocking
+      console.log('🔄 Resetting React state...');
+      setUser(null);
+      setProfile(null);
+      setError(null);
+      
+      // 2. Clear all browser storage
       if (typeof window !== 'undefined') {
         console.log('🧹 Clearing browser storage...');
         localStorage.clear();
@@ -389,46 +398,25 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
         localStorage.removeItem('sb-wkjvstuttbeyqzyjayxj-auth-token');
         sessionStorage.removeItem('sb-wkjvstuttbeyqzyjayxj-auth-token');
         
-        // Clear any other potential auth storage
-        const keysToRemove: string[] = [];
-        for (let i = 0; i < localStorage.length; i++) {
-          const key = localStorage.key(i);
-          if (key && (key.includes('supabase') || key.includes('auth') || key.includes('toptiermen'))) {
-            keysToRemove.push(key);
-          }
-        }
-        keysToRemove.forEach(key => localStorage.removeItem(key));
-        
         console.log('✅ Browser storage cleared');
       }
       
-      // 2. Sign out from Supabase
+      // 3. Sign out from Supabase with timeout
       console.log('🔐 Signing out from Supabase...');
-      const { error } = await supabase.auth.signOut();
+      const signOutPromise = supabase.auth.signOut();
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Supabase signOut timeout')), 2000)
+      );
       
-      if (error) {
-        console.error('❌ Supabase signOut error:', error);
-        // Continue with cleanup even if Supabase signOut fails
-      } else {
-        console.log('✅ Supabase signOut successful');
-      }
-
-      // 3. Reset React state
-      console.log('🔄 Resetting React state...');
-      setUser(null);
-      setProfile(null);
-      setError(null);
-      
-      // 4. Clear browser cache if possible
-      if (typeof window !== 'undefined' && 'caches' in window) {
-        try {
-          console.log('🗑️ Clearing browser cache...');
-          const cacheNames = await caches.keys();
-          await Promise.all(cacheNames.map(name => caches.delete(name)));
-          console.log('✅ Browser cache cleared');
-        } catch (cacheError) {
-          console.warn('⚠️ Could not clear browser cache:', cacheError);
+      try {
+        const { error } = await Promise.race([signOutPromise, timeoutPromise]) as any;
+        if (error) {
+          console.error('❌ Supabase signOut error:', error);
+        } else {
+          console.log('✅ Supabase signOut successful');
         }
+      } catch (timeoutError) {
+        console.warn('⚠️ Supabase signOut timeout, continuing with logout');
       }
       
       console.log('✅ Enhanced logout completed successfully');
@@ -448,57 +436,48 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     }
   };
 
-  // Enhanced logout with redirect function
+  // Enhanced logout with redirect function - IMPROVED WITH TIMEOUT
   const logoutAndRedirect = async (redirectUrl: string = '/login') => {
     try {
       console.log('🚪 Starting logout and redirect process...');
       
-      // Perform enhanced logout
-      const result = await signOut();
+      // Set a maximum timeout for the entire logout process
+      const logoutTimeout = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Logout timeout')), 5000)
+      );
+      
+      // Perform enhanced logout with timeout
+      const logoutPromise = signOut();
+      const result = await Promise.race([logoutPromise, logoutTimeout]) as { success: boolean; error?: string };
       
       if (result.success) {
         console.log('✅ Logout successful, preparing redirect...');
-        
-        // Use window.location.href for hard redirect to prevent any React state issues
-        if (typeof window !== 'undefined') {
-          // Add a small delay to ensure cleanup is complete
-          setTimeout(() => {
-            const finalUrl = redirectUrl.includes('?') 
-              ? `${redirectUrl}&logout=success&t=${Date.now()}` 
-              : `${redirectUrl}?logout=success&t=${Date.now()}`;
-            
-            console.log(`🔄 Redirecting to: ${finalUrl}`);
-            window.location.href = finalUrl;
-          }, 100);
-        }
       } else {
         console.error('❌ Logout failed, forcing redirect anyway...');
-        
-        // Force redirect even on logout failure to prevent stuck state
-        if (typeof window !== 'undefined') {
-          setTimeout(() => {
-            const finalUrl = redirectUrl.includes('?') 
-              ? `${redirectUrl}&logout=error&t=${Date.now()}` 
-              : `${redirectUrl}?logout=error&t=${Date.now()}`;
-            
-            console.log(`🔄 Emergency redirect to: ${finalUrl}`);
-            window.location.href = finalUrl;
-          }, 100);
-        }
       }
+      
+      // Always redirect regardless of logout success/failure to prevent stuck state
+      if (typeof window !== 'undefined') {
+        // Immediate redirect without delay to prevent hanging
+        const finalUrl = redirectUrl.includes('?') 
+          ? `${redirectUrl}&logout=success&t=${Date.now()}` 
+          : `${redirectUrl}?logout=success&t=${Date.now()}`;
+        
+        console.log(`🔄 Redirecting to: ${finalUrl}`);
+        window.location.href = finalUrl;
+      }
+      
     } catch (error) {
       console.error('❌ Logout and redirect error:', error);
       
-      // Emergency fallback - force redirect
+      // Emergency fallback - force redirect immediately
       if (typeof window !== 'undefined') {
-        setTimeout(() => {
-          const finalUrl = redirectUrl.includes('?') 
-            ? `${redirectUrl}&logout=error&t=${Date.now()}` 
-            : `${redirectUrl}?logout=error&t=${Date.now()}`;
-          
-          console.log(`🔄 Emergency fallback redirect to: ${finalUrl}`);
-          window.location.href = finalUrl;
-        }, 100);
+        const finalUrl = redirectUrl.includes('?') 
+          ? `${redirectUrl}&logout=error&t=${Date.now()}` 
+          : `${redirectUrl}?logout=error&t=${Date.now()}`;
+        
+        console.log(`🔄 Emergency fallback redirect to: ${finalUrl}`);
+        window.location.href = finalUrl;
       }
     }
   };

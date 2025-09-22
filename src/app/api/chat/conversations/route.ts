@@ -37,80 +37,111 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to fetch conversations' }, { status: 500 });
     }
 
-    // Get the other participant's info for each conversation
-    const conversationsWithParticipants = await Promise.all(
-      conversations?.map(async (conv) => {
-        const otherParticipantId = conv.participant1_id === userId 
-          ? conv.participant2_id 
-          : conv.participant1_id;
+    // OPTIMIZED: Batch fetch all related data to avoid N+1 queries
+    if (!conversations || conversations.length === 0) {
+      return NextResponse.json({ conversations: [] });
+    }
 
-        // Get other participant's profile
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('id, display_name, full_name, avatar_url, rank')
-          .eq('id', otherParticipantId)
-          .single();
-
-        if (profileError) {
-          console.error('Error fetching profile:', profileError);
-        }
-
-        // Get last message
-        const { data: lastMessage, error: msgError } = await supabase
-          .from('chat_messages')
-          .select('content, created_at, sender_id')
-          .eq('conversation_id', conv.id)
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .single();
-
-        if (msgError && msgError.code !== 'PGRST116') {
-          console.error('Error fetching last message:', msgError);
-        }
-
-        // Get unread count
-        const { count: unreadCount, error: countError } = await supabase
-          .from('chat_messages')
-          .select('*', { count: 'exact', head: true })
-          .eq('conversation_id', conv.id)
-          .eq('is_read', false)
-          .neq('sender_id', userId);
-
-        if (countError) {
-          console.error('Error counting unread messages:', countError);
-        }
-
-        // Get online status
-        const { data: onlineStatus, error: statusError } = await supabase
-          .from('user_online_status')
-          .select('is_online, last_seen')
-          .eq('user_id', otherParticipantId)
-          .single();
-
-        if (statusError && statusError.code !== 'PGRST116') {
-          console.error('Error fetching online status:', statusError);
-        }
-
-        return {
-          id: conv.id,
-          participant: {
-            id: otherParticipantId,
-            name: profile?.display_name || profile?.full_name || 'Onbekende gebruiker',
-            avatar: profile?.avatar_url || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
-            rank: profile?.rank || 'Member'
-          },
-          lastMessage: lastMessage ? {
-            content: lastMessage.content,
-            time: lastMessage.created_at,
-            fromMe: lastMessage.sender_id === userId
-          } : null,
-          unreadCount: unreadCount || 0,
-          online: onlineStatus?.is_online || false,
-          lastSeen: onlineStatus?.last_seen,
-          updatedAt: conv.updated_at
-        };
-      }) || []
+    // Get all unique participant IDs
+    const participantIds = conversations.map(conv => 
+      conv.participant1_id === userId ? conv.participant2_id : conv.participant1_id
     );
+
+    // Get all conversation IDs
+    const conversationIds = conversations.map(conv => conv.id);
+
+    // Batch fetch all profiles
+    const { data: profiles, error: profilesError } = await supabase
+      .from('profiles')
+      .select('id, display_name, full_name, avatar_url, rank')
+      .in('id', participantIds);
+
+    if (profilesError) {
+      console.error('Error fetching profiles:', profilesError);
+    }
+
+    // Batch fetch all last messages
+    const { data: lastMessages, error: messagesError } = await supabase
+      .from('chat_messages')
+      .select('conversation_id, content, created_at, sender_id')
+      .in('conversation_id', conversationIds)
+      .order('created_at', { ascending: false });
+
+    if (messagesError) {
+      console.error('Error fetching messages:', messagesError);
+    }
+
+    // Batch fetch unread counts
+    const { data: unreadCounts, error: unreadError } = await supabase
+      .from('chat_messages')
+      .select('conversation_id, id')
+      .in('conversation_id', conversationIds)
+      .eq('is_read', false)
+      .neq('sender_id', userId);
+
+    if (unreadError) {
+      console.error('Error fetching unread counts:', unreadError);
+    }
+
+    // Batch fetch online statuses
+    const { data: onlineStatuses, error: onlineError } = await supabase
+      .from('user_online_status')
+      .select('user_id, is_online, last_seen')
+      .in('user_id', participantIds);
+
+    if (onlineError) {
+      console.error('Error fetching online statuses:', onlineError);
+    }
+
+    // Create lookup maps
+    const profilesMap = new Map(profiles?.map(p => [p.id, p]) || []);
+    const lastMessagesMap = new Map();
+    const unreadCountsMap = new Map();
+    const onlineStatusesMap = new Map(onlineStatuses?.map(s => [s.user_id, s]) || []);
+
+    // Process last messages (get the most recent per conversation)
+    lastMessages?.forEach(msg => {
+      if (!lastMessagesMap.has(msg.conversation_id)) {
+        lastMessagesMap.set(msg.conversation_id, msg);
+      }
+    });
+
+    // Process unread counts
+    unreadCounts?.forEach(msg => {
+      const count = unreadCountsMap.get(msg.conversation_id) || 0;
+      unreadCountsMap.set(msg.conversation_id, count + 1);
+    });
+
+    // Build response
+    const conversationsWithParticipants = conversations.map(conv => {
+      const otherParticipantId = conv.participant1_id === userId 
+        ? conv.participant2_id 
+        : conv.participant1_id;
+
+      const profile = profilesMap.get(otherParticipantId);
+      const lastMessage = lastMessagesMap.get(conv.id);
+      const unreadCount = unreadCountsMap.get(conv.id) || 0;
+      const onlineStatus = onlineStatusesMap.get(otherParticipantId);
+
+      return {
+        id: conv.id,
+        participant: {
+          id: otherParticipantId,
+          name: profile?.display_name || profile?.full_name || 'Onbekende gebruiker',
+          avatar: profile?.avatar_url || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
+          rank: profile?.rank || 'Member'
+        },
+        lastMessage: lastMessage ? {
+          content: lastMessage.content,
+          time: lastMessage.created_at,
+          fromMe: lastMessage.sender_id === userId
+        } : null,
+        unreadCount,
+        online: onlineStatus?.is_online || false,
+        lastSeen: onlineStatus?.last_seen,
+        updatedAt: conv.updated_at
+      };
+    });
 
     return NextResponse.json({ 
       conversations: conversationsWithParticipants 

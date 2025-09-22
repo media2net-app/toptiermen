@@ -1064,6 +1064,7 @@ export default function VoedingsplannenV2Page() {
         // Redirect to forum intro after completing nutrition plan selection
         setTimeout(() => {
           console.log('🔧 DEBUG: Redirecting to forum intro...');
+          // Use router.push instead of window.location.href for better navigation
           window.location.href = '/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden';
         }, 1000);
       } catch (error) {
@@ -1148,10 +1149,20 @@ export default function VoedingsplannenV2Page() {
               
               {/* Upgrade Buttons */}
               <div className="flex flex-col sm:flex-row gap-4">
-                <button className="flex-1 bg-[#8BAE5A] text-[#181F17] px-6 py-3 rounded-lg font-semibold hover:bg-[#B6C948] transition-colors">
+                <button 
+                  onClick={() => {
+                    alert('Mocht je deze onderdelen willen neem dan contact op met Rick voor het upgraden van je pakket');
+                  }}
+                  className="flex-1 bg-[#8BAE5A] text-[#181F17] px-6 py-3 rounded-lg font-semibold hover:bg-[#B6C948] transition-colors"
+                >
                   Upgrade naar Premium
                 </button>
-                <button className="flex-1 bg-[#B6C948] text-[#181F17] px-6 py-3 rounded-lg font-semibold hover:bg-[#8BAE5A] transition-colors">
+                <button 
+                  onClick={() => {
+                    alert('Mocht je deze onderdelen willen neem dan contact op met Rick voor het upgraden van je pakket');
+                  }}
+                  className="flex-1 bg-[#B6C948] text-[#181F17] px-6 py-3 rounded-lg font-semibold hover:bg-[#8BAE5A] transition-colors"
+                >
                   Upgrade naar Lifetime
                 </button>
               </div>

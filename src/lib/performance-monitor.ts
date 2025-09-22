@@ -1,159 +1,229 @@
 /**
- * Performance monitoring utility for the application
+ * Performance Monitoring Utility
+ * Tracks API performance metrics and provides insights
  */
 
 interface PerformanceMetric {
-  name: string;
-  startTime: number;
-  endTime?: number;
-  duration?: number;
-  metadata?: Record<string, any>;
+  timestamp: string;
+  endpoint: string;
+  queryTime: number;
+  dataSize: number;
+  cacheHit: boolean;
+  userId?: string;
+  error?: string;
 }
 
 class PerformanceMonitor {
-  private metrics: Map<string, PerformanceMetric> = new Map();
-  private observers: Set<(metric: PerformanceMetric) => void> = new Set();
+  private static instance: PerformanceMonitor;
+  private metrics: PerformanceMetric[] = [];
+  private readonly maxMetrics = 1000;
 
-  startTimer(name: string, metadata?: Record<string, any>): void {
-    this.metrics.set(name, {
-      name,
-      startTime: performance.now(),
-      metadata
-    });
-    
-    console.log(`⏱️ Started timer: ${name}`);
+  private constructor() {}
+
+  public static getInstance(): PerformanceMonitor {
+    if (!PerformanceMonitor.instance) {
+      PerformanceMonitor.instance = new PerformanceMonitor();
+    }
+    return PerformanceMonitor.instance;
   }
 
-  endTimer(name: string): number | null {
-    const metric = this.metrics.get(name);
-    if (!metric) {
-      console.warn(`⚠️ Timer "${name}" not found`);
+  /**
+   * Record a performance metric
+   */
+  public recordMetric(metric: Omit<PerformanceMetric, 'timestamp'>): void {
+    const fullMetric: PerformanceMetric = {
+      ...metric,
+      timestamp: new Date().toISOString()
+    };
+
+    this.metrics.push(fullMetric);
+
+    // Keep only the most recent metrics
+    if (this.metrics.length > this.maxMetrics) {
+      this.metrics = this.metrics.slice(-this.maxMetrics);
+    }
+
+    // Log slow queries
+    if (metric.queryTime > 1000) {
+      console.warn(`🐌 Slow query detected: ${metric.endpoint} - ${metric.queryTime}ms`);
+    }
+
+    // Log errors
+    if (metric.error) {
+      console.error(`❌ API Error: ${metric.endpoint} - ${metric.error}`);
+    }
+  }
+
+  /**
+   * Get performance statistics for a time range
+   */
+  public getStats(timeRangeMs: number = 60 * 60 * 1000): {
+    totalRequests: number;
+    averageQueryTime: number;
+    maxQueryTime: number;
+    minQueryTime: number;
+    cacheHitRate: number;
+    errorRate: number;
+    slowQueries: number;
+  } {
+    const cutoffTime = new Date(Date.now() - timeRangeMs);
+    const recentMetrics = this.metrics.filter(
+      m => new Date(m.timestamp) >= cutoffTime
+    );
+
+    if (recentMetrics.length === 0) {
+      return {
+        totalRequests: 0,
+        averageQueryTime: 0,
+        maxQueryTime: 0,
+        minQueryTime: 0,
+        cacheHitRate: 0,
+        errorRate: 0,
+        slowQueries: 0
+      };
+    }
+
+    const totalRequests = recentMetrics.length;
+    const totalTime = recentMetrics.reduce((sum, m) => sum + m.queryTime, 0);
+    const averageQueryTime = totalTime / totalRequests;
+    const maxQueryTime = Math.max(...recentMetrics.map(m => m.queryTime));
+    const minQueryTime = Math.min(...recentMetrics.map(m => m.queryTime));
+    const cacheHits = recentMetrics.filter(m => m.cacheHit).length;
+    const cacheHitRate = (cacheHits / totalRequests) * 100;
+    const errors = recentMetrics.filter(m => m.error).length;
+    const errorRate = (errors / totalRequests) * 100;
+    const slowQueries = recentMetrics.filter(m => m.queryTime > 1000).length;
+
+    return {
+      totalRequests,
+      averageQueryTime,
+      maxQueryTime,
+      minQueryTime,
+      cacheHitRate,
+      errorRate,
+      slowQueries
+    };
+  }
+
+  /**
+   * Get endpoint-specific statistics
+   */
+  public getEndpointStats(endpoint: string, timeRangeMs: number = 60 * 60 * 1000): any {
+    const cutoffTime = new Date(Date.now() - timeRangeMs);
+    const endpointMetrics = this.metrics.filter(
+      m => m.endpoint.includes(endpoint) && new Date(m.timestamp) >= cutoffTime
+    );
+
+    if (endpointMetrics.length === 0) {
       return null;
     }
 
-    metric.endTime = performance.now();
-    metric.duration = metric.endTime - metric.startTime;
+    const stats = this.getStats(timeRangeMs);
+    const endpointSpecificStats = {
+      ...stats,
+      endpoint,
+      recentQueries: endpointMetrics
+        .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+        .slice(0, 10)
+    };
 
-    console.log(`✅ Timer "${name}" completed in ${metric.duration.toFixed(2)}ms`);
-
-    // Notify observers
-    this.observers.forEach(observer => observer(metric));
-
-    return metric.duration;
+    return endpointSpecificStats;
   }
 
-  getMetric(name: string): PerformanceMetric | undefined {
-    return this.metrics.get(name);
+  /**
+   * Get all metrics (for debugging)
+   */
+  public getAllMetrics(): PerformanceMetric[] {
+    return [...this.metrics];
   }
 
-  getAllMetrics(): PerformanceMetric[] {
-    return Array.from(this.metrics.values());
+  /**
+   * Clear all metrics
+   */
+  public clearMetrics(): void {
+    this.metrics = [];
   }
 
-  getSlowOperations(threshold: number = 1000): PerformanceMetric[] {
-    return this.getAllMetrics().filter(metric => 
-      metric.duration && metric.duration > threshold
-    );
-  }
-
-  clearMetrics(): void {
-    this.metrics.clear();
-  }
-
-  addObserver(observer: (metric: PerformanceMetric) => void): void {
-    this.observers.add(observer);
-  }
-
-  removeObserver(observer: (metric: PerformanceMetric) => void): void {
-    this.observers.delete(observer);
-  }
-
-  // System performance checks
-  checkSystemPerformance(): {
-    memoryUsage: number;
-    loadTime: number;
-    slowOperations: PerformanceMetric[];
-    recommendations: string[];
-  } {
-    const memoryUsage = (performance as any).memory ? (performance as any).memory.usedJSHeapSize / 1024 / 1024 : 0;
-    const loadTime = (performance as any).timing ? (performance as any).timing.loadEventEnd - (performance as any).timing.navigationStart : 0;
-    const slowOperations = this.getSlowOperations(1000);
-
+  /**
+   * Get performance recommendations
+   */
+  public getRecommendations(): string[] {
+    const stats = this.getStats();
     const recommendations: string[] = [];
 
-    if (memoryUsage > 100) {
-      recommendations.push('High memory usage detected. Consider optimizing component rendering.');
+    if (stats.averageQueryTime > 500) {
+      recommendations.push('Consider optimizing database queries - average response time is high');
     }
 
-    if (loadTime > 3000) {
-      recommendations.push('Slow page load detected. Consider code splitting and lazy loading.');
+    if (stats.cacheHitRate < 70) {
+      recommendations.push('Cache hit rate is low - consider implementing more aggressive caching');
     }
 
-    if (slowOperations.length > 0) {
-      recommendations.push(`Found ${slowOperations.length} slow operations. Review performance bottlenecks.`);
+    if (stats.errorRate > 5) {
+      recommendations.push('Error rate is high - investigate and fix API errors');
     }
 
-    return {
-      memoryUsage,
-      loadTime,
-      slowOperations,
-      recommendations
-    };
+    if (stats.slowQueries > 10) {
+      recommendations.push('Multiple slow queries detected - review and optimize slow endpoints');
+    }
+
+    if (recommendations.length === 0) {
+      recommendations.push('Performance looks good! No immediate optimizations needed.');
+    }
+
+    return recommendations;
   }
 }
 
-// Global performance monitor instance
-export const performanceMonitor = new PerformanceMonitor();
+// Export singleton instance
+export const performanceMonitor = PerformanceMonitor.getInstance();
 
-// React hook for performance monitoring
-export const usePerformanceMonitor = (componentName: string) => {
-  const startTimer = (operationName: string, metadata?: Record<string, any>) => {
-    performanceMonitor.startTimer(`${componentName}-${operationName}`, metadata);
+// Helper function to measure API performance
+export async function measureApiPerformance<T>(
+  endpoint: string,
+  operation: () => Promise<T>,
+  options: {
+    userId?: string;
+    cacheHit?: boolean;
+    dataSize?: number;
+  } = {}
+): Promise<T> {
+  const startTime = Date.now();
+  let error: string | undefined;
+
+  try {
+    const result = await operation();
+    const queryTime = Date.now() - startTime;
+
+    performanceMonitor.recordMetric({
+      endpoint,
+      queryTime,
+      dataSize: options.dataSize || 0,
+      cacheHit: options.cacheHit || false,
+      userId: options.userId
+    });
+
+    return result;
+  } catch (err: any) {
+    error = err.message;
+    const queryTime = Date.now() - startTime;
+
+    performanceMonitor.recordMetric({
+      endpoint,
+      queryTime,
+      dataSize: 0,
+      cacheHit: false,
+      userId: options.userId,
+      error
+    });
+
+    throw err;
+  }
+}
+
+// Helper function to create performance middleware
+export function createPerformanceMiddleware(endpoint: string) {
+  return async function<T>(operation: () => Promise<T>, options: any = {}): Promise<T> {
+    return measureApiPerformance(endpoint, operation, options);
   };
-
-  const endTimer = (operationName: string) => {
-    return performanceMonitor.endTimer(`${componentName}-${operationName}`);
-  };
-
-  return { startTimer, endTimer };
-};
-
-// Performance decorator for functions
-export const withPerformanceTracking = <T extends (...args: any[]) => any>(
-  fn: T,
-  operationName: string
-): T => {
-  return ((...args: Parameters<T>) => {
-    performanceMonitor.startTimer(operationName);
-    try {
-      const result = fn(...args);
-      if (result instanceof Promise) {
-        return result.finally(() => performanceMonitor.endTimer(operationName));
-      } else {
-        performanceMonitor.endTimer(operationName);
-        return result;
-      }
-    } catch (error) {
-      performanceMonitor.endTimer(operationName);
-      throw error;
-    }
-  }) as T;
-};
-
-// Auth performance tracking
-export const trackAuthPerformance = {
-  signIn: () => performanceMonitor.startTimer('auth-signin'),
-  signInComplete: () => performanceMonitor.endTimer('auth-signin'),
-  signOut: () => performanceMonitor.startTimer('auth-signout'),
-  signOutComplete: () => performanceMonitor.endTimer('auth-signout'),
-  sessionRefresh: () => performanceMonitor.startTimer('auth-session-refresh'),
-  sessionRefreshComplete: () => performanceMonitor.endTimer('auth-session-refresh'),
-};
-
-// Page load performance tracking
-export const trackPagePerformance = {
-  pageLoad: (pageName: string) => performanceMonitor.startTimer(`page-load-${pageName}`),
-  pageLoadComplete: (pageName: string) => performanceMonitor.endTimer(`page-load-${pageName}`),
-  dataFetch: (endpoint: string) => performanceMonitor.startTimer(`data-fetch-${endpoint}`),
-  dataFetchComplete: (endpoint: string) => performanceMonitor.endTimer(`data-fetch-${endpoint}`),
-}; 
+}

@@ -68,6 +68,8 @@ export default function TestGebruikers() {
   const [newUserData, setNewUserData] = useState({
     name: '',
     email: '',
+    password: '',
+    subscription_type: 'basic' as 'basic' | 'premium' | 'lifetime',
     status: 'active' as const,
     assigned_modules: [] as string[],
     test_start_date: '',
@@ -165,15 +167,17 @@ export default function TestGebruikers() {
   };
 
   const handleSaveTestUser = async () => {
-    if (!newUserData.name || !newUserData.email) {
-      toast.error('Vul naam en email in');
+    if (!newUserData.name || !newUserData.email || !newUserData.password) {
+      toast.error('Vul naam, email en wachtwoord in');
+      return;
+    }
+
+    if (newUserData.password.length < 6) {
+      toast.error('Wachtwoord moet minimaal 6 karakters bevatten');
       return;
     }
 
     try {
-      // Generate a unique password
-      const password = 'TestUser123!';
-      
       // Create test user via API
       const response = await fetch('/api/admin/create-test-user', {
         method: 'POST',
@@ -182,8 +186,9 @@ export default function TestGebruikers() {
         },
         body: JSON.stringify({
           email: newUserData.email,
-          password: password,
-          fullName: newUserData.name
+          password: newUserData.password,
+          fullName: newUserData.name,
+          subscriptionType: newUserData.subscription_type
         })
       });
 
@@ -216,12 +221,14 @@ export default function TestGebruikers() {
       setNewUserData({
         name: '',
         email: '',
+        password: '',
+        subscription_type: 'basic',
         status: 'active',
         assigned_modules: [],
         test_start_date: '',
         test_end_date: ''
       });
-      toast.success(`Test gebruiker succesvol aangemaakt! Email: ${newUserData.email}, Wachtwoord: ${password}`);
+      toast.success(`Test gebruiker succesvol aangemaakt! Email: ${newUserData.email}, Wachtwoord: ${newUserData.password}`);
     } catch (error) {
       console.error('Error creating test user:', error);
       toast.error('Fout bij aanmaken van test gebruiker');
@@ -623,6 +630,30 @@ export default function TestGebruikers() {
                   className="w-full px-4 py-2 bg-[#232D1A] border border-[#3A4D23] rounded-lg text-white focus:border-[#8BAE5A] focus:outline-none"
                   placeholder="email@example.com"
                 />
+              </div>
+
+              <div>
+                <label className="block text-[#8BAE5A] font-medium mb-2">Wachtwoord</label>
+                <input
+                  type="password"
+                  value={newUserData.password}
+                  onChange={(e) => setNewUserData(prev => ({ ...prev, password: e.target.value }))}
+                  className="w-full px-4 py-2 bg-[#232D1A] border border-[#3A4D23] rounded-lg text-white focus:border-[#8BAE5A] focus:outline-none"
+                  placeholder="Minimaal 6 karakters"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[#8BAE5A] font-medium mb-2">Account Type</label>
+                <select
+                  value={newUserData.subscription_type}
+                  onChange={(e) => setNewUserData(prev => ({ ...prev, subscription_type: e.target.value as any }))}
+                  className="w-full px-4 py-2 bg-[#232D1A] border border-[#3A4D23] rounded-lg text-white focus:border-[#8BAE5A] focus:outline-none"
+                >
+                  <option value="basic">Basic Tier</option>
+                  <option value="premium">Premium Tier</option>
+                  <option value="lifetime">Lifetime Tier</option>
+                </select>
               </div>
 
               <div>

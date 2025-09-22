@@ -1,412 +1,325 @@
-// V1.1: Error Recovery System with Circuit Breaker Pattern
-// This utility provides automatic error recovery, circuit breaker pattern, and graceful degradation
+/**
+ * Error Recovery Utility
+ * Provides robust error handling and recovery mechanisms
+ */
 
-export interface CircuitBreakerConfig {
-  failureThreshold: number; // Number of failures before opening circuit
-  recoveryTimeout: number; // Time in ms to wait before attempting recovery
-  monitoringWindow: number; // Time window for failure counting
-  expectedErrors: string[]; // Error types that should trigger circuit breaker
-}
-
-export interface ErrorRecoveryConfig {
+interface RetryOptions {
   maxRetries: number;
   baseDelay: number;
   maxDelay: number;
   backoffMultiplier: number;
-  jitter: boolean;
+  retryCondition?: (error: any) => boolean;
 }
 
-export interface CircuitBreakerState {
-  status: 'CLOSED' | 'OPEN' | 'HALF_OPEN';
-  failureCount: number;
-  lastFailureTime: number;
-  nextAttemptTime: number;
-  successCount: number;
-  totalRequests: number;
+interface CircuitBreakerOptions {
+  failureThreshold: number;
+  recoveryTimeout: number;
+  monitoringPeriod: number;
 }
 
-// Default configurations
-const DEFAULT_CIRCUIT_BREAKER_CONFIG: CircuitBreakerConfig = {
-  failureThreshold: 5, // 5 failures before opening circuit
-  recoveryTimeout: 30000, // 30 seconds recovery timeout
-  monitoringWindow: 60000, // 1 minute monitoring window
-  expectedErrors: [
-    'connection_timeout',
-    'database_unavailable',
-    'network_error',
-    'rate_limit_exceeded',
-    'service_unavailable',
-  ],
-};
+class ErrorRecovery {
+  private static instance: ErrorRecovery;
+  private circuitBreakers: Map<string, CircuitBreakerState> = new Map();
+  private retryAttempts: Map<string, number> = new Map();
 
-const DEFAULT_ERROR_RECOVERY_CONFIG: ErrorRecoveryConfig = {
-  maxRetries: 3,
-  baseDelay: 1000, // 1 second
-  maxDelay: 10000, // 10 seconds
-  backoffMultiplier: 2,
-  jitter: true,
-};
+  private constructor() {}
 
-class CircuitBreaker {
-  private state: CircuitBreakerState;
-  private config: CircuitBreakerConfig;
-  private failureHistory: Array<{ timestamp: number; error: string }> = [];
-
-  constructor(config: Partial<CircuitBreakerConfig> = {}) {
-    this.config = { ...DEFAULT_CIRCUIT_BREAKER_CONFIG, ...config };
-    this.state = {
-      status: 'CLOSED',
-      failureCount: 0,
-      lastFailureTime: 0,
-      nextAttemptTime: 0,
-      successCount: 0,
-      totalRequests: 0,
-    };
-  }
-
-  // Check if circuit breaker allows the operation
-  canExecute(): boolean {
-    const now = Date.now();
-
-    switch (this.state.status) {
-      case 'CLOSED':
-        return true;
-
-      case 'OPEN':
-        if (now >= this.state.nextAttemptTime) {
-          this.state.status = 'HALF_OPEN';
-          console.log('🔄 Circuit breaker: Attempting recovery (HALF_OPEN)');
-          return true;
-        }
-        return false;
-
-      case 'HALF_OPEN':
-        return true;
-
-      default:
-        return false;
+  public static getInstance(): ErrorRecovery {
+    if (!ErrorRecovery.instance) {
+      ErrorRecovery.instance = new ErrorRecovery();
     }
+    return ErrorRecovery.instance;
   }
 
-  // Record a successful operation
-  onSuccess(): void {
-    this.state.totalRequests++;
-    this.state.successCount++;
-
-    if (this.state.status === 'HALF_OPEN') {
-      this.state.status = 'CLOSED';
-      this.state.failureCount = 0;
-      this.failureHistory = [];
-      console.log('✅ Circuit breaker: Recovery successful, circuit CLOSED');
-    }
-  }
-
-  // Record a failed operation
-  onFailure(error: Error): void {
-    const now = Date.now();
-    this.state.totalRequests++;
-    this.state.lastFailureTime = now;
-
-    // Add to failure history
-    this.failureHistory.push({
-      timestamp: now,
-      error: error.message,
-    });
-
-    // Clean up old failures outside monitoring window
-    this.failureHistory = this.failureHistory.filter(
-      failure => (now - failure.timestamp) < this.config.monitoringWindow
-    );
-
-    this.state.failureCount = this.failureHistory.length;
-
-    if (this.state.status === 'CLOSED' && this.state.failureCount >= this.config.failureThreshold) {
-      this.state.status = 'OPEN';
-      this.state.nextAttemptTime = now + this.config.recoveryTimeout;
-      console.log(`🚨 Circuit breaker: Circuit OPENED after ${this.state.failureCount} failures`);
-    } else if (this.state.status === 'HALF_OPEN') {
-      this.state.status = 'OPEN';
-      this.state.nextAttemptTime = now + this.config.recoveryTimeout;
-      console.log('🚨 Circuit breaker: Recovery failed, circuit OPENED again');
-    }
-  }
-
-  // Get current state
-  getState(): CircuitBreakerState {
-    return { ...this.state };
-  }
-
-  // Force reset circuit breaker
-  reset(): void {
-    this.state = {
-      status: 'CLOSED',
-      failureCount: 0,
-      lastFailureTime: 0,
-      nextAttemptTime: 0,
-      successCount: 0,
-      totalRequests: 0,
-    };
-    this.failureHistory = [];
-    console.log('🔄 Circuit breaker: Manually reset');
-  }
-
-  // Get statistics
-  getStats() {
-    const successRate = this.state.totalRequests > 0 
-      ? (this.state.successCount / this.state.totalRequests) * 100 
-      : 0;
-
-    return {
-      status: this.state.status,
-      successRate: `${successRate.toFixed(1)}%`,
-      totalRequests: this.state.totalRequests,
-      failureCount: this.state.failureCount,
-      successCount: this.state.successCount,
-      failureHistory: this.failureHistory.length,
-    };
-  }
-}
-
-// Exponential backoff with jitter
-function calculateBackoffDelay(
-  attempt: number,
-  config: ErrorRecoveryConfig
-): number {
-  const delay = Math.min(
-    config.baseDelay * Math.pow(config.backoffMultiplier, attempt - 1),
-    config.maxDelay
-  );
-
-  if (config.jitter) {
-    // Add jitter to prevent thundering herd
-    const jitter = Math.random() * 0.1 * delay;
-    return delay + jitter;
-  }
-
-  return delay;
-}
-
-// Error classification
-function classifyError(error: Error): string {
-  const message = error.message.toLowerCase();
-  
-  if (message.includes('timeout') || message.includes('connection')) {
-    return 'connection_timeout';
-  }
-  if (message.includes('database') || message.includes('relation')) {
-    return 'database_unavailable';
-  }
-  if (message.includes('network') || message.includes('fetch')) {
-    return 'network_error';
-  }
-  if (message.includes('rate limit') || message.includes('429')) {
-    return 'rate_limit_exceeded';
-  }
-  if (message.includes('service unavailable') || message.includes('503')) {
-    return 'service_unavailable';
-  }
-  
-  return 'unknown_error';
-}
-
-// Main error recovery function with circuit breaker
-export async function withErrorRecovery<T>(
-  operation: () => Promise<T>,
-  options: {
-    circuitBreaker?: Partial<CircuitBreakerConfig>;
-    retry?: Partial<ErrorRecoveryConfig>;
-    fallback?: () => Promise<T>;
-    context?: string;
-  } = {}
-): Promise<T> {
-  const circuitBreaker = new CircuitBreaker(options.circuitBreaker);
-  const retryConfig = { ...DEFAULT_ERROR_RECOVERY_CONFIG, ...options.retry };
-  const context = options.context || 'unknown';
-
-  // Check if circuit breaker allows execution
-  if (!circuitBreaker.canExecute()) {
-    console.log(`🚨 Circuit breaker blocked operation: ${context}`);
-    
-    if (options.fallback) {
-      console.log(`🔄 Using fallback for: ${context}`);
-      return await options.fallback();
-    }
-    
-    throw new Error(`Circuit breaker is OPEN for: ${context}`);
-  }
-
-  let lastError: Error;
-
-  // Attempt operation with retries
-  for (let attempt = 1; attempt <= retryConfig.maxRetries; attempt++) {
-    try {
-      const result = await operation();
-      circuitBreaker.onSuccess();
-      console.log(`✅ Operation successful: ${context} (attempt ${attempt})`);
-      return result;
-    } catch (error) {
-      lastError = error as Error;
-      const errorType = classifyError(lastError);
-      
-      console.warn(`⚠️ Operation failed: ${context} (attempt ${attempt}/${retryConfig.maxRetries}) - ${errorType}: ${lastError.message}`);
-      
-      circuitBreaker.onFailure(lastError);
-
-      // If this is the last attempt, don't retry
-      if (attempt === retryConfig.maxRetries) {
-        break;
-      }
-
-      // Check if circuit breaker is now open
-      if (!circuitBreaker.canExecute()) {
-        console.log(`🚨 Circuit breaker opened during retry: ${context}`);
-        break;
-      }
-
-      // Calculate delay for next attempt
-      const delay = calculateBackoffDelay(attempt, retryConfig);
-      console.log(`⏳ Waiting ${delay}ms before retry: ${context}`);
-      await new Promise(resolve => setTimeout(resolve, delay));
-    }
-  }
-
-  // All attempts failed
-  console.error(`❌ Operation failed after ${retryConfig.maxRetries} attempts: ${context}`);
-  
-  if (options.fallback) {
-    console.log(`🔄 Using fallback after all retries failed: ${context}`);
-    return await options.fallback();
-  }
-
-  throw lastError!;
-}
-
-// Database-specific error recovery
-export async function withDatabaseErrorRecovery<T>(
-  operation: () => Promise<T>,
-  fallback?: () => Promise<T>
-): Promise<T> {
-  return withErrorRecovery(operation, {
-    circuitBreaker: {
-      failureThreshold: 3, // Lower threshold for database operations
-      recoveryTimeout: 15000, // 15 seconds for database recovery
-      expectedErrors: [
-        'database_unavailable',
-        'connection_timeout',
-        'relation_does_not_exist',
-      ],
-    },
-    retry: {
-      maxRetries: 2, // Fewer retries for database operations
-      baseDelay: 500, // Faster retry for database
-    },
-    fallback,
-    context: 'database_operation',
-  });
-}
-
-// API-specific error recovery
-export async function withAPIErrorRecovery<T>(
-  operation: () => Promise<T>,
-  fallback?: () => Promise<T>
-): Promise<T> {
-  return withErrorRecovery(operation, {
-    circuitBreaker: {
-      failureThreshold: 5,
-      recoveryTimeout: 30000,
-      expectedErrors: [
-        'network_error',
-        'rate_limit_exceeded',
-        'service_unavailable',
-      ],
-    },
-    retry: {
+  /**
+   * Retry an operation with exponential backoff
+   */
+  public async retry<T>(
+    operation: () => Promise<T>,
+    options: RetryOptions = {
       maxRetries: 3,
       baseDelay: 1000,
-    },
-    fallback,
-    context: 'api_operation',
-  });
-}
-
-// Auth-specific error recovery
-export async function withAuthErrorRecovery<T>(
-  operation: () => Promise<T>,
-  fallback?: () => Promise<T>
-): Promise<T> {
-  return withErrorRecovery(operation, {
-    circuitBreaker: {
-      failureThreshold: 2, // Very low threshold for auth operations
-      recoveryTimeout: 10000, // 10 seconds for auth recovery
-      expectedErrors: [
-        'auth_timeout',
-        'session_expired',
-        'invalid_token',
-      ],
-    },
-    retry: {
-      maxRetries: 1, // Minimal retries for auth
-      baseDelay: 200, // Very fast retry for auth
-    },
-    fallback,
-    context: 'auth_operation',
-  });
-}
-
-// Global error recovery manager
-class ErrorRecoveryManager {
-  private circuitBreakers: Map<string, CircuitBreaker> = new Map();
-
-  // Get or create circuit breaker for a specific service
-  getCircuitBreaker(service: string, config?: Partial<CircuitBreakerConfig>): CircuitBreaker {
-    if (!this.circuitBreakers.has(service)) {
-      this.circuitBreakers.set(service, new CircuitBreaker(config));
+      maxDelay: 10000,
+      backoffMultiplier: 2
     }
-    return this.circuitBreakers.get(service)!;
+  ): Promise<T> {
+    let lastError: any;
+    const operationId = Math.random().toString(36).substr(2, 9);
+
+    for (let attempt = 0; attempt <= options.maxRetries; attempt++) {
+      try {
+        const result = await operation();
+        
+        // Reset retry attempts on success
+        this.retryAttempts.delete(operationId);
+        
+        if (attempt > 0) {
+          console.log(`✅ Operation succeeded after ${attempt} retries: ${operationId}`);
+        }
+        
+        return result;
+      } catch (error: any) {
+        lastError = error;
+        
+        // Check if we should retry this error
+        if (options.retryCondition && !options.retryCondition(error)) {
+          console.log(`❌ Non-retryable error: ${error.message}`);
+          throw error;
+        }
+
+        if (attempt === options.maxRetries) {
+          console.error(`❌ Operation failed after ${options.maxRetries} retries: ${operationId}`);
+          this.retryAttempts.delete(operationId);
+          throw error;
+        }
+
+        // Calculate delay with exponential backoff
+        const delay = Math.min(
+          options.baseDelay * Math.pow(options.backoffMultiplier, attempt),
+          options.maxDelay
+        );
+
+        console.log(`⚠️ Attempt ${attempt + 1} failed, retrying in ${delay}ms: ${error.message}`);
+        
+        this.retryAttempts.set(operationId, attempt + 1);
+        
+        await this.sleep(delay);
+      }
+    }
+
+    throw lastError;
   }
 
-  // Get all circuit breaker statistics
-  getAllStats() {
-    const stats: Record<string, any> = {};
+  /**
+   * Circuit breaker pattern implementation
+   */
+  public async withCircuitBreaker<T>(
+    operation: () => Promise<T>,
+    key: string,
+    options: CircuitBreakerOptions = {
+      failureThreshold: 5,
+      recoveryTimeout: 60000,
+      monitoringPeriod: 300000
+    }
+  ): Promise<T> {
+    const circuitBreaker = this.getCircuitBreaker(key, options);
     
-    for (const [service, circuitBreaker] of this.circuitBreakers) {
-      stats[service] = circuitBreaker.getStats();
+    if (circuitBreaker.state === 'OPEN') {
+      if (Date.now() - circuitBreaker.lastFailureTime > options.recoveryTimeout) {
+        circuitBreaker.state = 'HALF_OPEN';
+        console.log(`🔄 Circuit breaker ${key} moved to HALF_OPEN state`);
+      } else {
+        throw new Error(`Circuit breaker ${key} is OPEN - operation blocked`);
+      }
     }
-    
-    return stats;
+
+    try {
+      const result = await operation();
+      
+      if (circuitBreaker.state === 'HALF_OPEN') {
+        circuitBreaker.state = 'CLOSED';
+        circuitBreaker.failureCount = 0;
+        console.log(`✅ Circuit breaker ${key} moved to CLOSED state`);
+      }
+      
+      return result;
+    } catch (error: any) {
+      circuitBreaker.failureCount++;
+      circuitBreaker.lastFailureTime = Date.now();
+      
+      if (circuitBreaker.failureCount >= options.failureThreshold) {
+        circuitBreaker.state = 'OPEN';
+        console.log(`🚨 Circuit breaker ${key} moved to OPEN state after ${circuitBreaker.failureCount} failures`);
+      }
+      
+      throw error;
+    }
   }
 
-  // Reset all circuit breakers
-  resetAll() {
-    for (const circuitBreaker of this.circuitBreakers.values()) {
-      circuitBreaker.reset();
+  /**
+   * Fallback mechanism with graceful degradation
+   */
+  public async withFallback<T>(
+    primaryOperation: () => Promise<T>,
+    fallbackOperation: () => Promise<T>,
+    fallbackCondition?: (error: any) => boolean
+  ): Promise<T> {
+    try {
+      return await primaryOperation();
+    } catch (error: any) {
+      if (fallbackCondition && !fallbackCondition(error)) {
+        throw error;
+      }
+      
+      console.log(`🔄 Primary operation failed, using fallback: ${error.message}`);
+      
+      try {
+        return await fallbackOperation();
+      } catch (fallbackError: any) {
+        console.error(`❌ Both primary and fallback operations failed`);
+        throw new Error(`Primary: ${error.message}, Fallback: ${fallbackError.message}`);
+      }
     }
-    console.log('🔄 All circuit breakers reset');
   }
 
-  // Get overall system health
-  getSystemHealth() {
-    const stats = this.getAllStats();
-    const totalServices = Object.keys(stats).length;
-    const healthyServices = Object.values(stats).filter(
-      (stat: any) => stat.status === 'CLOSED'
-    ).length;
+  /**
+   * Timeout wrapper for operations
+   */
+  public async withTimeout<T>(
+    operation: () => Promise<T>,
+    timeoutMs: number,
+    timeoutMessage?: string
+  ): Promise<T> {
+    return Promise.race([
+      operation(),
+      new Promise<never>((_, reject) => {
+        setTimeout(() => {
+          reject(new Error(timeoutMessage || `Operation timed out after ${timeoutMs}ms`));
+        }, timeoutMs);
+      })
+    ]);
+  }
+
+  /**
+   * Bulk operation with partial success handling
+   */
+  public async bulkOperation<T>(
+    operations: Array<() => Promise<T>>,
+    options: {
+      continueOnError?: boolean;
+      maxConcurrency?: number;
+      retryOptions?: RetryOptions;
+    } = {}
+  ): Promise<{
+    results: T[];
+    errors: Array<{ index: number; error: any }>;
+    successCount: number;
+    failureCount: number;
+  }> {
+    const {
+      continueOnError = true,
+      maxConcurrency = 5,
+      retryOptions
+    } = options;
+
+    const results: T[] = [];
+    const errors: Array<{ index: number; error: any }> = [];
+    let successCount = 0;
+    let failureCount = 0;
+
+    // Process operations in batches to control concurrency
+    for (let i = 0; i < operations.length; i += maxConcurrency) {
+      const batch = operations.slice(i, i + maxConcurrency);
+      
+      const batchPromises = batch.map(async (operation, batchIndex) => {
+        const globalIndex = i + batchIndex;
+        
+        try {
+          const result = retryOptions 
+            ? await this.retry(operation, retryOptions)
+            : await operation();
+          
+          results[globalIndex] = result;
+          successCount++;
+          return { index: globalIndex, result, error: null };
+        } catch (error: any) {
+          failureCount++;
+          const errorInfo = { index: globalIndex, error };
+          errors.push(errorInfo);
+          
+          if (!continueOnError) {
+            throw error;
+          }
+          
+          return { index: globalIndex, result: null, error };
+        }
+      });
+
+      await Promise.allSettled(batchPromises);
+    }
 
     return {
-      totalServices,
-      healthyServices,
-      unhealthyServices: totalServices - healthyServices,
-      healthPercentage: totalServices > 0 ? (healthyServices / totalServices) * 100 : 100,
+      results,
+      errors,
+      successCount,
+      failureCount
     };
   }
+
+  /**
+   * Get circuit breaker state
+   */
+  private getCircuitBreaker(key: string, options: CircuitBreakerOptions): CircuitBreakerState {
+    if (!this.circuitBreakers.has(key)) {
+      this.circuitBreakers.set(key, {
+        state: 'CLOSED',
+        failureCount: 0,
+        lastFailureTime: 0
+      });
+    }
+    
+    return this.circuitBreakers.get(key)!;
+  }
+
+  /**
+   * Sleep utility
+   */
+  private sleep(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  /**
+   * Get retry statistics
+   */
+  public getRetryStats(): { [operationId: string]: number } {
+    return Object.fromEntries(this.retryAttempts);
+  }
+
+  /**
+   * Get circuit breaker states
+   */
+  public getCircuitBreakerStates(): { [key: string]: CircuitBreakerState } {
+    return Object.fromEntries(this.circuitBreakers);
+  }
+
+  /**
+   * Reset all circuit breakers
+   */
+  public resetCircuitBreakers(): void {
+    this.circuitBreakers.clear();
+    console.log('🔄 All circuit breakers reset');
+  }
+}
+
+interface CircuitBreakerState {
+  state: 'CLOSED' | 'OPEN' | 'HALF_OPEN';
+  failureCount: number;
+  lastFailureTime: number;
 }
 
 // Export singleton instance
-export const errorRecoveryManager = new ErrorRecoveryManager();
+export const errorRecovery = ErrorRecovery.getInstance();
 
-// Export utility functions
-export {
-  CircuitBreaker,
-  calculateBackoffDelay,
-  classifyError,
-};
+// Helper functions for common error recovery patterns
+export const withRetry = <T>(
+  operation: () => Promise<T>,
+  options?: RetryOptions
+) => errorRecovery.retry(operation, options);
+
+export const withCircuitBreaker = <T>(
+  operation: () => Promise<T>,
+  key: string,
+  options?: CircuitBreakerOptions
+) => errorRecovery.withCircuitBreaker(operation, key, options);
+
+export const withFallback = <T>(
+  primaryOperation: () => Promise<T>,
+  fallbackOperation: () => Promise<T>,
+  fallbackCondition?: (error: any) => boolean
+) => errorRecovery.withFallback(primaryOperation, fallbackOperation, fallbackCondition);
+
+export const withTimeout = <T>(
+  operation: () => Promise<T>,
+  timeoutMs: number,
+  timeoutMessage?: string
+) => errorRecovery.withTimeout(operation, timeoutMs, timeoutMessage);

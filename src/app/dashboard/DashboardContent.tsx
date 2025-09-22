@@ -90,6 +90,7 @@ const SubscriptionTier = () => {
 const menu = [
   { label: 'Onboarding', icon: CheckCircleIcon, href: null, onboardingStep: 0, isOnboardingItem: true, isDynamic: true },
   { label: 'Dashboard', icon: HomeIcon, href: '/dashboard', onboardingStep: 0 },
+  { label: 'Mijn Dashboard', icon: HomeIcon, parent: 'Dashboard', href: '/dashboard', isSub: true, onboardingStep: 0 },
   { label: 'Mijn Profiel', icon: UserCircleIcon, parent: 'Dashboard', href: '/dashboard/mijn-profiel', isSub: true, onboardingStep: 0 },
   { label: 'Notificaties', icon: BellIcon, parent: 'Dashboard', href: '/dashboard/notificaties', isSub: true, onboardingStep: 0 },
   { label: 'Mijn Trainingen', icon: AcademicCapIcon, parent: 'Dashboard', href: '/dashboard/mijn-trainingen', isSub: true, onboardingStep: 0 },

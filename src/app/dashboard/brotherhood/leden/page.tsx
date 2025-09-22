@@ -194,26 +194,42 @@ export default function LedenOverzicht() {
     fetchMembers();
   }, []);
 
-  // Set up real-time presence updates
+  // Set up real-time presence updates (simplified to prevent logout issues)
   useEffect(() => {
     if (!user) return;
 
     // Mark user as online when component mounts
     markUserOnline();
 
-    // Set up real-time subscription for presence changes
+    // Simplified real-time subscription - only listen for INSERT/UPDATE events
     const presenceSubscription = supabase
-      .channel('user_presence')
+      .channel('user_presence_simple')
       .on('postgres_changes', 
         { 
-          event: '*', 
+          event: 'INSERT', 
           schema: 'public', 
           table: 'user_presence' 
         }, 
         (payload) => {
-          console.log('Presence change:', payload);
-          // Refresh members data when presence changes
-          fetchMembers(true);
+          console.log('User came online:', payload);
+          // Only refresh if it's not the current user
+          if (payload.new?.user_id !== user.id) {
+            fetchMembers(true);
+          }
+        }
+      )
+      .on('postgres_changes', 
+        { 
+          event: 'UPDATE', 
+          schema: 'public', 
+          table: 'user_presence' 
+        }, 
+        (payload) => {
+          console.log('User status changed:', payload);
+          // Only refresh if it's not the current user
+          if (payload.new?.user_id !== user.id) {
+            fetchMembers(true);
+          }
         }
       )
       .subscribe();
@@ -222,9 +238,6 @@ export default function LedenOverzicht() {
     const handleBeforeUnload = () => {
       markUserOffline();
     };
-
-    // Removed visibilitychange event listener to prevent page reloads when switching tabs
-    // Only keep beforeunload for proper cleanup when leaving the page
 
     window.addEventListener('beforeunload', handleBeforeUnload);
 
@@ -271,7 +284,7 @@ export default function LedenOverzicht() {
       }
       setError(null);
 
-      // Use the API endpoint to get enriched members data
+      // Use the API endpoint to get enriched members data (now includes badges)
       const response = await fetch('/api/members-data', {
         cache: 'no-store',
         headers: {
@@ -285,52 +298,11 @@ export default function LedenOverzicht() {
 
       const { members: enrichedMembers } = await response.json();
       
-      // Fetch badges for each member
-      const membersWithBadges = await Promise.all(
-        enrichedMembers.map(async (member: Profile) => {
-          try {
-            const { data: badges, error } = await supabase
-              .from('user_badges')
-              .select(`
-                id,
-                badge_id,
-                unlocked_at,
-                badges (
-                  id,
-                  title,
-                  description,
-                  image_url
-                )
-              `)
-              .eq('user_id', member.id)
-              .order('unlocked_at', { ascending: false })
-              .limit(5); // Get last 5 badges for display
-
-            if (error) {
-              console.error('Error fetching badges for user:', member.id, error);
-              return { ...member, badges: [] };
-            }
-
-            const formattedBadges = badges?.map((badge: any) => ({
-              id: badge.id,
-              name: badge.badges?.title || 'Unknown Badge',
-              description: badge.badges?.description || '',
-              icon_url: badge.badges?.image_url || null,
-              unlocked_at: badge.unlocked_at
-            })) || [];
-
-            return { ...member, badges: formattedBadges };
-          } catch (error) {
-            console.error('Error fetching badges for user:', member.id, error);
-            return { ...member, badges: [] };
-          }
-        })
-      );
-
-      setMembers(membersWithBadges);
+      // No need to fetch badges separately anymore - they're included in the API response
+      setMembers(enrichedMembers);
       
       // Count online members
-      const onlineMembers = membersWithBadges.filter((m: Profile) => m.is_online);
+      const onlineMembers = enrichedMembers.filter((m: Profile) => m.is_online);
       setOnlineCount(onlineMembers.length);
     } catch (err) {
       console.error('Error fetching members:', err);

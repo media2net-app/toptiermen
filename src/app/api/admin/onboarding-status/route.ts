@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
 
     // Fetch onboarding status for all users
     const { data: onboardingData, error: onboardingError } = await supabaseAdmin
-      .from('onboarding_status')
+      .from('user_onboarding_status')
       .select('*');
 
     if (onboardingError) {
@@ -58,22 +58,20 @@ export async function GET(request: NextRequest) {
       // Calculate actual current step based on completed steps
       let actualCurrentStep = 0;
       
-
-      
       if (onboarding) {
         if (onboarding.onboarding_completed) {
           actualCurrentStep = 6; // Completed
-        } else if (onboarding.step_5_completed) {
+        } else if (onboarding.challenge_started) {
           actualCurrentStep = 6; // Forum Introductie (final step)
-        } else if (onboarding.step_4_completed) {
+        } else if (onboarding.nutrition_plan_selected) {
           actualCurrentStep = 5; // Forum Introductie
-        } else if (onboarding.step_3_completed) {
+        } else if (onboarding.training_schema_selected) {
           actualCurrentStep = 4; // Voedingsplan
-        } else if (onboarding.step_2_completed) {
+        } else if (onboarding.missions_selected) {
           actualCurrentStep = 3; // Trainingsschema
-        } else if (onboarding.step_1_completed) {
+        } else if (onboarding.goal_set) {
           actualCurrentStep = 2; // Missies Selecteren
-        } else if (onboarding.welcome_video_watched) {
+        } else if (onboarding.welcome_video_shown) {
           actualCurrentStep = 1; // Doel Omschrijven
         } else {
           actualCurrentStep = 0; // Welkom Video

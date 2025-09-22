@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { useAuth } from '@/hooks/useAuth';
 import { EnvelopeIcon, LockClosedIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 
 // Simplified configuration
@@ -15,91 +15,88 @@ const LOGIN_CONFIG = {
 function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user, profile, loading: authLoading, signIn, isAdmin } = useSupabaseAuth();
+  const { user, profile, isLoading: authLoading, login, isAdmin, getRedirectPath } = useAuth();
   const loading = authLoading; // Use actual auth loading state
   
-  // ✅ FIXED: Split complex state into separate useState hooks
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
-  const [isClient, setIsClient] = useState(false); // Start with false to prevent hydration mismatch
+  // ✅ PHASE 1: Simplified state management - Single state object
+  const [loginState, setLoginState] = useState({
+    email: "",
+    password: "",
+    isLoading: false,
+    error: "",
+    showPassword: false,
+    rememberMe: false,
+    isClient: false,
+    showLoadingOverlay: false,
+    loadingProgress: 0,
+    loadingText: "",
+    isRedirecting: false
+  });
   
-  // Loading overlay states
-  const [showLoadingOverlay, setShowLoadingOverlay] = useState(false);
-  const [loadingStep, setLoadingStep] = useState(0);
-  const [loadingText, setLoadingText] = useState("");
+  // Ref to prevent multiple redirects
+  const redirectExecuted = useRef(false);
   
-  // Loading steps configuration
-  const loadingSteps = [
-    { text: "Inloggegevens checken...", duration: 1500 },
-    { text: "Platform laden...", duration: 2000 },
-    { text: "Welkom terug op het platform", duration: 1000 }
-  ];
   
-  // Function to handle loading steps
+  // ✅ PHASE 1: Simplified loading system - Progress-based instead of time-based
   const startLoadingSequence = () => {
-    setShowLoadingOverlay(true);
-    setLoadingStep(0);
-    setLoadingText(loadingSteps[0].text);
-    
-    let currentStep = 0;
-    const totalDuration = loadingSteps.reduce((sum, step) => sum + step.duration, 0);
-    
-    // Progress through each step
-    loadingSteps.forEach((step, index) => {
-      setTimeout(() => {
-        setLoadingStep(index);
-        setLoadingText(step.text);
-      }, loadingSteps.slice(0, index).reduce((sum, s) => sum + s.duration, 0));
-    });
-    
-    // Hide overlay and trigger redirect after all steps complete
-    setTimeout(() => {
-      setShowLoadingOverlay(false);
-      // The useEffect will handle the redirect once showLoadingOverlay becomes false
-    }, totalDuration);
+    console.log('🎬 Starting loading sequence...');
+    setLoginState(prev => ({
+      ...prev,
+      showLoadingOverlay: true,
+      isRedirecting: true,
+      loadingProgress: 0,
+      loadingText: "Inloggen..."
+    }));
   };
   
-  // Forgot password states
-  const [showForgotPassword, setShowForgotPassword] = useState(false);
-  const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
-  const [isSendingReset, setIsSendingReset] = useState(false);
+  const updateLoadingProgress = (progress: number, text: string) => {
+    setLoginState(prev => ({
+      ...prev,
+      loadingProgress: progress,
+      loadingText: text
+    }));
+  };
+  
+  // ✅ PHASE 1: Simplified forgot password state
+  const [forgotPasswordState, setForgotPasswordState] = useState({
+    showForgotPassword: false,
+    email: "",
+    isSendingReset: false
+  });
   const [resetMessage, setResetMessage] = useState("");
 
-  // ✅ FIXED: Hydration safety - set isClient after mount
+  // ✅ PHASE 1: Hydration safety - set isClient after mount
   useEffect(() => {
-    setIsClient(true);
+    setLoginState(prev => ({ ...prev, isClient: true }));
     
     // Fallback timeout to prevent infinite loading - reduced timeout
     const fallbackTimeout = setTimeout(() => {
       console.log('⚠️ Login page timeout - forcing completion');
-      setIsLoading(false);
-    }, 1500); // Reduced to 1.5s for faster loading
+      setLoginState(prev => ({ ...prev, isLoading: false }));
+    }, 500); // Reduced to 0.5s for faster loading
     
     return () => clearTimeout(fallbackTimeout);
   }, []);
 
-  // ✅ FIXED: Simplified admin detection
-  const getRedirectPath = (user: any, profile: any, redirectTo?: string) => {
-    if (redirectTo && redirectTo !== '/login') return redirectTo;
+  // ✅ NEW: Fallback for auth context loading issues
+  useEffect(() => {
+    const authTimeout = setTimeout(() => {
+      if (loading && loginState.isClient) {
+        console.log('⚠️ Auth context loading timeout - forcing auth completion');
+        // Force auth to complete if it's taking too long
+      }
+    }, 3000); // 3 second timeout for auth loading
     
-    const knownAdminEmails = ['chiel@media2net.nl', 'rick@toptiermen.eu', 'admin@toptiermen.com', 'chiel@toptiermen.eu'];
-    const isAdminByRole = profile?.role?.toLowerCase() === 'admin';
-    const isAdminByEmail = user?.email && knownAdminEmails.includes(user.email);
-    const isAdmin = isAdminByRole || isAdminByEmail;
-    
-    return isAdmin ? '/dashboard-admin' : LOGIN_CONFIG.defaultRedirect;
-  };
+    return () => clearTimeout(authTimeout);
+  }, [loading, loginState.isClient]);
+
 
   // ✅ FIXED: Single useEffect for logout status handling
   useEffect(() => {
     // Handle logout status with improved messaging
     const logoutStatus = searchParams?.get('logout');
     if (logoutStatus === 'success') {
-      setError('');
+      setLoginState(prev => ({ ...prev, error: '' }));
       // Show success message briefly
       console.log('✅ Logout successful, ready for new login');
       // Clean URL
@@ -110,7 +107,7 @@ function LoginPageContent() {
         window.history.replaceState({}, '', url.toString());
       }
     } else if (logoutStatus === 'error') {
-      setError('Er is een fout opgetreden bij het uitloggen. Je sessie is gewist, probeer opnieuw in te loggen.');
+      setLoginState(prev => ({ ...prev, error: 'Er is een fout opgetreden bij het uitloggen. Je sessie is gewist, probeer opnieuw in te loggen.' }));
       console.log('⚠️ Logout error occurred, but session should be cleared');
       // Clean URL
       if (typeof window !== 'undefined') {
@@ -124,75 +121,152 @@ function LoginPageContent() {
 
   // ✅ FIXED: Single useEffect for authentication redirect with better loading handling
   useEffect(() => {
-    // Don't redirect while auth is still loading, form is submitting, or overlay is showing
-    if (loading || isLoading || showLoadingOverlay) {
-      console.log('⏳ Auth, form, or overlay still loading, waiting...', { loading, isLoading, showLoadingOverlay });
+    console.log('🔄 Redirect useEffect triggered:', { 
+      user: user?.email, 
+      profile: profile?.full_name, 
+      loading, 
+      isLoading: loginState.isLoading, 
+      isRedirecting: loginState.isRedirecting 
+    });
+
+    // Don't redirect while form is submitting
+    if (loginState.isLoading) {
+      console.log('⏳ Form still loading, waiting...', { isLoading: loginState.isLoading });
       return;
     }
 
-    // Only redirect if we have a confirmed authenticated user
-    if (user && profile !== undefined) {
-      console.log('✅ User authenticated, redirecting...', { email: user.email, profile: profile?.full_name });
+    // Only redirect if we have a confirmed authenticated user and not already redirecting
+    if (user && !loginState.isLoading && !loginState.isRedirecting && !redirectExecuted.current) {
+      console.log('✅ User authenticated, starting redirect process...', { email: user.email, profile: profile?.full_name });
       const redirectTo = searchParams?.get('redirect') || undefined;
-      const targetPath = getRedirectPath(user, profile, redirectTo);
+      const targetPath = getRedirectPath(redirectTo);
       
-      // Quick redirect without complex timeout logic
+      console.log('🎯 Target path determined:', targetPath);
+      
+      // Mark redirect as executed to prevent multiple redirects
+      redirectExecuted.current = true;
+      
+      // Don't start loading sequence again if already showing (from login)
+      if (!loginState.showLoadingOverlay) {
+        console.log('🎬 Starting redirect loading sequence...');
+        startLoadingSequence();
+      } else {
+        console.log('🎬 Loading overlay already showing from login');
+      }
+      
+      // Execute redirect immediately after starting loading sequence
       setTimeout(() => {
+        console.log('🚀 Executing redirect to:', targetPath);
         router.replace(targetPath);
-      }, 100);
+      }, 100); // Very short delay to allow loading sequence to start
     } else if (!user && !loading) {
       console.log('ℹ️ No authenticated user found, staying on login page');
+    } else {
+      console.log('⏸️ Redirect conditions not met:', { 
+        hasUser: !!user, 
+        isLoading: loginState.isLoading,
+        loading 
+      });
     }
-  }, [loading, user, profile, router, searchParams, isLoading, showLoadingOverlay]);
+  }, [loading, user, profile, router, searchParams, loginState.isLoading]); // Updated dependencies
 
-  // ✅ FIXED: Enhanced login handler with detailed debugging
+  // ✅ NEW: Hide overlay when URL changes (user has been redirected)
+  useEffect(() => {
+    const handleRouteChange = () => {
+      if (loginState.isRedirecting && loginState.showLoadingOverlay) {
+        console.log('🔄 Route changed, hiding loading overlay');
+        setLoginState(prev => ({ 
+          ...prev, 
+          showLoadingOverlay: false, 
+          isRedirecting: false 
+        }));
+        // Reset redirect executed flag for future logins
+        redirectExecuted.current = false;
+      }
+    };
+
+    // Listen for route changes
+    const originalPush = router.push;
+    const originalReplace = router.replace;
+    
+    router.push = (...args) => {
+      handleRouteChange();
+      return originalPush.apply(router, args);
+    };
+    
+    router.replace = (...args) => {
+      handleRouteChange();
+      return originalReplace.apply(router, args);
+    };
+
+    // Also listen for popstate events (back/forward navigation)
+    window.addEventListener('popstate', handleRouteChange);
+
+    return () => {
+      router.push = originalPush;
+      router.replace = originalReplace;
+      window.removeEventListener('popstate', handleRouteChange);
+    };
+  }, [loginState.isRedirecting, loginState.showLoadingOverlay, router]);
+
+  // ✅ PHASE 1: Enhanced login handler with simplified state management
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
     
-    console.log('🚀 Login form submitted');
-    console.log('📧 Email:', email);
-    console.log('🔑 Password length:', password.length);
-    console.log('⏳ IsLoading:', isLoading);
+    // Reset redirecting state for new login attempt
+    setLoginState(prev => ({ ...prev, isRedirecting: false }));
+    redirectExecuted.current = false;
     
-    if (!email || !password) {
-      setError("Vul alle velden in");
+    console.log('🚀 Login form submitted');
+    console.log('📧 Email:', loginState.email);
+    console.log('🔑 Password length:', loginState.password.length);
+    console.log('⏳ IsLoading:', loginState.isLoading);
+    
+    if (!loginState.email || !loginState.password) {
+      setLoginState(prev => ({ ...prev, error: "Vul alle velden in" }));
       console.log('❌ Validation failed: missing email or password');
       return;
     }
 
-    if (isLoading) {
+    if (loginState.isLoading) {
       console.log('❌ Already loading, ignoring request');
       return;
     }
 
-    setIsLoading(true);
-    setError("");
+    setLoginState(prev => ({ ...prev, isLoading: true, error: "" }));
     
-    // Start the loading sequence
+    // Show loading overlay immediately when login starts
+    console.log('🎬 Starting login loading sequence...');
     startLoadingSequence();
     
     try {
       console.log('🔐 Calling signIn function...');
-      const result = await signIn(email, password);
+      const result = await login(loginState.email, loginState.password, updateLoadingProgress);
       console.log('📋 SignIn result:', result);
 
       if (!result.success) {
         console.error('❌ Login failed:', result.error);
-        setError(result.error || "Ongeldige inloggegevens");
-        setIsLoading(false);
-        setShowLoadingOverlay(false);
+        setLoginState(prev => ({
+          ...prev,
+          error: result.error || "Ongeldige inloggegevens",
+          isLoading: false,
+          showLoadingOverlay: false
+        }));
         return;
       }
 
       console.log('✅ Login successful, redirecting...');
-      // Success - let useEffect handle redirect
-      setIsLoading(false);
+      // Success - let useEffect handle redirect and loading sequence
+      setLoginState(prev => ({ ...prev, isLoading: false }));
       
     } catch (error: any) {
       console.error('❌ Login exception:', error);
-      setError(error.message || "Er is een fout opgetreden bij het inloggen");
-      setIsLoading(false);
-      setShowLoadingOverlay(false);
+      setLoginState(prev => ({
+        ...prev,
+        error: error.message || "Er is een fout opgetreden bij het inloggen",
+        isLoading: false,
+        showLoadingOverlay: false
+      }));
     }
   }
 
@@ -200,19 +274,19 @@ function LoginPageContent() {
   async function handleForgotPassword(e: React.FormEvent) {
     e.preventDefault();
     
-    if (!forgotPasswordEmail) {
+    if (!forgotPasswordState.email) {
       setResetMessage("Vul een e-mailadres in");
       return;
     }
 
-    setIsSendingReset(true);
+    setForgotPasswordState(prev => ({ ...prev, isSendingReset: true }));
     setResetMessage("");
 
     try {
       const response = await fetch('/api/auth/forgot-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: forgotPasswordEmail }),
+        body: JSON.stringify({ email: forgotPasswordState.email }),
       });
 
       const data = await response.json();
@@ -223,46 +297,29 @@ function LoginPageContent() {
       }
 
       setResetMessage("Wachtwoord reset e-mail is verstuurd! Controleer je inbox.");
-      setForgotPasswordEmail("");
+      setForgotPasswordState(prev => ({ ...prev, email: "" }));
       
       // Close modal after 3 seconds
       setTimeout(() => {
-        setShowForgotPassword(false);
+        setForgotPasswordState(prev => ({ ...prev, showForgotPassword: false }));
         setResetMessage("");
       }, 3000);
 
     } catch (error) {
       setResetMessage("Er is een fout opgetreden. Probeer het opnieuw.");
     } finally {
-      setIsSendingReset(false);
+      setForgotPasswordState(prev => ({ ...prev, isSendingReset: false }));
     }
   }
 
-  // Hydration safety - only show brief loading for hydration, not for auth
-  if (!isClient) {
-    return (
-      <div className="min-h-screen flex items-center justify-center relative px-4 py-6" style={{ backgroundColor: '#181F17' }}>
-        <img src="/pattern.png" alt="pattern" className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none z-0" />
-        <div className="w-full max-w-md p-6 sm:p-8 rounded-3xl shadow-2xl bg-[#232D1A]/95 border border-[#3A4D23] backdrop-blur-lg relative z-10">
-          <div className="flex justify-center mb-4">
-            <img 
-              src="/logo_white-full.svg" 
-              alt="Top Tier Men Logo" 
-              className="h-16 sm:h-20 md:h-24 w-auto"
-            />
-          </div>
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#B6C948] mx-auto mb-4"></div>
-            <p className="text-[#B6C948] text-lg">Initialiseren...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // Skip hydration check to prevent infinite loading
+  // if (!isClient) {
+  //   return <div>Loading...</div>;
+  // }
 
   return (
     <div 
-      className={`min-h-screen flex items-center justify-center relative px-4 py-6 ${isLoading ? 'login-loading' : ''}`}
+      className={`min-h-screen flex items-center justify-center relative px-4 py-6 ${loginState.isLoading ? 'login-loading' : ''}`}
       style={{ backgroundColor: '#181F17' }}
     >
       <img src="/pattern.png" alt="pattern" className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none z-0" />
@@ -284,16 +341,19 @@ function LoginPageContent() {
             <p className="text-[#B6C948] font-bold mb-2">🔧 Debug Info:</p>
             <p className="text-[#8BAE5A]">Loading: {loading ? '✅' : '❌'}</p>
             <p className="text-[#8BAE5A]">User: {user ? '✅' : '❌'}</p>
-            <p className="text-[#8BAE5A]">Email: {email || 'Empty'}</p>
-            <p className="text-[#8BAE5A]">Password Length: {password.length}</p>
-            <p className="text-[#8BAE5A]">Error: {error || 'None'}</p>
+            <p className="text-[#8BAE5A]">Email: {loginState.email || 'Empty'}</p>
+            <p className="text-[#8BAE5A]">Password Length: {loginState.password.length}</p>
+            <p className="text-[#8BAE5A]">Error: {loginState.error || 'None'}</p>
             <button
               type="button"
               onClick={() => {
                 console.log('🔧 Filling test credentials...');
-                setEmail('chiel@media2net.nl');
-                setPassword('Test123!');
-                setError(''); // Clear any existing errors
+                setLoginState(prev => ({
+                  ...prev,
+                  email: 'chiel@media2net.nl',
+                  password: 'Test123!',
+                  error: ''
+                }));
                 console.log('✅ Test credentials filled');
               }}
               className="mt-2 px-2 py-1 bg-[#8BAE5A] text-[#181F17] rounded text-xs cursor-pointer hover:bg-[#7A9E4A] transition-colors"
@@ -308,35 +368,35 @@ function LoginPageContent() {
             <EnvelopeIcon className="w-5 h-5 text-[#B6C948] absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              className={`w-full pl-10 pr-4 py-3 rounded-xl bg-[#181F17] text-[#B6C948] placeholder-[#B6C948] focus:outline-none focus:ring-2 focus:ring-[#B6C948] transition shadow-inner border border-[#3A4D23] font-figtree ${isLoading || showLoadingOverlay ? 'cursor-wait opacity-75' : 'cursor-text'}`}
+              value={loginState.email}
+              onChange={e => setLoginState(prev => ({ ...prev, email: e.target.value }))}
+              className={`w-full pl-10 pr-4 py-3 rounded-xl bg-[#181F17] text-[#B6C948] placeholder-[#B6C948] focus:outline-none focus:ring-2 focus:ring-[#B6C948] transition shadow-inner border border-[#3A4D23] font-figtree ${loginState.isLoading || loginState.showLoadingOverlay ? 'cursor-wait opacity-75' : 'cursor-text'}`}
               placeholder="E-mailadres"
               autoComplete="email"
               required
-              disabled={isLoading || showLoadingOverlay}
+              disabled={loginState.isLoading || loginState.showLoadingOverlay || loginState.isRedirecting}
             />
           </div>
           <div className="relative">
             <LockClosedIcon className="w-5 h-5 text-[#B6C948] absolute left-3 top-1/2 -translate-y-1/2" />
             <input
-              type={showPassword ? "text" : "password"}
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              className={`w-full pl-10 pr-12 py-3 rounded-xl bg-[#181F17] text-[#B6C948] placeholder-[#B6C948] focus:outline-none focus:ring-2 focus:ring-[#B6C948] transition shadow-inner border border-[#3A4D23] font-figtree ${isLoading || showLoadingOverlay ? 'cursor-wait opacity-75' : 'cursor-text'}`}
+              type={loginState.showPassword ? "text" : "password"}
+              value={loginState.password}
+              onChange={e => setLoginState(prev => ({ ...prev, password: e.target.value }))}
+              className={`w-full pl-10 pr-12 py-3 rounded-xl bg-[#181F17] text-[#B6C948] placeholder-[#B6C948] focus:outline-none focus:ring-2 focus:ring-[#B6C948] transition shadow-inner border border-[#3A4D23] font-figtree ${loginState.isLoading || loginState.showLoadingOverlay ? 'cursor-wait opacity-75' : 'cursor-text'}`}
               placeholder="Wachtwoord"
               autoComplete="current-password"
               required
-              disabled={isLoading || showLoadingOverlay}
+              disabled={loginState.isLoading || loginState.showLoadingOverlay || loginState.isRedirecting}
             />
             <button
               type="button"
-              onClick={() => setShowPassword(!showPassword)}
+              onClick={() => setLoginState(prev => ({ ...prev, showPassword: !prev.showPassword }))}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-[#B6C948] hover:text-white transition-colors focus:outline-none focus:text-white"
-              disabled={isLoading || showLoadingOverlay}
-              aria-label={showPassword ? "Wachtwoord verbergen" : "Wachtwoord tonen"}
+              disabled={loginState.isLoading || loginState.showLoadingOverlay || loginState.isRedirecting}
+              aria-label={loginState.showPassword ? "Wachtwoord verbergen" : "Wachtwoord tonen"}
             >
-              {showPassword ? (
+              {loginState.showPassword ? (
                 <EyeSlashIcon className="w-5 h-5" />
               ) : (
                 <EyeIcon className="w-5 h-5" />
@@ -349,40 +409,40 @@ function LoginPageContent() {
             <label className="flex items-center cursor-pointer">
               <input
                 type="checkbox"
-                checked={rememberMe}
-                onChange={e => setRememberMe(e.target.checked)}
+                checked={loginState.rememberMe}
+                onChange={e => setLoginState(prev => ({ ...prev, rememberMe: e.target.checked }))}
                 className="w-4 h-4 text-[#B6C948] bg-[#181F17] border-[#3A4D23] rounded focus:ring-[#B6C948] focus:ring-2"
-                disabled={isLoading || showLoadingOverlay}
+                disabled={loginState.isLoading || loginState.showLoadingOverlay || loginState.isRedirecting}
               />
               <span className="ml-2 text-[#B6C948] text-sm font-figtree">Ingelogd blijven</span>
             </label>
             
             <button
               type="button"
-              onClick={() => setShowForgotPassword(true)}
-              className={`text-[#8BAE5A] hover:text-[#B6C948] text-sm underline font-figtree ${isLoading || showLoadingOverlay ? 'cursor-wait opacity-75' : 'cursor-pointer'}`}
-              disabled={isLoading || showLoadingOverlay}
+              onClick={() => setForgotPasswordState(prev => ({ ...prev, showForgotPassword: true }))}
+              className={`text-[#8BAE5A] hover:text-[#B6C948] text-sm underline font-figtree ${loginState.isLoading || loginState.showLoadingOverlay ? 'cursor-wait opacity-75' : 'cursor-pointer'}`}
+              disabled={loginState.isLoading || loginState.showLoadingOverlay || loginState.isRedirecting}
             >
               Wachtwoord vergeten?
             </button>
           </div>
           
-          {error && (
+          {loginState.error && (
             <div className="text-[#B6C948] text-center text-sm -mt-4 border border-[#B6C948] rounded-lg py-2 px-3 bg-[#181F17] font-figtree">
-              {error}
+              {loginState.error}
             </div>
           )}
           
           <button
             type="submit"
-            disabled={isLoading || showLoadingOverlay}
+            disabled={loginState.isLoading || loginState.showLoadingOverlay || loginState.isRedirecting}
             className={`w-full py-3 sm:py-4 rounded-xl bg-gradient-to-r from-[#B6C948] to-[#3A4D23] text-[#181F17] font-semibold text-base sm:text-lg shadow-lg hover:from-[#B6C948] hover:to-[#B6C948] transition-all duration-200 border border-[#B6C948] font-figtree ${
-              isLoading || showLoadingOverlay
+              loginState.isLoading || loginState.showLoadingOverlay
                 ? 'opacity-75 cursor-wait' 
                 : 'cursor-pointer hover:opacity-90'
             }`}
           >
-            {isLoading || showLoadingOverlay ? (
+            {loginState.isLoading || loginState.showLoadingOverlay ? (
               <div className="flex items-center justify-center">
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#181F17] mr-2"></div>
                 <span>Inloggen...</span>
@@ -410,8 +470,8 @@ function LoginPageContent() {
                   console.log('🔄 Manual refresh');
                   window.location.reload();
                 }}
-                className={`w-full px-3 py-2 bg-[#3A4D23] text-[#8BAE5A] rounded text-sm font-medium hover:bg-[#4A5D33] transition-colors ${isLoading ? 'cursor-wait opacity-75' : 'cursor-pointer'}`}
-                disabled={isLoading}
+                className={`w-full px-3 py-2 bg-[#3A4D23] text-[#8BAE5A] rounded text-sm font-medium hover:bg-[#4A5D33] transition-colors ${loginState.isLoading ? 'cursor-wait opacity-75' : 'cursor-pointer'}`}
+                disabled={loginState.isLoading}
               >
                 🔄 Pagina Verversen
               </button>
@@ -430,7 +490,7 @@ function LoginPageContent() {
       </div>
 
       {/* Loading Overlay */}
-      {showLoadingOverlay && (
+      {loginState.showLoadingOverlay && (
         <div className="fixed inset-0 bg-[#181F17]/95 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="text-center">
             {/* Logo */}
@@ -450,41 +510,26 @@ function LoginPageContent() {
             {/* Loading Text with Fade Animation */}
             <div className="mb-4">
               <p className="text-[#8BAE5A] text-xl font-semibold animate-pulse">
-                {loadingText}
+                {loginState.loadingText}
               </p>
             </div>
             
-            {/* Progress Dots */}
-            <div className="flex justify-center space-x-2">
-              {loadingSteps.map((_, index) => (
-                <div
-                  key={index}
-                  className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                    index <= loadingStep 
-                      ? 'bg-[#8BAE5A] scale-110' 
-                      : 'bg-[#3A4D23]'
-                  }`}
-                />
-              ))}
-            </div>
-            
             {/* Progress Bar */}
-            <div className="mt-6 w-64 mx-auto">
+            <div className="w-64 mx-auto mb-4">
               <div className="w-full bg-[#3A4D23] rounded-full h-2">
                 <div 
-                  className="bg-gradient-to-r from-[#8BAE5A] to-[#B6C948] h-2 rounded-full transition-all duration-500 ease-out"
-                  style={{ 
-                    width: `${((loadingStep + 1) / loadingSteps.length) * 100}%` 
-                  }}
+                  className="bg-[#8BAE5A] h-2 rounded-full transition-all duration-300 ease-out"
+                  style={{ width: `${loginState.loadingProgress}%` }}
                 />
               </div>
             </div>
+            
           </div>
         </div>
       )}
 
       {/* ✅ FIXED: Simplified forgot password modal */}
-      {showForgotPassword && (
+      {forgotPasswordState.showForgotPassword && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-[#232D1A] rounded-2xl p-8 max-w-md w-full mx-4 border border-[#3A4D23]">
             <div className="text-center mb-6">
@@ -516,12 +561,12 @@ function LoginPageContent() {
                 </label>
                 <input
                   type="email"
-                  value={forgotPasswordEmail}
-                  onChange={e => setForgotPasswordEmail(e.target.value)}
+                  value={forgotPasswordState.email}
+                  onChange={e => setForgotPasswordState(prev => ({ ...prev, email: e.target.value }))}
                   className="w-full bg-[#181F17] text-white px-3 py-2 rounded-lg border border-[#3A4D23] focus:outline-none focus:border-[#8BAE5A]"
                   placeholder="Voer je e-mailadres in"
                   required
-                  disabled={isSendingReset}
+                  disabled={forgotPasswordState.isSendingReset}
                 />
               </div>
             </form>
@@ -529,21 +574,20 @@ function LoginPageContent() {
             <div className="flex gap-3">
               <button
                 onClick={() => {
-                  setShowForgotPassword(false);
-                  setForgotPasswordEmail("");
+                  setForgotPasswordState(prev => ({ ...prev, showForgotPassword: false, email: "" }));
                   setResetMessage("");
                 }}
-                disabled={isSendingReset}
+                disabled={forgotPasswordState.isSendingReset}
                 className="flex-1 px-4 py-2 bg-[#3A4D23] text-[#8BAE5A] rounded-lg font-semibold hover:bg-[#4A5D33] transition-colors disabled:opacity-50"
               >
                 Annuleren
               </button>
               <button
                 onClick={handleForgotPassword}
-                disabled={isSendingReset || !forgotPasswordEmail}
+                disabled={forgotPasswordState.isSendingReset || !forgotPasswordState.email}
                 className="flex-1 px-4 py-2 bg-[#8BAE5A] text-[#181F17] rounded-lg font-semibold hover:bg-[#A6C97B] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isSendingReset ? (
+                {forgotPasswordState.isSendingReset ? (
                   <div className="flex items-center justify-center gap-2">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#181F17]"></div>
                     Versturen...

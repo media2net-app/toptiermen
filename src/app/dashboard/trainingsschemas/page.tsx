@@ -291,8 +291,34 @@ function TrainingschemasContent() {
         filteredSchemas = filterSchemasByProfile(filteredSchemas, userTrainingProfile);
       } else if (showOnboardingStep3 && userTrainingProfile) {
         // During onboarding, show schemas that match the user's training goal, frequency and equipment
-        filteredSchemas = filterSchemasByProfile(data || [], userTrainingProfile);
-        console.log('🎯 Onboarding: Using same filtering logic as normal use');
+        if (userTrainingProfile) {
+          filteredSchemas = filterSchemasByProfile(data || [], userTrainingProfile);
+          console.log('🎯 Onboarding: Using profile-based filtering');
+        } else {
+          // Fallback to real schemas if no profile - prefer 3-day schemas
+          let fallbackSchemas = (data || []).filter(s => 
+            s.training_goal === 'spiermassa' && 
+            s.equipment_type === 'gym' &&
+            (s.training_schema_days?.length || 0) === 3
+          ).sort((a, b) => (a.schema_nummer || 0) - (b.schema_nummer || 0));
+          
+          // If not enough 3-day schemas, add other frequencies to reach 3 schemas
+          if (fallbackSchemas.length < 3) {
+            const otherSchemas = (data || []).filter(s => 
+              s.training_goal === 'spiermassa' && 
+              s.equipment_type === 'gym' &&
+              (s.training_schema_days?.length || 0) !== 3
+            ).sort((a, b) => (a.schema_nummer || 0) - (b.schema_nummer || 0));
+            
+            // Add other schemas to reach 3 total
+            const needed = 3 - fallbackSchemas.length;
+            fallbackSchemas = [...fallbackSchemas, ...otherSchemas.slice(0, needed)];
+          }
+          
+          filteredSchemas = fallbackSchemas.slice(0, 3);
+          console.log('🎯 Onboarding: Using fallback schemas (spiermassa + gym, prefer 3-day)');
+          console.log('📊 Fallback schemas:', filteredSchemas.map(s => `${s.name} (${s.training_schema_days?.length || 0} days)`));
+        }
       }
       
       setTrainingSchemas(filteredSchemas);
@@ -465,9 +491,33 @@ function TrainingschemasContent() {
         setTrainingSchemas(filtered);
         console.log('🎯 Applied filtering:', filtered.length, 'schemas');
       } else {
-        // If no profile, show all schemas
-        setTrainingSchemas(allSchemas);
-        console.log('🎯 No profile found, showing all schemas:', allSchemas.length);
+        // If no profile, show real schemas for spiermassa + gym as fallback
+        // Try to find 3-day schemas first (most common), then fallback to any available
+        let fallbackSchemas = allSchemas.filter(s => 
+          s.training_goal === 'spiermassa' && 
+          s.equipment_type === 'gym' &&
+          (s.training_schema_days?.length || 0) === 3
+        ).sort((a, b) => (a.schema_nummer || 0) - (b.schema_nummer || 0));
+        
+        // If not enough 3-day schemas, add other frequencies to reach 3 schemas
+        if (fallbackSchemas.length < 3) {
+          const otherSchemas = allSchemas.filter(s => 
+            s.training_goal === 'spiermassa' && 
+            s.equipment_type === 'gym' &&
+            (s.training_schema_days?.length || 0) !== 3
+          ).sort((a, b) => (a.schema_nummer || 0) - (b.schema_nummer || 0));
+          
+          // Add other schemas to reach 3 total
+          const needed = 3 - fallbackSchemas.length;
+          fallbackSchemas = [...fallbackSchemas, ...otherSchemas.slice(0, needed)];
+        }
+        
+        // Take first 3 schemas
+        fallbackSchemas = fallbackSchemas.slice(0, 3);
+        
+        setTrainingSchemas(fallbackSchemas);
+        console.log('🎯 No profile found, showing fallback schemas (spiermassa + gym):', fallbackSchemas.length);
+        console.log('📊 Fallback schemas:', fallbackSchemas.map(s => `${s.name} (${s.training_schema_days?.length || 0} days)`));
       }
       
     } catch (error) {
@@ -555,28 +605,40 @@ function TrainingschemasContent() {
         if (existingSchema) {
           result.push(existingSchema);
       } else {
-          // Create placeholder for missing schema
-          const displayGoal = getDisplayName(dbGoal);
-          const displayEquipment = getDisplayName(profile.equipment_type);
-          const placeholderSchema: TrainingSchema = {
-            id: `placeholder-${dbGoal}-${profile.equipment_type}-${profile.training_frequency}-${i}`,
-            name: `${displayGoal} ${profile.training_frequency}x per week Schema ${i}`,
-            description: `Schema ${i} voor ${displayGoal} met ${displayEquipment} - Binnenkort beschikbaar`,
-            category: 'Gym',
-            cover_image: null,
-            status: 'coming_soon',
-            difficulty: 'Intermediate',
-            estimated_duration: '30 min',
-            target_audience: null,
-            training_goal: dbGoal,
-            rep_range: '',
-            rest_time_seconds: 0,
-            equipment_type: profile.equipment_type,
-            schema_nummer: i,
-            training_schema_days: []
-          };
-          result.push(placeholderSchema);
-          console.log(`  📝 Created placeholder for Schema ${i}`);
+          // Try to find any schema with the same goal and equipment (any frequency)
+          const fallbackSchema = schemas.find(s => 
+            s.training_goal === dbGoal && 
+            s.equipment_type === profile.equipment_type && 
+            s.schema_nummer === i
+          );
+          
+          if (fallbackSchema) {
+            result.push(fallbackSchema);
+            console.log(`  ✅ Found fallback schema for Schema ${i}: ${fallbackSchema.name}`);
+          } else {
+            // Only create placeholder if no real schema exists
+            const displayGoal = getDisplayName(dbGoal);
+            const displayEquipment = getDisplayName(profile.equipment_type);
+            const placeholderSchema: TrainingSchema = {
+              id: `placeholder-${dbGoal}-${profile.equipment_type}-${profile.training_frequency}-${i}`,
+              name: `${displayGoal} ${profile.training_frequency}x per week Schema ${i}`,
+              description: `Schema ${i} voor ${displayGoal} met ${displayEquipment} - Binnenkort beschikbaar`,
+              category: 'Gym',
+              cover_image: null,
+              status: 'coming_soon',
+              difficulty: 'Intermediate',
+              estimated_duration: '30 min',
+              target_audience: null,
+              training_goal: dbGoal,
+              rep_range: '',
+              rest_time_seconds: 0,
+              equipment_type: profile.equipment_type,
+              schema_nummer: i,
+              training_schema_days: []
+            };
+            result.push(placeholderSchema);
+            console.log(`  📝 Created placeholder for Schema ${i} (no real schema found)`);
+          }
         }
       }
     } else {
@@ -945,6 +1007,7 @@ function TrainingschemasContent() {
         } else if (showOnboardingStep3) {
           console.log('🎯 Schema selected during onboarding step 3');
           // Don't auto-complete, let user click "Volgende Stap" button
+          // The "Volgende Stap" button will be shown in the UI
         }
       } else {
         toast.error(data.error || 'Failed to select training schema');
@@ -1582,9 +1645,16 @@ function TrainingschemasContent() {
             </div>
             
             <button
-              onClick={() => {
-                completeStep(3);
-                window.location.href = '/dashboard/voedingsplannen-v2';
+              onClick={async () => {
+                try {
+                  await completeStep(3);
+                  console.log('✅ Training schema step completed, redirecting to nutrition plans...');
+                  // Use router.push instead of window.location.href for better navigation
+                  router.push('/dashboard/voedingsplannen-v2');
+                } catch (error) {
+                  console.error('❌ Error completing training step:', error);
+                  toast.error('Er is een fout opgetreden bij het voltooien van de stap');
+                }
               }}
               className="flex items-center gap-2 px-6 sm:px-8 py-2 sm:py-3 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold shadow-lg shadow-[#8BAE5A]/20 mx-auto text-sm sm:text-base"
             >
@@ -2171,7 +2241,7 @@ function TrainingschemasContent() {
                               : 'bg-[#3A4D23] text-white hover:bg-[#4A5D33]'
                           }`}
                         >
-                          {isPlaceholder ? 'Binnenkort' : isLocked ? 'Vergrendeld' : selectedTrainingSchema === schema.id ? (currentSchemaPeriod?.status === 'active' ? 'Actief' : 'Geselecteerd') : 'Selecteer'}
+                          {isPlaceholder ? 'Binnenkort' : isLocked ? 'Vergrendeld' : selectedTrainingSchema === schema.id ? (currentSchemaPeriod?.status === 'active' ? 'Actief' : 'Geselecteerd') : 'Selecteer Schema'}
                         </button>
                         <button
                           onClick={() => !isLocked && handlePrintSchema(schema.id)}

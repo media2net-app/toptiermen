@@ -1,13 +1,12 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import ClientLayout from '../components/ClientLayout';
 import { CheckCircleIcon, TrophyIcon, BookOpenIcon, CurrencyDollarIcon } from '@heroicons/react/24/solid';
 import { BeakerIcon as DumbbellIcon, LightBulbIcon as BrainIcon } from '@heroicons/react/24/solid';
 import { toast } from 'react-hot-toast';
 import Link from 'next/link';
 import BadgeDisplay from '@/components/BadgeDisplay';
-import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
-import { useOnboardingV2 } from '@/contexts/OnboardingV2Context';
+import { useAuth } from '@/hooks/useAuth';
 import DashboardLoadingModal from '@/components/ui/DashboardLoadingModal';
 import DashboardDebugger from '@/components/DashboardDebugger';
 import OnboardingV2Modal from '@/components/OnboardingV2Modal';
@@ -65,6 +64,12 @@ interface DashboardStats {
     total: number;
     rank: any;
     level: number;
+    nextLevelRequirements: {
+      xpNeeded: number;
+      badgesNeeded: number;
+      challengesNeeded: number;
+      academyModulesNeeded: number;
+    };
   };
   summary: {
     totalProgress: number;
@@ -92,52 +97,101 @@ export default function Dashboard() {
     xp_reward: number;
     unlocked_at?: string;
   }>>([]);
+  const [activityLog, setActivityLog] = useState<Array<{
+    id: string;
+    type: 'mission' | 'badge' | 'lesson';
+    title: string;
+    description: string;
+    xp_reward: number;
+    date: string;
+    category: string;
+    icon: string;
+  }>>([]);
+  const [activityLoading, setActivityLoading] = useState(false);
+  const [hasMoreActivities, setHasMoreActivities] = useState(false);
+  const [activityOffset, setActivityOffset] = useState(0);
 
   const [showDebugger, setShowDebugger] = useState(false);
 
-  const { user, profile, loading: authLoading } = useSupabaseAuth();
-  const { isCompleted, currentStep } = useOnboardingV2();
+  const { 
+    user, 
+    profile, 
+    isLoading: authLoading, 
+    onboarding,
+    isAdmin, 
+    hasTrainingAccess, 
+    hasNutritionAccess, 
+    isBasic,
+    getRedirectPath
+  } = useAuth();
   const router = useRouter();
+  
+  // Fallback redirect if onboarding context fails to load
+  const [fallbackRedirectAttempted, setFallbackRedirectAttempted] = useState(false);
+  
+  // Ref to prevent multiple redirects
+  const dashboardRedirectExecuted = useRef(false);
 
-  // Onboarding V2 redirect logic
+  // ✅ PHASE 2.1: Simplified redirect logic using unified auth hook
   useEffect(() => {
-    if (!user || !user.email) return;
+    if (!user || !user.email || authLoading) return;
+    
+    console.log(`🔍 Dashboard Redirect Check: user=${user.email}, onboarding=${JSON.stringify(onboarding)}, authLoading=${authLoading}`);
     
     // If onboarding is not completed, redirect to the current step
-    if (!isCompleted && currentStep !== null) {
-      console.log(`🔄 Onboarding V2 Dashboard Redirect: User on step ${currentStep}`);
+    if (!onboarding?.isCompleted && onboarding?.currentStep !== null && !dashboardRedirectExecuted.current) {
+      console.log(`🔄 Dashboard Redirect: User on step ${onboarding.currentStep}, isCompleted: ${onboarding.isCompleted}`);
       
-      let redirectPath = '/dashboard/welcome-video';
+      // Use unified auth hook for redirect path
+      const redirectPath = getRedirectPath();
       
-      // Map currentStep to correct redirect path
-      switch (currentStep) {
-        case 0: // Welcome video
-          redirectPath = '/dashboard/welcome-video';
-          break;
-        case 1: // Goal setting - stay on dashboard (modal will show)
-          console.log(`✅ Staying on dashboard for step 1 (goal setting modal)`);
-          return;
-        case 2: // Challenges
-          redirectPath = '/dashboard/mijn-challenges';
-          break;
-        case 3: // Training - only premium users
-          redirectPath = '/dashboard/trainingsschemas';
-          break;
-        case 4: // Nutrition - only premium users
-          redirectPath = '/dashboard/voedingsplannen-v2';
-          break;
-        case 5: // Forum intro
-          redirectPath = '/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden';
-          break;
-        default:
-          console.log(`⚠️ Unknown step ${currentStep}, staying on dashboard`);
-          return;
+      // Special case: step 1 stays on dashboard for goal setting modal
+      if (onboarding.currentStep === 1) {
+        console.log(`✅ Staying on dashboard for step 1 (goal setting modal)`);
+        return;
       }
       
+      // Mark redirect as executed to prevent multiple redirects
+      dashboardRedirectExecuted.current = true;
+      
       console.log(`🔄 Redirecting to: ${redirectPath}`);
-      router.push(redirectPath);
+      // Use replace instead of push to prevent back button issues
+      router.replace(redirectPath);
+    } else if (onboarding?.isCompleted) {
+      console.log(`✅ Onboarding completed, staying on dashboard`);
+    } else {
+      console.log(`⚠️ No redirect needed: isCompleted=${onboarding?.isCompleted}, currentStep=${onboarding?.currentStep}`);
     }
-  }, [user, isCompleted, currentStep, router]);
+  }, [user, onboarding, router, authLoading, getRedirectPath]);
+
+  // ✅ PHASE 2.1: Simplified fallback redirect using unified auth hook
+  useEffect(() => {
+    if (!user || !user.email || authLoading || fallbackRedirectAttempted || dashboardRedirectExecuted.current) return;
+    
+    // If onboarding context hasn't loaded after 3 seconds, try direct API call
+    const timeout = setTimeout(async () => {
+      if (onboarding === undefined) {
+        console.log('🔄 Fallback: Onboarding context not loaded, trying direct API call...');
+        setFallbackRedirectAttempted(true);
+        
+        try {
+          const response = await fetch(`/api/onboarding-v2?email=${encodeURIComponent(user.email || '')}`);
+          const data = await response.json();
+          
+          if (data.success && !data.onboarding.isCompleted && data.onboarding.currentStep !== null) {
+            console.log(`🔄 Fallback redirect using unified auth hook`);
+            dashboardRedirectExecuted.current = true;
+            const redirectPath = getRedirectPath();
+            router.replace(redirectPath);
+          }
+        } catch (error) {
+          console.error('❌ Fallback redirect failed:', error);
+        }
+      }
+    }, 3000);
+    
+    return () => clearTimeout(timeout);
+  }, [user, authLoading, onboarding, fallbackRedirectAttempted, router, getRedirectPath]);
 
   // 2.0.1: Fetch real dashboard data from database - FIXED INFINITE LOOP + DEBOUNCED
   useEffect(() => {
@@ -173,7 +227,7 @@ export default function Dashboard() {
           setUserBadges(data.userBadges || []);
           
           // Check for onboarding completion badge unlock
-          if (data.stats && isCompleted && (data.userBadges || []).length === 0) {
+          if (data.stats && onboarding?.isCompleted && (data.userBadges || []).length === 0) {
             await checkOnboardingCompletionBadge(user.id);
           }
         } else {
@@ -187,7 +241,17 @@ export default function Dashboard() {
             finance: { netWorth: 0, monthlyIncome: 0, savings: 0, investments: 0, progress: 0 },
             brotherhood: { totalMembers: 0, activeMembers: 0, communityScore: 0, progress: 0 },
             academy: { totalCourses: 0, completedCourses: 0, learningProgress: 0, progress: 0 },
-            xp: { total: 0, rank: null, level: 1 },
+            xp: { 
+              total: 0, 
+              rank: null, 
+              level: 1,
+              nextLevelRequirements: {
+                xpNeeded: 100,
+                badgesNeeded: 1,
+                challengesNeeded: 5,
+                academyModulesNeeded: 1
+              }
+            },
             summary: { totalProgress: 0 }
           });
           setUserBadges([]);
@@ -203,7 +267,17 @@ export default function Dashboard() {
           finance: { netWorth: 0, monthlyIncome: 0, savings: 0, investments: 0, progress: 0 },
           brotherhood: { totalMembers: 0, activeMembers: 0, communityScore: 0, progress: 0 },
                       academy: { totalCourses: 0, completedCourses: 0, learningProgress: 0, progress: 0 },
-          xp: { total: 0, rank: null, level: 1 },
+          xp: { 
+            total: 0, 
+            rank: null, 
+            level: 1,
+            nextLevelRequirements: {
+              xpNeeded: 100,
+              badgesNeeded: 1,
+              challengesNeeded: 5,
+              academyModulesNeeded: 1
+            }
+          },
           summary: { totalProgress: 0 }
         });
         setUserBadges([]);
@@ -252,6 +326,43 @@ export default function Dashboard() {
       console.error('Error checking onboarding completion badge:', error);
     }
   };
+
+  // Fetch activity log
+  const fetchActivityLog = async (offset = 0, append = false) => {
+    if (!user?.id) return;
+    
+    try {
+      setActivityLoading(true);
+      const response = await fetch(`/api/activity-log?userId=${user.id}&limit=10&offset=${offset}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch activity log');
+      }
+      const data = await response.json();
+      
+      if (append) {
+        setActivityLog(prev => [...prev, ...data.activities]);
+      } else {
+        setActivityLog(data.activities);
+      }
+      setHasMoreActivities(data.hasMore);
+      setActivityOffset(offset + data.activities.length);
+    } catch (error) {
+      console.error('Error fetching activity log:', error);
+    } finally {
+      setActivityLoading(false);
+    }
+  };
+
+  const loadMoreActivities = () => {
+    fetchActivityLog(activityOffset, true);
+  };
+
+  // Fetch activity log when user is available
+  useEffect(() => {
+    if (user?.id) {
+      fetchActivityLog(0, false);
+    }
+  }, [user?.id]);
 
   // Simple fade in effect
   useEffect(() => {
@@ -535,15 +646,117 @@ export default function Dashboard() {
               <div className="w-full h-3 bg-[#3A4D23]/40 rounded-full">
                 <div 
                   className="h-3 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] rounded-full transition-all duration-700" 
-                  style={{ width: `${(stats.xp.total % 1000) / 10}%` }}
+                  style={{ width: `${(stats.xp.total % 100) / 1}%` }}
                 ></div>
               </div>
               <div className="flex justify-between text-sm text-gray-400 mt-2">
                 <span>Level {stats.xp.level}</span>
                 <span>Level {stats.xp.level + 1}</span>
               </div>
+              
+              {/* Level Requirements */}
+              {stats.xp.nextLevelRequirements && (
+                <div className="mt-6 pt-4 border-t border-[#3A4D23]/30">
+                  <h4 className="text-lg font-semibold text-white mb-3">Vereisten voor Level {stats.xp.level + 1}</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="flex items-center justify-between p-3 bg-[#2A3317]/50 rounded-lg border border-[#3A4D23]/20">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-[#FFD700] rounded-full"></div>
+                        <span className="text-sm text-[#8BAE5A]">XP Nodig</span>
+                      </div>
+                      <span className="text-sm font-semibold text-[#FFD700]">{stats.xp.nextLevelRequirements.xpNeeded}</span>
+                    </div>
+                    
+                    <div className="flex items-center justify-between p-3 bg-[#2A3317]/50 rounded-lg border border-[#3A4D23]/20">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-[#8BAE5A] rounded-full"></div>
+                        <span className="text-sm text-[#8BAE5A]">Badges Nodig</span>
+                      </div>
+                      <span className="text-sm font-semibold text-[#8BAE5A]">{stats.xp.nextLevelRequirements.badgesNeeded}</span>
+                    </div>
+                    
+                    <div className="flex items-center justify-between p-3 bg-[#2A3317]/50 rounded-lg border border-[#3A4D23]/20">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-[#f0a14f] rounded-full"></div>
+                        <span className="text-sm text-[#8BAE5A]">Challenges Nodig</span>
+                      </div>
+                      <span className="text-sm font-semibold text-[#f0a14f]">{stats.xp.nextLevelRequirements.challengesNeeded}</span>
+                    </div>
+                    
+                    <div className="flex items-center justify-between p-3 bg-[#2A3317]/50 rounded-lg border border-[#3A4D23]/20">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-[#B6C948] rounded-full"></div>
+                        <span className="text-sm text-[#8BAE5A]">Academy Modules</span>
+                      </div>
+                      <span className="text-sm font-semibold text-[#B6C948]">{stats.xp.nextLevelRequirements.academyModulesNeeded}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
+
+          {/* Activity Log Section */}
+          <div className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-6 mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-white">📊 Recente Activiteiten</h3>
+              <div className="text-sm text-[#8BAE5A]">
+                {activityLog.length} activiteiten
+              </div>
+            </div>
+            
+            {activityLog.length > 0 ? (
+              <div className="space-y-3">
+                {activityLog.map((activity) => (
+                  <div key={activity.id} className="flex items-center gap-4 p-4 bg-[#2A3317]/50 rounded-lg border border-[#3A4D23]/20 hover:bg-[#2A3317]/70 transition-colors">
+                    <div className="text-2xl">{activity.icon}</div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h4 className="font-semibold text-white text-sm">{activity.title}</h4>
+                        <span className="px-2 py-1 bg-[#3A4D23] text-[#8BAE5A] text-xs rounded-full">
+                          {activity.category}
+                        </span>
+                      </div>
+                      <p className="text-[#8BAE5A] text-xs mb-1">{activity.description}</p>
+                      <div className="text-xs text-gray-400">
+                        {new Date(activity.date).toLocaleDateString('nl-NL', {
+                          day: 'numeric',
+                          month: 'short',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-lg font-bold text-[#FFD700]">+{activity.xp_reward}</div>
+                      <div className="text-xs text-[#8BAE5A]">XP</div>
+                    </div>
+                  </div>
+                ))}
+                
+                {hasMoreActivities && (
+                  <div className="text-center pt-4">
+                    <button
+                      onClick={loadMoreActivities}
+                      disabled={activityLoading}
+                      className="px-6 py-2 bg-[#8BAE5A] hover:bg-[#7A9D4A] disabled:bg-[#3A4D23] disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors text-sm"
+                    >
+                      {activityLoading ? 'Laden...' : 'Laad meer activiteiten'}
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <div className="text-4xl mb-4">📝</div>
+                <h4 className="text-lg font-semibold text-white mb-2">Nog geen activiteiten</h4>
+                <p className="text-[#8BAE5A] text-sm">
+                  Voltooi challenges, behaal badges of volg academy lessen om je activiteiten hier te zien!
+                </p>
+              </div>
+            )}
+          </div>
 
           {/* Admin Debug Section */}
           {profile?.role === 'admin' && (
@@ -591,7 +804,7 @@ export default function Dashboard() {
 
       {/* Onboarding V2 Modal */}
       <OnboardingV2Modal 
-        isOpen={!isCompleted && currentStep !== null}
+        isOpen={!onboarding?.isCompleted && onboarding?.currentStep !== null}
       />
     </div>
   );

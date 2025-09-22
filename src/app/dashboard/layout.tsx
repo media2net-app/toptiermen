@@ -8,7 +8,6 @@ import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 // import { useV2ErrorRecovery } from '@/lib/v2-error-recovery';
 // import { useV2Cache } from '@/lib/v2-cache-strategy';
 import { DebugProvider } from '@/contexts/DebugContext';
-import { OnboardingV2Provider } from '@/contexts/OnboardingV2Context';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import DashboardContent from './DashboardContent';
 
@@ -145,11 +144,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <ErrorBoundary>
       <DebugProvider>
-        <OnboardingV2Provider>
-          <DashboardContent>
-            {children}
-          </DashboardContent>
-        </OnboardingV2Provider>
+        <DashboardContent>
+          {children}
+        </DashboardContent>
       </DebugProvider>
     </ErrorBoundary>
   );

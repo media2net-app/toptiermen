@@ -93,25 +93,33 @@ async function fetchDashboardStats(userId: string) {
 
 async function fetchMissionsStats(userId: string) {
   try {
-    // Get total missions (all missions assigned to user)
-    const { data: totalMissions, error: totalError } = await supabaseAdmin
+    // Get missions from the user_missions table (same as missions-simple API)
+    const { data: missions, error: missionsError } = await supabaseAdmin
       .from('user_missions')
-      .select('id, status')
+      .select('id, title, status, last_completion_date, points, xp_reward')
       .eq('user_id', userId);
 
-    if (totalError) {
-      console.error('Error fetching total missions:', totalError);
+    if (missionsError) {
+      console.error('Error fetching missions:', missionsError);
       return { total: 0, completedToday: 0, completedThisWeek: 0, progress: 0 };
     }
 
-    // Count completed missions (status = 'completed')
-    const completedMissions = totalMissions?.filter(mission => mission.status === 'completed') || [];
-    const total = totalMissions?.length || 0;
-    const completedTodayCount = 0; // For now, we don't have daily tracking
+    const total = missions?.length || 0;
+    
+    // Count completed missions today (same logic as missions-simple API)
+    const today = new Date().toISOString().split('T')[0];
+    const completedToday = missions?.filter(mission => 
+      mission.last_completion_date === today
+    ) || [];
+    
+    // Count all completed missions (missions with last_completion_date)
+    const completedMissions = missions?.filter(mission => mission.last_completion_date) || [];
+    
+    const completedTodayCount = completedToday.length;
     const completedThisWeekCount = completedMissions.length;
     const progress = total > 0 ? Math.round((completedMissions.length / total) * 100) : 0;
 
-    console.log(`📊 Missions stats for user ${userId}: ${completedMissions.length}/${total} completed (${progress}%)`);
+    console.log(`📊 Missions stats for user ${userId}: ${completedMissions.length}/${total} completed (${progress}%), ${completedTodayCount} today`);
 
     return {
       total,
@@ -236,35 +244,89 @@ async function fetchBoekenkamerStats(userId: string) {
 
 async function fetchXPStats(userId: string) {
   try {
-    // Get user's XP and rank
-    const { data: userProfile, error: profileError } = await supabaseAdmin
-      .from('profiles')
-      .select('points, rank')
-      .eq('id', userId)
-      .single();
+    // Get user's XP from completed missions in user_missions table
+    const { data: missions, error: missionsError } = await supabaseAdmin
+      .from('user_missions')
+      .select('points, xp_reward, last_completion_date')
+      .eq('user_id', userId)
+      .not('last_completion_date', 'is', null);
 
-    if (profileError) {
+    if (missionsError) {
+      console.error('Error fetching missions for XP:', missionsError);
       return {
         total: 0,
-        rank: null,
-        level: 1
+        rank: 'Beginner',
+        level: 1,
+        nextLevelRequirements: {
+          xpNeeded: 100,
+          badgesNeeded: 1,
+          challengesNeeded: 5,
+          academyModulesNeeded: 1
+        }
       };
     }
 
-    const totalXP = userProfile.points || 0;
+    // Calculate total XP from completed missions (use points or xp_reward)
+    const totalXP = missions?.reduce((sum, mission) => sum + (mission.points || mission.xp_reward || 0), 0) || 0;
     const level = Math.floor(totalXP / 100) + 1; // Simple level calculation
+    
+    // Determine rank based on XP
+    let rank = 'Beginner';
+    if (totalXP >= 500) rank = 'Expert';
+    else if (totalXP >= 200) rank = 'Advanced';
+    else if (totalXP >= 50) rank = 'Intermediate';
+
+    // Calculate next level requirements
+    const currentLevelXP = (level - 1) * 100;
+    const nextLevelXP = level * 100;
+    const xpNeeded = nextLevelXP - totalXP;
+
+    // Get user's current badges count
+    const { data: badges, error: badgesError } = await supabaseAdmin
+      .from('user_badges')
+      .select('id')
+      .eq('user_id', userId);
+
+    const currentBadges = badges?.length || 0;
+    const badgesNeeded = Math.max(0, level - currentBadges);
+
+    // Get user's completed academy modules
+    const { data: academyProgress, error: academyError } = await supabaseAdmin
+      .from('user_lesson_progress')
+      .select('lesson_id, completed')
+      .eq('user_id', userId)
+      .eq('completed', true);
+
+    const completedLessons = academyProgress?.length || 0;
+    const academyModulesNeeded = Math.max(0, Math.ceil(level / 2) - Math.floor(completedLessons / 3));
+
+    const nextLevelRequirements = {
+      xpNeeded: Math.max(0, xpNeeded),
+      badgesNeeded: Math.max(0, badgesNeeded),
+      challengesNeeded: Math.max(0, level * 2 - missions?.length || 0),
+      academyModulesNeeded: Math.max(0, academyModulesNeeded)
+    };
+
+    console.log(`📊 XP stats for user ${userId}: ${totalXP} XP, Level ${level}, Rank ${rank}`);
 
     return {
       total: totalXP,
-      rank: userProfile.rank,
-      level
+      rank,
+      level,
+      nextLevelRequirements
     };
   } catch (error) {
     console.error('Error fetching XP stats:', error);
     return {
       total: 0,
-      rank: null,
-      level: 1
+      rank: 'Beginner',
+      level: 1,
+      nextLevelRequirements: {
+        xpNeeded: 100,
+        badgesNeeded: 1,
+        challengesNeeded: 5,
+        academyModulesNeeded: 1
+      }
     };
   }
 }
