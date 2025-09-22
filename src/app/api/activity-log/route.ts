@@ -38,14 +38,7 @@ export async function GET(request: NextRequest) {
           points,
           xp_reward,
           last_completion_date,
-          status,
-          missions (
-            id,
-            title,
-            description,
-            category,
-            points
-          )
+          status
         `)
         .eq('user_id', userId)
         .not('last_completion_date', 'is', null)
@@ -57,14 +50,7 @@ export async function GET(request: NextRequest) {
         .select(`
           id,
           badge_id,
-          unlocked_at,
-          badges (
-            id,
-            title,
-            description,
-            category,
-            image_url
-          )
+          unlocked_at
         `)
         .eq('user_id', userId)
         .eq('status', 'unlocked')
@@ -76,14 +62,7 @@ export async function GET(request: NextRequest) {
         .select(`
           id,
           lesson_id,
-          completed_at,
-          lessons (
-            id,
-            title,
-            description,
-            category,
-            points
-          )
+          completed_at
         `)
         .eq('user_id', userId)
         .eq('completed', true)
@@ -117,17 +96,16 @@ export async function GET(request: NextRequest) {
     if (missions && missions.length > 0) {
       missions.forEach(mission => {
         const xpReward = mission.points || mission.xp_reward || 0;
-        const missionData = Array.isArray(mission.missions) ? mission.missions[0] : mission.missions;
         
         if (xpReward > 0) {
           activities.push({
             id: `mission-${mission.id}`,
             type: 'mission',
-            title: missionData?.title || mission.title || 'Challenge',
-            description: `Challenge voltooid: ${missionData?.title || mission.title || 'Onbekende challenge'}`,
+            title: mission.title || 'Challenge',
+            description: `Challenge voltooid: ${mission.title || 'Onbekende challenge'}`,
             xp_reward: xpReward,
             date: mission.last_completion_date,
-            category: missionData?.category || 'Challenge',
+            category: 'Challenge',
             icon: '🏆',
             details: {
               mission_id: mission.mission_id,
@@ -141,21 +119,17 @@ export async function GET(request: NextRequest) {
     // Add badges with detailed information
     if (badges && badges.length > 0) {
       badges.forEach(badge => {
-        const badgeData = Array.isArray(badge.badges) ? badge.badges[0] : badge.badges;
-        
         activities.push({
           id: `badge-${badge.id}`,
           type: 'badge',
-          title: badgeData?.title || 'Badge behaald',
-          description: `Nieuwe badge ontgrendeld: ${badgeData?.title || 'Onbekende badge'}`,
+          title: 'Badge behaald',
+          description: `Nieuwe badge ontgrendeld`,
           xp_reward: 10, // Default XP for badges
           date: badge.unlocked_at,
-          category: badgeData?.category || 'Badge',
+          category: 'Badge',
           icon: '🏅',
           details: {
-            badge_id: badge.badge_id,
-            image_url: badgeData?.image_url,
-            description: badgeData?.description
+            badge_id: badge.badge_id
           }
         });
       });
@@ -164,20 +138,17 @@ export async function GET(request: NextRequest) {
     // Add academy lessons with detailed information
     if (lessons && lessons.length > 0) {
       lessons.forEach(lesson => {
-        const lessonData = Array.isArray(lesson.lessons) ? lesson.lessons[0] : lesson.lessons;
-        
         activities.push({
           id: `lesson-${lesson.id}`,
           type: 'lesson',
-          title: lessonData?.title || 'Academy les voltooid',
-          description: `Academy les afgerond: ${lessonData?.title || 'Onbekende les'}`,
-          xp_reward: lessonData?.points || 5, // Use actual points from lesson data
+          title: 'Academy les voltooid',
+          description: `Academy les afgerond`,
+          xp_reward: 5, // Default XP for lessons
           date: lesson.completed_at,
-          category: lessonData?.category || 'Academy',
+          category: 'Academy',
           icon: '📚',
           details: {
-            lesson_id: lesson.lesson_id,
-            description: lessonData?.description
+            lesson_id: lesson.lesson_id
           }
         });
       });

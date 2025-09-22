@@ -9,6 +9,7 @@ import ClientLayout from '@/app/components/ClientLayout';
 import OnboardingV2Modal from '@/components/OnboardingV2Modal';
 import OnboardingV2Progress from '@/components/OnboardingV2Progress';
 import OnboardingNotice from '@/components/OnboardingNotice';
+import OnboardingLoadingOverlay from '@/components/OnboardingLoadingOverlay';
 
 interface Challenge {
   id: string;
@@ -270,7 +271,7 @@ const CHALLENGE_LIBRARY: SuggestedChallenge[] = [
 
 export default function MijnChallengesPage() {
   const { user } = useSupabaseAuth();
-  const { currentStep, completeStep, isCompleted, isBasic, hasTrainingAccess, hasNutritionAccess } = useOnboardingV2();
+  const { currentStep, completeStep, isCompleted, isBasic, hasTrainingAccess, hasNutritionAccess, showLoadingOverlay, loadingText, loadingProgress } = useOnboardingV2();
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [summary, setSummary] = useState<Summary>({ completedToday: 0, totalToday: 0, dailyStreak: 0 });
   const [loading, setLoading] = useState(true);
@@ -1414,6 +1415,13 @@ export default function MijnChallengesPage() {
         
         {/* OnboardingV2Modal removed to prevent conflicts - handled by main dashboard */}
       </div>
+
+      {/* Onboarding Loading Overlay */}
+      <OnboardingLoadingOverlay 
+        show={showLoadingOverlay}
+        text={loadingText}
+        progress={loadingProgress}
+      />
     </ClientLayout>
   );
 } 

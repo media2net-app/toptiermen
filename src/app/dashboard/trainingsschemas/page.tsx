@@ -20,6 +20,7 @@ import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { useOnboardingV2 } from "@/contexts/OnboardingV2Context";
 import OnboardingNotice from '@/components/OnboardingNotice';
 import OnboardingV2Progress from '@/components/OnboardingV2Progress';
+import OnboardingLoadingOverlay from '@/components/OnboardingLoadingOverlay';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useSubscription } from '@/hooks/useSubscription';
 import { supabase } from '@/lib/supabase';
@@ -133,7 +134,7 @@ const trainingFrequencies = [
 
 function TrainingschemasContent() {
   const { user, loading: authLoading } = useSupabaseAuth();
-  const { isCompleted, currentStep: onboardingStep, completeStep } = useOnboardingV2();
+  const { isCompleted, currentStep: onboardingStep, completeStep, showLoadingOverlay, loadingText, loadingProgress } = useOnboardingV2();
   const { hasAccess, loading: subscriptionLoading } = useSubscription();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -2376,6 +2377,13 @@ function TrainingschemasContent() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Onboarding Loading Overlay */}
+      <OnboardingLoadingOverlay 
+        show={showLoadingOverlay}
+        text={loadingText}
+        progress={loadingProgress}
+      />
     </PageLayout>
   );
 }

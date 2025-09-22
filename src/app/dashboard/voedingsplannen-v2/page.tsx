@@ -6,6 +6,7 @@ import { useOnboardingV2 } from '@/contexts/OnboardingV2Context';
 import { useRouter } from 'next/navigation';
 import OnboardingV2Progress from '@/components/OnboardingV2Progress';
 import OnboardingNotice from '@/components/OnboardingNotice';
+import OnboardingLoadingOverlay from '@/components/OnboardingLoadingOverlay';
 import { motion } from 'framer-motion';
 import { 
   BookOpenIcon, 
@@ -94,7 +95,7 @@ interface UserProfile {
 
 export default function VoedingsplannenV2Page() {
   const { user, isAdmin, loading: authLoading } = useSupabaseAuth();
-  const { completeStep, currentStep, isCompleted } = useOnboardingV2();
+  const { completeStep, currentStep, isCompleted, showLoadingOverlay, loadingText, loadingProgress } = useOnboardingV2();
   const { hasAccess, loading: subscriptionLoading } = useSubscription();
   const router = useRouter();
   
@@ -2138,6 +2139,13 @@ export default function VoedingsplannenV2Page() {
         )}
         </div>
       </div>
+
+      {/* Onboarding Loading Overlay */}
+      <OnboardingLoadingOverlay 
+        show={showLoadingOverlay}
+        text={loadingText}
+        progress={loadingProgress}
+      />
     </div>
   );
 }

@@ -155,8 +155,8 @@ function LoginPageContent() {
       return;
     }
 
-    // Only redirect if we have a confirmed authenticated user and not already redirecting
-    if (user && !loginState.isLoading && !loginState.isRedirecting && !redirectExecuted.current) {
+    // Only redirect if we have a confirmed authenticated user and not already executed
+    if (user && !loginState.isLoading && !redirectExecuted.current) {
       console.log('✅ User authenticated, starting redirect process...', { email: user.email, profile: profile?.full_name });
       
       // Mark redirect as executed to prevent multiple redirects
@@ -186,7 +186,7 @@ function LoginPageContent() {
       setTimeout(() => {
         console.log('🚀 Executing redirect to:', targetPath);
         router.replace(targetPath);
-      }, 1500); // Give time for loading sequence to show progress
+      }, 800); // Reduced time for faster redirect
       
       // Fallback redirect if the first one doesn't work
       setTimeout(() => {
@@ -194,7 +194,7 @@ function LoginPageContent() {
           console.log('🔄 Fallback redirect - forcing navigation to:', targetPath);
           window.location.href = targetPath;
         }
-      }, 3000); // Fallback after 3 seconds
+      }, 2000); // Fallback after 2 seconds
     } else if (!user && !loading) {
       console.log('ℹ️ No authenticated user found, staying on login page');
     } else {
@@ -221,7 +221,7 @@ function LoginPageContent() {
       }
     };
     
-    // Emergency fallback: hide overlay after 10 seconds
+    // Emergency fallback: hide overlay after 5 seconds
     const emergencyTimeout = setTimeout(() => {
       if (loginState.showLoadingOverlay && loginState.isRedirecting) {
         console.log('🚨 Emergency fallback: hiding stuck loading overlay');
@@ -232,7 +232,7 @@ function LoginPageContent() {
         }));
         redirectExecuted.current = false;
       }
-    }, 10000);
+    }, 5000);
     
     return () => clearTimeout(emergencyTimeout);
 
@@ -309,8 +309,12 @@ function LoginPageContent() {
       console.log('✅ Login successful, waiting for redirect...');
 
       console.log('✅ Login successful, redirecting...');
-      // Success - let useEffect handle redirect and loading sequence
-      setLoginState(prev => ({ ...prev, isLoading: false }));
+      // Success - immediately reset loading state and let useEffect handle redirect
+      setLoginState(prev => ({ 
+        ...prev, 
+        isLoading: false,
+        isRedirecting: true 
+      }));
       
     } catch (error: any) {
       console.error('❌ Login exception:', error);
@@ -427,7 +431,7 @@ function LoginPageContent() {
               placeholder="E-mailadres"
               autoComplete="email"
               required
-              disabled={loginState.isLoading || loginState.showLoadingOverlay || loginState.isRedirecting}
+              disabled={loginState.isLoading || loginState.showLoadingOverlay}
             />
           </div>
           <div className="relative">
@@ -440,13 +444,13 @@ function LoginPageContent() {
               placeholder="Wachtwoord"
               autoComplete="current-password"
               required
-              disabled={loginState.isLoading || loginState.showLoadingOverlay || loginState.isRedirecting}
+              disabled={loginState.isLoading || loginState.showLoadingOverlay}
             />
             <button
               type="button"
               onClick={() => setLoginState(prev => ({ ...prev, showPassword: !prev.showPassword }))}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#B6C948] hover:text-white transition-colors focus:outline-none focus:text-white"
-              disabled={loginState.isLoading || loginState.showLoadingOverlay || loginState.isRedirecting}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#B6C948] hover:text-white transition-colors focus:outline-none focus:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={loginState.isLoading || loginState.showLoadingOverlay}
               aria-label={loginState.showPassword ? "Wachtwoord verbergen" : "Wachtwoord tonen"}
             >
               {loginState.showPassword ? (
@@ -465,7 +469,7 @@ function LoginPageContent() {
                 checked={loginState.rememberMe}
                 onChange={e => setLoginState(prev => ({ ...prev, rememberMe: e.target.checked }))}
                 className="w-4 h-4 text-[#B6C948] bg-[#181F17] border-[#3A4D23] rounded focus:ring-[#B6C948] focus:ring-2"
-                disabled={loginState.isLoading || loginState.showLoadingOverlay || loginState.isRedirecting}
+                disabled={loginState.isLoading || loginState.showLoadingOverlay}
               />
               <span className="ml-2 text-[#B6C948] text-sm font-figtree">Ingelogd blijven</span>
             </label>
@@ -474,7 +478,7 @@ function LoginPageContent() {
               type="button"
               onClick={() => setForgotPasswordState(prev => ({ ...prev, showForgotPassword: true }))}
               className={`text-[#8BAE5A] hover:text-[#B6C948] text-sm underline font-figtree ${loginState.isLoading || loginState.showLoadingOverlay ? 'cursor-wait opacity-75' : 'cursor-pointer'}`}
-              disabled={loginState.isLoading || loginState.showLoadingOverlay || loginState.isRedirecting}
+              disabled={loginState.isLoading || loginState.showLoadingOverlay}
             >
               Wachtwoord vergeten?
             </button>
@@ -488,7 +492,7 @@ function LoginPageContent() {
           
           <button
             type="submit"
-            disabled={loginState.isLoading || loginState.showLoadingOverlay || loginState.isRedirecting}
+            disabled={loginState.isLoading || loginState.showLoadingOverlay}
             className={`w-full py-3 sm:py-4 rounded-xl bg-gradient-to-r from-[#B6C948] to-[#3A4D23] text-[#181F17] font-semibold text-base sm:text-lg shadow-lg hover:from-[#B6C948] hover:to-[#B6C948] transition-all duration-200 border border-[#B6C948] font-figtree ${
               loginState.isLoading || loginState.showLoadingOverlay
                 ? 'opacity-75 cursor-wait' 

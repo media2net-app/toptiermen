@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { useOnboardingV2 } from '@/contexts/OnboardingV2Context';
 import { supabase } from '@/lib/supabase';
+import OnboardingLoadingOverlay from '@/components/OnboardingLoadingOverlay';
 import { motion } from 'framer-motion';
 import { 
   ArrowLeftIcon, 
@@ -46,7 +47,7 @@ interface ForumTopic {
 
 const VoorstellenTopicPage = () => {
   const { user, loading: authLoading } = useSupabaseAuth();
-  const { completeStep } = useOnboardingV2();
+  const { completeStep, showLoadingOverlay, loadingText, loadingProgress } = useOnboardingV2();
   const [topic, setTopic] = useState<ForumTopic | null>(null);
   const [posts, setPosts] = useState<ForumPost[]>([]);
   const [loading, setLoading] = useState(true);
@@ -533,6 +534,12 @@ const VoorstellenTopicPage = () => {
         </div>
       </aside>
 
+      {/* Onboarding Loading Overlay */}
+      <OnboardingLoadingOverlay 
+        show={showLoadingOverlay}
+        text={loadingText}
+        progress={loadingProgress}
+      />
     </div>
   );
 };

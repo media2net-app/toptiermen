@@ -17,6 +17,11 @@ interface OnboardingV2ContextType {
   availableSteps: OnboardingStep[];
   stepMapping: Record<number, number>;
   
+  // Loading overlay state
+  showLoadingOverlay: boolean;
+  loadingText: string;
+  loadingProgress: number;
+  
   // Access control
   hasTrainingAccess: boolean;
   hasNutritionAccess: boolean;
@@ -46,11 +51,52 @@ export function OnboardingV2Provider({ children }: { children: React.ReactNode }
   const [availableSteps, setAvailableSteps] = useState<OnboardingStep[]>([]);
   const [stepMapping, setStepMapping] = useState<Record<number, number>>({});
   
+  // Loading overlay state
+  const [showLoadingOverlay, setShowLoadingOverlay] = useState(false);
+  const [loadingText, setLoadingText] = useState('');
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  
   // Access control
   const [hasTrainingAccess, setHasTrainingAccess] = useState(false);
   const [hasNutritionAccess, setHasNutritionAccess] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isBasic, setIsBasic] = useState(false);
+
+  // Loading sequence function
+  const startLoadingSequence = (stepNumber: number, stepTitle: string) => {
+    console.log(`🎬 Starting loading sequence for step ${stepNumber}: ${stepTitle}`);
+    setShowLoadingOverlay(true);
+    setLoadingText(`Stap ${stepNumber} laden...`);
+    setLoadingProgress(0);
+    
+    // Auto-progress loading sequence
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += 15;
+      if (progress <= 90) {
+        setLoadingProgress(progress);
+        if (progress < 30) {
+          setLoadingText(`Stap ${stepNumber} laden...`);
+        } else if (progress < 60) {
+          setLoadingText(`${stepTitle} voorbereiden...`);
+        } else if (progress < 90) {
+          setLoadingText(`Bijna klaar...`);
+        }
+      } else {
+        clearInterval(interval);
+      }
+    }, 200);
+    
+    // Cleanup interval after 3 seconds
+    setTimeout(() => clearInterval(interval), 3000);
+  };
+
+  const hideLoadingOverlay = () => {
+    console.log('🎬 Hiding loading overlay');
+    setShowLoadingOverlay(false);
+    setLoadingText('');
+    setLoadingProgress(0);
+  };
 
   // Load onboarding status
   const loadOnboardingStatus = async () => {
@@ -97,6 +143,10 @@ export function OnboardingV2Provider({ children }: { children: React.ReactNode }
     if (!user?.email) return false;
 
     try {
+      // Start loading sequence
+      const stepTitle = getStepTitle(step);
+      startLoadingSequence(step, stepTitle);
+
       const response = await fetch('/api/onboarding-v2', {
         method: 'POST',
         headers: {
@@ -115,13 +165,21 @@ export function OnboardingV2Provider({ children }: { children: React.ReactNode }
       if (result.success) {
         console.log('✅ Step completed:', step);
         await loadOnboardingStatus(); // Refresh status
+        
+        // Hide loading overlay after a short delay
+        setTimeout(() => {
+          hideLoadingOverlay();
+        }, 1000);
+        
         return true;
       } else {
         console.error('❌ Failed to complete step:', result.error);
+        hideLoadingOverlay();
         return false;
       }
     } catch (error) {
       console.error('❌ Error completing step:', error);
+      hideLoadingOverlay();
       return false;
     }
   };
@@ -201,6 +259,11 @@ export function OnboardingV2Provider({ children }: { children: React.ReactNode }
     currentStep,
     availableSteps,
     stepMapping,
+    
+    // Loading overlay state
+    showLoadingOverlay,
+    loadingText,
+    loadingProgress,
     
     // Access control
     hasTrainingAccess,
