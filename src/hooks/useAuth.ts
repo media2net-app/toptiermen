@@ -174,8 +174,8 @@ export function useAuth(): AuthState & AuthActions & AuthUtils {
     // Admin users go to admin dashboard
     if (authState.isAdmin) return '/dashboard-admin';
     
-    // If onboarding is not completed, redirect to current step
-    if (!authState.onboarding?.isCompleted && authState.onboarding?.currentStep !== null) {
+    // If onboarding data exists and is not completed, redirect to current step
+    if (authState.onboarding && !authState.onboarding.isCompleted && authState.onboarding.currentStep !== null) {
       const currentStep = authState.onboarding.currentStep;
       
       switch (currentStep) {
@@ -195,8 +195,9 @@ export function useAuth(): AuthState & AuthActions & AuthUtils {
 
   // ✅ PHASE 1.4: Check if user is authenticated
   const isAuthenticated = useCallback(() => {
-    return !!authState.user && !!authState.profile;
-  }, [authState.user, authState.profile]);
+    // User is authenticated if they have a user object, profile is optional
+    return !!authState.user;
+  }, [authState.user]);
 
   // ✅ PHASE 1.4: Check if user can access a feature
   const canAccessFeature = useCallback((feature: 'training' | 'nutrition' | 'admin') => {

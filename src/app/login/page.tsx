@@ -158,13 +158,21 @@ function LoginPageContent() {
     // Only redirect if we have a confirmed authenticated user and not already redirecting
     if (user && !loginState.isLoading && !loginState.isRedirecting && !redirectExecuted.current) {
       console.log('✅ User authenticated, starting redirect process...', { email: user.email, profile: profile?.full_name });
-      const redirectTo = searchParams?.get('redirect') || undefined;
-      const targetPath = getRedirectPath(redirectTo);
-      
-      console.log('🎯 Target path determined:', targetPath);
       
       // Mark redirect as executed to prevent multiple redirects
       redirectExecuted.current = true;
+      
+      // Determine redirect path - use fallback if getRedirectPath fails
+      let targetPath = '/dashboard'; // Default fallback
+      try {
+        const redirectTo = searchParams?.get('redirect') || undefined;
+        targetPath = getRedirectPath(redirectTo);
+        console.log('🎯 Target path determined:', targetPath);
+      } catch (error) {
+        console.warn('⚠️ getRedirectPath failed, using fallback:', error);
+        // Use admin dashboard for admin users, regular dashboard for others
+        targetPath = isAdmin ? '/dashboard-admin' : '/dashboard';
+      }
       
       // Don't start loading sequence again if already showing (from login)
       if (!loginState.showLoadingOverlay) {
@@ -212,6 +220,21 @@ function LoginPageContent() {
         redirectExecuted.current = false;
       }
     };
+    
+    // Emergency fallback: hide overlay after 10 seconds
+    const emergencyTimeout = setTimeout(() => {
+      if (loginState.showLoadingOverlay && loginState.isRedirecting) {
+        console.log('🚨 Emergency fallback: hiding stuck loading overlay');
+        setLoginState(prev => ({ 
+          ...prev, 
+          showLoadingOverlay: false, 
+          isRedirecting: false 
+        }));
+        redirectExecuted.current = false;
+      }
+    }, 10000);
+    
+    return () => clearTimeout(emergencyTimeout);
 
     // Listen for route changes
     const originalPush = router.push;
