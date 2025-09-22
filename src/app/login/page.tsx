@@ -47,6 +47,26 @@ function LoginPageContent() {
       loadingProgress: 0,
       loadingText: "Inloggen..."
     }));
+    
+    // Auto-progress for redirect scenarios
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += 10;
+      if (progress <= 90) {
+        setLoginState(prev => ({
+          ...prev,
+          loadingProgress: progress,
+          loadingText: progress < 30 ? "Inloggen..." : 
+                      progress < 60 ? "Profiel laden..." :
+                      progress < 90 ? "Sessie voorbereiden..." : "Welkom terug!"
+        }));
+      } else {
+        clearInterval(interval);
+      }
+    }, 200);
+    
+    // Cleanup interval after 5 seconds
+    setTimeout(() => clearInterval(interval), 5000);
   };
   
   const updateLoadingProgress = (progress: number, text: string) => {
@@ -154,11 +174,19 @@ function LoginPageContent() {
         console.log('🎬 Loading overlay already showing from login');
       }
       
-      // Execute redirect immediately after starting loading sequence
+      // Execute redirect after loading sequence has time to show
       setTimeout(() => {
         console.log('🚀 Executing redirect to:', targetPath);
         router.replace(targetPath);
-      }, 100); // Very short delay to allow loading sequence to start
+      }, 1500); // Give time for loading sequence to show progress
+      
+      // Fallback redirect if the first one doesn't work
+      setTimeout(() => {
+        if (redirectExecuted.current && loginState.showLoadingOverlay) {
+          console.log('🔄 Fallback redirect - forcing navigation to:', targetPath);
+          window.location.href = targetPath;
+        }
+      }, 3000); // Fallback after 3 seconds
     } else if (!user && !loading) {
       console.log('ℹ️ No authenticated user found, staying on login page');
     } else {
@@ -254,6 +282,8 @@ function LoginPageContent() {
         }));
         return;
       }
+      
+      console.log('✅ Login successful, waiting for redirect...');
 
       console.log('✅ Login successful, redirecting...');
       // Success - let useEffect handle redirect and loading sequence
