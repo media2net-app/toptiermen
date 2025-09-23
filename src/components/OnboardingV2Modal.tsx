@@ -405,8 +405,9 @@ export default function OnboardingV2Modal({ isOpen }: OnboardingV2ModalProps) {
     }
   }, [isOpen]);
 
-  // Don't show modal if completed, loading, or for steps 2+ (only show for step 0 - welcome video and step 1 - goal setting)
-  if (!isOpen || isLoading || isCompleted || (currentStep !== null && currentStep > 1)) {
+
+  // Don't show modal if completed, loading, or for steps 3+ (only show for step 1 - welcome video and step 2 - goal setting)
+  if (!isOpen || isLoading || isCompleted || (currentStep !== null && currentStep > 2)) {
     return null;
   }
 
@@ -414,11 +415,11 @@ export default function OnboardingV2Modal({ isOpen }: OnboardingV2ModalProps) {
     const success = await completeStep(step, data);
     if (success) {
       // Handle redirects after step completion
-      if (step === 0) { // Welcome video -> redirect to goal step
+      if (step === 0) { // Welcome video (database step 0) -> redirect to goal step
         router.push('/dashboard');
-      } else if (step === 1) { // Goal step -> redirect to challenges
+      } else if (step === 1) { // Goal step (database step 1) -> redirect to challenges
         router.push('/dashboard/mijn-challenges');
-      } else if (step === 5) { // Forum intro step -> complete onboarding
+      } else if (step === 5) { // Forum intro step (database step 5) -> complete onboarding
         router.push('/dashboard');
       }
     }
@@ -438,17 +439,17 @@ export default function OnboardingV2Modal({ isOpen }: OnboardingV2ModalProps) {
 
   const renderStep = () => {
     switch (currentStep) {
-      case 0: // Welcome video
+      case 1: // Welcome video (UI step 1)
         return <WelcomeVideoStep onComplete={() => handleStepComplete(0)} />;
       
-      case 1: // Set goal - show modal
+      case 2: // Set goal - show modal (UI step 2)
         return <SetGoalStep onComplete={() => handleStepComplete(1)} />;
       
-      case 2: // Select challenges - redirect to challenges page
+      case 3: // Select challenges - redirect to challenges page (UI step 3)
         router.push('/dashboard/mijn-challenges');
         return null;
       
-      case 3: // Select training - redirect to training schemas page
+      case 4: // Select training - redirect to training schemas page (UI step 4)
         if (!hasTrainingAccess) {
           handleStepSkip(3);
           return null;
@@ -456,7 +457,7 @@ export default function OnboardingV2Modal({ isOpen }: OnboardingV2ModalProps) {
         router.push('/dashboard/trainingsschemas');
         return null;
       
-      case 4: // Select nutrition - redirect to nutrition plans page
+      case 5: // Select nutrition - redirect to nutrition plans page (UI step 5)
         if (!hasNutritionAccess) {
           handleStepSkip(4);
           return null;
@@ -464,7 +465,7 @@ export default function OnboardingV2Modal({ isOpen }: OnboardingV2ModalProps) {
         router.push('/dashboard/voedingsplannen-v2');
         return null;
       
-      case 5: // Forum intro
+      case 6: // Forum intro (UI step 6)
         return <ForumIntroStep onComplete={() => handleStepComplete(5)} />;
       
       default:
@@ -481,32 +482,32 @@ export default function OnboardingV2Modal({ isOpen }: OnboardingV2ModalProps) {
     // Determine total steps based on user access
     const totalSteps = (!hasTrainingAccess && !hasNutritionAccess) ? 4 : 6; // Basic: 4 steps, Premium: 6 steps
     
-    // Map step IDs to sequential step numbers based on user tier
+    // Map UI step numbers to sequential step numbers based on user tier
     const isBasicTier = !hasTrainingAccess && !hasNutritionAccess;
     const stepMapping = isBasicTier ? {
-      0: 1, // Welcome video
-      1: 2, // Set goal
-      2: 3, // Select challenges
-      5: 4  // Forum intro
+      1: 1, // Welcome video (UI step 1)
+      2: 2, // Set goal (UI step 2)
+      3: 3, // Select challenges (UI step 3)
+      6: 4  // Forum intro (UI step 6)
     } : {
-      0: 1, // Welcome video
-      1: 2, // Set goal
-      2: 3, // Select challenges
-      3: 4, // Select training schema
-      4: 5, // Select nutrition plan
-      5: 6  // Forum intro
+      1: 1, // Welcome video (UI step 1)
+      2: 2, // Set goal (UI step 2)
+      3: 3, // Select challenges (UI step 3)
+      4: 4, // Select training schema (UI step 4)
+      5: 5, // Select nutrition plan (UI step 5)
+      6: 6  // Forum intro (UI step 6)
     };
     
     const currentStepNumber = stepMapping[currentStep as keyof typeof stepMapping] || 1;
     const percentage = (currentStepNumber / totalSteps) * 100;
     
     const stepNames = {
-      0: "Welkomstvideo",
-      1: "Hoofddoel instellen", 
-      2: "Uitdagingen selecteren",
-      3: "Trainingsschema kiezen",
-      4: "Voedingsplan selecteren",
-      5: "Forum introductie"
+      1: "Welkomstvideo",
+      2: "Hoofddoel instellen", 
+      3: "Uitdagingen selecteren",
+      4: "Trainingsschema kiezen",
+      5: "Voedingsplan selecteren",
+      6: "Forum introductie"
     };
     
     return {

@@ -227,6 +227,7 @@ const mapDbSchemaToForm = (dbSchema: any) => ({
   category: dbSchema.category,
   difficulty: dbSchema.difficulty,
   status: dbSchema.status,
+  training_goal: dbSchema.training_goal,
   days: (dbSchema.training_schema_days || [])
     .sort((a: any, b: any) => (a.day_number ?? 0) - (b.day_number ?? 0))
     .map((day: any) => ({
@@ -908,6 +909,24 @@ export default function TrainingscentrumBeheer() {
     }
   };
 
+  const getFilterColor = (trainingGoal: string) => {
+    switch (trainingGoal) {
+      case 'spiermassa': return 'text-blue-400';
+      case 'kracht_uithouding': return 'text-green-400';
+      case 'power_kracht': return 'text-red-400';
+      default: return 'text-[#B6C948]';
+    }
+  };
+
+  const getFilterText = (trainingGoal: string) => {
+    switch (trainingGoal) {
+      case 'spiermassa': return 'Spiermassa';
+      case 'kracht_uithouding': return 'Kracht/Conditie';
+      case 'power_kracht': return 'Kracht/Power';
+      default: return trainingGoal;
+    }
+  };
+
   const filteredSchemas = schemas.filter(schema => {
     const matchesSearch = schema.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = filterCategory === 'Alle Categorieën' || schema.category === filterCategory;
@@ -1193,6 +1212,7 @@ export default function TrainingscentrumBeheer() {
                       <th className="px-6 py-4 text-center text-sm font-medium text-[#8BAE5A] w-20">Schema #</th>
                       <th className="px-6 py-4 text-left text-sm font-medium text-[#8BAE5A] w-1/12">Categorie</th>
                       <th className="px-6 py-4 text-center text-sm font-medium text-[#8BAE5A] w-1/12">Dagen</th>
+                      <th className="px-6 py-4 text-center text-sm font-medium text-[#8BAE5A] w-1/12">Filter</th>
                       <th className="px-6 py-4 text-center text-sm font-medium text-[#8BAE5A] w-1/12">Status</th>
                       <th className="px-6 py-4 text-center text-sm font-medium text-[#8BAE5A] w-1/12">Gebruikers</th>
                       <th className="px-6 py-4 text-center text-sm font-medium text-[#8BAE5A] w-1/4">Acties</th>
@@ -1231,6 +1251,11 @@ export default function TrainingscentrumBeheer() {
                         </td>
                         <td className="px-6 py-4 text-center">
                           <span className="text-[#8BAE5A] font-semibold">{schema.training_schema_days?.length || 0}</span>
+                        </td>
+                        <td className="px-6 py-4 text-center">
+                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getFilterColor(schema.training_goal)} bg-[#181F17]`}>
+                            {getFilterText(schema.training_goal)}
+                          </span>
                         </td>
                         <td className="px-6 py-4 text-center">
                           <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(schema.status)} bg-[#181F17]`}>

@@ -3,7 +3,6 @@
 import React from 'react';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { useOnboardingV2 } from '@/contexts/OnboardingV2Context';
-import OnboardingV2Modal from '@/components/OnboardingV2Modal';
 
 export default function WelcomeVideoPage() {
   const { user } = useSupabaseAuth();
@@ -24,8 +23,6 @@ export default function WelcomeVideoPage() {
     );
   }
 
-  // Show the onboarding modal for step 0 (welcome video)
-  const shouldShowModal = !isCompleted && currentStep === 0;
 
   return (
     <div className="min-h-screen bg-[#181F17]">
@@ -67,10 +64,6 @@ export default function WelcomeVideoPage() {
         </div>
       </div>
 
-      {/* Onboarding Modal */}
-      {shouldShowModal && (
-        <OnboardingV2Modal isOpen={true} />
-      )}
     </div>
   );
 }

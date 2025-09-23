@@ -18,7 +18,7 @@ export default function OnboardingNotice({ className = "" }: OnboardingNoticePro
 
   const getStepInstructions = () => {
     switch (currentStep) {
-      case 0:
+      case 1:
         return {
           title: "Welkomstvideo bekijken",
           message: "Bekijk de welkomstvideo om het platform te leren kennen. De video moet volledig worden afgespeeld voordat je naar de volgende stap kunt gaan.",
@@ -26,7 +26,7 @@ export default function OnboardingNotice({ className = "" }: OnboardingNoticePro
           color: "from-blue-500 to-blue-600"
         };
       
-      case 1:
+      case 2:
         return {
           title: "Hoofddoel instellen",
           message: "Beschrijf je hoofddoel in één zin. Dit helpt ons je de juiste content en uitdagingen te geven.",
@@ -34,7 +34,7 @@ export default function OnboardingNotice({ className = "" }: OnboardingNoticePro
           color: "from-green-500 to-green-600"
         };
       
-      case 2:
+      case 3:
         return {
           title: "Uitdagingen selecteren",
           message: "Voeg 3 uitdagingen toe die je dagelijks wilt voltooien. Klik op 'Nieuwe Challenge Toevoegen' of gebruik de 'Challenge Bibliotheek' om challenges te selecteren.",
@@ -42,7 +42,7 @@ export default function OnboardingNotice({ className = "" }: OnboardingNoticePro
           color: "from-orange-300 to-orange-400"
         };
       
-      case 3:
+      case 4:
         if (hasTrainingAccess) {
           return {
             title: "Trainingsschema kiezen",
@@ -53,7 +53,7 @@ export default function OnboardingNotice({ className = "" }: OnboardingNoticePro
         }
         return null;
       
-      case 4:
+      case 5:
         if (hasNutritionAccess) {
           return {
             title: "Voedingsplan selecteren",
@@ -64,7 +64,7 @@ export default function OnboardingNotice({ className = "" }: OnboardingNoticePro
         }
         return null;
       
-      case 5:
+      case 6:
         return {
           title: "Forum introductie",
           message: "Maak kennis met de Brotherhood community. Stel jezelf voor in het forum om je onboarding te voltooien.",

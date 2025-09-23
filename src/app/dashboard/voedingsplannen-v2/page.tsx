@@ -1065,9 +1065,9 @@ export default function VoedingsplannenV2Page() {
         // Redirect to forum intro after completing nutrition plan selection
         setTimeout(() => {
           console.log('🔧 DEBUG: Redirecting to forum intro...');
-          // Use router.push instead of window.location.href for better navigation
-          window.location.href = '/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden';
-        }, 1000);
+          // Use router.push for better navigation and loading overlay support
+          router.push('/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden');
+        }, 1500); // Increased timeout to allow loading overlay to show
       } catch (error) {
         console.error('❌ Error completing onboarding step 4:', error);
       }

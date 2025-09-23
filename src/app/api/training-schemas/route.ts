@@ -10,7 +10,8 @@ export async function GET() {
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
     const supabase = createClient(supabaseUrl, supabaseKey);
     
-    console.log('🔍 [TRAINING-SCHEMAS-FIXED] Fetching ONLY the 24 real training schemas...');
+    console.log('🔍 [TRAINING-SCHEMAS-FIXED] Fetching ONLY the real training schemas...');
+    console.log('🔄 [CACHE-FORCE] Forcing fresh data fetch at:', new Date().toISOString());
     
     // OPTIMIZED: Single efficient query with join to avoid N+1 problem
     console.log('⚡ [PERFORMANCE] Using optimized single query with join...');
@@ -30,7 +31,9 @@ export async function GET() {
         )
       `)
       .eq('status', 'published')
-      .order('created_at', { ascending: false })
+      .order('schema_nummer', { ascending: true })
+      .order('training_goal', { ascending: true })
+      .order('equipment_type', { ascending: true })
       .limit(1000);
     
     const queryTime = Date.now() - startTime;

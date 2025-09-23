@@ -19,32 +19,32 @@ export default function OnboardingV2Progress({ className = "" }: OnboardingV2Pro
     const { hasTrainingAccess, hasNutritionAccess } = useOnboardingV2();
     const totalSteps = (!hasTrainingAccess && !hasNutritionAccess) ? 4 : 6; // Basic: 4 steps, Premium: 6 steps
     
-    // Map step IDs to sequential step numbers based on user tier
+    // Map UI step numbers to sequential step numbers based on user tier
     const isBasicTier = !hasTrainingAccess && !hasNutritionAccess;
     const stepMapping = isBasicTier ? {
-      0: 1, // Welcome video
-      1: 2, // Set goal
-      2: 3, // Select challenges
-      5: 4  // Forum intro
+      1: 1, // Welcome video (UI step 1)
+      2: 2, // Set goal (UI step 2)
+      3: 3, // Select challenges (UI step 3)
+      6: 4  // Forum intro (UI step 6)
     } : {
-      0: 1, // Welcome video
-      1: 2, // Set goal
-      2: 3, // Select challenges
-      3: 4, // Select training schema
-      4: 5, // Select nutrition plan (step 5 of 6)
-      5: 6  // Forum intro (step 6 of 6)
+      1: 1, // Welcome video (UI step 1)
+      2: 2, // Set goal (UI step 2)
+      3: 3, // Select challenges (UI step 3)
+      4: 4, // Select training schema (UI step 4)
+      5: 5, // Select nutrition plan (UI step 5)
+      6: 6  // Forum intro (UI step 6)
     };
     
     const currentStepNumber = stepMapping[currentStep as keyof typeof stepMapping] || 1;
     const percentage = (currentStepNumber / totalSteps) * 100;
     
     const stepNames = {
-      0: "Welkomstvideo",
-      1: "Hoofddoel instellen", 
-      2: "Uitdagingen selecteren",
-      3: "Trainingsschema kiezen",
-      4: "Voedingsplan selecteren",
-      5: "Forum introductie"
+      1: "Welkomstvideo",
+      2: "Hoofddoel instellen", 
+      3: "Uitdagingen selecteren",
+      4: "Trainingsschema kiezen",
+      5: "Voedingsplan selecteren",
+      6: "Forum introductie"
     };
     
     return {

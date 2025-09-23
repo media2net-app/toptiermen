@@ -9,7 +9,6 @@ import BadgeDisplay from '@/components/BadgeDisplay';
 import { useAuth } from '@/hooks/useAuth';
 import DashboardLoadingModal from '@/components/ui/DashboardLoadingModal';
 import DashboardDebugger from '@/components/DashboardDebugger';
-import OnboardingV2Modal from '@/components/OnboardingV2Modal';
 import { useRouter } from 'next/navigation';
 
 
@@ -145,9 +144,9 @@ export default function Dashboard() {
       // Use unified auth hook for redirect path
       const redirectPath = getRedirectPath();
       
-      // Special case: step 1 stays on dashboard for goal setting modal
-      if (onboarding.currentStep === 1) {
-        console.log(`✅ Staying on dashboard for step 1 (goal setting modal)`);
+      // Special case: step 2 stays on dashboard for goal setting modal
+      if (onboarding.currentStep === 2) {
+        console.log(`✅ Staying on dashboard for step 2 (goal setting modal)`);
         return;
       }
       
@@ -802,10 +801,6 @@ export default function Dashboard() {
         />
       )}
 
-      {/* Onboarding V2 Modal */}
-      <OnboardingV2Modal 
-        isOpen={!onboarding?.isCompleted && onboarding?.currentStep !== null}
-      />
     </div>
   );
 } 

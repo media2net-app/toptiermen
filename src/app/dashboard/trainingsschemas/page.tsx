@@ -572,8 +572,8 @@ function TrainingschemasContent() {
     
     console.log(`🎯 Mapping frontend goal "${profile.training_goal}" to database goal "${dbGoal}"`);
     
-    // IMPROVED APPROACH: Filter by goal + equipment + frequency, but show all available schemas
-    // First, find schemas that match goal + equipment + frequency (exact match)
+    // FIXED APPROACH: Simple and effective filtering with proper deduplication
+    // Find schemas that match goal + equipment + frequency (exact match)
     const exactMatches = schemas.filter(schema => {
       const goalMatch = schema.training_goal === dbGoal;
       const equipmentMatch = schema.equipment_type === profile.equipment_type;
@@ -589,80 +589,60 @@ function TrainingschemasContent() {
       console.log(`  ✅ "${schema.name}" - Schema ${schema.schema_nummer} (${schema.training_goal}, ${schema.equipment_type}, ${schema.training_schema_days?.length || 0} days)`);
     });
     
-    // If we have exact matches, use those and ensure we have 3 schemas
-    let result: TrainingSchema[] = [];
-    
-    if (exactMatches.length > 0) {
-      // Sort by schema number
-      const sortedExactMatches = exactMatches.sort((a, b) => {
-        const aNum = a.schema_nummer || 0;
-        const bNum = b.schema_nummer || 0;
-        return aNum - bNum;
-      });
-      
-      // Ensure we have exactly 3 schemas
-    for (let i = 1; i <= 3; i++) {
-        const existingSchema = sortedExactMatches.find(s => s.schema_nummer === i);
-        if (existingSchema) {
-          result.push(existingSchema);
-      } else {
-          // Try to find any schema with the same goal and equipment (any frequency)
-          const fallbackSchema = schemas.find(s => 
-            s.training_goal === dbGoal && 
-            s.equipment_type === profile.equipment_type && 
-            s.schema_nummer === i
-          );
-          
-          if (fallbackSchema) {
-            result.push(fallbackSchema);
-            console.log(`  ✅ Found fallback schema for Schema ${i}: ${fallbackSchema.name}`);
-          } else {
-            // Only create placeholder if no real schema exists
-            const displayGoal = getDisplayName(dbGoal);
-            const displayEquipment = getDisplayName(profile.equipment_type);
-            const placeholderSchema: TrainingSchema = {
-              id: `placeholder-${dbGoal}-${profile.equipment_type}-${profile.training_frequency}-${i}`,
-              name: `${displayGoal} ${profile.training_frequency}x per week Schema ${i}`,
-              description: `Schema ${i} voor ${displayGoal} met ${displayEquipment} - Binnenkort beschikbaar`,
-              category: 'Gym',
-              cover_image: null,
-              status: 'coming_soon',
-              difficulty: 'Intermediate',
-              estimated_duration: '30 min',
-              target_audience: null,
-              training_goal: dbGoal,
-              rep_range: '',
-              rest_time_seconds: 0,
-              equipment_type: profile.equipment_type,
-              schema_nummer: i,
-              training_schema_days: []
-            };
-            result.push(placeholderSchema);
-            console.log(`  📝 Created placeholder for Schema ${i} (no real schema found)`);
-          }
-        }
+    // DEDUPLICATION: Remove duplicates based on schema_nummer
+    const uniqueExactMatches = exactMatches.reduce((acc, schema) => {
+      const existing = acc.find(s => s.schema_nummer === schema.schema_nummer);
+      if (!existing) {
+        acc.push(schema);
       }
-    } else {
-      // No exact matches, fall back to goal + equipment (any frequency)
-      const goalEquipmentMatches = schemas.filter(schema => {
+      return acc;
+    }, [] as TrainingSchema[]);
+    
+    console.log(`🎯 Unique exact matches after deduplication: ${uniqueExactMatches.length}`);
+    
+    // Sort by schema number and take first 3
+    const sortedExactMatches = uniqueExactMatches.sort((a, b) => {
+      const aNum = a.schema_nummer || 0;
+      const bNum = b.schema_nummer || 0;
+      return aNum - bNum;
+    });
+    
+    let result = sortedExactMatches.slice(0, 3);
+    
+    // If we don't have enough exact matches, show what we have with clear messaging
+    if (result.length === 0) {
+      console.log('⚠️ No exact matches found, showing fallback schemas');
+      // Fallback to goal + equipment (any frequency)
+      const fallbackMatches = schemas.filter(schema => {
         const goalMatch = schema.training_goal === dbGoal;
         const equipmentMatch = schema.equipment_type === profile.equipment_type;
         return goalMatch && equipmentMatch;
       });
       
-      console.log(`🎯 Fallback: Goal + equipment matches: ${goalEquipmentMatches.length}`);
+      // Deduplicate and sort
+      const uniqueFallback = fallbackMatches.reduce((acc, schema) => {
+        const existing = acc.find(s => s.schema_nummer === schema.schema_nummer);
+        if (!existing) {
+          acc.push(schema);
+        }
+        return acc;
+      }, [] as TrainingSchema[]);
       
-      // Sort by schema number and take first 3
-      const sortedSchemas = goalEquipmentMatches.sort((a, b) => {
-        const aNum = a.schema_nummer || 0;
-        const bNum = b.schema_nummer || 0;
-        return aNum - bNum;
-        });
-        
-      result = sortedSchemas.slice(0, 3);
+      result = uniqueFallback.sort((a, b) => (a.schema_nummer || 0) - (b.schema_nummer || 0)).slice(0, 3);
+    } else if (result.length < 3) {
+      console.log(`⚠️ Only ${result.length} exact matches found for ${profile.training_frequency}x per week ${dbGoal}`);
+      console.log('📝 This is expected if the database doesn\'t have all 3 schemas for this frequency');
+      
+      // Show a helpful message to the user about available schemas
+      if (result.length === 1) {
+        console.log(`ℹ️ Only Schema ${result[0].schema_nummer} is available for ${profile.training_frequency}x per week ${dbGoal}`);
+      } else if (result.length === 2) {
+        const schemaNumbers = result.map(s => s.schema_nummer).sort();
+        console.log(`ℹ️ Only Schemas ${schemaNumbers.join(' and ')} are available for ${profile.training_frequency}x per week ${dbGoal}`);
+      }
     }
     
-    console.log('✅ Final filtered schemas (always 3):', result.length);
+    console.log('✅ Final filtered schemas:', result.length);
     result.forEach((schema, index) => {
       console.log(`  ${index + 1}. Schema ${schema.schema_nummer}: "${schema.name}" (${schema.training_goal}, ${schema.equipment_type}, ${schema.training_schema_days?.length || 0} days) - Status: ${schema.status}`);
     });
@@ -980,33 +960,8 @@ function TrainingschemasContent() {
         }
         
         // Complete onboarding step if needed
-        if (!isCompleted && onboardingStep === 3) {
-          console.log('🎯 Completing onboarding step 3 after schema selection');
-          // Call completeStep directly to avoid stale closure
-          try {
-            const response = await fetch(`/api/onboarding-v2?email=${user?.email}`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                email: user?.email,
-                step: 3,
-                action: 'complete_step',
-                selectedTrainingSchema: schemaId
-              }),
-            });
-            
-            if (response.ok) {
-              console.log('✅ Onboarding step 3 completed');
-              // DON'T redirect to mijn-trainingen during onboarding - let onboarding flow continue
-              console.log('🎯 Onboarding step 3 completed, staying in onboarding flow');
-            }
-          } catch (error) {
-            console.error('❌ Error completing onboarding step:', error);
-          }
-        } else if (showOnboardingStep3) {
-          console.log('🎯 Schema selected during onboarding step 3');
+        if (!isCompleted && showOnboardingStep3) {
+          console.log('🎯 Schema selected during onboarding step 3 - NOT auto-completing');
           // Don't auto-complete, let user click "Volgende Stap" button
           // The "Volgende Stap" button will be shown in the UI
         }
@@ -1648,7 +1603,7 @@ function TrainingschemasContent() {
             <button
               onClick={async () => {
                 try {
-                  await completeStep(3);
+                  await completeStep(3); // Database step 3 = SELECT_TRAINING for UI step 4
                   console.log('✅ Training schema step completed, redirecting to nutrition plans...');
                   // Use router.push instead of window.location.href for better navigation
                   router.push('/dashboard/voedingsplannen-v2');

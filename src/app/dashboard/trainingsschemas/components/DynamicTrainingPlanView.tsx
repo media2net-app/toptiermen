@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 import { 
   ArrowLeftIcon,
   CalendarDaysIcon,
@@ -44,6 +45,7 @@ interface TrainingSchema {
 }
 
 export default function DynamicTrainingPlanView({ schemaId, schemaName, userId, onBack }: DynamicTrainingPlanViewProps) {
+  const router = useRouter();
   const [schemaData, setSchemaData] = useState<TrainingSchema | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -138,7 +140,7 @@ export default function DynamicTrainingPlanView({ schemaId, schemaName, userId, 
         toast.success(`🎉 ${schemaName} is nu je actieve trainingsschema!`);
         // Navigate back to overview with the selected schema
         // Note: This will trigger the main selectTrainingSchema function which handles onboarding logic
-        window.location.href = `/dashboard/trainingsschemas?select=${schemaId}`;
+        router.push(`/dashboard/trainingsschemas?select=${schemaId}`);
       } else {
         throw new Error(data.error || 'Failed to select training schema');
       }

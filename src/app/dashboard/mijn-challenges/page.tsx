@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { useOnboardingV2 } from '@/contexts/OnboardingV2Context';
 import { useSubscription } from '@/hooks/useSubscription';
 import { toast } from 'react-hot-toast';
 import ClientLayout from '@/app/components/ClientLayout';
-import OnboardingV2Modal from '@/components/OnboardingV2Modal';
 import OnboardingV2Progress from '@/components/OnboardingV2Progress';
 import OnboardingNotice from '@/components/OnboardingNotice';
 import OnboardingLoadingOverlay from '@/components/OnboardingLoadingOverlay';
@@ -270,6 +270,7 @@ const CHALLENGE_LIBRARY: SuggestedChallenge[] = [
 ];
 
 export default function MijnChallengesPage() {
+  const router = useRouter();
   const { user } = useSupabaseAuth();
   const { currentStep, completeStep, isCompleted, isBasic, hasTrainingAccess, hasNutritionAccess, showLoadingOverlay, loadingText, loadingProgress } = useOnboardingV2();
   const [challenges, setChallenges] = useState<Challenge[]>([]);
@@ -698,11 +699,13 @@ export default function MijnChallengesPage() {
           completeOnboarding: false // Don't auto-complete onboarding for Basic tier
         };
       } else if (currentStep === 3) {
-        // User is on step 3 (challenges)
+        // User is on step 3 (challenges) - complete step 2 (SELECT_CHALLENGES)
+        console.log('🔧 DEBUG: User on step 3, completing step 2 (SELECT_CHALLENGES)');
         stepData = { 
           challenges: challenges.map(c => c.id),
           completeOnboarding: false // Don't auto-complete onboarding for Basic tier
         };
+        stepToComplete = 2; // Database step 2 = SELECT_CHALLENGES for UI step 3
       } else {
         return;
       }
@@ -715,7 +718,7 @@ export default function MijnChallengesPage() {
       // If we completed step 2, also complete step 3 if user has enough challenges
       if (currentStep === 2 && challenges.length >= 3) {
         console.log('🔧 DEBUG: Auto-completing step 3 after step 2');
-        await completeStep(3, { 
+        await completeStep(2, { // Database step 2 = SELECT_CHALLENGES for UI step 3
           challenges: challenges.map(c => c.id),
           completeOnboarding: false // Don't auto-complete onboarding for Basic tier
         });
@@ -726,10 +729,10 @@ export default function MijnChallengesPage() {
         if (hasTrainingAccess) {
           console.log('🔧 DEBUG: Redirecting to training schemas...');
           // Use router.push instead of window.location.href for better navigation
-          window.location.href = '/dashboard/trainingsschemas';
+          router.push('/dashboard/trainingsschemas');
         } else {
           console.log('🔧 DEBUG: Redirecting to forum intro...');
-          window.location.href = '/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden';
+          router.push('/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden');
         }
       }, 1000);
     } catch (error) {

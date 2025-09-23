@@ -152,6 +152,7 @@ interface TrainingSchema {
   category: 'Gym' | 'Outdoor' | 'Home';
   difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
   schema_nummer?: number | null;
+  training_goal?: string;
   days: TrainingDay[];
   status: 'draft' | 'published' | 'archived';
 }
@@ -320,6 +321,7 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
     category: 'Gym',
     difficulty: 'Beginner',
     schema_nummer: null,
+    training_goal: '',
     days: [],
     status: 'draft'
   });
@@ -343,6 +345,7 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
           category: schema.category,
           difficulty: schema.difficulty,
           schema_nummer: schema.schema_nummer || null,
+          training_goal: schema.training_goal || '',
           days: schema.days || [], // Data is already sorted and transformed
           status: schema.status
         };
@@ -354,6 +357,7 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
           category: 'Gym',
           difficulty: 'Beginner',
           schema_nummer: null,
+          training_goal: '',
           days: [],
           status: 'draft'
         });
@@ -692,7 +696,8 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
           description: currentFormData.description,
           category: currentFormData.category,
           difficulty: currentFormData.difficulty,
-          status: currentFormData.status
+          status: currentFormData.status,
+          training_goal: currentFormData.training_goal
         })
         .select()
         .single();
@@ -935,6 +940,22 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
                       })}
                     </select>
                   </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Filter
+                  </label>
+                  <select
+                    value={formData.training_goal || ''}
+                    onChange={(e) => setFormData(prev => ({ ...prev, training_goal: e.target.value }))}
+                    className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-[#8BAE5A] focus:ring-2"
+                  >
+                    <option value="">Selecteer filter</option>
+                    <option value="spiermassa">Spiermassa</option>
+                    <option value="kracht_uithouding">Kracht/Conditie</option>
+                    <option value="power_kracht">Kracht/Power</option>
+                  </select>
                 </div>
               </div>
 

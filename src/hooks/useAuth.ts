@@ -179,12 +179,12 @@ export function useAuth(): AuthState & AuthActions & AuthUtils {
       const currentStep = authState.onboarding.currentStep;
       
       switch (currentStep) {
-        case 0: return '/dashboard/welcome-video';
-        case 1: return '/dashboard'; // Goal setting modal
-        case 2: return '/dashboard/mijn-challenges';
-        case 3: return '/dashboard/trainingsschemas';
-        case 4: return '/dashboard/voedingsplannen-v2';
-        case 5: return '/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden';
+        case 1: return '/dashboard/welcome-video-v2'; // UI step 1 = Welcome video
+        case 2: return '/dashboard'; // UI step 2 = Goal setting modal
+        case 3: return '/dashboard/mijn-challenges'; // UI step 3 = Challenges
+        case 4: return '/dashboard/trainingsschemas'; // UI step 4 = Training schemas
+        case 5: return '/dashboard/voedingsplannen-v2'; // UI step 5 = Nutrition plans
+        case 6: return '/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden'; // UI step 6 = Forum
         default: return '/dashboard';
       }
     }

@@ -3,7 +3,7 @@
 import React from 'react';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 
-export default function BoekenkamerPage() {
+export default function MindFocusPage() {
   const { user, profile } = useSupabaseAuth();
 
   // Check if user is admin
@@ -31,10 +31,10 @@ export default function BoekenkamerPage() {
           <div className="bg-[#232D1A]/80 rounded-xl shadow-xl border border-[#3A4D23]/40 p-8">
             <div className="text-center mb-8">
               <h1 className="text-3xl font-bold text-white mb-4">
-                Boekenkamer 📚
+                Mind & Focus 🧠
               </h1>
               <p className="text-[#8BAE5A]/70 text-lg">
-                Admin-only pagina voor Boekenkamer functionaliteit.
+                Admin-only pagina voor Mind & Focus functionaliteit.
               </p>
             </div>
             

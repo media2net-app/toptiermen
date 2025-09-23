@@ -72,7 +72,7 @@ export function OnboardingV2Provider({ children }: { children: React.ReactNode }
     // Auto-progress loading sequence
     let progress = 0;
     const interval = setInterval(() => {
-      progress += 15;
+      progress += 10;
       if (progress <= 90) {
         setLoadingProgress(progress);
         if (progress < 30) {
@@ -85,10 +85,10 @@ export function OnboardingV2Provider({ children }: { children: React.ReactNode }
       } else {
         clearInterval(interval);
       }
-    }, 200);
+    }, 300);
     
-    // Cleanup interval after 3 seconds
-    setTimeout(() => clearInterval(interval), 3000);
+    // Cleanup interval after 4 seconds
+    setTimeout(() => clearInterval(interval), 4000);
   };
 
   const hideLoadingOverlay = () => {
@@ -166,10 +166,10 @@ export function OnboardingV2Provider({ children }: { children: React.ReactNode }
         console.log('✅ Step completed:', step);
         await loadOnboardingStatus(); // Refresh status
         
-        // Hide loading overlay after a short delay
+        // Hide loading overlay after a longer delay to ensure smooth transition
         setTimeout(() => {
           hideLoadingOverlay();
-        }, 1000);
+        }, 2000);
         
         return true;
       } else {

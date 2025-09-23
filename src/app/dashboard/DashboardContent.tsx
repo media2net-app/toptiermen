@@ -10,6 +10,7 @@ import { useOnboardingV2 } from '@/contexts/OnboardingV2Context';
 import { useDebug } from '@/contexts/DebugContext';
 import { useTestUser } from '@/hooks/useTestUser';
 import { useSubscription } from '@/hooks/useSubscription';
+import OnboardingV2Modal from '@/components/OnboardingV2Modal';
 import { WorkoutSessionProvider, useWorkoutSession } from '@/contexts/WorkoutSessionContext';
 import FloatingWorkoutWidget from '@/components/FloatingWorkoutWidget';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -24,7 +25,6 @@ import {
   RocketLaunchIcon
 } from '@heroicons/react/24/solid';
 import DebugPanel from '@/components/DebugPanel';
-import OnboardingV2Modal from '@/components/OnboardingV2Modal';
 import TestUserVideoModal from '@/components/TestUserVideoModal';
 import TestUserFeedback from '@/components/TestUserFeedback';
 import PWAInstallPrompt from '@/components/PWAInstallPrompt';
@@ -88,23 +88,23 @@ const SubscriptionTier = () => {
 
 // 2.0.1: Dashboard menu configuration
 const menu = [
-  { label: 'Onboarding', icon: CheckCircleIcon, href: null, onboardingStep: 0, isOnboardingItem: true, isDynamic: true },
-  { label: 'Dashboard', icon: HomeIcon, href: '/dashboard', onboardingStep: 0 },
-  { label: 'Mijn Dashboard', icon: HomeIcon, parent: 'Dashboard', href: '/dashboard', isSub: true, onboardingStep: 0 },
-  { label: 'Mijn Profiel', icon: UserCircleIcon, parent: 'Dashboard', href: '/dashboard/mijn-profiel', isSub: true, onboardingStep: 0 },
-  { label: 'Notificaties', icon: BellIcon, parent: 'Dashboard', href: '/dashboard/notificaties', isSub: true, onboardingStep: 0 },
-  { label: 'Mijn Trainingen', icon: AcademicCapIcon, parent: 'Dashboard', href: '/dashboard/mijn-trainingen', isSub: true, onboardingStep: 0 },
+  { label: 'Onboarding', icon: CheckCircleIcon, href: null, onboardingStep: 1, isOnboardingItem: true, isDynamic: true },
+  { label: 'Dashboard', icon: HomeIcon, href: '/dashboard', onboardingStep: 1 },
+  { label: 'Mijn Dashboard', icon: HomeIcon, parent: 'Dashboard', href: '/dashboard', isSub: true, onboardingStep: 1 },
+  { label: 'Mijn Profiel', icon: UserCircleIcon, parent: 'Dashboard', href: '/dashboard/mijn-profiel', isSub: true, onboardingStep: 1 },
+  { label: 'Notificaties', icon: BellIcon, parent: 'Dashboard', href: '/dashboard/notificaties', isSub: true, onboardingStep: 1 },
+  { label: 'Mijn Trainingen', icon: AcademicCapIcon, parent: 'Dashboard', href: '/dashboard/mijn-trainingen', isSub: true, onboardingStep: 1 },
   { label: 'Finance & Business', icon: CurrencyDollarIcon, href: '/dashboard/finance-en-business', onboardingStep: 7 },
   { label: 'Academy', icon: FireIcon, href: '/dashboard/academy', onboardingStep: 7 },
-  { label: 'Challenges', icon: FireIcon, href: '/dashboard/mijn-challenges', onboardingStep: 2 },
-  { label: 'Trainingsschemas', icon: AcademicCapIcon, href: '/dashboard/trainingsschemas', onboardingStep: 3 },
-  { label: 'Voedingsplannen', icon: RocketLaunchIcon, href: '/dashboard/voedingsplannen-v2', onboardingStep: 4 },
-  { label: 'Mind & Focus (binnenkort online)', icon: ChartBarIcon, href: null, onboardingStep: 7, disabled: true },
-  { label: 'Brotherhood', icon: UsersIcon, href: '/dashboard/brotherhood', onboardingStep: 5 },
+  { label: 'Challenges', icon: FireIcon, href: '/dashboard/mijn-challenges', onboardingStep: 3 },
+  { label: 'Trainingsschemas', icon: AcademicCapIcon, href: '/dashboard/trainingsschemas', onboardingStep: 4 },
+  { label: 'Voedingsplannen', icon: RocketLaunchIcon, href: '/dashboard/voedingsplannen-v2', onboardingStep: 5 },
+  { label: 'Mind & Focus (Admin)', icon: ChartBarIcon, href: '/dashboard/mind-focus', onboardingStep: 7, adminOnly: true },
+  { label: 'Brotherhood', icon: UsersIcon, href: '/dashboard/brotherhood', onboardingStep: 6 },
   { label: 'Social Feed', icon: ChatBubbleLeftRightIcon, parent: 'Brotherhood', href: '/dashboard/brotherhood/social-feed', isSub: true, onboardingStep: 7 },
-  { label: 'Forum', icon: FireIcon, parent: 'Brotherhood', href: '/dashboard/brotherhood/forum', isSub: true, onboardingStep: 5 },
+  { label: 'Forum', icon: FireIcon, parent: 'Brotherhood', href: '/dashboard/brotherhood/forum', isSub: true, onboardingStep: 6 },
   { label: 'Leden', icon: UsersIcon, parent: 'Brotherhood', href: '/dashboard/brotherhood/leden', isSub: true, onboardingStep: 7 },
-  { label: 'Boekenkamer (binnenkort online)', icon: BookOpenIcon, href: null, onboardingStep: 7, disabled: true },
+  { label: 'Boekenkamer (Admin)', icon: BookOpenIcon, href: '/dashboard/boekenkamer', onboardingStep: 7, adminOnly: true },
   { label: 'Badges & Rangen', icon: StarIcon, href: '/dashboard/badges-en-rangen', onboardingStep: 7 },
   { label: 'Producten', icon: ShoppingBagIcon, href: '/dashboard/producten', onboardingStep: 7 },
   { label: 'Mentorship & Coaching', icon: ChatBubbleLeftRightIcon, href: '/dashboard/mentorship-en-coaching', onboardingStep: 7 },
@@ -147,8 +147,8 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
 
   // Function to check if a menu item should be visible based on subscription tier and admin status
   const isMenuItemVisible = (item: any) => {
-    // Check admin-only items first - specifically allow chiel@media2net.nl
-    if (item.adminOnly && user?.email !== 'chiel@media2net.nl') {
+    // Check admin-only items first - specifically allow rick@toptiermen.eu and chiel@media2net.nl
+    if (item.adminOnly && user?.email !== 'rick@toptiermen.eu' && user?.email !== 'chiel@media2net.nl') {
       return false;
     }
     
@@ -162,7 +162,7 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
   // Function to check if a menu item should be disabled during onboarding
   const isMenuItemDisabled = (item: any) => {
     // Check if item is explicitly disabled (e.g., "binnenkort online")
-    if (item.disabled) return true;
+    if ((item as any).disabled) return true;
     
     // If onboarding is completed, no items should be disabled (except explicitly disabled ones)
     // BUT: If user is still on step 5 (Forum intro), only allow Brotherhood > Forum
@@ -191,7 +191,7 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
     if (actualCurrentStep !== null && actualCurrentStep !== undefined) {
       // Determine if this is the last step for the current user tier
       const isBasicTier = !hasTrainingAccess && !hasNutritionAccess;
-      const isLastStep = actualCurrentStep === 5; // Forum intro is always the last step
+      const isLastStep = actualCurrentStep === 6; // Forum intro is always the last step
       
       // Enhanced debug logging for step 5
       if (typeof window !== 'undefined' && actualCurrentStep === 5) {
@@ -208,15 +208,15 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
         if (item.label === 'Forum' && item.parent === 'Brotherhood') {
           return false; // Not disabled
         }
-        // Block everything else during step 5 - including Dashboard and its subitems
+        // Block everything else during step 6 - including Dashboard and its subitems
         return true;
       }
       
-      // Special case for step 0 (video step): Only allow Onboarding menu item
-      if (actualCurrentStep === 0) {
-        // Debug logging for step 0
+      // Special case for step 1 (video step): Only allow Onboarding menu item
+      if (actualCurrentStep === 1) {
+        // Debug logging for step 1
         if (typeof window !== 'undefined') {
-          console.log(`🔍 [STEP 0 DEBUG] ${item.label}: isOnboardingItem=${item.isOnboardingItem}, shouldDisable=${!item.isOnboardingItem}`);
+          console.log(`🔍 [MOBILE STEP 1 DEBUG] ${item.label}: isOnboardingItem=${item.isOnboardingItem}, shouldDisable=${!item.isOnboardingItem}`);
         }
         // Only allow the Onboarding menu item during video step
         return !item.isOnboardingItem;
@@ -300,10 +300,10 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
         
         if (!item.parent) {
           // During onboarding, only the current step should be active
-          // Special case for step 5: Brotherhood should be active when on forum pages
+          // Special case for step 6: Brotherhood should be active when on forum pages
           const isActive = !isCompleted 
             ? (safePathname === item.href && item.onboardingStep === actualCurrentStep) ||
-              (actualCurrentStep === 5 && item.label === 'Brotherhood' && safePathname.includes('/brotherhood/forum'))
+              (actualCurrentStep === 6 && item.label === 'Brotherhood' && safePathname.includes('/brotherhood/forum'))
             : safePathname === item.href;
           const hasSubmenu = menu.some(sub => sub.parent === item.label);
 
@@ -337,7 +337,7 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
                     }
                   }}
                   disabled={allSubItemsDisabled}
-                  title={allSubItemsDisabled ? (subItems.some(sub => sub.disabled) ? "Binnenkort online" : "Nog niet beschikbaar tijdens onboarding") : undefined}
+                  title={allSubItemsDisabled ? (subItems.some(sub => (sub as any).disabled) ? "Binnenkort online" : "Nog niet beschikbaar tijdens onboarding") : undefined}
                 >
                   <item.icon className={`w-6 h-6 ${allSubItemsDisabled ? 'text-gray-500' : isActive || hasActiveSubItem ? 'text-white' : 'text-[#8BAE5A]'}`} />
                   <span className="truncate col-start-2">{item.label}</span>
@@ -367,7 +367,7 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
                             <div
                               key={sub.label}
                               className="block px-4 py-2 rounded-lg text-sm text-gray-500 cursor-not-allowed opacity-50"
-                              title={sub.disabled ? "Binnenkort online" : "Nog niet beschikbaar tijdens onboarding"}
+                              title={(sub as any).disabled ? "Binnenkort online" : "Nog niet beschikbaar tijdens onboarding"}
                             >
                               {sub.label}
                             </div>
@@ -378,10 +378,10 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
                           <Link
                             key={sub.label}
                             href={sub.href || '#'}
-                            onClick={sub.disabled ? (e) => e.preventDefault() : onLinkClick}
-                            title={sub.disabled ? "Binnenkort online" : undefined}
+                            onClick={(sub as any).disabled ? (e) => e.preventDefault() : onLinkClick}
+                            title={(sub as any).disabled ? "Binnenkort online" : undefined}
                             className={`block px-4 py-2 rounded-lg text-sm transition-all duration-150 ${
-                              sub.disabled
+                              (sub as any).disabled
                                 ? 'text-gray-500 cursor-not-allowed opacity-50'
                                 : isSubActive 
                                 ? 'bg-[#8BAE5A] text-black font-semibold' 
@@ -415,7 +415,7 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
               <div
                 key={item.label}
                 className={`grid grid-cols-[auto_1fr] items-center gap-4 px-4 py-3 rounded-xl font-bold uppercase text-sm tracking-wide font-figtree text-gray-500 cursor-not-allowed opacity-50`}
-                title={item.disabled ? "Binnenkort online" : "Nog niet beschikbaar tijdens onboarding"}
+                title={(item as any).disabled ? "Binnenkort online" : "Nog niet beschikbaar tijdens onboarding"}
               >
                 <item.icon className="w-6 h-6 text-gray-500" />
                 <span className="truncate">{item.label}</span>
@@ -426,7 +426,7 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
           return (
             <Link
               key={item.label}
-              href={item.disabled ? '#' : (item.isDynamic && item.isOnboardingItem && !isCompleted ? 
+              href={(item as any).disabled ? '#' : (item.isDynamic && item.isOnboardingItem && !isCompleted ? 
                 (actualCurrentStep === 0 ? '/dashboard/welcome-video-v2' :
                  actualCurrentStep === 1 ? '/dashboard/profiel' :
                  actualCurrentStep === 2 ? '/dashboard/mijn-challenges' :
@@ -435,10 +435,10 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
                  actualCurrentStep === 5 ? '/dashboard/challenges' :
                  actualCurrentStep === 6 ? '/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden' :
                  '/dashboard/welcome-video') : (item.href || '#'))}
-              onClick={item.disabled ? (e) => e.preventDefault() : (e) => handleMobileLinkClick(item.href || '#', item.label, e)}
-              title={item.disabled ? "Binnenkort online" : undefined}
+              onClick={(item as any).disabled ? (e) => e.preventDefault() : (e) => handleMobileLinkClick(item.href || '#', item.label, e)}
+              title={(item as any).disabled ? "Binnenkort online" : undefined}
               className={`grid grid-cols-[auto_1fr] items-center gap-4 px-4 py-3 rounded-xl font-bold uppercase text-sm tracking-wide transition-all duration-500 font-figtree ${
-                item.disabled
+                (item as any).disabled
                   ? 'text-gray-500 cursor-not-allowed opacity-50'
                   : isActive
                   ? 'bg-[#8BAE5A] text-black shadow-lg'
@@ -449,7 +449,7 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
                       : 'text-white hover:text-[#8BAE5A] hover:bg-[#3A4D23]/50'
               }`}
             >
-              <item.icon className={`w-6 h-6 ${item.disabled ? 'text-gray-500' : isActive ? 'text-white' : shouldBeYellow ? 'text-[#FFD700]' : shouldBeGreen ? 'text-[#8BAE5A]' : 'text-[#8BAE5A]'}`} />
+              <item.icon className={`w-6 h-6 ${(item as any).disabled ? 'text-gray-500' : isActive ? 'text-white' : shouldBeYellow ? 'text-[#FFD700]' : shouldBeGreen ? 'text-[#8BAE5A]' : 'text-[#8BAE5A]'}`} />
               <div className="flex items-center justify-between w-full">
                 <span className="truncate">{item.label}</span>
               </div>
@@ -512,8 +512,8 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
 
   // Function to check if a menu item should be visible based on subscription tier and admin status
   const isMenuItemVisible = (item: any) => {
-    // Check admin-only items first - specifically allow chiel@media2net.nl
-    if (item.adminOnly && user?.email !== 'chiel@media2net.nl') {
+    // Check admin-only items first - specifically allow rick@toptiermen.eu and chiel@media2net.nl
+    if (item.adminOnly && user?.email !== 'rick@toptiermen.eu' && user?.email !== 'chiel@media2net.nl') {
       return false;
     }
     
@@ -527,7 +527,7 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
   // Function to check if a menu item should be disabled during onboarding
   const isMenuItemDisabled = (item: any) => {
     // Check if item is explicitly disabled (e.g., "binnenkort online")
-    if (item.disabled) return true;
+    if ((item as any).disabled) return true;
     
     // If onboarding is completed, no items should be disabled (except explicitly disabled ones)
     // BUT: If user is still on step 5 (Forum intro), only allow Brotherhood > Forum
@@ -556,11 +556,11 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
     if (actualCurrentStep !== null && actualCurrentStep !== undefined) {
       // Determine if this is the last step for the current user tier
       const isBasicTier = !hasTrainingAccess && !hasNutritionAccess;
-      const isLastStep = actualCurrentStep === 5; // Forum intro is always the last step
+      const isLastStep = actualCurrentStep === 6; // Forum intro is always the last step
       
-      // Enhanced debug logging for step 5
-      if (typeof window !== 'undefined' && actualCurrentStep === 5) {
-        console.log(`🔍 [STEP 5 DEBUG] ${item.label}: parent=${item.parent}, isBasicTier=${isBasicTier}, isLastStep=${isLastStep}, onboarding_completed=${actualOnboardingStatus?.onboarding_completed}`);
+      // Enhanced debug logging for step 6
+      if (typeof window !== 'undefined' && actualCurrentStep === 6) {
+        console.log(`🔍 [STEP 6 DEBUG] ${item.label}: parent=${item.parent}, isBasicTier=${isBasicTier}, isLastStep=${isLastStep}, onboarding_completed=${actualOnboardingStatus?.onboarding_completed}`);
       }
       
       // Special case for last step (Forum intro): Only allow Brotherhood > Forum
@@ -573,15 +573,15 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
         if (item.label === 'Forum' && item.parent === 'Brotherhood') {
           return false; // Not disabled
         }
-        // Block everything else during step 5
+        // Block everything else during step 6
         return true;
       }
       
-      // Special case for step 0 (video step): Only allow Onboarding menu item
-      if (actualCurrentStep === 0) {
-        // Debug logging for step 0
+      // Special case for step 1 (video step): Only allow Onboarding menu item
+      if (actualCurrentStep === 1) {
+        // Debug logging for step 1
         if (typeof window !== 'undefined') {
-          console.log(`🔍 [DESKTOP STEP 0 DEBUG] ${item.label}: isOnboardingItem=${item.isOnboardingItem}, shouldDisable=${!item.isOnboardingItem}`);
+          console.log(`🔍 [DESKTOP STEP 1 DEBUG] ${item.label}: isOnboardingItem=${item.isOnboardingItem}, shouldDisable=${!item.isOnboardingItem}`);
         }
         // Only allow the Onboarding menu item during video step
         return !item.isOnboardingItem;
@@ -659,10 +659,10 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
         
         if (!item.parent) {
           // During onboarding, only the current step should be active
-          // Special case for step 5: Brotherhood should be active when on forum pages
+          // Special case for step 6: Brotherhood should be active when on forum pages
           const isActive = !isCompleted 
             ? (safePathname === item.href && item.onboardingStep === actualCurrentStep) ||
-              (actualCurrentStep === 5 && item.label === 'Brotherhood' && safePathname.includes('/brotherhood/forum'))
+              (actualCurrentStep === 6 && item.label === 'Brotherhood' && safePathname.includes('/brotherhood/forum'))
             : safePathname === item.href;
           const hasSubmenu = menu.some(sub => sub.parent === item.label);
 
@@ -697,7 +697,7 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
                     }
                   }}
                   disabled={allSubItemsDisabled}
-                  title={allSubItemsDisabled ? (subItems.some(sub => sub.disabled) ? "Binnenkort online" : "Nog niet beschikbaar tijdens onboarding") : undefined}
+                  title={allSubItemsDisabled ? (subItems.some(sub => (sub as any).disabled) ? "Binnenkort online" : "Nog niet beschikbaar tijdens onboarding") : undefined}
                 >
                   <item.icon className={`w-6 h-6 ${allSubItemsDisabled ? 'text-gray-500' : isActive || hasActiveSubItem ? 'text-white' : 'text-[#8BAE5A]'}`} />
                   {!collapsed && (
@@ -731,7 +731,7 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
                             <div
                               key={sub.label}
                               className="block px-4 py-2 rounded-lg text-sm text-gray-500 cursor-not-allowed opacity-50"
-                              title={sub.disabled ? "Binnenkort online" : "Nog niet beschikbaar tijdens onboarding"}
+                              title={(sub as any).disabled ? "Binnenkort online" : "Nog niet beschikbaar tijdens onboarding"}
                             >
                               {sub.label}
                             </div>
@@ -742,10 +742,10 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
                           <Link
                             key={sub.label}
                             href={sub.href || '#'}
-                            onClick={sub.disabled ? (e) => e.preventDefault() : onLinkClick}
-                            title={sub.disabled ? "Binnenkort online" : undefined}
+                            onClick={(sub as any).disabled ? (e) => e.preventDefault() : onLinkClick}
+                            title={(sub as any).disabled ? "Binnenkort online" : undefined}
                             className={`block px-4 py-2 rounded-lg text-sm transition-all duration-150 ${
-                              sub.disabled
+                              (sub as any).disabled
                                 ? 'text-gray-500 cursor-not-allowed opacity-50'
                                 : isSubActive 
                                 ? 'bg-[#8BAE5A] text-black font-semibold' 
@@ -779,7 +779,7 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
               <div
                 key={item.label}
                 className={`grid grid-cols-[auto_1fr] items-center gap-4 px-4 py-3 rounded-xl font-bold uppercase text-sm tracking-wide font-figtree text-gray-500 cursor-not-allowed opacity-50 ${collapsed ? 'justify-center px-2' : ''}`}
-                title={item.disabled ? "Binnenkort online" : "Nog niet beschikbaar tijdens onboarding"}
+                title={(item as any).disabled ? "Binnenkort online" : "Nog niet beschikbaar tijdens onboarding"}
               >
                 <item.icon className="w-6 h-6 text-gray-500" />
                 {!collapsed && (
@@ -805,7 +805,7 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
               }}
             >
               <Link
-                href={item.disabled ? '#' : (item.isDynamic && item.isOnboardingItem && !isCompleted ? 
+                href={(item as any).disabled ? '#' : (item.isDynamic && item.isOnboardingItem && !isCompleted ? 
                   (actualCurrentStep === 0 ? '/dashboard/welcome-video-v2' :
                    actualCurrentStep === 1 ? '/dashboard/profiel' :
                    actualCurrentStep === 2 ? '/dashboard/mijn-challenges' :
@@ -814,10 +814,10 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
                    actualCurrentStep === 5 ? '/dashboard/challenges' :
                    actualCurrentStep === 6 ? '/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden' :
                    '/dashboard/welcome-video') : (item.href || '#'))}
-                onClick={item.disabled ? (e) => e.preventDefault() : onLinkClick}
-                title={item.disabled ? "Binnenkort online" : undefined}
+                onClick={(item as any).disabled ? (e) => e.preventDefault() : onLinkClick}
+                title={(item as any).disabled ? "Binnenkort online" : undefined}
                 className={`grid grid-cols-[auto_1fr] items-center gap-4 px-4 py-3 rounded-xl font-bold uppercase text-sm tracking-wide transition-all duration-500 font-figtree ${
-                  item.disabled
+                  (item as any).disabled
                     ? 'text-gray-500 cursor-not-allowed opacity-50'
                     : isActive 
                     ? 'bg-[#8BAE5A] text-black shadow-lg' 
@@ -828,7 +828,7 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
                         : 'text-white hover:text-[#8BAE5A] hover:bg-[#3A4D23]/50'
                 } ${collapsed ? 'justify-center px-2' : ''}`}
               >
-              <item.icon className={`w-6 h-6 ${item.disabled ? 'text-gray-500' : isActive ? 'text-white' : shouldBeYellow ? 'text-[#FFD700]' : shouldBeGreen ? 'text-[#8BAE5A]' : 'text-[#8BAE5A]'}`} />
+              <item.icon className={`w-6 h-6 ${(item as any).disabled ? 'text-gray-500' : isActive ? 'text-white' : shouldBeYellow ? 'text-[#FFD700]' : shouldBeGreen ? 'text-[#8BAE5A]' : 'text-[#8BAE5A]'}`} />
               {!collapsed && (
                 <div className="flex items-center justify-between w-full">
                   <span className="truncate">{item.label}</span>
@@ -1357,7 +1357,8 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
         {/* Onboarding Banner - Removed */}
 
         {/* Modals and Components */}
-        {/* OnboardingV2Modal moved to individual pages to prevent conflicts */}
+        {/* OnboardingV2Modal - Global modal for onboarding steps */}
+        <OnboardingV2Modal isOpen={!isCompleted && (contextCurrentStep === 1 || contextCurrentStep === 2)} />
 
         <TestUserVideoModal 
           isOpen={showTestUserVideo}

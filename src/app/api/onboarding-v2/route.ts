@@ -54,6 +54,13 @@ export async function GET(request: NextRequest) {
     const hasTrainingAccess = isAdmin || packageType === 'premium' || packageType === 'lifetime' || packageType === 'Premium Tier' || packageType === 'Lifetime Tier' || packageType === 'Lifetime Access';
     const hasNutritionAccess = isAdmin || packageType === 'premium' || packageType === 'lifetime' || packageType === 'Premium Tier' || packageType === 'Lifetime Tier' || packageType === 'Lifetime Access';
 
+    // Get available steps based on access (needed for step mapping)
+    const availableSteps = Object.values(ONBOARDING_STEPS).filter(step => {
+      if (step.requiresAccess === 'training') return hasTrainingAccess;
+      if (step.requiresAccess === 'nutrition') return hasNutritionAccess;
+      return true;
+    });
+
     // Calculate current step
     let currentStep: number | null = null;
     let isCompleted = false;
@@ -64,18 +71,19 @@ export async function GET(request: NextRequest) {
         currentStep = null;
       } else {
         // Determine current step based on completed flags
+        let databaseStep: number | null = null;
         if (!onboardingStatus.welcome_video_shown) {
-          currentStep = ONBOARDING_STEPS.WELCOME_VIDEO.id;
+          databaseStep = ONBOARDING_STEPS.WELCOME_VIDEO.id;
         } else if (!onboardingStatus.goal_set) {
-          currentStep = ONBOARDING_STEPS.SET_GOAL.id;
+          databaseStep = ONBOARDING_STEPS.SET_GOAL.id;
         } else if (!onboardingStatus.missions_selected) {
-          currentStep = ONBOARDING_STEPS.SELECT_CHALLENGES.id;
+          databaseStep = ONBOARDING_STEPS.SELECT_CHALLENGES.id;
         } else if (hasTrainingAccess && !onboardingStatus.training_schema_selected) {
-          currentStep = ONBOARDING_STEPS.SELECT_TRAINING.id;
+          databaseStep = ONBOARDING_STEPS.SELECT_TRAINING.id;
         } else if (hasNutritionAccess && !onboardingStatus.nutrition_plan_selected) {
-          currentStep = ONBOARDING_STEPS.SELECT_NUTRITION.id;
+          databaseStep = ONBOARDING_STEPS.SELECT_NUTRITION.id;
         } else if (!onboardingStatus.challenge_started) {
-          currentStep = ONBOARDING_STEPS.FORUM_INTRO.id;
+          databaseStep = ONBOARDING_STEPS.FORUM_INTRO.id;
         } else {
           // All steps completed, mark as completed
           currentStep = null;
@@ -86,25 +94,27 @@ export async function GET(request: NextRequest) {
         // Don't auto-complete based on missions_selected alone
         if (!hasTrainingAccess && !hasNutritionAccess && onboardingStatus.missions_selected && !onboardingStatus.challenge_started) {
           // User has completed challenges but not forum intro yet
-          currentStep = ONBOARDING_STEPS.FORUM_INTRO.id;
+          databaseStep = ONBOARDING_STEPS.FORUM_INTRO.id;
+        }
+        
+        // Map database step to UI step using available steps
+        if (databaseStep !== null) {
+          const availableStepIndex = availableSteps.findIndex(step => step.id === databaseStep);
+          if (availableStepIndex !== -1) {
+            currentStep = availableStepIndex + 1; // 1-based UI steps
+          }
         }
       }
     } else {
-      // No onboarding data, start at step 0
-      currentStep = ONBOARDING_STEPS.WELCOME_VIDEO.id;
+      // No onboarding data, start at step 1 (UI step)
+      currentStep = 1;
     }
-
-    // Get available steps based on access
-    const availableSteps = Object.values(ONBOARDING_STEPS).filter(step => {
-      if (step.requiresAccess === 'training') return hasTrainingAccess;
-      if (step.requiresAccess === 'nutrition') return hasNutritionAccess;
-      return true;
-    });
 
     // Create step mapping for available steps
     const stepMapping = {};
     availableSteps.forEach((step, index) => {
-      stepMapping[step.id] = index;
+      // Map to 1-based UI steps (1, 2, 3, 4, 5, 6)
+      stepMapping[step.id] = index + 1;
     });
 
     const response = {
