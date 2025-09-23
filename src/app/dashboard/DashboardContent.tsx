@@ -97,12 +97,12 @@ const menu = [
   { label: 'Finance & Business', icon: CurrencyDollarIcon, href: '/dashboard/finance-en-business', onboardingStep: 7 },
   { label: 'Academy', icon: FireIcon, href: '/dashboard/academy', onboardingStep: 7 },
   { label: 'Challenges', icon: FireIcon, href: '/dashboard/mijn-challenges', onboardingStep: 3 },
-  { label: 'Trainingsschemas', icon: AcademicCapIcon, href: '/dashboard/trainingsschemas', onboardingStep: 4 },
-  { label: 'Voedingsplannen', icon: RocketLaunchIcon, href: '/dashboard/voedingsplannen-v2', onboardingStep: 5 },
+  { label: 'Trainingsschemas', icon: AcademicCapIcon, href: '/dashboard/trainingsschemas', onboardingStep: 4, requiresTrainingAccess: true },
+  { label: 'Voedingsplannen', icon: RocketLaunchIcon, href: '/dashboard/voedingsplannen-v2', onboardingStep: 5, requiresNutritionAccess: true },
   { label: 'Mind & Focus', icon: ChartBarIcon, href: '/dashboard/mind-focus', onboardingStep: 7 },
   { label: 'Brotherhood', icon: UsersIcon, href: '/dashboard/brotherhood', onboardingStep: 6 },
   { label: 'Social Feed', icon: ChatBubbleLeftRightIcon, parent: 'Brotherhood', href: '/dashboard/brotherhood/social-feed', isSub: true, onboardingStep: 7 },
-  { label: 'Forum', icon: FireIcon, parent: 'Brotherhood', href: '/dashboard/brotherhood/forum', isSub: true, onboardingStep: 6 },
+  { label: 'Forum', icon: FireIcon, parent: 'Brotherhood', href: '/dashboard/brotherhood/forum', isSub: true, onboardingStep: 4, isBasicTierStep: true },
   { label: 'Leden', icon: UsersIcon, parent: 'Brotherhood', href: '/dashboard/brotherhood/leden', isSub: true, onboardingStep: 7 },
   { label: 'Boekenkamer (Admin)', icon: BookOpenIcon, href: '/dashboard/boekenkamer', onboardingStep: 7, adminOnly: true },
   { label: 'Badges & Rangen', icon: StarIcon, href: '/dashboard/badges-en-rangen', onboardingStep: 7 },
@@ -222,8 +222,33 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
         return !item.isOnboardingItem;
       }
       
-      // For other steps, only allow access to the current onboarding step
-      const isCurrentStep = item.onboardingStep === actualCurrentStep;
+      // For other steps, check if this is the correct step for the current tier
+      let isCurrentStep = false;
+      
+      // Check if this item matches the current step
+      if (item.onboardingStep === actualCurrentStep) {
+        // For Basic Tier users, step 4 should show Forum, not Trainingsschemas
+        if (actualCurrentStep === 4) {
+          if (isBasicTier) {
+            // Basic tier: step 4 = Forum (Brotherhood > Forum)
+            isCurrentStep = item.label === 'Forum' && item.parent === 'Brotherhood';
+          } else {
+            // Premium/Lifetime tier: step 4 = Trainingsschemas
+            isCurrentStep = item.label === 'Trainingsschemas';
+          }
+        } else if (actualCurrentStep === 5) {
+          if (isBasicTier) {
+            // Basic tier: step 5 = Forum (Brotherhood > Forum) - this shouldn't happen as Basic only has 4 steps
+            isCurrentStep = false;
+          } else {
+            // Premium/Lifetime tier: step 5 = Voedingsplannen
+            isCurrentStep = item.label === 'Voedingsplannen';
+          }
+        } else {
+          // For all other steps, use normal matching
+          isCurrentStep = true;
+        }
+      }
       
       // Block all items except the current step
       return !isCurrentStep;
@@ -587,8 +612,33 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
         return !item.isOnboardingItem;
       }
       
-      // For other steps, only allow access to the current onboarding step
-      const isCurrentStep = item.onboardingStep === actualCurrentStep;
+      // For other steps, check if this is the correct step for the current tier
+      let isCurrentStep = false;
+      
+      // Check if this item matches the current step
+      if (item.onboardingStep === actualCurrentStep) {
+        // For Basic Tier users, step 4 should show Forum, not Trainingsschemas
+        if (actualCurrentStep === 4) {
+          if (isBasicTier) {
+            // Basic tier: step 4 = Forum (Brotherhood > Forum)
+            isCurrentStep = item.label === 'Forum' && item.parent === 'Brotherhood';
+          } else {
+            // Premium/Lifetime tier: step 4 = Trainingsschemas
+            isCurrentStep = item.label === 'Trainingsschemas';
+          }
+        } else if (actualCurrentStep === 5) {
+          if (isBasicTier) {
+            // Basic tier: step 5 = Forum (Brotherhood > Forum) - this shouldn't happen as Basic only has 4 steps
+            isCurrentStep = false;
+          } else {
+            // Premium/Lifetime tier: step 5 = Voedingsplannen
+            isCurrentStep = item.label === 'Voedingsplannen';
+          }
+        } else {
+          // For all other steps, use normal matching
+          isCurrentStep = true;
+        }
+      }
       
       // Block all items except the current step
       return !isCurrentStep;
