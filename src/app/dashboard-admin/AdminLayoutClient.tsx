@@ -184,6 +184,7 @@ const SidebarContent = ({ pathname }: { pathname: string }) => {
         { label: 'Voedingsplannen', icon: BookOpenIcon, href: '/dashboard-admin/voedingsplannen' },
         { label: 'Voedingsplannen V2', icon: RocketLaunchIcon, href: '/dashboard-admin/voedingsplannen-v2', badge: 'V2' },
         { label: 'Voedingsplannen Backup', icon: DocumentTextIcon, href: '/dashboard-admin/voedingsplannen-backup', badge: 'BACKUP' },
+        { label: 'Mind & Focus', icon: ChartBarIcon, href: '/dashboard-admin/mind-focus' },
         { label: 'Boekenkamer', icon: BookOpenIcon, href: '/dashboard-admin/boekenkamer' },
         { label: 'Badges & Rangen', icon: StarIcon, href: '/dashboard-admin/badges-rangen' }
       ]

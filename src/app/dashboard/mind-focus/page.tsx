@@ -2,36 +2,12 @@
 
 import React, { useState } from 'react';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
-import { FaBrain, FaLeaf, FaLungs, FaRegSmileBeam, FaPlay, FaEdit, FaTrash, FaPlus, FaMusic, FaBookOpen, FaClock, FaUser, FaTimes, FaSave } from 'react-icons/fa';
-import { toast } from 'react-hot-toast';
+import { FaBrain, FaLeaf, FaLungs, FaRegSmileBeam, FaPlay, FaMusic, FaBookOpen, FaClock, FaUser, FaHeart, FaStar, FaPlayCircle, FaCheckCircle } from 'react-icons/fa';
+import Link from 'next/link';
 
 export default function MindFocusPage() {
   const { user, profile } = useSupabaseAuth();
   const [activeTab, setActiveTab] = useState('overview');
-  
-  // Modal states
-  const [showModal, setShowModal] = useState(false);
-  const [modalType, setModalType] = useState('');
-  const [editingItem, setEditingItem] = useState(null);
-  const [modalData, setModalData] = useState({});
-
-  // Check if user is admin
-  const isAdmin = user?.email === 'rick@toptiermen.eu' || user?.email === 'chiel@media2net.nl';
-
-  if (!isAdmin) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#181F17]">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-white mb-4">
-            Toegang Geweigerd
-          </h2>
-          <p className="text-[#8BAE5A]/70">
-            Deze pagina is alleen toegankelijk voor administrators.
-          </p>
-        </div>
-      </div>
-    );
-  }
 
   const tabs = [
     { id: 'overview', label: 'Overzicht', icon: <FaBrain /> },
@@ -41,7 +17,8 @@ export default function MindFocusPage() {
     { id: 'focus', label: 'Focus & Productiviteit', icon: <FaBookOpen /> },
   ];
 
-  const [meditationData, setMeditationData] = useState([
+  // Sample data - in real app this would come from API
+  const meditationData = [
     {
       id: 1,
       title: 'Ochtend Focus',
@@ -49,7 +26,8 @@ export default function MindFocusPage() {
       duration: 10,
       type: 'Focus',
       favorite: true,
-      status: 'published'
+      description: 'Start je dag met helderheid en focus',
+      audioUrl: '#'
     },
     {
       id: 2,
@@ -58,7 +36,8 @@ export default function MindFocusPage() {
       duration: 20,
       type: 'Slaap',
       favorite: false,
-      status: 'published'
+      description: 'Ontspan en bereid je voor op een goede nachtrust',
+      audioUrl: '#'
     },
     {
       id: 3,
@@ -66,248 +45,183 @@ export default function MindFocusPage() {
       speaker: 'Ruben',
       duration: 8,
       type: 'Stressreductie',
-      favorite: false,
-      status: 'draft'
+      favorite: true,
+      description: 'Laat spanning los en vind innerlijke rust',
+      audioUrl: '#'
     },
-  ]);
+  ];
 
-  const [breathingData, setBreathingData] = useState([
+  const breathingData = [
     {
       id: 1,
       title: 'Box Breathing',
-      description: '4-4-4-4 ademhaling voor focus',
+      description: '4-4-4-4 ademhaling voor focus en kalmte',
       duration: 5,
       difficulty: 'Beginner',
-      status: 'published'
+      steps: ['Inademen 4 tellen', 'Vasthouden 4 tellen', 'Uitademen 4 tellen', 'Wachten 4 tellen']
     },
     {
       id: 2,
       title: 'Wim Hof Methode',
-      description: 'Koude training en ademhaling',
+      description: 'Koude training en ademhaling voor energie',
       duration: 15,
       difficulty: 'Advanced',
-      status: 'published'
+      steps: ['Diepe ademhaling', 'Vasthouden', 'Ontspanning', 'Herhaling']
     },
-  ]);
+  ];
 
-  const [gratitudeData, setGratitudeData] = useState([
+  const gratitudeData = [
     {
       id: 1,
       title: 'Dagelijkse Dankbaarheid',
       description: '3 dingen waar je dankbaar voor bent',
       frequency: 'Dagelijks',
-      status: 'published'
+      prompt: 'Wat ging er vandaag goed? Waar ben je dankbaar voor?'
     },
     {
       id: 2,
       title: 'Week Reflectie',
       description: 'Wekelijkse dankbaarheidsoefening',
       frequency: 'Wekelijks',
-      status: 'published'
+      prompt: 'Wat was het hoogtepunt van deze week?'
     },
-  ]);
+  ];
 
-  const [focusData, setFocusData] = useState([
+  const focusData = [
     {
       id: 1,
       title: 'Pomodoro Timer',
-      description: '25 minuten gefocust werken',
+      description: '25 minuten gefocust werken met korte pauzes',
       type: 'Tool',
-      status: 'published'
+      duration: 25,
+      technique: '25 min werken, 5 min pauze, 4 cycli, lange pauze'
     },
     {
       id: 2,
       title: 'Deep Work Sessie',
       description: '2 uur ononderbroken werken',
       type: 'Techniek',
-      status: 'published'
+      duration: 120,
+      technique: 'Elimineer afleidingen, focus op één taak'
     },
-  ]);
-
-  // Modal handlers
-  const openModal = (type, item = null) => {
-    setModalType(type);
-    setEditingItem(item);
-    setModalData(item || {});
-    setShowModal(true);
-  };
-
-  const closeModal = () => {
-    setShowModal(false);
-    setModalType('');
-    setEditingItem(null);
-    setModalData({});
-  };
-
-  const handleSave = (type, data) => {
-    const newId = Math.max(...getCurrentData(type).map(item => item.id)) + 1;
-    const newItem = { ...data, id: newId, status: 'published' };
-    
-    switch (type) {
-      case 'meditation':
-        setMeditationData([...meditationData, newItem]);
-        toast.success('Meditatie toegevoegd!');
-        break;
-      case 'breathing':
-        setBreathingData([...breathingData, newItem]);
-        toast.success('Ademhalingsoefening toegevoegd!');
-        break;
-      case 'gratitude':
-        setGratitudeData([...gratitudeData, newItem]);
-        toast.success('Dankbaarheidsoefening toegevoegd!');
-        break;
-      case 'focus':
-        setFocusData([...focusData, newItem]);
-        toast.success('Focus tool toegevoegd!');
-        break;
-    }
-    closeModal();
-  };
-
-  const handleEdit = (type, item) => {
-    switch (type) {
-      case 'meditation':
-        setMeditationData(meditationData.map(i => i.id === item.id ? { ...i, ...item } : i));
-        toast.success('Meditatie bijgewerkt!');
-        break;
-      case 'breathing':
-        setBreathingData(breathingData.map(i => i.id === item.id ? { ...i, ...item } : i));
-        toast.success('Ademhalingsoefening bijgewerkt!');
-        break;
-      case 'gratitude':
-        setGratitudeData(gratitudeData.map(i => i.id === item.id ? { ...i, ...item } : i));
-        toast.success('Dankbaarheidsoefening bijgewerkt!');
-        break;
-      case 'focus':
-        setFocusData(focusData.map(i => i.id === item.id ? { ...i, ...item } : i));
-        toast.success('Focus tool bijgewerkt!');
-        break;
-    }
-    closeModal();
-  };
-
-  const handleDelete = (type, id) => {
-    if (confirm('Weet je zeker dat je dit item wilt verwijderen?')) {
-      switch (type) {
-        case 'meditation':
-          setMeditationData(meditationData.filter(i => i.id !== id));
-          toast.success('Meditatie verwijderd!');
-          break;
-        case 'breathing':
-          setBreathingData(breathingData.filter(i => i.id !== id));
-          toast.success('Ademhalingsoefening verwijderd!');
-          break;
-        case 'gratitude':
-          setGratitudeData(gratitudeData.filter(i => i.id !== id));
-          toast.success('Dankbaarheidsoefening verwijderd!');
-          break;
-        case 'focus':
-          setFocusData(focusData.filter(i => i.id !== id));
-          toast.success('Focus tool verwijderd!');
-          break;
-      }
-    }
-  };
-
-  const getCurrentData = (type) => {
-    switch (type) {
-      case 'meditation': return meditationData;
-      case 'breathing': return breathingData;
-      case 'gratitude': return gratitudeData;
-      case 'focus': return focusData;
-      default: return [];
-    }
-  };
+  ];
 
   const renderOverview = () => (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      <div className="bg-[#232D1A]/80 rounded-xl p-6 border border-[#3A4D23]/40">
-        <div className="flex items-center gap-3 mb-4">
-          <FaLeaf className="text-[#8BAE5A] text-xl" />
-          <h3 className="text-white font-semibold">Meditaties</h3>
-        </div>
-        <p className="text-[#8BAE5A] text-2xl font-bold">{meditationData.length}</p>
-        <p className="text-[#8BAE5A]/70 text-sm">Totaal beschikbaar</p>
+    <div className="space-y-8">
+      {/* Welcome Section */}
+      <div className="text-center">
+        <h1 className="text-4xl font-bold text-white mb-4">
+          Mind & Focus 🧠
+        </h1>
+        <p className="text-[#8BAE5A]/70 text-lg max-w-2xl mx-auto">
+          Versterk je geest, verbeter je focus en ontwikkel een positieve mindset met onze collectie meditaties, ademhalingsoefeningen en focus tools.
+        </p>
       </div>
 
-      <div className="bg-[#232D1A]/80 rounded-xl p-6 border border-[#3A4D23]/40">
-        <div className="flex items-center gap-3 mb-4">
-          <FaLungs className="text-[#8BAE5A] text-xl" />
-          <h3 className="text-white font-semibold">Ademhaling</h3>
+      {/* Quick Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="bg-[#232D1A]/80 rounded-xl p-6 border border-[#3A4D23]/40 text-center">
+          <FaLeaf className="text-[#8BAE5A] text-3xl mx-auto mb-3" />
+          <h3 className="text-white font-semibold text-lg mb-2">Meditaties</h3>
+          <p className="text-[#8BAE5A] text-2xl font-bold">{meditationData.length}</p>
+          <p className="text-[#8BAE5A]/70 text-sm">Beschikbaar</p>
         </div>
-        <p className="text-[#8BAE5A] text-2xl font-bold">{breathingData.length}</p>
-        <p className="text-[#8BAE5A]/70 text-sm">Oefeningen</p>
+
+        <div className="bg-[#232D1A]/80 rounded-xl p-6 border border-[#3A4D23]/40 text-center">
+          <FaLungs className="text-[#8BAE5A] text-3xl mx-auto mb-3" />
+          <h3 className="text-white font-semibold text-lg mb-2">Ademhaling</h3>
+          <p className="text-[#8BAE5A] text-2xl font-bold">{breathingData.length}</p>
+          <p className="text-[#8BAE5A]/70 text-sm">Oefeningen</p>
+        </div>
+
+        <div className="bg-[#232D1A]/80 rounded-xl p-6 border border-[#3A4D23]/40 text-center">
+          <FaRegSmileBeam className="text-[#8BAE5A] text-3xl mx-auto mb-3" />
+          <h3 className="text-white font-semibold text-lg mb-2">Dankbaarheid</h3>
+          <p className="text-[#8BAE5A] text-2xl font-bold">{gratitudeData.length}</p>
+          <p className="text-[#8BAE5A]/70 text-sm">Oefeningen</p>
+        </div>
+
+        <div className="bg-[#232D1A]/80 rounded-xl p-6 border border-[#3A4D23]/40 text-center">
+          <FaBookOpen className="text-[#8BAE5A] text-3xl mx-auto mb-3" />
+          <h3 className="text-white font-semibold text-lg mb-2">Focus Tools</h3>
+          <p className="text-[#8BAE5A] text-2xl font-bold">{focusData.length}</p>
+          <p className="text-[#8BAE5A]/70 text-sm">Beschikbaar</p>
+        </div>
       </div>
 
-      <div className="bg-[#232D1A]/80 rounded-xl p-6 border border-[#3A4D23]/40">
-        <div className="flex items-center gap-3 mb-4">
-          <FaRegSmileBeam className="text-[#8BAE5A] text-xl" />
-          <h3 className="text-white font-semibold">Dankbaarheid</h3>
-        </div>
-        <p className="text-[#8BAE5A] text-2xl font-bold">{gratitudeData.length}</p>
-        <p className="text-[#8BAE5A]/70 text-sm">Oefeningen</p>
-      </div>
+      {/* Quick Actions */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Link href="/dashboard/mind-en-focus/meditaties" className="group">
+          <div className="bg-[#232D1A]/80 rounded-xl p-6 border border-[#3A4D23]/40 hover:border-[#8BAE5A] transition-colors">
+            <div className="flex items-center gap-4 mb-4">
+              <FaLeaf className="text-[#8BAE5A] text-2xl" />
+              <div>
+                <h3 className="text-white font-semibold text-lg">Meditatie Bibliotheek</h3>
+                <p className="text-[#8BAE5A]/70">Ontdek geleide meditaties</p>
+              </div>
+            </div>
+            <p className="text-[#8BAE5A]/70 text-sm mb-4">
+              Vind rust en helderheid met onze collectie geleide meditaties. Voor beginners en gevorderden.
+            </p>
+            <div className="flex items-center text-[#8BAE5A] group-hover:text-white transition-colors">
+              <span className="text-sm font-medium">Bekijk meditaties</span>
+              <FaPlayCircle className="ml-2" />
+            </div>
+          </div>
+        </Link>
 
-      <div className="bg-[#232D1A]/80 rounded-xl p-6 border border-[#3A4D23]/40">
-        <div className="flex items-center gap-3 mb-4">
-          <FaBookOpen className="text-[#8BAE5A] text-xl" />
-          <h3 className="text-white font-semibold">Focus Tools</h3>
-        </div>
-        <p className="text-[#8BAE5A] text-2xl font-bold">{focusData.length}</p>
-        <p className="text-[#8BAE5A]/70 text-sm">Beschikbaar</p>
+        <Link href="/dashboard/mind-en-focus/focus" className="group">
+          <div className="bg-[#232D1A]/80 rounded-xl p-6 border border-[#3A4D23]/40 hover:border-[#8BAE5A] transition-colors">
+            <div className="flex items-center gap-4 mb-4">
+              <FaBookOpen className="text-[#8BAE5A] text-2xl" />
+              <div>
+                <h3 className="text-white font-semibold text-lg">Focus & Productiviteit</h3>
+                <p className="text-[#8BAE5A]/70">Verbeter je concentratie</p>
+              </div>
+            </div>
+            <p className="text-[#8BAE5A]/70 text-sm mb-4">
+              Leer technieken om afleiding te verslaan en diep werk te verrichten. Inclusief Pomodoro timer.
+            </p>
+            <div className="flex items-center text-[#8BAE5A] group-hover:text-white transition-colors">
+              <span className="text-sm font-medium">Start focus sessie</span>
+              <FaPlayCircle className="ml-2" />
+            </div>
+          </div>
+        </Link>
       </div>
     </div>
   );
 
   const renderMeditations = () => (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-white">Meditatie Bibliotheek</h2>
-        <button 
-          onClick={() => openModal('meditation')}
-          className="bg-[#8BAE5A] text-[#181F17] px-4 py-2 rounded-lg font-semibold hover:bg-[#B6C948] transition-colors flex items-center gap-2"
-        >
-          <FaPlus /> Nieuwe Meditatie
-        </button>
+    <div className="space-y-6">
+      <div className="text-center mb-8">
+        <h2 className="text-3xl font-bold text-white mb-2">Meditatie Bibliotheek</h2>
+        <p className="text-[#8BAE5A]/70">Ontdek geleide meditaties voor elke situatie</p>
       </div>
 
-      <div className="grid gap-4">
+      <div className="grid gap-6">
         {meditationData.map((meditation) => (
-          <div key={meditation.id} className="bg-[#232D1A]/80 rounded-xl p-6 border border-[#3A4D23]/40">
-            <div className="flex justify-between items-start">
+          <div key={meditation.id} className="bg-[#232D1A]/80 rounded-xl p-6 border border-[#3A4D23]/40 hover:border-[#8BAE5A] transition-colors">
+            <div className="flex items-start justify-between">
               <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
-                  <h3 className="text-white font-semibold text-lg">{meditation.title}</h3>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    meditation.status === 'published' 
-                      ? 'bg-green-500/20 text-green-400' 
-                      : 'bg-yellow-500/20 text-yellow-400'
-                  }`}>
-                    {meditation.status === 'published' ? 'Gepubliceerd' : 'Concept'}
-                  </span>
+                <div className="flex items-center gap-3 mb-3">
+                  <h3 className="text-white font-semibold text-xl">{meditation.title}</h3>
+                  {meditation.favorite && <FaHeart className="text-red-400" />}
                 </div>
-                <div className="flex items-center gap-4 text-[#8BAE5A]/70 text-sm">
+                <p className="text-[#8BAE5A]/70 mb-4">{meditation.description}</p>
+                <div className="flex items-center gap-4 text-[#8BAE5A]/70 text-sm mb-4">
                   <span className="flex items-center gap-1">
                     <FaUser /> {meditation.speaker}
                   </span>
                   <span className="flex items-center gap-1">
                     <FaClock /> {meditation.duration} min
                   </span>
-                  <span>{meditation.type}</span>
+                  <span className="px-2 py-1 bg-[#3A4D23]/40 rounded-full text-xs">
+                    {meditation.type}
+                  </span>
                 </div>
-              </div>
-              <div className="flex gap-2">
-                <button 
-                  onClick={() => openModal('meditation', meditation)}
-                  className="p-2 text-[#8BAE5A] hover:bg-[#3A4D23]/40 rounded-lg transition-colors"
-                >
-                  <FaEdit />
-                </button>
-                <button 
-                  onClick={() => handleDelete('meditation', meditation.id)}
-                  className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors"
-                >
-                  <FaTrash />
+                <button className="bg-[#8BAE5A] text-[#181F17] px-6 py-2 rounded-lg font-semibold hover:bg-[#B6C948] transition-colors flex items-center gap-2">
+                  <FaPlay /> Start Meditatie
                 </button>
               </div>
             </div>
@@ -318,43 +232,48 @@ export default function MindFocusPage() {
   );
 
   const renderBreathing = () => (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-white">Ademhalingsoefeningen</h2>
-        <button 
-          onClick={() => openModal('breathing')}
-          className="bg-[#8BAE5A] text-[#181F17] px-4 py-2 rounded-lg font-semibold hover:bg-[#B6C948] transition-colors flex items-center gap-2"
-        >
-          <FaPlus /> Nieuwe Oefening
-        </button>
+    <div className="space-y-6">
+      <div className="text-center mb-8">
+        <h2 className="text-3xl font-bold text-white mb-2">Ademhalingsoefeningen</h2>
+        <p className="text-[#8BAE5A]/70">Verlaag stress en verhoog je energie</p>
       </div>
 
-      <div className="grid gap-4">
+      <div className="grid gap-6">
         {breathingData.map((exercise) => (
-          <div key={exercise.id} className="bg-[#232D1A]/80 rounded-xl p-6 border border-[#3A4D23]/40">
-            <div className="flex justify-between items-start">
+          <div key={exercise.id} className="bg-[#232D1A]/80 rounded-xl p-6 border border-[#3A4D23]/40 hover:border-[#8BAE5A] transition-colors">
+            <div className="flex items-start justify-between">
               <div className="flex-1">
-                <h3 className="text-white font-semibold text-lg mb-2">{exercise.title}</h3>
-                <p className="text-[#8BAE5A]/70 mb-3">{exercise.description}</p>
-                <div className="flex items-center gap-4 text-[#8BAE5A]/70 text-sm">
+                <div className="flex items-center gap-3 mb-3">
+                  <h3 className="text-white font-semibold text-xl">{exercise.title}</h3>
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                    exercise.difficulty === 'Beginner' 
+                      ? 'bg-green-500/20 text-green-400' 
+                      : exercise.difficulty === 'Advanced'
+                      ? 'bg-red-500/20 text-red-400'
+                      : 'bg-yellow-500/20 text-yellow-400'
+                  }`}>
+                    {exercise.difficulty}
+                  </span>
+                </div>
+                <p className="text-[#8BAE5A]/70 mb-4">{exercise.description}</p>
+                <div className="flex items-center gap-4 text-[#8BAE5A]/70 text-sm mb-4">
                   <span className="flex items-center gap-1">
                     <FaClock /> {exercise.duration} min
                   </span>
-                  <span>Niveau: {exercise.difficulty}</span>
                 </div>
-              </div>
-              <div className="flex gap-2">
-                <button 
-                  onClick={() => openModal('breathing', exercise)}
-                  className="p-2 text-[#8BAE5A] hover:bg-[#3A4D23]/40 rounded-lg transition-colors"
-                >
-                  <FaEdit />
-                </button>
-                <button 
-                  onClick={() => handleDelete('breathing', exercise.id)}
-                  className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors"
-                >
-                  <FaTrash />
+                <div className="mb-4">
+                  <h4 className="text-white font-medium mb-2">Stappen:</h4>
+                  <ul className="text-[#8BAE5A]/70 text-sm space-y-1">
+                    {exercise.steps.map((step, index) => (
+                      <li key={index} className="flex items-center gap-2">
+                        <FaCheckCircle className="text-[#8BAE5A] text-xs" />
+                        {step}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <button className="bg-[#8BAE5A] text-[#181F17] px-6 py-2 rounded-lg font-semibold hover:bg-[#B6C948] transition-colors flex items-center gap-2">
+                  <FaPlay /> Start Oefening
                 </button>
               </div>
             </div>
@@ -365,40 +284,30 @@ export default function MindFocusPage() {
   );
 
   const renderGratitude = () => (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-white">Dankbaarheidsdagboek</h2>
-        <button 
-          onClick={() => openModal('gratitude')}
-          className="bg-[#8BAE5A] text-[#181F17] px-4 py-2 rounded-lg font-semibold hover:bg-[#B6C948] transition-colors flex items-center gap-2"
-        >
-          <FaPlus /> Nieuwe Oefening
-        </button>
+    <div className="space-y-6">
+      <div className="text-center mb-8">
+        <h2 className="text-3xl font-bold text-white mb-2">Dankbaarheidsdagboek</h2>
+        <p className="text-[#8BAE5A]/70">Train je brein om het positieve te zien</p>
       </div>
 
-      <div className="grid gap-4">
+      <div className="grid gap-6">
         {gratitudeData.map((exercise) => (
-          <div key={exercise.id} className="bg-[#232D1A]/80 rounded-xl p-6 border border-[#3A4D23]/40">
-            <div className="flex justify-between items-start">
+          <div key={exercise.id} className="bg-[#232D1A]/80 rounded-xl p-6 border border-[#3A4D23]/40 hover:border-[#8BAE5A] transition-colors">
+            <div className="flex items-start justify-between">
               <div className="flex-1">
-                <h3 className="text-white font-semibold text-lg mb-2">{exercise.title}</h3>
-                <p className="text-[#8BAE5A]/70 mb-3">{exercise.description}</p>
-                <div className="flex items-center gap-4 text-[#8BAE5A]/70 text-sm">
-                  <span>Frequentie: {exercise.frequency}</span>
+                <div className="flex items-center gap-3 mb-3">
+                  <h3 className="text-white font-semibold text-xl">{exercise.title}</h3>
+                  <span className="px-2 py-1 bg-[#3A4D23]/40 rounded-full text-xs text-[#8BAE5A]">
+                    {exercise.frequency}
+                  </span>
                 </div>
-              </div>
-              <div className="flex gap-2">
-                <button 
-                  onClick={() => openModal('gratitude', exercise)}
-                  className="p-2 text-[#8BAE5A] hover:bg-[#3A4D23]/40 rounded-lg transition-colors"
-                >
-                  <FaEdit />
-                </button>
-                <button 
-                  onClick={() => handleDelete('gratitude', exercise.id)}
-                  className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors"
-                >
-                  <FaTrash />
+                <p className="text-[#8BAE5A]/70 mb-4">{exercise.description}</p>
+                <div className="bg-[#181F17]/50 rounded-lg p-4 mb-4">
+                  <h4 className="text-white font-medium mb-2">Reflectie Vraag:</h4>
+                  <p className="text-[#8BAE5A]/70 text-sm italic">"{exercise.prompt}"</p>
+                </div>
+                <button className="bg-[#8BAE5A] text-[#181F17] px-6 py-2 rounded-lg font-semibold hover:bg-[#B6C948] transition-colors flex items-center gap-2">
+                  <FaRegSmileBeam /> Start Dagboek
                 </button>
               </div>
             </div>
@@ -409,40 +318,35 @@ export default function MindFocusPage() {
   );
 
   const renderFocus = () => (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-white">Focus & Productiviteit</h2>
-        <button 
-          onClick={() => openModal('focus')}
-          className="bg-[#8BAE5A] text-[#181F17] px-4 py-2 rounded-lg font-semibold hover:bg-[#B6C948] transition-colors flex items-center gap-2"
-        >
-          <FaPlus /> Nieuwe Tool
-        </button>
+    <div className="space-y-6">
+      <div className="text-center mb-8">
+        <h2 className="text-3xl font-bold text-white mb-2">Focus & Productiviteit</h2>
+        <p className="text-[#8BAE5A]/70">Leer technieken om afleiding te verslaan</p>
       </div>
 
-      <div className="grid gap-4">
+      <div className="grid gap-6">
         {focusData.map((tool) => (
-          <div key={tool.id} className="bg-[#232D1A]/80 rounded-xl p-6 border border-[#3A4D23]/40">
-            <div className="flex justify-between items-start">
+          <div key={tool.id} className="bg-[#232D1A]/80 rounded-xl p-6 border border-[#3A4D23]/40 hover:border-[#8BAE5A] transition-colors">
+            <div className="flex items-start justify-between">
               <div className="flex-1">
-                <h3 className="text-white font-semibold text-lg mb-2">{tool.title}</h3>
-                <p className="text-[#8BAE5A]/70 mb-3">{tool.description}</p>
-                <div className="flex items-center gap-4 text-[#8BAE5A]/70 text-sm">
-                  <span>Type: {tool.type}</span>
+                <div className="flex items-center gap-3 mb-3">
+                  <h3 className="text-white font-semibold text-xl">{tool.title}</h3>
+                  <span className="px-2 py-1 bg-[#3A4D23]/40 rounded-full text-xs text-[#8BAE5A]">
+                    {tool.type}
+                  </span>
                 </div>
-              </div>
-              <div className="flex gap-2">
-                <button 
-                  onClick={() => openModal('focus', tool)}
-                  className="p-2 text-[#8BAE5A] hover:bg-[#3A4D23]/40 rounded-lg transition-colors"
-                >
-                  <FaEdit />
-                </button>
-                <button 
-                  onClick={() => handleDelete('focus', tool.id)}
-                  className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors"
-                >
-                  <FaTrash />
+                <p className="text-[#8BAE5A]/70 mb-4">{tool.description}</p>
+                <div className="flex items-center gap-4 text-[#8BAE5A]/70 text-sm mb-4">
+                  <span className="flex items-center gap-1">
+                    <FaClock /> {tool.duration} min
+                  </span>
+                </div>
+                <div className="bg-[#181F17]/50 rounded-lg p-4 mb-4">
+                  <h4 className="text-white font-medium mb-2">Techniek:</h4>
+                  <p className="text-[#8BAE5A]/70 text-sm">{tool.technique}</p>
+                </div>
+                <button className="bg-[#8BAE5A] text-[#181F17] px-6 py-2 rounded-lg font-semibold hover:bg-[#B6C948] transition-colors flex items-center gap-2">
+                  <FaPlay /> Start Sessie
                 </button>
               </div>
             </div>
@@ -455,24 +359,14 @@ export default function MindFocusPage() {
   return (
     <div className="min-h-screen bg-[#181F17]">
       <div className="p-6">
-        <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-white mb-2">
-              Mind & Focus Admin 🧠
-            </h1>
-            <p className="text-[#8BAE5A]/70 text-lg">
-              Beheer alle Mind & Focus content en functionaliteiten
-            </p>
-          </div>
-
+        <div className="max-w-6xl mx-auto">
           {/* Tabs */}
-          <div className="flex gap-2 mb-8 border-b border-[#3A4D23]/40">
+          <div className="flex gap-2 mb-8 border-b border-[#3A4D23]/40 overflow-x-auto">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-4 py-3 rounded-t-lg font-medium transition-colors ${
+                className={`flex items-center gap-2 px-4 py-3 rounded-t-lg font-medium transition-colors whitespace-nowrap ${
                   activeTab === tab.id
                     ? 'bg-[#8BAE5A] text-[#181F17]'
                     : 'text-[#8BAE5A]/70 hover:text-white hover:bg-[#3A4D23]/40'
@@ -494,198 +388,6 @@ export default function MindFocusPage() {
           </div>
         </div>
       </div>
-
-      {/* Modal */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-[#232D1A] rounded-xl p-6 w-full max-w-md mx-4 border border-[#3A4D23]/40">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold text-white">
-                {editingItem ? 'Bewerk' : 'Nieuwe'} {modalType === 'meditation' ? 'Meditatie' : 
-                 modalType === 'breathing' ? 'Ademhalingsoefening' :
-                 modalType === 'gratitude' ? 'Dankbaarheidsoefening' : 'Focus Tool'}
-              </h3>
-              <button 
-                onClick={closeModal}
-                className="text-[#8BAE5A]/70 hover:text-white transition-colors"
-              >
-                <FaTimes />
-              </button>
-            </div>
-
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              const formData = new FormData(e.target);
-              const data = Object.fromEntries(formData.entries());
-              if (editingItem) {
-                handleEdit(modalType, { ...editingItem, ...data });
-              } else {
-                handleSave(modalType, data);
-              }
-            }}>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-[#8BAE5A] mb-2">
-                    Titel
-                  </label>
-                  <input
-                    type="text"
-                    name="title"
-                    defaultValue={modalData.title || ''}
-                    className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-[#8BAE5A] mb-2">
-                    Beschrijving
-                  </label>
-                  <textarea
-                    name="description"
-                    defaultValue={modalData.description || ''}
-                    className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] h-20"
-                    required
-                  />
-                </div>
-
-                {modalType === 'meditation' && (
-                  <>
-                    <div>
-                      <label className="block text-sm font-medium text-[#8BAE5A] mb-2">
-                        Speaker
-                      </label>
-                      <input
-                        type="text"
-                        name="speaker"
-                        defaultValue={modalData.speaker || ''}
-                        className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-[#8BAE5A] mb-2">
-                        Duur (minuten)
-                      </label>
-                      <input
-                        type="number"
-                        name="duration"
-                        defaultValue={modalData.duration || ''}
-                        className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-[#8BAE5A] mb-2">
-                        Type
-                      </label>
-                      <select
-                        name="type"
-                        defaultValue={modalData.type || ''}
-                        className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                        required
-                      >
-                        <option value="">Selecteer type</option>
-                        <option value="Focus">Focus</option>
-                        <option value="Slaap">Slaap</option>
-                        <option value="Stressreductie">Stressreductie</option>
-                        <option value="Energie">Energie</option>
-                      </select>
-                    </div>
-                  </>
-                )}
-
-                {modalType === 'breathing' && (
-                  <>
-                    <div>
-                      <label className="block text-sm font-medium text-[#8BAE5A] mb-2">
-                        Duur (minuten)
-                      </label>
-                      <input
-                        type="number"
-                        name="duration"
-                        defaultValue={modalData.duration || ''}
-                        className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-[#8BAE5A] mb-2">
-                        Moeilijkheidsgraad
-                      </label>
-                      <select
-                        name="difficulty"
-                        defaultValue={modalData.difficulty || ''}
-                        className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                        required
-                      >
-                        <option value="">Selecteer niveau</option>
-                        <option value="Beginner">Beginner</option>
-                        <option value="Intermediate">Intermediate</option>
-                        <option value="Advanced">Advanced</option>
-                      </select>
-                    </div>
-                  </>
-                )}
-
-                {modalType === 'gratitude' && (
-                  <div>
-                    <label className="block text-sm font-medium text-[#8BAE5A] mb-2">
-                      Frequentie
-                    </label>
-                    <select
-                      name="frequency"
-                      defaultValue={modalData.frequency || ''}
-                      className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                      required
-                    >
-                      <option value="">Selecteer frequentie</option>
-                      <option value="Dagelijks">Dagelijks</option>
-                      <option value="Wekelijks">Wekelijks</option>
-                      <option value="Maandelijks">Maandelijks</option>
-                    </select>
-                  </div>
-                )}
-
-                {modalType === 'focus' && (
-                  <div>
-                    <label className="block text-sm font-medium text-[#8BAE5A] mb-2">
-                      Type
-                    </label>
-                    <select
-                      name="type"
-                      defaultValue={modalData.type || ''}
-                      className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                      required
-                    >
-                      <option value="">Selecteer type</option>
-                      <option value="Tool">Tool</option>
-                      <option value="Techniek">Techniek</option>
-                      <option value="Methode">Methode</option>
-                    </select>
-                  </div>
-                )}
-
-                <div className="flex gap-3 pt-4">
-                  <button
-                    type="submit"
-                    className="flex-1 bg-[#8BAE5A] text-[#181F17] px-4 py-2 rounded-lg font-semibold hover:bg-[#B6C948] transition-colors flex items-center justify-center gap-2"
-                  >
-                    <FaSave /> {editingItem ? 'Bijwerken' : 'Toevoegen'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={closeModal}
-                    className="flex-1 bg-[#3A4D23] text-[#8BAE5A] px-4 py-2 rounded-lg font-semibold hover:bg-[#3A4D23]/80 transition-colors"
-                  >
-                    Annuleren
-                  </button>
-                </div>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
