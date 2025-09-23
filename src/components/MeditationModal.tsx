@@ -1,60 +1,76 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  FaPlay, 
-  FaPause, 
-  FaStop, 
-  FaVolumeUp, 
-  FaVolumeMute,
-  FaClock,
-  FaHeart,
-  FaTimes
-} from 'react-icons/fa';
+import { FaPlay, FaPause, FaStop, FaVolumeUp, FaVolumeMute, FaTimes } from 'react-icons/fa';
 
 interface MeditationModalProps {
   isOpen: boolean;
   onClose: () => void;
-  meditation: {
-    id: number;
+  meditation?: {
+    id: string;
     title: string;
-    speaker: string;
-    duration: number;
     type: string;
+    duration: number;
     description: string;
-    audioUrl: string;
+    audioUrl?: string;
+  } | null;
+  session?: {
+    id: string;
+    title: string;
+    type: string;
+    duration: number;
+    description: string;
+    audioUrl?: string;
   } | null;
 }
 
-export default function MeditationModal({ isOpen, onClose, meditation }: MeditationModalProps) {
+export default function MeditationModal({ isOpen, onClose, session, meditation }: MeditationModalProps) {
+  const currentSession = session || meditation;
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [volume, setVolume] = useState(0.7);
+  const [volume, setVolume] = useState(1);
   const [isMuted, setIsMuted] = useState(false);
-  const [isFavorite, setIsFavorite] = useState(false);
+  const [progress, setProgress] = useState(0);
 
-  // Reset state when modal opens/closes
   useEffect(() => {
-    if (isOpen && meditation) {
-      setIsPlaying(false);
+    if (currentSession) {
+      setDuration(currentSession.duration * 60); // Convert minutes to seconds
       setCurrentTime(0);
-      setDuration(meditation.duration * 60); // Convert minutes to seconds
-      setIsFavorite(meditation.id === 1 || meditation.id === 3); // Sample favorites
+      setProgress(0);
     }
-  }, [isOpen, meditation]);
+  }, [currentSession]);
 
-  // Timer effect
   useEffect(() => {
     let interval: NodeJS.Timeout;
+    
     if (isPlaying && currentTime < duration) {
       interval = setInterval(() => {
-        setCurrentTime(prev => prev + 1);
+        setCurrentTime(prev => {
+          const newTime = prev + 1;
+          setProgress((newTime / duration) * 100);
+          
+          if (newTime >= duration) {
+            setIsPlaying(false);
+            // Session completed
+            onClose();
+          }
+          
+          return newTime;
+        });
       }, 1000);
     }
-    return () => clearInterval(interval);
-  }, [isPlaying, currentTime, duration]);
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isPlaying, currentTime, duration, onClose]);
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
 
   const handlePlayPause = () => {
     setIsPlaying(!isPlaying);
@@ -63,6 +79,7 @@ export default function MeditationModal({ isOpen, onClose, meditation }: Meditat
   const handleStop = () => {
     setIsPlaying(false);
     setCurrentTime(0);
+    setProgress(0);
   };
 
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -75,136 +92,126 @@ export default function MeditationModal({ isOpen, onClose, meditation }: Meditat
     setIsMuted(!isMuted);
   };
 
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
-
-  const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
-
-  if (!isOpen || !meditation) return null;
+  if (!isOpen || !currentSession) return null;
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <div className="fixed inset-0 bg-[#0A0F0A] bg-opacity-95 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
-            className="bg-[#181F17] border border-[#3A4D23] rounded-2xl p-6 max-w-2xl w-full mx-4 shadow-2xl"
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+        {/* Header */}
+        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+          <div>
+            <h2 className="text-xl font-semibold text-gray-900">{currentSession.title}</h2>
+            <p className="text-sm text-gray-600">{currentSession.description}</p>
+          </div>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 transition-colors"
           >
-            {/* Header */}
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-[#8BAE5A]/20 rounded-lg">
-                  <FaHeart className="w-5 h-5 text-[#8BAE5A]" />
-                </div>
-                <div>
-                  <h2 className="text-[#B6C948] text-xl font-bold">{meditation.title}</h2>
-                  <p className="text-[#8BAE5A] text-sm">door {meditation.speaker}</p>
-                </div>
-              </div>
-              <button
-                onClick={onClose}
-                className="p-2 hover:bg-[#3A4D23] rounded-lg transition-colors"
-              >
-                <FaTimes className="w-5 h-5 text-gray-400" />
-              </button>
-            </div>
-
-            {/* Meditation Info */}
-            <div className="bg-[#1A1A1A] border border-[#3A4D23] rounded-xl p-4 mb-6">
-              <p className="text-gray-300 text-sm mb-3">{meditation.description}</p>
-              <div className="flex items-center gap-4 text-[#8BAE5A]/70 text-sm">
-                <span className="flex items-center gap-1">
-                  <FaClock /> {meditation.duration} min
-                </span>
-                <span className="px-2 py-1 bg-[#3A4D23]/40 rounded-full text-xs">
-                  {meditation.type}
-                </span>
-              </div>
-            </div>
-
-            {/* Progress Bar */}
-            <div className="mb-6">
-              <div className="flex justify-between text-sm text-[#8BAE5A]/70 mb-2">
-                <span>{formatTime(currentTime)}</span>
-                <span>{formatTime(duration)}</span>
-              </div>
-              <div className="w-full bg-[#3A4D23] rounded-full h-2">
-                <div 
-                  className="bg-gradient-to-r from-[#B6C948] to-[#8BAE5A] h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${progress}%` }}
-                ></div>
-              </div>
-            </div>
-
-            {/* Controls */}
-            <div className="flex items-center justify-center gap-4 mb-6">
-              <button
-                onClick={handleStop}
-                className="p-3 bg-[#3A4D23] text-[#8BAE5A] rounded-full hover:bg-[#4A5D33] transition-colors"
-              >
-                <FaStop className="w-4 h-4" />
-              </button>
-              
-              <button
-                onClick={handlePlayPause}
-                className="p-4 bg-[#8BAE5A] text-[#181F17] rounded-full hover:bg-[#B6C948] transition-colors"
-              >
-                {isPlaying ? <FaPause className="w-6 h-6" /> : <FaPlay className="w-6 h-6" />}
-              </button>
-              
-              <button
-                onClick={() => setIsFavorite(!isFavorite)}
-                className={`p-3 rounded-full transition-colors ${
-                  isFavorite 
-                    ? 'bg-red-500/20 text-red-400' 
-                    : 'bg-[#3A4D23] text-[#8BAE5A] hover:bg-[#4A5D33]'
-                }`}
-              >
-                <FaHeart className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Volume Control */}
-            <div className="flex items-center gap-3">
-              <button
-                onClick={handleMute}
-                className="p-2 hover:bg-[#3A4D23] rounded-lg transition-colors"
-              >
-                {isMuted ? <FaVolumeMute className="w-4 h-4 text-[#8BAE5A]" /> : <FaVolumeUp className="w-4 h-4 text-[#8BAE5A]" />}
-              </button>
-              <input
-                type="range"
-                min="0"
-                max="1"
-                step="0.1"
-                value={isMuted ? 0 : volume}
-                onChange={handleVolumeChange}
-                className="flex-1 h-2 bg-[#3A4D23] rounded-lg appearance-none cursor-pointer"
-              />
-              <span className="text-[#8BAE5A] text-sm w-8">
-                {Math.round((isMuted ? 0 : volume) * 100)}%
-              </span>
-            </div>
-
-            {/* Meditation Tips */}
-            <div className="mt-6 p-4 bg-[#1A1A1A] border border-[#3A4D23] rounded-xl">
-              <h4 className="text-[#B6C948] font-semibold mb-2">💡 Meditatie Tips</h4>
-              <ul className="text-gray-300 text-sm space-y-1">
-                <li>• Zoek een rustige plek zonder afleiding</li>
-                <li>• Zit comfortabel met een rechte rug</li>
-                <li>• Focus op je ademhaling</li>
-                <li>• Laat gedachten komen en gaan zonder oordeel</li>
-              </ul>
-            </div>
-          </motion.div>
+            <FaTimes className="text-xl" />
+          </button>
         </div>
-      )}
-    </AnimatePresence>
+
+        {/* Meditation Content */}
+        <div className="p-6">
+          {/* Progress Bar */}
+          <div className="mb-6">
+            <div className="flex justify-between text-sm text-gray-600 mb-2">
+              <span>{formatTime(currentTime)}</span>
+              <span>{formatTime(duration)}</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div
+                className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+                style={{ width: `${progress}%` }}
+              ></div>
+            </div>
+          </div>
+
+          {/* Meditation Visualization */}
+          <div className="mb-6">
+            <div className="w-32 h-32 mx-auto bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center mb-4">
+              <div className={`w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full transition-all duration-1000 ${
+                isPlaying ? 'animate-pulse' : ''
+              }`}></div>
+            </div>
+            <p className="text-center text-gray-600">
+              {isPlaying ? 'Focus op je ademhaling...' : 'Klaar om te beginnen?'}
+            </p>
+          </div>
+
+          {/* Controls */}
+          <div className="flex items-center justify-center space-x-4 mb-6">
+            <button
+              onClick={handleStop}
+              className="p-3 bg-gray-100 text-gray-600 rounded-full hover:bg-gray-200 transition-colors"
+            >
+              <FaStop />
+            </button>
+            
+            <button
+              onClick={handlePlayPause}
+              className={`p-4 rounded-full text-white transition-colors ${
+                isPlaying 
+                  ? 'bg-red-500 hover:bg-red-600' 
+                  : 'bg-blue-500 hover:bg-blue-600'
+              }`}
+            >
+              {isPlaying ? <FaPause /> : <FaPlay />}
+            </button>
+          </div>
+
+          {/* Volume Control */}
+          <div className="flex items-center space-x-3">
+            <button
+              onClick={handleMute}
+              className="text-gray-600 hover:text-gray-800 transition-colors"
+            >
+              {isMuted ? <FaVolumeMute /> : <FaVolumeUp />}
+            </button>
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.1"
+              value={isMuted ? 0 : volume}
+              onChange={handleVolumeChange}
+              className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+            />
+            <span className="text-sm text-gray-600 w-8">
+              {Math.round((isMuted ? 0 : volume) * 100)}%
+            </span>
+          </div>
+
+          {/* Session Info */}
+          <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+            <div className="flex justify-between text-sm text-gray-600">
+              <span>Type: {currentSession.type}</span>
+              <span>Duur: {currentSession.duration} min</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="p-6 border-t border-gray-200">
+          <div className="flex space-x-3">
+            <button
+              onClick={onClose}
+              className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors"
+            >
+              Sluiten
+            </button>
+            <button
+              onClick={() => {
+                // Mark session as completed
+                onClose();
+              }}
+              className="flex-1 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors"
+            >
+              Voltooi Sessie
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

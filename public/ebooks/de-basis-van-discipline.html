@@ -220,6 +220,47 @@
             font-weight: 700;
         }
 
+        /* Sticky Back Button */
+        .sticky-back-btn {
+            position: fixed;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+            z-index: 1000;
+            background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 15px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(139, 174, 90, 0.3);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            min-width: 120px;
+            justify-content: center;
+        }
+
+        .sticky-back-btn:hover {
+            background: linear-gradient(135deg, #B6C948 0%, #8BAE5A 100%);
+            transform: translateY(-50%) scale(1.05);
+            box-shadow: 0 12px 35px rgba(139, 174, 90, 0.4);
+        }
+
+        .sticky-back-btn:active {
+            transform: translateY(-50%) scale(0.95);
+        }
+
+        .sticky-back-btn svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 1rem;
@@ -231,6 +272,13 @@
             
             .section {
                 padding: 1.5rem;
+            }
+
+            .sticky-back-btn {
+                right: 10px;
+                padding: 12px 16px;
+                font-size: 12px;
+                min-width: 100px;
             }
         }
     </style>
@@ -286,24 +334,50 @@
             </div>
         </div>
 
+    <!-- Sticky Back Button -->
+    <a href="/dashboard/academy" class="sticky-back-btn" title="Terug naar Academy">
+        <svg viewBox="0 0 24 24">
+            <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+        </svg>
+        Terug
+    </a>
+
         <!-- Uitgebreide Samenvatting -->
         <div class="section">
             <h2>📚 Uitgebreide Samenvatting van de Les</h2>
             
             <div class="highlight-box">
                 <h4>🎯 Les Overzicht</h4>
-                <p>In deze les hebben we de basis van discipline behandeld. Dit is een cruciaal onderdeel van je ontwikkeling als Top Tier Man en vormt de basis voor verdere groei en prestaties.</p>
+                <p>In deze les hebben we de fundamenten van discipline behandeld - de hoeksteen van persoonlijke ontwikkeling en de basis voor alle andere aspecten van je groei als Top Tier Man. Discipline is niet alleen een karaktereigenschap, maar een vaardigheid die je kunt ontwikkelen en versterken.</p>
             </div>
 
-            <h3>Belangrijkste Inzichten</h3>
-            <ul>
-                <li><strong>Waarom discipline zo belangrijk is:</strong> Een fundamenteel concept dat je dagelijks kunt toepassen</li><li><strong>Discipline = Doen wat je hebt beloofd aan jezelf, ook als je er geen zin in hebt.:</strong> Een fundamenteel concept dat je dagelijks kunt toepassen</li><li><strong>De 3 simpele bouwstenen van discipline:</strong> Een fundamenteel concept dat je dagelijks kunt toepassen</li><li><strong>1. Klein beginnen (Consistentie):</strong> Een fundamenteel concept dat je dagelijks kunt toepassen</li><li><strong>Waarom dit werkt: Je hersenen raken gewend aan succes en willen meer.:</strong> Een fundamenteel concept dat je dagelijks kunt toepassen</li>
-                <li><strong>Praktische Toepassing:</strong> Het verschil tussen kennis en wijsheid ligt in de dagelijkse implementatie</li>
-                <li><strong>Consistentie:</strong> Kleine, dagelijkse acties leiden tot grote, langetermijn resultaten</li>
-            </ul>
+            <h3>Wat is Discipline Precies?</h3>
+            <p>Discipline is het vermogen om te doen wat je moet doen, wanneer je het moet doen, ongeacht hoe je je voelt. Het is de brug tussen intentie en actie, tussen dromen en realiteit. Discipline is niet hetzelfde als zelfbeheersing - het is een actieve keuze om consistent te handelen naar je waarden en doelen.</p>
+            
+            <p>Denk aan discipline als de "architect" van je succes. Net zoals een architect een plan volgt om een gebouw te bouwen, volgt discipline een plan om je leven te bouwen. Zonder discipline zijn je doelen slechts wensen. Met discipline worden je wensen realiteit.</p>
 
-            <h3>Waarom Dit Belangrijk Is</h3>
-            <p>De concepten uit deze les zijn niet alleen theoretisch interessant, maar vormen de praktische basis voor je dagelijkse leven. Door deze principes consequent toe te passen, bouw je aan een sterke fundering voor alle andere aspecten van je ontwikkeling.</p>
+            <h3>De Wetenschap achter Discipline</h3>
+            <p>Discipline is gebaseerd op neuroplasticiteit - het vermogen van je hersenen om nieuwe verbindingen te vormen. Wanneer je consequent een bepaalde actie uitvoert, worden de neurale paden in je hersenen sterker. Dit betekent dat discipline letterlijk je hersenen verandert en het makkelijker maakt om in de toekomst de juiste keuzes te maken.</p>
+
+            <h3>De 3 Fundamentele Bouwstenen van Discipline</h3>
+            
+            <h4>1. Klein Beginnen (Consistentie)</h4>
+            <p>De kracht van kleine, dagelijkse acties kan niet worden onderschat. Door klein te beginnen, bouw je momentum op en creëer je een patroon van succes. Je hersenen raken gewend aan het voltooien van taken en willen meer van dat gevoel van voldoening.</p>
+            
+            <h4>2. Duidelijke Intentie</h4>
+            <p>Discipline zonder duidelijke richting is als een auto zonder bestuurder. Je moet precies weten waarom je doet wat je doet. Hoe sterker je "waarom", hoe makkelijker het wordt om de "hoe" vol te houden.</p>
+            
+            <h4>3. Systemen boven Wilskracht</h4>
+            <p>Wilskracht is een eindige bron die uitgeput raakt. Systemen zijn oneindig. Door goede systemen te bouwen, maak je discipline automatisch en verminder je de mentale belasting van elke dag opnieuw beslissingen nemen.</p>
+
+            <h3>Waarom Discipline zo Belangrijk is</h3>
+            <p>Discipline is de fundering waarop alle andere persoonlijke ontwikkeling wordt gebouwd. Zonder discipline blijven je doelen, dromen en plannen slechts goede bedoelingen. Discipline is wat het verschil maakt tussen mensen die hun doelen bereiken en mensen die alleen maar praten over wat ze willen bereiken.</p>
+
+            <h3>De Psychologie van Discipline</h3>
+            <p>Discipline is niet alleen een kwestie van karakter - het is een vaardigheid die je kunt ontwikkelen. Het gaat om het begrijpen van je eigen psychologie en het creëren van omstandigheden die discipline ondersteunen in plaats van ondermijnen.</p>
+
+            <h3>Praktische Toepassing in het Dagelijks Leven</h3>
+            <p>Het verschil tussen kennis en wijsheid ligt in de dagelijkse implementatie. Discipline is niet iets wat je eenmaal leert en dan voor altijd hebt - het is een dagelijkse praktijk die onderhoud en aandacht vereist. Door deze principes consequent toe te passen, bouw je aan een sterke fundering voor alle andere aspecten van je ontwikkeling.</p>
         </div>
 
         <!-- Praktische Oefeningen en Opdrachten -->
@@ -311,169 +385,250 @@
             <h2>💪 Praktische Oefeningen en Opdrachten</h2>
 
             <div class="exercise-box">
-                <h4>Oefening 1: Zelf-Assessment</h4>
-                <p><strong>Doel:</strong> Evalueer je huidige situatie en identificeer verbeterpunten.</p>
+                <h4>Opdracht 1: Discipline Assessment</h4>
+                <p><strong>Doel:</strong> Evalueer je huidige discipline niveau en identificeer verbeterpunten.</p>
                 <p><strong>Actie:</strong> Beantwoord de volgende vragen eerlijk en noteer je antwoorden:</p>
                 <ul>
-                    <li>Hoe pas je momenteel de concepten uit deze les toe in je dagelijkse leven?</li>
-                    <li>Welke aspecten vind je het moeilijkst om te implementeren?</li>
-                    <li>Wat zijn je grootste uitdagingen op dit gebied?</li>
-                    <li>Welke kleine veranderingen kun je vandaag nog maken?</li>
+                    <li>Hoe consistent ben je in het voltooien van taken die je jezelf hebt opgegeven?</li>
+                    <li>Welke gebieden in je leven hebben de meeste discipline nodig?</li>
+                    <li>Wat zijn je grootste uitdagingen bij het volhouden van nieuwe gewoonten?</li>
+                    <li>Welke kleine veranderingen kun je vandaag nog maken om je discipline te versterken?</li>
+                    <li>Hoe zou je je discipline niveau beoordelen op een schaal van 1-10?</li>
                 </ul>
             </div>
 
             <div class="exercise-box">
-                <h4>Oefening 2: Dagelijkse Implementatie</h4>
-                <p><strong>Doel:</strong> Maak de concepten onderdeel van je dagelijkse routine.</p>
+                <h4>Opdracht 2: Discipline Dagboek</h4>
+                <p><strong>Doel:</strong> Houd 7 dagen bij hoe je discipline toepast in je dagelijkse leven.</p>
+                <p><strong>Actie:</strong> Noteer elke dag:</p>
+                <ul>
+                    <li>Welke taken heb je voltooid die je had gepland?</li>
+                    <li>Welke taken heb je uitgesteld of niet voltooid?</li>
+                    <li>Wat was je motivatie niveau (1-10)?</li>
+                    <li>Welke uitdagingen kwam je tegen?</li>
+                    <li>Hoe voelde je je na het voltooien van taken?</li>
+                </ul>
+            </div>
+
+            <div class="exercise-box">
+                <h4>Opdracht 3: Kleine Gewoonten Challenge</h4>
+                <p><strong>Doel:</strong> Implementeer 3 kleine, dagelijkse gewoonten om discipline op te bouwen.</p>
                 <p><strong>Actie:</strong> Kies 3 specifieke acties die je deze week gaat uitvoeren:</p>
                 <ul>
-                    <li>Actie 1: _________________________________</li>
-                    <li>Actie 2: _________________________________</li>
-                    <li>Actie 3: _________________________________</li>
+                    <li>Gewoonte 1: _________________________________ (bijv. 5 minuten lezen per dag)</li>
+                    <li>Gewoonte 2: _________________________________ (bijv. 10 push-ups per dag)</li>
+                    <li>Gewoonte 3: _________________________________ (bijv. 1 glas water direct na het opstaan)</li>
+                </ul>
+                <p><strong>Regel:</strong> Start klein en focus op consistentie, niet op perfectie.</p>
+            </div>
+
+            <div class="exercise-box">
+                <h4>Opdracht 4: Discipline Systemen Bouwen</h4>
+                <p><strong>Doel:</strong> Creëer systemen die discipline ondersteunen in plaats van afhankelijk zijn van wilskracht.</p>
+                <p><strong>Actie:</strong> Ontwerp systemen voor 3 gebieden:</p>
+                <ul>
+                    <li><strong>Gebied 1:</strong> _________________________________</li>
+                    <li><strong>Systeem:</strong> _________________________________</li>
+                    <li><strong>Gebied 2:</strong> _________________________________</li>
+                    <li><strong>Systeem:</strong> _________________________________</li>
+                    <li><strong>Gebied 3:</strong> _________________________________</li>
+                    <li><strong>Systeem:</strong> _________________________________</li>
                 </ul>
             </div>
 
             <div class="exercise-box">
-                <h4>Oefening 3: Progressie Tracking</h4>
-                <p><strong>Doel:</strong> Monitor je voortgang en pas je aanpak aan.</p>
-                <p><strong>Actie:</strong> Houd deze week bij:</p>
+                <h4>Opdracht 5: Discipline Educatie Research</h4>
+                <p><strong>Doel:</strong> Verdiep je kennis over discipline en gewoonten.</p>
+                <p><strong>Actie:</strong> Onderzoek de volgende onderwerpen:</p>
                 <ul>
-                    <li>Dagelijkse implementatie van de concepten</li>
-                    <li>Uitdagingen die je tegenkomt</li>
-                    <li>Momenten van succes en doorbraak</li>
-                    <li>Aanpassingen die je moet maken</li>
+                    <li>Wat is het verschil tussen discipline en motivatie?</li>
+                    <li>Hoe werken gewoonten in je hersenen?</li>
+                    <li>Wat zijn de beste strategieën om nieuwe gewoonten te vormen?</li>
+                    <li>Hoe kun je discipline opbouwen zonder uitputting?</li>
+                    <li>Wat zijn de psychologische principes achter zelfbeheersing?</li>
                 </ul>
+                <p><strong>Presentatie:</strong> Maak een korte samenvatting van je bevindingen en deel deze met anderen.</p>
             </div>
         </div>
 
         <!-- Dagelijkse Checklists en Routines -->
         <div class="section">
-            <h2>✅ Dagelijkse Checklists en Routines</h2>
+            <h2>✅ Discipline Optimalisatie Checklists</h2>
+            <p><strong>Doel:</strong> Deze checklists zijn specifiek ontworpen om je discipline te versterken en te ondersteunen.</p>
 
-            <h3>Ochtend Routine</h3>
+            <h3>Ochtend Routine (Discipline Boost)</h3>
             <div class="checklist">
                 <div class="checklist-item">
                     <input type="checkbox" id="morning1">
-                    <label for="morning1">Herinner jezelf aan de belangrijkste concepten uit deze les</label>
+                    <label for="morning1">Sta op op het geplande tijdstip (geen snooze)</label>
                 </div>
                 <div class="checklist-item">
                     <input type="checkbox" id="morning2">
-                    <label for="morning2">Plan je dag met de principes in gedachten</label>
+                    <label for="morning2">Doe je bed op direct na het opstaan</label>
                 </div>
                 <div class="checklist-item">
                     <input type="checkbox" id="morning3">
-                    <label for="morning3">Stel jezelf een specifiek doel voor vandaag</label>
+                    <label for="morning3">Drink een glas water direct na het opstaan</label>
                 </div>
                 <div class="checklist-item">
                     <input type="checkbox" id="morning4">
-                    <label for="morning4">Visualiseer hoe je de concepten gaat toepassen</label>
+                    <label for="morning4">Plan je dag met 3 prioriteiten</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="morning5">
+                    <label for="morning5">Visualiseer je succesvolle dag</label>
                 </div>
             </div>
 
-            <h3>Dagelijkse Implementatie</h3>
+            <h3>Dagelijkse Discipline Ondersteuning</h3>
             <div class="checklist">
                 <div class="checklist-item">
                     <input type="checkbox" id="daily1">
-                    <label for="daily1">Pas de concepten toe in je dagelijkse activiteiten</label>
+                    <label for="daily1">Voltooi je eerste taak voordat je je telefoon checkt</label>
                 </div>
                 <div class="checklist-item">
                     <input type="checkbox" id="daily2">
-                    <label for="daily2">Wees bewust van momenten waar je kunt groeien</label>
+                    <label for="daily2">Eet gezond volgens je plan (geen impulsieve keuzes)</label>
                 </div>
                 <div class="checklist-item">
                     <input type="checkbox" id="daily3">
-                    <label for="daily3">Leer van uitdagingen en tegenslagen</label>
+                    <label for="daily3">Doe je geplande beweging/training</label>
                 </div>
                 <div class="checklist-item">
                     <input type="checkbox" id="daily4">
-                    <label for="daily4">Celebreer kleine overwinningen</label>
+                    <label for="daily4">Vermijd afleidingen tijdens werk/studie tijd</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="daily5">
+                    <label for="daily5">Voltooi taken volledig voordat je aan nieuwe begint</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="daily6">
+                    <label for="daily6">Houd je aan je geplande tijdschema</label>
                 </div>
             </div>
 
-            <h3>Avond Reflectie</h3>
+            <h3>Avond Discipline Reflectie</h3>
             <div class="checklist">
                 <div class="checklist-item">
                     <input type="checkbox" id="evening1">
-                    <label for="evening1">Evalueer hoe je dag is verlopen</label>
+                    <label for="evening1">Evalueer welke taken je hebt voltooid</label>
                 </div>
                 <div class="checklist-item">
                     <input type="checkbox" id="evening2">
-                    <label for="evening2">Identificeer wat goed ging en wat beter kan</label>
+                    <label for="evening2">Identificeer waar je discipline sterk was</label>
                 </div>
                 <div class="checklist-item">
                     <input type="checkbox" id="evening3">
-                    <label for="evening3">Plan verbeteringen voor morgen</label>
+                    <label for="evening3">Noteer waar je discipline kon verbeteren</label>
                 </div>
                 <div class="checklist-item">
                     <input type="checkbox" id="evening4">
-                    <label for="evening4">Wees dankbaar voor je groei en leerervaringen</label>
+                    <label for="evening4">Plan morgen met specifieke discipline doelen</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="evening5">
+                    <label for="evening5">Celebreer je discipline overwinningen</label>
+                </div>
+            </div>
+
+            <h3>Weekelijkse Discipline Check</h3>
+            <div class="checklist">
+                <div class="checklist-item">
+                    <input type="checkbox" id="weekly1">
+                    <label for="weekly1">Evalueer je discipline niveau deze week (1-10)</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="weekly2">
+                    <label for="weekly2">Controleer welke gewoonten je consistent hebt volgehouden</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="weekly3">
+                    <label for="weekly3">Identificeer patronen in je discipline uitdagingen</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="weekly4">
+                    <label for="weekly4">Plan verbeteringen voor de komende week</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="weekly5">
+                    <label for="weekly5">Stel nieuwe, uitdagende discipline doelen</label>
                 </div>
             </div>
         </div>
 
         <!-- Reflectie Vragen -->
         <div class="section">
-            <h2>🤔 Reflectie Vragen voor Persoonlijke Groei</h2>
+            <h2>🤔 Reflectie Vragen voor Discipline Optimalisatie</h2>
+            <p><strong>Doel:</strong> Deze vragen helpen je om dieper na te denken over je discipline ontwikkeling en optimalisatie.</p>
 
             <div class="reflection-question">
-                <h4>Vraag 1: Huidige Situatie</h4>
-                <p>Hoe zou je je huidige implementatie van de concepten uit deze les beoordelen op een schaal van 1-10? Wat zijn de specifieke gebieden waar je de meeste groei kunt maken?</p>
+                <h4>Vraag 1: Huidige Discipline Status</h4>
+                <p>Hoe zou je je huidige discipline niveau beoordelen op een schaal van 1-10? Welke specifieke gebieden van je leven hebben de meeste discipline nodig? Wat zijn je grootste discipline uitdagingen?</p>
             </div>
 
             <div class="reflection-question">
-                <h4>Vraag 2: Uitdagingen</h4>
-                <p>Welke uitdagingen kom je tegen bij het toepassen van deze concepten? Hoe kun je deze uitdagingen omzetten in kansen voor groei?</p>
+                <h4>Vraag 2: Discipline Killers Identificatie</h4>
+                <p>Welke factoren in je huidige levensstijl ondermijnen je discipline het meest? Denk aan afleidingen, slechte gewoonten, omgevingsfactoren, en mentale patronen. Welke van deze factoren kun je het gemakkelijkst aanpakken?</p>
             </div>
 
             <div class="reflection-question">
-                <h4>Vraag 3: Impact</h4>
-                <p>Welke positieve veranderingen heb je al gemerkt sinds je begonnen bent met het toepassen van deze concepten? Hoe heeft dit je leven beïnvloed?</p>
+                <h4>Vraag 3: Impact van Discipline op je Leven</h4>
+                <p>Hoe heeft een gebrek aan discipline je leven beïnvloed? Welke kansen heb je gemist door inconsistentie of uitstelgedrag? Hoe zou je leven eruitzien als je optimale discipline had?</p>
             </div>
 
             <div class="reflection-question">
-                <h4>Vraag 4: Toekomst</h4>
-                <p>Hoe ziet je ideale implementatie van deze concepten eruit over 3 maanden? Welke specifieke doelen stel je jezelf?</p>
+                <h4>Vraag 4: Discipline Optimalisatie Doelen</h4>
+                <p>Wat zijn je specifieke doelen voor discipline ontwikkeling over de komende 3 maanden? Welke meetbare verbeteringen wil je zien in je consistentie, volharding, en zelfbeheersing?</p>
             </div>
 
             <div class="reflection-question">
-                <h4>Vraag 5: Ondersteuning</h4>
-                <p>Welke ondersteuning heb je nodig om deze concepten beter te kunnen toepassen? Hoe kun je jezelf en anderen helpen om te groeien?</p>
+                <h4>Vraag 5: Implementatie Strategie</h4>
+                <p>Welke veranderingen in je levensstijl ben je bereid te maken om je discipline te optimaliseren? Wat zijn je grootste uitdagingen bij het implementeren van discipline-vriendelijke gewoonten? Hoe kun je jezelf verantwoordelijk houden?</p>
+            </div>
+
+            <div class="reflection-question">
+                <h4>Vraag 6: Langetermijn Discipline Visie</h4>
+                <p>Hoe ziet je ideale discipline niveau eruit over 1 jaar? Welke rol speelt discipline in je algemene prestatie- en ontwikkelingsdoelen? Hoe kun je deze discipline kennis doorgeven aan anderen?</p>
             </div>
         </div>
 
         <!-- Volgende Stappen en Actieplan -->
         <div class="section">
-            <h2>🚀 Volgende Stappen en Actieplan</h2>
+            <h2>🚀 Discipline Optimalisatie Actieplan</h2>
 
             <div class="action-plan">
-                <h3>30-Dagen Implementatie Plan</h3>
+                <h3>30-Dagen Discipline Boost Plan</h3>
 
                 <div class="action-step">
-                    <h4>Week 1: Bewustwording en Baseline</h4>
+                    <h4>Week 1: Baseline en Bewustwording</h4>
                     <ul>
-                        <li>Voltooi de zelf-assessment oefening</li>
-                        <li>Implementeer de ochtend routine</li>
-                        <li>Begin met dagelijkse bewustwording van de concepten</li>
-                        <li>Start met het bijhouden van je voortgang</li>
+                        <li>Voltooi de discipline assessment oefening</li>
+                        <li>Start met het discipline dagboek (7 dagen)</li>
+                        <li>Implementeer de ochtend routine (opstaan, bed opmaken, water)</li>
+                        <li>Begin met 3 kleine dagelijkse gewoonten</li>
+                        <li>Identificeer je grootste discipline killers</li>
                     </ul>
                 </div>
 
                 <div class="action-step">
-                    <h4>Week 2: Dagelijkse Implementatie</h4>
+                    <h4>Week 2: Gewoonten en Systemen</h4>
                     <ul>
-                        <li>Pas de concepten toe in je dagelijkse activiteiten</li>
-                        <li>Focus op consistentie boven perfectie</li>
-                        <li>Identificeer en adresseer uitdagingen</li>
+                        <li>Optimaliseer je ochtend routine (geen snooze, planning)</li>
+                        <li>Implementeer discipline-vriendelijke systemen</li>
+                        <li>Vermijd afleidingen tijdens werk/studie tijd</li>
+                        <li>Voltooi taken volledig voordat je aan nieuwe begint</li>
+                        <li>Begin met avond reflectie routine</li>
+                    </ul>
+                </div>
+
+                <div class="action-step">
+                    <h4>Week 3: Versterking en Uitbreiding</h4>
+                    <ul>
+                        <li>Verhoog de intensiteit van je gewoonten</li>
+                        <li>Integreer discipline in nieuwe situaties</li>
                         <li>Bouw momentum op door kleine overwinningen</li>
-                    </ul>
-                </div>
-
-                <div class="action-step">
-                    <h4>Week 3: Optimalisatie en Verfijning</h4>
-                    <ul>
-                        <li>Evalueer je voortgang en pas je aanpak aan</li>
-                        <li>Verhoog de intensiteit waar mogelijk</li>
-                        <li>Integreer de concepten in nieuwe situaties</li>
+                        <li>Implementeer weekelijkse discipline checks</li>
                         <li>Zoek naar manieren om anderen te helpen</li>
                     </ul>
                 </div>
@@ -481,24 +636,35 @@
                 <div class="action-step">
                     <h4>Week 4: Consolidatie en Planning</h4>
                     <ul>
-                        <li>Consolideer je nieuwe gewoonten</li>
-                        <li>Plan voor langetermijn implementatie</li>
-                        <li>Stel nieuwe, uitdagende doelen</li>
-                        <li>Deel je ervaringen en leer van anderen</li>
+                        <li>Consolideer alle nieuwe discipline gewoonten</li>
+                        <li>Evalueer je voortgang met het dagboek</li>
+                        <li>Meet je verbeteringen (consistentie, volharding)</li>
+                        <li>Plan voor langetermijn discipline onderhoud</li>
+                        <li>Stel nieuwe, uitdagende discipline doelen</li>
                     </ul>
                 </div>
             </div>
 
-            <h3>Langetermijn Strategieën</h3>
+            <h3>Langetermijn Discipline Strategieën</h3>
             <ul>
-                <li><strong>Maand 2-3:</strong> Verdieping en geavanceerde toepassing</li>
+                <li><strong>Maand 2-3:</strong> Verdieping in geavanceerde discipline technieken</li>
                 <li><strong>Maand 4-6:</strong> Integratie met andere ontwikkelingsgebieden</li>
-                <li><strong>Maand 6+:</strong> Mentorschap en doorgeven van kennis</li>
+                <li><strong>Maand 6+:</strong> Mentorschap en doorgeven van discipline kennis</li>
             </ul>
+
+            <h3>Discipline Monitoring en Meting</h3>
+            <div class="highlight-box">
+                <h4>📊 Belangrijke Metingen</h4>
+                <ul>
+                    <li><strong>Subjectieve Metingen:</strong> Discipline niveau, consistentie, zelfbeheersing</li>
+                    <li><strong>Objectieve Metingen:</strong> Voltooide taken, geplande vs. werkelijke tijd, gewoonte streak</li>
+                    <li><strong>Reflectie Tests:</strong> Weekelijkse discipline evaluatie en aanpassingen</li>
+                </ul>
+            </div>
 
             <div class="highlight-box">
                 <h4>🎯 Belangrijke Herinnering</h4>
-                <p>Echte groei gebeurt door consistente, dagelijkse actie. Focus op progressie, niet op perfectie. Elke dag is een nieuwe kans om te groeien en jezelf te verbeteren.</p>
+                <p>Discipline optimalisatie is een langetermijn proces. Focus op consistente, dagelijkse actie. Kleine veranderingen leiden tot grote resultaten. Elke dag is een nieuwe kans om je discipline te versterken en je prestaties te verbeteren.</p>
             </div>
         </div>
 

@@ -220,6 +220,47 @@
             font-weight: 700;
         }
 
+        /* Sticky Back Button */
+        .sticky-back-btn {
+            position: fixed;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+            z-index: 1000;
+            background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 15px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(139, 174, 90, 0.3);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            min-width: 120px;
+            justify-content: center;
+        }
+
+        .sticky-back-btn:hover {
+            background: linear-gradient(135deg, #B6C948 0%, #8BAE5A 100%);
+            transform: translateY(-50%) scale(1.05);
+            box-shadow: 0 12px 35px rgba(139, 174, 90, 0.4);
+        }
+
+        .sticky-back-btn:active {
+            transform: translateY(-50%) scale(0.95);
+        }
+
+        .sticky-back-btn svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 1rem;
@@ -231,6 +272,13 @@
             
             .section {
                 padding: 1.5rem;
+            }
+
+            .sticky-back-btn {
+                right: 10px;
+                padding: 12px 16px;
+                font-size: 12px;
+                min-width: 100px;
             }
         }
     </style>
@@ -286,24 +334,65 @@
             </div>
         </div>
 
+    <!-- Sticky Back Button -->
+    <a href="/dashboard/academy" class="sticky-back-btn" title="Terug naar Academy">
+        <svg viewBox="0 0 24 24">
+            <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+        </svg>
+        Terug
+    </a>
+
         <!-- Uitgebreide Samenvatting -->
         <div class="section">
             <h2>📚 Uitgebreide Samenvatting van de Les</h2>
             
             <div class="highlight-box">
                 <h4>🎯 Les Overzicht</h4>
-                <p>In deze les hebben we militaire discipline behandeld. Dit is een cruciaal onderdeel van je ontwikkeling als Top Tier Man en vormt de basis voor verdere groei en prestaties.</p>
+                <p>In deze les hebben we militaire discipline behandeld - de hoogste vorm van discipline die bestaat. Militaire discipline is niet alleen krachtig, maar ook bewezen effectief in de meest extreme omstandigheden. Dit vormt de basis voor onverzettelijke karakter en onverslaanbare prestaties als Top Tier Man.</p>
             </div>
 
-            <h3>Belangrijkste Inzichten</h3>
+            <h3>Wat is Militaire Discipline Precies?</h3>
+            <p>Militaire discipline is het vermogen om te handelen volgens principes en routines, ongeacht de omstandigheden. Het is discipline die werkt onder extreme druk, in chaos, en wanneer alles om je heen instort. Het is de discipline die soldaten in staat stelt om te functioneren in de meest stressvolle situaties ter wereld.</p>
+            
+            <p>Denk aan militaire discipline als de "onverzettelijke kern" van je karakter. Net zoals een soldaat zijn training volgt ongeacht hoe hij zich voelt, volgt militaire discipline principes ongeacht de omstandigheden. Het is discipline die niet afhankelijk is van motivatie, stemming, of externe omstandigheden.</p>
+
+            <h3>Waarom Militaire Discipline zo Krachtig is</h3>
+            <p>Militaire discipline is zo krachtig omdat het is ontworpen voor de meest extreme omstandigheden. Het is getest in oorlog, stress, en levensbedreigende situaties. Wanneer militaire discipline werkt in deze omstandigheden, werkt het zeker in het dagelijks leven.</p>
+
+            <h3>De 3 Kernwaarden van Militaire Discipline</h3>
+            
+            <h4>1. Structuur en Orde</h4>
+            <p>Militaire discipline begint met structuur en orde. Dit betekent dat alles een plaats heeft, alles een tijd heeft, en alles een doel heeft. Structuur creëert voorspelbaarheid, en voorspelbaarheid creëert vertrouwen.</p>
             <ul>
-                <li><strong>Waarom militaire discipline zo krachtig is:</strong> Een fundamenteel concept dat je dagelijks kunt toepassen</li><li><strong>Discipline = Handelen volgens principes en routines, ook als je omgeving chaos is.:</strong> Een fundamenteel concept dat je dagelijks kunt toepassen</li><li><strong>De 3 kernwaarden van militaire discipline:</strong> Een fundamenteel concept dat je dagelijks kunt toepassen</li><li><strong>1. Structuur en orde:</strong> Een fundamenteel concept dat je dagelijks kunt toepassen</li><li><strong>Voorbeelden::</strong> Een fundamenteel concept dat je dagelijks kunt toepassen</li>
-                <li><strong>Praktische Toepassing:</strong> Het verschil tussen kennis en wijsheid ligt in de dagelijkse implementatie</li>
-                <li><strong>Consistentie:</strong> Kleine, dagelijkse acties leiden tot grote, langetermijn resultaten</li>
+                <li><strong>Fysieke Orde:</strong> Je omgeving is georganiseerd en functioneel</li>
+                <li><strong>Tijdsstructuur:</strong> Alles heeft een geplande tijd en duur</li>
+                <li><strong>Processtructuur:</strong> Alles volgt een logische volgorde</li>
+            </ul>
+            
+            <h4>2. Onvoorwaardelijke Uitvoering</h4>
+            <p>Militaire discipline betekent dat taken worden uitgevoerd, ongeacht persoonlijke voorkeuren, stemming, of omstandigheden. Het is de discipline om te doen wat moet gebeuren, wanneer het moet gebeuren, hoe het moet gebeuren.</p>
+            <ul>
+                <li><strong>Geen Uitstel:</strong> Taken worden onmiddellijk uitgevoerd</li>
+                <li><strong>Geen Excuses:</strong> Resultaten zijn belangrijker dan redenen</li>
+                <li><strong>Geen Compromissen:</strong> Standaarden worden altijd gehandhaafd</li>
+            </ul>
+            
+            <h4>3. Team en Missie Focus</h4>
+            <p>Militaire discipline is altijd gericht op het grotere geheel. Het gaat niet om persoonlijke comfort, maar om missie succes en team welzijn. Dit creëert een hoger doel dat persoonlijke uitdagingen overstijgt.</p>
+            <ul>
+                <li><strong>Missie Eerst:</strong> Het doel is belangrijker dan persoonlijke voorkeuren</li>
+                <li><strong>Team Eerst:</strong> Het team is belangrijker dan het individu</li>
+                <li><strong>Service Eerst:</strong> Dienst aan anderen is belangrijker dan zelfzucht</li>
             </ul>
 
+            <h3>De Wetenschap achter Militaire Discipline</h3>
+            <p>Neurowetenschappelijk onderzoek toont aan dat militaire discipline de prefrontale cortex versterkt - het deel van de hersenen dat verantwoordelijk is voor executieve functies, besluitvorming, en zelfbeheersing. Dit betekent dat militaire discipline letterlijk je hersenen verandert en je mentale kracht vergroot.</p>
+
+            <h3>Praktische Toepassing in het Dagelijks Leven</h3>
+            <p>Militaire discipline is niet alleen voor soldaten - het is voor iedereen die excellente prestaties wil leveren. Door militaire principes toe te passen in je dagelijks leven, ontwikkel je de mentale kracht en karaktersterkte die nodig zijn voor buitengewone prestaties.</p>
+
             <h3>Waarom Dit Belangrijk Is</h3>
-            <p>De concepten uit deze les zijn niet alleen theoretisch interessant, maar vormen de praktische basis voor je dagelijkse leven. Door deze principes consequent toe te passen, bouw je aan een sterke fundering voor alle andere aspecten van je ontwikkeling.</p>
+            <p>Militaire discipline is de fundering voor alle andere vormen van discipline. Zonder deze basis blijven andere discipline vormen oppervlakkig en afhankelijk van externe omstandigheden. Met militaire discipline wordt je karakter onverzettelijk en je prestaties onverslaanbaar.</p>
         </div>
 
         <!-- Praktische Oefeningen en Opdrachten -->

@@ -220,6 +220,47 @@
             font-weight: 700;
         }
 
+        /* Sticky Back Button */
+        .sticky-back-btn {
+            position: fixed;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+            z-index: 1000;
+            background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 15px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(139, 174, 90, 0.3);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            min-width: 120px;
+            justify-content: center;
+        }
+
+        .sticky-back-btn:hover {
+            background: linear-gradient(135deg, #B6C948 0%, #8BAE5A 100%);
+            transform: translateY(-50%) scale(1.05);
+            box-shadow: 0 12px 35px rgba(139, 174, 90, 0.4);
+        }
+
+        .sticky-back-btn:active {
+            transform: translateY(-50%) scale(0.95);
+        }
+
+        .sticky-back-btn svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 1rem;
@@ -231,6 +272,13 @@
             
             .section {
                 padding: 1.5rem;
+            }
+
+            .sticky-back-btn {
+                right: 10px;
+                padding: 12px 16px;
+                font-size: 12px;
+                min-width: 100px;
             }
         }
     </style>
@@ -286,24 +334,67 @@
             </div>
         </div>
 
+    <!-- Sticky Back Button -->
+    <a href="/dashboard/academy" class="sticky-back-btn" title="Terug naar Academy">
+        <svg viewBox="0 0 24 24">
+            <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+        </svg>
+        Terug
+    </a>
+
         <!-- Uitgebreide Samenvatting -->
         <div class="section">
             <h2>📚 Uitgebreide Samenvatting van de Les</h2>
             
             <div class="highlight-box">
                 <h4>🎯 Les Overzicht</h4>
-                <p>In deze les hebben we discipline van korte termijn naar een levensstijl behandeld. Dit is een cruciaal onderdeel van je ontwikkeling als Top Tier Man en vormt de basis voor verdere groei en prestaties.</p>
+                <p>In deze les hebben we de transformatie van discipline van korte-termijn naar een levensstijl behandeld - de cruciale overgang van tijdelijke motivatie naar duurzame identiteit. Dit vormt de basis voor alle langetermijn succes en persoonlijke ontwikkeling als Top Tier Man.</p>
             </div>
 
-            <h3>Belangrijkste Inzichten</h3>
+            <h3>Het Probleem met Korte-Termijn Discipline</h3>
+            <p>De meeste mensen proberen discipline te "doen" in plaats van discipline te "zijn". Dit is het fundamentele probleem dat leidt tot uitputting, frustratie en uiteindelijk opgeven. Korte-termijn discipline is gebaseerd op wilskracht, wat een eindige bron is die uitgeput raakt.</p>
+            
+            <p>Denk aan discipline als een spier die je kunt trainen, maar ook als een identiteit die je kunt ontwikkelen. Het verschil tussen "doen" en "zijn" is het verschil tussen acteren en authentiek zijn. Wanneer discipline deel wordt van wie je bent, wordt het automatisch en natuurlijk.</p>
+
+            <h3>Het Verschil tussen Doen en Zijn</h3>
+            
+            <h4>Tijdelijke Discipline (DOEN)</h4>
+            <p>Dit is discipline gebaseerd op externe motivatie, wilskracht en tijdelijke doelen. Het is alsof je een masker opzet - je speelt de rol van een gedisciplineerd persoon, maar het is niet wie je werkelijk bent. Deze vorm van discipline is:</p>
             <ul>
-                <li><strong>Het probleem met korte-termijn discipline:</strong> Een fundamenteel concept dat je dagelijks kunt toepassen</li><li><strong>Het probleem: Je probeert discipline te "doen" in plaats van discipline te "zijn".:</strong> Een fundamenteel concept dat je dagelijks kunt toepassen</li><li><strong>Het verschil tussen doen en zijn:</strong> Een fundamenteel concept dat je dagelijks kunt toepassen</li><li><strong>Tijdelijke discipline (DOEN)::</strong> Een fundamenteel concept dat je dagelijks kunt toepassen</li><li><strong>Levensstijl discipline (ZIJN)::</strong> Een fundamenteel concept dat je dagelijks kunt toepassen</li>
-                <li><strong>Praktische Toepassing:</strong> Het verschil tussen kennis en wijsheid ligt in de dagelijkse implementatie</li>
-                <li><strong>Consistentie:</strong> Kleine, dagelijkse acties leiden tot grote, langetermijn resultaten</li>
+                <li>Afhankelijk van motivatie en stemming</li>
+                <li>Uitputtend en niet duurzaam</li>
+                <li>Gebaseerd op externe druk en verwachtingen</li>
+                <li>Makkelijk te verliezen bij tegenslag</li>
+            </ul>
+            
+            <h4>Levensstijl Discipline (ZIJN)</h4>
+            <p>Dit is discipline die deel is geworden van je identiteit. Het is niet iets wat je doet, maar wie je bent. Deze vorm van discipline is:</p>
+            <ul>
+                <li>Automatisch en natuurlijk</li>
+                <li>Duurzaam en zelfversterkend</li>
+                <li>Gebaseerd op interne waarden en identiteit</li>
+                <li>Bestand tegen uitdagingen en tegenslag</li>
             </ul>
 
+            <h3>De Wetenschap achter Identiteit-gebaseerde Discipline</h3>
+            <p>Neurowetenschappelijk onderzoek toont aan dat wanneer gedragingen deel worden van je identiteit, ze automatisch worden. Je hersenen creëren nieuwe neurale paden die deze gedragingen ondersteunen zonder bewuste inspanning. Dit is het verschil tussen gewoonten die je moet onthouden en gewoonten die je vergeet te vergeten.</p>
+
+            <h3>De 3 Stappen naar Levensstijl Discipline</h3>
+            
+            <h4>Stap 1: Identiteit Bewustwording</h4>
+            <p>Begin met het identificeren van je huidige identiteit rond discipline. Wat geloof je over jezelf? Ben je iemand die "geen discipline heeft" of iemand die "discipline ontwikkelt"? Je overtuigingen over jezelf bepalen je gedrag.</p>
+            
+            <h4>Stap 2: Kleine Identiteit Veranderingen</h4>
+            <p>Start met kleine acties die je nieuwe identiteit ondersteunen. Als je wilt worden wie je "een gezond persoon" bent, begin dan met kleine gezonde keuzes die deze identiteit bevestigen.</p>
+            
+            <h4>Stap 3: Consistentie en Consolidatie</h4>
+            <p>Door consistent te handelen naar je nieuwe identiteit, versterk je deze overtuigingen. Elke actie die overeenkomt met je gewenste identiteit maakt deze sterker en natuurlijker.</p>
+
             <h3>Waarom Dit Belangrijk Is</h3>
-            <p>De concepten uit deze les zijn niet alleen theoretisch interessant, maar vormen de praktische basis voor je dagelijkse leven. Door deze principes consequent toe te passen, bouw je aan een sterke fundering voor alle andere aspecten van je ontwikkeling.</p>
+            <p>Levensstijl discipline is de fundering voor alle andere persoonlijke ontwikkeling. Zonder deze basis blijven alle andere doelen, dromen en plannen afhankelijk van externe motivatie en wilskracht. Met levensstijl discipline wordt succes niet alleen mogelijk, maar onvermijdelijk.</p>
+
+            <h3>Praktische Toepassing in het Dagelijks Leven</h3>
+            <p>Het verschil tussen kennis en wijsheid ligt in de dagelijkse implementatie. Levensstijl discipline is niet iets wat je eenmaal bereikt en dan voor altijd hebt - het is een continu proces van identiteit ontwikkeling en versterking. Door deze principes consequent toe te passen, bouw je aan een sterke fundering voor alle andere aspecten van je ontwikkeling.</p>
         </div>
 
         <!-- Praktische Oefeningen en Opdrachten -->
@@ -311,194 +402,289 @@
             <h2>💪 Praktische Oefeningen en Opdrachten</h2>
 
             <div class="exercise-box">
-                <h4>Oefening 1: Zelf-Assessment</h4>
-                <p><strong>Doel:</strong> Evalueer je huidige situatie en identificeer verbeterpunten.</p>
+                <h4>Opdracht 1: Identiteit Assessment</h4>
+                <p><strong>Doel:</strong> Evalueer je huidige identiteit rond discipline en identificeer verbeterpunten.</p>
                 <p><strong>Actie:</strong> Beantwoord de volgende vragen eerlijk en noteer je antwoorden:</p>
                 <ul>
-                    <li>Hoe pas je momenteel de concepten uit deze les toe in je dagelijkse leven?</li>
-                    <li>Welke aspecten vind je het moeilijkst om te implementeren?</li>
-                    <li>Wat zijn je grootste uitdagingen op dit gebied?</li>
-                    <li>Welke kleine veranderingen kun je vandaag nog maken?</li>
+                    <li>Wat geloof je momenteel over jezelf wat betreft discipline?</li>
+                    <li>Ben je iemand die "discipline heeft" of iemand die "discipline ontwikkelt"?</li>
+                    <li>Welke identiteit zou je willen hebben rond discipline?</li>
+                    <li>Welke kleine acties kun je vandaag doen die je gewenste identiteit ondersteunen?</li>
+                    <li>Hoe zou je leven eruitzien als discipline deel was van wie je bent?</li>
                 </ul>
             </div>
 
             <div class="exercise-box">
-                <h4>Oefening 2: Dagelijkse Implementatie</h4>
-                <p><strong>Doel:</strong> Maak de concepten onderdeel van je dagelijkse routine.</p>
+                <h4>Opdracht 2: Levensstijl Discipline Dagboek</h4>
+                <p><strong>Doel:</strong> Houd 7 dagen bij hoe je identiteit-gebaseerde discipline toepast.</p>
+                <p><strong>Actie:</strong> Noteer elke dag:</p>
+                <ul>
+                    <li>Welke acties deed je die overeenkomen met je gewenste identiteit?</li>
+                    <li>Welke acties deed je die niet overeenkomen met je gewenste identiteit?</li>
+                    <li>Hoe voelde je je toen je handelde naar je gewenste identiteit?</li>
+                    <li>Welke uitdagingen kwam je tegen bij het handelen naar je identiteit?</li>
+                    <li>Welke kleine overwinningen vierde je?</li>
+                </ul>
+            </div>
+
+            <div class="exercise-box">
+                <h4>Opdracht 3: Identiteit Versterkende Gewoonten</h4>
+                <p><strong>Doel:</strong> Implementeer 3 kleine gewoonten die je gewenste identiteit ondersteunen.</p>
                 <p><strong>Actie:</strong> Kies 3 specifieke acties die je deze week gaat uitvoeren:</p>
                 <ul>
-                    <li>Actie 1: _________________________________</li>
-                    <li>Actie 2: _________________________________</li>
-                    <li>Actie 3: _________________________________</li>
+                    <li>Gewoonte 1: _________________________________ (bijv. "Ik ben iemand die altijd zijn bed opmaakt")</li>
+                    <li>Gewoonte 2: _________________________________ (bijv. "Ik ben iemand die altijd op tijd komt")</li>
+                    <li>Gewoonte 3: _________________________________ (bijv. "Ik ben iemand die zijn woord houdt")</li>
+                </ul>
+                <p><strong>Regel:</strong> Focus op identiteit, niet op perfectie. Elke actie die je identiteit ondersteunt is een overwinning.</p>
+            </div>
+
+            <div class="exercise-box">
+                <h4>Opdracht 4: Identiteit Systemen Bouwen</h4>
+                <p><strong>Doel:</strong> Creëer systemen die je gewenste identiteit ondersteunen.</p>
+                <p><strong>Actie:</strong> Ontwerp systemen voor 3 gebieden:</p>
+                <ul>
+                    <li><strong>Gebied 1:</strong> _________________________________</li>
+                    <li><strong>Identiteit:</strong> "Ik ben iemand die..." _________________________________</li>
+                    <li><strong>Systeem:</strong> _________________________________</li>
+                    <li><strong>Gebied 2:</strong> _________________________________</li>
+                    <li><strong>Identiteit:</strong> "Ik ben iemand die..." _________________________________</li>
+                    <li><strong>Systeem:</strong> _________________________________</li>
+                    <li><strong>Gebied 3:</strong> _________________________________</li>
+                    <li><strong>Identiteit:</strong> "Ik ben iemand die..." _________________________________</li>
+                    <li><strong>Systeem:</strong> _________________________________</li>
                 </ul>
             </div>
 
             <div class="exercise-box">
-                <h4>Oefening 3: Progressie Tracking</h4>
-                <p><strong>Doel:</strong> Monitor je voortgang en pas je aanpak aan.</p>
-                <p><strong>Actie:</strong> Houd deze week bij:</p>
+                <h4>Opdracht 5: Levensstijl Discipline Educatie</h4>
+                <p><strong>Doel:</strong> Verdiep je kennis over identiteit-gebaseerde discipline.</p>
+                <p><strong>Actie:</strong> Onderzoek de volgende onderwerpen:</p>
                 <ul>
-                    <li>Dagelijkse implementatie van de concepten</li>
-                    <li>Uitdagingen die je tegenkomt</li>
-                    <li>Momenten van succes en doorbraak</li>
-                    <li>Aanpassingen die je moet maken</li>
+                    <li>Wat is het verschil tussen gedrag en identiteit?</li>
+                    <li>Hoe werken identiteit overtuigingen in je hersenen?</li>
+                    <li>Wat zijn de beste strategieën om identiteit te veranderen?</li>
+                    <li>Hoe kun je identiteit-gebaseerde gewoonten vormen?</li>
+                    <li>Wat zijn de psychologische principes achter identiteit ontwikkeling?</li>
                 </ul>
+                <p><strong>Presentatie:</strong> Maak een korte samenvatting van je bevindingen en deel deze met anderen.</p>
             </div>
         </div>
 
         <!-- Dagelijkse Checklists en Routines -->
         <div class="section">
-            <h2>✅ Dagelijkse Checklists en Routines</h2>
+            <h2>✅ Levensstijl Discipline Checklists</h2>
+            <p><strong>Doel:</strong> Deze checklists zijn specifiek ontworpen om je identiteit-gebaseerde discipline te versterken.</p>
 
-            <h3>Ochtend Routine</h3>
+            <h3>Ochtend Routine (Identiteit Versterking)</h3>
             <div class="checklist">
                 <div class="checklist-item">
                     <input type="checkbox" id="morning1">
-                    <label for="morning1">Herinner jezelf aan de belangrijkste concepten uit deze les</label>
+                    <label for="morning1">Herinner jezelf aan je gewenste identiteit ("Ik ben iemand die...")</label>
                 </div>
                 <div class="checklist-item">
                     <input type="checkbox" id="morning2">
-                    <label for="morning2">Plan je dag met de principes in gedachten</label>
+                    <label for="morning2">Plan je dag met identiteit-gebaseerde doelen</label>
                 </div>
                 <div class="checklist-item">
                     <input type="checkbox" id="morning3">
-                    <label for="morning3">Stel jezelf een specifiek doel voor vandaag</label>
+                    <label for="morning3">Visualiseer jezelf handelend naar je gewenste identiteit</label>
                 </div>
                 <div class="checklist-item">
                     <input type="checkbox" id="morning4">
-                    <label for="morning4">Visualiseer hoe je de concepten gaat toepassen</label>
+                    <label for="morning4">Stel jezelf de vraag: "Wat zou iemand met mijn gewenste identiteit doen?"</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="morning5">
+                    <label for="morning5">Begin met een kleine actie die je identiteit ondersteunt</label>
                 </div>
             </div>
 
-            <h3>Dagelijkse Implementatie</h3>
+            <h3>Dagelijkse Identiteit Ondersteuning</h3>
             <div class="checklist">
                 <div class="checklist-item">
                     <input type="checkbox" id="daily1">
-                    <label for="daily1">Pas de concepten toe in je dagelijkse activiteiten</label>
+                    <label for="daily1">Handel naar je gewenste identiteit in elke beslissing</label>
                 </div>
                 <div class="checklist-item">
                     <input type="checkbox" id="daily2">
-                    <label for="daily2">Wees bewust van momenten waar je kunt groeien</label>
+                    <label for="daily2">Wees bewust van momenten waar je kunt kiezen voor je identiteit</label>
                 </div>
                 <div class="checklist-item">
                     <input type="checkbox" id="daily3">
-                    <label for="daily3">Leer van uitdagingen en tegenslagen</label>
+                    <label for="daily3">Vier elke actie die je identiteit ondersteunt</label>
                 </div>
                 <div class="checklist-item">
                     <input type="checkbox" id="daily4">
-                    <label for="daily4">Celebreer kleine overwinningen</label>
+                    <label for="daily4">Leer van momenten waar je niet naar je identiteit handelde</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="daily5">
+                    <label for="daily5">Herinner jezelf regelmatig aan je gewenste identiteit</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="daily6">
+                    <label for="daily6">Gebruik identiteit-gebaseerde zelfspraak ("Ik ben iemand die...")</label>
                 </div>
             </div>
 
-            <h3>Avond Reflectie</h3>
+            <h3>Avond Identiteit Reflectie</h3>
             <div class="checklist">
                 <div class="checklist-item">
                     <input type="checkbox" id="evening1">
-                    <label for="evening1">Evalueer hoe je dag is verlopen</label>
+                    <label for="evening1">Evalueer welke acties je identiteit ondersteunden</label>
                 </div>
                 <div class="checklist-item">
                     <input type="checkbox" id="evening2">
-                    <label for="evening2">Identificeer wat goed ging en wat beter kan</label>
+                    <label for="evening2">Identificeer waar je sterk was in je identiteit</label>
                 </div>
                 <div class="checklist-item">
                     <input type="checkbox" id="evening3">
-                    <label for="evening3">Plan verbeteringen voor morgen</label>
+                    <label for="evening3">Noteer waar je je identiteit kon versterken</label>
                 </div>
                 <div class="checklist-item">
                     <input type="checkbox" id="evening4">
-                    <label for="evening4">Wees dankbaar voor je groei en leerervaringen</label>
+                    <label for="evening4">Plan morgen met specifieke identiteit doelen</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="evening5">
+                    <label for="evening5">Celebreer je identiteit overwinningen</label>
+                </div>
+            </div>
+
+            <h3>Weekelijkse Identiteit Check</h3>
+            <div class="checklist">
+                <div class="checklist-item">
+                    <input type="checkbox" id="weekly1">
+                    <label for="weekly1">Evalueer hoe sterk je identiteit is geworden (1-10)</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="weekly2">
+                    <label for="weekly2">Controleer welke identiteit-gebaseerde gewoonten je hebt ontwikkeld</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="weekly3">
+                    <label for="weekly3">Identificeer patronen in je identiteit ontwikkeling</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="weekly4">
+                    <label for="weekly4">Plan verdere identiteit versterking voor de komende week</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="weekly5">
+                    <label for="weekly5">Stel nieuwe, uitdagende identiteit doelen</label>
                 </div>
             </div>
         </div>
 
         <!-- Reflectie Vragen -->
         <div class="section">
-            <h2>🤔 Reflectie Vragen voor Persoonlijke Groei</h2>
+            <h2>🤔 Reflectie Vragen voor Levensstijl Discipline</h2>
+            <p><strong>Doel:</strong> Deze vragen helpen je om dieper na te denken over je identiteit ontwikkeling en levensstijl discipline.</p>
 
             <div class="reflection-question">
-                <h4>Vraag 1: Huidige Situatie</h4>
-                <p>Hoe zou je je huidige implementatie van de concepten uit deze les beoordelen op een schaal van 1-10? Wat zijn de specifieke gebieden waar je de meeste groei kunt maken?</p>
+                <h4>Vraag 1: Huidige Identiteit Status</h4>
+                <p>Hoe zou je je huidige identiteit rond discipline beoordelen op een schaal van 1-10? Welke specifieke overtuigingen heb je over jezelf wat betreft discipline? Wat zijn je grootste identiteit uitdagingen?</p>
             </div>
 
             <div class="reflection-question">
-                <h4>Vraag 2: Uitdagingen</h4>
-                <p>Welke uitdagingen kom je tegen bij het toepassen van deze concepten? Hoe kun je deze uitdagingen omzetten in kansen voor groei?</p>
+                <h4>Vraag 2: Identiteit Killers Identificatie</h4>
+                <p>Welke factoren in je huidige levensstijl ondermijnen je gewenste identiteit het meest? Denk aan negatieve zelfspraak, beperkende overtuigingen, omgevingsfactoren, en mentale patronen. Welke van deze factoren kun je het gemakkelijkst aanpakken?</p>
             </div>
 
             <div class="reflection-question">
-                <h4>Vraag 3: Impact</h4>
-                <p>Welke positieve veranderingen heb je al gemerkt sinds je begonnen bent met het toepassen van deze concepten? Hoe heeft dit je leven beïnvloed?</p>
+                <h4>Vraag 3: Impact van Identiteit op je Leven</h4>
+                <p>Hoe heeft je huidige identiteit je leven beïnvloed? Welke kansen heb je gemist door beperkende identiteit overtuigingen? Hoe zou je leven eruitzien als je je gewenste identiteit volledig had ontwikkeld?</p>
             </div>
 
             <div class="reflection-question">
-                <h4>Vraag 4: Toekomst</h4>
-                <p>Hoe ziet je ideale implementatie van deze concepten eruit over 3 maanden? Welke specifieke doelen stel je jezelf?</p>
+                <h4>Vraag 4: Levensstijl Discipline Doelen</h4>
+                <p>Wat zijn je specifieke doelen voor identiteit ontwikkeling over de komende 3 maanden? Welke meetbare verbeteringen wil je zien in je identiteit-gebaseerde discipline en automatische gewoonten?</p>
             </div>
 
             <div class="reflection-question">
-                <h4>Vraag 5: Ondersteuning</h4>
-                <p>Welke ondersteuning heb je nodig om deze concepten beter te kunnen toepassen? Hoe kun je jezelf en anderen helpen om te groeien?</p>
+                <h4>Vraag 5: Identiteit Implementatie Strategie</h4>
+                <p>Welke veranderingen in je identiteit ben je bereid te maken om levensstijl discipline te ontwikkelen? Wat zijn je grootste uitdagingen bij het implementeren van identiteit-gebaseerde gewoonten? Hoe kun je jezelf verantwoordelijk houden?</p>
+            </div>
+
+            <div class="reflection-question">
+                <h4>Vraag 6: Langetermijn Identiteit Visie</h4>
+                <p>Hoe ziet je ideale identiteit eruit over 1 jaar? Welke rol speelt levensstijl discipline in je algemene prestatie- en ontwikkelingsdoelen? Hoe kun je deze identiteit kennis doorgeven aan anderen?</p>
             </div>
         </div>
 
         <!-- Volgende Stappen en Actieplan -->
         <div class="section">
-            <h2>🚀 Volgende Stappen en Actieplan</h2>
+            <h2>🚀 Levensstijl Discipline Actieplan</h2>
 
             <div class="action-plan">
-                <h3>30-Dagen Implementatie Plan</h3>
+                <h3>30-Dagen Identiteit Ontwikkeling Plan</h3>
 
                 <div class="action-step">
-                    <h4>Week 1: Bewustwording en Baseline</h4>
+                    <h4>Week 1: Identiteit Bewustwording en Baseline</h4>
                     <ul>
-                        <li>Voltooi de zelf-assessment oefening</li>
-                        <li>Implementeer de ochtend routine</li>
-                        <li>Begin met dagelijkse bewustwording van de concepten</li>
-                        <li>Start met het bijhouden van je voortgang</li>
+                        <li>Voltooi de identiteit assessment oefening</li>
+                        <li>Start met het levensstijl discipline dagboek (7 dagen)</li>
+                        <li>Implementeer de ochtend identiteit routine</li>
+                        <li>Begin met 3 kleine identiteit-versterkende gewoonten</li>
+                        <li>Identificeer je grootste identiteit killers</li>
                     </ul>
                 </div>
 
                 <div class="action-step">
-                    <h4>Week 2: Dagelijkse Implementatie</h4>
+                    <h4>Week 2: Identiteit Versterking en Systemen</h4>
                     <ul>
-                        <li>Pas de concepten toe in je dagelijkse activiteiten</li>
-                        <li>Focus op consistentie boven perfectie</li>
-                        <li>Identificeer en adresseer uitdagingen</li>
-                        <li>Bouw momentum op door kleine overwinningen</li>
+                        <li>Optimaliseer je identiteit-gebaseerde ochtend routine</li>
+                        <li>Implementeer identiteit-ondersteunende systemen</li>
+                        <li>Gebruik identiteit-gebaseerde zelfspraak dagelijks</li>
+                        <li>Handel naar je gewenste identiteit in elke beslissing</li>
+                        <li>Begin met avond identiteit reflectie routine</li>
                     </ul>
                 </div>
 
                 <div class="action-step">
-                    <h4>Week 3: Optimalisatie en Verfijning</h4>
+                    <h4>Week 3: Identiteit Consolidatie en Uitbreiding</h4>
                     <ul>
-                        <li>Evalueer je voortgang en pas je aanpak aan</li>
-                        <li>Verhoog de intensiteit waar mogelijk</li>
-                        <li>Integreer de concepten in nieuwe situaties</li>
-                        <li>Zoek naar manieren om anderen te helpen</li>
+                        <li>Verhoog de intensiteit van je identiteit gewoonten</li>
+                        <li>Integreer identiteit-gebaseerde discipline in nieuwe situaties</li>
+                        <li>Bouw momentum op door identiteit overwinningen</li>
+                        <li>Implementeer weekelijkse identiteit checks</li>
+                        <li>Zoek naar manieren om anderen te helpen met identiteit ontwikkeling</li>
                     </ul>
                 </div>
 
                 <div class="action-step">
-                    <h4>Week 4: Consolidatie en Planning</h4>
+                    <h4>Week 4: Identiteit Consolidatie en Planning</h4>
                     <ul>
-                        <li>Consolideer je nieuwe gewoonten</li>
-                        <li>Plan voor langetermijn implementatie</li>
-                        <li>Stel nieuwe, uitdagende doelen</li>
-                        <li>Deel je ervaringen en leer van anderen</li>
+                        <li>Consolideer alle nieuwe identiteit gewoonten</li>
+                        <li>Evalueer je identiteit ontwikkeling met het dagboek</li>
+                        <li>Meet je verbeteringen (identiteit sterkte, automatische gewoonten)</li>
+                        <li>Plan voor langetermijn identiteit onderhoud</li>
+                        <li>Stel nieuwe, uitdagende identiteit doelen</li>
                     </ul>
                 </div>
             </div>
 
-            <h3>Langetermijn Strategieën</h3>
+            <h3>Langetermijn Identiteit Strategieën</h3>
             <ul>
-                <li><strong>Maand 2-3:</strong> Verdieping en geavanceerde toepassing</li>
+                <li><strong>Maand 2-3:</strong> Verdieping in geavanceerde identiteit ontwikkeling technieken</li>
                 <li><strong>Maand 4-6:</strong> Integratie met andere ontwikkelingsgebieden</li>
-                <li><strong>Maand 6+:</strong> Mentorschap en doorgeven van kennis</li>
+                <li><strong>Maand 6+:</strong> Mentorschap en doorgeven van identiteit kennis</li>
             </ul>
+
+            <h3>Identiteit Monitoring en Meting</h3>
+            <div class="highlight-box">
+                <h4>📊 Belangrijke Metingen</h4>
+                <ul>
+                    <li><strong>Subjectieve Metingen:</strong> Identiteit sterkte, automatische gewoonten, zelfspraak</li>
+                    <li><strong>Objectieve Metingen:</strong> Identiteit-gebaseerde acties, gewoonte streak, beslissingsconsistentie</li>
+                    <li><strong>Reflectie Tests:</strong> Weekelijkse identiteit evaluatie en aanpassingen</li>
+                </ul>
+            </div>
 
             <div class="highlight-box">
                 <h4>🎯 Belangrijke Herinnering</h4>
-                <p>Echte groei gebeurt door consistente, dagelijkse actie. Focus op progressie, niet op perfectie. Elke dag is een nieuwe kans om te groeien en jezelf te verbeteren.</p>
+                <p>Levensstijl discipline ontwikkeling is een langetermijn proces. Focus op consistente, dagelijkse identiteit versterking. Kleine identiteit veranderingen leiden tot grote resultaten. Elke dag is een nieuwe kans om je identiteit te versterken en je levensstijl discipline te verbeteren.</p>
             </div>
         </div>
 
