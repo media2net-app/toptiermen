@@ -228,6 +228,7 @@ const mapDbSchemaToForm = (dbSchema: any) => ({
   difficulty: dbSchema.difficulty,
   status: dbSchema.status,
   training_goal: dbSchema.training_goal,
+  schema_nummer: dbSchema.schema_nummer,
   days: (dbSchema.training_schema_days || [])
     .sort((a: any, b: any) => (a.day_number ?? 0) - (b.day_number ?? 0))
     .map((day: any) => ({
