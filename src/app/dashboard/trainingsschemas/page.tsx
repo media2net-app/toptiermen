@@ -572,25 +572,39 @@ function TrainingschemasContent() {
     
     console.log(`🎯 Mapping frontend goal "${profile.training_goal}" to database goal "${dbGoal}"`);
     
-    // FIXED APPROACH: Simple and effective filtering with proper deduplication
-    // Find schemas that match goal + equipment + frequency (exact match)
-    const exactMatches = schemas.filter(schema => {
+    // IMPROVED APPROACH: Prioritize goal + frequency, then equipment as secondary filter
+    // First, find schemas that match goal + frequency (primary criteria)
+    const primaryMatches = schemas.filter(schema => {
       const goalMatch = schema.training_goal === dbGoal;
-      const equipmentMatch = schema.equipment_type === profile.equipment_type;
       const frequencyMatch = (schema.training_schema_days?.length || 0) === profile.training_frequency;
       
-      console.log(`🔍 Schema "${schema.name}": goal=${goalMatch}, equipment=${equipmentMatch}, frequency=${frequencyMatch} (${schema.training_goal} vs ${dbGoal}, ${schema.equipment_type} vs ${profile.equipment_type}, ${schema.training_schema_days?.length || 0} days vs ${profile.training_frequency})`);
+      console.log(`🔍 Schema "${schema.name}": goal=${goalMatch}, frequency=${frequencyMatch} (${schema.training_goal} vs ${dbGoal}, ${schema.training_schema_days?.length || 0} days vs ${profile.training_frequency})`);
       
-      return goalMatch && equipmentMatch && frequencyMatch;
+      return goalMatch && frequencyMatch;
     });
     
-    console.log(`🎯 Exact matches (goal + equipment + frequency): ${exactMatches.length}`);
-    exactMatches.forEach(schema => {
+    console.log(`🎯 Primary matches (goal + frequency): ${primaryMatches.length}`);
+    primaryMatches.forEach(schema => {
+      console.log(`  ✅ "${schema.name}" - Schema ${schema.schema_nummer} (${schema.training_goal}, ${schema.equipment_type}, ${schema.training_schema_days?.length || 0} days)`);
+    });
+    
+    // Then, prioritize equipment type matches but include all primary matches
+    const exactMatches = primaryMatches.filter(schema => {
+      const equipmentMatch = schema.equipment_type === profile.equipment_type;
+      console.log(`🔍 Equipment check for "${schema.name}": ${equipmentMatch} (${schema.equipment_type} vs ${profile.equipment_type})`);
+      return equipmentMatch;
+    });
+    
+    // If we have equipment matches, use them; otherwise use all primary matches
+    const finalMatches = exactMatches.length > 0 ? exactMatches : primaryMatches;
+    
+    console.log(`🎯 Final matches (prioritized): ${finalMatches.length}`);
+    finalMatches.forEach(schema => {
       console.log(`  ✅ "${schema.name}" - Schema ${schema.schema_nummer} (${schema.training_goal}, ${schema.equipment_type}, ${schema.training_schema_days?.length || 0} days)`);
     });
     
     // DEDUPLICATION: Remove duplicates based on schema_nummer
-    const uniqueExactMatches = exactMatches.reduce((acc, schema) => {
+    const uniqueFinalMatches = finalMatches.reduce((acc, schema) => {
       const existing = acc.find(s => s.schema_nummer === schema.schema_nummer);
       if (!existing) {
         acc.push(schema);
@@ -598,25 +612,24 @@ function TrainingschemasContent() {
       return acc;
     }, [] as TrainingSchema[]);
     
-    console.log(`🎯 Unique exact matches after deduplication: ${uniqueExactMatches.length}`);
+    console.log(`🎯 Unique final matches after deduplication: ${uniqueFinalMatches.length}`);
     
     // Sort by schema number and take first 3
-    const sortedExactMatches = uniqueExactMatches.sort((a, b) => {
+    const sortedFinalMatches = uniqueFinalMatches.sort((a, b) => {
       const aNum = a.schema_nummer || 0;
       const bNum = b.schema_nummer || 0;
       return aNum - bNum;
     });
     
-    let result = sortedExactMatches.slice(0, 3);
+    let result = sortedFinalMatches.slice(0, 3);
     
-    // If we don't have enough exact matches, show what we have with clear messaging
+    // If we don't have enough matches, show what we have with clear messaging
     if (result.length === 0) {
-      console.log('⚠️ No exact matches found, showing fallback schemas');
-      // Fallback to goal + equipment (any frequency)
+      console.log('⚠️ No matches found, showing fallback schemas');
+      // Fallback to goal only (any frequency, any equipment)
       const fallbackMatches = schemas.filter(schema => {
         const goalMatch = schema.training_goal === dbGoal;
-        const equipmentMatch = schema.equipment_type === profile.equipment_type;
-        return goalMatch && equipmentMatch;
+        return goalMatch;
       });
       
       // Deduplicate and sort
@@ -630,7 +643,7 @@ function TrainingschemasContent() {
       
       result = uniqueFallback.sort((a, b) => (a.schema_nummer || 0) - (b.schema_nummer || 0)).slice(0, 3);
     } else if (result.length < 3) {
-      console.log(`⚠️ Only ${result.length} exact matches found for ${profile.training_frequency}x per week ${dbGoal}`);
+      console.log(`⚠️ Only ${result.length} matches found for ${profile.training_frequency}x per week ${dbGoal}`);
       console.log('📝 This is expected if the database doesn\'t have all 3 schemas for this frequency');
       
       // Show a helpful message to the user about available schemas
