@@ -12,8 +12,8 @@ export default function MindFocusAdminPage() {
   // Modal states
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState('');
-  const [editingItem, setEditingItem] = useState(null);
-  const [modalData, setModalData] = useState({});
+  const [editingItem, setEditingItem] = useState<any>(null);
+  const [modalData, setModalData] = useState<any>({});
 
   // Check if user is admin
   const isAdmin = user?.email === 'rick@toptiermen.eu' || user?.email === 'chiel@media2net.nl';
@@ -125,7 +125,7 @@ export default function MindFocusAdminPage() {
   ]);
 
   // Modal handlers
-  const openModal = (type, item = null) => {
+  const openModal = (type: string, item: any = null) => {
     setModalType(type);
     setEditingItem(item);
     setModalData(item || {});
@@ -139,7 +139,7 @@ export default function MindFocusAdminPage() {
     setModalData({});
   };
 
-  const handleSave = (type, data) => {
+  const handleSave = (type: string, data: any) => {
     const newId = Math.max(...getCurrentData(type).map(item => item.id)) + 1;
     const newItem = { ...data, id: newId, status: 'published' };
     
@@ -164,7 +164,7 @@ export default function MindFocusAdminPage() {
     closeModal();
   };
 
-  const handleEdit = (type, item) => {
+  const handleEdit = (type: string, item: any) => {
     switch (type) {
       case 'meditation':
         setMeditationData(meditationData.map(i => i.id === item.id ? { ...i, ...item } : i));
@@ -186,7 +186,7 @@ export default function MindFocusAdminPage() {
     closeModal();
   };
 
-  const handleDelete = (type, id) => {
+  const handleDelete = (type: string, id: number) => {
     if (confirm('Weet je zeker dat je dit item wilt verwijderen?')) {
       switch (type) {
         case 'meditation':
@@ -209,7 +209,7 @@ export default function MindFocusAdminPage() {
     }
   };
 
-  const getCurrentData = (type) => {
+  const getCurrentData = (type: string) => {
     switch (type) {
       case 'meditation': return meditationData;
       case 'breathing': return breathingData;
@@ -515,7 +515,7 @@ export default function MindFocusAdminPage() {
 
             <form onSubmit={(e) => {
               e.preventDefault();
-              const formData = new FormData(e.target);
+              const formData = new FormData(e.target as HTMLFormElement);
               const data = Object.fromEntries(formData.entries());
               if (editingItem) {
                 handleEdit(modalType, { ...editingItem, ...data });
