@@ -563,6 +563,7 @@ function TrainingschemasContent() {
       'kracht/conditie': 'kracht_uithouding',
       'kracht/power': 'power_kracht',
       'Power & Kracht': 'power_kracht',
+      'Kracht & Uithouding': 'kracht_uithouding', // Frontend naam -> Database naam
       'power_kracht': 'power_kracht',
       'kracht_uithouding': 'kracht_uithouding'
     };
@@ -572,8 +573,8 @@ function TrainingschemasContent() {
     
     console.log(`🎯 Mapping frontend goal "${profile.training_goal}" to database goal "${dbGoal}"`);
     
-    // IMPROVED APPROACH: Prioritize goal + frequency, then equipment as secondary filter
-    // First, find schemas that match goal + frequency (primary criteria)
+    // NEW APPROACH: Always show ALL schemas that match goal + frequency, regardless of equipment type
+    // This ensures users see all 3 schemas (1, 2, 3) for their chosen goal and frequency
     const primaryMatches = schemas.filter(schema => {
       const goalMatch = schema.training_goal === dbGoal;
       const frequencyMatch = (schema.training_schema_days?.length || 0) === profile.training_frequency;
@@ -588,23 +589,8 @@ function TrainingschemasContent() {
       console.log(`  ✅ "${schema.name}" - Schema ${schema.schema_nummer} (${schema.training_goal}, ${schema.equipment_type}, ${schema.training_schema_days?.length || 0} days)`);
     });
     
-    // Then, prioritize equipment type matches but include all primary matches
-    const exactMatches = primaryMatches.filter(schema => {
-      const equipmentMatch = schema.equipment_type === profile.equipment_type;
-      console.log(`🔍 Equipment check for "${schema.name}": ${equipmentMatch} (${schema.equipment_type} vs ${profile.equipment_type})`);
-      return equipmentMatch;
-    });
-    
-    // If we have equipment matches, use them; otherwise use all primary matches
-    const finalMatches = exactMatches.length > 0 ? exactMatches : primaryMatches;
-    
-    console.log(`🎯 Final matches (prioritized): ${finalMatches.length}`);
-    finalMatches.forEach(schema => {
-      console.log(`  ✅ "${schema.name}" - Schema ${schema.schema_nummer} (${schema.training_goal}, ${schema.equipment_type}, ${schema.training_schema_days?.length || 0} days)`);
-    });
-    
     // DEDUPLICATION: Remove duplicates based on schema_nummer
-    const uniqueFinalMatches = finalMatches.reduce((acc, schema) => {
+    const uniqueMatches = primaryMatches.reduce((acc, schema) => {
       const existing = acc.find(s => s.schema_nummer === schema.schema_nummer);
       if (!existing) {
         acc.push(schema);
@@ -612,16 +598,22 @@ function TrainingschemasContent() {
       return acc;
     }, [] as TrainingSchema[]);
     
-    console.log(`🎯 Unique final matches after deduplication: ${uniqueFinalMatches.length}`);
+    console.log(`🎯 Unique matches after deduplication: ${uniqueMatches.length}`);
     
-    // Sort by schema number and take first 3
-    const sortedFinalMatches = uniqueFinalMatches.sort((a, b) => {
+    // Sort by schema number to ensure consistent ordering (1, 2, 3)
+    const sortedMatches = uniqueMatches.sort((a, b) => {
       const aNum = a.schema_nummer || 0;
       const bNum = b.schema_nummer || 0;
       return aNum - bNum;
     });
     
-    let result = sortedFinalMatches.slice(0, 3);
+    // Take first 3 schemas (should be Schema 1, 2, 3)
+    let result = sortedMatches.slice(0, 3);
+    
+    console.log(`🎯 Final result: ${result.length} schemas`);
+    result.forEach((schema, index) => {
+      console.log(`  ${index + 1}. Schema ${schema.schema_nummer}: "${schema.name}" (${schema.training_goal}, ${schema.equipment_type}, ${schema.training_schema_days?.length || 0} days) - Status: ${schema.status}`);
+    });
     
     // If we don't have enough matches, show what we have with clear messaging
     if (result.length === 0) {

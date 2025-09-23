@@ -1055,12 +1055,12 @@ export default function VoedingsplannenV2Page() {
     // Set the selected plan ID for visual selection
     setSelectedPlanId(plan.plan_id || plan.id);
     
-    // Complete onboarding step 4 if in onboarding
-    if (!isCompleted && currentStep === 4) {
-      console.log('🔧 DEBUG: Completing onboarding step 4...');
+    // Complete onboarding step 5 if in onboarding
+    if (!isCompleted && currentStep === 5) {
+      console.log('🔧 DEBUG: Completing onboarding step 5...');
       try {
-        await completeStep(4, { nutritionPlan: plan.plan_id || plan.id });
-        console.log('✅ Onboarding step 4 completed');
+        await completeStep(5, { nutritionPlan: plan.plan_id || plan.id });
+        console.log('✅ Onboarding step 5 completed');
         
         // Redirect to forum intro after completing nutrition plan selection
         setTimeout(() => {
@@ -1069,10 +1069,10 @@ export default function VoedingsplannenV2Page() {
           router.push('/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden');
         }, 1500); // Increased timeout to allow loading overlay to show
       } catch (error) {
-        console.error('❌ Error completing onboarding step 4:', error);
+        console.error('❌ Error completing onboarding step 5:', error);
       }
     } else {
-      console.log('🔧 DEBUG: Not in onboarding or not step 4, skipping onboarding completion');
+      console.log('🔧 DEBUG: Not in onboarding or not step 5, skipping onboarding completion');
     }
   };
 
@@ -1999,6 +1999,39 @@ export default function VoedingsplannenV2Page() {
               </motion.div>
             )}
             
+            {/* Volgende Stap Button - Show when any plan is selected in onboarding */}
+            {!isCompleted && currentStep === 5 && selectedPlanId && (
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-[#181F17] border border-[#3A4D23] rounded-xl p-6 mb-6"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-gradient-to-r from-[#B6C948] to-[#8BAE5A] rounded-full flex items-center justify-center">
+                      <span className="text-[#181F17] font-bold text-sm">✓</span>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-white">Voedingsplan Geselecteerd</h3>
+                      <p className="text-[#8BAE5A] text-sm">Je hebt een voedingsplan gekozen. Klik op "Volgende Stap" om door te gaan.</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      const selectedPlan = plans.find(plan => (plan.plan_id || plan.id) === selectedPlanId);
+                      if (selectedPlan) {
+                        handlePlanSelect(selectedPlan);
+                      }
+                    }}
+                    className="px-6 py-3 bg-gradient-to-r from-[#B6C948] to-[#8BAE5A] text-[#181F17] rounded-lg font-semibold hover:from-[#8BAE5A] hover:to-[#B6C948] transition-all duration-200 flex items-center gap-2"
+                  >
+                    <span>Volgende Stap</span>
+                    <span>→</span>
+                  </button>
+                </div>
+              </motion.div>
+            )}
+            
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {plans
               .filter((plan) => {
@@ -2121,6 +2154,20 @@ export default function VoedingsplannenV2Page() {
                     >
                       {isSelected ? 'Geselecteerd' : 'Selecteer Dit Plan'}
                     </button>
+                    
+                    {/* Volgende Stap Button - Only show in onboarding when plan is selected */}
+                    {!isCompleted && currentStep === 5 && isSelected && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handlePlanSelect(plan);
+                        }}
+                        className="w-full px-4 py-2 bg-gradient-to-r from-[#B6C948] to-[#8BAE5A] text-[#181F17] rounded-lg font-semibold hover:from-[#8BAE5A] hover:to-[#B6C948] transition-all duration-200 flex items-center justify-center gap-2"
+                      >
+                        <span>Volgende Stap</span>
+                        <span>→</span>
+                      </button>
+                    )}
                   </div>
                 </motion.div>
               );
