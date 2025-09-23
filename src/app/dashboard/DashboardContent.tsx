@@ -917,11 +917,15 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
   // Get onboarding status from context
   const { isCompleted: contextIsCompleted, currentStep: contextCurrentStep, refreshStatus } = useOnboardingV2();
   
-  // Refresh onboarding status on mount (only once)
+  // Refresh onboarding status on mount (only once) - optimized
   useEffect(() => {
     if (refreshStatus) {
       console.log('🔄 [DASHBOARD] Refreshing onboarding status on mount...');
-      refreshStatus();
+      // Add small delay to prevent race conditions
+      const timeoutId = setTimeout(() => {
+        refreshStatus();
+      }, 100);
+      return () => clearTimeout(timeoutId);
     }
   }, []); // Empty dependency array to run only once
 

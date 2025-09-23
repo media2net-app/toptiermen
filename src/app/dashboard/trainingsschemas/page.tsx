@@ -21,6 +21,7 @@ import { useOnboardingV2 } from "@/contexts/OnboardingV2Context";
 import OnboardingNotice from '@/components/OnboardingNotice';
 import OnboardingV2Progress from '@/components/OnboardingV2Progress';
 import OnboardingLoadingOverlay from '@/components/OnboardingLoadingOverlay';
+import PostOnboardingSchemaModal from '@/components/PostOnboardingSchemaModal';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useSubscription } from '@/hooks/useSubscription';
 import { supabase } from '@/lib/supabase';
@@ -162,6 +163,10 @@ function TrainingschemasContent() {
     exerciseName: '',
     videoUrl: ''
   });
+  
+  // Post-onboarding modal state
+  const [showPostOnboardingModal, setShowPostOnboardingModal] = useState(false);
+  const [selectedSchemaForModal, setSelectedSchemaForModal] = useState<TrainingSchema | null>(null);
   const [viewingDynamicPlan, setViewingDynamicPlan] = useState<{schemaId: string, schemaName: string} | null>(null);
   
   // Onboarding state
@@ -969,6 +974,18 @@ function TrainingschemasContent() {
           console.log('🎯 Schema selected during onboarding step 3 - NOT auto-completing');
           // Don't auto-complete, let user click "Volgende Stap" button
           // The "Volgende Stap" button will be shown in the UI
+          
+          // Auto-scroll to the "Volgende Stap" button after a short delay
+          setTimeout(() => {
+            const nextStepButton = document.querySelector('[data-next-step-button]');
+            if (nextStepButton) {
+              console.log('🎯 Auto-scrolling to next step button...');
+              nextStepButton.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'center' 
+              });
+            }
+          }, 500); // Small delay to ensure the button is rendered
         }
       } else {
         toast.error(data.error || 'Failed to select training schema');
@@ -1407,6 +1424,23 @@ function TrainingschemasContent() {
             const shouldShowStep3 = !data.onboarding.isCompleted && 
               (data.onboarding.currentStep === 3 || (!data.onboarding.status?.training_schema_selected && data.onboarding.currentStep >= 2));
             setShowOnboardingStep3(shouldShowStep3);
+            
+            // Check if user just completed onboarding and has a selected schema
+            if (data.onboarding.isCompleted && data.onboarding.status?.training_schema_selected && data.onboarding.status?.selected_training_schema_id) {
+              console.log('🎯 User completed onboarding with selected schema, checking for post-onboarding modal...');
+              // Check if this is the first visit after onboarding completion
+              const hasSeenPostOnboardingModal = localStorage.getItem('hasSeenPostOnboardingModal');
+              if (!hasSeenPostOnboardingModal) {
+                console.log('🎯 First visit after onboarding completion, showing modal...');
+                // Find the selected schema in the loaded schemas
+                const selectedSchema = trainingSchemas.find(schema => schema.id === data.onboarding.status.selected_training_schema_id);
+                if (selectedSchema) {
+                  setSelectedSchemaForModal(selectedSchema);
+                  setShowPostOnboardingModal(true);
+                  localStorage.setItem('hasSeenPostOnboardingModal', 'true');
+                }
+              }
+            }
           }
         }
       } catch (error) {
@@ -1606,6 +1640,7 @@ function TrainingschemasContent() {
             </div>
             
             <button
+              data-next-step-button
               onClick={async () => {
                 try {
                   await completeStep(3); // Database step 3 = SELECT_TRAINING for UI step 4
@@ -2340,9 +2375,16 @@ function TrainingschemasContent() {
 
       {/* Onboarding Loading Overlay */}
       <OnboardingLoadingOverlay 
-        show={showLoadingOverlay}
-        text={loadingText}
-        progress={loadingProgress}
+        show={showLoadingOverlay} 
+        text={loadingText} 
+        progress={loadingProgress} 
+      />
+      
+      {/* Post-Onboarding Schema Modal */}
+      <PostOnboardingSchemaModal
+        isOpen={showPostOnboardingModal}
+        onClose={() => setShowPostOnboardingModal(false)}
+        selectedSchema={selectedSchemaForModal}
       />
     </PageLayout>
   );

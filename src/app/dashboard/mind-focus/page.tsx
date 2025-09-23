@@ -4,10 +4,18 @@ import React, { useState } from 'react';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { FaBrain, FaLeaf, FaLungs, FaRegSmileBeam, FaPlay, FaMusic, FaBookOpen, FaClock, FaUser, FaHeart, FaStar, FaPlayCircle, FaCheckCircle } from 'react-icons/fa';
 import Link from 'next/link';
+import MeditationModal from '@/components/MeditationModal';
 
 export default function MindFocusPage() {
   const { user, profile } = useSupabaseAuth();
   const [activeTab, setActiveTab] = useState('overview');
+  const [showMeditationModal, setShowMeditationModal] = useState(false);
+  const [selectedMeditation, setSelectedMeditation] = useState(null);
+
+  const handleStartMeditation = (meditation: any) => {
+    setSelectedMeditation(meditation);
+    setShowMeditationModal(true);
+  };
 
   const tabs = [
     { id: 'overview', label: 'Overzicht', icon: <FaBrain /> },
@@ -220,7 +228,10 @@ export default function MindFocusPage() {
                     {meditation.type}
                   </span>
                 </div>
-                <button className="bg-[#8BAE5A] text-[#181F17] px-6 py-2 rounded-lg font-semibold hover:bg-[#B6C948] transition-colors flex items-center gap-2">
+                <button 
+                  onClick={() => handleStartMeditation(meditation)}
+                  className="bg-[#8BAE5A] text-[#181F17] px-6 py-2 rounded-lg font-semibold hover:bg-[#B6C948] transition-colors flex items-center gap-2"
+                >
                   <FaPlay /> Start Meditatie
                 </button>
               </div>
@@ -388,6 +399,13 @@ export default function MindFocusPage() {
           </div>
         </div>
       </div>
+      
+      {/* Meditation Modal */}
+      <MeditationModal
+        isOpen={showMeditationModal}
+        onClose={() => setShowMeditationModal(false)}
+        meditation={selectedMeditation}
+      />
     </div>
   );
 }

@@ -414,13 +414,13 @@ export default function OnboardingV2Modal({ isOpen }: OnboardingV2ModalProps) {
   const handleStepComplete = async (step: number, data?: any) => {
     const success = await completeStep(step, data);
     if (success) {
-      // Handle redirects after step completion
+      // Handle redirects after step completion with optimized timing
       if (step === 0) { // Welcome video (database step 0) -> redirect to goal step
-        router.push('/dashboard');
+        setTimeout(() => router.push('/dashboard'), 100);
       } else if (step === 1) { // Goal step (database step 1) -> redirect to challenges
-        router.push('/dashboard/mijn-challenges');
+        setTimeout(() => router.push('/dashboard/mijn-challenges'), 100);
       } else if (step === 5) { // Forum intro step (database step 5) -> complete onboarding
-        router.push('/dashboard');
+        setTimeout(() => router.push('/dashboard'), 100);
       }
     }
   };

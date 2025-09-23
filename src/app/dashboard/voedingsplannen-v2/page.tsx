@@ -23,6 +23,7 @@ import {
 } from '@heroicons/react/24/solid';
 import { PencilIcon } from '@heroicons/react/24/outline';
 import IngredientEditModal from '@/components/IngredientEditModal';
+import PostOnboardingNutritionModal from '@/components/PostOnboardingNutritionModal';
 import { toast } from 'react-hot-toast';
 import { useSubscription } from '@/hooks/useSubscription';
 
@@ -118,6 +119,43 @@ export default function VoedingsplannenV2Page() {
   const [editingMealType, setEditingMealType] = useState<string>('');
   const [editingDay, setEditingDay] = useState<string>('');
   const [selectedPlanId, setSelectedPlanId] = useState<string | number | null>(null);
+  
+  // Post-onboarding modal state
+  const [showPostOnboardingModal, setShowPostOnboardingModal] = useState(false);
+  const [selectedPlanForModal, setSelectedPlanForModal] = useState<NutritionPlan | null>(null);
+
+  // Check for post-onboarding modal
+  useEffect(() => {
+    if (!user?.email || !isCompleted) return;
+    
+    const checkPostOnboardingModal = async () => {
+      try {
+        const response = await fetch(`/api/onboarding-v2?email=${user.email}`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.onboarding.isCompleted && data.onboarding.status?.nutrition_plan_selected && data.onboarding.status?.selected_nutrition_plan_id) {
+            console.log('🎯 User completed onboarding with selected nutrition plan, checking for post-onboarding modal...');
+            // Check if this is the first visit after onboarding completion
+            const hasSeenPostOnboardingModal = localStorage.getItem('hasSeenPostOnboardingNutritionModal');
+            if (!hasSeenPostOnboardingModal) {
+              console.log('🎯 First visit after onboarding completion, showing nutrition modal...');
+              // Find the selected plan in the loaded plans
+              const selectedPlan = plans.find(plan => (plan.plan_id || plan.id) === data.onboarding.status.selected_nutrition_plan_id);
+              if (selectedPlan) {
+                setSelectedPlanForModal(selectedPlan);
+                setShowPostOnboardingModal(true);
+                localStorage.setItem('hasSeenPostOnboardingNutritionModal', 'true');
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error checking post-onboarding status:', error);
+      }
+    };
+    
+    checkPostOnboardingModal();
+  }, [user?.email, isCompleted, plans]);
 
   // Check user subscription on component mount
   useEffect(() => {
@@ -1063,11 +1101,9 @@ export default function VoedingsplannenV2Page() {
         console.log('✅ Onboarding step 5 completed');
         
         // Redirect to forum intro after completing nutrition plan selection
-        setTimeout(() => {
-          console.log('🔧 DEBUG: Redirecting to forum intro...');
-          // Use router.push for better navigation and loading overlay support
-          router.push('/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden');
-        }, 1500); // Increased timeout to allow loading overlay to show
+        console.log('🔧 DEBUG: Redirecting to forum intro...');
+        // Use router.push for better navigation and loading overlay support
+        router.push('/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden');
       } catch (error) {
         console.error('❌ Error completing onboarding step 5:', error);
       }
@@ -2192,6 +2228,13 @@ export default function VoedingsplannenV2Page() {
         show={showLoadingOverlay}
         text={loadingText}
         progress={loadingProgress}
+      />
+      
+      {/* Post-Onboarding Nutrition Modal */}
+      <PostOnboardingNutritionModal
+        isOpen={showPostOnboardingModal}
+        onClose={() => setShowPostOnboardingModal(false)}
+        selectedPlan={selectedPlanForModal}
       />
     </div>
   );

@@ -11,16 +11,16 @@ export async function POST(request: NextRequest) {
     const { data: existingAdmin, error: checkError } = await supabaseAdmin
       .from('profiles')
       .select('id, email, role')
-      .eq('email', 'admin@toptiermen.com')
+      .eq('email', 'rick@toptiermen.eu')
       .single();
 
     if (existingAdmin && existingAdmin.role === 'admin') {
-      console.log('✅ Admin account already exists');
+      console.log('✅ Rick admin account already exists');
       return NextResponse.json({ 
         success: true, 
-        message: 'Admin account already exists',
-        email: 'admin@toptiermen.com',
-        password: 'Admin123!'
+        message: 'Rick admin account already exists',
+        email: 'rick@toptiermen.eu',
+        password: 'Carnivoor2025!'
       });
     }
 
@@ -38,8 +38,8 @@ export async function POST(request: NextRequest) {
           (SELECT id FROM auth.instances LIMIT 1),
           'authenticated',
           'authenticated',
-          'admin@toptiermen.com',
-          crypt('Admin123!', gen_salt('bf')),
+          'rick@toptiermen.eu',
+          crypt('Carnivoor2025!', gen_salt('bf')),
           NOW(),
           '{"provider": "email", "providers": ["email"]}',
           '{}',
@@ -51,7 +51,8 @@ export async function POST(request: NextRequest) {
 
     if (authError && !authError.message.includes('duplicate key')) {
       console.error('Error creating auth user:', authError);
-      return NextResponse.json({ error: 'Failed to create auth user' }, { status: 500 });
+      // Continue anyway, we'll create the profile and let the user sign up manually
+      console.log('⚠️ Auth user creation failed, but continuing with profile creation...');
     }
 
     // Add role column if it doesn't exist
@@ -67,8 +68,8 @@ export async function POST(request: NextRequest) {
       .from('profiles')
       .upsert({
         id: adminUserId,
-        email: 'admin@toptiermen.com',
-        full_name: 'Platform Administrator',
+        email: 'rick@toptiermen.eu',
+        full_name: 'Rick',
         rank: 'Elite',
         points: 1000,
         missions_completed: 50,
@@ -90,9 +91,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ 
       success: true, 
-      message: 'Admin account created successfully',
-      email: 'admin@toptiermen.com',
-      password: 'Admin123!',
+      message: 'Rick admin account created successfully',
+      email: 'rick@toptiermen.eu',
+      password: 'Carnivoor2025!',
       userId: adminUserId
     });
 

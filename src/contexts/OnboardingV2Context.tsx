@@ -62,17 +62,17 @@ export function OnboardingV2Provider({ children }: { children: React.ReactNode }
   const [isAdmin, setIsAdmin] = useState(false);
   const [isBasic, setIsBasic] = useState(false);
 
-  // Loading sequence function
+  // Loading sequence function - optimized for smoother experience
   const startLoadingSequence = (stepNumber: number, stepTitle: string) => {
     console.log(`🎬 Starting loading sequence for step ${stepNumber}: ${stepTitle}`);
     setShowLoadingOverlay(true);
     setLoadingText(`Stap ${stepNumber} laden...`);
     setLoadingProgress(0);
     
-    // Auto-progress loading sequence
+    // Faster, smoother loading sequence
     let progress = 0;
     const interval = setInterval(() => {
-      progress += 10;
+      progress += 15; // Increased from 10 to 15 for faster progress
       if (progress <= 90) {
         setLoadingProgress(progress);
         if (progress < 30) {
@@ -85,10 +85,10 @@ export function OnboardingV2Provider({ children }: { children: React.ReactNode }
       } else {
         clearInterval(interval);
       }
-    }, 300);
+    }, 200); // Reduced from 300ms to 200ms for smoother animation
     
-    // Cleanup interval after 4 seconds
-    setTimeout(() => clearInterval(interval), 4000);
+    // Cleanup interval after 2.5 seconds (reduced from 4 seconds)
+    setTimeout(() => clearInterval(interval), 2500);
   };
 
   const hideLoadingOverlay = () => {

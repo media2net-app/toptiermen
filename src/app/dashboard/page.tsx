@@ -131,7 +131,7 @@ export default function Dashboard() {
   // Ref to prevent multiple redirects
   const dashboardRedirectExecuted = useRef(false);
 
-  // ✅ PHASE 2.1: Simplified redirect logic using unified auth hook
+  // ✅ PHASE 2.1: Simplified redirect logic using unified auth hook - optimized
   useEffect(() => {
     if (!user || !user.email || authLoading) return;
     
@@ -155,7 +155,10 @@ export default function Dashboard() {
       
       console.log(`🔄 Redirecting to: ${redirectPath}`);
       // Use replace instead of push to prevent back button issues
-      router.replace(redirectPath);
+      // Add small delay to prevent race conditions with loading overlays
+      setTimeout(() => {
+        router.replace(redirectPath);
+      }, 150);
     } else if (onboarding?.isCompleted) {
       console.log(`✅ Onboarding completed, staying on dashboard`);
     } else {
