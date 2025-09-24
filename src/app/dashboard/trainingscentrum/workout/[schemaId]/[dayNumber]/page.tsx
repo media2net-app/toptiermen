@@ -119,6 +119,9 @@ export default function WorkoutPage() {
   ];
 
   useEffect(() => {
+    // Only run on client side to prevent hydration issues
+    if (typeof window === 'undefined') return;
+    
     console.log('🔄 useEffect triggered with:', { sessionId, schemaId, dayNumber, user: !!user });
     
     if (sessionId) {

@@ -366,9 +366,9 @@ export default function Dashboard() {
     }
   }, [user?.id]);
 
-  // Simple fade in effect
+  // Simple fade in effect - only on client side
   useEffect(() => {
-    if (!loading) {
+    if (typeof window !== 'undefined' && !loading) {
       const timer = setTimeout(() => setFadeIn(true), 100);
       return () => clearTimeout(timer);
     }

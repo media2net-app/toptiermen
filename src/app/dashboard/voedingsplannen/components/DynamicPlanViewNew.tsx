@@ -249,6 +249,9 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
   };
 
   useEffect(() => {
+    // Only run on client side to prevent hydration issues
+    if (typeof window === 'undefined') return;
+    
     if (planId && userId && userId !== 'anonymous') {
       fetchDynamicPlan();
     }

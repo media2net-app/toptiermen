@@ -719,13 +719,16 @@ export default function LessonDetailPage() {
 
   // Main data fetching effect - simplified and more reliable
   useEffect(() => {
+    // Only run on client side to prevent hydration issues
+    if (typeof window === 'undefined') return;
+    
     console.log('🔍 Main fetch effect triggered:', {
       user: !!user,
       moduleId,
       lessonId,
       hasCorrectLesson: lesson?.id === lessonId,
       loading,
-      pageVisible: typeof document !== 'undefined' ? document.visibilityState === 'visible' : 'unknown'
+      pageVisible: document.visibilityState === 'visible'
     });
 
     // Only fetch if we have required params and don't have the right data

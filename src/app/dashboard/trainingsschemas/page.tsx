@@ -1304,6 +1304,9 @@ function TrainingschemasContent() {
 
   // Effects - OPTIMIZED: Use parallel loading with enhanced debugging
   useEffect(() => {
+    // Only run on client side to prevent hydration issues
+    if (typeof window === 'undefined') return;
+    
     console.log('🔄 useEffect triggered:', {
       hasUser: !!user?.id,
       userEmail: user?.email,

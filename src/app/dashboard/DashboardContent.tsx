@@ -919,7 +919,7 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
   
   // Refresh onboarding status on mount (only once) - optimized
   useEffect(() => {
-    if (refreshStatus) {
+    if (refreshStatus && typeof window !== 'undefined') {
       console.log('🔄 [DASHBOARD] Refreshing onboarding status on mount...');
       // Add small delay to prevent race conditions
       const timeoutId = setTimeout(() => {
@@ -931,6 +931,9 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
 
   // Sync onboardingStatus with context changes
   useEffect(() => {
+    // Only run on client side to prevent hydration issues
+    if (typeof window === 'undefined') return;
+    
     if (contextIsCompleted !== undefined && contextCurrentStep !== undefined) {
       setOnboardingStatus({
         onboarding_completed: contextIsCompleted,
@@ -945,6 +948,9 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
 
   // 2.0.1: Cache busting for existing users
   useEffect(() => {
+    // Only run on client side to prevent hydration issues
+    if (typeof window === 'undefined') return;
+    
     // Check if this is an existing user with potential cache issues
     const lastVersion = localStorage.getItem('ttm-app-version');
     const currentVersion = '3.0.0'; // Increment this when making breaking changes
@@ -1051,6 +1057,9 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
 
   // Check onboarding status on mount
   useEffect(() => {
+    // Only run on client side to prevent hydration issues
+    if (typeof window === 'undefined') return;
+    
     if (user && !isLoadingLocal) {
       checkOnboardingStatus();
     }
@@ -1058,6 +1067,9 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
 
   // Show forced onboarding if user hasn't completed onboarding
   useEffect(() => {
+    // Only run on client side to prevent hydration issues
+    if (typeof window === 'undefined') return;
+    
     if (onboardingStatus && !onboardingStatus.onboarding_completed) {
       // Check if user is a test user (email contains @toptiermen.test)
       const isTestUser = user?.email?.includes('@toptiermen.test') || false;
@@ -1412,46 +1424,52 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
 
         {/* Modals and Components */}
         {/* OnboardingV2Modal - Global modal for onboarding steps */}
-        <OnboardingV2Modal isOpen={!isCompleted && (contextCurrentStep === 1 || contextCurrentStep === 2)} />
+        {typeof window !== 'undefined' && (
+          <OnboardingV2Modal isOpen={!isCompleted && (contextCurrentStep === 1 || contextCurrentStep === 2)} />
+        )}
 
-        <TestUserVideoModal 
-          isOpen={showTestUserVideo}
-          onComplete={() => {
-            setShowTestUserVideo(false);
-            // After test video is watched, show normal onboarding
-            if (onboardingStatus && !onboardingStatus.onboarding_completed) {
-              setShowForcedOnboarding(true);
-            }
-          }}
-        />
+        {typeof window !== 'undefined' && (
+          <TestUserVideoModal 
+            isOpen={showTestUserVideo}
+            onComplete={() => {
+              setShowTestUserVideo(false);
+              // After test video is watched, show normal onboarding
+              if (onboardingStatus && !onboardingStatus.onboarding_completed) {
+                setShowForcedOnboarding(true);
+              }
+            }}
+          />
+        )}
 
-        {showDebug && <DebugPanel />}
+        {typeof window !== 'undefined' && showDebug && <DebugPanel />}
 
-        <TestUserFeedback 
-          isTestUser={isTestUser}
-          currentPage={pathname || '/'}
-          userRole={profile?.role}
-          onNoteCreated={(note) => {
-            console.log('Test note created:', note);
-          }}
-        />
+        {typeof window !== 'undefined' && (
+          <TestUserFeedback 
+            isTestUser={isTestUser}
+            currentPage={pathname || '/'}
+            userRole={profile?.role}
+            onNoteCreated={(note) => {
+              console.log('Test note created:', note);
+            }}
+          />
+        )}
 
-        <PWAInstallPrompt />
+        {typeof window !== 'undefined' && <PWAInstallPrompt />}
         
         {/* 2.0.1: Monitoring Dashboard */}
-        <V2MonitoringDashboard />
+        {typeof window !== 'undefined' && <V2MonitoringDashboard />}
         
         {/* 2.0.1: Performance Alerts */}
-        <V2PerformanceAlerts />
+        {typeof window !== 'undefined' && <V2PerformanceAlerts />}
         
         {/* 2.0.1: Cache issue helper - DISABLED TO PREVENT INFINITE MODAL */}
         {/* <CacheIssueHelper /> */}
         
         {/* Support Button - Fixed position */}
-        <SupportButton />
+        {typeof window !== 'undefined' && <SupportButton />}
         
         {/* Floating Workout Widget */}
-        <WorkoutWidget />
+        {typeof window !== 'undefined' && <WorkoutWidget />}
       </div>
     </>
   );
