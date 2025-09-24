@@ -13,6 +13,8 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     persistSession: true, // ENABLED: Keep users logged in after refresh
     detectSessionInUrl: true,
     flowType: 'pkce', // Use PKCE flow for better security and session management
+    storage: typeof window !== 'undefined' ? window.localStorage : undefined, // Explicitly use localStorage
+    storageKey: 'sb-toptiermen-auth-token', // Custom storage key
   }
 });
 
@@ -50,8 +52,9 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [loading, setLoading] = useState(false); // Start with false to prevent infinite loading
+  const [loading, setLoading] = useState(true); // Start with true to prevent immediate redirects
   const [error, setError] = useState<string | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false); // Track if auth has been initialized
 
   // Fetch user profile - IMPROVED WITH EMAIL FALLBACK
   const fetchProfile = async (userId: string, email?: string): Promise<Profile | null> => {
@@ -138,6 +141,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
       } finally {
         console.log('🔄 Auth initialization complete');
         setLoading(false);
+        setIsInitialized(true); // Mark as initialized
       }
     };
 
@@ -145,8 +149,8 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     const initTimeout = setTimeout(() => {
       console.log('⚠️ Auth initialization timeout - forcing completion');
       setLoading(false);
-      setUser(null);
-      setProfile(null);
+      setIsInitialized(true); // Mark as initialized even on timeout
+      // Don't clear user state on timeout - this might cause unwanted redirects
     }, 2000); // 2 second timeout for auth initialization
 
     getInitialSession().then(() => {
@@ -495,7 +499,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
   const value: AuthContextType = {
     user,
     profile,
-    loading,
+    loading: loading || !isInitialized, // Keep loading true until initialized
     error,
     signIn,
     signUp,

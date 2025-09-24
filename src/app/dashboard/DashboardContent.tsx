@@ -13,14 +13,15 @@ import { useSubscription } from '@/hooks/useSubscription';
 import OnboardingV2Modal from '@/components/OnboardingV2Modal';
 import { WorkoutSessionProvider, useWorkoutSession } from '@/contexts/WorkoutSessionContext';
 import FloatingWorkoutWidget from '@/components/FloatingWorkoutWidget';
+import MobileNav from '../components/MobileNav';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
 import { 
   HomeIcon, FireIcon, AcademicCapIcon, ChartBarIcon, CurrencyDollarIcon, 
   UsersIcon, BookOpenIcon, StarIcon, UserCircleIcon, ChatBubbleLeftRightIcon, 
-  ChevronUpIcon, ChevronDownIcon, Bars3Icon, XMarkIcon, BellIcon, 
-  EnvelopeIcon, CheckCircleIcon, UserGroupIcon, TrophyIcon, 
+  ChevronUpIcon, ChevronDownIcon, Bars3Icon, XMarkIcon, BellIcon,
+  CheckCircleIcon, UserGroupIcon, TrophyIcon, 
   CalendarDaysIcon, ShoppingBagIcon, ChevronLeftIcon, ChevronRightIcon,
   RocketLaunchIcon
 } from '@heroicons/react/24/solid';
@@ -31,8 +32,6 @@ import PWAInstallPrompt from '@/components/PWAInstallPrompt';
 import V2MonitoringDashboard from '@/components/V2MonitoringDashboard';
 import V2PerformanceAlerts from '@/components/V2PerformanceAlerts';
 import CacheIssueHelper from '@/components/CacheIssueHelper';
-import NotificationBell from '@/components/NotificationBell';
-import InboxIcon from '@/components/InboxIcon';
 import SupportButton from '@/components/SupportButton';
 
 // Workout Widget Component
@@ -104,7 +103,7 @@ const menu = [
   { label: 'Social Feed', icon: ChatBubbleLeftRightIcon, parent: 'Brotherhood', href: '/dashboard/brotherhood/social-feed', isSub: true, onboardingStep: 7 },
   { label: 'Forum', icon: FireIcon, parent: 'Brotherhood', href: '/dashboard/brotherhood/forum', isSub: true, onboardingStep: 4, isBasicTierStep: true },
   { label: 'Leden', icon: UsersIcon, parent: 'Brotherhood', href: '/dashboard/brotherhood/leden', isSub: true, onboardingStep: 7 },
-  { label: 'Boekenkamer (Admin)', icon: BookOpenIcon, href: '/dashboard/boekenkamer', onboardingStep: 7, adminOnly: true },
+  { label: 'Boekenkamer', icon: BookOpenIcon, href: '/dashboard/boekenkamer', onboardingStep: 7, adminOnly: false },
   { label: 'Badges & Rangen', icon: StarIcon, href: '/dashboard/badges-en-rangen', onboardingStep: 7 },
   { label: 'Producten', icon: ShoppingBagIcon, href: '/dashboard/producten', onboardingStep: 7 },
   { label: 'Mentorship & Coaching', icon: ChatBubbleLeftRightIcon, href: '/dashboard/mentorship-en-coaching', onboardingStep: 7 },
@@ -927,7 +926,7 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
       }, 100);
       return () => clearTimeout(timeoutId);
     }
-  }, []); // Empty dependency array to run only once
+  }, [refreshStatus]); // Add refreshStatus to dependency array
 
   // Sync onboardingStatus with context changes
   useEffect(() => {
@@ -1307,11 +1306,6 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
                 </Link>
               )}
 
-              {/* Notifications */}
-              <NotificationBell />
-
-              {/* Messages */}
-              <InboxIcon />
 
               {/* Logout */}
               <button
@@ -1470,6 +1464,9 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
         
         {/* Floating Workout Widget */}
         {typeof window !== 'undefined' && <WorkoutWidget />}
+        
+        {/* Mobile Navigation */}
+        <MobileNav onMenuClick={() => setIsMobileMenuOpen(true)} />
       </div>
     </>
   );

@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   QuestionMarkCircleIcon, 
   XMarkIcon,
@@ -177,6 +177,11 @@ export default function SupportButton({ className = '' }: SupportButtonProps) {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [showContactForm, setShowContactForm] = useState(false);
   const [showMyTickets, setShowMyTickets] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
   const [userTickets, setUserTickets] = useState<any[]>([]);
   const [loadingTickets, setLoadingTickets] = useState(false);
 
@@ -260,6 +265,10 @@ export default function SupportButton({ className = '' }: SupportButtonProps) {
   };
 
   const selectedCategoryData = supportCategories.find(cat => cat.id === selectedCategory);
+
+  if (!isMounted) {
+    return null;
+  }
 
   return (
     <>

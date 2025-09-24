@@ -55,12 +55,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }
     
     // Only redirect if we're absolutely sure the user is not authenticated
+    // Add a small delay to prevent immediate redirects on refresh
     if (!user) {
       console.log('🚫 User not authenticated after loading complete, redirecting to login');
       
-      // Prevent redirect loops by checking current path
+      // Prevent redirect loops by checking current path and adding delay
       if (window.location.pathname !== '/login') {
-        router.push('/login');
+        setTimeout(() => {
+          router.push('/login');
+        }, 100); // Small delay to prevent immediate redirects
       }
       return;
     }

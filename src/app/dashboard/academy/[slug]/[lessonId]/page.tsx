@@ -7,6 +7,8 @@ import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import PageLayout from '@/components/PageLayout';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import CDNVideoPlayer from '@/components/CDNVideoPlayer';
+import { useAcademyVideoPreload } from '@/hooks/useAcademyVideoPreload';
 import { PlayIcon } from '@heroicons/react/24/solid';
 import { academyNav } from '@/utils/academyNavigation';
 
@@ -341,6 +343,13 @@ export default function LessonDetailPage() {
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [navigating, setNavigating] = useState(false);
   const [showForceButton, setShowForceButton] = useState(false);
+
+  // Video preloading for better performance
+  const { preloadStatus, isPreloading, preloadProgress } = useAcademyVideoPreload(
+    lessons || [], 
+    lessonId as string, 
+    3 // Preload next 3 videos
+  );
 
   // Reset navigating state when navigation completes
   useEffect(() => {
@@ -1081,136 +1090,33 @@ export default function LessonDetailPage() {
               <span>Duur: {lesson.duration}</span>
               <span>Type: {lesson.type}</span>
               {completed && <span className="text-green-400">✓ Voltooid</span>}
+              {isPreloading && (
+                <span className="text-[#8BAE5A]">
+                  📥 Volgende videos laden... {Math.round(preloadProgress)}%
+                </span>
+              )}
             </div>
           </div>
 
           {/* Video content */}
           {lesson.video_url && (
             <div className="mb-6">
-              <div className="aspect-video bg-[#232D1A] rounded-lg overflow-hidden relative border border-[#3A4D23]">
-                <video
-                  key={lesson.id} // Unieke key om video te behouden bij les wissel
-                  ref={videoRef}
-                  src={lesson.video_url}
-                  controls
-                  className="w-full h-full rounded-lg bg-black"
-                  preload="metadata"
-                  onError={(e) => {
-                    console.error('❌ Video error:', e);
-                    console.log('🎥 Video URL:', lesson.video_url);
-                    // Toon een fallback bericht
-                    setShowVideoOverlay(true);
-                  }}
-                  onLoadStart={() => {
-                    console.log('🎥 Loading video:', lesson.video_url);
-                    setIsVideoLoading(true);
-                  }}
-                  onCanPlay={() => {
-                    console.log('🎥 Video can start playing');
-                    setIsVideoLoading(false);
-                  }}
-                  onPlay={() => {
-                    setShowVideoOverlay(false);
-                    setIsVideoLoading(false);
-                  }}
-                  onPause={() => {
-                    setShowVideoOverlay(true);
-                  }}
-                  onEnded={() => {
-                    setShowVideoOverlay(true);
-                  }}
-                  onAbort={() => {
-                    console.log('🎥 Video loading aborted');
-                    setShowVideoOverlay(true);
-                    setIsVideoLoading(false);
-                  }}
-                  onSuspend={() => {
-                    console.log('🎥 Video loading suspended');
-                    setIsVideoLoading(false);
-                  }}
-                >
-                  Je browser ondersteunt deze video niet.
-                </video>
-                
-                {/* Video Play Overlay */}
-                {showVideoOverlay && (
-                  <div 
-                    className="absolute inset-0 bg-black/60 flex items-center justify-center cursor-pointer group"
-                    onClick={() => {
-                      if (videoRef.current && !isVideoLoading) {
-                        try {
-                          setIsVideoLoading(true);
-                          const playPromise = videoRef.current.play();
-                          if (playPromise !== undefined) {
-                            playPromise
-                              .then(() => {
-                                console.log('🎥 Video started playing successfully');
-                                setShowVideoOverlay(false);
-                                setIsVideoLoading(false);
-                              })
-                              .catch((error) => {
-                                console.error('❌ Video play error:', error);
-                                setIsVideoLoading(false);
-                                // Fallback: probeer opnieuw na een korte vertraging
-                                setTimeout(() => {
-                      if (videoRef.current) {
-                                    setIsVideoLoading(true);
-                                    videoRef.current.play()
-                                      .then(() => {
-                                        setShowVideoOverlay(false);
-                                        setIsVideoLoading(false);
-                                      })
-                                      .catch(e => {
-                                        console.error('❌ Retry video play failed:', e);
-                                        setIsVideoLoading(false);
-                                      });
-                                  }
-                                }, 100);
-                              });
-                          }
-                        } catch (error) {
-                          console.error('❌ Video play error:', error);
-                          setIsVideoLoading(false);
-                        }
-                      }
-                    }}
-                  >
-                    <div className="bg-[#8BAE5A] hover:bg-[#B6C948] text-[#181F17] rounded-full p-4 transition-all duration-200 group-hover:scale-110 shadow-lg">
-                      {isVideoLoading ? (
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#181F17]"></div>
-                      ) : (
-                      <PlayIcon className="w-12 h-12" />
-                      )}
-                    </div>
-                    <div className="absolute bottom-4 left-4 right-4 text-center">
-                      <p className="text-white text-sm font-medium">
-                        {isVideoLoading ? 'Video laden...' : 'Klik om video af te spelen'}
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {/* Video Error Fallback */}
-                {!showVideoOverlay && videoRef.current?.error && (
-                  <div className="absolute inset-0 bg-black/80 flex items-center justify-center">
-                    <div className="text-center text-white p-6">
-                      <div className="text-red-400 mb-2 text-lg">❌ Video kan niet worden afgespeeld</div>
-                      <p className="text-sm mb-4">Er is een probleem met het laden van de video</p>
-                      <button
-                        onClick={() => {
-                          if (videoRef.current) {
-                            videoRef.current.load();
-                            setShowVideoOverlay(true);
-                          }
-                        }}
-                        className="px-4 py-2 bg-[#8BAE5A] text-[#181F17] rounded-lg hover:bg-[#B6C948] transition-colors"
-                      >
-                        Opnieuw proberen
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
+              <CDNVideoPlayer
+                key={lesson.id}
+                src={lesson.video_url}
+                onEnded={() => {
+                  setShowVideoOverlay(true);
+                }}
+                onPlay={() => {
+                  setShowVideoOverlay(false);
+                  setIsVideoLoading(false);
+                }}
+                onPause={() => {
+                  setShowVideoOverlay(true);
+                }}
+                preload="metadata"
+                className="w-full h-full rounded-lg bg-black"
+              />
             </div>
           )}
          

@@ -186,6 +186,7 @@ const SidebarContent = ({ pathname }: { pathname: string }) => {
         { label: 'Voedingsplannen Backup', icon: DocumentTextIcon, href: '/dashboard-admin/voedingsplannen-backup', badge: 'BACKUP' },
         { label: 'Mind & Focus', icon: ChartBarIcon, href: '/dashboard-admin/mind-focus' },
         { label: 'Boekenkamer', icon: BookOpenIcon, href: '/dashboard-admin/boekenkamer' },
+        { label: 'Boeken Beheer', icon: BookOpenIcon, href: '/dashboard-admin/books', badge: 'NEW' },
         { label: 'Badges & Rangen', icon: StarIcon, href: '/dashboard-admin/badges-rangen' }
       ]
     },
@@ -339,10 +340,10 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
       // Redirect to login with current path preserved
       const currentPath = window.location.pathname;
       if (currentPath !== '/login') {
-        // Use setTimeout to prevent immediate redirect loops
+        // Use setTimeout to prevent immediate redirect loops - increased delay
         setTimeout(() => {
           router.push(`/login?redirect=${encodeURIComponent(currentPath)}`);
-        }, 100);
+        }, 200); // Increased delay to prevent immediate redirects on refresh
       }
     } else {
       console.log('Admin: User authenticated:', user?.email);

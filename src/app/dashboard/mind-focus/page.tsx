@@ -566,14 +566,14 @@ export default function MindFocusPage() {
           <div className="bg-gradient-to-r from-[#2A3A1A] to-[#3A4A2A] px-12 py-8">
             <div className="flex items-center space-x-6">
               <div className="p-4 bg-[#B6C948]/20 rounded-xl">
-                {intakeSteps[currentStep].icon}
+                {intakeSteps[currentStep]?.icon}
               </div>
               <div>
                 <h1 className="text-4xl font-bold text-[#B6C948] mb-2">
-                  {intakeSteps[currentStep].title}
+                  {intakeSteps[currentStep]?.title}
                 </h1>
                 <p className="text-[#8BAE5A] text-xl">
-                  {intakeSteps[currentStep].subtitle}
+                  {intakeSteps[currentStep]?.subtitle}
                 </p>
               </div>
             </div>
