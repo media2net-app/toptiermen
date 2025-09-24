@@ -95,7 +95,10 @@ export default function PreWorkoutModal({
       if (data.success) {
         // Navigate to appropriate page based on mode
         if (selectedMode === 'interactive') {
-          router.push(`/dashboard/trainingscentrum/workout/${schemaId}/${dayNumber}?sessionId=${data.session.id}`);
+          // For interactive mode, show a success message and redirect to training page
+          console.log('🎯 Interactive workout started');
+          onClose();
+          router.push('/dashboard/mijn-trainingen');
         } else {
           // For quick mode, complete immediately and go back
           await completeQuickWorkout(data.session.id);
@@ -110,6 +113,8 @@ export default function PreWorkoutModal({
 
   const completeQuickWorkout = async (sessionId: string) => {
     try {
+      console.log('🏁 Completing quick workout:', sessionId);
+      
       const response = await fetch('/api/workout-sessions/complete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -121,16 +126,21 @@ export default function PreWorkoutModal({
       });
 
       if (response.ok) {
+        const data = await response.json();
+        console.log('✅ Quick workout completed:', data);
+        
         onClose();
-        // Show success message or redirect with hard refresh
+        // Show success message and redirect
         router.push('/dashboard/mijn-trainingen');
         // Force a hard refresh to show updated completion status
         setTimeout(() => {
           window.location.reload();
         }, 100);
+      } else {
+        console.error('❌ Error completing quick workout:', response.status);
       }
     } catch (error) {
-      console.error('Error completing quick workout:', error);
+      console.error('❌ Error completing quick workout:', error);
     }
   };
 

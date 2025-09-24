@@ -64,8 +64,8 @@ export async function GET(request: NextRequest) {
         currentStep
       },
       isAdmin,
-      hasTrainingAccess: ['Premium Tier', 'Lifetime Access'].includes(profileResult.data.package_type),
-      hasNutritionAccess: ['Premium Tier', 'Lifetime Access'].includes(profileResult.data.package_type),
+      hasTrainingAccess: ['Premium Tier', 'Lifetime Access', 'Lifetime Tier'].includes(profileResult.data.package_type) || profileResult.data.subscription_tier === 'lifetime',
+      hasNutritionAccess: ['Premium Tier', 'Lifetime Access', 'Lifetime Tier'].includes(profileResult.data.package_type) || profileResult.data.subscription_tier === 'lifetime',
       isBasic: profileResult.data.package_type === 'Basic Tier'
     };
 

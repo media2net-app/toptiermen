@@ -380,29 +380,29 @@ export default function MijnTrainingen() {
 
   return (
     <PageLayout title="Mijn Trainingen">
-      <div className="min-h-screen bg-gradient-to-br from-[#0F1419] to-[#1A1F2E] p-6">
+      <div className="min-h-screen bg-gradient-to-br from-[#0F1419] to-[#1A1F2E] p-4 sm:p-6">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold text-white mb-2">Mijn Trainingen</h1>
-            <p className="text-[#8BAE5A] text-lg">Jouw actieve trainingsschema en voortgang</p>
+          <div className="mb-6 sm:mb-8">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-2">Mijn Trainingen</h1>
+            <p className="text-[#8BAE5A] text-sm sm:text-base md:text-lg">Jouw actieve trainingsschema en voortgang</p>
           </div>
 
         {/* Schema Overview */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-2xl p-8 mb-8 shadow-xl"
+            className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-2xl p-4 sm:p-6 md:p-8 mb-6 sm:mb-8 shadow-xl"
           >
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 sm:gap-8">
             <div className="flex-1">
                 <div className="flex items-start justify-between mb-4">
-                  <div>
-                    <h2 className="text-3xl font-bold text-white mb-2">{schema?.name}</h2>
-                    <p className="text-gray-400 text-lg mb-4">{schema?.description}</p>
+                  <div className="flex-1 min-w-0">
+                    <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-2">{schema?.name}</h2>
+                    <p className="text-gray-400 text-sm sm:text-base md:text-lg mb-4">{schema?.description}</p>
               </div>
                   {schema?.cover_image && (
-                    <div className="w-24 h-24 bg-[#3A4D23] rounded-xl overflow-hidden ml-4">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-[#3A4D23] rounded-xl overflow-hidden ml-3 sm:ml-4 flex-shrink-0">
                       <img 
                         src={schema.cover_image} 
                         alt={schema.name}
@@ -412,26 +412,26 @@ export default function MijnTrainingen() {
                   )}
                 </div>
                 
-                <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-sm">
                   <div className="bg-[#0F1419]/50 rounded-lg p-3">
-                    <span className="text-[#8BAE5A] font-semibold">Categorie</span>
-                    <p className="text-white">{schema?.category}</p>
+                    <span className="text-[#8BAE5A] font-semibold text-xs sm:text-sm">Categorie</span>
+                    <p className="text-white text-sm sm:text-base">{schema?.category}</p>
                   </div>
                   <div className="bg-[#0F1419]/50 rounded-lg p-3">
-                    <span className="text-[#8BAE5A] font-semibold">Doel</span>
-                    <p className="text-white">{schema?.training_goal || 'Algemeen'}</p>
+                    <span className="text-[#8BAE5A] font-semibold text-xs sm:text-sm">Doel</span>
+                    <p className="text-white text-sm sm:text-base">{schema?.training_goal || 'Algemeen'}</p>
                   </div>
                 </div>
               </div>
               
               {progress && (
                 <div className="text-center lg:text-right">
-                  <div className="bg-[#0F1419]/50 rounded-xl p-6">
-                    <div className="text-4xl font-bold text-[#8BAE5A] mb-2">
+                  <div className="bg-[#0F1419]/50 rounded-xl p-4 sm:p-6">
+                    <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#8BAE5A] mb-2">
                       {progress.completed_days}/{progress.total_days}
                     </div>
-                    <div className="text-sm text-gray-400 mb-4">Dagen voltooid</div>
-                    <div className="w-48 h-3 bg-[#3A4D23] rounded-full overflow-hidden">
+                    <div className="text-xs sm:text-sm text-gray-400 mb-4">Dagen voltooid</div>
+                    <div className="w-full sm:w-48 h-3 bg-[#3A4D23] rounded-full overflow-hidden">
                       <motion.div 
                         initial={{ width: 0 }}
                         animate={{ width: `${(progress.completed_days / progress.total_days) * 100}%` }}
@@ -454,25 +454,26 @@ export default function MijnTrainingen() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="mb-8"
+              className="mb-6 sm:mb-8"
             >
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
                 <div>
-                <h2 className="text-2xl font-bold text-white">Trainingsdagen</h2>
-                  <p className="text-[#8BAE5A] text-sm mt-1">
+                <h2 className="text-xl sm:text-2xl font-bold text-white">Trainingsdagen</h2>
+                  <p className="text-[#8BAE5A] text-xs sm:text-sm mt-1">
                     Huidige Week: {completedWeeks.length + 1}/8
                   </p>
                 </div>
                 <button
                   onClick={viewSchemaDetails}
-                  className="flex items-center px-4 py-2 bg-[#3A4D23] text-[#8BAE5A] rounded-lg hover:bg-[#4A5D33] transition-colors"
+                  className="flex items-center px-3 py-2 sm:px-4 sm:py-2 bg-[#3A4D23] text-[#8BAE5A] rounded-lg hover:bg-[#4A5D33] transition-colors text-sm"
                 >
                   <EyeIcon className="w-4 h-4 mr-2" />
-                  Bekijk Schema Details
+                  <span className="hidden sm:inline">Bekijk Schema Details</span>
+                  <span className="sm:hidden">Details</span>
                 </button>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {days.sort((a, b) => a.day_number - b.day_number).map((day, index) => {
                   // Use day-specific completion status if available, otherwise fall back to progress-based calculation
                   const isCompleted = day.isCompleted !== undefined ? day.isCompleted : (progress ? day.day_number <= progress.completed_days : false);
@@ -486,7 +487,7 @@ export default function MijnTrainingen() {
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.1 * index }}
-                      className={`relative p-6 rounded-xl border-2 cursor-pointer transition-all duration-200 ${
+                      className={`relative p-4 sm:p-6 rounded-xl border-2 cursor-pointer transition-all duration-200 ${
                       isCurrentDay
                           ? 'border-[#8BAE5A] bg-[#232D1A] shadow-lg'
                         : isCompleted
@@ -496,12 +497,12 @@ export default function MijnTrainingen() {
                     onClick={() => setSelectedDay(day.day_number)}
                   >
                     {isCompleted && (
-                        <div className="absolute top-4 right-4 flex flex-col items-end">
-                          <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center shadow-lg">
-                            <CheckIcon className="w-5 h-5 text-white" />
+                        <div className="absolute top-3 right-3 sm:top-4 sm:right-4 flex flex-col items-end">
+                          <div className="w-6 h-6 sm:w-8 sm:h-8 bg-green-500 rounded-full flex items-center justify-center shadow-lg">
+                            <CheckIcon className="w-3 h-3 sm:w-5 sm:h-5 text-white" />
                           </div>
                           {day.completedAt && (
-                            <div className="text-xs text-green-400 mt-1 font-medium text-right">
+                            <div className="text-xs text-green-400 mt-1 font-medium text-right hidden sm:block">
                               <div>Voltooid</div>
                               <div className="text-green-300/80 text-[10px] mt-0.5">
                                 {new Date(day.completedAt).toLocaleDateString('nl-NL', {
@@ -523,19 +524,19 @@ export default function MijnTrainingen() {
                     
                       <div className="mb-4">
                     <div className="flex items-center justify-between mb-2">
-                          <h3 className="text-xl font-bold text-white">Dag {day.day_number}</h3>
+                          <h3 className="text-lg sm:text-xl font-bold text-white">Dag {day.day_number}</h3>
                       {isNextDay && (
-                            <span className="text-xs bg-[#8BAE5A] text-[#232D1A] px-3 py-1 rounded-full font-semibold">
+                            <span className="text-xs bg-[#8BAE5A] text-[#232D1A] px-2 py-1 sm:px-3 sm:py-1 rounded-full font-semibold">
                           Volgende
                         </span>
                       )}
                     </div>
-                        <h4 className="text-[#8BAE5A] font-semibold text-lg mb-2">{day.name}</h4>
+                        <h4 className="text-[#8BAE5A] font-semibold text-base sm:text-lg mb-2">{day.name}</h4>
                         {day.focus_area && (
-                    <p className="text-sm text-gray-400 mb-3">{day.focus_area}</p>
+                    <p className="text-xs sm:text-sm text-gray-400 mb-3">{day.focus_area}</p>
                         )}
-                        <div className="flex items-center text-sm text-gray-500">
-                          <FireIcon className="w-4 h-4 mr-1" />
+                        <div className="flex items-center text-xs sm:text-sm text-gray-500">
+                          <FireIcon className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
                           <span>{exerciseCount} oefeningen</span>
                         </div>
                       </div>
@@ -545,7 +546,7 @@ export default function MijnTrainingen() {
                         e.stopPropagation();
                         startWorkout(day.day_number);
                       }}
-                        className={`w-full px-4 py-3 font-semibold rounded-lg transition-all duration-200 flex items-center justify-center ${
+                        className={`w-full px-3 py-2 sm:px-4 sm:py-3 font-semibold rounded-lg transition-all duration-200 flex items-center justify-center text-sm sm:text-base ${
                           isCompleted
                             ? 'bg-green-600 text-white hover:bg-green-700'
                             : 'bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] hover:from-[#7A9D4A] hover:to-[#e0903f]'
@@ -553,13 +554,15 @@ export default function MijnTrainingen() {
                       >
                         {isCompleted ? (
                           <>
-                            <CheckIcon className="w-5 h-5 mr-2" />
-                            Opnieuw Doen
+                            <CheckIcon className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2" />
+                            <span className="hidden sm:inline">Opnieuw Doen</span>
+                            <span className="sm:hidden">Opnieuw</span>
                           </>
                         ) : (
                           <>
-                            <PlayIcon className="w-5 h-5 mr-2" />
-                      Start Training
+                            <PlayIcon className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2" />
+                            <span className="hidden sm:inline">Start Training</span>
+                            <span className="sm:hidden">Start</span>
                           </>
                         )}
                     </button>
@@ -578,47 +581,48 @@ export default function MijnTrainingen() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mt-8"
+          className="mt-6 sm:mt-8"
         >
-          <div className="bg-[#232D1A] rounded-xl p-6 border border-[#3A4D23]">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-2xl font-bold text-white">Week Overzicht</h3>
-              <div className="flex items-center gap-4">
-                <span className="text-[#8BAE5A] font-semibold">
+          <div className="bg-[#232D1A] rounded-xl p-4 sm:p-6 border border-[#3A4D23]">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+              <h3 className="text-xl sm:text-2xl font-bold text-white">Week Overzicht</h3>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                <span className="text-[#8BAE5A] font-semibold text-sm sm:text-base">
                   Huidige Week: {completedWeeks.length + 1}/8
                 </span>
-                <span className="text-gray-400">
+                <span className="text-gray-400 text-sm sm:text-base">
                   Voltooide weken: {completedWeeks.length}
                 </span>
               </div>
             </div>
             
-            <div className="overflow-x-auto">
-              <table className="w-full">
+            <div className="overflow-x-auto -mx-4 sm:mx-0">
+              <table className="w-full min-w-[600px]">
                 <thead>
                   <tr className="border-b border-[#3A4D23]">
-                    <th className="text-left py-3 px-4 text-[#8BAE5A] font-semibold">Week</th>
-                    <th className="text-left py-3 px-4 text-[#8BAE5A] font-semibold">Voltooid Op</th>
+                    <th className="text-left py-2 sm:py-3 px-2 sm:px-4 text-[#8BAE5A] font-semibold text-xs sm:text-sm">Week</th>
+                    <th className="text-left py-2 sm:py-3 px-2 sm:px-4 text-[#8BAE5A] font-semibold text-xs sm:text-sm hidden sm:table-cell">Voltooid Op</th>
                     {days?.map((day) => (
-                      <th key={day.day_number} className="text-left py-3 px-4 text-[#8BAE5A] font-semibold">
-                        Dag {day.day_number}
+                      <th key={day.day_number} className="text-left py-2 sm:py-3 px-1 sm:px-2 text-[#8BAE5A] font-semibold text-xs sm:text-sm">
+                        <span className="hidden sm:inline">Dag {day.day_number}</span>
+                        <span className="sm:hidden">D{day.day_number}</span>
                       </th>
                     ))}
-                    <th className="text-left py-3 px-4 text-[#8BAE5A] font-semibold">Status</th>
+                    <th className="text-left py-2 sm:py-3 px-2 sm:px-4 text-[#8BAE5A] font-semibold text-xs sm:text-sm">Status</th>
                   </tr>
                 </thead>
                 <tbody>
                   {completedWeeks.map((week, index) => (
                     <tr key={`completed-week-${week.week}-${index}`} className="border-b border-[#3A4D23]/50 hover:bg-[#1A1A1A]/50">
-                      <td className="py-4 px-4">
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-                            <CheckIcon className="w-5 h-5 text-white" />
+                      <td className="py-2 sm:py-4 px-2 sm:px-4">
+                        <div className="flex items-center gap-1 sm:gap-2">
+                          <div className="w-6 h-6 sm:w-8 sm:h-8 bg-green-500 rounded-full flex items-center justify-center">
+                            <CheckIcon className="w-3 h-3 sm:w-5 sm:h-5 text-white" />
                           </div>
-                          <span className="text-white font-semibold">Week {week.week}</span>
+                          <span className="text-white font-semibold text-xs sm:text-base">Week {week.week}</span>
                         </div>
                       </td>
-                      <td className="py-4 px-4 text-gray-300">
+                      <td className="py-2 sm:py-4 px-2 sm:px-4 text-gray-300 text-xs sm:text-base hidden sm:table-cell">
                         {new Date(week.completedAt).toLocaleDateString('nl-NL', {
                           day: '2-digit',
                           month: '2-digit',
@@ -628,11 +632,11 @@ export default function MijnTrainingen() {
                       {days?.map((day) => {
                         const dayData = week.days.find(d => d.day === day.day_number);
                         return (
-                          <td key={day.day_number} className="py-4 px-4">
+                          <td key={day.day_number} className="py-2 sm:py-4 px-1 sm:px-2">
                             {dayData ? (
-                              <div className="flex items-center gap-2">
-                                <CheckIcon className="w-4 h-4 text-green-400" />
-                                <div className="text-xs text-gray-300">
+                              <div className="flex items-center gap-1 sm:gap-2">
+                                <CheckIcon className="w-3 h-3 sm:w-4 sm:h-4 text-green-400" />
+                                <div className="text-xs text-gray-300 hidden sm:block">
                                   {dayData.name}
                                   <br />
                                   <span className="text-green-400">
@@ -642,15 +646,23 @@ export default function MijnTrainingen() {
                                     })}
                                   </span>
                                 </div>
+                                <div className="sm:hidden">
+                                  <div className="text-green-400 text-xs">
+                                    {new Date(dayData.completedAt).toLocaleTimeString('nl-NL', {
+                                      hour: '2-digit',
+                                      minute: '2-digit'
+                                    })}
+                                  </div>
+                                </div>
                               </div>
                             ) : (
-                              <span className="text-gray-500">-</span>
+                              <span className="text-gray-500 text-xs sm:text-base">-</span>
                             )}
                           </td>
                         );
                       })}
-                      <td className="py-4 px-4">
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-900/20 text-green-400 border border-green-500/20">
+                      <td className="py-2 sm:py-4 px-2 sm:px-4">
+                        <span className="inline-flex items-center px-2 py-1 sm:px-3 sm:py-1 rounded-full text-xs font-medium bg-green-900/20 text-green-400 border border-green-500/20">
                           Voltooid
                         </span>
                       </td>
@@ -660,23 +672,23 @@ export default function MijnTrainingen() {
                   {/* Show current week row if not completed */}
                   {completedWeeks.length < 8 && (
                     <tr key={`current-week-${completedWeeks.length + 1}`} className="border-b border-[#3A4D23]/50">
-                      <td className="py-4 px-4">
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 bg-[#8BAE5A] rounded-full flex items-center justify-center">
-                            <span className="text-[#181F17] font-bold text-sm">{completedWeeks.length + 1}</span>
+                      <td className="py-2 sm:py-4 px-2 sm:px-4">
+                        <div className="flex items-center gap-1 sm:gap-2">
+                          <div className="w-6 h-6 sm:w-8 sm:h-8 bg-[#8BAE5A] rounded-full flex items-center justify-center">
+                            <span className="text-[#181F17] font-bold text-xs sm:text-sm">{completedWeeks.length + 1}</span>
                           </div>
-                          <span className="text-white font-semibold">Week {completedWeeks.length + 1}</span>
+                          <span className="text-white font-semibold text-xs sm:text-base">Week {completedWeeks.length + 1}</span>
                         </div>
                       </td>
-                      <td className="py-4 px-4 text-gray-500">-</td>
+                      <td className="py-2 sm:py-4 px-2 sm:px-4 text-gray-500 text-xs sm:text-base hidden sm:table-cell">-</td>
                       {days?.map((day) => {
                         return (
-                          <td key={day.day_number} className="py-4 px-4">
-                            <div className="flex items-center gap-2">
+                          <td key={day.day_number} className="py-2 sm:py-4 px-1 sm:px-2">
+                            <div className="flex items-center gap-1 sm:gap-2">
                               {day.isCompleted ? (
                                 <>
-                                  <CheckIcon className="w-4 h-4 text-green-400" />
-                                  <div className="text-xs text-gray-300">
+                                  <CheckIcon className="w-3 h-3 sm:w-4 sm:h-4 text-green-400" />
+                                  <div className="text-xs text-gray-300 hidden sm:block">
                                     {day.name}
                                     <br />
                                     <span className="text-green-400">
@@ -686,19 +698,27 @@ export default function MijnTrainingen() {
                                       })}
                                     </span>
                                   </div>
+                                  <div className="sm:hidden">
+                                    <div className="text-green-400 text-xs">
+                                      {day.completedAt && new Date(day.completedAt).toLocaleTimeString('nl-NL', {
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                      })}
+                                    </div>
+                                  </div>
                                 </>
                               ) : (
                                 <>
-                                  <div className="w-4 h-4 border-2 border-[#8BAE5A] rounded-full"></div>
-                                  <span className="text-xs text-gray-400">{day.name}</span>
+                                  <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-[#8BAE5A] rounded-full"></div>
+                                  <span className="text-xs text-gray-400 hidden sm:inline">{day.name}</span>
                                 </>
                               )}
                             </div>
                           </td>
                         );
                       })}
-                      <td className="py-4 px-4">
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[#8BAE5A]/20 text-[#8BAE5A] border border-[#8BAE5A]/20">
+                      <td className="py-2 sm:py-4 px-2 sm:px-4">
+                        <span className="inline-flex items-center px-2 py-1 sm:px-3 sm:py-1 rounded-full text-xs font-medium bg-[#8BAE5A]/20 text-[#8BAE5A] border border-[#8BAE5A]/20">
                           In Progress
                         </span>
                       </td>
@@ -709,14 +729,14 @@ export default function MijnTrainingen() {
         </div>
             
             {completedWeeks.length >= 8 && (
-              <div className="mt-6 p-4 bg-gradient-to-r from-[#8BAE5A]/10 to-[#FFD700]/10 rounded-lg border border-[#8BAE5A]/20">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] rounded-full flex items-center justify-center">
-                    <span className="text-[#181F17] font-bold">🏆</span>
+              <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-gradient-to-r from-[#8BAE5A]/10 to-[#FFD700]/10 rounded-lg border border-[#8BAE5A]/20">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] rounded-full flex items-center justify-center">
+                    <span className="text-[#181F17] font-bold text-sm sm:text-base">🏆</span>
                   </div>
                   <div>
-                    <h4 className="text-lg font-bold text-white">Gefeliciteerd!</h4>
-                    <p className="text-gray-300">Je hebt alle 8 weken van dit schema voltooid. Tijd voor het volgende niveau!</p>
+                    <h4 className="text-base sm:text-lg font-bold text-white">Gefeliciteerd!</h4>
+                    <p className="text-gray-300 text-sm sm:text-base">Je hebt alle 8 weken van dit schema voltooid. Tijd voor het volgende niveau!</p>
                   </div>
                 </div>
               </div>
@@ -753,34 +773,34 @@ export default function MijnTrainingen() {
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-2xl p-8 max-w-2xl w-full shadow-2xl"
+              className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-2xl p-4 sm:p-6 md:p-8 max-w-2xl w-full shadow-2xl mx-4"
             >
               <div className="text-center">
                 {/* Success Icon */}
-                <div className="w-20 h-20 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] rounded-full flex items-center justify-center mx-auto mb-6">
-                  <TrophyIcon className="w-10 h-10 text-[#181F17]" />
+                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
+                  <TrophyIcon className="w-8 h-8 sm:w-10 sm:h-10 text-[#181F17]" />
                 </div>
                 
                 {/* Title */}
-                <h2 className="text-3xl font-bold text-white mb-4">
+                <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3 sm:mb-4">
                   🎉 Week {weekCompletionData.week} Voltooid!
                 </h2>
                 
                 {/* Description */}
-                <p className="text-gray-300 text-lg mb-6">
+                <p className="text-gray-300 text-sm sm:text-base md:text-lg mb-4 sm:mb-6">
                   Gefeliciteerd! Je hebt alle trainingsdagen van week {weekCompletionData.week} succesvol voltooid.
                 </p>
                 
                 {/* Week Stats */}
-                <div className="bg-[#0F1419]/50 rounded-xl p-6 mb-6">
-                  <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="bg-[#0F1419]/50 rounded-xl p-4 sm:p-6 mb-4 sm:mb-6">
+                  <div className="grid grid-cols-2 gap-3 sm:gap-4 text-xs sm:text-sm">
                     <div>
                       <span className="text-[#8BAE5A] font-semibold">Voltooide Dagen</span>
-                      <p className="text-white text-2xl font-bold">{weekCompletionData.days.length}</p>
+                      <p className="text-white text-xl sm:text-2xl font-bold">{weekCompletionData.days.length}</p>
                     </div>
                     <div>
                       <span className="text-[#8BAE5A] font-semibold">Voltooid Op</span>
-                      <p className="text-white">
+                      <p className="text-white text-xs sm:text-sm">
                         {new Date(weekCompletionData.completedAt).toLocaleDateString('nl-NL', {
                           day: '2-digit',
                           month: '2-digit',
@@ -792,16 +812,16 @@ export default function MijnTrainingen() {
                 </div>
                 
                 {/* Completed Days List */}
-                <div className="mb-6">
-                  <h3 className="text-lg font-semibold text-white mb-3">Voltooide Trainingen</h3>
+                <div className="mb-4 sm:mb-6">
+                  <h3 className="text-base sm:text-lg font-semibold text-white mb-3">Voltooide Trainingen</h3>
                   <div className="space-y-2">
                     {weekCompletionData.days.map((day: any) => (
-                      <div key={day.day} className="flex items-center justify-between bg-[#0F1419]/30 rounded-lg p-3">
-                        <div className="flex items-center gap-3">
-                          <CheckIcon className="w-5 h-5 text-green-400" />
-                          <span className="text-white font-medium">Dag {day.day}: {day.name}</span>
+                      <div key={day.day} className="flex items-center justify-between bg-[#0F1419]/30 rounded-lg p-2 sm:p-3">
+                        <div className="flex items-center gap-2 sm:gap-3">
+                          <CheckIcon className="w-4 h-4 sm:w-5 sm:h-5 text-green-400" />
+                          <span className="text-white font-medium text-xs sm:text-sm">Dag {day.day}: {day.name}</span>
                         </div>
-                        <span className="text-green-400 text-sm">
+                        <span className="text-green-400 text-xs sm:text-sm">
                           {day.completedAt && new Date(day.completedAt).toLocaleTimeString('nl-NL', {
                             hour: '2-digit',
                             minute: '2-digit'
@@ -813,11 +833,11 @@ export default function MijnTrainingen() {
                 </div>
                 
                 {/* Progress Info */}
-                <div className="bg-[#8BAE5A]/10 rounded-lg p-4 mb-6">
-                  <p className="text-[#8BAE5A] font-semibold">
+                <div className="bg-[#8BAE5A]/10 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6">
+                  <p className="text-[#8BAE5A] font-semibold text-sm sm:text-base">
                     Voortgang: {completedWeeks.length + 1}/8 weken
                   </p>
-                  <p className="text-gray-300 text-sm">
+                  <p className="text-gray-300 text-xs sm:text-sm">
                     {completedWeeks.length + 1 < 8 
                       ? `Nog ${8 - (completedWeeks.length + 1)} weken te gaan!`
                       : 'Je hebt alle weken voltooid! 🏆'
@@ -826,10 +846,10 @@ export default function MijnTrainingen() {
                 </div>
                 
                 {/* Action Buttons */}
-                <div className="flex gap-4 justify-center">
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
                   <button
                     onClick={startNewWeek}
-                    className="px-8 py-4 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-bold text-lg rounded-xl hover:from-[#7A9D4A] hover:to-[#e0903f] transition-all duration-200 shadow-lg hover:shadow-xl"
+                    className="px-6 py-3 sm:px-8 sm:py-4 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-bold text-sm sm:text-base md:text-lg rounded-xl hover:from-[#7A9D4A] hover:to-[#e0903f] transition-all duration-200 shadow-lg hover:shadow-xl"
                   >
                     Start Nieuwe Week
                   </button>
@@ -839,7 +859,7 @@ export default function MijnTrainingen() {
                       setShowWeekCompletionModal(false);
                       setWeekCompletionData(null);
                     }}
-                    className="px-8 py-4 bg-[#3A4D23] text-[#8BAE5A] font-semibold text-lg rounded-xl hover:bg-[#4A5D33] transition-colors"
+                    className="px-6 py-3 sm:px-8 sm:py-4 bg-[#3A4D23] text-[#8BAE5A] font-semibold text-sm sm:text-base md:text-lg rounded-xl hover:bg-[#4A5D33] transition-colors"
                   >
                     Later
                   </button>

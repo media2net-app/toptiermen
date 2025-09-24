@@ -1,109 +1,124 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
+import { supabaseAdmin } from '@/lib/supabase-admin';
 
-// GET - Fetch brotherhood groups
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createRouteHandlerClient({ cookies });
-    
     const { searchParams } = new URL(request.url);
-    const category = searchParams.get('category');
-    const isPublic = searchParams.get('is_public');
+    const userId = searchParams.get('userId');
+    const groupId = searchParams.get('groupId');
 
-    let query = supabase
-      .from('brotherhood_groups')
-      .select('*')
-      .eq('is_active', true)
-      .order('created_at', { ascending: false });
+    console.log('🏛️ Fetching brotherhood groups...');
 
-    if (category) {
-      query = query.eq('category', category);
+    if (groupId) {
+      // Get specific group with members and events
+      const { data: group, error: groupError } = await supabaseAdmin
+        .from('brotherhood_groups')
+        .select(`
+          *,
+          brotherhood_group_members (
+            id,
+            role,
+            joined_at,
+            user_id,
+            profiles (
+              id,
+              full_name,
+              email,
+              avatar_url
+            )
+          ),
+          brotherhood_events (
+            id,
+            title,
+            description,
+            event_type,
+            event_date,
+            location,
+            is_online,
+            max_attendees,
+            status
+          )
+        `)
+        .eq('id', groupId)
+        .eq('status', 'active')
+        .single();
+
+      if (groupError) {
+        console.error('❌ Error fetching group:', groupError);
+        return NextResponse.json({ error: 'Failed to fetch group' }, { status: 500 });
+      }
+
+      return NextResponse.json({ group });
+    } else {
+      // Get all active groups
+      const { data: groups, error: groupsError } = await supabaseAdmin
+        .from('brotherhood_groups')
+        .select(`
+          *,
+          brotherhood_group_members (
+            user_id,
+            role,
+            joined_at
+          )
+        `)
+        .eq('status', 'active')
+        .order('created_at', { ascending: false });
+
+      if (groupsError) {
+        console.error('❌ Error fetching groups:', groupsError);
+        return NextResponse.json({ error: 'Failed to fetch groups' }, { status: 500 });
+      }
+
+      return NextResponse.json({ groups });
     }
-
-    if (isPublic === 'true') {
-      query = query.eq('is_public', true);
-    }
-
-    const { data: groups, error } = await query;
-
-    if (error) {
-      console.error('Error fetching brotherhood groups:', error);
-      return NextResponse.json({ 
-        error: 'Failed to fetch groups' 
-      }, { status: 500 });
-    }
-
-    return NextResponse.json({ 
-      success: true, 
-      groups 
-    });
-
   } catch (error) {
-    console.error('Error in brotherhood groups GET:', error);
-    return NextResponse.json({ 
-      error: 'Internal server error' 
-    }, { status: 500 });
+    console.error('❌ Brotherhood groups API error:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
-// POST - Create new brotherhood group
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createRouteHandlerClient({ cookies });
-    
-    // Get current user
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const body = await request.json();
-    const {
-      name,
-      description,
-      category,
-      max_members = 50,
-      is_public = true
-    } = body;
+    const { name, description, category, max_members, is_private, created_by } = body;
 
-    // Validate required fields
-    if (!name || !description) {
-      return NextResponse.json({ 
-        error: 'Missing required fields: name, description' 
-      }, { status: 400 });
-    }
+    console.log('🏛️ Creating brotherhood group:', name);
 
-    const { data: group, error } = await supabase
+    const { data: group, error: groupError } = await supabaseAdmin
       .from('brotherhood_groups')
       .insert({
         name,
         description,
         category,
         max_members,
-        is_public,
-        created_by: user.id,
-        member_count: 1 // Creator is first member
+        is_private,
+        created_by
       })
       .select()
       .single();
 
-    if (error) {
-      console.error('Error creating brotherhood group:', error);
-      return NextResponse.json({ 
-        error: 'Failed to create group' 
-      }, { status: 500 });
+    if (groupError) {
+      console.error('❌ Error creating group:', groupError);
+      return NextResponse.json({ error: 'Failed to create group' }, { status: 500 });
     }
 
-    return NextResponse.json({ 
-      success: true, 
-      group 
-    });
+    // Add creator as admin member
+    const { error: memberError } = await supabaseAdmin
+      .from('brotherhood_group_members')
+      .insert({
+        group_id: group.id,
+        user_id: created_by,
+        role: 'admin'
+      });
 
+    if (memberError) {
+      console.error('❌ Error adding creator as member:', memberError);
+    }
+
+    console.log('✅ Group created successfully:', group.id);
+    return NextResponse.json({ group });
   } catch (error) {
-    console.error('Error in brotherhood groups POST:', error);
-    return NextResponse.json({ 
-      error: 'Internal server error' 
-    }, { status: 500 });
+    console.error('❌ Brotherhood groups POST API error:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

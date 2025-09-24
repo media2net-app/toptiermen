@@ -210,6 +210,112 @@ export class EmailService {
 
   getTemplate(template: string, variables: Record<string, string>): { subject: string; html: string; text: string } {
     const templates = {
+      'platform-update': {
+        subject: '🚀 Platform gereed voor gebruik!',
+        html: `
+          <div style="background: linear-gradient(135deg, #0F1419 0%, #1F2D17 100%); min-height: 100vh; padding: 40px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+            <div style="max-width: 600px; margin: 0 auto; background: #0F1419; border-radius: 16px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.3);">
+              
+              <!-- Header -->
+              <div style="background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%); padding: 40px 30px; text-align: center;">
+                <div style="width: 200px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto; border: 2px solid rgba(255,255,255,0.2);">
+                  <span style="color: white; font-size: 24px; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">TOP TIER MEN</span>
+                </div>
+                <h1 style="color: white; font-size: 32px; font-weight: 700; margin: 0; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+                  🚀 PLATFORM UPDATE
+                </h1>
+                <p style="color: rgba(255,255,255,0.95); font-size: 18px; margin: 12px 0 0 0; font-weight: 500;">
+                  Top Tier Men Platform is gereed!
+                </p>
+              </div>
+
+              <!-- Content -->
+              <div style="padding: 40px 30px; color: #E5E7EB;">
+                <p style="font-size: 18px; color: #8BAE5A; font-weight: 600; margin: 0 0 24px 0;">
+                  Beste \${name},
+                </p>
+                
+                <p style="font-size: 16px; line-height: 1.6; margin: 0 0 24px 0; color: #E5E7EB;">
+                  We zijn sinds de laatste update hard achter de schermen bezig geweest het platform 100% werkend te maken. We kunnen nu eindelijk melden dat het platform gereed is voor gebruik.
+                </p>
+
+
+                <div style="background: rgba(139, 174, 90, 0.1); border-left: 4px solid #8BAE5A; padding: 20px; margin: 24px 0; border-radius: 0 8px 8px 0;">
+                  <h3 style="color: #8BAE5A; font-size: 18px; font-weight: 700; margin: 0 0 12px 0;">
+                    📱 Platform Status:
+                  </h3>
+                  <p style="color: #D1D5DB; font-size: 15px; line-height: 1.5; margin: 0 0 8px 0;">
+                    <strong>Live URL:</strong> <a href="https://platform.toptiermen.eu" style="color: #8BAE5A;">https://platform.toptiermen.eu</a>
+                  </p>
+                  <p style="color: #D1D5DB; font-size: 15px; line-height: 1.5; margin: 0 0 8px 0;">
+                    <strong>Status:</strong> ✅ Volledig operationeel
+                  </p>
+                  <p style="color: #D1D5DB; font-size: 15px; line-height: 1.5; margin: 0;">
+                    <strong>Versie:</strong> 3.1 Improved
+                  </p>
+                </div>
+
+                <h3 style="color: #8BAE5A; font-size: 20px; font-weight: 700; margin: 32px 0 16px 0;">
+                  🎯 Volgende stappen:
+                </h3>
+                <p style="font-size: 15px; line-height: 1.6; margin: 0 0 24px 0; color: #D1D5DB;">
+                  Het platform is nu klaar voor gebruik door alle leden. Alle core functionaliteiten zijn werkend en getest.
+                </p>
+
+                <div style="background: rgba(139, 174, 90, 0.1); border-left: 4px solid #8BAE5A; padding: 20px; margin: 24px 0; border-radius: 0 8px 8px 0;">
+                  <p style="color: #D1D5DB; font-size: 15px; line-height: 1.5; margin: 0;">
+                    <strong>⚠️ Belangrijk:</strong> Ervaar je toch nog problemen tijdens het gebruik van het platform, mail dan rechtstreeks naar <a href="mailto:rick@toptiermen.eu" style="color: #8BAE5A;">rick@toptiermen.eu</a>
+                  </p>
+                </div>
+
+                <p style="font-size: 15px; line-height: 1.6; margin: 0 0 24px 0; color: #D1D5DB;">
+                  Binnen nu en 2 weken staat onze eerste groeps video call gepland, meer info hierover volgt. In de eerste call gaan we kennismaken met elkaar, en is er ruimte om functies en wensen te bespreken van het platform.
+                </p>
+
+                <p style="font-size: 16px; line-height: 1.6; margin: 32px 0 0 0; color: #8BAE5A; font-weight: 600;">
+                  Met vriendelijke groet,<br>
+                  <strong>Top Tier Men Team</strong>
+                </p>
+              </div>
+
+              <!-- Footer -->
+              <div style="background: #0F1419; padding: 20px 30px; text-align: center; border-top: 1px solid #2A3A1A;">
+                <p style="color: #6B7280; font-size: 14px; margin: 0;">
+                  Top Tier Men Platform | Versie 3.1 Improved
+                </p>
+                <p style="color: #6B7280; font-size: 12px; margin: 5px 0 0 0;">
+                  Deze mail is alleen verstuurd naar chielvanderzee@gmail.com
+                </p>
+              </div>
+            </div>
+          </div>
+        `,
+        text: `Platform Update - Top Tier Men
+
+Beste ${variables.name || 'Chiel'},
+
+We zijn sinds de laatste update hard achter de schermen bezig geweest het platform 100% werkend te maken. We kunnen nu eindelijk melden dat het platform gereed is voor gebruik.
+
+
+Platform Status:
+- Live URL: https://platform.toptiermen.eu
+- Status: ✅ Volledig operationeel
+- Versie: 3.1 Improved
+
+Volgende stappen:
+Het platform is nu klaar voor gebruik door alle leden. Alle core functionaliteiten zijn werkend en getest.
+
+⚠️ Belangrijk: Ervaar je toch nog problemen tijdens het gebruik van het platform, mail dan rechtstreeks naar rick@toptiermen.eu
+
+Binnen nu en 2 weken staat onze eerste groeps video call gepland, meer info hierover volgt. In de eerste call gaan we kennismaken met elkaar, en is er ruimte om functies en wensen te bespreken van het platform.
+
+Met vriendelijke groet,
+Top Tier Men Team
+
+---
+Top Tier Men Platform | Versie 3.1 Improved
+Deze mail is alleen verstuurd naar chielvanderzee@gmail.com`
+      },
       welcome: {
         subject: '🎯 Welkom in de Top Tier Men Broederschap!',
         html: `

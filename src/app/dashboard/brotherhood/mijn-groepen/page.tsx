@@ -2,260 +2,378 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { CalendarDaysIcon, UsersIcon, ChatBubbleLeftRightIcon, PlusIcon } from '@heroicons/react/24/outline';
 
 // Force dynamic rendering to prevent navigator errors
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-const mockGroups = [
-  {
-    id: '1',
-    name: 'Crypto & DeFi Pioniers',
-    members: [
-      { name: 'Rick', avatar: 'https://randomuser.me/api/portraits/men/31.jpg' },
-      { name: 'Mark', avatar: 'https://randomuser.me/api/portraits/men/32.jpg' },
-      { name: 'Jeroen', avatar: 'https://randomuser.me/api/portraits/men/33.jpg' },
-      { name: 'Sven', avatar: 'https://randomuser.me/api/portraits/men/34.jpg' },
-      { name: 'Teun', avatar: 'https://randomuser.me/api/portraits/men/35.jpg' },
-      { name: 'Pieter', avatar: 'https://randomuser.me/api/portraits/men/36.jpg' },
-      { name: 'Daan', avatar: 'https://randomuser.me/api/portraits/men/37.jpg' },
-      { name: 'Jij', avatar: 'https://randomuser.me/api/portraits/men/38.jpg' },
-    ],
-    activity: [
-      { type: 'forum', content: "Mark V. startte de discussie: 'Analyse van de laatste Bitcoin halving'.", date: '2u geleden' },
-      { type: 'member', content: 'Welkom bij de groep, Jeroen D.!', date: '1 dag geleden' },
-      { type: 'event', content: 'Volgende call: Wekelijkse Portfolio Review - morgen om 20:00.', date: 'Morgen' },
-    ],
-  },
-  {
-    id: '2',
-    name: 'Vaders & Leiders',
-    members: [
-      { name: 'Rick', avatar: 'https://randomuser.me/api/portraits/men/31.jpg' },
-      { name: 'Jij', avatar: 'https://randomuser.me/api/portraits/men/38.jpg' },
-      { name: 'Teun', avatar: 'https://randomuser.me/api/portraits/men/35.jpg' },
-    ],
-    activity: [
-      { type: 'forum', content: 'Sven plaatste: "Hoe combineer jij vaderschap en ondernemerschap?"', date: '3u geleden' },
-      { type: 'event', content: 'Volgende call: Reflectie & Groei - vrijdag 21:00.', date: 'Vrijdag' },
-    ],
-  },
-];
+interface BrotherhoodGroup {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  max_members: number;
+  is_private: boolean;
+  created_at: string;
+  brotherhood_group_members: Array<{
+    id: string;
+    role: string;
+    joined_at: string;
+    user_id: string;
+    profiles: {
+      id: string;
+      full_name: string;
+      email: string;
+      avatar_url?: string;
+    };
+  }>;
+  brotherhood_events: Array<{
+    id: string;
+    title: string;
+    description: string;
+    event_type: string;
+    event_date: string;
+    location: string;
+    is_online: boolean;
+    max_attendees: number;
+    status: string;
+  }>;
+}
 
-const mockEvents = [
-  {
-    id: '1',
-    title: 'Online Workshop: Onderhandelen als een Pro',
-    type: 'Online Workshop',
-    date: 'Morgen',
-    time: '20:00',
-    status: 'aangemeld',
-    upcoming: true,
-  },
-  {
-    id: '2',
-    title: 'Fysieke Meetup: Kracht & Connectie',
-    type: 'Fysieke Meetup (Amsterdam)',
-    date: 'Donderdag 26 juni',
-    time: '19:30',
-    status: 'aangemeld',
-    upcoming: true,
-  },
-  {
-    id: '3',
-    title: 'Online Masterclass: Mindset & Groei',
-    type: 'Online Masterclass',
-    date: 'Vorige week',
-    time: '20:00',
-    status: 'deelgenomen',
-    upcoming: false,
-  },
-];
+interface BrotherhoodEvent {
+  id: string;
+  title: string;
+  description: string;
+  event_type: string;
+  event_date: string;
+  location: string;
+  is_online: boolean;
+  max_attendees: number;
+  status: string;
+  brotherhood_groups: {
+    id: string;
+    name: string;
+    description: string;
+  };
+}
 
 export default function MijnGroepenEnEvenementen() {
+  const { user } = useSupabaseAuth();
   const [tab, setTab] = useState<'groepen' | 'evenementen'>('groepen');
   const [eventView, setEventView] = useState<'aankomend' | 'voorbij'>('aankomend');
-  const [groups, setGroups] = useState(mockGroups);
-  const [events, setEvents] = useState(mockEvents);
+  const [groups, setGroups] = useState<BrotherhoodGroup[]>([]);
+  const [events, setEvents] = useState<BrotherhoodEvent[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
+  // Load user's groups from database
   useEffect(() => {
-    loadBrotherhoodData();
-  }, []);
+    if (!user?.id) return;
 
-  const loadBrotherhoodData = async () => {
-    try {
-      setLoading(true);
-      
-      // Load groups
-      const groupsResponse = await fetch('/api/brotherhood/groups?is_public=true');
-      const groupsResult = await groupsResponse.json();
-      
-      if (groupsResult.success) {
-        // Transform database groups to match frontend format
-        const formattedGroups = groupsResult.groups.map((group: any) => ({
-          id: group.id,
-          name: group.name,
-          members: [
-            { name: 'Rick', avatar: 'https://randomuser.me/api/portraits/men/31.jpg' },
-            { name: 'Mark', avatar: 'https://randomuser.me/api/portraits/men/32.jpg' },
-            { name: 'Jeroen', avatar: 'https://randomuser.me/api/portraits/men/33.jpg' },
-            { name: 'Sven', avatar: 'https://randomuser.me/api/portraits/men/34.jpg' },
-            { name: 'Teun', avatar: 'https://randomuser.me/api/portraits/men/35.jpg' },
-            { name: 'Pieter', avatar: 'https://randomuser.me/api/portraits/men/36.jpg' },
-            { name: 'Daan', avatar: 'https://randomuser.me/api/portraits/men/37.jpg' },
-            { name: 'Jij', avatar: 'https://randomuser.me/api/portraits/men/38.jpg' },
-          ],
-          activity: [
-            { type: 'forum', content: "Mark V. startte de discussie: 'Analyse van de laatste Bitcoin halving'.", date: '2u geleden' },
-            { type: 'member', content: 'Welkom bij de groep, Jeroen D.!', date: '1 dag geleden' },
-            { type: 'event', content: 'Volgende call: Wekelijkse Portfolio Review - morgen om 20:00.', date: 'Morgen' },
-          ],
-        }));
-        setGroups(formattedGroups);
-      }
+    const loadUserData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
 
-      // Load events
-      const eventsResponse = await fetch('/api/brotherhood/events?status=upcoming');
-      const eventsResult = await eventsResponse.json();
-      
-      if (eventsResult.success) {
-        const formattedEvents = eventsResult.events.map((event: any) => ({
-          id: event.id,
-          title: event.title,
-          type: event.type,
-          date: new Date(event.date).toLocaleDateString('nl-NL', { 
-            day: 'numeric', 
-            month: 'long' 
-          }),
-          time: event.time || '20:00',
-          status: 'aangemeld',
-          upcoming: true,
-        }));
-        setEvents(formattedEvents);
+        // Load groups
+        const groupsResponse = await fetch(`/api/brotherhood/groups?userId=${user.id}`);
+        if (groupsResponse.ok) {
+          const groupsData = await groupsResponse.json();
+          setGroups(groupsData.groups || []);
+        }
+
+        // Load events
+        const eventsResponse = await fetch(`/api/brotherhood/events?userId=${user.id}`);
+        if (eventsResponse.ok) {
+          const eventsData = await eventsResponse.json();
+          setEvents(eventsData.events || []);
+        }
+      } catch (err) {
+        console.error('Error loading brotherhood data:', err);
+        setError('Er is een fout opgetreden bij het laden van de gegevens.');
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error('Error loading brotherhood data:', error);
-      // Keep using mock data as fallback
-    } finally {
-      setLoading(false);
+    };
+
+    loadUserData();
+  }, [user?.id]);
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = date.getTime() - now.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) return 'Vandaag';
+    if (diffDays === 1) return 'Morgen';
+    if (diffDays === -1) return 'Gisteren';
+    if (diffDays > 1) return `Over ${diffDays} dagen`;
+    if (diffDays < -1) return `${Math.abs(diffDays)} dagen geleden`;
+    return date.toLocaleDateString('nl-NL');
+  };
+
+  const getEventStatus = (event: BrotherhoodEvent) => {
+    const eventDate = new Date(event.event_date);
+    const now = new Date();
+    
+    if (eventDate > now) {
+      return 'upcoming';
+    } else {
+      return 'past';
     }
   };
 
-  return (
-    <div className="w-full max-w-7xl mx-auto">
-      {/* Tabs */}
-      <div className="flex gap-2 mb-8 border-b border-[#3A4D23]/40">
-        <button
-          className={`px-4 py-2 font-bold text-white border-b-2 transition-all ${tab === 'groepen' ? 'border-[#8BAE5A] text-[#8BAE5A]' : 'border-transparent text-white/60'}`}
-          onClick={() => setTab('groepen')}
-        >
-          Mijn Mastermind Groepen
-        </button>
-        <button
-          className={`px-4 py-2 font-bold text-white border-b-2 transition-all ${tab === 'evenementen' ? 'border-[#8BAE5A] text-[#8BAE5A]' : 'border-transparent text-white/60'}`}
-          onClick={() => setTab('evenementen')}
-        >
-          Mijn Evenementen
-        </button>
-      </div>
-      {/* Tab 1: Groepen */}
-      {tab === 'groepen' && (
-        <div>
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-white">Mijn Mastermind Groepen</h2>
-            <Link href="/dashboard/brotherhood/groepen-directory">
-              <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-bold shadow hover:from-[#B6C948] hover:to-[#8BAE5A] transition-all">
-                + Vind of creëer een groep
-              </button>
-            </Link>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {groups.map(group => (
-              <div key={group.id} className="bg-[#232D1A]/90 rounded-2xl shadow-xl border border-[#3A4D23]/40 p-6 flex flex-col gap-4">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-lg font-bold text-white">{group.name}</h3>
-                  <button className="text-[#8BAE5A] hover:text-[#FFD700] text-xl px-2 py-1 rounded-full transition-colors" title="Groep opties">⋯</button>
-                </div>
-                <div className="mb-2">
-                  <div className="text-xs text-[#8BAE5A] font-semibold mb-1">Recente activiteit</div>
-                  <ul className="space-y-1">
-                    {group.activity.map((a, idx) => (
-                      <li key={idx} className="flex items-center gap-2 text-white/90 text-sm">
-                        <span className="text-[#FFD700] text-xs font-bold">{a.type === 'forum' ? 'Forum' : a.type === 'member' ? 'Lid' : 'Event'}</span>
-                        <span className="flex-1">{a.content}</span>
-                        <span className="text-xs text-[#8BAE5A]">{a.date}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="flex -space-x-3">
-                    {group.members.slice(0, 5).map((m, idx) => (
-                      <Image key={m.name} src={m.avatar} alt={m.name} width={32} height={32} className="rounded-full border-2 border-[#8BAE5A] bg-[#232D1A]" style={{ zIndex: 10 - idx }} />
-                    ))}
-                  </div>
-                  <span className="text-xs text-[#8BAE5A] ml-2">Jij en {group.members.length - 1} anderen.</span>
-                  <button className="text-xs text-[#FFD700] underline ml-2 hover:text-[#8BAE5A]">Bekijk leden</button>
-                </div>
-                <div className="mt-auto">
-                  <Link href={`/dashboard/brotherhood/groepen/${group.id}`}>
-                    <button className="w-full px-4 py-2 rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-bold shadow hover:from-[#B6C948] hover:to-[#8BAE5A] transition-all flex items-center justify-center gap-2">
-                      <span>Ga naar de Groepshub</span>
-                      <span className="text-lg">→</span>
-                    </button>
-                  </Link>
-                </div>
-              </div>
-            ))}
-          </div>
+  const upcomingEvents = events.filter(event => getEventStatus(event) === 'upcoming');
+  const pastEvents = events.filter(event => getEventStatus(event) === 'past');
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#181F17] flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
+          <div className="text-white text-lg">Brotherhood data laden...</div>
         </div>
-      )}
-      {/* Tab 2: Evenementen */}
-      {tab === 'evenementen' && (
-        <div>
-          <div className="flex items-center gap-4 mb-6">
-            <h2 className="text-2xl font-bold text-white">Mijn Evenementen</h2>
-            <div className="flex gap-2 ml-4">
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-[#181F17] flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-400 text-lg mb-4">{error}</div>
+          <button 
+            onClick={() => window.location.reload()}
+            className="bg-[#8BAE5A] text-white px-4 py-2 rounded-lg hover:bg-[#7A9E4A] transition-colors"
+          >
+            Opnieuw proberen
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-[#181F17] text-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-[#B6C948] mb-2">Mijn Brotherhood</h1>
+          <p className="text-gray-300">Je groepen en evenementen</p>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex space-x-1 mb-8 bg-[#2A3A1A] p-1 rounded-lg">
+          <button
+            onClick={() => setTab('groepen')}
+            className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+              tab === 'groepen'
+                ? 'bg-[#8BAE5A] text-[#181F17]'
+                : 'text-gray-300 hover:text-white'
+            }`}
+          >
+            <UsersIcon className="w-4 h-4 inline mr-2" />
+            Mijn Groepen ({groups.length})
+          </button>
+          <button
+            onClick={() => setTab('evenementen')}
+            className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+              tab === 'evenementen'
+                ? 'bg-[#8BAE5A] text-[#181F17]'
+                : 'text-gray-300 hover:text-white'
+            }`}
+          >
+            <CalendarDaysIcon className="w-4 h-4 inline mr-2" />
+            Evenementen ({events.length})
+          </button>
+        </div>
+
+        {/* Groups Tab */}
+        {tab === 'groepen' && (
+          <div className="space-y-6">
+            {groups.length === 0 ? (
+              <div className="text-center py-12">
+                <UsersIcon className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-gray-300 mb-2">Nog geen groepen</h3>
+                <p className="text-gray-500 mb-6">Word lid van een groep om te beginnen</p>
+                <button className="bg-[#8BAE5A] text-white px-6 py-3 rounded-lg hover:bg-[#7A9E4A] transition-colors">
+                  <PlusIcon className="w-4 h-4 inline mr-2" />
+                  Groep zoeken
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {groups.map((group) => (
+                  <div key={group.id} className="bg-[#2A3A1A] rounded-lg p-6 border border-[#3A4A2A]">
+                    <div className="flex items-start justify-between mb-4">
+                      <div>
+                        <h3 className="text-xl font-semibold text-white mb-1">{group.name}</h3>
+                        <p className="text-gray-400 text-sm">{group.description}</p>
+                      </div>
+                      <span className="bg-[#8BAE5A] text-[#181F17] text-xs px-2 py-1 rounded-full">
+                        {group.category}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center text-sm text-gray-400 mb-4">
+                      <UsersIcon className="w-4 h-4 mr-1" />
+                      {group.brotherhood_group_members?.length || 0} leden
+                    </div>
+
+                    <div className="space-y-2 mb-4">
+                      {group.brotherhood_group_members?.slice(0, 3).map((member) => (
+                        <div key={member.id} className="flex items-center text-sm">
+                          <div className="w-6 h-6 bg-[#8BAE5A] rounded-full flex items-center justify-center text-[#181F17] text-xs font-semibold mr-2">
+                            {member.profiles?.full_name?.charAt(0) || '?'}
+                          </div>
+                          <span className="text-gray-300">{member.profiles?.full_name || 'Onbekend'}</span>
+                          {member.role === 'admin' && (
+                            <span className="ml-2 text-[#8BAE5A] text-xs">Admin</span>
+                          )}
+                        </div>
+                      ))}
+                      {group.brotherhood_group_members && group.brotherhood_group_members.length > 3 && (
+                        <div className="text-sm text-gray-500">
+                          +{group.brotherhood_group_members.length - 3} andere leden
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex space-x-2">
+                      <Link
+                        href={`/dashboard/brotherhood/groepen/${group.id}`}
+                        className="flex-1 bg-[#8BAE5A] text-[#181F17] text-center py-2 px-4 rounded-lg hover:bg-[#7A9E4A] transition-colors font-medium"
+                      >
+                        Bekijk Groep
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Events Tab */}
+        {tab === 'evenementen' && (
+          <div className="space-y-6">
+            {/* Event View Toggle */}
+            <div className="flex space-x-1 bg-[#2A3A1A] p-1 rounded-lg w-fit">
               <button
-                className={`px-3 py-1 rounded-lg font-semibold text-sm transition-all ${eventView === 'aankomend' ? 'bg-[#8BAE5A] text-[#181F17]' : 'bg-[#232D1A] text-[#8BAE5A] border border-[#3A4D23]/40'}`}
                 onClick={() => setEventView('aankomend')}
+                className={`py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                  eventView === 'aankomend'
+                    ? 'bg-[#8BAE5A] text-[#181F17]'
+                    : 'text-gray-300 hover:text-white'
+                }`}
               >
-                Aankomend
+                Aankomend ({upcomingEvents.length})
               </button>
               <button
-                className={`px-3 py-1 rounded-lg font-semibold text-sm transition-all ${eventView === 'voorbij' ? 'bg-[#8BAE5A] text-[#181F17]' : 'bg-[#232D1A] text-[#8BAE5A] border border-[#3A4D23]/40'}`}
                 onClick={() => setEventView('voorbij')}
+                className={`py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                  eventView === 'voorbij'
+                    ? 'bg-[#8BAE5A] text-[#181F17]'
+                    : 'text-gray-300 hover:text-white'
+                }`}
               >
-                Voorbij
+                Voorbij ({pastEvents.length})
               </button>
             </div>
+
+            {/* Events List */}
+            {eventView === 'aankomend' ? (
+              upcomingEvents.length === 0 ? (
+                <div className="text-center py-12">
+                  <CalendarDaysIcon className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold text-gray-300 mb-2">Geen aankomende evenementen</h3>
+                  <p className="text-gray-500">Er zijn momenteel geen aankomende evenementen</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {upcomingEvents.map((event) => (
+                    <div key={event.id} className="bg-[#2A3A1A] rounded-lg p-6 border border-[#3A4A2A]">
+                      <div className="flex items-start justify-between mb-4">
+                        <div>
+                          <h3 className="text-xl font-semibold text-white mb-1">{event.title}</h3>
+                          <p className="text-gray-400">{event.description}</p>
+                        </div>
+                        <span className="bg-[#8BAE5A] text-[#181F17] text-xs px-2 py-1 rounded-full">
+                          {event.event_type}
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                        <div className="flex items-center text-sm text-gray-400">
+                          <CalendarDaysIcon className="w-4 h-4 mr-2" />
+                          {formatDate(event.event_date)}
+                        </div>
+                        <div className="flex items-center text-sm text-gray-400">
+                          <UsersIcon className="w-4 h-4 mr-2" />
+                          {event.brotherhood_groups?.name}
+                        </div>
+                        <div className="flex items-center text-sm text-gray-400">
+                          {event.is_online ? '🌐 Online' : '📍 ' + event.location}
+                        </div>
+                      </div>
+
+                      <div className="flex space-x-2">
+                        <Link
+                          href={`/dashboard/brotherhood/evenementen/${event.id}`}
+                          className="flex-1 bg-[#8BAE5A] text-[#181F17] text-center py-2 px-4 rounded-lg hover:bg-[#7A9E4A] transition-colors font-medium"
+                        >
+                          Bekijk Evenement
+                        </Link>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )
+            ) : (
+              pastEvents.length === 0 ? (
+                <div className="text-center py-12">
+                  <CalendarDaysIcon className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold text-gray-300 mb-2">Geen voorbije evenementen</h3>
+                  <p className="text-gray-500">Er zijn nog geen voorbije evenementen</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {pastEvents.map((event) => (
+                    <div key={event.id} className="bg-[#2A3A1A] rounded-lg p-6 border border-[#3A4A2A] opacity-75">
+                      <div className="flex items-start justify-between mb-4">
+                        <div>
+                          <h3 className="text-xl font-semibold text-white mb-1">{event.title}</h3>
+                          <p className="text-gray-400">{event.description}</p>
+                        </div>
+                        <span className="bg-gray-600 text-white text-xs px-2 py-1 rounded-full">
+                          Voorbij
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                        <div className="flex items-center text-sm text-gray-400">
+                          <CalendarDaysIcon className="w-4 h-4 mr-2" />
+                          {formatDate(event.event_date)}
+                        </div>
+                        <div className="flex items-center text-sm text-gray-400">
+                          <UsersIcon className="w-4 h-4 mr-2" />
+                          {event.brotherhood_groups?.name}
+                        </div>
+                        <div className="flex items-center text-sm text-gray-400">
+                          {event.is_online ? '🌐 Online' : '📍 ' + event.location}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )
+            )}
           </div>
-          <div className="space-y-4">
-            {events.filter(e => e.upcoming === (eventView === 'aankomend')).map(event => (
-              <div key={event.id} className="bg-[#232D1A]/90 rounded-2xl shadow-xl border border-[#3A4D23]/40 p-5 flex flex-col md:flex-row md:items-center gap-4">
-                <div className="flex flex-col items-start min-w-[120px] mb-2 md:mb-0">
-                  <div className="text-lg font-bold text-[#FFD700]">{event.date}, {event.time}</div>
-                  <div className="text-xs text-[#8BAE5A] font-semibold">{event.type}</div>
-                </div>
-                <div className="flex-1">
-                  <div className="text-white font-bold text-base mb-1">{event.title}</div>
-                  <div className="text-xs text-[#8BAE5A] font-semibold mb-2">{event.status === 'aangemeld' ? '✓ Je bent aangemeld' : '✓ Deelgenomen'}</div>
-                </div>
-                <div className="flex items-center gap-2 mt-2 md:mt-0">
-                  <Link href={`/dashboard/brotherhood/evenementen/${event.id}`}>
-                    <button className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-bold shadow hover:from-[#B6C948] hover:to-[#8BAE5A] transition-all flex items-center gap-2">
-                      {event.upcoming ? <span>Bekijk Details</span> : <span>Throwback</span>}
-                      <span className="text-lg">{event.upcoming ? '→' : '⏪'}</span>
-                    </button>
-                  </Link>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
-} 
+}

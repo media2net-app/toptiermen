@@ -3,60 +3,18 @@ import { Fragment, useState, useEffect } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { ArrowPathIcon, LightBulbIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
 
-const mockTraining = {
-  name: "Push Day",
-  exercises: [
-    {
-      name: "Bench Press",
-      video: "/videos/bench-press.gif",
-      instructions: [
-        "Voeten plat op de grond",
-        "Schouderbladen samenknijpen",
-        "Stang laten zakken tot borsthoogte",
-        "Volledige extensie bij het uitstoten"
-      ],
-      alternatives: [
-        { name: "Dumbbell Press", reason: "Geen barbell beschikbaar" },
-        { name: "Machine Chest Press", reason: "Barbell rack bezet" },
-        { name: "Incline Push-ups", reason: "Lichte blessure" }
-      ],
-      sets: [
-        { prevWeight: 60, prevReps: 8, weight: "", reps: "", done: false, feedback: "" },
-        { prevWeight: 60, prevReps: 8, weight: "", reps: "", done: false, feedback: "" },
-        { prevWeight: 60, prevReps: 8, weight: "", reps: "", done: false, feedback: "" }
-      ]
-    },
-    {
-      name: "Incline Dumbbell Press",
-      video: "/videos/incline-dumbbell.gif",
-      instructions: [
-        "Bankje op 30 graden",
-        "Dumbbells boven borst uitstoten",
-        "Langzaam laten zakken tot schouderhoogte"
-      ],
-      alternatives: [
-        { name: "Incline Barbell Press", reason: "Dumbbells niet beschikbaar" },
-        { name: "Decline Push-ups", reason: "Bankje bezet" }
-      ],
-      sets: [
-        { prevWeight: 22, prevReps: 10, weight: "", reps: "", done: false, feedback: "" },
-        { prevWeight: 22, prevReps: 10, weight: "", reps: "", done: false, feedback: "" },
-        { prevWeight: 22, prevReps: 10, weight: "", reps: "", done: false, feedback: "" }
-      ]
-    }
-  ]
-};
+// Database-driven workout data - no more mock data
 
 type WorkoutPlayerModalProps = {
   isOpen: boolean;
   onClose: () => void;
   onComplete: (data: any) => void;
-  trainingData?: typeof mockTraining;
+  trainingData?: any;
   schemaId?: string;
   dayNumber?: number;
 };
 
-export default function WorkoutPlayerModal({ isOpen, onClose, onComplete, trainingData = mockTraining, schemaId, dayNumber }: WorkoutPlayerModalProps) {
+export default function WorkoutPlayerModal({ isOpen, onClose, onComplete, trainingData, schemaId, dayNumber }: WorkoutPlayerModalProps) {
   const [activeIdx, setActiveIdx] = useState(0);
   const [exercises, setExercises] = useState(trainingData.exercises);
   const [resting, setResting] = useState(false);

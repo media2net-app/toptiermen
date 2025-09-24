@@ -1,414 +1,392 @@
 'use client';
-import { useState, useEffect } from 'react';
-import { 
-  HeartIcon, 
-  StarIcon,
-  EyeIcon
-} from '@heroicons/react/24/outline';
-
+import React, { useState, useEffect } from 'react';
+import { StarIcon, ShoppingCartIcon, HeartIcon, EyeIcon } from '@heroicons/react/24/solid';
+import { MagnifyingGlassIcon, FunnelIcon } from '@heroicons/react/24/outline';
 
 interface Product {
   id: string;
   name: string;
   description: string;
+  short_description?: string;
   price: number;
-  originalPrice?: number;
-  image: string;
-  category: string;
-  inStock: boolean;
+  original_price?: number;
+  image_url?: string;
+  gallery_images?: string[];
+  category_id: string;
+  in_stock: boolean;
+  stock_quantity: number;
+  sku?: string;
+  brand?: string;
   rating: number;
-  reviews: number;
-  features: string[];
-  benefits: string[];
-  dosage?: string;
-  ingredients?: string[];
-  affiliateLink?: string;
+  review_count: number;
+  featured: boolean;
+  status: string;
+  created_at: string;
+  updated_at: string;
+  product_categories?: {
+    id: string;
+    name: string;
+    description: string;
+    icon?: string;
+    color: string;
+  };
+  product_features?: Array<{
+    id: string;
+    feature: string;
+    order_index: number;
+  }>;
+  product_benefits?: Array<{
+    id: string;
+    benefit: string;
+    order_index: number;
+  }>;
+  product_ingredients?: Array<{
+    id: string;
+    ingredient: string;
+    order_index: number;
+  }>;
+  product_dosage?: Array<{
+    id: string;
+    dosage_instructions: string;
+  }>;
+  product_affiliate_links?: Array<{
+    id: string;
+    platform: string;
+    affiliate_url: string;
+    is_primary: boolean;
+  }>;
+  product_reviews?: Array<{
+    id: string;
+    rating: number;
+    title?: string;
+    review_text?: string;
+    verified_purchase: boolean;
+    helpful_count: number;
+    created_at: string;
+    user_id: string;
+    profiles?: {
+      id: string;
+      full_name: string;
+    };
+  }>;
 }
 
-
-
 export default function ProductenPage() {
-  const [products, setProducts] = useState<Product[]>([
-    {
-      id: 'omega3',
-      name: 'Omega 3 Visolie Premium',
-      description: 'Hoogwaardige visolie met optimale verhouding EPA/DHA voor hart, hersenen en gewrichten. Geproduceerd volgens de hoogste kwaliteitsstandaarden.',
-      price: 29.95,
-      originalPrice: 39.95,
-      image: '/images/products/omega3.jpg',
-      category: 'supplementen',
-      inStock: true,
-      rating: 4.8,
-      reviews: 127,
-      features: [
-        '1000mg EPA + 500mg DHA per capsule',
-        'Moleculair gedistilleerd voor zuiverheid',
-        'IFOS gecertificeerd (5 sterren)',
-        'Vrij van zware metalen',
-        '60 capsules per verpakking'
-      ],
-      benefits: [
-        'Ondersteunt hart- en vaatgezondheid',
-        'Verbeterd cognitieve functie',
-        'Vermindert ontstekingen',
-        'Ondersteunt gewrichtsgezondheid',
-        'Verbetert stemming en welzijn'
-      ],
-      dosage: '1-2 capsules per dag bij de maaltijd',
-      ingredients: ['Visolie (sardines, ansjovis)', 'Gelatine', 'Glycerine', 'Vitamine E']
-    },
-    {
-      id: 'bloedtest',
-      name: 'Comprehensive Bloedtest',
-      description: 'Complete bloedanalyse inclusief hormonen, vitaminen, mineralen en biomarkers. Ontvang gedetailleerde inzichten in je gezondheid en optimaliseer je prestaties.',
-      price: 149.00,
-      originalPrice: 199.00,
-      image: '/images/products/bloedtest.jpg',
-      category: 'diagnostiek',
-      inStock: true,
-      rating: 4.9,
-      reviews: 89,
-      features: [
-        '50+ biomarkers geanalyseerd',
-        'Hormoonprofiel (testosteron, cortisol)',
-        'Vitaminen en mineralen status',
-        'Hart- en vaatmarkers',
-        'Lever- en nierfunctie',
-        'Gedetailleerd rapport met aanbevelingen'
-      ],
-      benefits: [
-        'Identificeer tekorten en onevenwichtigheden',
-        'Optimaliseer je hormoonbalans',
-        'Voorkom gezondheidsproblemen',
-        'Meetbare verbeteringen in prestaties',
-        'Persoonlijke aanbevelingen van experts'
-      ]
-    },
-    {
-      id: 'electrolyte',
-      name: 'Electrolyte Hydration Mix',
-      description: 'Premium elektrolyten mix voor optimale hydratatie en prestaties. Ideaal voor training, herstel en dagelijks gebruik. Bevat alle essentiële mineralen.',
-      price: 24.95,
-      originalPrice: 29.95,
-      image: '/images/products/electrolyte.jpg',
-      category: 'supplementen',
-      inStock: true,
-      rating: 4.7,
-      reviews: 156,
-      features: [
-        'Complete elektrolyten balans',
-        'Natrium, kalium, magnesium, calcium',
-        'Natuurlijke smaken (citroen, sinaasappel)',
-        'Vrij van kunstmatige zoetstoffen',
-        '30 porties per verpakking',
-        'Makkelijk oplosbaar'
-      ],
-      benefits: [
-        'Verbeterde hydratatie tijdens training',
-        'Sneller herstel na inspanning',
-        'Vermindert spierkrampen',
-        'Ondersteunt zenuwstelsel',
-        'Optimaliseert prestaties'
-      ],
-      dosage: '1 scoop per 500ml water tijdens/na training',
-      ingredients: ['Natriumcitraat', 'Kaliumcitraat', 'Magnesiumcitraat', 'Calciumcitraat', 'Natuurlijke aroma\'s', 'Stevia']
-    },
-    {
-      id: 'testosteron-kit',
-      name: 'Testosteron Test Kit',
-      description: 'Professionele testosteron test die je thuis kunt afnemen via vingerprik. Ontvang binnen 6 werkdagen een gedetailleerd rapport met persoonlijk advies van een arts.',
-      price: 39.00,
-      image: '/testosteron_packshot.png',
-      category: 'diagnostiek',
-      inStock: true,
-      rating: 4.9,
-      reviews: 234,
-      features: [
-        'Zelftest via vingerprik thuis',
-        'ISO15189-gecertificeerd Europees laboratorium',
-        'Gevalideerd door biochemicus en arts',
-        'Resultaten binnen 6 werkdagen',
-        'Beveiligd rapport met uitleg',
-        'Persoonlijk advies inbegrepen'
-      ],
-      benefits: [
-        'Inzicht in je testosteron niveau',
-        'Identificeer hormonale onevenwichtigheden',
-        'Optimaliseer je hormoonbalans',
-        'Meetbare verbeteringen in prestaties',
-        'Professionele begeleiding van arts',
-        'Privacy en gemak van thuis testen'
-      ],
-      dosage: 'Eenmalige test - volg instructies in testkit',
-      ingredients: ['Testkit met alle benodigde materialen', 'Retourenvelop', 'Gedetailleerde instructies'],
-      affiliateLink: 'https://mijnlabtest.nl/testosteron-test.html?aw_affiliate=eyJjYW1wYWlnbl9pZCI6IjU3IiwidHJhZmZpY19zb3VyY2UiOiJub19zb3VyY2UiLCJhY2NvdW50X2lkIjo3NTF9'
-    }
-  ]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState('created_at');
+  const [sortOrder, setSortOrder] = useState('desc');
+  const [showFilters, setShowFilters] = useState(false);
 
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [showProductModal, setShowProductModal] = useState(false);
+  // Load products from database
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        setLoading(true);
+        setError(null);
 
+        const params = new URLSearchParams({
+          category: selectedCategory,
+          search: searchTerm,
+          sortBy,
+          sortOrder
+        });
 
+        const response = await fetch(`/api/products?${params}`);
+        if (response.ok) {
+          const data = await response.json();
+          setProducts(data.products || []);
+          setCategories(data.categories || []);
+        } else {
+          throw new Error('Failed to load products');
+        }
+      } catch (err) {
+        console.error('Error loading products:', err);
+        setError('Er is een fout opgetreden bij het laden van de producten.');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const openProductModal = (product: Product) => {
-    setSelectedProduct(product);
-    setShowProductModal(true);
+    loadProducts();
+  }, [selectedCategory, searchTerm, sortBy, sortOrder]);
+
+  const renderStars = (rating: number) => {
+    return Array.from({ length: 5 }, (_, i) => (
+      <StarIcon
+        key={i}
+        className={`w-4 h-4 ${
+          i < Math.floor(rating) ? 'text-yellow-400' : 'text-gray-600'
+        }`}
+      />
+    ));
   };
 
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('nl-NL', {
+      style: 'currency',
+      currency: 'EUR'
+    }).format(price);
+  };
+
+  const getPrimaryAffiliateLink = (product: Product) => {
+    return product.product_affiliate_links?.find(link => link.is_primary)?.affiliate_url || 
+           product.product_affiliate_links?.[0]?.affiliate_url;
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#181F17] flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
+          <div className="text-white text-lg">Producten laden...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-[#181F17] flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-400 text-lg mb-4">{error}</div>
+          <button 
+            onClick={() => window.location.reload()}
+            className="bg-[#8BAE5A] text-white px-4 py-2 rounded-lg hover:bg-[#7A9E4A] transition-colors"
+          >
+            Opnieuw proberen
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="p-6 bg-[#0A0F0A] min-h-screen">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-[#181F17] text-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-[#8BAE5A] mb-2">Producten</h1>
-              <p className="text-[#B6C948]">Premium supplementen en diagnostiek voor optimale prestaties</p>
-            </div>
-          </div>
+          <h1 className="text-3xl font-bold text-[#B6C948] mb-2">Producten</h1>
+          <p className="text-gray-300">Ontdek onze zorgvuldig geselecteerde producten voor optimale gezondheid en prestaties</p>
         </div>
 
-        {/* Development Notice */}
-        <div className="mb-8 bg-gradient-to-r from-[#FFD700]/20 to-[#FFA500]/20 border border-[#FFD700]/30 rounded-xl p-6">
-          <div className="flex items-start gap-4">
-            <div className="flex-shrink-0">
-              <div className="w-12 h-12 bg-[#FFD700]/20 rounded-full flex items-center justify-center">
-                <svg className="w-6 h-6 text-[#FFD700]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                </svg>
-              </div>
+        {/* Search and Filters */}
+        <div className="mb-8">
+          <div className="flex flex-col md:flex-row gap-4 mb-6">
+            {/* Search */}
+            <div className="flex-1 relative">
+              <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Zoek producten..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 bg-[#2A3A1A] border border-[#3A4A2A] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] focus:border-transparent"
+              />
             </div>
-            <div className="flex-1">
-              <h3 className="text-lg font-semibold text-[#FFD700] mb-2">
-                🚧 Producten Pagina in Ontwikkeling
-              </h3>
-              <p className="text-[#B6C948] mb-3">
-                Deze pagina is momenteel nog in ontwikkeling. De producten die je hier ziet zijn voorbeelden en de functionaliteit om door te klikken naar individuele productlandingspagina's wordt binnenkort toegevoegd.
-              </p>
-              <div className="bg-[#181F17]/50 rounded-lg p-4 border border-[#FFD700]/20">
-                <h4 className="text-[#FFD700] font-semibold mb-2">📋 Wat wordt er toegevoegd:</h4>
-                <ul className="text-[#B6C948] text-sm space-y-1">
-                  <li>• Individuele productlandingspagina's met uitgebreide informatie</li>
-                  <li>• Product reviews en beoordelingen</li>
-                  <li>• Gerelateerde producten en aanbevelingen</li>
-                  <li>• Volledige checkout en betalingsintegratie</li>
-                  <li>• Product filtering en zoekfunctionaliteit</li>
-                </ul>
-              </div>
-            </div>
+
+            {/* Filter Toggle */}
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className="flex items-center gap-2 px-4 py-3 bg-[#2A3A1A] border border-[#3A4A2A] rounded-lg text-white hover:bg-[#3A4A2A] transition-colors"
+            >
+              <FunnelIcon className="w-5 h-5" />
+              Filters
+            </button>
           </div>
+
+          {/* Filters Panel */}
+          {showFilters && (
+            <div className="bg-[#2A3A1A] border border-[#3A4A2A] rounded-lg p-6 mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Category Filter */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Categorie</label>
+                  <select
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4A2A] rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+                  >
+                    <option value="all">Alle categorieën</option>
+                    {categories.map((category) => (
+                      <option key={category.id} value={category.id}>
+                        {category.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Sort By */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Sorteren op</label>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4A2A] rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+                  >
+                    <option value="created_at">Nieuwste eerst</option>
+                    <option value="name">Naam A-Z</option>
+                    <option value="price">Prijs laag-hoog</option>
+                    <option value="rating">Beoordeling</option>
+                  </select>
+                </div>
+
+                {/* Sort Order */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Volgorde</label>
+                  <select
+                    value={sortOrder}
+                    onChange={(e) => setSortOrder(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4A2A] rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+                  >
+                    <option value="desc">Aflopend</option>
+                    <option value="asc">Oplopend</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Products Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {products.map((product) => (
-            <div key={product.id} className="bg-[#232D1A] border border-[#3A4D23] rounded-xl overflow-hidden hover:border-[#8BAE5A] hover:shadow-xl transition-all duration-300 shadow-lg">
-              {/* Product Image */}
-              <div className="relative h-48 bg-gradient-to-br from-[#8BAE5A]/10 to-[#FFD700]/10 flex items-center justify-center overflow-hidden">
-                {product.image && product.image !== '/images/products/omega3.jpg' && product.image !== '/images/products/bloedtest.jpg' && product.image !== '/images/products/electrolyte.jpg' ? (
-                  <img 
-                    src={product.image} 
-                    alt={product.name}
-                    className="max-w-full max-h-full object-contain"
-                  />
-                ) : (
-                  <div className="text-[#8BAE5A] text-4xl font-bold">
-                    {product.name.split(' ')[0]}
-                  </div>
-                )}
-                {product.originalPrice && (
-                  <div className="absolute top-4 left-4 bg-red-500 text-white px-2 py-1 rounded-lg text-sm font-semibold shadow-md">
-                    -{Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
-                  </div>
-                )}
-              </div>
-
-              {/* Product Info */}
-              <div className="p-6">
-                <div className="flex items-start justify-between mb-3">
-                  <h3 className="text-xl font-bold text-[#8BAE5A]">{product.name}</h3>
-                  <button className="text-[#B6C948] hover:text-red-500 transition-colors">
-                    <HeartIcon className="w-5 h-5" />
-                  </button>
-                </div>
-
-                <p className="text-[#B6C948] text-sm mb-4 line-clamp-2">{product.description}</p>
-
-                {/* Rating */}
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="flex items-center gap-1">
-                    {[...Array(5)].map((_, i) => (
-                      <StarIcon
-                        key={i}
-                        className={`w-4 h-4 ${
-                          i < Math.floor(product.rating)
-                            ? 'text-[#FFD700] fill-current'
-                            : 'text-[#3A4D23]'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                  <span className="text-[#B6C948] text-sm">
-                    {product.rating} ({product.reviews} reviews)
-                  </span>
-                </div>
-
-                {/* Price */}
-                <div className="flex items-center gap-3 mb-4">
-                  <span className="text-2xl font-bold text-[#8BAE5A]">€{product.price.toFixed(2)}</span>
-                  {product.originalPrice && (
-                    <span className="text-[#B6C948] line-through">€{product.originalPrice.toFixed(2)}</span>
-                  )}
-                </div>
-
-                {/* Stock Status */}
-                <div className="flex items-center gap-2 mb-4">
-                  <div className={`w-2 h-2 rounded-full ${product.inStock ? 'bg-[#8BAE5A]' : 'bg-red-500'}`}></div>
-                  <span className={`text-sm ${product.inStock ? 'text-[#8BAE5A]' : 'text-red-500'}`}>
-                    {product.inStock ? 'Op voorraad' : 'Niet op voorraad'}
-                  </span>
-                </div>
-
-                {/* Action Button */}
-                <div className="flex gap-3">
-                  {product.affiliateLink ? (
-                    <a
-                      href={product.affiliateLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-full bg-transparent border border-[#8BAE5A] text-[#8BAE5A] hover:bg-[#8BAE5A] hover:text-[#0A0F0A] px-4 py-2 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center gap-2"
-                    >
-                      <EyeIcon className="w-4 h-4" />
-                      Meer Info
-                    </a>
+        {products.length === 0 ? (
+          <div className="text-center py-12">
+            <ShoppingCartIcon className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-gray-300 mb-2">Geen producten gevonden</h3>
+            <p className="text-gray-500">Probeer andere zoektermen of filters</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {products.map((product) => (
+              <div key={product.id} className="bg-[#2A3A1A] rounded-lg overflow-hidden border border-[#3A4A2A] hover:border-[#8BAE5A] transition-colors">
+                {/* Product Image */}
+                <div className="relative h-48 bg-gray-800">
+                  {product.image_url ? (
+                    <img
+                      src={product.image_url}
+                      alt={product.name}
+                      className="w-full h-full object-cover"
+                    />
                   ) : (
-                    <button
-                      onClick={() => openProductModal(product)}
-                      className="w-full bg-transparent border border-[#8BAE5A] text-[#8BAE5A] hover:bg-[#8BAE5A] hover:text-[#0A0F0A] px-4 py-2 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center gap-2"
-                    >
-                      <EyeIcon className="w-4 h-4" />
-                      Bekijk Details
-                    </button>
+                    <div className="w-full h-full flex items-center justify-center text-gray-500">
+                      <ShoppingCartIcon className="w-12 h-12" />
+                    </div>
+                  )}
+                  
+                  {/* Featured Badge */}
+                  {product.featured && (
+                    <div className="absolute top-2 left-2 bg-[#8BAE5A] text-[#181F17] text-xs px-2 py-1 rounded-full font-semibold">
+                      Aanbevolen
+                    </div>
+                  )}
+
+                  {/* Stock Status */}
+                  {!product.in_stock && (
+                    <div className="absolute top-2 right-2 bg-red-600 text-white text-xs px-2 py-1 rounded-full">
+                      Uitverkocht
+                    </div>
                   )}
                 </div>
-              </div>
-            </div>
-          ))}
-        </div>
 
-        {/* Product Modal */}
-        {showProductModal && selectedProduct && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-[#232D1A] border border-[#3A4D23] rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
-              <div className="p-6">
-                <div className="flex items-start justify-between mb-6">
-                  <h2 className="text-2xl font-bold text-[#8BAE5A]">{selectedProduct.name}</h2>
-                  <button
-                    onClick={() => setShowProductModal(false)}
-                    className="text-[#B6C948] hover:text-[#8BAE5A] text-2xl font-bold"
-                  >
-                    ✕
-                  </button>
-                </div>
+                {/* Product Info */}
+                <div className="p-4">
+                  {/* Category */}
+                  {product.product_categories && (
+                    <span className="inline-block bg-[#3A4D23] text-[#8BAE5A] text-xs px-2 py-1 rounded-full mb-2">
+                      {product.product_categories.name}
+                    </span>
+                  )}
 
-                {/* Preview Notice */}
-                <div className="mb-6 bg-[#FFD700]/10 border border-[#FFD700]/30 rounded-lg p-4">
-                  <div className="flex items-center gap-2 text-[#FFD700] text-sm">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span className="font-medium">Preview Mode</span>
-                  </div>
-                  <p className="text-[#B6C948] text-sm mt-1">
-                    Dit is een preview van de productdetailpagina. De volledige functionaliteit wordt binnenkort toegevoegd.
+                  {/* Product Name */}
+                  <h3 className="text-lg font-semibold text-white mb-2 line-clamp-2">
+                    {product.name}
+                  </h3>
+
+                  {/* Description */}
+                  <p className="text-gray-400 text-sm mb-3 line-clamp-2">
+                    {product.short_description || product.description}
                   </p>
-                </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                  {/* Product Image */}
-                  <div className="bg-gradient-to-br from-[#8BAE5A]/10 to-[#FFD700]/10 rounded-xl h-64 flex items-center justify-center overflow-hidden">
-                    {selectedProduct.image && selectedProduct.image !== '/images/products/omega3.jpg' && selectedProduct.image !== '/images/products/bloedtest.jpg' && selectedProduct.image !== '/images/products/electrolyte.jpg' ? (
-                      <img 
-                        src={selectedProduct.image} 
-                        alt={selectedProduct.name}
-                        className="max-w-full max-h-full object-contain rounded-xl"
-                      />
-                    ) : (
-                      <div className="text-[#8BAE5A] text-6xl font-bold">
-                        {selectedProduct.name.split(' ')[0]}
-                      </div>
+                  {/* Rating */}
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="flex">
+                      {renderStars(product.rating)}
+                    </div>
+                    <span className="text-sm text-gray-400">
+                      {product.rating.toFixed(1)} ({product.review_count})
+                    </span>
+                  </div>
+
+                  {/* Price */}
+                  <div className="flex items-center gap-2 mb-4">
+                    <span className="text-xl font-bold text-[#B6C948]">
+                      {formatPrice(product.price)}
+                    </span>
+                    {product.original_price && product.original_price > product.price && (
+                      <span className="text-sm text-gray-500 line-through">
+                        {formatPrice(product.original_price)}
+                      </span>
                     )}
                   </div>
 
-                  {/* Product Details */}
-                  <div>
-                    <p className="text-[#B6C948] mb-6">{selectedProduct.description}</p>
-
-                    {/* Price */}
-                    <div className="flex items-center gap-3 mb-6">
-                      <span className="text-3xl font-bold text-[#8BAE5A]">€{selectedProduct.price.toFixed(2)}</span>
-                      {selectedProduct.originalPrice && (
-                        <span className="text-[#B6C948] line-through text-xl">€{selectedProduct.originalPrice.toFixed(2)}</span>
-                      )}
-                    </div>
-
-                    {/* Features */}
-                    <div className="mb-6">
-                      <h3 className="text-lg font-semibold text-[#8BAE5A] mb-3">Kenmerken</h3>
-                      <ul className="space-y-2">
-                        {selectedProduct.features.map((feature, index) => (
-                          <li key={index} className="flex items-center gap-2 text-[#B6C948]">
-                            <div className="w-2 h-2 bg-[#8BAE5A] rounded-full"></div>
-                            {feature}
+                  {/* Features Preview */}
+                  {product.product_features && product.product_features.length > 0 && (
+                    <div className="mb-4">
+                      <ul className="text-xs text-gray-400 space-y-1">
+                        {product.product_features.slice(0, 2).map((feature) => (
+                          <li key={feature.id} className="flex items-center gap-1">
+                            <span className="w-1 h-1 bg-[#8BAE5A] rounded-full"></span>
+                            {feature.feature}
                           </li>
                         ))}
-                      </ul>
-                    </div>
-
-                    {/* Benefits */}
-                    <div className="mb-6">
-                      <h3 className="text-lg font-semibold text-[#8BAE5A] mb-3">Voordelen</h3>
-                      <ul className="space-y-2">
-                        {selectedProduct.benefits.map((benefit, index) => (
-                          <li key={index} className="flex items-center gap-2 text-[#B6C948]">
-                            <div className="w-2 h-2 bg-[#8BAE5A] rounded-full"></div>
-                            {benefit}
+                        {product.product_features.length > 2 && (
+                          <li className="text-[#8BAE5A]">
+                            +{product.product_features.length - 2} meer...
                           </li>
-                        ))}
+                        )}
                       </ul>
                     </div>
+                  )}
 
-                    {/* Dosage & Ingredients */}
-                    {selectedProduct.dosage && (
-                      <div className="mb-6">
-                        <h3 className="text-lg font-semibold text-[#8BAE5A] mb-2">Dosering</h3>
-                        <p className="text-[#B6C948]">{selectedProduct.dosage}</p>
-                      </div>
+                  {/* Actions */}
+                  <div className="flex gap-2">
+                    {getPrimaryAffiliateLink(product) ? (
+                      <a
+                        href={getPrimaryAffiliateLink(product)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1 bg-[#8BAE5A] text-[#181F17] text-center py-2 px-4 rounded-lg hover:bg-[#7A9E4A] transition-colors font-medium"
+                      >
+                        <ShoppingCartIcon className="w-4 h-4 inline mr-2" />
+                        Bestellen
+                      </a>
+                    ) : (
+                      <button
+                        disabled
+                        className="flex-1 bg-gray-600 text-gray-400 text-center py-2 px-4 rounded-lg cursor-not-allowed"
+                      >
+                        Niet beschikbaar
+                      </button>
                     )}
-
-                    {selectedProduct.ingredients && (
-                      <div className="mb-6">
-                        <h3 className="text-lg font-semibold text-[#8BAE5A] mb-2">Ingrediënten</h3>
-                        <p className="text-[#B6C948]">{selectedProduct.ingredients.join(', ')}</p>
-                      </div>
-                    )}
-
-                    {/* Close Button */}
-                    <button
-                      onClick={() => setShowProductModal(false)}
-                      className="w-full bg-transparent border border-[#8BAE5A] text-[#8BAE5A] hover:bg-[#8BAE5A] hover:text-[#0A0F0A] py-3 px-6 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center gap-2"
-                    >
-                      Sluiten
+                    
+                    <button className="p-2 bg-[#3A4A2A] text-gray-400 rounded-lg hover:bg-[#4A5A3A] hover:text-white transition-colors">
+                      <HeartIcon className="w-4 h-4" />
+                    </button>
+                    
+                    <button className="p-2 bg-[#3A4A2A] text-gray-400 rounded-lg hover:bg-[#4A5A3A] hover:text-white transition-colors">
+                      <EyeIcon className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
               </div>
-            </div>
+            ))}
           </div>
         )}
-
-
       </div>
     </div>
   );
-} 
+}
