@@ -1,10 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+import { supabaseAdmin } from '@/lib/supabase-admin';
 
 // GET - Fetch tickets for user or admin
 export async function GET(request: NextRequest) {
@@ -15,7 +10,7 @@ export async function GET(request: NextRequest) {
 
     if (adminView) {
       // Admin view - get all tickets with user info
-      const { data, error } = await supabase
+      const { data, error } = await supabaseAdminAdmin
         .from('tickets')
         .select(`
           *,
@@ -35,7 +30,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(data);
     } else if (userId) {
       // User view - get only their tickets
-      const { data, error } = await supabase
+      const { data, error } = await supabaseAdminAdmin
         .from('tickets')
         .select('*')
         .eq('user_id', userId)
@@ -60,19 +55,32 @@ export async function GET(request: NextRequest) {
 // POST - Create new ticket
 export async function POST(request: NextRequest) {
   try {
+    console.log('🎫 Creating support ticket...');
+    
     const body = await request.json();
     const { userId, subject, message, category } = body;
 
+    console.log('🎫 Ticket data:', { userId, subject, category, messageLength: message?.length });
+
     if (!userId || !subject || !message || !category) {
+      console.error('❌ Missing required fields:', { userId: !!userId, subject: !!subject, message: !!message, category: !!category });
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const { data, error } = await supabase
+    // Validate message length
+    if (message.length < 10) {
+      console.error('❌ Message too short:', message.length);
+      return NextResponse.json({ error: 'Message must be at least 10 characters long' }, { status: 400 });
+    }
+
+    console.log('🎫 Inserting ticket into database...');
+    
+    const { data, error } = await supabaseAdmin
       .from('tickets')
       .insert({
         user_id: userId,
-        subject,
-        message,
+        subject: subject.trim(),
+        message: message.trim(),
         category,
         status: 'open',
         priority: 'medium'
@@ -81,14 +89,15 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Error creating ticket:', error);
+      console.error('❌ Error creating ticket:', error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json(data);
+    console.log('✅ Ticket created successfully:', data.id);
+    return NextResponse.json({ success: true, data });
 
   } catch (error) {
-    console.error('Unexpected error creating ticket:', error);
+    console.error('❌ Unexpected error creating ticket:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

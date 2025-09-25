@@ -14,6 +14,7 @@ import {
   DocumentTextIcon,
   PaperAirplaneIcon
 } from '@heroicons/react/24/outline';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 
 interface SupportButtonProps {
   className?: string;
@@ -173,6 +174,7 @@ const supportCategories: SupportCategory[] = [
 ];
 
 export default function SupportButton({ className = '' }: SupportButtonProps) {
+  const { user } = useSupabaseAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [showContactForm, setShowContactForm] = useState(false);
@@ -236,14 +238,19 @@ export default function SupportButton({ className = '' }: SupportButtonProps) {
     e.preventDefault();
     const formData = new FormData(e.currentTarget as HTMLFormElement);
     
+    // Get user ID from auth context instead of localStorage
+    const currentUser = user || { id: 'demo-user-id' };
+    
     const ticketData = {
-      userId: localStorage.getItem('userId') || 'demo-user-id',
+      userId: currentUser.id,
       subject: formData.get('subject') as string,
       message: formData.get('message') as string,
       category: formData.get('category') as string
     };
 
     try {
+      console.log('🎫 Submitting ticket:', ticketData);
+      
       const response = await fetch('/api/tickets', {
         method: 'POST',
         headers: {
@@ -252,14 +259,18 @@ export default function SupportButton({ className = '' }: SupportButtonProps) {
         body: JSON.stringify(ticketData),
       });
 
-      if (response.ok) {
+      const responseData = await response.json();
+
+      if (response.ok && responseData.success) {
+        console.log('✅ Ticket created successfully:', responseData.data);
         alert('Je ticket is succesvol aangemaakt! We nemen zo snel mogelijk contact met je op.');
         handleBackToCategories();
       } else {
-        throw new Error('Failed to create ticket');
+        console.error('❌ Failed to create ticket:', responseData);
+        throw new Error(responseData.error || 'Failed to create ticket');
       }
     } catch (error) {
-      console.error('Error creating ticket:', error);
+      console.error('❌ Error creating ticket:', error);
       alert('Er is een fout opgetreden bij het aanmaken van je ticket. Probeer het opnieuw.');
     }
   };
