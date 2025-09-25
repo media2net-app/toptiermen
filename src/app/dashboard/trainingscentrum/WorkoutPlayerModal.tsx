@@ -2,6 +2,10 @@
 import { Fragment, useState, useEffect } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { ArrowPathIcon, LightBulbIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
+import WorkoutCompletionModal from "@/components/WorkoutCompletionModal";
+import { useRouter } from "next/navigation";
+import { toast } from "react-hot-toast";
+import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 
 // Database-driven workout data - no more mock data
 
@@ -15,6 +19,8 @@ type WorkoutPlayerModalProps = {
 };
 
 export default function WorkoutPlayerModal({ isOpen, onClose, onComplete, trainingData, schemaId, dayNumber }: WorkoutPlayerModalProps) {
+  const { user } = useSupabaseAuth();
+  const router = useRouter();
   const [activeIdx, setActiveIdx] = useState(0);
   const [exercises, setExercises] = useState(trainingData.exercises);
   const [resting, setResting] = useState(false);
@@ -25,6 +31,14 @@ export default function WorkoutPlayerModal({ isOpen, onClose, onComplete, traini
   const [workoutStartTime] = useState(Date.now());
   const [loading, setLoading] = useState(false);
   const [workoutName, setWorkoutName] = useState(trainingData.name);
+  
+  // Workout completion modal state
+  const [showCompletionModal, setShowCompletionModal] = useState(false);
+  const [workoutStats, setWorkoutStats] = useState({
+    workoutTime: 0,
+    totalExercises: 0,
+    completedExercises: 0
+  });
 
   // Load real workout data when schemaId and dayNumber are provided
   useEffect(() => {
@@ -110,6 +124,23 @@ export default function WorkoutPlayerModal({ isOpen, onClose, onComplete, traini
   }
 
   const handleCompleteWorkout = () => {
+    const workoutDuration = Math.round((Date.now() - workoutStartTime) / 1000);
+    const completedExercises = exercises.filter(exercise => 
+      exercise.sets.some(set => set.done)
+    ).length;
+    
+    // Set workout stats for completion modal
+    setWorkoutStats({
+      workoutTime: workoutDuration,
+      totalExercises: exercises.length,
+      completedExercises: completedExercises
+    });
+    
+    // Show completion modal
+    setShowCompletionModal(true);
+  };
+
+  const handleWorkoutCompletion = async () => {
     const workoutDuration = Math.round((Date.now() - workoutStartTime) / 1000 / 60);
     const totalVolume = exercises.reduce((total, exercise) => {
       return total + exercise.sets.reduce((setTotal, set) => {
@@ -135,7 +166,42 @@ export default function WorkoutPlayerModal({ isOpen, onClose, onComplete, traini
       pump: 0
     };
 
-    onComplete(workoutData);
+    // Call the workout completion API
+    try {
+      const response = await fetch('/api/workout-sessions/complete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId: `workout_session_${Date.now()}`,
+          userId: user?.id,
+          schemaId: schemaId,
+          dayNumber: dayNumber,
+          rating: 5,
+          notes: `Workout completed: ${workoutData.duration} minutes, ${workoutData.totalVolume}kg total volume`
+        })
+      });
+
+      if (response.ok) {
+        console.log('✅ Workout completion saved successfully');
+        toast.success('Workout voltooid! 🎉');
+        
+        // Close modals and redirect
+        setShowCompletionModal(false);
+        onClose();
+        router.push('/dashboard/mijn-trainingen');
+        
+        // Force refresh to show updated progress
+        setTimeout(() => {
+          window.location.reload();
+        }, 100);
+      } else {
+        console.error('❌ Error saving workout completion:', response.status);
+        toast.error('Fout bij opslaan workout completion');
+      }
+    } catch (error) {
+      console.error('❌ Error completing workout:', error);
+      toast.error('Fout bij voltooien workout');
+    }
   };
 
   const activeExercise = exercises[activeIdx];
@@ -327,6 +393,16 @@ export default function WorkoutPlayerModal({ isOpen, onClose, onComplete, traini
             </div>
           </div>
         )}
+
+        {/* Workout Completion Modal */}
+        <WorkoutCompletionModal
+          isOpen={showCompletionModal}
+          onClose={() => setShowCompletionModal(false)}
+          onComplete={handleWorkoutCompletion}
+          workoutTime={workoutStats.workoutTime}
+          totalExercises={workoutStats.totalExercises}
+          completedExercises={workoutStats.completedExercises}
+        />
       </Dialog>
     </Transition.Root>
   );
