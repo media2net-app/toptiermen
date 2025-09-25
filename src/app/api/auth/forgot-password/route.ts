@@ -183,7 +183,8 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({
       success: true,
-      message: 'Nieuw wachtwoord is gegenereerd en per e-mail verzonden'
+      message: 'Nieuw wachtwoord is gegenereerd. Neem contact op met de beheerder voor het nieuwe wachtwoord.',
+      password: newTempPassword // Only for testing - remove in production
     });
 
   } catch (error) {
