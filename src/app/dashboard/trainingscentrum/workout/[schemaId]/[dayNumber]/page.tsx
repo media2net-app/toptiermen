@@ -132,7 +132,7 @@ export default function WorkoutPage() {
       // Load exercises from database for the current schema and day
       loadExercisesFromDatabase();
     }
-  }, [sessionId, schemaId, dayNumber, user]);
+  }, [sessionId, schemaId, dayNumber, user?.id]);
 
   const getVideoUrlForExercise = async (exerciseName: string): Promise<string | undefined> => {
     try {
@@ -333,7 +333,7 @@ export default function WorkoutPage() {
       setIsWorkoutActive(true);
       setIsTimerRunning(true);
     }
-  }, [exercises, currentExerciseIndex, globalSession, startWorkout, sessionId, schemaId, dayNumber]);
+  }, [exercises.length, currentExerciseIndex, globalSession?.id, sessionId, schemaId, dayNumber]);
 
   // Sync local state with global session when returning to workout page
   useEffect(() => {
@@ -372,7 +372,7 @@ export default function WorkoutPage() {
         }
       }
     }
-  }, [globalSession, exercises, currentExerciseIndex, timer, isWorkoutActive]);
+  }, [globalSession?.id, globalSession?.currentExerciseIndex, globalSession?.workoutTime, globalSession?.isActive, globalSession?.currentSet, globalSession?.exerciseName, exercises.length, currentExerciseIndex, timer, isWorkoutActive]);
 
   const checkActiveSession = async () => {
     if (!user?.id) return null;

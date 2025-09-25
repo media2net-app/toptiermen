@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
 
     if (adminView) {
       // Admin view - get all tickets with user info
-      const { data, error } = await supabaseAdminAdmin
+      const { data, error } = await supabaseAdmin
         .from('tickets')
         .select(`
           *,
@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(data);
     } else if (userId) {
       // User view - get only their tickets
-      const { data, error } = await supabaseAdminAdmin
+      const { data, error } = await supabaseAdmin
         .from('tickets')
         .select('*')
         .eq('user_id', userId)

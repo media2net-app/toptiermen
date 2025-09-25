@@ -1,10 +1,11 @@
 'use client';
 import ClientLayout from '../../../components/ClientLayout';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { FaPlay, FaHeart, FaRegHeart, FaSearch, FaSpinner } from 'react-icons/fa';
 import { IoMdClose } from 'react-icons/io';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { toast } from 'react-hot-toast';
+import { useSearchParams } from 'next/navigation';
 
 // Force dynamic rendering to prevent navigator errors
 export const dynamic = 'force-dynamic';
@@ -24,17 +25,26 @@ interface Meditation {
 const types = ['all', 'focus', 'stress', 'recovery', 'performance', 'sleep'];
 const durations = ['Alles', '1-5 min', '5-10 min', '10-20 min', '20+ min'];
 
-export default function MeditatieBibliotheek() {
+function MeditatieBibliotheekContent() {
   const { user } = useSupabaseAuth();
+  const searchParams = useSearchParams();
   const [meditations, setMeditations] = useState<Meditation[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [type, setType] = useState('all');
+  const [type, setType] = useState(searchParams?.get('type') || 'all');
   const [duration, setDuration] = useState('Alles');
   const [playing, setPlaying] = useState<null | Meditation>(null);
   const [favorites, setFavorites] = useState<string[]>([]);
   const [totalTime, setTotalTime] = useState(0);
   const [streak, setStreak] = useState(0);
+
+  // Update type when URL parameter changes
+  useEffect(() => {
+    const urlType = searchParams?.get('type');
+    if (urlType && urlType !== type) {
+      setType(urlType);
+    }
+  }, [searchParams, type]);
 
   // Load meditations from database
   useEffect(() => {
@@ -256,5 +266,19 @@ export default function MeditatieBibliotheek() {
         )}
       </div>
     </ClientLayout>
+  );
+}
+
+export default function MeditatieBibliotheek() {
+  return (
+    <Suspense fallback={
+      <ClientLayout>
+        <div className="min-h-screen bg-gradient-to-br from-[#0A0F0A] to-[#1A2A1A] flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#B6C948]"></div>
+        </div>
+      </ClientLayout>
+    }>
+      <MeditatieBibliotheekContent />
+    </Suspense>
   );
 } 

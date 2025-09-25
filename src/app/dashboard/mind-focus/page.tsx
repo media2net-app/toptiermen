@@ -212,21 +212,127 @@ export default function MindFocusPage() {
   const [todaySessions, setTodaySessions] = useState<MeditationSession[]>([]);
   const [streakCount, setStreakCount] = useState(0);
   const [currentStressLevel, setCurrentStressLevel] = useState(5);
+  
+  // Journaling state
+  const [journalText, setJournalText] = useState('');
+  const [isSavingJournal, setIsSavingJournal] = useState(false);
+  
+  // Dashboard loading state
+  const [isLoadingDashboardData, setIsLoadingDashboardData] = useState(false);
+
+  // Fetch real dashboard data from database
+  const fetchDashboardData = async () => {
+    if (!user?.id) return;
+
+    try {
+      setIsLoadingDashboardData(true);
+      console.log('📊 Fetching dashboard data for user:', user.id);
+
+      // Fetch meditation sessions
+      const sessionsResponse = await fetch(`/api/mind-focus/sessions?userId=${user.id}`);
+      const sessionsData = await sessionsResponse.json();
+      
+      // Fetch journal entries
+      const journalResponse = await fetch(`/api/mind-focus/journal?userId=${user.id}`);
+      const journalData = await journalResponse.json();
+
+      // Calculate current week sessions
+      const now = new Date();
+      const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
+      startOfWeek.setHours(0, 0, 0, 0);
+      
+      const sessionsThisWeek = sessionsData.success && sessionsData.sessions 
+        ? sessionsData.sessions.filter((session: any) => 
+            new Date(session.created_at) >= startOfWeek
+          ).length 
+        : 0;
+
+      // Calculate total sessions
+      const totalSessions = sessionsData.success && sessionsData.sessions 
+        ? sessionsData.sessions.length 
+        : 0;
+
+      // Get latest stress level from journal entries
+      const latestStressLevel = journalData.success && journalData.entries && journalData.entries.length > 0
+        ? journalData.entries[0].stress_level || currentStressLevel
+        : currentStressLevel;
+
+      // Calculate streak from journal entries
+      const calculateStreak = (entries: any[]) => {
+        if (!entries || entries.length === 0) return 0;
+        
+        let streak = 0;
+        const today = new Date();
+        let currentDate = new Date(today);
+        
+        // Sort entries by date descending
+        const sortedEntries = entries.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        
+        for (let i = 0; i < sortedEntries.length; i++) {
+          const entryDate = new Date(sortedEntries[i].date);
+          const expectedDate = new Date(currentDate);
+          
+          // Check if entry is for expected date (allowing for same day)
+          if (entryDate.toDateString() === expectedDate.toDateString()) {
+            streak++;
+            currentDate.setDate(currentDate.getDate() - 1);
+          } else {
+            break;
+          }
+        }
+        
+        return streak;
+      };
+
+      const streak = journalData.success && journalData.entries 
+        ? calculateStreak(journalData.entries)
+        : 0;
+
+      // Calculate focus improvement (placeholder logic - could be enhanced)
+      const focusImprovement = Math.min(95, Math.max(0, streak * 10 + sessionsThisWeek * 5));
+
+      const realDashboardData = {
+        sessionsThisWeek,
+        currentStressLevel: latestStressLevel,
+        totalSessions,
+        focusImprovement,
+        streak,
+        timestamp: new Date().toISOString()
+      };
+
+      console.log('✅ Dashboard data fetched:', realDashboardData);
+      setDashboardData(realDashboardData);
+
+    } catch (error) {
+      console.error('❌ Error fetching dashboard data:', error);
+      // Fallback to dummy data if API fails
+      const fallbackData = {
+        sessionsThisWeek: 0,
+        currentStressLevel: currentStressLevel,
+        totalSessions: 0,
+        focusImprovement: 0,
+        streak: 0,
+        timestamp: new Date().toISOString()
+      };
+      setDashboardData(fallbackData);
+    } finally {
+      setIsLoadingDashboardData(false);
+    }
+  };
 
   // Update dashboard data when component mounts or when currentView changes to dashboard
   useEffect(() => {
-    if (currentView === 'dashboard' && !dashboardData) {
-      const dashboardDebugInfo = {
-        sessionsThisWeek: 5,
-        currentStressLevel: currentStressLevel,
-        totalSessions: 12,
-        focusImprovement: 85,
-        streak: streakCount,
-        timestamp: new Date().toISOString()
-      };
-      setDashboardData(dashboardDebugInfo);
+    if (currentView === 'dashboard' && user?.id) {
+      fetchDashboardData();
     }
-  }, [currentView, currentStressLevel, streakCount, dashboardData]);
+  }, [currentView, user?.id]);
+
+  // Refresh dashboard data when switching to overview tab
+  useEffect(() => {
+    if (activeTab === 'overview' && currentView === 'dashboard' && user?.id) {
+      fetchDashboardData();
+    }
+  }, [activeTab, currentView, user?.id]);
 
   const tabs = [
     { id: 'overview', label: 'Overzicht', icon: <CpuChipIcon className="w-5 h-5" /> },
@@ -308,6 +414,57 @@ export default function MindFocusPage() {
           timestamp: new Date().toISOString()
         }
       }));
+    }
+  };
+
+  // Save journal entry
+  const saveJournalEntry = async () => {
+    if (!user?.id) {
+      toast.error('Je moet ingelogd zijn om journal entries op te slaan');
+      return;
+    }
+
+    if (!journalText.trim()) {
+      toast.error('Voeg wat tekst toe aan je journal entry');
+      return;
+    }
+
+    try {
+      setIsSavingJournal(true);
+      const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+      
+      const response = await fetch('/api/mind-focus/journal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user.id,
+          date: today,
+          dailyReview: journalText,
+          mood: currentStressLevel,
+          stressLevel: currentStressLevel,
+          energyLevel: currentStressLevel,
+          sleepQuality: currentStressLevel,
+          notes: '',
+          gratitude: [],
+          tomorrowPriorities: []
+        })
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        toast.success('Journal entry opgeslagen! 🎉');
+        setJournalText(''); // Clear the textarea after saving
+        // Refresh dashboard data to show updated stats
+        fetchDashboardData();
+      } else {
+        toast.error('Kon journal entry niet opslaan');
+      }
+    } catch (error) {
+      console.error('Error saving journal entry:', error);
+      toast.error('Kon journal entry niet opslaan');
+    } finally {
+      setIsSavingJournal(false);
     }
   };
 
@@ -992,7 +1149,13 @@ export default function MindFocusPage() {
               <p className="text-[#8BAE5A]">Jouw persoonlijke stress management hub</p>
             </div>
             <div className="text-right">
-              <div className="text-2xl font-bold">{streakCount}</div>
+              <div className="text-2xl font-bold">
+                {isLoadingDashboardData ? (
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#B6C948]"></div>
+                ) : (
+                  dashboardData?.streak || 0
+                )}
+              </div>
               <div className="text-sm text-[#8BAE5A]">Dagen streak</div>
             </div>
           </div>
@@ -1001,19 +1164,43 @@ export default function MindFocusPage() {
         {/* Quick Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="bg-[#1A2A1A] rounded-xl shadow-2xl border border-[#2A3A1A] p-6">
-            <div className="text-3xl font-bold text-white mb-2">5</div>
+            <div className="text-3xl font-bold text-white mb-2">
+              {isLoadingDashboardData ? (
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#B6C948]"></div>
+              ) : (
+                dashboardData?.sessionsThisWeek || 0
+              )}
+            </div>
             <div className="text-[#8BAE5A]">Sessies deze week</div>
           </div>
           <div className="bg-[#1A2A1A] rounded-xl shadow-2xl border border-[#2A3A1A] p-6">
-            <div className="text-3xl font-bold text-white mb-2">{currentStressLevel}</div>
+            <div className="text-3xl font-bold text-white mb-2">
+              {isLoadingDashboardData ? (
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#B6C948]"></div>
+              ) : (
+                dashboardData?.currentStressLevel || currentStressLevel
+              )}
+            </div>
             <div className="text-[#8BAE5A]">Huidige stress level</div>
           </div>
           <div className="bg-[#1A2A1A] rounded-xl shadow-2xl border border-[#2A3A1A] p-6">
-            <div className="text-3xl font-bold text-white mb-2">12</div>
+            <div className="text-3xl font-bold text-white mb-2">
+              {isLoadingDashboardData ? (
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#B6C948]"></div>
+              ) : (
+                dashboardData?.totalSessions || 0
+              )}
+            </div>
             <div className="text-[#8BAE5A]">Totaal sessies</div>
           </div>
           <div className="bg-[#1A2A1A] rounded-xl shadow-2xl border border-[#2A3A1A] p-6">
-            <div className="text-3xl font-bold text-white mb-2">85%</div>
+            <div className="text-3xl font-bold text-white mb-2">
+              {isLoadingDashboardData ? (
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#B6C948]"></div>
+              ) : (
+                `${dashboardData?.focusImprovement || 0}%`
+              )}
+            </div>
             <div className="text-[#8BAE5A]">Focus verbetering</div>
           </div>
         </div>
@@ -1253,7 +1440,10 @@ export default function MindFocusPage() {
                           <p className="text-[#8BAE5A] text-sm">{type.description}</p>
                         </div>
                       </div>
-                      <button className="w-full bg-[#2A3A1A] text-[#B6C948] py-2 rounded-lg hover:bg-[#3A4A2A] transition-colors">
+                      <button 
+                        onClick={() => router.push(`/dashboard/mind-en-focus/meditaties?type=${type.id}`)}
+                        className="w-full bg-[#2A3A1A] text-[#B6C948] py-2 rounded-lg hover:bg-[#3A4A2A] transition-colors"
+                      >
                         Bekijk Sessies
                       </button>
                     </div>
@@ -1286,12 +1476,26 @@ export default function MindFocusPage() {
                     <div>
                       <label className="block text-white font-medium mb-2">Waar ben je dankbaar voor?</label>
                       <textarea
-                        className="w-full h-24 p-3 bg-[#1A2A1A] text-white border border-[#2A3A1A] rounded-lg focus:ring-2 focus:ring-[#B6C948] focus:border-transparent"
+                        value={journalText}
+                        onChange={(e) => setJournalText(e.target.value)}
+                        className="w-full h-24 p-3 bg-[#1A2A1A] text-white border border-[#2A3A1A] rounded-lg focus:ring-2 focus:ring-[#B6C948] focus:border-transparent resize-none"
                         placeholder="Schrijf hier je gedachten..."
+                        disabled={isSavingJournal}
                       />
                     </div>
-                    <button className="bg-[#B6C948] text-[#1A2A1A] px-6 py-2 rounded-lg font-semibold hover:bg-[#8BAE5A] transition-colors">
-                      Opslaan
+                    <button 
+                      onClick={saveJournalEntry}
+                      disabled={isSavingJournal || !journalText.trim()}
+                      className="bg-[#B6C948] text-[#1A2A1A] px-6 py-2 rounded-lg font-semibold hover:bg-[#8BAE5A] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    >
+                      {isSavingJournal ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#1A2A1A]"></div>
+                          Opslaan...
+                        </>
+                      ) : (
+                        'Opslaan'
+                      )}
                     </button>
                   </div>
                 </div>
