@@ -141,31 +141,6 @@ export async function POST(request: NextRequest) {
           
           if (!user) {
             console.error('❌ Could not find or create auth user after all attempts');
-            
-            // Last resort: try to reset password directly via force reset API
-            console.log('🔄 Last resort: trying force password reset...');
-            try {
-              const resetResponse = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/admin/force-password-reset`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: email })
-              });
-              
-              const resetData = await resetResponse.json();
-              
-              if (resetResponse.ok && resetData.success) {
-                console.log('✅ Force password reset successful');
-                return NextResponse.json({
-                  success: true,
-                  message: 'Wachtwoord is gereset en per e-mail verzonden'
-                });
-              } else {
-                console.error('❌ Force password reset failed:', resetData.error);
-              }
-            } catch (directResetError) {
-              console.error('❌ Force password reset failed:', directResetError);
-            }
-            
             return NextResponse.json({
               success: false,
               error: 'Account bestaat maar er is een technisch probleem. Neem contact op met de beheerder.'
@@ -242,6 +217,11 @@ export async function POST(request: NextRequest) {
       }
     } catch (emailError) {
       console.error('❌ Error sending password reset email:', emailError);
+      console.error('❌ Email error details:', {
+        message: emailError.message,
+        stack: emailError.stack,
+        name: emailError.name
+      });
       return NextResponse.json({
         success: false,
         error: 'E-mail service is momenteel niet beschikbaar. Neem contact op met de beheerder.'
@@ -257,9 +237,14 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('❌ Forgot password error:', error);
+    console.error('❌ Error details:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    });
     return NextResponse.json({
       success: false,
-      error: 'Interne server fout'
+      error: 'Interne server fout. Probeer het later opnieuw of neem contact op met de beheerder.'
     }, { status: 500 });
   }
 }
