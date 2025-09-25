@@ -139,6 +139,30 @@ export default function MijnTrainingen() {
         console.log('✅ Active schema found, current day:', data.progress.current_day);
       }
 
+      // Load week completions from database
+      if (data.hasActiveSchema && data.schema?.id) {
+        try {
+          console.log('📅 Loading week completions...');
+          const weekResponse = await fetch(`/api/week-completion?userId=${user.id}&schemaId=${data.schema.id}`);
+          const weekData = await weekResponse.json();
+          
+          if (weekData.success && weekData.completions) {
+            console.log('✅ Week completions loaded:', weekData.completions.length);
+            
+            // Convert database completions to local format
+            const loadedCompletedWeeks = weekData.completions.map((completion: any) => ({
+              week: completion.week_number,
+              completedAt: completion.completed_at,
+              days: completion.completed_days || []
+            }));
+            
+            setCompletedWeeks(loadedCompletedWeeks);
+          }
+        } catch (error) {
+          console.error('❌ Error loading week completions:', error);
+        }
+      }
+
       // Check if all days are completed and handle week progression (only if modal is not open)
       if (data.hasActiveSchema && data.days && !showWeekCompletionModal) {
         checkWeekCompletion(data.days);
@@ -152,7 +176,7 @@ export default function MijnTrainingen() {
   };
 
   // Function to check if all days are completed and handle week progression
-  const checkWeekCompletion = (days: any[]) => {
+  const checkWeekCompletion = async (days: any[]) => {
     // Don't check if modal is already open
     if (showWeekCompletionModal) {
       console.log('⏸️ Week completion modal already open, skipping check');
@@ -162,10 +186,31 @@ export default function MijnTrainingen() {
     const allDaysCompleted = days.every(day => day.isCompleted);
     
     if (allDaysCompleted) {
-      console.log('🎉 All days completed! Showing week completion modal...');
+      console.log('🎉 All days completed! Checking if week completion exists...');
       
       // Calculate the correct week number based on completed weeks
       const nextWeekNumber = completedWeeks.length + 1;
+      
+      // Check if this week completion already exists in database
+      if (user && trainingData?.schema?.id) {
+        try {
+          const response = await fetch(`/api/week-completion?userId=${user.id}&schemaId=${trainingData.schema.id}`);
+          const data = await response.json();
+          
+          if (data.success && data.completions) {
+            const existingCompletion = data.completions.find((completion: any) => completion.week_number === nextWeekNumber);
+            
+            if (existingCompletion) {
+              console.log('📅 Week completion already exists in database, skipping modal');
+              return;
+            }
+          }
+        } catch (error) {
+          console.error('❌ Error checking existing week completion:', error);
+        }
+      }
+      
+      console.log('🎉 Showing week completion modal...');
       
       // Prepare week completion data
       const weekData = {
@@ -186,10 +231,47 @@ export default function MijnTrainingen() {
 
   // Function to start a new week
   const startNewWeek = async () => {
-    if (!user || !trainingData?.schema?.id || !weekCompletionData) return;
+    if (!user || !trainingData?.schema?.id || !days) return;
     
     try {
       console.log('🔄 Starting new week...');
+      
+      // Create week completion data from current days
+      const currentWeekNumber = completedWeeks.length + 1;
+      const weekCompletionData = {
+        week: currentWeekNumber,
+        completedAt: new Date().toISOString(),
+        days: days.map(day => ({
+          day: day.day_number,
+          name: day.name,
+          completedAt: day.completedAt
+        }))
+      };
+      
+      // Save week completion to database first
+      try {
+        console.log('💾 Saving week completion to database...');
+        
+        const response = await fetch('/api/week-completion', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: user.id,
+            schemaId: trainingData.schema.id,
+            weekNumber: weekCompletionData.week,
+            completedAt: weekCompletionData.completedAt,
+            completedDays: weekCompletionData.days
+          })
+        });
+
+        if (response.ok) {
+          console.log('✅ Week completion saved to database');
+        } else {
+          console.error('❌ Failed to save week completion:', response.status);
+        }
+      } catch (error) {
+        console.error('❌ Error saving week completion:', error);
+      }
       
       // Add completed week to the list
       setCompletedWeeks(prev => [...prev, weekCompletionData]);
@@ -754,6 +836,29 @@ export default function MijnTrainingen() {
               </table>
         </div>
             
+            {/* Start New Week Button - Show when current week is completed */}
+            {days && days.every(day => day.isCompleted) && completedWeeks.length < 8 && !showWeekCompletionModal && (
+              <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-gradient-to-r from-[#8BAE5A]/10 to-[#FFD700]/10 rounded-lg border border-[#8BAE5A]/20">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] rounded-full flex items-center justify-center">
+                      <span className="text-[#181F17] font-bold text-sm sm:text-base">🎉</span>
+                    </div>
+                    <div>
+                      <h4 className="text-base sm:text-lg font-bold text-white">Week {completedWeeks.length + 1} Voltooid!</h4>
+                      <p className="text-gray-300 text-sm sm:text-base">Alle trainingsdagen zijn voltooid. Klaar voor de volgende week?</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={startNewWeek}
+                    className="px-4 py-2 sm:px-6 sm:py-3 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-bold text-sm sm:text-base rounded-lg hover:from-[#7A9D4A] hover:to-[#e0903f] transition-all duration-200 shadow-lg"
+                  >
+                    Start Nieuwe Week
+                  </button>
+                </div>
+              </div>
+            )}
+
             {completedWeeks.length >= 8 && (
               <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-gradient-to-r from-[#8BAE5A]/10 to-[#FFD700]/10 rounded-lg border border-[#8BAE5A]/20">
                 <div className="flex items-center gap-2 sm:gap-3">
@@ -875,7 +980,35 @@ export default function MijnTrainingen() {
                 {/* Action Buttons */}
                 <div className="flex justify-center">
                   <button
-                    onClick={() => {
+                    onClick={async () => {
+                      // Save week completion to database when closing
+                      if (user && trainingData?.schema?.id && weekCompletionData) {
+                        try {
+                          console.log('💾 Saving week completion to database...');
+                          
+                          const response = await fetch('/api/week-completion', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                              userId: user.id,
+                              schemaId: trainingData.schema.id,
+                              weekNumber: weekCompletionData.week,
+                              completedAt: weekCompletionData.completedAt,
+                              completedDays: weekCompletionData.days
+                            })
+                          });
+
+                          if (response.ok) {
+                            console.log('✅ Week completion saved to database');
+                          } else {
+                            console.error('❌ Failed to save week completion:', response.status);
+                          }
+                        } catch (error) {
+                          console.error('❌ Error saving week completion:', error);
+                        }
+                      }
+
+                      // Close modal
                       setShowWeekCompletionModal(false);
                       setWeekCompletionData(null);
                     }}
