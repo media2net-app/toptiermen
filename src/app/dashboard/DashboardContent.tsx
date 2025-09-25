@@ -119,7 +119,6 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
   const router = useRouter();
   const [openBrotherhood, setOpenBrotherhood] = useState(true); // Default expanded
   const [openDashboard, setOpenDashboard] = useState(true); // Default expanded
-  const [showOnboardingCompletion, setShowOnboardingCompletion] = useState(false);
   const { isCompleted, currentStep, hasTrainingAccess, hasNutritionAccess } = useOnboardingV2();
   
   // Use onboardingStatus from props if available, otherwise fallback to context
@@ -132,17 +131,6 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
   // Use currentStep from actualOnboardingStatus if available, otherwise fallback to useOnboarding hook
   const actualCurrentStep = actualOnboardingStatus?.current_step ?? currentStep;
 
-  // Handle onboarding completion animation
-  useEffect(() => {
-    if (actualOnboardingStatus?.onboarding_completed && !showOnboardingCompletion) {
-      setShowOnboardingCompletion(true);
-      
-      // Hide onboarding item after 5 seconds
-      setTimeout(() => {
-        setShowOnboardingCompletion(false);
-      }, 5000);
-    }
-  }, [actualOnboardingStatus?.onboarding_completed, showOnboardingCompletion]);
 
   // Function to check if a menu item should be visible based on subscription tier and admin status
   const isMenuItemVisible = (item: any) => {
@@ -312,8 +300,8 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
       </Link>
       
       {menu.map((item) => {
-        // Skip onboarding menu item if onboarding is completed and animation is done, or user is not in onboarding mode
-        if (item.isOnboardingItem && (actualOnboardingStatus?.onboarding_completed && !showOnboardingCompletion || isCompleted)) {
+        // Only show onboarding menu item if onboarding is NOT completed
+        if (item.isOnboardingItem && (actualOnboardingStatus?.onboarding_completed || isCompleted)) {
           return null;
         }
         
@@ -429,9 +417,8 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
           const isDisabled = isMenuItemDisabled(item);
           const isOnboardingItem = item.isOnboardingItem;
           
-          // Only the onboarding menu item should be yellow during onboarding, green when completed
+          // Only the onboarding menu item should be yellow during onboarding
           const shouldBeYellow = isOnboardingItem && !isCompleted && !actualOnboardingStatus?.onboarding_completed;
-          const shouldBeGreen = isOnboardingItem && actualOnboardingStatus?.onboarding_completed && showOnboardingCompletion;
           
           // Special case: Onboarding menu item should always be yellow during onboarding, never disabled
           if (isDisabled && !isOnboardingItem) {
@@ -468,12 +455,12 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
                   ? 'bg-[#8BAE5A] text-black shadow-lg'
                   : shouldBeYellow
                     ? 'bg-[#FFD700]/20 text-[#FFD700] border border-[#FFD700]/30 shadow-lg'
-                    : shouldBeGreen
+                    : false
                       ? 'bg-[#8BAE5A]/20 text-[#8BAE5A] border border-[#8BAE5A]/30 shadow-lg animate-pulse'
                       : 'text-white hover:text-[#8BAE5A] hover:bg-[#3A4D23]/50'
               }`}
             >
-              <item.icon className={`w-6 h-6 ${(item as any).disabled ? 'text-gray-500' : isActive ? 'text-white' : shouldBeYellow ? 'text-[#FFD700]' : shouldBeGreen ? 'text-[#8BAE5A]' : 'text-[#8BAE5A]'}`} />
+              <item.icon className={`w-6 h-6 ${(item as any).disabled ? 'text-gray-500' : isActive ? 'text-white' : shouldBeYellow ? 'text-[#FFD700]' : 'text-[#8BAE5A]'}`} />
               <div className="flex items-center justify-between w-full">
                 <span className="truncate">{item.label}</span>
               </div>
@@ -495,7 +482,6 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
   const pathname = usePathname();
   const [openBrotherhood, setOpenBrotherhood] = useState(false);
   const [openDashboard, setOpenDashboard] = useState(false);
-  const [showOnboardingCompletion, setShowOnboardingCompletion] = useState(false);
   const { isCompleted, currentStep, hasTrainingAccess, hasNutritionAccess } = useOnboardingV2();
   
   // Use onboardingStatus from props if available, otherwise fallback to context
@@ -522,17 +508,6 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
   // Use currentStep from actualOnboardingStatus if available, otherwise fallback to useOnboarding hook
   const actualCurrentStep = actualOnboardingStatus?.current_step ?? currentStep;
 
-  // Handle onboarding completion animation
-  useEffect(() => {
-    if (actualOnboardingStatus?.onboarding_completed && !showOnboardingCompletion) {
-      setShowOnboardingCompletion(true);
-      
-      // Hide onboarding item after 5 seconds
-      setTimeout(() => {
-        setShowOnboardingCompletion(false);
-      }, 5000);
-    }
-  }, [actualOnboardingStatus?.onboarding_completed, showOnboardingCompletion]);
 
   // Function to check if a menu item should be visible based on subscription tier and admin status
   const isMenuItemVisible = (item: any) => {
@@ -696,8 +671,8 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
   return (
     <nav className="flex flex-col gap-2">
       {menu.map((item) => {
-        // Skip onboarding menu item if onboarding is completed and animation is done, or user is not in onboarding mode
-        if (item.isOnboardingItem && (actualOnboardingStatus?.onboarding_completed && !showOnboardingCompletion || isCompleted)) {
+        // Only show onboarding menu item if onboarding is NOT completed
+        if (item.isOnboardingItem && (actualOnboardingStatus?.onboarding_completed || isCompleted)) {
           return null;
         }
         
@@ -818,9 +793,8 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
           const isDisabled = isMenuItemDisabled(item);
           const isOnboardingItem = item.isOnboardingItem;
           
-          // Only the onboarding menu item should be yellow during onboarding, green when completed
+          // Only the onboarding menu item should be yellow during onboarding
           const shouldBeYellow = isOnboardingItem && !isCompleted && !actualOnboardingStatus?.onboarding_completed;
-          const shouldBeGreen = isOnboardingItem && actualOnboardingStatus?.onboarding_completed && showOnboardingCompletion;
           
           // Special case: Onboarding menu item should always be yellow during onboarding, never disabled
           if (isDisabled && !isOnboardingItem) {
@@ -845,12 +819,12 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
               key={item.label}
               initial={false}
               animate={{ 
-                opacity: shouldBeGreen ? [1, 1, 0] : 1,
-                scale: shouldBeGreen ? [1, 1.05, 0.95] : 1
+                opacity: 1,
+                scale: 1
               }}
               transition={{ 
-                duration: shouldBeGreen ? 5 : 0,
-                times: shouldBeGreen ? [0, 0.8, 1] : [0]
+                duration: 0,
+                times: [0]
               }}
             >
               <Link
@@ -872,12 +846,12 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
                     ? 'bg-[#8BAE5A] text-black shadow-lg' 
                     : shouldBeYellow
                       ? 'bg-[#FFD700]/20 text-[#FFD700] border border-[#FFD700]/30 shadow-lg'
-                      : shouldBeGreen
+                      : false
                         ? 'bg-[#8BAE5A]/20 text-[#8BAE5A] border border-[#8BAE5A]/30 shadow-lg animate-pulse'
                         : 'text-white hover:text-[#8BAE5A] hover:bg-[#3A4D23]/50'
                 } ${collapsed ? 'justify-center px-2' : ''}`}
               >
-              <item.icon className={`w-6 h-6 ${(item as any).disabled ? 'text-gray-500' : isActive ? 'text-white' : shouldBeYellow ? 'text-[#FFD700]' : shouldBeGreen ? 'text-[#8BAE5A]' : 'text-[#8BAE5A]'}`} />
+              <item.icon className={`w-6 h-6 ${(item as any).disabled ? 'text-gray-500' : isActive ? 'text-white' : shouldBeYellow ? 'text-[#FFD700]' : 'text-[#8BAE5A]'}`} />
               {!collapsed && (
                 <div className="flex items-center justify-between w-full">
                   <span className="truncate">{item.label}</span>
