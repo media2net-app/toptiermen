@@ -93,38 +93,72 @@ async function fetchDashboardStats(userId: string) {
 
 async function fetchMissionsStats(userId: string) {
   try {
-    // Get missions from the user_missions table (same as missions-simple API)
+    // Get missions from the user_missions table
     const { data: missions, error: missionsError } = await supabaseAdmin
       .from('user_missions')
       .select('id, title, status, last_completion_date, points, xp_reward')
       .eq('user_id', userId);
 
+    // Get challenges from the user_challenges table
+    const { data: challenges, error: challengesError } = await supabaseAdmin
+      .from('user_challenges')
+      .select(`
+        id, 
+        challenge_id,
+        status,
+        progress_percentage,
+        current_streak,
+        start_date,
+        completion_date,
+        challenges (
+          id,
+          title,
+          xp_reward
+        )
+      `)
+      .eq('user_id', userId);
+
     if (missionsError) {
       console.error('Error fetching missions:', missionsError);
-      return { total: 0, completedToday: 0, completedThisWeek: 0, progress: 0 };
+    }
+    
+    if (challengesError) {
+      console.error('Error fetching challenges:', challengesError);
     }
 
-    const total = missions?.length || 0;
-    
-    // Count completed missions today (same logic as missions-simple API)
+    // Process missions
+    const missionsTotal = missions?.length || 0;
     const today = new Date().toISOString().split('T')[0];
-    const completedToday = missions?.filter(mission => 
+    const completedMissionsToday = missions?.filter(mission => 
       mission.last_completion_date === today
     ) || [];
-    
-    // Count all completed missions (missions with last_completion_date)
     const completedMissions = missions?.filter(mission => mission.last_completion_date) || [];
-    
-    const completedTodayCount = completedToday.length;
-    const completedThisWeekCount = completedMissions.length;
-    const progress = total > 0 ? Math.round((completedMissions.length / total) * 100) : 0;
 
-    console.log(`📊 Missions stats for user ${userId}: ${completedMissions.length}/${total} completed (${progress}%), ${completedTodayCount} today`);
+    // Process challenges
+    const challengesTotal = challenges?.length || 0;
+    const activeChallenges = challenges?.filter(challenge => challenge.status === 'active') || [];
+    const completedChallenges = challenges?.filter(challenge => challenge.completion_date) || [];
+    
+    // Count challenges completed today
+    const completedChallengesToday = challenges?.filter(challenge => {
+      if (!challenge.completion_date) return false;
+      const completionDate = new Date(challenge.completion_date).toISOString().split('T')[0];
+      return completionDate === today;
+    }) || [];
+
+    // Combine missions and challenges
+    const total = missionsTotal + challengesTotal;
+    const completedToday = completedMissionsToday.length + completedChallengesToday.length;
+    const completedThisWeek = completedMissions.length + completedChallenges.length;
+    const progress = total > 0 ? Math.round((completedThisWeek / total) * 100) : 0;
+
+    console.log(`📊 Combined stats for user ${userId}: ${completedThisWeek}/${total} completed (${progress}%), ${completedToday} today`);
+    console.log(`   Missions: ${completedMissions.length}/${missionsTotal}, Challenges: ${completedChallenges.length}/${challengesTotal}`);
 
     return {
       total,
-      completedToday: completedTodayCount,
-      completedThisWeek: completedThisWeekCount,
+      completedToday,
+      completedThisWeek,
       progress
     };
   } catch (error) {
@@ -251,23 +285,39 @@ async function fetchXPStats(userId: string) {
       .eq('user_id', userId)
       .not('last_completion_date', 'is', null);
 
+    // Get user's XP from completed challenges in user_challenges table
+    const { data: challenges, error: challengesError } = await supabaseAdmin
+      .from('user_challenges')
+      .select(`
+        id,
+        completion_date,
+        challenges (
+          id,
+          title,
+          xp_reward
+        )
+      `)
+      .eq('user_id', userId)
+      .not('completion_date', 'is', null);
+
     if (missionsError) {
       console.error('Error fetching missions for XP:', missionsError);
-      return {
-        total: 0,
-        rank: 'Beginner',
-        level: 1,
-        nextLevelRequirements: {
-          xpNeeded: 100,
-          badgesNeeded: 1,
-          challengesNeeded: 5,
-          academyModulesNeeded: 1
-        }
-      };
+    }
+    
+    if (challengesError) {
+      console.error('Error fetching challenges for XP:', challengesError);
     }
 
-    // Calculate total XP from completed missions (use points or xp_reward)
-    const totalXP = missions?.reduce((sum, mission) => sum + (mission.points || mission.xp_reward || 0), 0) || 0;
+    // Calculate total XP from completed missions
+    const missionsXP = missions?.reduce((sum, mission) => sum + (mission.points || mission.xp_reward || 0), 0) || 0;
+    
+    // Calculate total XP from completed challenges
+    const challengesXP = challenges?.reduce((sum, challenge) => {
+      const challengeData = challenge.challenges as any;
+      return sum + (challengeData?.xp_reward || 0);
+    }, 0) || 0;
+
+    const totalXP = missionsXP + challengesXP;
     const level = Math.floor(totalXP / 100) + 1; // Simple level calculation
     
     // Determine rank based on XP
@@ -300,14 +350,17 @@ async function fetchXPStats(userId: string) {
     const completedLessons = academyProgress?.length || 0;
     const academyModulesNeeded = Math.max(0, Math.ceil(level / 2) - Math.floor(completedLessons / 3));
 
+    // Calculate total challenges and missions for requirements
+    const totalMissionsAndChallenges = (missions?.length || 0) + (challenges?.length || 0);
+
     const nextLevelRequirements = {
       xpNeeded: Math.max(0, xpNeeded),
       badgesNeeded: Math.max(0, badgesNeeded),
-      challengesNeeded: Math.max(0, level * 2 - missions?.length || 0),
+      challengesNeeded: Math.max(0, level * 2 - totalMissionsAndChallenges),
       academyModulesNeeded: Math.max(0, academyModulesNeeded)
     };
 
-    console.log(`📊 XP stats for user ${userId}: ${totalXP} XP, Level ${level}, Rank ${rank}`);
+    console.log(`📊 XP stats for user ${userId}: ${totalXP} XP (${missionsXP} from missions, ${challengesXP} from challenges), Level ${level}, Rank ${rank}`);
 
     return {
       total: totalXP,
