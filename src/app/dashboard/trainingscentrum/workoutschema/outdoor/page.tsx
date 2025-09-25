@@ -1,6 +1,8 @@
 "use client";
 import { useState } from "react";
-
+import { useRouter } from 'next/navigation';
+import { toast } from 'react-hot-toast';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 
 // Force dynamic rendering to prevent navigator errors
 export const dynamic = 'force-dynamic';
@@ -127,6 +129,8 @@ const days = [
 ];
 
 export default function OutdoorSchema() {
+  const { user } = useSupabaseAuth();
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState(0);
   const [activeSchema, setActiveSchema] = useState(false);
   const [notes, setNotes] = useState<string[]>(days.map(() => ""));
@@ -181,9 +185,44 @@ export default function OutdoorSchema() {
       <WorkoutPlayerModal 
         isOpen={showWorkoutModal} 
         onClose={() => setShowWorkoutModal(false)} 
-        onComplete={(data) => {
+        onComplete={async (data) => {
           console.log('Workout completed:', data);
-          setShowWorkoutModal(false);
+          
+          try {
+            // Call the workout completion API
+            const response = await fetch('/api/workout-sessions/complete', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                sessionId: `outdoor_session_${Date.now()}`,
+                userId: user?.id,
+                schemaId: '22c1e74b-62b0-433e-9e80-e14f72706a95', // Rick's active schema
+                dayNumber: activeTab + 1, // Convert tab index to day number
+                rating: 5,
+                notes: `Outdoor workout completed: ${data.duration} minutes, ${data.totalVolume}kg total volume`
+              })
+            });
+
+            if (response.ok) {
+              console.log('✅ Workout completion saved successfully');
+              toast.success('Workout voltooid! 🎉');
+              
+              // Close modal and redirect
+              setShowWorkoutModal(false);
+              router.push('/dashboard/mijn-trainingen');
+              
+              // Force refresh to show updated progress
+              setTimeout(() => {
+                window.location.reload();
+              }, 100);
+            } else {
+              console.error('❌ Error saving workout completion:', response.status);
+              toast.error('Fout bij opslaan workout completion');
+            }
+          } catch (error) {
+            console.error('❌ Error completing workout:', error);
+            toast.error('Fout bij voltooien workout');
+          }
         }}
         trainingData={trainingData} 
       />

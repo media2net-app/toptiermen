@@ -34,7 +34,6 @@ export async function POST(request: Request) {
               schema_day_id: schemaDay.id,
               completed: true,
               completed_at: new Date().toISOString(),
-              rating: rating || 5,
               notes: notes || 'Workout completed'
             }, { onConflict: 'user_id,schema_day_id' });
 
