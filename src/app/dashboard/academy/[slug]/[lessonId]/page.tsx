@@ -675,15 +675,30 @@ export default function LessonDetailPage() {
 
       console.log('✅ Current lesson found:', currentLesson.title);
 
-      // Fetch user progress
+      // Fetch user progress from both tables
       console.log('🔍 Fetching progress for user:', user.id);
+      
+      // Check academy_lesson_completions table first (primary)
+      const { data: academyProgress } = await supabase
+        .from('academy_lesson_completions')
+        .select('lesson_id')
+        .eq('user_id', user.id);
+
+      // Also check user_lesson_progress table for compatibility
       const { data: progressData } = await supabase
         .from('user_lesson_progress')
         .select('lesson_id')
         .eq('user_id', user.id)
         .eq('completed', true);
 
-      console.log('📈 Progress data:', progressData?.length, 'completed lessons');
+      // Combine both progress sources
+      const allCompletedLessons = [
+        ...(academyProgress?.map(p => p.lesson_id) || []),
+        ...(progressData?.map(p => p.lesson_id) || [])
+      ];
+      const uniqueCompletedLessons = [...new Set(allCompletedLessons)];
+
+      console.log('📈 Progress data:', uniqueCompletedLessons.length, 'completed lessons');
 
       // Fetch ebook data
       console.log('🔍 Fetching ebook for lesson:', lessonId);
@@ -700,8 +715,8 @@ export default function LessonDetailPage() {
       setModule(moduleData);
       setLessons(lessonsData);
       setLesson(currentLesson);
-      setCompleted(progressData?.some(p => p.lesson_id === currentLesson.id) || false);
-      setCompletedLessonIds(progressData?.map(p => p.lesson_id) || []);
+      setCompleted(uniqueCompletedLessons.includes(currentLesson.id));
+      setCompletedLessonIds(uniqueCompletedLessons);
       setEbook(ebookData);
       setIsDataLoaded(true);
 
@@ -787,17 +802,24 @@ export default function LessonDetailPage() {
 
     setSaving(true);
     try {
-      const { error } = await supabase
-        .from('user_lesson_progress')
-        .upsert({
-          user_id: user.id,
-          lesson_id: lesson.id,
-          completed: true,
-          completed_at: new Date().toISOString()
-        }, { onConflict: 'user_id,lesson_id' });
+      // Use the new API endpoint that handles both tables
+      const response = await fetch('/api/academy/complete-lesson', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user.id,
+          lessonId: lesson.id,
+          score: 100,
+          timeSpent: 300
+        })
+      });
 
-      if (error) {
-        console.error('Error completing lesson:', error);
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        console.error('Error completing lesson:', data.error);
         setError('Fout bij voltooien van les');
       } else {
         setCompleted(true);

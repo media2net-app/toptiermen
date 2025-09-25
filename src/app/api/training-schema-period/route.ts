@@ -54,15 +54,38 @@ export async function POST(request: NextRequest) {
     const end = new Date(start);
     end.setDate(end.getDate() + (8 * 7)); // 8 weeks
 
-    // Update profiles table with schema selection (dates will be handled separately)
-    const { data, error } = await supabase
+    // First, update profiles table with schema selection
+    const { error: profileError } = await supabase
       .from('profiles')
       .update({ 
         selected_schema_id: schemaId
       })
-      .eq('id', actualUserId)
+      .eq('id', actualUserId);
+
+    if (profileError) {
+      console.error('❌ Error updating profile:', profileError);
+      return NextResponse.json({ error: 'Failed to update profile' }, { status: 500 });
+    }
+
+    // Create or update schema period in user_schema_periods table
+    const { data: periodData, error: periodError } = await supabase
+      .from('user_schema_periods')
+      .upsert({
+        user_id: actualUserId,
+        training_schema_id: schemaId,
+        start_date: start.toISOString(),
+        end_date: end.toISOString(),
+        status: 'active'
+      }, { 
+        onConflict: 'user_id,training_schema_id,status',
+        ignoreDuplicates: false 
+      })
       .select(`
-        selected_schema_id,
+        id,
+        training_schema_id,
+        start_date,
+        end_date,
+        status,
         training_schemas (
           id,
           name,
@@ -73,20 +96,20 @@ export async function POST(request: NextRequest) {
       `)
       .single();
 
-    if (error) {
-      console.error('❌ Error creating schema period:', error);
+    if (periodError) {
+      console.error('❌ Error creating schema period:', periodError);
       return NextResponse.json({ error: 'Failed to create schema period' }, { status: 500 });
     }
 
-    console.log('✅ Training schema period created:', data);
+    console.log('✅ Training schema period created:', periodData);
 
     return NextResponse.json({ 
       success: true,
       data: {
-        selected_schema_id: data.selected_schema_id,
-        schema_start_date: start.toISOString(),
-        schema_end_date: end.toISOString(),
-        training_schema: data.training_schemas
+        selected_schema_id: periodData.training_schema_id,
+        schema_start_date: periodData.start_date,
+        schema_end_date: periodData.end_date,
+        training_schema: periodData.training_schemas
       }
     });
 
@@ -127,11 +150,15 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Get current schema period from profiles table
-    const { data, error } = await supabase
-      .from('profiles')
+    // Get current schema period from user_schema_periods table
+    const { data: schemaPeriod, error: periodError } = await supabase
+      .from('user_schema_periods')
       .select(`
-        selected_schema_id,
+        id,
+        training_schema_id,
+        start_date,
+        end_date,
+        status,
         training_schemas (
           id,
           name,
@@ -140,36 +167,23 @@ export async function GET(request: NextRequest) {
           schema_nummer
         )
       `)
-      .eq('id', actualUserId)
+      .eq('user_id', actualUserId)
+      .eq('status', 'active')
       .single();
 
-    if (error) {
-      console.log('⚠️ No schema period found for user:', error.message);
+    if (periodError) {
+      console.log('⚠️ No active schema period found for user:', periodError.message);
       return NextResponse.json({ data: null });
     }
 
-    // Only return data if a schema is actually selected
-    if (!data.selected_schema_id) {
-      console.log('⚠️ No schema selected for user');
-      return NextResponse.json({ data: null });
-    }
-
-    // For now, we'll assume the schema period is active if a schema is selected
-    // In the future, we can add proper date tracking
-
-    console.log('✅ Current schema period found:', data);
-
-    // Simulate start and end dates (8 weeks from now)
-    const startDate = new Date();
-    const endDate = new Date();
-    endDate.setDate(endDate.getDate() + (8 * 7)); // 8 weeks
+    console.log('✅ Current schema period found:', schemaPeriod);
 
     return NextResponse.json({ 
       data: {
-        selected_schema_id: data.selected_schema_id,
-        schema_start_date: startDate.toISOString(),
-        schema_end_date: endDate.toISOString(),
-        training_schema: data.training_schemas
+        selected_schema_id: schemaPeriod.training_schema_id,
+        schema_start_date: schemaPeriod.start_date,
+        schema_end_date: schemaPeriod.end_date,
+        training_schema: schemaPeriod.training_schemas
       }
     });
 

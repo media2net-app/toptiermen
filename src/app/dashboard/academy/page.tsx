@@ -38,7 +38,12 @@ interface Lesson {
 }
 
 interface ProgressData {
-  [moduleId: string]: number;
+  [moduleId: string]: {
+    completed: boolean;
+    progress_percentage: number;
+    completed_lessons: number;
+    total_lessons: number;
+  };
 }
 
 interface UnlockData {
@@ -138,9 +143,15 @@ export default function AcademyPage() {
           // Don't throw error, just use empty progress data
         }
 
-        // Fetch lesson progress
+        // Fetch lesson progress from both tables
         const { data: lessonProgressData, error: lessonProgressError } = await supabase
           .from('user_lesson_progress')
+          .select('*')
+          .eq('user_id', user.id);
+
+        // Also fetch from academy_lesson_completions for compatibility
+        const { data: academyCompletionsData, error: academyCompletionsError } = await supabase
+          .from('academy_lesson_completions')
           .select('*')
           .eq('user_id', user.id);
 
@@ -149,10 +160,20 @@ export default function AcademyPage() {
           throw new Error('Fout bij het laden van les voortgang');
         }
 
+        if (academyCompletionsError) {
+          console.warn('⚠️ Warning fetching academy completions:', academyCompletionsError);
+        }
+
         // Fetch unlocks (optional - table might not exist yet)
         const { data: unlocksData, error: unlocksError } = await supabase
           .from('user_module_unlocks')
           .select('module_id, unlocked_at, opened_at')
+          .eq('user_id', user.id);
+
+        // Also fetch module completions
+        const { data: moduleCompletionsData, error: moduleCompletionsError } = await supabase
+          .from('academy_module_completions')
+          .select('*')
           .eq('user_id', user.id);
 
         if (unlocksError) {
@@ -160,20 +181,43 @@ export default function AcademyPage() {
           // Don't throw error, just use empty unlocks data
         }
 
+        if (moduleCompletionsError) {
+          console.warn('⚠️ Warning fetching module completions:', moduleCompletionsError);
+        }
+
         // Process data
         const processedModules = modulesData || [];
         const processedLessons = lessonsData || [];
         
-        // Process progress data (calculate from lesson progress instead of using separate table)
+        // Process progress data (calculate from lesson progress and module completions)
         const progressMap: ProgressData = {};
-        // We'll calculate progress from lesson progress instead of using a separate table
+        
+        // Process module completions
+        moduleCompletionsData?.forEach((completion: any) => {
+          progressMap[completion.module_id] = {
+            completed: true,
+            progress_percentage: 100,
+            completed_lessons: completion.completed_lessons || 0,
+            total_lessons: completion.total_lessons || 0
+          };
+        });
 
-        // Process lesson progress
+        // Process lesson progress from both tables
         const lessonProgressMap: LessonProgress = {};
+        
+        // First, add from user_lesson_progress
         lessonProgressData?.forEach((progress: any) => {
           lessonProgressMap[progress.lesson_id] = {
             completed: progress.completed || false,
             time_spent: progress.time_spent || 0
+          };
+        });
+
+        // Then, add from academy_lesson_completions (overwrites if exists)
+        academyCompletionsData?.forEach((completion: any) => {
+          lessonProgressMap[completion.lesson_id] = {
+            completed: true, // If in completions table, it's completed
+            time_spent: completion.time_spent || 0
           };
         });
 
