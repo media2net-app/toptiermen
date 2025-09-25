@@ -750,6 +750,25 @@ function TrainingschemasContent() {
     }
   };
 
+  const fetchUserProfile = useCallback(async () => {
+    if (!user?.id) return null;
+    
+    try {
+      const response = await fetch(`/api/auth/login-data?userId=${user.id}`);
+      const data = await response.json();
+      
+      if (response.ok && data.success) {
+        return data.data.profile;
+      } else {
+        console.error('❌ Error loading user profile:', data.error);
+        return null;
+      }
+    } catch (error) {
+      console.error('❌ Error fetching user profile:', error);
+      return null;
+    }
+  }, [user?.id]);
+
   const fetchUserTrainingProfile = async () => {
     try {
       if (!user?.id) {
@@ -1501,13 +1520,21 @@ function TrainingschemasContent() {
     }
   }, [showOnboardingStep3]);
 
-  // Set selectedTrainingSchema when currentSchemaPeriod is loaded
+  // Set selectedTrainingSchema when currentSchemaPeriod is loaded or from profile
   useEffect(() => {
     if (currentSchemaPeriod && currentSchemaPeriod.training_schema_id) {
       console.log('🔄 Setting selectedTrainingSchema from currentSchemaPeriod:', currentSchemaPeriod.training_schema_id);
       setSelectedTrainingSchema(currentSchemaPeriod.training_schema_id);
+    } else if (user && user.id) {
+      // If no currentSchemaPeriod but user has selected_schema_id in profile, use that
+      fetchUserProfile().then((profile) => {
+        if (profile && profile.selected_schema_id) {
+          console.log('🔄 Setting selectedTrainingSchema from profile:', profile.selected_schema_id);
+          setSelectedTrainingSchema(profile.selected_schema_id);
+        }
+      });
     }
-  }, [currentSchemaPeriod]);
+  }, [currentSchemaPeriod, user, fetchUserProfile]);
 
   // Progressieve loading states
   if (authLoading) {
