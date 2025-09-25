@@ -38,7 +38,7 @@
 
         .logo {
             margin: 0 auto 1rem;
-            display: flex;
+            display: flex !important;
             align-items: center;
             justify-content: center;
         }
@@ -81,7 +81,7 @@
             font-size: 1.8rem;
             font-weight: 700;
             margin-bottom: 1.5rem;
-            display: flex;
+            display: flex !important;
             align-items: center;
             gap: 0.5rem;
         }
@@ -139,7 +139,7 @@
         }
 
         .checklist-item {
-            display: flex;
+            display: flex !important;
             align-items: center;
             margin-bottom: 0.8rem;
             padding: 0.5rem;
@@ -220,6 +220,43 @@
             font-weight: 700;
         }
 
+        /* Sticky Back Button Styles */
+        .sticky-back-btn {
+            position: fixed;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+            z-index: 9999;
+            background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 15px 20px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            box-shadow: 0 8px 25px rgba(139, 174, 90, 0.3);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+            opacity: 1 !important;
+            visibility: visible !important;
+
+        .sticky-back-btn:hover {
+            background: linear-gradient(135deg, #B6C948 0%, #8BAE5A 100%);
+            transform: translateY(-50%) scale(1.05);
+            box-shadow: 0 12px 35px rgba(139, 174, 90, 0.4);
+        }
+
+        .sticky-back-btn svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 1rem;
@@ -232,10 +269,40 @@
             .section {
                 padding: 1.5rem;
             }
+
+            .sticky-back-btn {
+            position: fixed;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+            z-index: 9999;
+            background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 15px 20px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            box-shadow: 0 8px 25px rgba(139, 174, 90, 0.3);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
         }
     </style>
 </head>
 <body>
+    <!-- Sticky Back Button -->
+    <a href="/dashboard/academy/discipline-identiteit" class="sticky-back-btn" title="Terug naar Module">
+        <svg viewBox="0 0 24 24">
+            <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+        </svg>
+        Terug
+    </a>
+
     <div class="container">
         <!-- Header -->
         <div class="header">
@@ -288,185 +355,150 @@
 
         <!-- Uitgebreide Samenvatting -->
         <div class="section">
-            <h2>📚 Uitgebreide Samenvatting van de Les</h2>
+            <h2>📚 Wat Je Deze Les Hebt Geleerd</h2>
             
             <div class="highlight-box">
-                <h4>🎯 Les Overzicht</h4>
-                <p>In deze les hebben we ontdek je kernwaarden en bouw je top tier identiteit behandeld. Dit is een cruciaal onderdeel van je ontwikkeling als Top Tier Man en vormt de basis voor verdere groei en prestaties.</p>
+                <h4>🎯 Het Grote Plaatje</h4>
+                <p>In deze les hebben we geleerd wat het betekent om een Top Tier Man te zijn en hoe je je eigen sterke identiteit kunt bouwen. Dit is de basis voor alles wat je in je leven wilt bereiken.</p>
             </div>
 
-            <h3>Belangrijkste Inzichten</h3>
+            <h3>De 4 Hoofdpunten van een Top Tier Man</h3>
             <ul>
-                <li><strong>Wat is een Top Tier Man?:</strong> Een fundamenteel concept dat je dagelijks kunt toepassen</li><li><strong>Leeft volgens zijn principes - Hij weet wat belangrijk is en handelt ernaar:</strong> Een fundamenteel concept dat je dagelijks kunt toepassen</li><li><strong>Neemt verantwoordelijkheid - Hij is de baas van zijn eigen leven:</strong> Een fundamenteel concept dat je dagelijks kunt toepassen</li><li><strong>Houdt zijn woord - Wat hij zegt, doet hij ook:</strong> Een fundamenteel concept dat je dagelijks kunt toepassen</li><li><strong>Blijft groeien - Hij wordt elke dag beter:</strong> Een fundamenteel concept dat je dagelijks kunt toepassen</li>
-                <li><strong>Praktische Toepassing:</strong> Het verschil tussen kennis en wijsheid ligt in de dagelijkse implementatie</li>
-                <li><strong>Consistentie:</strong> Kleine, dagelijkse acties leiden tot grote, langetermijn resultaten</li>
+                <li><strong>Hij leeft volgens zijn principes:</strong> Hij weet wat belangrijk is en doet wat hij zegt</li>
+                <li><strong>Hij neemt verantwoordelijkheid:</strong> Hij is de baas van zijn eigen leven, geen slachtoffer</li>
+                <li><strong>Hij houdt zijn woord:</strong> Wat hij belooft, doet hij ook echt</li>
+                <li><strong>Hij blijft groeien:</strong> Hij wordt elke dag een beetje beter</li>
             </ul>
 
-            <h3>Waarom Dit Belangrijk Is</h3>
-            <p>De concepten uit deze les zijn niet alleen theoretisch interessant, maar vormen de praktische basis voor je dagelijkse leven. Door deze principes consequent toe te passen, bouw je aan een sterke fundering voor alle andere aspecten van je ontwikkeling.</p>
+            <h3>Waarom Dit Zo Belangrijk Is</h3>
+            <p>Wanneer je weet wie je bent en waar je voor staat, wordt alles makkelijker. Je kunt betere beslissingen nemen, je voelt je zekerder, en mensen vertrouwen je meer. Het is alsof je een kompas hebt in het leven.</p>
 
-            <h3>🧬 Wetenschappelijke Onderbouwing van Identiteit</h3>
-            <p>De wetenschap achter identiteitsvorming is fascinerend en helpt ons begrijpen waarom kernwaarden zo krachtig zijn:</p>
-
-            <h4>🧠 Neurowetenschappelijke Aspecten</h4>
-            <p><strong>Neuroplasticiteit:</strong> Je brein kan zichzelf herstructureren op basis van je gedrag en overtuigingen</p>
-            <p><strong>Identiteitsconsolidatie:</strong> Het proces waarbij je brein je identiteit vormt en versterkt</p>
-            <p><strong>Waarden-gebaseerde besluitvorming:</strong> Hoe je kernwaarden je dagelijkse keuzes beïnvloeden</p>
+            <h3>🧠 Hoe Je Brein Werkt Met Identiteit</h3>
+            <p>Je brein is als een spier - hoe meer je het gebruikt, hoe sterker het wordt. Wanneer je consequent handelt volgens je waarden, wordt dit een automatische gewoonte. Je hoeft er niet meer over na te denken, het gebeurt gewoon.</p>
 
             <div class="highlight-box">
-                <h4>⚡ Hersenmechanismen</h4>
+                <h4>⚡ Het Belangrijkste Wat Je Moet Weten</h4>
                 <ul>
-                    <li><strong>Prefrontale cortex:</strong> Reguleert identiteitsgebaseerde beslissingen</li>
-                    <li><strong>Limbisch systeem:</strong> Verwerkt emotionele waarden en overtuigingen</li>
-                    <li><strong>Basale ganglia:</strong> Automatiseert gewoonten gebaseerd op identiteit</li>
-                    <li><strong>Hippocampus:</strong> Slaat identiteitsgerelateerde herinneringen op</li>
+                    <li><strong>Je kunt jezelf opnieuw uitvinden:</strong> Je bent niet vastgepind aan wie je nu bent</li>
+                    <li><strong>Kleine acties maken groot verschil:</strong> Elke dag een kleine stap telt</li>
+                    <li><strong>Consistentie wint altijd:</strong> Beter elke dag 10 minuten dan één keer per week 2 uur</li>
+                    <li><strong>Je gedrag bepaalt wie je bent:</strong> Niet je gedachten, maar je acties</li>
                 </ul>
             </div>
 
-            <h4>🔬 Psychologische Theorieën</h4>
-            <p><strong>Sociale Identiteitstheorie:</strong> Hoe groepsidentiteit je individuele identiteit beïnvloedt</p>
-            <p><strong>Zelfdeterminatietheorie:</strong> De rol van autonomie, competentie en verbondenheid</p>
-            <p><strong>Identiteitsontwikkeling:</strong> Hoe identiteit evolueert door verschillende levensfasen</p>
+            <h3>🎯 Hoe Je Je Identiteit Sterker Maakt</h3>
+            <p>Het bouwen van een sterke identiteit is een proces dat tijd kost. Hier zijn de belangrijkste stappen:</p>
+
+            <h4>Stap 1: Weet Wat Je Waarden Zijn</h4>
+            <p>Wat is echt belangrijk voor jou? Is het eerlijkheid? Familie? Succes? Schrijf dit op. Dit zijn je kernwaarden - je persoonlijke regels voor het leven.</p>
 
             <div class="highlight-box">
-                <h4>🎯 Identiteitsvorming Processen</h4>
+                <h4>🔄 Hoe Je Je Identiteit Ontwikkelt</h4>
                 <ul>
-                    <li><strong>Exploratie:</strong> Actief onderzoeken van verschillende identiteiten</li>
-                    <li><strong>Commitment:</strong> Toewijding aan specifieke waarden en doelen</li>
-                    <li><strong>Consolidatie:</strong> Integratie van identiteit in dagelijks leven</li>
-                    <li><strong>Herziening:</strong> Aanpassing van identiteit op basis van nieuwe ervaringen</li>
+                    <li><strong>Onderzoek:</strong> Probeer verschillende dingen uit, zie wat bij je past</li>
+                    <li><strong>Kies:</strong> Besluit welke waarden het belangrijkst voor je zijn</li>
+                    <li><strong>Doe:</strong> Handel elke dag volgens deze waarden</li>
+                    <li><strong>Herhaal:</strong> Blijf dit doen, ook als het moeilijk is</li>
                 </ul>
             </div>
 
-            <h3>🎯 Geavanceerde Identiteitsstrategieën</h3>
-            <p>Voor mannen die hun identiteit willen optimaliseren, zijn er bewezen effectieve benaderingen:</p>
-
-            <h4>📈 Identiteitsontwikkeling Modellen</h4>
-            <p><strong>Stadia van identiteitsontwikkeling:</strong> Van diffusie naar consolidatie</p>
-            <p><strong>Identiteitscrises:</strong> Momenten van intense zelfreflectie en groei</p>
-            <p><strong>Identiteitsintegratie:</strong> Het samenbrengen van verschillende aspecten van jezelf</p>
+            <h4>Stap 2: Maak Je Identiteit Dagelijks Sterker</h4>
+            <p>Elke dag kun je kleine dingen doen die je identiteit versterken. Bijvoorbeeld: als eerlijkheid belangrijk voor je is, vertel dan altijd de waarheid, ook als het moeilijk is.</p>
 
             <div class="highlight-box">
-                <h4>🔄 Identiteitsontwikkeling Fasen</h4>
+                <h4>🎯 Praktische Manieren Om Je Identiteit Te Versterken</h4>
                 <ul>
-                    <li><strong>Fase 1 - Exploratie:</strong> Onderzoeken van verschillende mogelijkheden</li>
-                    <li><strong>Fase 2 - Experimentatie:</strong> Uitproberen van verschillende rollen en waarden</li>
-                    <li><strong>Fase 3 - Commitment:</strong> Toewijding aan specifieke waarden en doelen</li>
-                    <li><strong>Fase 4 - Consolidatie:</strong> Integratie van identiteit in dagelijks leven</li>
+                    <li><strong>Dagelijkse bevestigingen:</strong> Zeg elke ochtend tegen jezelf wat voor man je bent</li>
+                    <li><strong>Visualiseer je ideale zelf:</strong> Stel je voor hoe je wilt zijn</li>
+                    <li><strong>Evalueer regelmatig:</strong> Kijk of je nog steeds handelt volgens je waarden</li>
+                    <li><strong>Vier je successen:</strong> Wees trots op jezelf als je het goed doet</li>
                 </ul>
             </div>
 
-            <h4>💪 Identiteitsversterking Technieken</h4>
-            <p><strong>Identiteitsgebaseerde doelen:</strong> Doelen die voortkomen uit je kernwaarden</p>
-            <p><strong>Identiteitsgebaseerde gewoonten:</strong> Dagelijkse acties die je identiteit versterken</p>
-            <p><strong>Identiteitsgebaseerde besluitvorming:</strong> Keuzes maken op basis van je waarden</p>
+            <h3>🌍 Hoe Anderen Je Beïnvloeden</h3>
+            <p>De mensen om je heen hebben veel invloed op wie je wordt. Familie, vrienden, collega's - ze vormen allemaal je identiteit. Het is belangrijk om je hier bewust van te zijn.</p>
+
+            <h4>🏛️ De Invloed Van Je Omgeving</h4>
+            <p>Je familie en vrienden hebben je gevormd tot wie je nu bent. Sommige invloeden zijn goed, andere niet. Het is jouw taak om te kiezen welke invloeden je wilt behouden en welke je wilt veranderen.</p>
 
             <div class="highlight-box">
-                <h4>🎯 Praktische Identiteitsversterking</h4>
+                <h4>🌐 Wie Beïnvloedt Je Identiteit?</h4>
                 <ul>
-                    <li><strong>Identiteitsverklaringen:</strong> Dagelijkse bevestigingen van je waarden</li>
-                    <li><strong>Identiteitsvisualisatie:</strong> Je ideale zelf voorstellen</li>
-                    <li><strong>Identiteitsreflectie:</strong> Regelmatige evaluatie van je identiteit</li>
-                    <li><strong>Identiteitsintegratie:</strong> Samenbrengen van alle aspecten van jezelf</li>
+                    <li><strong>Je familie:</strong> Ze hebben je eerste waarden meegegeven</li>
+                    <li><strong>Je vrienden:</strong> Je wordt zoals de mensen om je heen</li>
+                    <li><strong>Je werk:</strong> Je werk kan je identiteit versterken of verzwakken</li>
+                    <li><strong>De media:</strong> Films, boeken, social media beïnvloeden hoe je denkt</li>
                 </ul>
             </div>
 
-            <h3>🌍 Culturele en Sociale Aspecten</h3>
-            <p>Identiteit wordt ook gevormd door culturele en sociale factoren:</p>
-
-            <h4>🏛️ Culturele Invloeden</h4>
-            <p><strong>Culturele waarden:</strong> Hoe je cultuur je kernwaarden beïnvloedt</p>
-            <p><strong>Sociale normen:</strong> De verwachtingen van je sociale omgeving</p>
-            <p><strong>Generatieverschillen:</strong> Hoe je generatie je identiteit vormt</p>
+            <h4>🤝 Hoe Je Je Sociale Omgeving Slim Gebruikt</h4>
+            <p>Omring jezelf met mensen die de waarden hebben die jij ook wilt hebben. Als je succesvol wilt worden, hang dan rond met succesvolle mensen. Als je fit wilt worden, train dan met fitte mensen.</p>
 
             <div class="highlight-box">
-                <h4>🌐 Sociale Identiteitsfactoren</h4>
+                <h4>👥 Slimme Sociale Strategieën</h4>
                 <ul>
-                    <li><strong>Familie-invloeden:</strong> Hoe je familie je identiteit vormt</li>
-                    <li><strong>Vriendengroepen:</strong> De invloed van je sociale kring</li>
-                    <li><strong>Werkomgeving:</strong> Hoe je werk je identiteit beïnvloedt</li>
-                    <li><strong>Media-invloeden:</strong> De rol van media in identiteitsvorming</li>
+                    <li><strong>Kies je vrienden wijs:</strong> Omring je met mensen die je waarden delen</li>
+                    <li><strong>Vraag om feedback:</strong> Laat anderen je vertellen hoe ze je zien</li>
+                    <li><strong>Leer van rolmodellen:</strong> Kijk naar mensen die hebben wat jij wilt</li>
+                    <li><strong>Help anderen:</strong> Door anderen te helpen, word je zelf sterker</li>
                 </ul>
             </div>
 
-            <h4>🤝 Sociale Identiteitsontwikkeling</h4>
-            <p><strong>Sociale vergelijking:</strong> Hoe je jezelf vergelijkt met anderen</p>
-            <p><strong>Sociale bevestiging:</strong> Hoe anderen je identiteit bevestigen</p>
-            <p><strong>Sociale druk:</strong> Hoe sociale verwachtingen je identiteit beïnvloeden</p>
+            <h3>🚀 Hoe Je Je Identiteit Blijft Verbeteren</h3>
+            <p>Je identiteit is nooit "klaar". Je kunt altijd groeien en verbeteren. Het is belangrijk om regelmatig te kijken naar wie je bent en wie je wilt worden.</p>
+
+            <h4>⚡ Manieren Om Te Blijven Groeien</h4>
+            <p>Elke paar maanden kun je jezelf evalueren. Ben je nog steeds de man die je wilt zijn? Handel je nog steeds volgens je waarden? Zo niet, dan kun je aanpassingen maken.</p>
 
             <div class="highlight-box">
-                <h4>👥 Sociale Identiteitsstrategieën</h4>
+                <h4>🎯 Hoe Je Je Identiteit Blijft Optimaliseren</h4>
                 <ul>
-                    <li><strong>Sociale steun:</strong> Omring jezelf met mensen die je waarden delen</li>
-                    <li><strong>Sociale feedback:</strong> Vraag feedback over je identiteit</li>
-                    <li><strong>Sociale modellering:</strong> Leer van anderen met sterke identiteiten</li>
-                    <li><strong>Sociale verantwoordelijkheid:</strong> Gebruik je identiteit om anderen te helpen</li>
+                    <li><strong>Wees duidelijk:</strong> Weet precies wie je wilt zijn</li>
+                    <li><strong>Blijf consistent:</strong> Handel elke dag hetzelfde</li>
+                    <li><strong>Wees toegewijd:</strong> Geef niet op als het moeilijk wordt</li>
+                    <li><strong>Blijf flexibel:</strong> Pas je aan als je nieuwe dingen leert</li>
                 </ul>
             </div>
 
-            <h3>🚀 Identiteitsoptimalisatie</h3>
-            <p>Voor mannen die hun identiteit willen optimaliseren, zijn er specifieke strategieën:</p>
-
-            <h4>⚡ Identiteitsoptimalisatie Technieken</h4>
-            <p><strong>Identiteitsaudit:</strong> Regelmatige evaluatie van je identiteit</p>
-            <p><strong>Identiteitsupdates:</strong> Aanpassen van je identiteit op basis van nieuwe ervaringen</p>
-            <p><strong>Identiteitsintegratie:</strong> Samenbrengen van alle aspecten van jezelf</p>
+            <h4>💡 Nieuwe Kansen Ontdekken</h4>
+            <p>Je identiteit kan groeien door nieuwe ervaringen. Probeer nieuwe dingen uit, leer nieuwe vaardigheden, ontmoet nieuwe mensen. Dit helpt je om een completere man te worden.</p>
 
             <div class="highlight-box">
-                <h4>🎯 Identiteitsoptimalisatie Strategieën</h4>
+                <h4>🔄 Hoe Je Je Identiteit Blijft Ontwikkelen</h4>
                 <ul>
-                    <li><strong>Identiteitsclarity:</strong> Duidelijkheid over wie je bent</li>
-                    <li><strong>Identiteitsconsistency:</strong> Consistentie in je identiteit</li>
-                    <li><strong>Identiteitscommitment:</strong> Toewijding aan je identiteit</li>
-                    <li><strong>Identiteitsflexibility:</strong> Flexibiliteit in je identiteit</li>
+                    <li><strong>Onderzoek nieuwe mogelijkheden:</strong> Kijk naar dingen die je nog nooit hebt geprobeerd</li>
+                    <li><strong>Experimenteer:</strong> Probeer nieuwe rollen en gedragingen uit</li>
+                    <li><strong>Integreer nieuwe aspecten:</strong> Voeg nieuwe vaardigheden toe aan wie je bent</li>
+                    <li><strong>Consolideer je groei:</strong> Maak nieuwe aspecten onderdeel van je dagelijks leven</li>
                 </ul>
             </div>
 
-            <h4>💡 Identiteitsinnovatie</h4>
-            <p><strong>Identiteitscreatie:</strong> Het creëren van een nieuwe identiteit</p>
-            <p><strong>Identiteitsontwikkeling:</strong> Het ontwikkelen van je bestaande identiteit</p>
-            <p><strong>Identiteitsintegratie:</strong> Het integreren van verschillende aspecten van jezelf</p>
+            <h3>📊 Hoe Je Je Vooruitgang Bijhoudt</h3>
+            <p>Om te weten of je vooruitgaat, moet je je vooruitgang meten. Dit hoeft niet ingewikkeld te zijn - je kunt gewoon regelmatig kijken of je nog steeds handelt volgens je waarden.</p>
+
+            <h4>📏 Simpele Manieren Om Te Meten</h4>
+            <p>Je kunt een dagboek bijhouden, feedback vragen aan anderen, of gewoon regelmatig nadenken over je gedrag. Het belangrijkste is dat je eerlijk bent tegen jezelf.</p>
 
             <div class="highlight-box">
-                <h4>🔄 Identiteitsinnovatie Processen</h4>
+                <h4>📊 Hoe Je Je Vooruitgang Meet</h4>
                 <ul>
-                    <li><strong>Identiteitsonderzoek:</strong> Onderzoeken van nieuwe mogelijkheden</li>
-                    <li><strong>Identiteitsexperimentatie:</strong> Uitproberen van nieuwe rollen</li>
-                    <li><strong>Identiteitsintegratie:</strong> Integreren van nieuwe aspecten</li>
-                    <li><strong>Identiteitsconsolidatie:</strong> Consolideren van je nieuwe identiteit</li>
+                    <li><strong>Houd een dagboek bij:</strong> Schrijf op hoe je je gedraagt</li>
+                    <li><strong>Vraag feedback:</strong> Laat anderen je vertellen hoe je bent veranderd</li>
+                    <li><strong>Observeer je gedrag:</strong> Kijk of je handelt zoals je wilt</li>
+                    <li><strong>Reflecteer regelmatig:</strong> Neem tijd om na te denken over wie je bent</li>
                 </ul>
             </div>
 
-            <h3>📊 Identiteitsmeting en Evaluatie</h3>
-            <p>Het meten van je identiteitsontwikkeling is cruciaal voor voortgang:</p>
-
-            <h4>📏 Identiteitsmeting Tools</h4>
-            <p><strong>Identiteitsclarity schaal:</strong> Meet hoe duidelijk je identiteit is</p>
-            <p><strong>Identiteitscommitment schaal:</strong> Meet hoe toegewijd je bent aan je identiteit</p>
-            <p><strong>Identiteitsconsistency schaal:</strong> Meet hoe consistent je identiteit is</p>
+            <h4>📈 Je Groei Volgen</h4>
+            <p>Schrijf belangrijke momenten op wanneer je merkt dat je bent gegroeid. Vier deze momenten - ze laten zien dat je op de goede weg bent.</p>
 
             <div class="highlight-box">
-                <h4>📊 Identiteitsmeting Methoden</h4>
+                <h4>📊 Belangrijke Metingen</h4>
                 <ul>
-                    <li><strong>Zelfrapportage:</strong> Je eigen identiteit evalueren</li>
-                    <li><strong>Anderen feedback:</strong> Feedback van anderen over je identiteit</li>
-                    <li><strong>Gedragsobservatie:</strong> Observeren van je gedrag</li>
-                    <li><strong>Identiteitsreflectie:</strong> Reflecteren op je identiteit</li>
-                </ul>
-            </div>
-
-            <h4>📈 Identiteitsontwikkeling Tracking</h4>
-            <p><strong>Identiteitsjournaal:</strong> Dagelijks bijhouden van je identiteitsontwikkeling</p>
-            <p><strong>Identiteitsmilestones:</strong> Belangrijke momenten in je identiteitsontwikkeling</p>
-            <p><strong>Identiteitsfeedback:</strong> Regelmatige feedback over je identiteit</p>
-
-            <div class="highlight-box">
-                <h4>📊 Identiteitsontwikkeling Metrics</h4>
-                <ul>
-                    <li><strong>Identiteitsclarity:</strong> Duidelijkheid over je identiteit</li>
-                    <li><strong>Identiteitscommitment:</strong> Toewijding aan je identiteit</li>
-                    <li><strong>Identiteitsconsistency:</strong> Consistentie in je identiteit</li>
-                    <li><strong>Identiteitsflexibility:</strong> Flexibiliteit in je identiteit</li>
+                    <li><strong>Duidelijkheid:</strong> Weet je nog steeds wie je wilt zijn?</li>
+                    <li><strong>Toewijding:</strong> Ben je nog steeds toegewijd aan je waarden?</li>
+                    <li><strong>Consistentie:</strong> Handel je elke dag hetzelfde?</li>
+                    <li><strong>Flexibiliteit:</strong> Kun je je aanpassen wanneer dat nodig is?</li>
                 </ul>
             </div>
         </div>

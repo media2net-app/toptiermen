@@ -38,7 +38,7 @@
 
         .logo {
             margin: 0 auto 1rem;
-            display: flex;
+            display: flex !important;
             align-items: center;
             justify-content: center;
         }
@@ -81,7 +81,7 @@
             font-size: 1.8rem;
             font-weight: 700;
             margin-bottom: 1.5rem;
-            display: flex;
+            display: flex !important;
             align-items: center;
             gap: 0.5rem;
         }
@@ -139,7 +139,7 @@
         }
 
         .checklist-item {
-            display: flex;
+            display: flex !important;
             align-items: center;
             margin-bottom: 0.8rem;
             padding: 0.5rem;
@@ -233,9 +233,64 @@
                 padding: 1.5rem;
             }
         }
+    
+        /* Sticky Back Button Styles */
+        .sticky-back-btn {
+            position: fixed;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+            z-index: 9999;
+            background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 15px 20px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            box-shadow: 0 8px 25px rgba(139, 174, 90, 0.3);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+            opacity: 1 !important;
+            visibility: visible !important;
+
+        .sticky-back-btn:hover {
+            background: linear-gradient(135deg, #B6C948 0%, #8BAE5A 100%);
+            transform: translateY(-50%) scale(1.05);
+            box-shadow: 0 12px 35px rgba(139, 174, 90, 0.4);
+        }
+
+        .sticky-back-btn svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+
+        @media (max-width: 768px) {
+            .sticky-back-btn {
+                right: 10px;
+                padding: 12px 16px;
+                font-size: 12px;
+                min-width: 100px;
+            }
+        }
     </style>
 </head>
 <body>
+    <!-- Sticky Back Button -->
+    <a href="/dashboard/academy/fysieke-dominantie" class="sticky-back-btn" title="Terug naar Module">
+        <svg viewBox="0 0 24 24">
+            <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+        </svg>
+        Terug
+    </a>
+
+
     <div class="container">
         <!-- Header -->
         <div class="header">
@@ -303,15 +358,15 @@
             </ul>
 
             <h3>Waarom Dit Belangrijk Is</h3>
-            <p>De concepten uit deze les zijn niet alleen theoretisch interessant, maar vormen de praktische basis voor je dagelijkse leven. Door deze principes consequent toe te passen, bouw je aan een sterke fundering voor alle andere aspecten van je ontwikkeling.</p>
+            <p>De concepten uit deze les zijn niet alleen theoretisch interessant, maar vormen de praktische basis voor je dagelijkse leven. Door deze principes consequent toe te passen, bouw je aan een sterke basis voor alle andere aspecten van je ontwikkeling.</p>
 
             <h3>Wat is Kracht Precies?</h3>
             <p>Kracht is het vermogen om weerstand te overwinnen en fysieke prestaties te leveren. Het is niet alleen over spierkracht, maar over het vermogen om je lichaam te gebruiken om doelen te bereiken en uitdagingen aan te gaan.</p>
             
-            <p>Denk aan kracht als de "fundering" van alle fysieke prestaties. Net zoals een gebouw een sterke fundering nodig heeft, heeft je lichaam kracht nodig voor alle andere prestaties. Zonder kracht blijf je zwak. Met kracht word je onverzettelijk.</p>
+            <p>Denk aan kracht als de "basis" van alle fysieke prestaties. Net zoals een gebouw een sterke basis nodig heeft, heeft je lichaam kracht nodig voor alle andere prestaties. Zonder kracht blijf je zwak. Met kracht word je onverzettelijk.</p>
 
-            <h3>De 5 Fundamentele Pijlers van Kracht</h3>
-            <p>Kracht is gebouwd op vijf fundamentele pijlers die samen een onverzettelijke fysieke basis creëren. Deze pijlers zijn de basis van alle kracht prestaties.</p>
+            <h3>De 5 Belangrijkste Pijlers van Kracht</h3>
+            <p>Kracht is gebouwd op vijf belangrijke pijlers die samen een onverzettelijke fysieke basis creëren. Deze pijlers zijn de basis van alle kracht prestaties.</p>
             
             <h4>1. Spierkracht en Power</h4>
             <p>Spierkracht en power zijn de eerste pijler van kracht. Het is het vermogen om maximale kracht te genereren in korte tijd.</p>
@@ -369,7 +424,7 @@
             </ul>
 
             <h3>Waarom Kracht zo Belangrijk is</h3>
-            <p>Kracht is zo belangrijk omdat het de fundering vormt voor alle andere fysieke prestaties. Zonder kracht kun je geen andere fysieke doelen bereiken.</p>
+            <p>Kracht is zo belangrijk omdat het de basis vormt voor alle andere fysieke prestaties. Zonder kracht kun je geen andere fysieke doelen bereiken.</p>
             
             <h4>Fysieke Prestaties en Doelen</h4>
             <p>Kracht is de basis voor alle fysieke prestaties. Of je nu wilt afvallen, spieren wilt opbouwen, of je conditie wilt verbeteren, kracht is altijd de eerste stap.</p>

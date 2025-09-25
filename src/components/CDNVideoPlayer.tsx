@@ -4,6 +4,7 @@ import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { PlayIcon, PauseIcon } from '@heroicons/react/24/solid';
 import { useVideoCDN } from '@/hooks/useVideoCDN';
 import VideoPreloadService from '@/services/VideoPreloadService';
+import { useVideoPreload } from '@/hooks/useVideoPreload';
 
 interface CDNVideoPlayerProps {
   src: string;
@@ -37,11 +38,15 @@ export default function CDNVideoPlayer({
   const [hasError, setHasError] = useState(false);
   const [bufferingProgress, setBufferingProgress] = useState(0);
   const [retryCount, setRetryCount] = useState(0);
+  const [isPreloaded, setIsPreloaded] = useState(false);
   
   // Use CDN optimization hook
   const { optimizedUrl, isLoading: cdnLoading, error: cdnError, retry: cdnRetry, getAlternativeUrl } = useVideoCDN(src);
   const [currentSrc, setCurrentSrc] = useState(optimizedUrl);
   const [cdnOptimized, setCdnOptimized] = useState(false);
+
+  // Use enhanced video preloading
+  const { preloadVideo, getPreloadStatus } = useVideoPreload();
 
   // Update current source when CDN optimization completes
   useEffect(() => {
@@ -49,10 +54,21 @@ export default function CDNVideoPlayer({
       setCurrentSrc(optimizedUrl);
       setCdnOptimized(true);
       
-      // Preload the optimized video
-      VideoPreloadService.preloadVideo(optimizedUrl, 'high');
+      // Preload the optimized video with enhanced service
+      preloadVideo(optimizedUrl, {
+        priority: 'high',
+        preloadAmount: 'auto',
+        aggressivePreload: true
+      }).then(() => {
+        setIsPreloaded(true);
+      }).catch(error => {
+        console.warn('Enhanced preloading failed, falling back to old service:', error);
+        VideoPreloadService.preloadVideo(optimizedUrl, 'high').then(() => {
+          setIsPreloaded(true);
+        });
+      });
     }
-  }, [optimizedUrl, currentSrc]);
+  }, [optimizedUrl, currentSrc, preloadVideo]);
 
   // Preload optimization
   useEffect(() => {
@@ -63,27 +79,11 @@ export default function CDNVideoPlayer({
     // Set up preload optimization
     video.preload = preload;
     
-    // Add multiple source formats for better compatibility
-    const sources = [
-      { src: currentSrc, type: 'video/mp4' },
-      { src: currentSrc.replace('.mp4', '.webm'), type: 'video/webm' },
-      { src: currentSrc.replace('.mp4', '.ogg'), type: 'video/ogg' }
-    ];
-
-    // Clear existing sources
-    while (video.firstChild) {
-      video.removeChild(video.firstChild);
-    }
-
-    // Add optimized sources
-    sources.forEach(source => {
-      const sourceElement = document.createElement('source');
-      sourceElement.src = source.src;
-      sourceElement.type = source.type;
-      video.appendChild(sourceElement);
-    });
-
-    // Set the main src as fallback
+    // Optimize for better seeking and buffering
+    video.setAttribute('crossorigin', 'anonymous');
+    video.setAttribute('playsinline', 'true');
+    
+    // Set the main src directly for better performance
     video.src = currentSrc;
 
     // Add event listeners for better buffering
@@ -97,6 +97,7 @@ export default function CDNVideoPlayer({
       setIsLoading(false);
       setIsBuffering(false);
       setBufferingProgress(100);
+      setIsPreloaded(true);
     };
 
     const handleProgress = () => {
@@ -106,7 +107,10 @@ export default function CDNVideoPlayer({
         if (duration > 0) {
           const progress = (bufferedEnd / duration) * 100;
           setBufferingProgress(progress);
-          setIsBuffering(progress < 95);
+          // Only show buffering if we're close to the end of buffered content
+          const currentTime = video.currentTime;
+          const bufferAhead = bufferedEnd - currentTime;
+          setIsBuffering(bufferAhead < 5); // Show buffering if less than 5 seconds ahead
         }
       }
     };
@@ -206,6 +210,10 @@ export default function CDNVideoPlayer({
         }
       }
     }
+    
+    // Optimize for better seeking
+    video.setAttribute('webkit-playsinline', 'true');
+    video.setAttribute('x-webkit-airplay', 'allow');
   }, []);
 
   if (hasError && retryCount >= 3) {
@@ -253,6 +261,11 @@ export default function CDNVideoPlayer({
             <p className="text-sm">
               {cdnLoading ? 'CDN optimaliseren...' : 'Video laden...'}
             </p>
+            {isPreloaded && (
+              <p className="text-xs text-green-400 mt-1">
+                ✅ Video vooraf geladen
+              </p>
+            )}
             {cdnError && (
               <p className="text-xs text-yellow-400 mt-1">
                 CDN optimalisatie mislukt, originele URL gebruikt

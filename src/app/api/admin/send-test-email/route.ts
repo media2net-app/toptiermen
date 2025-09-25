@@ -622,43 +622,31 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Email credentials are configured in emailConfig above
-    console.log('📧 Using TopTierMen SMTP credentials for email sending...');
+    // Use the centralized email service
+    console.log('📧 Using centralized email service...');
+    
+    const { EmailService } = await import('@/lib/email-service');
+    const emailService = new EmailService();
 
-    // Create nodemailer transporter
-    const transporter = nodemailer.createTransport({
-      host: emailConfig.smtpHost,
-      port: emailConfig.smtpPort,
-      secure: emailConfig.smtpSecure,
-      auth: {
-        user: emailConfig.smtpUsername,
-        pass: emailConfig.smtpPassword
-      }
-    });
-
-    // Send the email with proper headers for better deliverability
-    const mailOptions = {
-      from: `${emailConfig.fromName} <${emailConfig.fromEmail}>`,
-      to: recipient,
-      subject: subject,
-      html: emailHtml,
-      headers: {
-        'List-Unsubscribe': '<mailto:unsubscribe@toptiermen.eu>',
-        'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
-        'X-Mailer': 'TopTierMen Platform',
-        'X-Priority': '3',
-        'X-MSMail-Priority': 'Normal',
-        'Importance': 'normal',
-        'Message-ID': `<${Date.now()}.${Math.random().toString(36).substr(2, 9)}@toptiermen.eu>`,
-        'Date': new Date().toUTCString(),
-        'MIME-Version': '1.0',
-        'Content-Type': 'text/html; charset=UTF-8'
-      }
-    };
-
+    // Send the email using the centralized service
     try {
-      const info = await transporter.sendMail(mailOptions);
-      console.log('✅ Email sent successfully:', info.messageId);
+      const success = await emailService.sendEmail(
+        recipient,
+        subject,
+        'test_email',
+        {
+          name: recipientName || 'Gebruiker',
+          email: recipient,
+          platformUrl: process.env.NEXT_PUBLIC_SITE_URL || 'https://platform.toptiermen.eu'
+        },
+        { tracking: true }
+      );
+
+      if (!success) {
+        throw new Error('Email service returned false');
+      }
+
+      console.log('✅ Email sent successfully via centralized service');
 
       // Update tracking to "sent" status using direct update
       const { error: trackingUpdateError } = await supabaseAdmin
@@ -688,8 +676,8 @@ export async function POST(request: NextRequest) {
             subject: subject,
             status: 'sent',
             error_message: null,
-            provider: 'smtp',
-            message_id: info.messageId,
+            provider: emailConfig.provider,
+            message_id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
             template_id: 'test_email'
           });
         
@@ -721,7 +709,7 @@ export async function POST(request: NextRequest) {
         campaignId: campaign.id,
         trackingId: trackingId,
         recipient: recipient,
-        messageId: info.messageId
+        messageId: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
       });
 
     } catch (emailError) {
@@ -747,7 +735,7 @@ export async function POST(request: NextRequest) {
             subject: subject,
             status: 'failed',
             error_message: emailError instanceof Error ? emailError.message : 'Unknown error',
-            provider: 'smtp',
+            provider: emailConfig.provider,
             message_id: null,
             template_id: 'test_email'
           });

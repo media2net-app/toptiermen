@@ -1,6 +1,6 @@
 // Email Configuration - Easy switching between providers
 export interface EmailConfig {
-  provider: 'smtp' | 'sendgrid' | 'mailgun';
+  provider: 'smtp' | 'api' | 'mailgun';
   // SMTP Configuration
   smtpHost?: string;
   smtpPort?: number;
@@ -24,14 +24,14 @@ export const currentSmtpConfig: EmailConfig = {
   smtpPort: 465,
   smtpSecure: true,
   smtpUsername: 'platform@toptiermen.eu',
-  smtpPassword: '5LUrnxEmEQYgEUt3PmZg',
+  smtpPassword: 'KEQDiA4ZEl&2Y$UX',
   fromEmail: 'platform@toptiermen.eu',
   fromName: 'TopTierMen Platform'
 };
 
 // SendGrid Configuration Example
 export const sendgridConfig: EmailConfig = {
-  provider: 'sendgrid',
+  provider: 'api',
   sendgridApiKey: process.env.SENDGRID_API_KEY || 'SG.test_key_for_development',
   fromEmail: 'platform@toptiermen.eu',
   fromName: 'TopTierMen Platform'
@@ -40,7 +40,7 @@ export const sendgridConfig: EmailConfig = {
 // Mailgun Configuration - PRODUCTION READY
 export const mailgunConfig: EmailConfig = {
   provider: 'mailgun',
-  mailgunApiKey: process.env.MAILGUN_API_KEY || '',
+  mailgunApiKey: process.env.MAILGUN_API_KEY || '5a4acb93-7be634a3',
   mailgunDomain: 'toptiermen.eu',
   fromEmail: 'platform@toptiermen.eu',
   fromName: 'Top Tier Men Platform'
@@ -49,13 +49,13 @@ export const mailgunConfig: EmailConfig = {
 // Function to get current email configuration
 export function getEmailConfig(): EmailConfig {
   // You can switch providers here by changing the return value
-  // return currentSmtpConfig; // Previously using SMTP
+  return mailgunConfig; // BACK TO MAILGUN - SMTP HAS HELO ISSUES
+  
+  // To use SMTP (HELO issues):
+  // return currentSmtpConfig;
   
   // To use SendGrid:
   // return sendgridConfig;
-  
-  // To use Mailgun:
-  return mailgunConfig; // NOW USING MAILGUN FOR BULK CAMPAIGNS
 }
 
 // Function to create nodemailer config for SMTP

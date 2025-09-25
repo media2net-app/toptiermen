@@ -1,23 +1,45 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { supabaseAdmin } from '@/lib/supabase-admin';
 import { emailService } from '@/lib/email-service';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+// Function to generate a secure temporary password
+function generateTempPassword(): string {
+  const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const lowercase = 'abcdefghijklmnopqrstuvwxyz';
+  const numbers = '0123456789';
+  const symbols = '!@#$%^&*()_+-=[]{}|;:,.<>?';
+  
+  let password = '';
+  
+  // Ensure at least one character from each category
+  password += uppercase[Math.floor(Math.random() * uppercase.length)];
+  password += lowercase[Math.floor(Math.random() * lowercase.length)];
+  password += numbers[Math.floor(Math.random() * numbers.length)];
+  password += symbols[Math.floor(Math.random() * symbols.length)];
+  
+  // Fill the rest with random characters
+  const allChars = uppercase + lowercase + numbers + symbols;
+  for (let i = 4; i < 12; i++) {
+    password += allChars[Math.floor(Math.random() * allChars.length)];
+  }
+  
+  // Shuffle the password
+  return password.split('').sort(() => Math.random() - 0.5).join('');
+}
+
+// Using supabaseAdmin from import
 
 export async function POST(request: NextRequest) {
   try {
-    const { userIds, email, password, testMode = false } = await request.json();
+    const { userIds, email, password, tempPassword, testMode = false } = await request.json();
 
-    console.log('📧 Sending account credentials:', { userIds, email, password, testMode });
+    console.log('📧 Sending account credentials:', { userIds, email, password, tempPassword, testMode });
 
     // Test mode restrictions removed - allow all users
     // const allowedTestEmails = ['chiel@media2net.nl', 'rick@toptiermen.eu'];
     
     // Get users from database
-    let query = supabase
+    let query = supabaseAdmin
       .from('profiles')
       .select('id, email, full_name, display_name, package_type, created_at');
 
@@ -67,8 +89,42 @@ export async function POST(request: NextRequest) {
       try {
         console.log(`📧 Sending credentials to: ${user.email}`);
 
-        // Use the provided password or default
-        const tempPassword = password || "W4t3rk0k3r^";
+        // Determine the final password to use
+        let finalPassword;
+        
+        // If password or tempPassword is provided, use that
+        if (password || tempPassword) {
+          finalPassword = password || tempPassword;
+          console.log(`📧 Using provided password for ${user.email}: ${finalPassword}`);
+        } else {
+          // For existing users, generate a new password and always synchronize it
+          // This ensures the email password matches the database password
+          finalPassword = generateTempPassword();
+          console.log(`📧 Generated new password for ${user.email}: ${finalPassword}`);
+        }
+        
+        // ALWAYS update the user's password in auth to ensure synchronization
+        try {
+          // Get user from auth to get their ID
+          const { data: authUsers, error: authError } = await supabaseAdmin.auth.admin.listUsers();
+          if (!authError && authUsers) {
+            const authUser = authUsers.users.find(u => u.email === user.email);
+            if (authUser) {
+              // Update password in auth
+              const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
+                authUser.id,
+                { password: finalPassword }
+              );
+              if (updateError) {
+                console.error(`❌ Error updating password for ${user.email}:`, updateError);
+              } else {
+                console.log(`✅ Password synchronized for ${user.email}: ${finalPassword}`);
+              }
+            }
+          }
+        } catch (error) {
+          console.error(`❌ Error updating password for ${user.email}:`, error);
+        }
         
         // Create login URL
         const loginUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://platform.toptiermen.eu'}/login`;
@@ -82,7 +138,7 @@ export async function POST(request: NextRequest) {
             name: user.full_name || user.display_name || 'Gebruiker',
             email: user.email,
             username: user.display_name || user.email.split('@')[0],
-            tempPassword: tempPassword,
+            tempPassword: finalPassword,
             loginUrl: loginUrl,
             packageType: user.package_type || 'Basic Tier',
             platformUrl: process.env.NEXT_PUBLIC_SITE_URL || 'https://platform.toptiermen.eu'
@@ -95,7 +151,7 @@ export async function POST(request: NextRequest) {
           results.details.push({
             email: user.email,
             status: 'sent',
-            tempPassword: tempPassword
+            tempPassword: finalPassword
           });
           console.log(`✅ Credentials sent to: ${user.email}`);
         } else {
@@ -135,24 +191,4 @@ export async function POST(request: NextRequest) {
       details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }
-}
-
-function generateTempPassword(): string {
-  // Generate a secure temporary password
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
-  let password = '';
-  
-  // Ensure at least one of each type
-  password += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[Math.floor(Math.random() * 26)]; // Uppercase
-  password += 'abcdefghijklmnopqrstuvwxyz'[Math.floor(Math.random() * 26)]; // Lowercase
-  password += '0123456789'[Math.floor(Math.random() * 10)]; // Number
-  password += '!@#$%^&*'[Math.floor(Math.random() * 8)]; // Special char
-  
-  // Fill the rest randomly
-  for (let i = 4; i < 12; i++) {
-    password += chars[Math.floor(Math.random() * chars.length)];
-  }
-  
-  // Shuffle the password
-  return password.split('').sort(() => Math.random() - 0.5).join('');
 }

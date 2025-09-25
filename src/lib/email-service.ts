@@ -1,15 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
 import { supabaseAdmin } from '@/lib/supabase-admin';
+import { getEmailConfig } from '@/lib/email-config';
 
 interface EmailConfig {
-  provider: 'api' | 'smtp';
+  provider: 'api' | 'smtp' | 'mailgun';
   useManualSmtp: boolean;
   smtpHost?: string;
   smtpPort?: string;
   smtpSecure?: boolean;
   smtpUsername?: string;
   smtpPassword?: string;
+  mailgunApiKey?: string;
+  mailgunDomain?: string;
   fromEmail: string;
   fromName: string;
 }
@@ -25,27 +28,26 @@ export class EmailService {
   async getConfig(): Promise<EmailConfig> {
     if (this.config) return this.config;
     
-    console.log('📧 Using direct email configuration...');
+    console.log('📧 Loading email configuration...');
     
-    // Check if required SMTP configuration is available
-    if (!process.env.SMTP_PASSWORD) {
-      throw new Error('SMTP_PASSWORD environment variable is not set');
-    }
+    // Use the centralized email config
+    const emailConfig = getEmailConfig();
     
-    // Use direct configuration instead of database lookup
     this.config = {
-      provider: 'smtp',
-      useManualSmtp: true,
-      smtpHost: process.env.SMTP_HOST || 'toptiermen.eu',
-      smtpPort: process.env.SMTP_PORT || '465',
-      smtpSecure: process.env.SMTP_SECURE === 'true' || true,
-      smtpUsername: process.env.SMTP_USERNAME || 'platform@toptiermen.eu',
-      smtpPassword: process.env.SMTP_PASSWORD,
-      fromEmail: process.env.FROM_EMAIL || 'platform@toptiermen.eu',
-      fromName: process.env.FROM_NAME || 'Top Tier Men'
+      provider: emailConfig.provider,
+      useManualSmtp: emailConfig.provider === 'smtp',
+      smtpHost: emailConfig.smtpHost,
+      smtpPort: emailConfig.smtpPort?.toString(),
+      smtpSecure: emailConfig.smtpSecure,
+      smtpUsername: emailConfig.smtpUsername,
+      smtpPassword: emailConfig.smtpPassword,
+      mailgunApiKey: emailConfig.mailgunApiKey,
+      mailgunDomain: emailConfig.mailgunDomain,
+      fromEmail: emailConfig.fromEmail,
+      fromName: emailConfig.fromName
     };
     
-    console.log('✅ Email configuration loaded from environment');
+    console.log(`✅ Email configuration loaded: ${emailConfig.provider} provider`);
     return this.config;
   }
 
@@ -111,7 +113,9 @@ export class EmailService {
 
     try {
       // Send email
-      if (config.provider === 'smtp' && config.useManualSmtp) {
+      if (config.provider === 'mailgun') {
+        emailSuccess = await this.sendViaMailgun(to, emailTemplate.subject, emailTemplate.html, emailTemplate.text);
+      } else if (config.provider === 'smtp' && config.useManualSmtp) {
         emailSuccess = await this.sendViaSmtp(to, emailTemplate.subject, emailTemplate.html, emailTemplate.text);
       } else {
         emailSuccess = await this.sendViaApi(to, emailTemplate.subject, emailTemplate.html, emailTemplate.text);
@@ -603,6 +607,79 @@ Het Top Tier Men Team
         `
       },
       
+      'test_email': {
+        subject: 'Test Email - Top Tier Men',
+        html: `
+          <div style="background: linear-gradient(135deg, #0F1419 0%, #1F2D17 100%); min-height: 100vh; padding: 40px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+            <div style="max-width: 600px; margin: 0 auto; background: #0F1419; border-radius: 16px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.3);">
+              
+              <!-- Header -->
+              <div style="background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%); padding: 40px 30px; text-align: center;">
+                <div style="width: 200px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto; border: 2px solid rgba(255,255,255,0.2);">
+                  <span style="color: white; font-size: 24px; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">TOP TIER MEN</span>
+                </div>
+                <h1 style="color: white; font-size: 32px; font-weight: 700; margin: 0; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+                  📧 TEST EMAIL
+                </h1>
+                <p style="color: rgba(255,255,255,0.95); font-size: 18px; margin: 12px 0 0 0; font-weight: 500;">
+                  Mailgun Email Service Test
+                </p>
+              </div>
+
+              <!-- Content -->
+              <div style="padding: 40px 30px; color: #E5E7EB;">
+                <p style="font-size: 18px; color: #8BAE5A; font-weight: 600; margin: 0 0 24px 0;">
+                  Beste \${name},
+                </p>
+                
+                <p style="font-size: 16px; line-height: 1.6; margin: 0 0 24px 0; color: #E5E7EB;">
+                  Dit is een test email om te controleren of de Mailgun email service correct werkt. Als je deze email ontvangt, betekent dit dat de configuratie succesvol is!
+                </p>
+
+                <div style="background: rgba(139, 174, 90, 0.1); border-left: 4px solid #8BAE5A; padding: 20px; margin: 24px 0; border-radius: 0 8px 8px 0;">
+                  <h3 style="color: #8BAE5A; font-size: 18px; font-weight: 700; margin: 0 0 12px 0;">
+                    ✅ Test Details:
+                  </h3>
+                  <p style="color: #D1D5DB; font-size: 15px; line-height: 1.5; margin: 0 0 8px 0;">
+                    <strong>Provider:</strong> Mailgun
+                  </p>
+                  <p style="color: #D1D5DB; font-size: 15px; line-height: 1.5; margin: 0 0 8px 0;">
+                    <strong>Ontvanger:</strong> \${email}
+                  </p>
+                  <p style="color: #D1D5DB; font-size: 15px; line-height: 1.5; margin: 0;">
+                    <strong>Status:</strong> ✅ Succesvol verzonden
+                  </p>
+                </div>
+
+                <p style="font-size: 16px; line-height: 1.6; margin: 32px 0 0 0; color: #8BAE5A; font-weight: 600;">
+                  Met vriendelijke groet,<br>
+                  <strong>Top Tier Men Team</strong>
+                </p>
+              </div>
+
+              <!-- Footer -->
+              <div style="background: #0F1419; padding: 20px 30px; text-align: center; border-top: 1px solid #2A3A1A;">
+                <p style="color: #6B7280; font-size: 14px; margin: 0;">
+                  Top Tier Men Platform | Email Service Test
+                </p>
+              </div>
+            </div>
+          </div>
+        `,
+        text: `Test Email - Top Tier Men
+
+Beste ${variables.name || 'Gebruiker'},
+
+Dit is een test email om te controleren of de Mailgun email service correct werkt. Als je deze email ontvangt, betekent dit dat de configuratie succesvol is!
+
+Test Details:
+- Provider: Mailgun
+- Ontvanger: ${variables.email || 'Unknown'}
+- Status: ✅ Succesvol verzonden
+
+Met vriendelijke groet,
+Top Tier Men Team`
+      },
       'account-credentials': {
         subject: '🔐 Je Top Tier Men Accountgegevens - Platform Live!',
         html: `
@@ -1299,6 +1376,74 @@ Contact: platform@toptiermen.eu
     }
   }
 
+  private async sendViaMailgun(to: string, subject: string, html: string, text: string): Promise<boolean> {
+    try {
+      const config = await this.getConfig();
+      
+      if (!config.mailgunApiKey || !config.mailgunDomain) {
+        console.error('❌ Mailgun configuration missing:', {
+          hasApiKey: !!config.mailgunApiKey,
+          hasDomain: !!config.mailgunDomain,
+          apiKey: config.mailgunApiKey ? config.mailgunApiKey.substring(0, 10) + '...' : 'none'
+        });
+        throw new Error('Mailgun API key or domain not configured');
+      }
+
+      console.log('📧 Sending email via Mailgun:', {
+        domain: config.mailgunDomain,
+        to,
+        subject,
+        from: config.fromEmail,
+        apiKeyPrefix: config.mailgunApiKey.substring(0, 10) + '...'
+      });
+
+      const formData = new URLSearchParams();
+      formData.append('from', `${config.fromName} <${config.fromEmail}>`);
+      formData.append('to', to);
+      formData.append('subject', subject);
+      formData.append('html', html);
+      formData.append('text', text);
+
+      const response = await fetch(`https://api.eu.mailgun.net/v3/${config.mailgunDomain}/messages`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Basic ${Buffer.from(`api:${config.mailgunApiKey}`).toString('base64')}`,
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: formData
+      });
+
+      console.log('📧 Mailgun API response:', {
+        status: response.status,
+        statusText: response.statusText,
+        headers: Object.fromEntries(response.headers.entries())
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log('✅ Email sent successfully via Mailgun:', {
+          messageId: result.id,
+          message: result.message
+        });
+
+        // Log email to database
+        await this.logEmail(to, 'mailgun', subject);
+        return true;
+      } else {
+        const errorText = await response.text();
+        console.error('❌ Mailgun API error:', {
+          status: response.status,
+          statusText: response.statusText,
+          body: errorText
+        });
+        return false;
+      }
+    } catch (error) {
+      console.error('❌ Error sending email via Mailgun:', error);
+      return false;
+    }
+  }
+
   private async logEmail(to: string, method: string, subject: string): Promise<void> {
     // Skip database logging for now to avoid dependency issues
     console.log('📧 Email sent:', { to, method, subject, timestamp: new Date().toISOString() });
@@ -1348,7 +1493,7 @@ class LegacyEmailService extends EmailService {
       console.log('📧 Testing SMTP connection...');
       
       const nodemailer = require('nodemailer');
-      const transporter = nodemailer.createTransporter({
+      const transporter = nodemailer.createTransport({
         host: config.smtpHost,
         port: parseInt(config.smtpPort || '465'),
         secure: config.smtpSecure,

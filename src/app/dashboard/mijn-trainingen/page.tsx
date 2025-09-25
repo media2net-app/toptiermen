@@ -384,7 +384,6 @@ export default function MijnTrainingen() {
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="mb-4 sm:mb-6 md:mb-8">
-            <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-1 sm:mb-2">Mijn Trainingen</h1>
             <p className="text-[#8BAE5A] text-xs sm:text-sm md:text-base lg:text-lg">Jouw actieve trainingsschema en voortgang</p>
           </div>
 
@@ -571,6 +570,33 @@ export default function MijnTrainingen() {
               })}
             </div>
             </motion.div>
+        )}
+
+        {/* Start New Week Button - Show when all days are completed */}
+        {trainingData?.hasActiveSchema && days && days.every(day => day.isCompleted) && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="mt-6 text-center"
+          >
+            <div className="bg-gradient-to-r from-[#8BAE5A]/20 to-[#FFD700]/20 border border-[#8BAE5A]/30 rounded-xl p-6">
+              <div className="mb-4">
+                <div className="w-16 h-16 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] rounded-full flex items-center justify-center mx-auto mb-4">
+                  <TrophyIcon className="w-8 h-8 text-[#181F17]" />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-2">Week {completedWeeks.length + 1} Voltooid! 🎉</h3>
+                <p className="text-gray-300">Alle trainingsdagen zijn succesvol afgerond. Klaar voor de volgende week?</p>
+              </div>
+              
+              <button
+                onClick={startNewWeek}
+                className="px-8 py-3 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-bold text-lg rounded-lg hover:from-[#7A9D4A] hover:to-[#e0903f] transition-all duration-200 shadow-lg hover:shadow-xl"
+              >
+                Start Nieuwe Week
+              </button>
+            </div>
+          </motion.div>
         )}
 
         </div>
@@ -847,22 +873,15 @@ export default function MijnTrainingen() {
                 </div>
                 
                 {/* Action Buttons */}
-                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 md:gap-4 justify-center">
-                  <button
-                    onClick={startNewWeek}
-                    className="px-4 py-2 sm:px-6 sm:py-3 md:px-8 md:py-4 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-bold text-xs sm:text-sm md:text-base lg:text-lg rounded-lg sm:rounded-xl hover:from-[#7A9D4A] hover:to-[#e0903f] transition-all duration-200 shadow-lg hover:shadow-xl"
-                  >
-                    Start Nieuwe Week
-                  </button>
-                  
+                <div className="flex justify-center">
                   <button
                     onClick={() => {
                       setShowWeekCompletionModal(false);
                       setWeekCompletionData(null);
                     }}
-                    className="px-4 py-2 sm:px-6 sm:py-3 md:px-8 md:py-4 bg-[#3A4D23] text-[#8BAE5A] font-semibold text-xs sm:text-sm md:text-base lg:text-lg rounded-lg sm:rounded-xl hover:bg-[#4A5D33] transition-colors"
+                    className="px-8 py-3 sm:px-12 sm:py-4 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-bold text-sm sm:text-base md:text-lg rounded-lg sm:rounded-xl hover:from-[#7A9D4A] hover:to-[#e0903f] transition-all duration-200 shadow-lg"
                   >
-                    Later
+                    Sluiten
                   </button>
                 </div>
               </div>

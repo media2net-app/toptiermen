@@ -120,10 +120,10 @@ export default function WorkoutCompletionModal({
                 <div className="flex gap-3">
                   <button
                     type="button"
-                    className="flex-1 px-4 py-3 text-gray-400 hover:text-white transition-colors font-medium"
+                    className="flex-1 px-4 py-3 bg-[#3A4D23] text-[#8BAE5A] hover:bg-[#4A5D33] transition-colors font-medium rounded-lg"
                     onClick={onClose}
                   >
-                    Nog niet klaar
+                    Terug naar Training
                   </button>
                   <button
                     type="button"

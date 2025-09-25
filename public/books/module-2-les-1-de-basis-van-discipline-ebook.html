@@ -210,7 +210,14 @@
         @media (max-width: 768px) {
             .header {
                 padding: 40px 20px;
+            
+            .sticky-back-btn {
+                right: 10px;
+                padding: 12px 16px;
+                font-size: 12px;
+                min-width: 100px;
             }
+        }
             
             .header h1 {
                 font-size: 2rem;
@@ -220,9 +227,59 @@
                 padding: 30px 20px;
             }
         }
-    </style>
+    
+        /* Sticky Back Button */
+        .sticky-back-btn {
+            position: fixed;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+            z-index: 1000;
+            background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 15px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(139, 174, 90, 0.3);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            min-width: 120px;
+            justify-content: center;
+        }
+
+        .sticky-back-btn:hover {
+            background: linear-gradient(135deg, #B6C948 0%, #8BAE5A 100%);
+            transform: translateY(-50%) scale(1.05);
+            box-shadow: 0 12px 35px rgba(139, 174, 90, 0.4);
+        }
+
+        .sticky-back-btn:active {
+            transform: translateY(-50%) scale(0.95);
+        }
+
+        .sticky-back-btn svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+</style>
 </head>
 <body>
+    <!-- Sticky Back Button -->
+    <a href="/dashboard/academy/discipline-identiteit" class="sticky-back-btn" title="Terug naar Module">
+        <svg viewBox="0 0 24 24">
+            <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+        </svg>
+        Terug
+    </a>
+
+
     <div class="ebook-container">
         <div class="header">
             <h1>De Basis van Discipline</h1>
@@ -233,15 +290,15 @@
             <div class="toc">
                 <h2>Inhoudsopgave</h2>
                 <ol>
-                    <li><a href="#intro">Inleiding</a></li>
-                    <li><a href="#wat-is-discipline">Wat is Discipline?</a></li>
-                    <li><a href="#psychologie-discipline">De Psychologie van Discipline</a></li>
-                    <li><a href="#drie-pijlers">De 3 Fundamentele Pijlers</a></li>
-                    <li><a href="#discipline-spier">Discipline als Spier</a></li>
-                    <li><a href="#omgeving-ontwerp">Environment Design</a></li>
-                    <li><a href="#praktische-tips">Praktische Tips</a></li>
-                    <li><a href="#reflection">Reflectie Vragen</a></li>
-                    <li><a href="#next-steps">Volgende Stappen</a></li>
+                    <li><a href="/dashboard/academy/discipline-identiteit">Inleiding</a></li>
+                    <li><a href="/dashboard/academy/discipline-identiteit">Wat is Discipline?</a></li>
+                    <li><a href="/dashboard/academy/discipline-identiteit">De Psychologie van Discipline</a></li>
+                    <li><a href="/dashboard/academy/discipline-identiteit">De 3 Fundamentele Pijlers</a></li>
+                    <li><a href="/dashboard/academy/discipline-identiteit">Discipline als Spier</a></li>
+                    <li><a href="/dashboard/academy/discipline-identiteit">Environment Design</a></li>
+                    <li><a href="/dashboard/academy/discipline-identiteit">Praktische Tips</a></li>
+                    <li><a href="/dashboard/academy/discipline-identiteit">Reflectie Vragen</a></li>
+                    <li><a href="/dashboard/academy/discipline-identiteit">Volgende Stappen</a></li>
                 </ol>
             </div>
             

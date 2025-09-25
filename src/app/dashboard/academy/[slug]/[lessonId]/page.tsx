@@ -9,6 +9,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import CDNVideoPlayer from '@/components/CDNVideoPlayer';
 import { useAcademyVideoPreload } from '@/hooks/useAcademyVideoPreload';
+import AcademyVideoPreloader from '@/components/AcademyVideoPreloader';
 import { PlayIcon } from '@heroicons/react/24/solid';
 import { academyNav } from '@/utils/academyNavigation';
 
@@ -344,12 +345,9 @@ export default function LessonDetailPage() {
   const [navigating, setNavigating] = useState(false);
   const [showForceButton, setShowForceButton] = useState(false);
 
-  // Video preloading for better performance
-  const { preloadStatus, isPreloading, preloadProgress } = useAcademyVideoPreload(
-    lessons || [], 
-    lessonId as string, 
-    3 // Preload next 3 videos
-  );
+  // Disable video preloading - only load current lesson video
+  const isPreloading = false;
+  const preloadProgress = 0;
 
   // Reset navigating state when navigation completes
   useEffect(() => {
@@ -1112,11 +1110,6 @@ export default function LessonDetailPage() {
               <span>Duur: {lesson.duration}</span>
               <span>Type: {lesson.type}</span>
               {completed && <span className="text-green-400">✓ Voltooid</span>}
-              {isPreloading && (
-                <span className="text-[#8BAE5A]">
-                  📥 Volgende videos laden... {Math.round(preloadProgress)}%
-                </span>
-              )}
             </div>
           </div>
 

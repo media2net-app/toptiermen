@@ -584,20 +584,14 @@ export default function Ledenbeheer() {
 
 
   const handleAddNewUser = async () => {
-    console.log('🔍 [USER CREATION] Starting user creation process...');
-    console.log('🔍 [USER CREATION] Form data:', newUserData);
-    
     // Validate form data
     if (!newUserData.email || !newUserData.full_name) {
-      console.log('❌ [USER CREATION] Validation failed - missing email or full_name');
       toast.error('E-mail en volledige naam zijn verplicht', {
         position: "top-right",
         duration: 3000,
       });
       return;
     }
-    
-    console.log('✅ [USER CREATION] Validation passed');
 
     // Only validate password if provided
     if (newUserData.password) {
@@ -619,38 +613,28 @@ export default function Ledenbeheer() {
     }
 
     setAddingUser(true);
-    console.log('🔄 [USER CREATION] Setting addingUser to true');
     
     try {
-      const requestBody = {
-        email: newUserData.email,
-        full_name: newUserData.full_name,
-        username: newUserData.username,
-        rank: newUserData.rank,
-        status: newUserData.status,
-        package_type: newUserData.package_type,
-        password: newUserData.password || undefined // Only send password if provided
-      };
-      
-      console.log('📡 [USER CREATION] Making API request to /api/admin/create-user');
-      console.log('📡 [USER CREATION] Request body:', requestBody);
-      
       // Call the API route to create user
       const response = await fetch('/api/admin/create-user', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(requestBody),
+        body: JSON.stringify({
+          email: newUserData.email,
+          full_name: newUserData.full_name,
+          username: newUserData.username,
+          rank: newUserData.rank,
+          status: newUserData.status,
+          package_type: newUserData.package_type,
+          password: newUserData.password || undefined // Only send password if provided
+        }),
       });
-      
-      console.log('📡 [USER CREATION] API response status:', response.status);
 
       const data = await response.json();
-      console.log('📡 [USER CREATION] API response data:', data);
 
       if (response.ok) {
-        console.log('✅ [USER CREATION] User created successfully!');
         toast.success(data.message || `Gebruiker ${newUserData.full_name} succesvol aangemaakt!`, {
           position: "top-right",
           duration: 3000,
@@ -668,22 +652,19 @@ export default function Ledenbeheer() {
           confirmPassword: ''
         });
         setShowAddUserModal(false);
-        console.log('🔄 [USER CREATION] Modal closed and form reset');
 
         // Refresh members list
         fetchMembers();
       } else {
-        console.log('❌ [USER CREATION] API returned error:', data.error);
         throw new Error(data.error || 'Er is een fout opgetreden bij het aanmaken van de gebruiker');
       }
     } catch (error: any) {
-      console.error('❌ [USER CREATION] Error creating user:', error);
+      console.error('Error creating user:', error);
       toast.error(error.message || 'Er is een fout opgetreden bij het aanmaken van de gebruiker', {
         position: "top-right",
         duration: 3000,
       });
     } finally {
-      console.log('🔄 [USER CREATION] Setting addingUser to false');
       setAddingUser(false);
     }
   };
@@ -1896,12 +1877,7 @@ export default function Ledenbeheer() {
               </AdminButton>
               <AdminButton
                 variant="primary"
-                onClick={() => {
-                  console.log('🔘 [BUTTON] Gebruiker Aanmaken button clicked!');
-                  console.log('🔘 [BUTTON] Current newUserData:', newUserData);
-                  console.log('🔘 [BUTTON] addingUser state:', addingUser);
-                  handleAddNewUser();
-                }}
+                onClick={handleAddNewUser}
                 disabled={addingUser}
                 loading={addingUser}
                 icon={<UserPlusIcon className="w-4 h-4" />}

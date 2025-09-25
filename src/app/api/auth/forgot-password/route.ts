@@ -50,11 +50,28 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    // Check if user exists in auth first
+    // First, check if user exists in profiles table
+    const { data: profile, error: profileError } = await supabaseAdmin
+      .from('profiles')
+      .select('id, email, full_name, display_name, package_type')
+      .eq('email', email)
+      .single();
+        
+    if (profileError || !profile) {
+      console.log('❌ User not found in profiles');
+      return NextResponse.json({
+        success: false,
+        error: 'Geen account gevonden met dit e-mailadres'
+      }, { status: 404 });
+    }
+    
+    console.log('✅ User found in profiles:', profile.email);
+
+    // Now check if user exists in auth
     const { data: authUsers, error: listError } = await supabaseAdmin.auth.admin.listUsers();
     
     if (listError) {
-      console.error('❌ Error listing users:', listError);
+      console.error('❌ Error listing auth users:', listError);
       return NextResponse.json({
         success: false,
         error: 'Fout bij het ophalen van gebruikersgegevens'
@@ -63,34 +80,17 @@ export async function POST(request: NextRequest) {
 
     let user = authUsers.users.find(u => u.email === email);
     
-    // If not found in auth, check profiles table and create auth account if needed
+    // If user doesn't exist in auth, create auth account
     if (!user) {
-      console.log('🔍 User not found in auth, checking profiles table...');
+      console.log('🔍 User not found in auth, creating auth account...');
       
-      const { data: profile, error: profileError } = await supabaseAdmin
-        .from('profiles')
-        .select('*')
-        .eq('email', email)
-        .single();
-        
-      if (profileError || !profile) {
-        console.log('❌ User not found in profiles either');
-        return NextResponse.json({
-          success: false,
-          error: 'Geen account gevonden met dit e-mailadres'
-        }, { status: 404 });
-      }
-      
-      console.log('✅ User found in profiles, creating auth account...');
-      
-      // Try to create auth account for this user
       const tempPassword = generateTempPassword();
       const { data: newAuthUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
         email: email,
         password: tempPassword,
         email_confirm: true,
         user_metadata: {
-          full_name: profile.full_name,
+          full_name: profile.full_name || profile.display_name,
           admin_created: true
         }
       });
@@ -98,85 +98,43 @@ export async function POST(request: NextRequest) {
       if (createError) {
         console.error('❌ Error creating auth account:', createError);
         
-        // If user already exists but is not visible in listUsers, try to find and update them
+        // If user already exists but not visible, try to find them
         if (createError.message.includes('already been registered') || createError.message.includes('email_exists')) {
-          console.log('🔄 User exists but not visible, searching for existing user...');
+          console.log('🔄 User exists but not visible, trying to find...');
           
-          // Try to find the existing user and update their password
-          const { data: authUsers, error: listError } = await supabaseAdmin.auth.admin.listUsers();
-          
-          if (listError) {
-            console.error('❌ Error listing auth users:', listError);
-          } else {
-            console.log(`📊 Found ${authUsers?.users?.length || 0} total auth users`);
-          }
-          
-          const existingUser = authUsers?.users?.find((u: any) => u.email === email);
-          
-          if (existingUser) {
-            console.log(`✅ Found existing auth user ${existingUser.id}, updating password...`);
+          // Try multiple times to find the user
+          for (let attempt = 1; attempt <= 3; attempt++) {
+            console.log(`🔄 Attempt ${attempt} to find user...`);
             
-            // Generate new password and update
-            const newTempPassword = generateTempPassword();
-            console.log(`🔄 Setting password: ${newTempPassword} (length: ${newTempPassword.length})`);
+            const { data: retryAuthUsers, error: retryError } = await supabaseAdmin.auth.admin.listUsers();
             
-            const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
-              existingUser.id,
-              { password: newTempPassword }
-            );
-            
-            if (updateError) {
-              console.error('❌ Error updating existing user password:', updateError);
-              return NextResponse.json({
-                success: false,
-                error: 'Fout bij het resetten van wachtwoord'
-              }, { status: 500 });
-            } else {
-              console.log(`✅ Successfully updated existing user password for ${existingUser.id}`);
-              
-              // Set user variable for main flow
-              user = existingUser;
+            if (!retryError && retryAuthUsers) {
+              const foundUser = retryAuthUsers.users.find((u: any) => u.email === email);
+              if (foundUser) {
+                console.log(`✅ Found user on attempt ${attempt}:`, foundUser.id);
+                user = foundUser;
+                break;
+              }
             }
-          } else {
-            console.log('❌ Could not find existing auth user');
-            return NextResponse.json({
-              success: false,
-              error: 'Account bestaat maar er is een technisch probleem. Neem contact op met de beheerder.'
-            }, { status: 500 });
+            
+            // Wait before retry
+            if (attempt < 3) {
+              await new Promise(resolve => setTimeout(resolve, 1000));
+            }
           }
-        } else {
+        }
+        
+        if (!user) {
+          console.error('❌ Could not find or create auth user after all attempts');
           return NextResponse.json({
             success: false,
             error: 'Account bestaat maar er is een technisch probleem. Neem contact op met de beheerder.'
           }, { status: 500 });
         }
+      } else {
+        user = newAuthUser.user;
+        console.log('✅ Auth account created for:', email);
       }
-      
-      user = newAuthUser.user || undefined;
-      console.log('✅ Auth account created for:', email);
-    }
-
-    // Check if user exists
-    if (!user) {
-      return NextResponse.json({
-        success: false,
-        error: 'Gebruiker niet gevonden'
-      }, { status: 404 });
-    }
-
-    // Get user profile for full name
-    const { data: profile, error: profileError } = await supabaseAdmin
-      .from('profiles')
-      .select('full_name, display_name, package_type')
-      .eq('id', user.id)
-      .single();
-
-    if (profileError) {
-      console.error('❌ Error fetching user profile:', profileError);
-      return NextResponse.json({
-        success: false,
-        error: 'Fout bij het ophalen van gebruikersprofiel'
-      }, { status: 500 });
     }
 
     // Generate new temporary password
@@ -204,26 +162,17 @@ export async function POST(request: NextRequest) {
     try {
       console.log(`📧 Sending password reset email to: ${email}`);
       
-      // Check if SMTP configuration is available
-      if (!process.env.SMTP_PASSWORD) {
-        console.error('❌ SMTP_PASSWORD environment variable is not set on live server');
-        return NextResponse.json({
-          success: false,
-          error: 'E-mail service is momenteel niet beschikbaar. Neem contact op met de beheerder.'
-        }, { status: 503 });
-      }
-      
       const emailService = new EmailService();
       const loginUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://platform.toptiermen.eu'}/login`;
       
       // Log the variables being sent to email template
       const emailVariables = {
-        name: profile?.full_name || profile?.display_name || 'Gebruiker',
+        name: profile.full_name || profile.display_name || 'Gebruiker',
         email: email,
-        username: profile?.display_name || email.split('@')[0],
+        username: profile.display_name || email.split('@')[0],
         tempPassword: newTempPassword,
         loginUrl: loginUrl,
-        packageType: profile?.package_type || 'Basic Tier',
+        packageType: profile.package_type || 'Basic Tier',
         isTestUser: 'false',
         platformUrl: process.env.NEXT_PUBLIC_SITE_URL || 'https://platform.toptiermen.eu'
       };

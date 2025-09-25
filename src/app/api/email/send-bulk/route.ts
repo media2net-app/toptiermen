@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { mailgunEmailService } from '@/lib/mailgun-email-service';
+import { EmailService } from '@/lib/email-service';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 
 // Email template function
@@ -323,13 +323,19 @@ export async function POST(request: NextRequest) {
             ...variables
           });
           
-          // Send email via Mailgun (with SMTP fallback)
-          const emailResult = await mailgunEmailService.sendEmail(
+          // Send email via EmailService (Mailgun EU)
+          const emailService = new EmailService();
+          const emailResult = await emailService.sendEmail(
             lead.email,
             emailTemplate.subject,
-            emailTemplate.html,
-            emailTemplate.text,
-            trackingId
+            'sneak_preview', // Use template name
+            {
+              name: lead.name || lead.email.split('@')[0],
+              trackingId: trackingId,
+              campaignId: campaignId,
+              ...variables
+            },
+            { tracking: true }
           );
           
           if (emailResult) {

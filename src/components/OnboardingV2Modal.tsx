@@ -126,12 +126,59 @@ const WelcomeVideoStep = ({ onComplete }: { onComplete: () => void }) => {
 
 const SetGoalStep = ({ onComplete }: { onComplete: (goal: string) => void }) => {
   const [goal, setGoal] = useState('');
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Mobile-friendly focus handling
+  useEffect(() => {
+    const focusTextarea = () => {
+      if (textareaRef.current) {
+        // Force focus and selection for mobile devices
+        textareaRef.current.focus();
+        textareaRef.current.setSelectionRange(0, 0);
+        
+        // For iOS, trigger additional events to ensure keyboard appears
+        if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+          textareaRef.current.click();
+          // Trigger input event to ensure keyboard shows
+          const inputEvent = new Event('input', { bubbles: true });
+          textareaRef.current.dispatchEvent(inputEvent);
+        }
+        
+        // For Android, ensure focus is properly set
+        if (/Android/.test(navigator.userAgent)) {
+          setTimeout(() => {
+            textareaRef.current?.focus();
+          }, 50);
+        }
+      }
+    };
+
+    // Delay focus to ensure modal is fully rendered
+    const timer = setTimeout(focusTextarea, 300);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleSubmit = () => {
     if (goal.trim()) {
       onComplete(goal.trim());
     } else {
       toast.error('Voer je hoofddoel in');
+    }
+  };
+
+  const handleTextareaClick = () => {
+    if (textareaRef.current) {
+      textareaRef.current.focus();
+    }
+  };
+
+  const handleTextareaTouch = () => {
+    if (textareaRef.current) {
+      // Force focus on touch for mobile devices
+      setTimeout(() => {
+        textareaRef.current?.focus();
+        textareaRef.current?.setSelectionRange(0, 0);
+      }, 100);
     }
   };
 
@@ -144,12 +191,24 @@ const SetGoalStep = ({ onComplete }: { onComplete: (goal: string) => void }) => 
       
       <div className="mb-6 relative z-[9999]" style={{ zIndex: 9999 }}>
         <textarea
+          ref={textareaRef}
           value={goal}
           onChange={(e) => setGoal(e.target.value)}
+          onClick={handleTextareaClick}
+          onTouchStart={handleTextareaTouch}
           placeholder="Bijvoorbeeld: Ik wil 10kg afvallen en sterker worden..."
           className="w-full h-32 p-4 bg-[#1a2e1a] border border-[#8BAE5A] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-[#8BAE5A] focus:ring-2 focus:ring-[#8BAE5A] focus:ring-opacity-50 resize-none relative z-[9999]"
-          style={{ pointerEvents: 'auto', zIndex: 9999 }}
-          autoFocus
+          style={{ 
+            pointerEvents: 'auto', 
+            zIndex: 9999,
+            fontSize: '16px', // Prevent zoom on iOS
+            WebkitAppearance: 'none',
+            WebkitTouchCallout: 'none',
+            WebkitUserSelect: 'text'
+          }}
+          autoFocus={false} // Disable autoFocus, handle manually
+          inputMode="text"
+          enterKeyHint="done"
         />
       </div>
 
@@ -525,12 +584,24 @@ export default function OnboardingV2Modal({ isOpen }: OnboardingV2ModalProps) {
       className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-[9999] p-4"
       onClick={(e) => e.preventDefault()}
       onMouseDown={(e) => e.preventDefault()}
-      style={{ zIndex: 9999 }}
+      style={{ 
+        zIndex: 9999,
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        WebkitOverflowScrolling: 'touch'
+      }}
     >
       <div 
         className="bg-gradient-to-br from-[#1a2e1a] via-[#2d4a2d] to-[#1a2e1a] rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-[#8BAE5A] relative z-[9999]"
         onClick={(e) => e.stopPropagation()}
-        style={{ zIndex: 9999 }}
+        style={{ 
+          zIndex: 9999,
+          position: 'relative',
+          WebkitOverflowScrolling: 'touch'
+        }}
       >
         <div className="p-8">
           <div className="flex justify-between items-center mb-8">

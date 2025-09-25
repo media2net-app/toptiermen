@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import { HomeIcon, FireIcon, AcademicCapIcon, UserCircleIcon, Bars3Icon } from '@heroicons/react/24/solid';
 import { useCallback } from 'react';
+import { useOnboardingV2 } from '@/contexts/OnboardingV2Context';
 
 const mobileMenu = [
   { label: 'Dashboard', href: '/dashboard', icon: HomeIcon },
@@ -15,6 +16,8 @@ interface MobileNavProps {
 }
 
 export default function MobileNav({ onMenuClick }: MobileNavProps) {
+  const { isLoading, isCompleted, currentStep } = useOnboardingV2();
+  
   const handleMenuClick = useCallback(() => {
     try {
       onMenuClick?.();
@@ -22,6 +25,14 @@ export default function MobileNav({ onMenuClick }: MobileNavProps) {
       console.error('Error opening mobile menu:', error);
     }
   }, [onMenuClick]);
+
+  // Hide mobile nav during onboarding (when not completed and has current step)
+  const shouldHideNav = !isLoading && !isCompleted && currentStep !== null;
+  
+  if (shouldHideNav) {
+    return null;
+  }
+
   return (
     <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-[#232D1A]/95 border-t border-[#3A4D23]/60 flex justify-between items-center px-2 py-2 shadow-2xl backdrop-blur-lg">
       {mobileMenu.map((item) => (

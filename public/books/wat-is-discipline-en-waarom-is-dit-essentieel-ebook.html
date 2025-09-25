@@ -188,6 +188,47 @@
             color: #8BAE5A;
             margin-bottom: 10px;
         }
+
+        /* Sticky Back Button */
+        .sticky-back-btn {
+            position: fixed;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+            z-index: 1000;
+            background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 15px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(139, 174, 90, 0.3);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            min-width: 120px;
+            justify-content: center;
+        }
+
+        .sticky-back-btn:hover {
+            background: linear-gradient(135deg, #B6C948 0%, #8BAE5A 100%);
+            transform: translateY(-50%) scale(1.05);
+            box-shadow: 0 12px 35px rgba(139, 174, 90, 0.4);
+        }
+
+        .sticky-back-btn:active {
+            transform: translateY(-50%) scale(0.95);
+        }
+
+        .sticky-back-btn svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
         
         @media (max-width: 768px) {
             .container {
@@ -203,10 +244,25 @@
                 flex-direction: column;
                 gap: 15px;
             }
+
+            .sticky-back-btn {
+                right: 10px;
+                padding: 12px 16px;
+                font-size: 12px;
+                min-width: 100px;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- Sticky Back Button -->
+    <a href="/dashboard/academy/discipline-identiteit" class="sticky-back-btn" title="Terug naar Module">
+        <svg viewBox="0 0 24 24">
+            <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+        </svg>
+        Terug
+    </a>
+
     <div class="container">
         <div class="header">
             <div class="module-badge">Module 02</div>
@@ -228,53 +284,145 @@
         </div>
         
         <div class="content">
-            Discipline is de fundering van alle succes. In deze les leer je wat discipline echt betekent en hoe je het kunt ontwikkelen.
+            <h1>Wat is Discipline en Waarom is Dit Essentieel?</h1>
+            
+            <p>Hey broeder! Welkom bij de eerste les van Module 2. Als je dit leest, ben je waarschijnlijk net zoals ik ooit was: gefrustreerd omdat je steeds je doelen niet haalt. Je weet wat je moet doen, maar je doet het gewoon niet consistent.</p>
 
-## Wat is discipline?
+            <p><strong>Discipline is de oplossing voor dit probleem.</strong> Niet motivatie, niet wilskracht, maar echte discipline. In deze les ga ik je precies uitleggen wat discipline is, waarom het zo belangrijk is, en hoe je het kunt ontwikkelen.</p>
 
-Discipline is niet alleen over hard werken of jezelf dwingen om dingen te doen die je niet leuk vindt. Het is over consistentie, focus en de bereidheid om korte-termijn plezier op te offeren voor lange-termijn doelen.
+            <h2>Wat is Discipline Echt?</h2>
+            
+            <p>Laat me beginnen met wat discipline NIET is. Discipline is niet:</p>
+            <ul>
+                <li>Jezelf martelen met dingen die je haat</li>
+                <li>Perfectionistisch zijn en alles perfect doen</li>
+                <li>Een robot worden zonder plezier</li>
+                <li>Willskracht hebben waar anderen dat niet hebben</li>
+            </ul>
 
-## De 3 pijlers van discipline:
+            <p><strong>Discipline is eigenlijk heel simpel: het is de beslissing om te doen wat je moet doen, ook als je er geen zin in hebt.</strong></p>
 
-### 1. **Consistentie**
-- Doe elke dag iets, hoe klein ook
-- Bouw routines op die je kunt volhouden
-- Focus op progressie, niet perfectie
+            <p>Stel je voor: je hebt besloten om elke dag om 6:00 uur op te staan om te sporten. De wekker gaat af, je bent moe, je bed voelt warm en comfortabel aan. Discipline is op dat moment kiezen om op te staan, ook al wil je dat niet.</p>
 
-### 2. **Focus**
-- Elimineer afleidingen
-- Werk in tijdsblokken
-- Leer nee zeggen tegen onnodige verplichtingen
+            <h2>Waarom is Discipline Zo Belangrijk?</h2>
 
-### 3. **Doelgerichtheid**
-- Ken je waarom
-- Visualiseer je doelen
-- Meet je voortgang
+            <p>Discipline is de fundering van alles wat je wilt bereiken. Zonder discipline gebeurt er niets. Met discipline kun je alles bereiken. Hier is waarom:</p>
 
-## Praktische oefeningen:
+            <h3>1. Discipline Overwint Motivatie</h3>
+            <p>Motivatie komt en gaat. Sommige dagen voel je je super gemotiveerd, andere dagen niet. Discipline is er altijd. Als je discipline hebt, hoef je niet te wachten tot je motivatie terugkomt.</p>
 
-1. **De 5-minuten regel**: Begin elke dag met 5 minuten van je belangrijkste taak
-2. **Habit stacking**: Koppel nieuwe gewoonten aan bestaande routines
-3. **Environment design**: Maak je omgeving zo dat goede keuzes makkelijk zijn
-4. **Accountability**: Vind iemand die je verantwoordelijk houdt
+            <h3>2. Discipline Bouwt Vertrouwen Op</h3>
+            <p>Elke keer dat je doet wat je zegt dat je gaat doen, word je zelfvertrouwen sterker. Je begint te geloven dat je iemand bent die zijn woord houdt - tegen anderen, maar vooral tegen jezelf.</p>
 
-## Dagelijkse discipline checklist:
+            <h3>3. Discipline Creëert Momentum</h3>
+            <p>Kleine, consistente acties bouwen momentum op. Net zoals een sneeuwbal die van een berg rolt, worden je resultaten groter en groter naarmate je consistenter wordt.</p>
 
-- [ ] Sta op tijd op (5:30 AM)
-- [ ] Drink water (500ml)
-- [ ] Mediteer (10 minuten)
-- [ ] Lees (30 minuten)
-- [ ] Train (45 minuten)
-- [ ] Plan morgen (10 minuten)
+            <h2>De 3 Pijlers van Discipline</h2>
 
-## Belangrijke inzichten:
+            <p>Discipline bestaat uit drie belangrijke onderdelen. Als je deze drie dingen begrijpt en toepast, wordt discipline veel makkelijker:</p>
 
-- Discipline is een spier die je kunt trainen
-- Start klein en bouw geleidelijk op
-- Focus op het proces, niet alleen het resultaat
-- Vier kleine overwinningen
+            <h3>1. Consistentie - Kleine Stappen Elke Dag</h3>
+            <p>Consistentie betekent niet dat je alles perfect moet doen. Het betekent dat je elke dag iets doet, hoe klein ook.</p>
 
-Door deze principes toe te passen, ontwikkel je een sterke basis van discipline die je helpt om alle andere doelen te bereiken.
+            <p><strong>Voorbeeld:</strong> Je wilt 10 kilo afvallen. In plaats van te zeggen "Ik ga morgen 2 uur sporten en de hele dag niets eten", zeg je "Ik ga elke dag 10 minuten wandelen en één glas water meer drinken dan gisteren."</p>
+
+            <p>Waarom werkt dit? Omdat 10 minuten wandelen elke dag veel makkelijker vol te houden is dan 2 uur sporten één keer per week.</p>
+
+            <h3>2. Focus - Eén Ding Tegelijk</h3>
+            <p>Focus betekent dat je je aandacht richt op één ding tegelijk. Niet multitasken, niet afgeleid worden, gewoon één taak afmaken voordat je aan de volgende begint.</p>
+
+            <p><strong>Praktische tip:</strong> Zet je telefoon op stil en leg hem in een andere kamer als je aan het werk bent. Elke keer dat je kijkt naar je telefoon, verlies je 15 minuten aan focus.</p>
+
+            <h3>3. Doelgerichtheid - Weet Waarom Je Het Doet</h3>
+            <p>Als je niet weet waarom je iets doet, is het veel moeilijker om het vol te houden. Je moet een duidelijk beeld hebben van wat je wilt bereiken.</p>
+
+            <p><strong>Vraag jezelf af:</strong> "Waarom wil ik dit eigenlijk? Wat gebeurt er als ik het niet doe? Hoe voel ik me over 1 jaar als ik dit wel/niet heb gedaan?"</p>
+
+            <h2>Hoe Ontwikkel Je Discipline?</h2>
+
+            <p>Discipline is geen talent waar je mee geboren wordt. Het is een vaardigheid die je kunt leren, net zoals leren fietsen of leren koken. Hier zijn de stappen:</p>
+
+            <h3>Stap 1: Start Super Klein</h3>
+            <p>De grootste fout die mensen maken is dat ze te groot beginnen. Ze willen van dag 1 alles perfect doen. Dat werkt niet.</p>
+
+            <p><strong>Doe dit in plaats daarvan:</strong> Kies één kleine gewoonte die je elke dag kunt doen. Bijvoorbeeld: elke ochtend 1 glas water drinken voordat je koffie drinkt. Dat is het. Niets meer.</p>
+
+            <h3>Stap 2: Koppel Het Aan Iets Dat Je Al Doet</h3>
+            <p>Dit heet "habit stacking" en het is een van de krachtigste technieken die er zijn.</p>
+
+            <p><strong>Voorbeeld:</strong> "Na elke keer dat ik mijn tanden poets, doe ik 5 push-ups." Je poetst je tanden al elke dag, dus je hoeft alleen maar de push-ups eraan te koppelen.</p>
+
+            <h3>Stap 3: Maak Je Omgeving Zo Dat Goede Keuzes Makkelijk Zijn</h3>
+            <p>Als je wilt stoppen met snoepen, haal dan geen snoep in huis. Als je meer wilt lezen, leg dan een boek naast je bed. Maak goede keuzes makkelijk en slechte keuzes moeilijk.</p>
+
+            <h3>Stap 4: Vind Iemand Die Je Verantwoordelijk Houdt</h3>
+            <p>Vertel iemand anders wat je van plan bent te doen. Iemand die je respecteert en die je niet teleur wilt stellen. Dit maakt het veel moeilijker om op te geven.</p>
+
+            <h2>Praktische Oefeningen Die Je Vandaag Kunt Doen</h2>
+
+            <h3>Oefening 1: De 5-Minuten Regel</h3>
+            <p>Kies één taak die je elke dag wilt doen (bijvoorbeeld lezen, sporten, of je kamer opruimen). Zeg tegen jezelf: "Ik hoef dit maar 5 minuten te doen." Na 5 minuten mag je stoppen.</p>
+
+            <p>Waarom werkt dit? Omdat 5 minuten niet eng is. Meestal ga je door na 5 minuten omdat je er al mee bezig bent.</p>
+
+            <h3>Oefening 2: De "Nee" Oefening</h3>
+            <p>Voor de komende week, zeg één keer per dag "nee" tegen iets dat je eigenlijk niet wilt doen. Dit kan zijn: een uitnodiging waar je geen zin in hebt, een extra taak op werk, of iets anders.</p>
+
+            <p>Dit helpt je om je grenzen te leren kennen en te respecteren.</p>
+
+            <h3>Oefening 3: De Dagelijkse Check-in</h3>
+            <p>Elke avond, voordat je gaat slapen, vraag jezelf af: "Wat heb ik vandaag gedaan waar ik trots op ben?" Schrijf het op, ook al is het iets kleins.</p>
+
+            <h2>Een Eenvoudige Dagelijkse Checklist</h2>
+
+            <p>Hier is een simpele checklist die je kunt gebruiken om discipline op te bouwen. Begin met 2-3 items en voeg er meer toe naarmate je sterker wordt:</p>
+
+            <ul>
+                <li><strong>Opstaan:</strong> Sta op op het tijdstip dat je hebt afgesproken (ook in het weekend)</li>
+                <li><strong>Water:</strong> Drink een glas water zodra je opstaat</li>
+                <li><strong>Eén Taak:</strong> Doe één belangrijke taak voordat je je telefoon pakt</li>
+                <li><strong>Beweging:</strong> Beweeg je lichaam minimaal 10 minuten (wandelen, trappen lopen, wat dan ook)</li>
+                <li><strong>Reflectie:</strong> Schrijf op wat goed ging vandaag</li>
+            </ul>
+
+            <h2>Veelgemaakte Fouten (En Hoe Je Ze Voorkomt)</h2>
+
+            <h3>Fout 1: Te Groot Beginnen</h3>
+            <p><strong>Probleem:</strong> "Ik ga vanaf morgen elke dag 2 uur sporten en 5 boeken per maand lezen."</p>
+            <p><strong>Oplossing:</strong> Begin met 10 minuten sporten en 5 pagina's lezen per dag.</p>
+
+            <h3>Fout 2: Alles Tegelijk Willen</h3>
+            <p><strong>Probleem:</strong> Je wilt je voeding, sport, slaap, werk en relaties allemaal tegelijk perfect maken.</p>
+            <p><strong>Oplossing:</strong> Focus op één gebied per maand. Deze maand slaap, volgende maand voeding, etc.</p>
+
+            <h3>Fout 3: Opgeven Na Een Slechte Dag</h3>
+            <p><strong>Probleem:</strong> Je mist één dag en denkt dat je gefaald hebt.</p>
+            <p><strong>Oplossing:</strong> Een slechte dag betekent niet dat je gefaald hebt. Het betekent dat je mens bent. Begin morgen gewoon opnieuw.</p>
+
+            <h2>Belangrijke Inzichten Die Je Moet Onthouden</h2>
+
+            <ul>
+                <li><strong>Discipline is een spier:</strong> Hoe meer je het gebruikt, hoe sterker het wordt</li>
+                <li><strong>Perfectie is de vijand van vooruitgang:</strong> 80% consistentie is beter dan 100% één keer</li>
+                <li><strong>Het proces is belangrijker dan het resultaat:</strong> Focus op wat je elke dag doet, niet op waar je over een jaar wilt zijn</li>
+                <li><strong>Kleine overwinningen tellen:</strong> Vier elke dag dat je doet wat je zegt dat je gaat doen</li>
+                <li><strong>Discipline geeft je vrijheid:</strong> Hoe meer discipline je hebt, hoe minder je je zorgen hoeft te maken over zelfbeheersing</li>
+            </ul>
+
+            <h2>Wat Nu?</h2>
+
+            <p>Nu je weet wat discipline is en waarom het belangrijk is, is het tijd om te beginnen. Hier is wat ik je aanraad om vandaag te doen:</p>
+
+            <ol>
+                <li><strong>Kies één kleine gewoonte</strong> die je de komende week elke dag wilt doen</li>
+                <li><strong>Koppel het aan iets dat je al doet</strong> (bijvoorbeeld: "Na het ontbijt doe ik 10 push-ups")</li>
+                <li><strong>Vertel het aan iemand anders</strong> zodat ze je verantwoordelijk kunnen houden</li>
+                <li><strong>Begin morgen</strong> en wees niet te streng voor jezelf</li>
+            </ol>
+
+            <p>Onthoud: discipline is geen bestemming, het is een reis. Elke dag dat je kiest om te doen wat je moet doen, word je sterker. En hoe sterker je wordt, hoe makkelijker het wordt om je doelen te bereiken.</p>
+
+            <p><strong>Je kunt dit. Je hebt alles in je wat je nodig hebt. Begin gewoon klein en wees consistent.</strong></p>
         </div>
         
         <div class="footer">

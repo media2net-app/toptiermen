@@ -1467,8 +1467,10 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
         {/* Floating Workout Widget */}
         {typeof window !== 'undefined' && <WorkoutWidget />}
         
-        {/* Mobile Navigation */}
-        <MobileNav onMenuClick={() => setIsMobileMenuOpen(true)} />
+        {/* Mobile Navigation - Hidden during onboarding */}
+        {!(!onboardingLoading && !isCompleted && contextCurrentStep !== null) && (
+          <MobileNav onMenuClick={() => setIsMobileMenuOpen(true)} />
+        )}
       </div>
     </>
   );
