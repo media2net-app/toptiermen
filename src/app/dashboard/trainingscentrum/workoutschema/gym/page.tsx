@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { useWorkoutSession } from '@/contexts/WorkoutSessionContext';
 
 // Force dynamic rendering to prevent navigator errors
 export const dynamic = 'force-dynamic';
@@ -131,6 +132,7 @@ const days = [
 export default function GymSchema() {
   const { user } = useSupabaseAuth();
   const router = useRouter();
+  const { stopWorkout } = useWorkoutSession();
   const [activeTab, setActiveTab] = useState(0);
   const [activeSchema, setActiveSchema] = useState(true);
   const [notes, setNotes] = useState<string[]>(days.map(() => ""));
@@ -206,6 +208,9 @@ export default function GymSchema() {
             if (response.ok) {
               console.log('✅ Workout completion saved successfully');
               toast.success('Workout voltooid! 🎉');
+              
+              // Stop the workout session completely
+              stopWorkout();
               
               // Close modal and redirect
               setShowWorkoutModal(false);

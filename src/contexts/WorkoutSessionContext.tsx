@@ -105,6 +105,17 @@ export function WorkoutSessionProvider({ children }: { children: ReactNode }) {
     if (savedSession) {
       try {
         const parsedSession = JSON.parse(savedSession);
+        
+        // Check if session is too old (more than 24 hours)
+        const sessionAge = Date.now() - new Date(parsedSession.started_at).getTime();
+        const maxAge = 24 * 60 * 60 * 1000; // 24 hours
+        
+        if (sessionAge > maxAge) {
+          console.log('🕐 Workout session is too old, clearing...');
+          localStorage.removeItem('activeWorkoutSession');
+          return;
+        }
+        
         setSession(parsedSession);
         setWorkoutTime(parsedSession.workoutTime || 0);
         setIsWorkoutTimerRunning(parsedSession.isActive || false);
@@ -158,11 +169,14 @@ export function WorkoutSessionProvider({ children }: { children: ReactNode }) {
   };
 
   const stopWorkout = () => {
+    console.log('🛑 Stopping workout session completely...');
     setSession(null);
     setWorkoutTime(0);
     setIsWorkoutTimerRunning(false);
     setRestTime(0);
     setIsRestTimerRunning(false);
+    // Clear localStorage
+    localStorage.removeItem('activeWorkoutSession');
   };
 
   const updateSession = (updates: Partial<WorkoutSession>) => {
@@ -186,6 +200,16 @@ export function WorkoutSessionProvider({ children }: { children: ReactNode }) {
       } : null);
     }
   };
+
+  // Add global function for debugging - clear workout session manually
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      (window as any).clearWorkoutSession = () => {
+        console.log('🧹 Manual workout session clear triggered');
+        stopWorkout();
+      };
+    }
+  }, []);
 
   const value: WorkoutSessionContextType = {
     session,

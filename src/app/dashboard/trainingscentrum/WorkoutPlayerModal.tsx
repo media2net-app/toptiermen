@@ -6,6 +6,7 @@ import WorkoutCompletionModal from "@/components/WorkoutCompletionModal";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
+import { useWorkoutSession } from "@/contexts/WorkoutSessionContext";
 
 // Database-driven workout data - no more mock data
 
@@ -21,6 +22,7 @@ type WorkoutPlayerModalProps = {
 export default function WorkoutPlayerModal({ isOpen, onClose, onComplete, trainingData, schemaId, dayNumber }: WorkoutPlayerModalProps) {
   const { user } = useSupabaseAuth();
   const router = useRouter();
+  const { stopWorkout } = useWorkoutSession();
   const [activeIdx, setActiveIdx] = useState(0);
   const [exercises, setExercises] = useState(trainingData.exercises);
   const [resting, setResting] = useState(false);
@@ -184,6 +186,9 @@ export default function WorkoutPlayerModal({ isOpen, onClose, onComplete, traini
       if (response.ok) {
         console.log('✅ Workout completion saved successfully');
         toast.success('Workout voltooid! 🎉');
+        
+        // Stop the workout session completely
+        stopWorkout();
         
         // Close modals and redirect
         setShowCompletionModal(false);
