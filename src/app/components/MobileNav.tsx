@@ -34,7 +34,7 @@ export default function MobileNav({ onMenuClick }: MobileNavProps) {
   }
 
   return (
-    <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-[#232D1A]/95 border-t border-[#3A4D23]/60 flex justify-between items-center px-2 py-2 shadow-2xl backdrop-blur-lg">
+    <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#232D1A]/95 border-t border-[#3A4D23]/60 flex justify-between items-center px-2 py-2 shadow-2xl backdrop-blur-lg">
       {mobileMenu.map((item) => (
         <Link 
           key={item.label} 

@@ -113,7 +113,7 @@ export default function FloatingWorkoutWidget({
         initial={{ opacity: 0, x: 100 }}
         animate={{ opacity: 1, x: 0 }}
         exit={{ opacity: 0, x: 100 }}
-        className="fixed bottom-4 right-4 z-50"
+        className="fixed bottom-20 right-4 z-50 lg:bottom-4"
       >
         <div className={`bg-gradient-to-br ${session.isActive ? 'from-[#181F17] to-[#232D1A] border-[#3A4D23]' : 'from-[#2D1A0F] to-[#3D2415] border-[#D97706]'} border rounded-xl p-4 shadow-2xl min-w-[280px]`}>
           {/* Header */}

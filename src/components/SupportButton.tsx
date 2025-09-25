@@ -286,7 +286,7 @@ export default function SupportButton({ className = '' }: SupportButtonProps) {
       {/* Floating Support Button */}
       <button
         onClick={() => setIsOpen(true)}
-        className={`fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-br from-[#8BAE5A] to-[#B6C948] rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 z-40 ${className}`}
+        className={`fixed bottom-20 right-6 w-14 h-14 bg-gradient-to-br from-[#8BAE5A] to-[#B6C948] rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 z-50 lg:bottom-6 ${className}`}
         aria-label="Support & FAQ"
       >
         <QuestionMarkCircleIcon className="w-7 h-7 text-[#181F17] mx-auto" />
