@@ -80,60 +80,101 @@ export async function POST(request: NextRequest) {
 
     let user = authUsers.users.find(u => u.email === email);
     
-    // If user doesn't exist in auth, create auth account
+    // If user doesn't exist in auth, try to find them first
     if (!user) {
-      console.log('🔍 User not found in auth, creating auth account...');
+      console.log('🔍 User not found in auth, trying to find existing user...');
       
-      const tempPassword = generateTempPassword();
-      const { data: newAuthUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
-        email: email,
-        password: tempPassword,
-        email_confirm: true,
-        user_metadata: {
-          full_name: profile.full_name || profile.display_name,
-          admin_created: true
-        }
-      });
-      
-      if (createError) {
-        console.error('❌ Error creating auth account:', createError);
+      // Try multiple times to find the user (sometimes users exist but aren't immediately visible)
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        console.log(`🔄 Attempt ${attempt} to find user in auth...`);
         
-        // If user already exists but not visible, try to find them
-        if (createError.message.includes('already been registered') || createError.message.includes('email_exists')) {
-          console.log('🔄 User exists but not visible, trying to find...');
-          
-          // Try multiple times to find the user
-          for (let attempt = 1; attempt <= 3; attempt++) {
-            console.log(`🔄 Attempt ${attempt} to find user...`);
-            
-            const { data: retryAuthUsers, error: retryError } = await supabaseAdmin.auth.admin.listUsers();
-            
-            if (!retryError && retryAuthUsers) {
-              const foundUser = retryAuthUsers.users.find((u: any) => u.email === email);
-              if (foundUser) {
-                console.log(`✅ Found user on attempt ${attempt}:`, foundUser.id);
-                user = foundUser;
-                break;
-              }
-            }
-            
-            // Wait before retry
-            if (attempt < 3) {
-              await new Promise(resolve => setTimeout(resolve, 1000));
-            }
+        const { data: retryAuthUsers, error: retryError } = await supabaseAdmin.auth.admin.listUsers();
+        
+        if (!retryError && retryAuthUsers) {
+          const foundUser = retryAuthUsers.users.find((u: any) => u.email === email);
+          if (foundUser) {
+            console.log(`✅ Found user on attempt ${attempt}:`, foundUser.id);
+            user = foundUser;
+            break;
           }
         }
         
-        if (!user) {
-          console.error('❌ Could not find or create auth user after all attempts');
-          return NextResponse.json({
-            success: false,
-            error: 'Account bestaat maar er is een technisch probleem. Neem contact op met de beheerder.'
-          }, { status: 500 });
+        // Wait before retry
+        if (attempt < 3) {
+          await new Promise(resolve => setTimeout(resolve, 1000));
         }
-      } else {
-        user = newAuthUser.user;
-        console.log('✅ Auth account created for:', email);
+      }
+      
+      // If still not found, try to create a new auth account
+      if (!user) {
+        console.log('🔍 User still not found, creating new auth account...');
+        
+        const tempPassword = generateTempPassword();
+        const { data: newAuthUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
+          email: email,
+          password: tempPassword,
+          email_confirm: true,
+          user_metadata: {
+            full_name: profile.full_name || profile.display_name,
+            admin_created: true
+          }
+        });
+        
+        if (createError) {
+          console.error('❌ Error creating auth account:', createError);
+          
+          // If user already exists but not visible, this is a sync issue
+          if (createError.message.includes('already been registered') || createError.message.includes('email_exists')) {
+            console.log('🔄 User exists but has sync issues, trying one more time...');
+            
+            // One final attempt to find the user
+            const { data: finalAuthUsers, error: finalError } = await supabaseAdmin.auth.admin.listUsers();
+            
+            if (!finalError && finalAuthUsers) {
+              const foundUser = finalAuthUsers.users.find((u: any) => u.email === email);
+              if (foundUser) {
+                console.log(`✅ Found user on final attempt:`, foundUser.id);
+                user = foundUser;
+              }
+            }
+          }
+          
+          if (!user) {
+            console.error('❌ Could not find or create auth user after all attempts');
+            
+            // Last resort: try to reset password directly via force reset API
+            console.log('🔄 Last resort: trying force password reset...');
+            try {
+              const resetResponse = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/admin/force-password-reset`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: email })
+              });
+              
+              const resetData = await resetResponse.json();
+              
+              if (resetResponse.ok && resetData.success) {
+                console.log('✅ Force password reset successful');
+                return NextResponse.json({
+                  success: true,
+                  message: 'Wachtwoord is gereset en per e-mail verzonden'
+                });
+              } else {
+                console.error('❌ Force password reset failed:', resetData.error);
+              }
+            } catch (directResetError) {
+              console.error('❌ Force password reset failed:', directResetError);
+            }
+            
+            return NextResponse.json({
+              success: false,
+              error: 'Account bestaat maar er is een technisch probleem. Neem contact op met de beheerder.'
+            }, { status: 500 });
+          }
+        } else {
+          user = newAuthUser.user;
+          console.log('✅ Auth account created for:', email);
+        }
       }
     }
 
