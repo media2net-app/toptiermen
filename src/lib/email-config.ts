@@ -41,8 +41,8 @@ export const sendgridConfig: EmailConfig = {
 export const mailgunConfig: EmailConfig = {
   provider: 'mailgun',
   mailgunApiKey: process.env.MAILGUN_API_KEY || '5a4acb93-7be634a3',
-  mailgunDomain: 'toptiermen.eu',
-  fromEmail: 'platform@toptiermen.eu',
+  mailgunDomain: process.env.MAILGUN_DOMAIN || 'toptiermen.eu',
+  fromEmail: process.env.FROM_EMAIL || 'platform@toptiermen.eu',
   fromName: 'Top Tier Men Platform'
 };
 
