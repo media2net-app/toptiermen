@@ -95,10 +95,10 @@ export default function PreWorkoutModal({
       if (data.success) {
         // Navigate to appropriate page based on mode
         if (selectedMode === 'interactive') {
-          // For interactive mode, navigate to the actual workout page
+          // For interactive mode, navigate to the actual workout page with sessionId
           console.log('🎯 Interactive workout started');
           onClose();
-          router.push(`/dashboard/trainingscentrum/workout/${schemaId}/${dayNumber}`);
+          router.push(`/dashboard/trainingscentrum/workout/${schemaId}/${dayNumber}?sessionId=${data.session.id}`);
         } else {
           // For quick mode, complete immediately and go back
           await completeQuickWorkout(data.session.id);

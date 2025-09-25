@@ -312,12 +312,14 @@ export default function WorkoutPage() {
     return () => clearInterval(interval);
   }, [isTimerRunning]);
 
-  // Initialize WorkoutSessionContext when exercises are loaded and session exists
+  // Initialize WorkoutSessionContext when exercises are loaded
   useEffect(() => {
-    if (session && exercises.length > 0 && !globalSession) {
+    if (exercises.length > 0 && !globalSession) {
       const currentExercise = exercises[currentExerciseIndex];
+      const sessionIdToUse = sessionId || `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
       startWorkout({
-        id: session.id,
+        id: sessionIdToUse,
         schemaId: schemaId,
         dayNumber: dayNumber,
         exerciseName: currentExercise.name,
@@ -331,7 +333,7 @@ export default function WorkoutPage() {
       setIsWorkoutActive(true);
       setIsTimerRunning(true);
     }
-  }, [session, exercises, currentExerciseIndex, globalSession, startWorkout]);
+  }, [exercises, currentExerciseIndex, globalSession, startWorkout, sessionId, schemaId, dayNumber]);
 
   // Sync local state with global session when returning to workout page
   useEffect(() => {
@@ -655,16 +657,21 @@ export default function WorkoutPage() {
   };
 
   const completeWorkout = async () => {
-    if (!sessionId) return;
+    // Use sessionId from URL params or global session
+    const currentSessionId = sessionId || globalSession?.id;
+    if (!currentSessionId) {
+      console.error('❌ No session ID available for completion');
+      return;
+    }
 
     try {
-      console.log('🏁 Starting workout completion for session:', sessionId);
+      console.log('🏁 Starting workout completion for session:', currentSessionId);
       
       const response = await fetch('/api/workout-sessions/complete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          sessionId: sessionId,
+          sessionId: currentSessionId,
           rating: 5,
           notes: `Completed workout in ${Math.floor((workoutEndTime || globalSession?.workoutTime || 0) / 60)}:${((workoutEndTime || globalSession?.workoutTime || 0) % 60).toString().padStart(2, '0')}`,
           exercises: exercises.map(ex => ({
