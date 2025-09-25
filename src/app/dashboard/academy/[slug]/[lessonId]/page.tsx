@@ -8,8 +8,6 @@ import PageLayout from '@/components/PageLayout';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import CDNVideoPlayer from '@/components/CDNVideoPlayer';
-import { useAcademyVideoPreload } from '@/hooks/useAcademyVideoPreload';
-import AcademyVideoPreloader from '@/components/AcademyVideoPreloader';
 import { PlayIcon } from '@heroicons/react/24/solid';
 import { academyNav } from '@/utils/academyNavigation';
 
