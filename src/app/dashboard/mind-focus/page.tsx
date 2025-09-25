@@ -13,7 +13,8 @@ import {
   ChartBarIcon,
   PlayIcon,
   PauseIcon,
-  StopIcon
+  StopIcon,
+  CheckCircleIcon
 } from '@heroicons/react/24/solid';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { useOnboardingV2 } from '@/contexts/OnboardingV2Context';
@@ -217,6 +218,19 @@ export default function MindFocusPage() {
   const [journalText, setJournalText] = useState('');
   const [isSavingJournal, setIsSavingJournal] = useState(false);
   
+  // Todo list state
+  const [todos, setTodos] = useState<{
+    id: string;
+    text: string;
+    completed: boolean;
+    category: 'mind-focus' | 'stress-release' | 'sleep-prep' | 'recovery' | 'general';
+  }[]>([]);
+  const [newTodo, setNewTodo] = useState('');
+  const [isAddingTodo, setIsAddingTodo] = useState(false);
+  
+  // Recent journaling state
+  const [recentJournaling, setRecentJournaling] = useState<any>(null);
+  
   // Dashboard loading state
   const [isLoadingDashboardData, setIsLoadingDashboardData] = useState(false);
 
@@ -235,6 +249,11 @@ export default function MindFocusPage() {
       // Fetch journal entries
       const journalResponse = await fetch(`/api/mind-focus/journal?userId=${user.id}`);
       const journalData = await journalResponse.json();
+      
+      // Set recent journaling data
+      if (journalData.success && journalData.entries && journalData.entries.length > 0) {
+        setRecentJournaling(journalData.entries[0]); // Most recent entry
+      }
 
       // Calculate current week sessions
       const now = new Date();
@@ -416,6 +435,114 @@ export default function MindFocusPage() {
       }));
     }
   };
+
+  // Todo list functions
+  const addTodo = async () => {
+    if (!newTodo.trim() || !user?.id) return;
+    
+    try {
+      setIsAddingTodo(true);
+      const todo = {
+        id: Date.now().toString(),
+        text: newTodo.trim(),
+        completed: false,
+        category: 'general' as const
+      };
+      
+      setTodos(prev => [...prev, todo]);
+      setNewTodo('');
+      
+      // Save to database
+      const response = await fetch('/api/mind-focus/todos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user.id,
+          text: todo.text,
+          category: todo.category
+        })
+      });
+      
+      if (!response.ok) {
+        console.error('Failed to save todo');
+      }
+    } catch (error) {
+      console.error('Error adding todo:', error);
+    } finally {
+      setIsAddingTodo(false);
+    }
+  };
+
+  const toggleTodo = async (todoId: string) => {
+    if (!user?.id) return;
+    
+    try {
+      setTodos(prev => prev.map(todo => 
+        todo.id === todoId ? { ...todo, completed: !todo.completed } : todo
+      ));
+      
+      // Update in database
+      const response = await fetch('/api/mind-focus/todos', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user.id,
+          todoId,
+          completed: !todos.find(t => t.id === todoId)?.completed
+        })
+      });
+      
+      if (!response.ok) {
+        console.error('Failed to update todo');
+      }
+    } catch (error) {
+      console.error('Error updating todo:', error);
+    }
+  };
+
+  const deleteTodo = async (todoId: string) => {
+    if (!user?.id) return;
+    
+    try {
+      setTodos(prev => prev.filter(todo => todo.id !== todoId));
+      
+      // Delete from database
+      const response = await fetch('/api/mind-focus/todos', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user.id,
+          todoId
+        })
+      });
+      
+      if (!response.ok) {
+        console.error('Failed to delete todo');
+      }
+    } catch (error) {
+      console.error('Error deleting todo:', error);
+    }
+  };
+
+  // Load todos on component mount
+  useEffect(() => {
+    const loadTodos = async () => {
+      if (!user?.id) return;
+      
+      try {
+        const response = await fetch(`/api/mind-focus/todos?userId=${user.id}`);
+        const data = await response.json();
+        
+        if (data.success && data.todos) {
+          setTodos(data.todos);
+        }
+      } catch (error) {
+        console.error('Error loading todos:', error);
+      }
+    };
+
+    loadTodos();
+  }, [user?.id]);
 
   // Save journal entry
   const saveJournalEntry = async () => {
@@ -1230,18 +1357,166 @@ export default function MindFocusPage() {
 
           <div className="p-6">
             {activeTab === 'overview' && (
-              <div>
-                <h3 className="text-xl font-semibold text-white mb-4">Vandaag</h3>
-                <div className="space-y-4">
-                  {personalPlan?.dailyRoutine.map((session, index) => (
-                    <div key={session.id} className="bg-[#1A2A1A] border border-[#2A3A1A] rounded-lg p-4">
-                      <div>
-                        <h4 className="text-white font-semibold">{session.title}</h4>
-                        <p className="text-[#8BAE5A] text-sm">{session.description}</p>
+              <div className="space-y-6">
+                {/* Recent Journaling */}
+                {recentJournaling && (
+                  <div className="bg-gradient-to-r from-[#2A3A1A] to-[#3A4A2A] rounded-xl p-6">
+                    <h3 className="text-xl font-semibold text-[#B6C948] mb-4 flex items-center">
+                      <BookOpenIcon className="w-6 h-6 mr-2" />
+                      Recente Journaling
+                    </h3>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[#8BAE5A]">Datum:</span>
+                        <span className="text-white font-medium">
+                          {new Date(recentJournaling.date).toLocaleDateString('nl-NL')}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-[#8BAE5A]">Stress Level:</span>
+                        <span className="text-white font-medium">{recentJournaling.stress_level}/10</span>
+                      </div>
+                      {recentJournaling.daily_review && (
+                        <div>
+                          <span className="text-[#8BAE5A] text-sm">Dagelijkse reflectie:</span>
+                          <p className="text-white text-sm mt-1 bg-[#1A2A1A] p-3 rounded-lg">
+                            {recentJournaling.daily_review}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Todo List */}
+                <div className="bg-[#1A2A1A] rounded-xl p-6 border border-[#2A3A1A]">
+                  <h3 className="text-xl font-semibold text-white mb-4 flex items-center">
+                    <CheckCircleIcon className="w-6 h-6 mr-2 text-[#B6C948]" />
+                    Vandaag's Taken
+                  </h3>
+                  
+                  {/* Add new todo */}
+                  <div className="mb-6">
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={newTodo}
+                        onChange={(e) => setNewTodo(e.target.value)}
+                        onKeyPress={(e) => e.key === 'Enter' && addTodo()}
+                        placeholder="Voeg een nieuwe taak toe..."
+                        className="flex-1 p-3 bg-[#2A3A1A] text-white border border-[#3A4A2A] rounded-lg focus:ring-2 focus:ring-[#B6C948] focus:border-transparent"
+                        disabled={isAddingTodo}
+                      />
+                      <motion.button
+                        onClick={addTodo}
+                        disabled={!newTodo.trim() || isAddingTodo}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className="bg-[#B6C948] text-[#1A2A1A] px-4 py-3 rounded-lg font-semibold hover:bg-[#8BAE5A] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isAddingTodo ? '...' : 'Toevoegen'}
+                      </motion.button>
+                    </div>
+                  </div>
+
+                  {/* Todo list */}
+                  <div className="space-y-3">
+                    {todos.length === 0 ? (
+                      <div className="text-center py-8 text-[#8BAE5A]">
+                        <CheckCircleIcon className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                        <p>Geen taken voor vandaag. Voeg er een toe om te beginnen!</p>
+                      </div>
+                    ) : (
+                      todos.map((todo) => (
+                        <motion.div
+                          key={todo.id}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className={`flex items-center p-4 rounded-lg border transition-all ${
+                            todo.completed 
+                              ? 'bg-[#B6C948]/10 border-[#B6C948] text-[#8BAE5A]' 
+                              : 'bg-[#2A3A1A] border-[#3A4A2A] hover:border-[#B6C948]'
+                          }`}
+                        >
+                          <motion.button
+                            onClick={() => toggleTodo(todo.id)}
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            className={`w-6 h-6 rounded-full border-2 flex items-center justify-center mr-3 transition-all ${
+                              todo.completed 
+                                ? 'bg-[#B6C948] border-[#B6C948]' 
+                                : 'border-[#8BAE5A] hover:border-[#B6C948]'
+                            }`}
+                          >
+                            {todo.completed && (
+                              <CheckCircleIcon className="w-4 h-4 text-[#1A2A1A]" />
+                            )}
+                          </motion.button>
+                          
+                          <span className={`flex-1 ${todo.completed ? 'line-through' : ''}`}>
+                            {todo.text}
+                          </span>
+                          
+                          <motion.button
+                            onClick={() => deleteTodo(todo.id)}
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            className="text-[#8BAE5A] hover:text-red-400 transition-colors p-1"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </motion.button>
+                        </motion.div>
+                      ))
+                    )}
+                  </div>
+
+                  {/* Progress indicator */}
+                  {todos.length > 0 && (
+                    <div className="mt-6 pt-4 border-t border-[#3A4A2A]">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-[#8BAE5A] text-sm">Progress vandaag</span>
+                        <span className="text-white font-semibold">
+                          {todos.filter(t => t.completed).length} van {todos.length} voltooid
+                        </span>
+                      </div>
+                      <div className="w-full bg-[#2A3A1A] rounded-full h-2">
+                        <div 
+                          className="bg-[#B6C948] h-2 rounded-full transition-all duration-300"
+                          style={{ 
+                            width: `${todos.length > 0 ? (todos.filter(t => t.completed).length / todos.length) * 100 : 0}%` 
+                          }}
+                        ></div>
                       </div>
                     </div>
-                  ))}
+                  )}
                 </div>
+
+                {/* Daily Routine */}
+                {personalPlan?.dailyRoutine && personalPlan.dailyRoutine.length > 0 && (
+                  <div className="bg-[#1A2A1A] rounded-xl p-6 border border-[#2A3A1A]">
+                    <h3 className="text-xl font-semibold text-white mb-4 flex items-center">
+                      <ClockIcon className="w-6 h-6 mr-2 text-[#B6C948]" />
+                      Dagelijkse Routine
+                    </h3>
+                    <div className="space-y-3">
+                      {personalPlan.dailyRoutine.map((session, index) => (
+                        <div key={session.id} className="bg-[#2A3A1A] border border-[#3A4A2A] rounded-lg p-4">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h4 className="text-white font-semibold">{session.title}</h4>
+                              <p className="text-[#8BAE5A] text-sm">{session.description}</p>
+                            </div>
+                            <span className="text-[#B6C948] text-sm font-medium">
+                              {session.scheduledTime} • {session.duration} min
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -1441,7 +1716,19 @@ export default function MindFocusPage() {
                         </div>
                       </div>
                       <button 
-                        onClick={() => router.push(`/dashboard/mind-en-focus/meditaties?type=${type.id}`)}
+                        onClick={() => {
+                          if (type.id === 'focus') {
+                            router.push('/dashboard/mind-focus/focus-training');
+                          } else if (type.id === 'stress') {
+                            router.push('/dashboard/mind-focus/stress-release');
+                          } else if (type.id === 'sleep') {
+                            router.push('/dashboard/mind-focus/sleep-preparation');
+                          } else if (type.id === 'recovery') {
+                            router.push('/dashboard/mind-focus/recovery');
+                          } else {
+                            router.push(`/dashboard/mind-en-focus/meditaties?type=${type.id}`);
+                          }
+                        }}
                         className="w-full bg-[#2A3A1A] text-[#B6C948] py-2 rounded-lg hover:bg-[#3A4A2A] transition-colors"
                       >
                         Bekijk Sessies

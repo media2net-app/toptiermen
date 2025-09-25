@@ -23,7 +23,7 @@ import {
   ChevronUpIcon, ChevronDownIcon, Bars3Icon, XMarkIcon, BellIcon,
   CheckCircleIcon, UserGroupIcon, TrophyIcon, 
   CalendarDaysIcon, ShoppingBagIcon, ChevronLeftIcon, ChevronRightIcon,
-  RocketLaunchIcon
+  RocketLaunchIcon, TagIcon, ClockIcon, CpuChipIcon
 } from '@heroicons/react/24/solid';
 import DebugPanel from '@/components/DebugPanel';
 import TestUserVideoModal from '@/components/TestUserVideoModal';
@@ -99,6 +99,10 @@ const menu = [
   { label: 'Trainingsschemas', icon: AcademicCapIcon, href: '/dashboard/trainingsschemas', onboardingStep: 4, requiresTrainingAccess: true },
   { label: 'Voedingsplannen', icon: RocketLaunchIcon, href: '/dashboard/voedingsplannen-v2', onboardingStep: 5, requiresNutritionAccess: true },
   { label: 'Mind & Focus', icon: ChartBarIcon, href: '/dashboard/mind-focus', onboardingStep: 7 },
+  { label: 'Focus Training', icon: TagIcon, parent: 'Mind & Focus', href: '/dashboard/mind-focus/focus-training', isSub: true, onboardingStep: 7 },
+  { label: 'Stress Release', icon: FireIcon, parent: 'Mind & Focus', href: '/dashboard/mind-focus/stress-release', isSub: true, onboardingStep: 7 },
+  { label: 'Sleep Preparation', icon: ClockIcon, parent: 'Mind & Focus', href: '/dashboard/mind-focus/sleep-preparation', isSub: true, onboardingStep: 7 },
+  { label: 'Recovery', icon: CpuChipIcon, parent: 'Mind & Focus', href: '/dashboard/mind-focus/recovery', isSub: true, onboardingStep: 7 },
   { label: 'Brotherhood', icon: UsersIcon, href: '/dashboard/brotherhood', onboardingStep: 6 },
   { label: 'Social Feed', icon: ChatBubbleLeftRightIcon, parent: 'Brotherhood', href: '/dashboard/brotherhood/social-feed', isSub: true, onboardingStep: 7 },
   { label: 'Forum', icon: FireIcon, parent: 'Brotherhood', href: '/dashboard/brotherhood/forum', isSub: true, onboardingStep: 4, isBasicTierStep: true },
@@ -119,6 +123,7 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
   const router = useRouter();
   const [openBrotherhood, setOpenBrotherhood] = useState(true); // Default expanded
   const [openDashboard, setOpenDashboard] = useState(true); // Default expanded
+  const [openMindFocus, setOpenMindFocus] = useState(true); // Default expanded
   const { isCompleted, currentStep, hasTrainingAccess, hasNutritionAccess } = useOnboardingV2();
   
   // Use onboardingStatus from props if available, otherwise fallback to context
@@ -279,6 +284,8 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
       setOpenDashboard(true);
     } else if (currentItem?.parent === 'Brotherhood') {
       setOpenBrotherhood(true);
+    } else if (currentItem?.parent === 'Mind & Focus') {
+      setOpenMindFocus(true);
     }
     
     // Auto-open Brotherhood submenu during onboarding step 6 (forum introduction)
@@ -320,8 +327,13 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
           const hasSubmenu = menu.some(sub => sub.parent === item.label);
 
           if (hasSubmenu) {
-            const isOpen = item.label === 'Dashboard' ? openDashboard : openBrotherhood;
-            const setIsOpen = item.label === 'Dashboard' ? setOpenDashboard : setOpenBrotherhood;
+            const isOpen = item.label === 'Dashboard' ? openDashboard : 
+                          item.label === 'Brotherhood' ? openBrotherhood : 
+                          item.label === 'Mind & Focus' ? openMindFocus : false;
+            const setIsOpen = item.label === 'Dashboard' ? setOpenDashboard : 
+                             item.label === 'Brotherhood' ? setOpenBrotherhood : 
+                             item.label === 'Mind & Focus' ? setOpenMindFocus : 
+                             () => {};
             const subItems = menu.filter(sub => sub.parent === item.label);
             const hasActiveSubItem = subItems.some(sub => 
               !isCompleted 
@@ -482,6 +494,7 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
   const pathname = usePathname();
   const [openBrotherhood, setOpenBrotherhood] = useState(false);
   const [openDashboard, setOpenDashboard] = useState(false);
+  const [openMindFocus, setOpenMindFocus] = useState(false);
   const { isCompleted, currentStep, hasTrainingAccess, hasNutritionAccess } = useOnboardingV2();
   
   // Use onboardingStatus from props if available, otherwise fallback to context
@@ -660,6 +673,8 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
       setOpenDashboard(true);
     } else if (currentItem?.parent === 'Brotherhood') {
       setOpenBrotherhood(true);
+    } else if (currentItem?.parent === 'Mind & Focus') {
+      setOpenMindFocus(true);
     }
     
     // Auto-open Brotherhood submenu during onboarding step 6 (forum introduction)
@@ -691,8 +706,13 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
           const hasSubmenu = menu.some(sub => sub.parent === item.label);
 
           if (hasSubmenu) {
-            const isOpen = item.label === 'Dashboard' ? openDashboard : openBrotherhood;
-            const setIsOpen = item.label === 'Dashboard' ? setOpenDashboard : setOpenBrotherhood;
+            const isOpen = item.label === 'Dashboard' ? openDashboard : 
+                          item.label === 'Brotherhood' ? openBrotherhood : 
+                          item.label === 'Mind & Focus' ? openMindFocus : false;
+            const setIsOpen = item.label === 'Dashboard' ? setOpenDashboard : 
+                             item.label === 'Brotherhood' ? setOpenBrotherhood : 
+                             item.label === 'Mind & Focus' ? setOpenMindFocus : 
+                             () => {};
             const subItems = menu.filter(sub => sub.parent === item.label);
             const hasActiveSubItem = subItems.some(sub => 
               !isCompleted 
