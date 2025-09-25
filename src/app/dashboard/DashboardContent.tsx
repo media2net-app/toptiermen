@@ -1190,9 +1190,10 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
               <Image
                 src="/logo_white-full.svg"
                 alt="Top Tier Men Logo"
-                width={sidebarCollapsed ? 40 : 240}
-                height={40}
-                className={`${sidebarCollapsed ? 'w-10 h-10' : 'w-full h-10'} object-contain hover:opacity-80 transition-opacity`}
+                width={sidebarCollapsed ? 20 : 128}
+                height={32}
+                style={{ height: 'auto' }}
+                className={`${sidebarCollapsed ? 'w-5 h-5' : 'w-32 h-8'} object-contain hover:opacity-80 transition-opacity`}
               />
             </Link>
           </div>
@@ -1376,9 +1377,10 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
                         <Image
                           src="/logo_white-full.svg"
                           alt="Top Tier Men Logo"
-                          width={120}
-                          height={30}
-                          className="h-8 w-auto object-contain"
+                          width={60}
+                          height={15}
+                          style={{ height: 'auto' }}
+                          className="h-4 w-auto object-contain"
                         />
                       </Link>
                       <motion.button

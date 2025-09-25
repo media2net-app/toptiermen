@@ -1648,32 +1648,32 @@ export default function MijnProfiel() {
                 <div className="bg-[#232D1A] rounded-lg p-3 sm:p-4">
                   <h4 className="font-semibold text-white mb-2 text-sm sm:text-base">Social Media Posts</h4>
                   <p className="text-[#8BAE5A] text-xs sm:text-sm mb-3">Kant-en-klare posts voor Instagram, Facebook en LinkedIn</p>
-                  <button className="w-full px-3 py-2 sm:px-4 sm:py-2 bg-[#8BAE5A] text-white rounded-lg font-semibold hover:bg-[#9BBE6A] transition-colors text-sm">
-                    Download Posts
+                  <button disabled className="w-full px-3 py-2 sm:px-4 sm:py-2 bg-gray-600 text-gray-400 rounded-lg font-semibold cursor-not-allowed text-sm">
+                    Binnenkort beschikbaar
                   </button>
                 </div>
                 
                 <div className="bg-[#232D1A] rounded-lg p-3 sm:p-4">
                   <h4 className="font-semibold text-white mb-2 text-sm sm:text-base">E-mail Templates</h4>
                   <p className="text-[#8BAE5A] text-xs sm:text-sm mb-3">Professionele e-mail templates voor je netwerk</p>
-                  <button className="w-full px-3 py-2 sm:px-4 sm:py-2 bg-[#8BAE5A] text-white rounded-lg font-semibold hover:bg-[#9BBE6A] transition-colors text-sm">
-                    Download Templates
+                  <button disabled className="w-full px-3 py-2 sm:px-4 sm:py-2 bg-gray-600 text-gray-400 rounded-lg font-semibold cursor-not-allowed text-sm">
+                    Binnenkort beschikbaar
                   </button>
                 </div>
                 
                 <div className="bg-[#232D1A] rounded-lg p-3 sm:p-4">
                   <h4 className="font-semibold text-white mb-2 text-sm sm:text-base">Banners & Graphics</h4>
                   <p className="text-[#8BAE5A] text-xs sm:text-sm mb-3">Visuele materialen voor websites en social media</p>
-                  <button className="w-full px-3 py-2 sm:px-4 sm:py-2 bg-[#8BAE5A] text-white rounded-lg font-semibold hover:bg-[#9BBE6A] transition-colors text-sm">
-                    Download Graphics
+                  <button disabled className="w-full px-3 py-2 sm:px-4 sm:py-2 bg-gray-600 text-gray-400 rounded-lg font-semibold cursor-not-allowed text-sm">
+                    Binnenkort beschikbaar
                   </button>
                 </div>
                 
                 <div className="bg-[#232D1A] rounded-lg p-3 sm:p-4">
                   <h4 className="font-semibold text-white mb-2 text-sm sm:text-base">Video Content</h4>
                   <p className="text-[#8BAE5A] text-xs sm:text-sm mb-3">Korte video's om Brotherhood te promoten</p>
-                  <button className="w-full px-3 py-2 sm:px-4 sm:py-2 bg-[#8BAE5A] text-white rounded-lg font-semibold hover:bg-[#9BBE6A] transition-colors text-sm">
-                    Download Videos
+                  <button disabled className="w-full px-3 py-2 sm:px-4 sm:py-2 bg-gray-600 text-gray-400 rounded-lg font-semibold cursor-not-allowed text-sm">
+                    Binnenkort beschikbaar
                   </button>
                 </div>
               </div>

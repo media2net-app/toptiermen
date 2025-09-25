@@ -12,5 +12,8 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: true,
+    flowType: 'pkce', // Use PKCE flow for better security and session management
+    storage: typeof window !== 'undefined' ? window.localStorage : undefined, // Explicitly use localStorage
+    storageKey: 'sb-toptiermen-auth-token', // Custom storage key
   }
 });

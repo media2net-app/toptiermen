@@ -170,14 +170,31 @@ async function fetchMissionsStats(userId: string) {
 
 async function fetchTrainingStats(userId: string) {
   try {
-    // Get user's selected training schema
-    const { data: userProfile, error: profileError } = await supabaseAdmin
-      .from('profiles')
-      .select('selected_schema_id')
-      .eq('id', userId)
+    console.log('📊 Fetching training stats for user:', userId);
+    
+    // Get current active schema period from user_schema_periods table
+    const { data: schemaPeriod, error: periodError } = await supabaseAdmin
+      .from('user_schema_periods')
+      .select(`
+        id,
+        training_schema_id,
+        start_date,
+        end_date,
+        status,
+        training_schemas (
+          id,
+          name,
+          description,
+          difficulty,
+          schema_nummer
+        )
+      `)
+      .eq('user_id', userId)
+      .eq('status', 'active')
       .single();
 
-    if (profileError || !userProfile?.selected_schema_id) {
+    if (periodError || !schemaPeriod) {
+      console.log('⚠️ No active schema period found for user:', periodError?.message || 'No data');
       return {
         hasActiveSchema: false,
         currentDay: 0,
@@ -187,14 +204,9 @@ async function fetchTrainingStats(userId: string) {
       };
     }
 
-    // Get training schema details
-    const { data: schema, error: schemaError } = await supabaseAdmin
-      .from('training_schemas')
-      .select('*')
-      .eq('id', userProfile.selected_schema_id)
-      .single();
-
-    if (schemaError || !schema) {
+    const schema = schemaPeriod.training_schemas as any;
+    if (!schema || !schema.name) {
+      console.log('⚠️ No schema data found in period');
       return {
         hasActiveSchema: false,
         currentDay: 0,
@@ -204,22 +216,50 @@ async function fetchTrainingStats(userId: string) {
       };
     }
 
-    // Calculate current day and progress
-    const startDate = new Date(schema.created_at);
+    // Get training schema days to calculate weekly sessions
+    const { data: schemaDays, error: daysError } = await supabaseAdmin
+      .from('training_schema_days')
+      .select('id, day_number, name')
+      .eq('schema_id', schemaPeriod.training_schema_id)
+      .order('day_number');
+
+    if (daysError) {
+      console.log('⚠️ Error fetching schema days:', daysError);
+      return {
+        hasActiveSchema: false,
+        currentDay: 0,
+        totalDays: 0,
+        weeklySessions: 0,
+        progress: 0
+      };
+    }
+
+    const weeklySessions = schemaDays?.length || 0;
+    const totalDays = 56; // 8 weeks standard
+
+    console.log('✅ Active schema found:', {
+      schemaName: schema.name,
+      weeklySessions,
+      totalDays,
+      schemaDaysCount: schemaDays?.length || 0
+    });
+
+    // Calculate current day and progress based on schema period start date
+    const startDate = new Date(schemaPeriod.start_date);
     const today = new Date();
     const daysDiff = Math.floor((today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-    const currentDay = Math.min(daysDiff + 1, schema.total_days || 30);
-    const progress = Math.round((currentDay / (schema.total_days || 30)) * 100);
+    const currentDay = Math.min(Math.max(daysDiff + 1, 1), totalDays);
+    const progress = Math.round((currentDay / totalDays) * 100);
 
     return {
       hasActiveSchema: true,
       currentDay,
-      totalDays: schema.total_days || 30,
-      weeklySessions: schema.weekly_sessions || 3,
-      progress
+      totalDays,
+      weeklySessions,
+      progress: Math.min(progress, 100)
     };
   } catch (error) {
-    console.error('Error fetching training stats:', error);
+    console.error('❌ Error fetching training stats:', error);
     return {
       hasActiveSchema: false,
       currentDay: 0,

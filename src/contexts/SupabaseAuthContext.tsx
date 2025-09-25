@@ -1,22 +1,8 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { createClient, User, Session } from '@supabase/supabase-js';
-
-// Simple Supabase client
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    autoRefreshToken: true,
-    persistSession: true, // ENABLED: Keep users logged in after refresh
-    detectSessionInUrl: true,
-    flowType: 'pkce', // Use PKCE flow for better security and session management
-    storage: typeof window !== 'undefined' ? window.localStorage : undefined, // Explicitly use localStorage
-    storageKey: 'sb-toptiermen-auth-token', // Custom storage key
-  }
-});
+import { User, Session } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase';
 
 interface Profile {
   id: string;

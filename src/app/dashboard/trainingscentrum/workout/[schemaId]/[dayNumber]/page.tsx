@@ -672,6 +672,9 @@ export default function WorkoutPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           sessionId: currentSessionId,
+          userId: user?.id,
+          schemaId: schemaId,
+          dayNumber: parseInt(dayNumber as unknown as string),
           rating: 5,
           notes: `Completed workout in ${Math.floor((workoutEndTime || globalSession?.workoutTime || 0) / 60)}:${((workoutEndTime || globalSession?.workoutTime || 0) % 60).toString().padStart(2, '0')}`,
           exercises: exercises.map(ex => ({

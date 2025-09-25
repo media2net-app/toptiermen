@@ -92,11 +92,8 @@ export default function AcademyPage() {
         return;
       }
 
-      // Prevent refetching if data is already loaded
-      if (isDataLoaded) {
-        console.log('🎓 Academy: Data already loaded, skipping fetch...');
-        return;
-      }
+      // Always fetch fresh data to ensure we have the latest progress
+      console.log('🎓 Academy: Starting fresh data fetch for user:', user.id);
 
       console.log('🎓 Academy: Starting data fetch...');
       setLoading(true);
@@ -110,167 +107,102 @@ export default function AcademyPage() {
       }, 10000); // 10 second timeout
 
       try {
-        // Fetch modules
-        const { data: modulesData, error: modulesError } = await supabase
-          .from('academy_modules')
-          .select('*')
-          .order('order_index', { ascending: true });
-
-        if (modulesError) {
-          console.error('❌ Error fetching modules:', modulesError);
-          throw new Error('Fout bij het laden van modules');
-        }
-
-        // Fetch lessons
-        const { data: lessonsData, error: lessonsError } = await supabase
-          .from('academy_lessons')
-          .select('*')
-          .order('order_index', { ascending: true });
-
-        if (lessonsError) {
-          console.error('❌ Error fetching lessons:', lessonsError);
-          throw new Error('Fout bij het laden van lessen');
-        }
-
-        // Fetch user progress (optional - table might not exist yet)
-        const { data: progressData, error: progressError } = await supabase
-          .from('user_academy_progress')
-          .select('*')
-          .eq('user_id', user.id);
-
-        if (progressError) {
-          console.warn('⚠️ Warning fetching academy progress (table might not exist):', progressError);
-          // Don't throw error, just use empty progress data
-        }
-
-        // Fetch lesson progress from both tables
-        const { data: lessonProgressData, error: lessonProgressError } = await supabase
-          .from('user_lesson_progress')
-          .select('*')
-          .eq('user_id', user.id);
-
-        // Also fetch from academy_lesson_completions for compatibility
-        const { data: academyCompletionsData, error: academyCompletionsError } = await supabase
-          .from('academy_lesson_completions')
-          .select('*')
-          .eq('user_id', user.id);
-
-        if (lessonProgressError) {
-          console.error('❌ Error fetching lesson progress:', lessonProgressError);
-          throw new Error('Fout bij het laden van les voortgang');
-        }
-
-        if (academyCompletionsError) {
-          console.warn('⚠️ Warning fetching academy completions:', academyCompletionsError);
-        }
-
-        // Fetch unlocks (optional - table might not exist yet)
-        const { data: unlocksData, error: unlocksError } = await supabase
-          .from('user_module_unlocks')
-          .select('module_id, unlocked_at, opened_at')
-          .eq('user_id', user.id);
-
-        // Also fetch module completions
-        const { data: moduleCompletionsData, error: moduleCompletionsError } = await supabase
-          .from('academy_module_completions')
-          .select('*')
-          .eq('user_id', user.id);
-
-        if (unlocksError) {
-          console.warn('⚠️ Warning fetching unlocks (table might not exist):', unlocksError);
-          // Don't throw error, just use empty unlocks data
-        }
-
-        if (moduleCompletionsError) {
-          console.warn('⚠️ Warning fetching module completions:', moduleCompletionsError);
-        }
-
-        // Process data
-        const processedModules = modulesData || [];
-        const processedLessons = lessonsData || [];
+        // Fetch academy data via API endpoint (bypasses RLS)
+        const response = await fetch(`/api/academy/progress?userId=${user.id}`);
         
-        // Process progress data (calculate from lesson progress and module completions)
-        const progressMap: ProgressData = {};
-        
-        // Process module completions
-        moduleCompletionsData?.forEach((completion: any) => {
-          progressMap[completion.module_id] = {
-            completed: true,
-            progress_percentage: 100,
-            completed_lessons: completion.completed_lessons || 0,
-            total_lessons: completion.total_lessons || 0
-          };
-        });
-
-        // Process lesson progress from both tables
-        const lessonProgressMap: LessonProgress = {};
-        
-        // First, add from user_lesson_progress
-        lessonProgressData?.forEach((progress: any) => {
-          lessonProgressMap[progress.lesson_id] = {
-            completed: progress.completed || false,
-            time_spent: progress.time_spent || 0
-          };
-        });
-
-        // Then, add from academy_lesson_completions (overwrites if exists)
-        academyCompletionsData?.forEach((completion: any) => {
-          lessonProgressMap[completion.lesson_id] = {
-            completed: true, // If in completions table, it's completed
-            time_spent: completion.time_spent || 0
-          };
-        });
-
-        // Process unlocks
-        const unlocksMap: UnlockData = {};
-        unlocksData?.forEach((unlock: any) => {
-          unlocksMap[unlock.module_id] = {
-            unlocked_at: unlock.unlocked_at,
-            opened_at: unlock.opened_at
-          };
-        });
-
-        // Check if academy is completed
-        const totalLessons = processedLessons.length;
-        const completedLessons = Object.values(lessonProgressMap).filter(p => p.completed).length;
-        const isAcademyCompleted = totalLessons > 0 && completedLessons === totalLessons;
-
-        // Check for academy badge
-        const { data: academyBadgeData, error: academyBadgeError } = await supabase
-          .from('user_badges')
-          .select('*')
-          .eq('user_id', user.id)
-          .eq('badge_type', 'academy_completion')
-          .single();
-
-        if (academyBadgeError && academyBadgeError.code !== 'PGRST116') {
-          console.error('❌ Error fetching academy badge:', academyBadgeError);
+        if (!response.ok) {
+          throw new Error('Failed to fetch academy data');
         }
+
+        const result = await response.json();
+        
+        if (!result.success) {
+          throw new Error(result.error || 'Failed to fetch academy data');
+        }
+
+        const {
+          modules: processedModules,
+          lessons: processedLessons,
+          progressData: progressMap,
+          lessonProgress: lessonProgressMap,
+          unlocks: unlocksMap,
+          academyCompleted: isAcademyCompleted,
+          academyBadge: academyBadgeData,
+          badgeAwarded,
+          stats
+        } = result.data;
+
+        console.log('🎯 Academy Data Fetch Debug:', {
+          modules: processedModules?.length || 0,
+          lessons: processedLessons?.length || 0,
+          progressData: Object.keys(progressMap || {}).length,
+          lessonProgress: Object.keys(lessonProgressMap || {}).length,
+          stats: stats
+        });
+
+        // Debug logging before setting state
+        console.log('🎯 Setting Academy State:', {
+          processedModules: processedModules?.length || 0,
+          processedLessons: processedLessons?.length || 0,
+          progressMapKeys: Object.keys(progressMap || {}).length,
+          lessonProgressMapKeys: Object.keys(lessonProgressMap || {}).length,
+          completedLessons: Object.values(lessonProgressMap || {}).filter((p: any) => p.completed).length,
+          isAcademyCompleted,
+          hasAcademyBadge: !!academyBadgeData,
+          stats: stats
+        });
 
         // Set state
-        setModules(processedModules);
-        setLessons(processedLessons);
-        setProgressData(progressMap);
-        setLessonProgress(lessonProgressMap);
-        setUnlocks(unlocksMap);
+        setModules(processedModules || []);
+        setLessons(processedLessons || []);
+        setProgressData(progressMap || {});
+        setLessonProgress(lessonProgressMap || {});
+        setUnlocks(unlocksMap || {});
         setAcademyCompleted(isAcademyCompleted);
         setHasAcademyBadge(!!academyBadgeData);
         setAcademyBadgeData(academyBadgeData);
         setIsDataLoaded(true);
         setLoading(false);
 
+        // Debug logging for Chiel
+        if (user?.email === 'chiel@media2net.nl') {
+          console.log('🔍 Academy Data Debug for Chiel:', {
+            modulesCount: processedModules?.length || 0,
+            lessonsCount: processedLessons?.length || 0,
+            unlocksData: unlocksMap,
+            unlocksKeys: Object.keys(unlocksMap || {}),
+            academyCompleted: isAcademyCompleted
+          });
+        }
+
+        // Show badge modal if badge was just awarded
+        if (badgeAwarded && academyBadgeData) {
+          setBadgeData(academyBadgeData);
+          setShowBadgeModal(true);
+        }
+
         // Clear timeout
         clearTimeout(timeoutId);
 
         console.log('✅ Academy data loaded successfully:', {
-          modules: processedModules.length,
-          lessons: processedLessons.length,
-          progress: Object.keys(progressMap).length,
-          lessonProgress: Object.keys(lessonProgressMap).length,
-          unlocks: Object.keys(unlocksMap).length,
+          modules: processedModules?.length || 0,
+          lessons: processedLessons?.length || 0,
+          progress: Object.keys(progressMap || {}).length,
+          lessonProgress: Object.keys(lessonProgressMap || {}).length,
+          unlocks: Object.keys(unlocksMap || {}).length,
           academyCompleted: isAcademyCompleted,
-          hasAcademyBadge: !!academyBadgeData
+          hasAcademyBadge: !!academyBadgeData,
+          stats: stats
         });
+
+        // Debug: Check state immediately after setting
+        setTimeout(() => {
+          console.log('🔍 State Check After Setting:', {
+            lessonProgressStateKeys: Object.keys(lessonProgressMap || {}).length,
+            lessonProgressStateValues: Object.values(lessonProgressMap || {}).filter((p: any) => p.completed).length,
+            lessonProgressMapRaw: lessonProgressMap
+          });
+        }, 100);
 
       } catch (error) {
         console.error('❌ Academy data fetch error:', error);
@@ -281,12 +213,20 @@ export default function AcademyPage() {
     };
 
     fetchAcademyData();
-  }, [user, isDataLoaded]);
+  }, [user?.id]);
 
   // Calculate totals
   const totalLessons = lessons.length;
   const totalCompleted = Object.values(lessonProgress).filter(p => p.completed).length;
   const overallProgress = totalLessons > 0 ? Math.round((totalCompleted / totalLessons) * 100) : 0;
+
+  // Debug logging (simplified)
+  console.log('🎯 Academy Progress Debug:', {
+    totalLessons,
+    totalCompleted,
+    overallProgress,
+    lessonProgressKeys: Object.keys(lessonProgress).length
+  });
 
   // Get module number based on order_index
   const getModuleNumber = (orderIndex: number) => {
@@ -330,7 +270,20 @@ export default function AcademyPage() {
       <div className="mb-8 p-6 bg-[#181F17]/90 rounded-xl border border-[#3A4D23]">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold text-[#8BAE5A]">Algemene Voortgang</h2>
+          <div className="flex items-center gap-3">
           <span className="text-[#8BAE5A] font-bold">{overallProgress}%</span>
+            <button
+              onClick={() => {
+                console.log('🔄 Manual refresh triggered');
+                setIsDataLoaded(false);
+                setLoading(true);
+              }}
+              className="px-3 py-1 bg-[#3A4D23] text-white rounded-lg hover:bg-[#4A5D33] transition-colors text-sm"
+              title="Ververs data"
+            >
+              🔄
+            </button>
+          </div>
         </div>
         <div className="w-full bg-[#232D1A] rounded-full h-3">
           <div
@@ -383,6 +336,19 @@ export default function AcademyPage() {
             Math.round((completedLessons / moduleLessons.length) * 100) : 0;
           const isUnlocked = unlocks[module.id]?.unlocked_at || module.order_index === 1;
           const isCompleted = progress === 100;
+
+          // Debug logging for Chiel
+          if (user?.email === 'chiel@media2net.nl') {
+            console.log(`🔍 Module ${module.title}:`, {
+              moduleId: module.id,
+              orderIndex: module.order_index,
+              isUnlocked,
+              unlockData: unlocks[module.id],
+              progress,
+              completedLessons,
+              totalLessons: moduleLessons.length
+            });
+          }
 
           return (
             <button
@@ -489,6 +455,7 @@ export default function AcademyPage() {
         <BadgeUnlockModal
           isOpen={showBadgeModal}
           badge={badgeData}
+          hasUnlockedBadge={true}
           onClose={() => {
             setShowBadgeModal(false);
             setBadgeData(null);

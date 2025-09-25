@@ -26,6 +26,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useSubscription } from '@/hooks/useSubscription';
 import { supabase } from '@/lib/supabase';
 import DynamicTrainingPlanView from './components/DynamicTrainingPlanView';
+import SchemaChangeWarningModal from '@/components/SchemaChangeWarningModal';
 
 interface TrainingSchema {
   id: string;
@@ -155,6 +156,7 @@ function TrainingschemasContent() {
   const [showWarningModal, setShowWarningModal] = useState(false);
   const [showSchemaWarningModal, setShowSchemaWarningModal] = useState(false);
   const [schemaToChange, setSchemaToChange] = useState<string | null>(null);
+  const [showSchemaChangeWarningModal, setShowSchemaChangeWarningModal] = useState(false);
   const [showAllSchemas, setShowAllSchemas] = useState(false);
   const [selectedSchemaDetail, setSelectedSchemaDetail] = useState<TrainingSchema | null>(null);
   const [profileLoading, setProfileLoading] = useState(true);
@@ -197,20 +199,36 @@ function TrainingschemasContent() {
     } : null,
     trainingSchemasCount: trainingSchemas.length,
     showOnboardingStep3,
-    onboardingStatus
+    onboardingStatus,
+    currentSchemaPeriod: currentSchemaPeriod ? {
+      id: currentSchemaPeriod.id,
+      training_schema_id: currentSchemaPeriod.training_schema_id,
+      start_date: currentSchemaPeriod.start_date,
+      end_date: currentSchemaPeriod.end_date,
+      status: currentSchemaPeriod.status,
+      schema_name: currentSchemaPeriod.training_schemas?.name
+    } : null
   });
 
   // Fetch current schema period
   const fetchCurrentSchemaPeriod = async () => {
-    if (!user?.id) return;
+    if (!user?.id) {
+      console.log('⚠️ fetchCurrentSchemaPeriod: No user ID');
+      return;
+    }
+    
+    console.log('🔄 fetchCurrentSchemaPeriod: Starting fetch for user:', user.id);
     
     try {
       setSchemaPeriodLoading(true);
       const response = await fetch(`/api/training-schema-period?userId=${user.id}`);
       const result = await response.json();
       
+      console.log('📡 fetchCurrentSchemaPeriod: API response:', result);
+      
       if (response.ok && result.data) {
         // Transform the API response to match the expected format
+        // The API returns schema_start_date and schema_end_date, not start_date and end_date
         const transformedData = {
           id: result.data.selected_schema_id,
           user_id: user.id,
@@ -222,6 +240,15 @@ function TrainingschemasContent() {
           updated_at: new Date().toISOString(),
           training_schemas: result.data.training_schema
         };
+        
+        console.log('🔍 fetchCurrentSchemaPeriod: Raw schema_start_date:', result.data.schema_start_date);
+        console.log('🔍 fetchCurrentSchemaPeriod: Raw schema_end_date:', result.data.schema_end_date);
+        console.log('🔍 fetchCurrentSchemaPeriod: Start date parsed:', new Date(transformedData.start_date));
+        console.log('🔍 fetchCurrentSchemaPeriod: End date parsed:', new Date(transformedData.end_date));
+        console.log('🔍 fetchCurrentSchemaPeriod: Is start_date valid?', !isNaN(new Date(transformedData.start_date).getTime()));
+        console.log('🔍 fetchCurrentSchemaPeriod: Is end_date valid?', !isNaN(new Date(transformedData.end_date).getTime()));
+        console.log('🔍 fetchCurrentSchemaPeriod: Schema name:', transformedData.training_schemas?.name);
+        
         setCurrentSchemaPeriod(transformedData);
         console.log('✅ Current schema period loaded:', transformedData);
       } else {
@@ -235,6 +262,19 @@ function TrainingschemasContent() {
       setSchemaPeriodLoading(false);
     }
   };
+
+  // Refresh schema period data when user comes back to the page
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && user?.id) {
+        console.log('🔄 Page became visible, refreshing schema period data...');
+        fetchCurrentSchemaPeriod();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [user?.id]);
 
   // Fetch user's schema progress to determine which schemas are unlocked
   const fetchSchemaProgress = async (userId: string) => {
@@ -938,6 +978,60 @@ function TrainingschemasContent() {
     setSchemaToChange(null);
   };
 
+  // Handle profile edit with active schema warning
+  const handleProfileEditWithWarning = async () => {
+    try {
+      console.log('🔄 User confirmed profile edit, deactivating current schema...');
+      console.log('🔍 Current schema period:', currentSchemaPeriod);
+      console.log('🔍 User ID:', user?.id);
+      
+      // Deactivate current schema period
+      if (currentSchemaPeriod && user?.id) {
+        console.log('📡 Making API call to deactivate schema...');
+        const response = await fetch('/api/training-schema-period', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: user.id,
+            trainingSchemaId: currentSchemaPeriod.training_schema_id,
+            action: 'deactivate'
+          })
+        });
+
+        console.log('📡 API response status:', response.status);
+        const responseData = await response.json();
+        console.log('📡 API response data:', responseData);
+
+        if (response.ok) {
+          console.log('✅ Current schema period deactivated');
+          setCurrentSchemaPeriod(null);
+          toast.success('Huidige schema is gedeactiveerd');
+        } else {
+          console.error('❌ Failed to deactivate schema period:', responseData);
+          toast.error('Er is een fout opgetreden bij het deactiveren van het schema');
+          return;
+        }
+      } else {
+        console.log('⚠️ No current schema period or user ID available');
+      }
+
+      // Close the warning modal and show calculator
+      setShowSchemaChangeWarningModal(false);
+      
+      // Show calculator with current profile data
+      setShowCalculator(true);
+      setCalculatorData({
+        training_goal: userTrainingProfile?.training_goal || '',
+        training_frequency: userTrainingProfile?.training_frequency?.toString() || '',
+        equipment_type: userTrainingProfile?.equipment_type || 'gym'
+      });
+      
+    } catch (error) {
+      console.error('❌ Error handling profile edit confirmation:', error);
+      toast.error('Er is een fout opgetreden');
+    }
+  };
+
   const selectTrainingSchema = useCallback(async (schemaId: string) => {
     try {
       console.log('🎯 selectTrainingSchema called with:', { schemaId, userId: user?.id, userEmail: user?.email });
@@ -1010,8 +1104,22 @@ function TrainingschemasContent() {
       
       if (response.ok && data.success) {
         setSelectedTrainingSchema(schemaId);
-        setCurrentSchemaPeriod(data.data);
-        console.log('✅ Schema period created:', data.data);
+        
+        // Transform the API response to match the expected format
+        const transformedData = {
+          id: data.data.selected_schema_id,
+          user_id: user.id,
+          training_schema_id: data.data.selected_schema_id,
+          start_date: data.data.schema_start_date,
+          end_date: data.data.schema_end_date,
+          status: 'active' as const,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          training_schemas: data.data.training_schema
+        };
+        
+        setCurrentSchemaPeriod(transformedData);
+        console.log('✅ Schema period created:', transformedData);
         
         const startDate = new Date(data.data.schema_start_date).toLocaleDateString('nl-NL');
         const endDate = new Date(data.data.schema_end_date).toLocaleDateString('nl-NL');
@@ -1397,14 +1505,54 @@ function TrainingschemasContent() {
           console.log('🔄 EMERGENCY: Force resetting stuck loading state');
           setTrainingLoading(false);
         }
+        // Also refresh current schema period data
+        if (user?.id) {
+          console.log('🔄 EMERGENCY: Refreshing current schema period data');
+          fetchCurrentSchemaPeriod();
+        }
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (!document.hidden && user?.id) {
+        console.log('🔄 Page became visible, refreshing current schema period');
+        fetchCurrentSchemaPeriod();
+      }
+    };
+
+    const handleFocus = () => {
+      if (user?.id) {
+        console.log('🔄 Window focused, refreshing current schema period');
+        fetchCurrentSchemaPeriod();
       }
     };
 
     if (typeof window !== 'undefined') {
       window.addEventListener('pageshow', handlePageShow);
-      return () => window.removeEventListener('pageshow', handlePageShow);
+      window.addEventListener('focus', handleFocus);
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+      return () => {
+        window.removeEventListener('pageshow', handlePageShow);
+        window.removeEventListener('focus', handleFocus);
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
+      };
     }
-  }, [trainingLoading]);
+  }, [trainingLoading, user?.id]);
+
+  // Periodic refresh of current schema period data
+  useEffect(() => {
+    if (!user?.id) return;
+
+    // Refresh every 30 seconds when page is visible
+    const interval = setInterval(() => {
+      if (!document.hidden) {
+        console.log('🔄 Periodic refresh of current schema period');
+        fetchCurrentSchemaPeriod();
+      }
+    }, 30000); // 30 seconds
+
+    return () => clearInterval(interval);
+  }, [user?.id]);
 
   // CRITICAL: Safety mechanism to prevent stuck loading states
   useEffect(() => {
@@ -1520,6 +1668,47 @@ function TrainingschemasContent() {
     }
   }, [showOnboardingStep3]);
 
+  // Fetch current schema period when user is available
+  useEffect(() => {
+    if (user?.id && !authLoading) {
+      console.log('🔄 Fetching current schema period for user:', user.id);
+      fetchCurrentSchemaPeriod();
+    }
+  }, [user?.id, authLoading]);
+
+  // Also fetch when returning to this page (on focus/visibility change)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden && user?.id && !authLoading) {
+        console.log('🔄 Page became visible, refreshing schema period data...');
+        fetchCurrentSchemaPeriod();
+      }
+    };
+
+    const handleFocus = () => {
+      if (user?.id && !authLoading) {
+        console.log('🔄 Page focused, refreshing schema period data...');
+        fetchCurrentSchemaPeriod();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [user?.id, authLoading]);
+
+  // Refresh schema period data when component mounts (useful when navigating back)
+  useEffect(() => {
+    if (user?.id && !authLoading && !schemaPeriodLoading) {
+      console.log('🔄 Component mounted/remounted, refreshing schema period data...');
+      fetchCurrentSchemaPeriod();
+    }
+  }, [user?.id, authLoading]);
+
   // Set selectedTrainingSchema when currentSchemaPeriod is loaded or from profile
   useEffect(() => {
     if (currentSchemaPeriod && currentSchemaPeriod.training_schema_id) {
@@ -1599,18 +1788,32 @@ function TrainingschemasContent() {
               <p className="text-gray-300 text-sm mb-4">
                 Klik op onderstaande button als de pagina niet laadt, en dat hij daarna sowieso laadt
               </p>
-              <button
-                onClick={() => {
-                  console.log('🔄 Hard refresh button clicked - forcing page reload');
-                  window.location.reload();
-                }}
-                className="w-full bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#0A0F0A] font-bold px-6 py-3 rounded-lg hover:from-[#A6C97B] hover:to-[#FFE55C] transition-all duration-200 flex items-center justify-center gap-2"
-              >
+              <div className="space-y-2">
+                <button
+                  onClick={() => {
+                    console.log('🔄 Schema period refresh button clicked');
+                    fetchCurrentSchemaPeriod();
+                  }}
+                  className="w-full bg-[#8BAE5A] text-[#232D1A] font-semibold px-4 py-2 rounded-lg hover:bg-[#7A9D4A] transition-colors flex items-center justify-center gap-2"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  Schema Data Verversen
+                </button>
+                <button
+                  onClick={() => {
+                    console.log('🔄 Hard refresh button clicked - forcing page reload');
+                    window.location.reload();
+                  }}
+                  className="w-full bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#0A0F0A] font-bold px-6 py-3 rounded-lg hover:from-[#A6C97B] hover:to-[#FFE55C] transition-all duration-200 flex items-center justify-center gap-2"
+                >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
                 Harde Refresh
               </button>
+              </div>
             </div>
           </div>
         </div>
@@ -1777,13 +1980,20 @@ function TrainingschemasContent() {
                 </div>
                 <button
                   onClick={() => {
-                    setShowCalculator(true);
-                    // Pre-fill calculator with current profile data
-                    setCalculatorData({
-                      training_goal: userTrainingProfile.training_goal,
-                      training_frequency: userTrainingProfile.training_frequency.toString(),
-                      equipment_type: userTrainingProfile.equipment_type
-                    });
+                    // Check if user has an active schema period
+                    if (currentSchemaPeriod) {
+                      // Show warning modal instead of calculator
+                      setShowSchemaChangeWarningModal(true);
+                    } else {
+                      // No active schema, proceed normally
+                      setShowCalculator(true);
+                      // Pre-fill calculator with current profile data
+                      setCalculatorData({
+                        training_goal: userTrainingProfile.training_goal,
+                        training_frequency: userTrainingProfile.training_frequency.toString(),
+                        equipment_type: userTrainingProfile.equipment_type
+                      });
+                    }
                   }}
                   className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors text-xs sm:text-sm font-medium"
                 >
@@ -2531,6 +2741,14 @@ function TrainingschemasContent() {
         isOpen={showPostOnboardingModal}
         onClose={() => setShowPostOnboardingModal(false)}
         selectedSchema={selectedSchemaForModal}
+      />
+
+      {/* Schema Change Warning Modal */}
+      <SchemaChangeWarningModal
+        isOpen={showSchemaChangeWarningModal}
+        onClose={() => setShowSchemaChangeWarningModal(false)}
+        onConfirm={handleProfileEditWithWarning}
+        currentSchemaName={currentSchemaPeriod?.training_schemas?.name || 'Huidige Schema'}
       />
     </PageLayout>
   );

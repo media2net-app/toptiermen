@@ -10,11 +10,82 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { userId, schemaId, startDate } = body;
+    const { userId, schemaId, startDate, action } = body;
 
-    if (!userId || !schemaId) {
+    if (!userId) {
       return NextResponse.json({ 
-        error: 'userId and schemaId are required' 
+        error: 'userId is required' 
+      }, { status: 400 });
+    }
+
+    // Handle deactivate action
+    if (action === 'deactivate') {
+      console.log('📅 Deactivating training schema period for user:', userId);
+      
+      // Check if userId is an email and convert to UUID if needed
+      let actualUserId = userId;
+      if (userId.includes('@')) {
+        try {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/auth/get-user-uuid`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: userId })
+          });
+          
+          if (response.ok) {
+            const { uuid } = await response.json();
+            actualUserId = uuid;
+            console.log('✅ Converted email to UUID for deactivation:', actualUserId);
+          }
+        } catch (error) {
+          console.log('❌ Error converting email to UUID for deactivation:', error);
+        }
+      }
+
+      // First, check if there are any active periods to deactivate
+      const { data: activePeriods, error: checkError } = await supabase
+        .from('user_schema_periods')
+        .select('id, training_schema_id')
+        .eq('user_id', actualUserId)
+        .eq('status', 'active');
+
+      if (checkError) {
+        console.error('❌ Error checking active periods:', checkError);
+        return NextResponse.json({ error: 'Failed to check active periods' }, { status: 500 });
+      }
+
+      // If there are active periods, deactivate them
+      if (activePeriods && activePeriods.length > 0) {
+        console.log('📅 Found active periods to deactivate:', activePeriods.length);
+        
+        // Delete active periods instead of updating to avoid constraint issues
+        const { error: deleteError } = await supabase
+          .from('user_schema_periods')
+          .delete()
+          .eq('user_id', actualUserId)
+          .eq('status', 'active');
+
+        if (deleteError) {
+          console.error('❌ Error deleting active periods:', deleteError);
+          return NextResponse.json({ error: 'Failed to deactivate schema period' }, { status: 500 });
+        }
+        
+        console.log('✅ Active periods deleted successfully');
+      } else {
+        console.log('ℹ️ No active periods found to deactivate');
+      }
+
+      console.log('✅ Training schema period deactivated successfully');
+      return NextResponse.json({ 
+        success: true,
+        message: 'Schema period deactivated successfully'
+      });
+    }
+
+    // Original logic for creating/updating schema periods
+    if (!schemaId) {
+      return NextResponse.json({ 
+        error: 'schemaId is required for creating schema periods' 
       }, { status: 400 });
     }
 
@@ -54,7 +125,21 @@ export async function POST(request: NextRequest) {
     const end = new Date(start);
     end.setDate(end.getDate() + (8 * 7)); // 8 weeks
 
-    // First, update profiles table with schema selection
+    // First, deactivate all existing active periods for this user
+    const { error: deactivateError } = await supabase
+      .from('user_schema_periods')
+      .update({ status: 'completed' })
+      .eq('user_id', actualUserId)
+      .eq('status', 'active');
+
+    if (deactivateError) {
+      console.log('⚠️ Warning deactivating existing periods:', deactivateError.message);
+      // Don't fail here, just log the warning
+    } else {
+      console.log('✅ All existing active periods deactivated');
+    }
+
+    // Then, update profiles table with schema selection
     const { error: profileError } = await supabase
       .from('profiles')
       .update({ 

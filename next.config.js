@@ -2,8 +2,8 @@
 const nextConfig = {
   // Performance optimizations
   experimental: {
-    // Enable CSS optimization
-    optimizeCss: true,
+    // Enable CSS optimization - temporarily disabled to fix CSS issues
+    optimizeCss: false,
     optimizePackageImports: ['@heroicons/react'],
     // Enable TypeScript build cache
     typedRoutes: false,
@@ -34,6 +34,9 @@ const nextConfig = {
         }
         return plugin;
       });
+      
+      // Disable CSS source maps in development to prevent CSS issues
+      config.devtool = false;
     }
     return config;
   },

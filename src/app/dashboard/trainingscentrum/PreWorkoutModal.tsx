@@ -20,6 +20,7 @@ interface PreWorkoutModalProps {
   schemaName: string;
   focusArea: string;
   estimatedDuration: string;
+  user?: any;
 }
 
 interface ChecklistItem {
@@ -35,7 +36,8 @@ export default function PreWorkoutModal({
   dayNumber,
   schemaName,
   focusArea,
-  estimatedDuration
+  estimatedDuration,
+  user: userProp
 }: PreWorkoutModalProps) {
   const router = useRouter();
   const { user } = useSupabaseAuth();
@@ -120,6 +122,9 @@ export default function PreWorkoutModal({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           sessionId: sessionId,
+          userId: userProp?.id || user?.id,
+          schemaId: schemaId,
+          dayNumber: dayNumber,
           rating: 5,
           notes: 'Quick completion'
         })
