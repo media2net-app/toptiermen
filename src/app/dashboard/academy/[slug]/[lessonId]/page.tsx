@@ -7,7 +7,68 @@ import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import PageLayout from '@/components/PageLayout';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import CDNVideoPlayer from '@/components/CDNVideoPlayer';
+// Simple video player for fast loading like onboarding
+const SimpleVideoPlayer = ({ src, onEnded, onPlay, onPause, className }: any) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isBuffering, setIsBuffering] = useState(false);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const handleWaiting = () => setIsBuffering(true);
+    const handleCanPlay = () => setIsBuffering(false);
+    const handlePlay = () => {
+      setIsBuffering(false);
+      onPlay?.();
+    };
+    const handlePause = () => {
+      onPause?.();
+    };
+    const handleEnded = () => {
+      onEnded?.();
+    };
+
+    video.addEventListener('waiting', handleWaiting);
+    video.addEventListener('canplay', handleCanPlay);
+    video.addEventListener('play', handlePlay);
+    video.addEventListener('pause', handlePause);
+    video.addEventListener('ended', handleEnded);
+
+    return () => {
+      video.removeEventListener('waiting', handleWaiting);
+      video.removeEventListener('canplay', handleCanPlay);
+      video.removeEventListener('play', handlePlay);
+      video.removeEventListener('pause', handlePause);
+      video.removeEventListener('ended', handleEnded);
+    };
+  }, [onPlay, onPause, onEnded]);
+
+  return (
+    <div className="relative aspect-video bg-black rounded-lg overflow-hidden">
+      <video
+        ref={videoRef}
+        className={className}
+        controls
+        preload="metadata"
+        playsInline
+        crossOrigin="anonymous"
+      >
+        <source src={src} type="video/mp4" />
+        Je browser ondersteunt geen video afspelen.
+      </video>
+      
+      {isBuffering && (
+        <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+          <div className="bg-black/60 rounded-lg p-3 flex items-center gap-2">
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+            <span className="text-white text-sm">Bufferen...</span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 import { PlayIcon } from '@heroicons/react/24/solid';
 import { academyNav } from '@/utils/academyNavigation';
 
@@ -1114,7 +1175,7 @@ export default function LessonDetailPage() {
           {/* Video content */}
           {lesson.video_url && (
             <div className="mb-6">
-              <CDNVideoPlayer
+              <SimpleVideoPlayer
                 key={lesson.id}
                 src={lesson.video_url}
                 onEnded={() => {
@@ -1127,7 +1188,6 @@ export default function LessonDetailPage() {
                 onPause={() => {
                   setShowVideoOverlay(true);
                 }}
-                preload="metadata"
                 className="w-full h-full rounded-lg bg-black"
               />
             </div>
