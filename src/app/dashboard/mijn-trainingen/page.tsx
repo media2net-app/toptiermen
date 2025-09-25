@@ -191,22 +191,30 @@ export default function MijnTrainingen() {
       // Calculate the correct week number based on completed weeks
       const nextWeekNumber = completedWeeks.length + 1;
       
-      // Check if this week completion already exists in database
+      // Check if modal should be shown (not already closed)
       if (user && trainingData?.schema?.id) {
         try {
-          const response = await fetch(`/api/week-completion?userId=${user.id}&schemaId=${trainingData.schema.id}`);
-          const data = await response.json();
+          const modalResponse = await fetch(`/api/week-completion-modal-views?userId=${user.id}&schemaId=${trainingData.schema.id}&weekNumber=${nextWeekNumber}`);
+          const modalData = await modalResponse.json();
           
-          if (data.success && data.completions) {
-            const existingCompletion = data.completions.find((completion: any) => completion.week_number === nextWeekNumber);
-            
-            if (existingCompletion) {
-              console.log('📅 Week completion already exists in database, skipping modal');
-              return;
-            }
+          if (modalData.success && !modalData.canShow) {
+            console.log('📋 Modal was already closed for this week, skipping modal');
+            return;
           }
+          
+          // Record that modal is being shown
+          await fetch('/api/week-completion-modal-views', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId: user.id,
+              schemaId: trainingData.schema.id,
+              weekNumber: nextWeekNumber,
+              action: 'shown'
+            })
+          });
         } catch (error) {
-          console.error('❌ Error checking existing week completion:', error);
+          console.error('❌ Error checking modal view status:', error);
         }
       }
       
@@ -248,10 +256,23 @@ export default function MijnTrainingen() {
         }))
       };
       
-      // Save week completion to database first
+      // Record modal close and save week completion to database
       try {
-        console.log('💾 Saving week completion to database...');
+        console.log('💾 Recording modal close and saving week completion...');
         
+        // Record that modal was closed (via Start New Week button)
+        await fetch('/api/week-completion-modal-views', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: user.id,
+            schemaId: trainingData.schema.id,
+            weekNumber: weekCompletionData.week,
+            action: 'closed'
+          })
+        });
+        
+        // Save week completion to database
         const response = await fetch('/api/week-completion', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -265,7 +286,7 @@ export default function MijnTrainingen() {
         });
 
         if (response.ok) {
-          console.log('✅ Week completion saved to database');
+          console.log('✅ Week completion and modal close recorded');
         } else {
           console.error('❌ Failed to save week completion:', response.status);
         }
@@ -981,11 +1002,24 @@ export default function MijnTrainingen() {
                 <div className="flex justify-center">
                   <button
                     onClick={async () => {
-                      // Save week completion to database when closing
+                      // Record modal close and save week completion to database
                       if (user && trainingData?.schema?.id && weekCompletionData) {
                         try {
-                          console.log('💾 Saving week completion to database...');
+                          console.log('💾 Recording modal close and saving week completion...');
                           
+                          // Record that modal was closed
+                          await fetch('/api/week-completion-modal-views', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                              userId: user.id,
+                              schemaId: trainingData.schema.id,
+                              weekNumber: weekCompletionData.week,
+                              action: 'closed'
+                            })
+                          });
+                          
+                          // Save week completion to database
                           const response = await fetch('/api/week-completion', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
@@ -999,7 +1033,7 @@ export default function MijnTrainingen() {
                           });
 
                           if (response.ok) {
-                            console.log('✅ Week completion saved to database');
+                            console.log('✅ Week completion and modal close recorded');
                           } else {
                             console.error('❌ Failed to save week completion:', response.status);
                           }
