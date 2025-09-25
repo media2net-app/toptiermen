@@ -174,12 +174,8 @@ export async function POST(request: NextRequest) {
     
     console.log(`✅ Password successfully updated for user ${user.id}`);
 
-    // For now, skip email sending and return success with password
-    // TODO: Fix email service configuration
-    console.log(`📧 Email sending temporarily disabled - password reset for: ${email}`);
-    console.log(`🔑 New password: ${newTempPassword}`);
-
     console.log('✅ Password reset completed successfully for:', email);
+    console.log(`🔑 New password: ${newTempPassword}`);
     
     return NextResponse.json({
       success: true,
