@@ -26,25 +26,13 @@ function LoginPageContent() {
     error: "",
     showPassword: false,
     rememberMe: false,
-    isClient: false,
     showLoadingOverlay: false,
     loadingProgress: 0,
     loadingText: "",
     isRedirecting: false
   });
 
-  // ✅ FIX: Ensure client-side hydration consistency
-  useEffect(() => {
-    setLoginState(prev => ({ ...prev, isClient: true }));
-    
-    // Force loading to complete after a short delay
-    const forceLoadingComplete = setTimeout(() => {
-      console.log('🔄 Forcing loading completion...');
-      // This will trigger the component to show the login form
-    }, 1000);
-    
-    return () => clearTimeout(forceLoadingComplete);
-  }, []);
+  // ✅ FIX: Removed isClient logic to prevent hydration mismatch
   
   // Ref to prevent multiple redirects
   const redirectExecuted = useRef(false);
@@ -98,30 +86,9 @@ function LoginPageContent() {
   });
   const [resetMessage, setResetMessage] = useState("");
 
-  // ✅ PHASE 1: Hydration safety - set isClient after mount
-  useEffect(() => {
-    setLoginState(prev => ({ ...prev, isClient: true }));
-    
-    // Fallback timeout to prevent infinite loading - reduced timeout
-    const fallbackTimeout = setTimeout(() => {
-      console.log('⚠️ Login page timeout - forcing completion');
-      setLoginState(prev => ({ ...prev, isLoading: false }));
-    }, 200); // Reduced to 0.2s for faster loading
-    
-    return () => clearTimeout(fallbackTimeout);
-  }, []);
+  // ✅ FIX: Removed isClient logic to prevent hydration mismatch
 
-  // ✅ NEW: Fallback for auth context loading issues
-  useEffect(() => {
-    const authTimeout = setTimeout(() => {
-      if (loading && loginState.isClient) {
-        console.log('⚠️ Auth context loading timeout - forcing auth completion');
-        // Force auth to complete if it's taking too long
-      }
-    }, 500); // 0.5 second timeout for auth loading
-    
-    return () => clearTimeout(authTimeout);
-  }, [loading, loginState.isClient]);
+  // ✅ FIX: Removed isClient logic to prevent hydration mismatch
 
 
   // ✅ FIXED: Single useEffect for logout status handling
@@ -382,30 +349,8 @@ function LoginPageContent() {
     }
   }
 
-  // ✅ FIX: Prevent hydration mismatch by ensuring consistent rendering
-  if (!loginState.isClient) {
-    return (
-      <div 
-        className="min-h-screen flex items-center justify-center relative px-4 py-6"
-        style={{ backgroundColor: '#181F17' }}
-      >
-        <img src="/pattern.png" alt="pattern" className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none z-0" />
-        <div className="w-full max-w-md p-6 sm:p-8 rounded-3xl shadow-2xl bg-[#232D1A]/95 border border-[#3A4D23] backdrop-blur-lg relative z-10">
-          <div className="flex justify-center mb-4">
-            <img 
-              src="/logo_white-full.svg" 
-              alt="Top Tier Men Logo" 
-              className="h-16 sm:h-20 md:h-24 w-auto"
-            />
-          </div>
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#8BAE5A] mx-auto"></div>
-            <p className="text-[#8BAE5A] mt-4">Laden...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // ✅ FIX: Show login form immediately to prevent hydration issues
+  // Removed the isClient check that was causing hydration mismatch
 
   return (
     <div 
@@ -426,7 +371,7 @@ function LoginPageContent() {
         <p className="text-[#B6C948] text-center mb-6 sm:mb-8 text-base sm:text-lg font-figtree">Log in op je dashboard</p>
         
         {/* ✅ FIXED: Enhanced debug info - only in development */}
-        {loginState.isClient && process.env.NODE_ENV === 'development' && (
+        {process.env.NODE_ENV === 'development' && (
           <div className="mb-4 p-3 bg-[#181F17] border border-[#B6C948] rounded-lg text-xs">
             <p className="text-[#B6C948] font-bold mb-2">🔧 Debug Info:</p>
             <p className="text-[#8BAE5A]">Loading: {loading ? '✅' : '❌'}</p>
@@ -580,7 +525,7 @@ function LoginPageContent() {
       </div>
 
       {/* Loading Overlay */}
-      {loginState.isClient && loginState.showLoadingOverlay && (
+      {loginState.showLoadingOverlay && (
         <div className="fixed inset-0 bg-[#181F17]/95 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="text-center">
             {/* Logo */}
@@ -619,7 +564,7 @@ function LoginPageContent() {
       )}
 
       {/* ✅ FIXED: Simplified forgot password modal */}
-      {loginState.isClient && forgotPasswordState.showForgotPassword && (
+      {forgotPasswordState.showForgotPassword && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-[#232D1A] rounded-2xl p-8 max-w-md w-full mx-4 border border-[#3A4D23]">
             <div className="text-center mb-6">
