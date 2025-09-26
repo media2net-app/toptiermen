@@ -381,7 +381,7 @@ export default function MijnChallengesPage() {
         }
         
         toast.success(`Challenge "${suggestedChallenge.title}" toegevoegd!`);
-        setShowChallengeLibrary(false);
+        // Keep challenge library open so users can add more challenges
         
         // Check if user is in onboarding step 2 or 3 and has enough challenges
         if ((currentStep === 2 || currentStep === 3) && !isCompleted && challenges.length >= 2) { // 2 because we just added one, so total will be 3

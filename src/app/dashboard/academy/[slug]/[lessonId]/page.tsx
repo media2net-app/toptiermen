@@ -603,9 +603,9 @@ export default function LessonDetailPage() {
   // CRITICAL: Safety mechanism to prevent stuck loading states
   useEffect(() => {
     if (loading) {
-      // Shorter timeout for quicker recovery
+      // Increased timeout for better reliability after ebook navigation
       const timeoutId = setTimeout(() => {
-        console.log('⚠️ Loading timeout reached (5s), forcing reset');
+        console.log('⚠️ Loading timeout reached (15s), forcing reset');
         if (lesson && lesson.id === lessonId) {
           console.log('🔄 FORCE: We have correct data, resetting loading state');
           setLoading(false);
@@ -614,7 +614,7 @@ export default function LessonDetailPage() {
           console.log('🔄 FORCE: No correct data, retrying fetch');
           fetchData();
         }
-      }, 5000); // Reduced from 10s to 5s
+      }, 15000); // Increased to 15s for better reliability
 
       return () => clearTimeout(timeoutId);
     }

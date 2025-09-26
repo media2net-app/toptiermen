@@ -18,7 +18,15 @@ export async function GET(request: NextRequest) {
 
     console.log('🎓 Fetching academy progress for user:', userId);
 
-    // Fetch all academy data in parallel
+    // Add timeout wrapper for better reliability
+    const fetchWithTimeout = async (promise: Promise<any>, timeoutMs: number = 25000) => {
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Request timeout')), timeoutMs)
+      );
+      return Promise.race([promise, timeoutPromise]);
+    };
+
+    // Fetch all academy data in parallel with timeout protection
     const [
       { data: modulesData, error: modulesError },
       { data: lessonsData, error: lessonsError },
@@ -26,7 +34,7 @@ export async function GET(request: NextRequest) {
       { data: academyCompletionsData, error: academyCompletionsError },
       { data: moduleCompletionsData, error: moduleCompletionsError },
       { data: unlocksData, error: unlocksError }
-    ] = await Promise.all([
+    ] = await fetchWithTimeout(Promise.all([
       supabaseAdmin
         .from('academy_modules')
         .select('*')
@@ -56,7 +64,7 @@ export async function GET(request: NextRequest) {
         .from('user_module_unlocks')
         .select('*')
         .eq('user_id', userId)
-    ]);
+    ]), 25000);
 
     // Handle errors
     if (modulesError) {
@@ -240,6 +248,15 @@ export async function GET(request: NextRequest) {
 
   } catch (error) {
     console.error('❌ Error in academy progress API:', error);
+    
+    // Handle timeout errors specifically
+    if (error instanceof Error && error.message === 'Request timeout') {
+      console.error('⏰ Academy API timeout - returning timeout error');
+      return NextResponse.json({ 
+        error: 'Timeout bij het laden van academy data. Probeer opnieuw.' 
+      }, { status: 408 });
+    }
+    
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

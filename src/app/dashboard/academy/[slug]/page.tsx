@@ -52,6 +52,38 @@ export default function ModuleDetailPage() {
     setNavigating(false);
   }, [moduleId]);
 
+  // Enhanced page visibility handler for PDF ebook returns
+  useEffect(() => {
+    const handlePageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) {
+        console.log('📖 User returned from ebook, refreshing module data...');
+        // Force refresh data when returning from ebook
+        fetchModuleData();
+      }
+    };
+
+    const handlePageFocus = () => {
+      console.log('📖 Page focused, checking if we need to refresh...');
+      // Only refresh if we're in a loading state or have an error
+      if (loading || error) {
+        console.log('🔄 Refreshing due to loading/error state...');
+        fetchModuleData();
+      }
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('pageshow', handlePageShow);
+      window.addEventListener('focus', handlePageFocus);
+    }
+
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('pageshow', handlePageShow);
+        window.removeEventListener('focus', handlePageFocus);
+      }
+    };
+  }, [loading, error, moduleId]);
+
   const fetchModuleData = async () => {
     if (!moduleId) {
       console.log('Module page: Missing moduleId');
@@ -64,12 +96,12 @@ export default function ModuleDetailPage() {
     setLoading(true);
     setError(null);
 
-    // Add timeout to prevent infinite loading
+    // Add timeout to prevent infinite loading - increased for better reliability
     const timeoutId = setTimeout(() => {
       console.log('⏰ Module data fetch timeout - setting error');
       setError('Timeout bij het laden van module data');
       setLoading(false);
-    }, 10000); // 10 second timeout
+    }, 30000); // Increased to 30 second timeout for better reliability
 
     try {
       // Fetch all modules first to determine next module

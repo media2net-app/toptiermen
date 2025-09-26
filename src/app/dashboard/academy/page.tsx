@@ -153,12 +153,12 @@ export default function AcademyPage() {
       setLoading(true);
       setError(null);
 
-      // Add timeout to prevent infinite loading
+      // Add timeout to prevent infinite loading - increased for better reliability
       const timeoutId = setTimeout(() => {
         console.warn('⚠️ Academy data fetch timeout, showing error...');
         setError('Data laden duurde te lang. Probeer de pagina te verversen.');
         setLoading(false);
-      }, 15000); // Increased to 15 second timeout
+      }, 30000); // Increased to 30 second timeout for better reliability
 
       try {
         // Fetch academy data via API endpoint (bypasses RLS)
