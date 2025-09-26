@@ -53,27 +53,27 @@ const WelcomeVideoStep = ({ onComplete }: { onComplete: () => void }) => {
 
   return (
     <div className="text-center">
-      <div className="mb-6">
-        <h2 className="text-3xl font-bold text-white mb-4">Welkom bij Top Tier Men!</h2>
-        <p className="text-gray-300 text-lg mb-4">
+      <div className="mb-4 sm:mb-6">
+        <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-2 sm:mb-4">Welkom bij Top Tier Men!</h2>
+        <p className="text-gray-300 text-sm sm:text-base lg:text-lg mb-3 sm:mb-4">
           Bekijk deze video en start daarna met onboarding om vervolgens te starten om een Top Tier Man te worden.
         </p>
         
         {/* Notice */}
-        <div className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] rounded-lg p-4 mb-6">
+        <div className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] rounded-lg p-3 sm:p-4 mb-4 sm:mb-6">
           <div className="flex items-center justify-center space-x-2">
-            <InformationCircleIcon className="w-5 h-5 text-white" />
-            <p className="text-white font-semibold">
+            <InformationCircleIcon className="w-4 h-4 sm:w-5 sm:h-5 text-white flex-shrink-0" />
+            <p className="text-white font-semibold text-xs sm:text-sm">
               Let op: Je moet de video volledig afkijken om door te gaan
             </p>
           </div>
         </div>
       </div>
       
-      <div className="relative bg-black rounded-xl overflow-hidden mb-6 shadow-2xl">
+      <div className="relative bg-black rounded-xl overflow-hidden mb-4 sm:mb-6 shadow-2xl">
         <video
           ref={videoRef}
-          className="w-full h-80 object-cover"
+          className="w-full h-48 sm:h-64 lg:h-80 object-cover"
           onEnded={handleVideoEnd}
           onPause={handlePause}
           onPlay={handlePlayEvent}
@@ -92,21 +92,21 @@ const WelcomeVideoStep = ({ onComplete }: { onComplete: () => void }) => {
             <div className="text-center">
               <button
                 onClick={handlePlay}
-                className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] hover:from-[#7A9E4A] hover:to-[#E6C200] text-white p-6 rounded-full transition-all duration-300 transform hover:scale-110 shadow-2xl"
+                className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] hover:from-[#7A9E4A] hover:to-[#E6C200] text-white p-4 sm:p-6 rounded-full transition-all duration-300 transform hover:scale-110 shadow-2xl"
               >
-                <PlayIcon className="w-12 h-12" />
+                <PlayIcon className="w-8 h-8 sm:w-12 sm:h-12" />
               </button>
-              <p className="text-white mt-4 text-lg font-semibold">Klik om te starten</p>
+              <p className="text-white mt-2 sm:mt-4 text-sm sm:text-lg font-semibold">Klik om te starten</p>
             </div>
           </div>
         )}
       </div>
 
       {/* Progress indicator */}
-      <div className="mb-6">
+      <div className="mb-4 sm:mb-6">
         <div className="flex items-center justify-center space-x-2 mb-2">
-          <div className={`w-3 h-3 rounded-full ${videoWatched ? 'bg-[#8BAE5A]' : 'bg-gray-600'}`}></div>
-          <span className="text-gray-300 text-sm">
+          <div className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full ${videoWatched ? 'bg-[#8BAE5A]' : 'bg-gray-600'}`}></div>
+          <span className="text-gray-300 text-xs sm:text-sm">
             {videoWatched ? 'Video bekeken ✓' : 'Video nog niet bekeken'}
           </span>
         </div>
@@ -115,7 +115,7 @@ const WelcomeVideoStep = ({ onComplete }: { onComplete: () => void }) => {
       {videoWatched && (
         <button
           onClick={onComplete}
-          className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] hover:from-[#7A9E4A] hover:to-[#E6C200] text-white px-8 py-4 rounded-lg font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-lg"
+          className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] hover:from-[#7A9E4A] hover:to-[#E6C200] text-white px-6 py-3 sm:px-8 sm:py-4 rounded-lg font-bold text-sm sm:text-lg transition-all duration-300 transform hover:scale-105 shadow-lg"
         >
           Volgende Stap →
         </button>
@@ -184,12 +184,12 @@ const SetGoalStep = ({ onComplete }: { onComplete: (goal: string) => void }) => 
 
   return (
     <div className="text-center">
-      <h2 className="text-2xl font-bold text-white mb-4">Wat is je hoofddoel?</h2>
-      <p className="text-gray-300 mb-6">
+      <h2 className="text-xl sm:text-2xl font-bold text-white mb-2 sm:mb-4">Wat is je hoofddoel?</h2>
+      <p className="text-gray-300 text-sm sm:text-base mb-4 sm:mb-6">
         Beschrijf in één zin wat je wilt bereiken met Top Tier Men.
       </p>
       
-      <div className="mb-6 relative z-[9999]" style={{ zIndex: 9999 }}>
+      <div className="mb-4 sm:mb-6 relative z-[9999]" style={{ zIndex: 9999 }}>
         <textarea
           ref={textareaRef}
           value={goal}
@@ -197,7 +197,7 @@ const SetGoalStep = ({ onComplete }: { onComplete: (goal: string) => void }) => 
           onClick={handleTextareaClick}
           onTouchStart={handleTextareaTouch}
           placeholder="Bijvoorbeeld: Ik wil 10kg afvallen en sterker worden..."
-          className="w-full h-32 p-4 bg-[#1a2e1a] border border-[#8BAE5A] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-[#8BAE5A] focus:ring-2 focus:ring-[#8BAE5A] focus:ring-opacity-50 resize-none relative z-[9999]"
+          className="w-full h-24 sm:h-32 p-3 sm:p-4 bg-[#1a2e1a] border border-[#8BAE5A] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-[#8BAE5A] focus:ring-2 focus:ring-[#8BAE5A] focus:ring-opacity-50 resize-none relative z-[9999]"
           style={{ 
             pointerEvents: 'auto', 
             zIndex: 9999,
@@ -215,7 +215,7 @@ const SetGoalStep = ({ onComplete }: { onComplete: (goal: string) => void }) => 
       <button
         onClick={handleSubmit}
         disabled={!goal.trim()}
-        className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] hover:from-[#7A9E4A] hover:to-[#E6C200] disabled:from-gray-600 disabled:to-gray-600 disabled:cursor-not-allowed text-white px-8 py-4 rounded-lg font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-lg relative z-[9999]"
+        className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] hover:from-[#7A9E4A] hover:to-[#E6C200] disabled:from-gray-600 disabled:to-gray-600 disabled:cursor-not-allowed text-white px-6 py-3 sm:px-8 sm:py-4 rounded-lg font-bold text-sm sm:text-lg transition-all duration-300 transform hover:scale-105 shadow-lg relative z-[9999]"
         style={{ pointerEvents: 'auto', zIndex: 9999 }}
       >
         Doel opslaan →
@@ -595,7 +595,7 @@ export default function OnboardingV2Modal({ isOpen }: OnboardingV2ModalProps) {
       }}
     >
       <div 
-        className="bg-gradient-to-br from-[#1a2e1a] via-[#2d4a2d] to-[#1a2e1a] rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-[#8BAE5A] relative z-[9999]"
+        className="bg-gradient-to-br from-[#1a2e1a] via-[#2d4a2d] to-[#1a2e1a] rounded-2xl max-w-3xl w-full max-h-[95vh] overflow-y-auto shadow-2xl border border-[#8BAE5A] relative z-[9999]"
         onClick={(e) => e.stopPropagation()}
         style={{ 
           zIndex: 9999,
@@ -603,20 +603,20 @@ export default function OnboardingV2Modal({ isOpen }: OnboardingV2ModalProps) {
           WebkitOverflowScrolling: 'touch'
         }}
       >
-        <div className="p-8">
-          <div className="flex justify-between items-center mb-8">
+        <div className="p-4 sm:p-6 lg:p-8">
+          <div className="flex justify-between items-center mb-4 sm:mb-6">
             <div className="flex-1">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-[#8BAE5A]">
+                <span className="text-xs sm:text-sm font-medium text-[#8BAE5A]">
                   Stap {stepInfo.currentStepNumber} van {stepInfo.totalSteps}
                 </span>
-                <span className="text-sm font-medium text-white">
+                <span className="text-xs sm:text-sm font-medium text-white">
                   {Math.round(stepInfo.percentage)}%
                 </span>
               </div>
-              <div className="w-full bg-gray-700 rounded-full h-2 mb-1">
+              <div className="w-full bg-gray-700 rounded-full h-1.5 sm:h-2 mb-1">
                 <div 
-                  className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] h-2 rounded-full transition-all duration-500 ease-out"
+                  className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] h-1.5 sm:h-2 rounded-full transition-all duration-500 ease-out"
                   style={{ width: `${stepInfo.percentage}%` }}
                 ></div>
               </div>

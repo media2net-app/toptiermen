@@ -39,6 +39,7 @@ interface TrainingSchema {
   training_goal?: string;
   rep_range?: string;
   equipment_type?: string;
+  schema_nummer?: number;
 }
 
 interface TrainingDay {
@@ -139,7 +140,7 @@ export default function MijnTrainingen() {
         console.log('✅ Active schema found, current day:', data.progress.current_day);
       }
 
-      // Load week completions from database
+      // Load week completions from database (with fallback for missing tables)
       if (data.hasActiveSchema && data.schema?.id) {
         try {
           console.log('📅 Loading week completions...');
@@ -147,7 +148,7 @@ export default function MijnTrainingen() {
           const weekData = await weekResponse.json();
           
           if (weekData.success && weekData.completions) {
-            console.log('✅ Week completions loaded:', weekData.completions.length);
+            console.log('✅ Week completions loaded from database:', weekData.completions.length);
             
             // Convert database completions to local format
             const loadedCompletedWeeks = weekData.completions.map((completion: any) => ({
@@ -157,9 +158,33 @@ export default function MijnTrainingen() {
             }));
             
             setCompletedWeeks(loadedCompletedWeeks);
+          } else {
+            console.log('⚠️ No week completions found in database, using local storage');
+            // Try to load from localStorage as fallback
+            const localCompletedWeeks = localStorage.getItem(`completedWeeks_${user.id}_${data.schema.id}`);
+            if (localCompletedWeeks) {
+              try {
+                const parsedWeeks = JSON.parse(localCompletedWeeks);
+                setCompletedWeeks(parsedWeeks);
+                console.log('✅ Week completions loaded from localStorage:', parsedWeeks.length);
+              } catch (parseError) {
+                console.log('⚠️ Could not parse localStorage week completions');
+              }
+            }
           }
         } catch (error) {
-          console.error('❌ Error loading week completions:', error);
+          console.log('⚠️ Week completions database not available (tables missing), using localStorage fallback');
+          // Try to load from localStorage as fallback
+          const localCompletedWeeks = localStorage.getItem(`completedWeeks_${user.id}_${data.schema.id}`);
+          if (localCompletedWeeks) {
+            try {
+              const parsedWeeks = JSON.parse(localCompletedWeeks);
+              setCompletedWeeks(parsedWeeks);
+              console.log('✅ Week completions loaded from localStorage:', parsedWeeks.length);
+            } catch (parseError) {
+              console.log('⚠️ Could not parse localStorage week completions');
+            }
+          }
         }
       }
 
@@ -191,7 +216,7 @@ export default function MijnTrainingen() {
       // Calculate the correct week number based on completed weeks
       const nextWeekNumber = completedWeeks.length + 1;
       
-      // Check if modal should be shown (not already closed)
+      // Check if modal should be shown (not already closed) - with fallback for missing tables
       if (user && trainingData?.schema?.id) {
         try {
           const modalResponse = await fetch(`/api/week-completion-modal-views?userId=${user.id}&schemaId=${trainingData.schema.id}&weekNumber=${nextWeekNumber}`);
@@ -202,19 +227,23 @@ export default function MijnTrainingen() {
             return;
           }
           
-          // Record that modal is being shown
-          await fetch('/api/week-completion-modal-views', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              userId: user.id,
-              schemaId: trainingData.schema.id,
-              weekNumber: nextWeekNumber,
-              action: 'shown'
-            })
-          });
+          // Record that modal is being shown (with error handling for missing tables)
+          try {
+            await fetch('/api/week-completion-modal-views', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                userId: user.id,
+                schemaId: trainingData.schema.id,
+                weekNumber: nextWeekNumber,
+                action: 'shown'
+              })
+            });
+          } catch (modalError) {
+            console.log('⚠️ Modal tracking not available (tables missing), continuing anyway');
+          }
         } catch (error) {
-          console.error('❌ Error checking modal view status:', error);
+          console.log('⚠️ Modal tracking not available (tables missing), continuing anyway');
         }
       }
       
@@ -256,46 +285,68 @@ export default function MijnTrainingen() {
         }))
       };
       
-      // Record modal close and save week completion to database
+      // Record modal close and save week completion to database (with fallback for missing tables)
       try {
         console.log('💾 Recording modal close and saving week completion...');
         
-        // Record that modal was closed (via Start New Week button)
-        await fetch('/api/week-completion-modal-views', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            userId: user.id,
-            schemaId: trainingData.schema.id,
-            weekNumber: weekCompletionData.week,
-            action: 'closed'
-          })
-        });
+        // Record that modal was closed (via Start New Week button) - with error handling
+        try {
+          await fetch('/api/week-completion-modal-views', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId: user.id,
+              schemaId: trainingData.schema.id,
+              weekNumber: weekCompletionData.week,
+              action: 'closed'
+            })
+          });
+        } catch (modalError) {
+          console.log('⚠️ Modal tracking not available (tables missing), continuing anyway');
+        }
         
-        // Save week completion to database
-        const response = await fetch('/api/week-completion', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            userId: user.id,
-            schemaId: trainingData.schema.id,
-            weekNumber: weekCompletionData.week,
-            completedAt: weekCompletionData.completedAt,
-            completedDays: weekCompletionData.days
-          })
-        });
+        // Save week completion to database - with error handling
+        try {
+          const response = await fetch('/api/week-completion', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId: user.id,
+              schemaId: trainingData.schema.id,
+              weekNumber: weekCompletionData.week,
+              completedAt: weekCompletionData.completedAt,
+              completedDays: weekCompletionData.days
+            })
+          });
 
-        if (response.ok) {
-          console.log('✅ Week completion and modal close recorded');
-        } else {
-          console.error('❌ Failed to save week completion:', response.status);
+          if (response.ok) {
+            console.log('✅ Week completion recorded in database');
+          } else {
+            console.log('⚠️ Week completion database save failed, continuing with local storage');
+          }
+        } catch (dbError) {
+          console.log('⚠️ Week completion database not available (tables missing), using local storage only');
         }
       } catch (error) {
-        console.error('❌ Error saving week completion:', error);
+        console.log('⚠️ Database operations not available, continuing with local storage');
       }
       
       // Add completed week to the list
-      setCompletedWeeks(prev => [...prev, weekCompletionData]);
+      setCompletedWeeks(prev => {
+        const newCompletedWeeks = [...prev, weekCompletionData];
+        
+        // Save to localStorage as backup
+        try {
+          if (trainingData?.schema?.id) {
+            localStorage.setItem(`completedWeeks_${user.id}_${trainingData.schema.id}`, JSON.stringify(newCompletedWeeks));
+            console.log('✅ Week completions saved to localStorage');
+          }
+        } catch (storageError) {
+          console.log('⚠️ Could not save to localStorage:', storageError);
+        }
+        
+        return newCompletedWeeks;
+      });
       
       // Update current week first
       const nextWeekNumber = weekCompletionData.week + 1;
@@ -304,6 +355,34 @@ export default function MijnTrainingen() {
       } else {
         console.log('🏆 All 8 weeks completed! Congratulations!');
         setCurrentWeek(8);
+        
+        // Check if this is Schema 1 completion and unlock Schema 2
+        if (trainingData?.schema?.schema_nummer === 1) {
+          console.log('🎉 Schema 1 completed! Unlocking Schema 2...');
+          
+          try {
+            // Update user's schema progress to mark Schema 1 as completed
+            const schemaCompletionResponse = await fetch('/api/schema-completion', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                userId: user.id,
+                schemaId: trainingData.schema.id,
+                completedWeeks: 8,
+                completionDate: new Date().toISOString()
+              })
+            });
+            
+            if (schemaCompletionResponse.ok) {
+              console.log('✅ Schema 1 marked as completed');
+              toast.success('🎉 Schema 1 voltooid! Schema 2 is nu beschikbaar!');
+            } else {
+              console.log('⚠️ Could not mark schema as completed, but continuing');
+            }
+          } catch (error) {
+            console.log('⚠️ Schema completion tracking not available, but continuing');
+          }
+        }
       }
       
       // Close modal immediately to prevent re-triggering

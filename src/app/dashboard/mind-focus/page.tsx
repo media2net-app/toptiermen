@@ -230,9 +230,29 @@ export default function MindFocusPage() {
   
   // Recent journaling state
   const [recentJournaling, setRecentJournaling] = useState<any>(null);
+  const [journalHistory, setJournalHistory] = useState<any[]>([]);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   
   // Dashboard loading state
   const [isLoadingDashboardData, setIsLoadingDashboardData] = useState(false);
+
+  // Fetch journal history
+  const fetchJournalHistory = async () => {
+    if (!user) return;
+    
+    setIsLoadingHistory(true);
+    try {
+      const response = await fetch('/api/mind-focus/journal');
+      if (response.ok) {
+        const data = await response.json();
+        setJournalHistory(data.entries || []);
+      }
+    } catch (error) {
+      console.error('Error fetching journal history:', error);
+    } finally {
+      setIsLoadingHistory(false);
+    }
+  };
 
   // Fetch real dashboard data from database
   const fetchDashboardData = async () => {
@@ -352,6 +372,13 @@ export default function MindFocusPage() {
       fetchDashboardData();
     }
   }, [activeTab, currentView, user?.id]);
+
+  // Load journal history when journaling tab is active
+  useEffect(() => {
+    if (activeTab === 'journal' && user) {
+      fetchJournalHistory();
+    }
+  }, [activeTab, user]);
 
   const tabs = [
     { id: 'overview', label: 'Overzicht', icon: <CpuChipIcon className="w-5 h-5" /> },
@@ -584,6 +611,8 @@ export default function MindFocusPage() {
         setJournalText(''); // Clear the textarea after saving
         // Refresh dashboard data to show updated stats
         fetchDashboardData();
+        // Refresh journal history to show the new entry
+        fetchJournalHistory();
       } else {
         toast.error('Kon journal entry niet opslaan');
       }
@@ -1740,51 +1769,118 @@ export default function MindFocusPage() {
             )}
 
             {activeTab === 'journal' && (
-              <div>
-                <h3 className="text-xl font-semibold text-white mb-4">Journaling</h3>
-                <div className="bg-[#2A3A1A] rounded-lg p-6">
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-white font-medium mb-2">Hoe voel je je vandaag?</label>
-                      <input
-                        type="range"
-                        min="1"
-                        max="10"
-                        value={currentStressLevel}
-                        onChange={(e) => setCurrentStressLevel(parseInt(e.target.value))}
-                        className="w-full h-3 bg-[#1A2A1A] rounded-lg appearance-none cursor-pointer"
-                      />
-                      <div className="flex justify-between text-sm text-[#8BAE5A] mt-1">
-                        <span>Zeer slecht</span>
-                        <span className="font-bold text-[#B6C948]">{currentStressLevel}</span>
-                        <span>Uitstekend</span>
+              <div className="space-y-6">
+                {/* New Journal Entry */}
+                <div>
+                  <h3 className="text-xl font-semibold text-white mb-4">Nieuwe Journal Entry</h3>
+                  <div className="bg-[#2A3A1A] rounded-lg p-6">
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-white font-medium mb-2">Hoe voel je je vandaag?</label>
+                        <input
+                          type="range"
+                          min="1"
+                          max="10"
+                          value={currentStressLevel}
+                          onChange={(e) => setCurrentStressLevel(parseInt(e.target.value))}
+                          className="w-full h-3 bg-[#1A2A1A] rounded-lg appearance-none cursor-pointer"
+                        />
+                        <div className="flex justify-between text-sm text-[#8BAE5A] mt-1">
+                          <span>Zeer slecht</span>
+                          <span className="font-bold text-[#B6C948]">{currentStressLevel}</span>
+                          <span>Uitstekend</span>
+                        </div>
                       </div>
+                      <div>
+                        <label className="block text-white font-medium mb-2">Waar ben je dankbaar voor?</label>
+                        <textarea
+                          value={journalText}
+                          onChange={(e) => setJournalText(e.target.value)}
+                          className="w-full h-24 p-3 bg-[#1A2A1A] text-white border border-[#2A3A1A] rounded-lg focus:ring-2 focus:ring-[#B6C948] focus:border-transparent resize-none"
+                          placeholder="Schrijf hier je gedachten..."
+                          disabled={isSavingJournal}
+                        />
+                      </div>
+                      <button 
+                        onClick={saveJournalEntry}
+                        disabled={isSavingJournal || !journalText.trim()}
+                        className="bg-[#B6C948] text-[#1A2A1A] px-6 py-2 rounded-lg font-semibold hover:bg-[#8BAE5A] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                      >
+                        {isSavingJournal ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#1A2A1A]"></div>
+                            Opslaan...
+                          </>
+                        ) : (
+                          'Opslaan'
+                        )}
+                      </button>
                     </div>
-                    <div>
-                      <label className="block text-white font-medium mb-2">Waar ben je dankbaar voor?</label>
-                      <textarea
-                        value={journalText}
-                        onChange={(e) => setJournalText(e.target.value)}
-                        className="w-full h-24 p-3 bg-[#1A2A1A] text-white border border-[#2A3A1A] rounded-lg focus:ring-2 focus:ring-[#B6C948] focus:border-transparent resize-none"
-                        placeholder="Schrijf hier je gedachten..."
-                        disabled={isSavingJournal}
-                      />
-                    </div>
-                    <button 
-                      onClick={saveJournalEntry}
-                      disabled={isSavingJournal || !journalText.trim()}
-                      className="bg-[#B6C948] text-[#1A2A1A] px-6 py-2 rounded-lg font-semibold hover:bg-[#8BAE5A] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  </div>
+                </div>
+
+                {/* Journal History */}
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xl font-semibold text-white">Journal Geschiedenis</h3>
+                    <button
+                      onClick={fetchJournalHistory}
+                      disabled={isLoadingHistory}
+                      className="bg-[#3A4A2A] text-[#B6C948] px-4 py-2 rounded-lg font-medium hover:bg-[#2A3A1A] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                     >
-                      {isSavingJournal ? (
+                      {isLoadingHistory ? (
                         <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#1A2A1A]"></div>
-                          Opslaan...
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#B6C948]"></div>
+                          Laden...
                         </>
                       ) : (
-                        'Opslaan'
+                        <>
+                          <BookOpenIcon className="w-4 h-4" />
+                          Ververs
+                        </>
                       )}
                     </button>
                   </div>
+                  
+                  {isLoadingHistory ? (
+                    <div className="bg-[#2A3A1A] rounded-lg p-6 text-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#B6C948] mx-auto mb-4"></div>
+                      <p className="text-[#8BAE5A]">Geschiedenis laden...</p>
+                    </div>
+                  ) : journalHistory.length > 0 ? (
+                    <div className="space-y-4">
+                      {journalHistory.map((entry, index) => (
+                        <div key={entry.id || index} className="bg-gradient-to-r from-[#2A3A1A] to-[#3A4A2A] rounded-lg p-6">
+                          <div className="flex items-center justify-between mb-3">
+                            <span className="text-[#B6C948] font-semibold">
+                              {new Date(entry.date).toLocaleDateString('nl-NL', {
+                                weekday: 'long',
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric'
+                              })}
+                            </span>
+                            <span className="text-[#8BAE5A] text-sm">
+                              Stress Level: {entry.stress_level}/10
+                            </span>
+                          </div>
+                          {entry.daily_review && (
+                            <div className="bg-[#1A2A1A] p-4 rounded-lg">
+                              <p className="text-white text-sm leading-relaxed">
+                                {entry.daily_review}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="bg-[#2A3A1A] rounded-lg p-6 text-center">
+                      <BookOpenIcon className="w-12 h-12 text-[#8BAE5A] mx-auto mb-4" />
+                      <p className="text-[#8BAE5A] mb-2">Nog geen journal entries</p>
+                      <p className="text-[#6A7A4A] text-sm">Begin met het schrijven van je eerste journal entry hierboven</p>
+                    </div>
+                  )}
                 </div>
               </div>
             )}

@@ -98,6 +98,7 @@ const baseMenu = [
   { label: 'Trainingsschemas', icon: AcademicCapIcon, href: '/dashboard/trainingsschemas', onboardingStep: 4, requiresTrainingAccess: true },
   { label: 'Voedingsplannen', icon: RocketLaunchIcon, href: '/dashboard/voedingsplannen-v2', onboardingStep: 5, requiresNutritionAccess: true },
   { label: 'Mind & Focus', icon: ChartBarIcon, href: '/dashboard/mind-focus', onboardingStep: 7 },
+  { label: 'Mijn Mind & Focus', icon: ChartBarIcon, parent: 'Mind & Focus', href: '/dashboard/mind-focus', isSub: true, onboardingStep: 7 },
   { label: 'Focus Training', icon: TagIcon, parent: 'Mind & Focus', href: '/dashboard/mind-focus/focus-training', isSub: true, onboardingStep: 7 },
   { label: 'Stress Release', icon: FireIcon, parent: 'Mind & Focus', href: '/dashboard/mind-focus/stress-release', isSub: true, onboardingStep: 7 },
   { label: 'Sleep Preparation', icon: ClockIcon, parent: 'Mind & Focus', href: '/dashboard/mind-focus/sleep-preparation', isSub: true, onboardingStep: 7 },
@@ -113,16 +114,33 @@ const baseMenu = [
 ];
 
 // Function to get menu with conditional onboarding button
-const getMenu = (isOnboardingCompleted: boolean) => {
-  if (isOnboardingCompleted) {
+const getMenu = (isOnboardingCompleted: boolean, isLoading: boolean = false) => {
+  // Don't show onboarding button while loading to prevent flash
+  if (isLoading) {
     return baseMenu;
   }
   
-  // Add onboarding button at the beginning if onboarding is not completed
-  return [
-    { label: 'Onboarding', icon: CheckCircleIcon, href: null, onboardingStep: 1, isOnboardingItem: true, isDynamic: true },
-    ...baseMenu
-  ];
+  // Only show onboarding button if onboarding is explicitly not completed
+  // Use strict equality to ensure we only show when definitely not completed
+  if (isOnboardingCompleted === true) {
+    return baseMenu;
+  }
+  
+  // If onboarding status is undefined or null, don't show onboarding button
+  if (isOnboardingCompleted === undefined || isOnboardingCompleted === null) {
+    return baseMenu;
+  }
+  
+  // Only show onboarding button if onboarding is explicitly false
+  if (isOnboardingCompleted === false) {
+    return [
+      { label: 'Onboarding', icon: CheckCircleIcon, href: null, onboardingStep: 1, isOnboardingItem: true, isDynamic: true },
+      ...baseMenu
+    ];
+  }
+  
+  // Default to base menu for any other case
+  return baseMenu;
 };
 
 // 2.0.1: Sidebar component with enhanced monitoring
@@ -136,7 +154,7 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
   const [openBrotherhood, setOpenBrotherhood] = useState(true); // Default expanded
   const [openDashboard, setOpenDashboard] = useState(true); // Default expanded
   const [openMindFocus, setOpenMindFocus] = useState(true); // Default expanded
-  const { isCompleted, currentStep, hasTrainingAccess, hasNutritionAccess } = useOnboardingV2();
+  const { isCompleted, currentStep, hasTrainingAccess, hasNutritionAccess, isLoading } = useOnboardingV2();
   
   // Use onboardingStatus from props if available, otherwise fallback to context
   const actualOnboardingStatus = onboardingStatus || { current_step: currentStep, onboarding_completed: isCompleted };
@@ -148,8 +166,12 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
   // Use currentStep from actualOnboardingStatus if available, otherwise fallback to useOnboarding hook
   const actualCurrentStep = actualOnboardingStatus?.current_step ?? currentStep;
   
-  // Get menu with conditional onboarding button
-  const menu = getMenu(actualOnboardingStatus?.onboarding_completed || isCompleted);
+  // Get menu with conditional onboarding button - pass loading state to prevent flash
+  // Use loading state to prevent flash during initial load
+  const mobileMenu = getMenu(
+    isLoading ? undefined : (actualOnboardingStatus?.onboarding_completed || isCompleted), 
+    isLoading
+  );
 
 
   // Function to check if a menu item should be visible based on subscription tier and admin status
@@ -323,7 +345,7 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
         <span>Mijn Dashboard</span>
       </Link>
       
-      {getMenu(actualOnboardingStatus?.onboarding_completed || isCompleted).map((item) => {
+      {mobileMenu.map((item) => {
         // Onboarding button is now handled by getMenu function
         
         // Skip menu items that are not visible based on subscription tier
@@ -338,7 +360,7 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
             ? (safePathname === item.href && item.onboardingStep === actualCurrentStep) ||
               (actualCurrentStep === 6 && item.label === 'Brotherhood' && safePathname.includes('/brotherhood/forum'))
             : safePathname === item.href;
-          const hasSubmenu = getMenu(actualOnboardingStatus?.onboarding_completed || isCompleted).some(sub => 'parent' in sub && sub.parent === item.label);
+          const hasSubmenu = mobileMenu.some(sub => 'parent' in sub && sub.parent === item.label);
 
           if (hasSubmenu) {
             const isOpen = item.label === 'Dashboard' ? openDashboard : 
@@ -348,7 +370,7 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
                              item.label === 'Brotherhood' ? setOpenBrotherhood : 
                              item.label === 'Mind & Focus' ? setOpenMindFocus : 
                              () => {};
-            const subItems = getMenu(actualOnboardingStatus?.onboarding_completed || isCompleted).filter(sub => 'parent' in sub && sub.parent === item.label);
+            const subItems = mobileMenu.filter(sub => 'parent' in sub && sub.parent === item.label);
             const hasActiveSubItem = subItems.some(sub => 
               !isCompleted 
                 ? (sub.href === safePathname && sub.onboardingStep === actualCurrentStep) ||
@@ -509,7 +531,7 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
   const [openBrotherhood, setOpenBrotherhood] = useState(false);
   const [openDashboard, setOpenDashboard] = useState(false);
   const [openMindFocus, setOpenMindFocus] = useState(false);
-  const { isCompleted, currentStep, hasTrainingAccess, hasNutritionAccess } = useOnboardingV2();
+  const { isCompleted, currentStep, hasTrainingAccess, hasNutritionAccess, isLoading } = useOnboardingV2();
   
   // Use onboardingStatus from props if available, otherwise fallback to context
   const actualOnboardingStatus = onboardingStatus || { current_step: currentStep, onboarding_completed: isCompleted };
@@ -521,10 +543,12 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
       actualOnboardingStatus,
       isCompleted,
       currentStep,
+      isLoading,
       onboarding_completed: actualOnboardingStatus?.onboarding_completed,
-      shouldShowAllItems: actualOnboardingStatus?.onboarding_completed
+      shouldShowAllItems: actualOnboardingStatus?.onboarding_completed,
+      menuWillShowOnboarding: !isLoading && actualOnboardingStatus?.onboarding_completed === false
     });
-  }, [onboardingStatus, actualOnboardingStatus, isCompleted, currentStep]);
+  }, [onboardingStatus, actualOnboardingStatus, isCompleted, currentStep, isLoading]);
   
   // const { trackFeatureUsage } = useV2Monitoring();
   const { user, isAdmin } = useSupabaseAuth();
@@ -535,8 +559,8 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
   // Use currentStep from actualOnboardingStatus if available, otherwise fallback to useOnboarding hook
   const actualCurrentStep = actualOnboardingStatus?.current_step ?? currentStep;
   
-  // Get menu with conditional onboarding button
-  const menu = getMenu(actualOnboardingStatus?.onboarding_completed || isCompleted);
+  // Get menu with conditional onboarding button - pass loading state to prevent flash
+  const menu = getMenu(actualOnboardingStatus?.onboarding_completed || isCompleted, isLoading);
 
   // Function to check if a menu item should be visible based on subscription tier and admin status
   const isMenuItemVisible = (item: any) => {
@@ -701,9 +725,16 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
     }
   }, [safePathname, isCompleted, actualCurrentStep]);
 
+  // Calculate menu once to avoid multiple calls
+  // Use loading state to prevent flash during initial load
+  const sidebarMenu = getMenu(
+    isLoading ? undefined : (actualOnboardingStatus?.onboarding_completed || isCompleted), 
+    isLoading
+  );
+  
   return (
     <nav className="flex flex-col gap-2">
-      {getMenu(actualOnboardingStatus?.onboarding_completed || isCompleted).map((item) => {
+      {sidebarMenu.map((item) => {
         // Onboarding button is now handled by getMenu function
         
         // Skip menu items that are not visible based on subscription tier
@@ -718,7 +749,7 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
             ? (safePathname === item.href && item.onboardingStep === actualCurrentStep) ||
               (actualCurrentStep === 6 && item.label === 'Brotherhood' && safePathname.includes('/brotherhood/forum'))
             : safePathname === item.href;
-          const hasSubmenu = getMenu(actualOnboardingStatus?.onboarding_completed || isCompleted).some(sub => 'parent' in sub && sub.parent === item.label);
+          const hasSubmenu = sidebarMenu.some(sub => 'parent' in sub && sub.parent === item.label);
 
           if (hasSubmenu) {
             const isOpen = item.label === 'Dashboard' ? openDashboard : 
@@ -728,7 +759,7 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
                              item.label === 'Brotherhood' ? setOpenBrotherhood : 
                              item.label === 'Mind & Focus' ? setOpenMindFocus : 
                              () => {};
-            const subItems = getMenu(actualOnboardingStatus?.onboarding_completed || isCompleted).filter(sub => 'parent' in sub && sub.parent === item.label);
+            const subItems = sidebarMenu.filter(sub => 'parent' in sub && sub.parent === item.label);
             const hasActiveSubItem = subItems.some(sub => 
               !isCompleted 
                 ? (sub.href === safePathname && sub.onboardingStep === actualCurrentStep) ||

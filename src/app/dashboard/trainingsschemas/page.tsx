@@ -151,6 +151,7 @@ function TrainingschemasContent() {
   const [userTrainingProfile, setUserTrainingProfile] = useState<TrainingProfile | null>(null);
   const [selectedTrainingSchema, setSelectedTrainingSchema] = useState<string | null>(null);
   const [unlockedSchemas, setUnlockedSchemas] = useState<{ [key: number]: boolean }>({ 1: true, 2: false, 3: false });
+  const [schemaCompletionStatus, setSchemaCompletionStatus] = useState<{ [key: string]: boolean }>({});
   const [showRequiredProfile, setShowRequiredProfile] = useState(false);
   const [showCalculator, setShowCalculator] = useState(false);
   const [showWarningModal, setShowWarningModal] = useState(false);
@@ -294,6 +295,30 @@ function TrainingschemasContent() {
     }
   };
 
+  // Fetch schema completion status
+  const fetchSchemaCompletionStatus = async (userId: string) => {
+    try {
+      console.log('🔍 Fetching schema completion status for user:', userId);
+      const response = await fetch(`/api/schema-completion?userId=${userId}`);
+      const data = await response.json();
+      
+      if (data.success && data.schemas) {
+        // Create a map of schema completion status
+        const completionStatus: Record<string, boolean> = {};
+        data.schemas.forEach((schema: any) => {
+          if (schema.completed_at) {
+            completionStatus[schema.schema_id] = true;
+          }
+        });
+        setSchemaCompletionStatus(completionStatus);
+        console.log('✅ Schema completion status loaded:', completionStatus);
+      }
+    } catch (error) {
+      console.error('❌ Error fetching schema completion status:', error);
+      setSchemaCompletionStatus({});
+    }
+  };
+
   // Training functions - using same method as admin dashboard
   const fetchTrainingSchemas = async () => {
     try {
@@ -402,7 +427,7 @@ function TrainingschemasContent() {
       
       // Start all API calls in parallel
       console.log('📡 Starting parallel API calls...');
-      const [schemasResult, profileResult, periodResult, progressResult] = await Promise.allSettled([
+      const [schemasResult, profileResult, periodResult, progressResult, completionResult] = await Promise.allSettled([
         // Load training schemas
         supabase
           .from('training_schemas')
@@ -424,7 +449,10 @@ function TrainingschemasContent() {
         fetch(`/api/training-schema-period?userId=${user.id}`),
         
         // Load schema progress
-        fetch(`/api/user/schema-progress?userId=${user.id}`)
+        fetch(`/api/user/schema-progress?userId=${user.id}`),
+        
+        // Load schema completion status
+        fetch(`/api/schema-completion?userId=${user.id}`)
       ]);
       
       console.log('📡 API calls completed:', {
@@ -523,6 +551,29 @@ function TrainingschemasContent() {
       } else {
         console.error('❌ Schema progress promise rejected:', progressResult.reason);
         setUnlockedSchemas({ 1: true, 2: false, 3: false });
+      }
+      
+      // Process schema completion status
+      if (completionResult.status === 'fulfilled') {
+        const response = completionResult.value;
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.schemas) {
+            // Create a map of schema completion status
+            const completionStatus: Record<string, boolean> = {};
+            data.schemas.forEach((schema: any) => {
+              if (schema.completed_at) {
+                completionStatus[schema.schema_id] = true;
+              }
+            });
+            setSchemaCompletionStatus(completionStatus);
+            console.log('✅ Schema completion status loaded:', completionStatus);
+          }
+        } else {
+          console.log('⚠️ Schema completion API error:', response.status);
+        }
+      } else {
+        console.error('❌ Schema completion promise rejected:', completionResult.reason);
       }
       
       // Apply filtering after both data sources are loaded
@@ -2419,6 +2470,9 @@ function TrainingschemasContent() {
                   const isPlaceholder = schema.status === 'coming_soon';
                   const isLocked = schema.schema_nummer === 1 ? false : (isPlaceholder || !unlockedSchemas[schema.schema_nummer || 1]);
                   
+                  // Check if schema is completed
+                  const isCompleted = schemaCompletionStatus[schema.id] || false;
+                  
                   return (
                     <motion.div
                       key={schema.id}
@@ -2439,9 +2493,16 @@ function TrainingschemasContent() {
                         <div>
                           <h3 className={`text-sm sm:text-base md:text-lg font-semibold ${isLocked ? 'text-gray-500' : 'text-white'}`}>
                             {schema.name}
+                            {isCompleted && (
+                              <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-500/20 text-green-400 border border-green-500/30">
+                                ✅ Voltooid
+                              </span>
+                            )}
                             {schema.schema_nummer && (
                               <span className={`ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${
-                                isSchema1 
+                                isCompleted
+                                  ? 'bg-green-500/20 text-green-400 border-green-500/30'
+                                  : isSchema1 
                                   ? 'bg-[#8BAE5A]/20 text-[#8BAE5A] border-[#8BAE5A]/30'
                                   : 'bg-gray-600/20 text-gray-400 border-gray-600/30'
                               }`}>

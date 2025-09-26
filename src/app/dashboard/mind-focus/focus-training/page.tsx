@@ -27,6 +27,8 @@ interface FocusSession {
   difficulty: 'beginner' | 'intermediate' | 'advanced';
   category: 'concentration' | 'mindfulness' | 'breathing' | 'visualization';
   completed?: boolean;
+  steps?: string[];
+  tips?: string[];
 }
 
 interface DailyTask {
@@ -45,7 +47,21 @@ const focusSessions: FocusSession[] = [
     duration: 5,
     description: 'Leer je aandacht te focussen op één punt. Perfect voor beginners.',
     difficulty: 'beginner',
-    category: 'concentration'
+    category: 'concentration',
+    steps: [
+      'Ga comfortabel zitten met je rug recht',
+      'Kies een focuspunt (kaars, steen, of ademhaling)',
+      'Sluit je ogen en richt je aandacht op je gekozen focuspunt',
+      'Wanneer je gedachten afdwalen, merk dit op zonder oordeel',
+      'Breng je aandacht terug naar je focuspunt',
+      'Herhaal dit proces gedurende de sessie'
+    ],
+    tips: [
+      'Start met korte sessies en bouw langzaam op',
+      'Consistentie is belangrijker dan perfectie',
+      'Gebruik een timer om je sessie te timen',
+      'Track je progress om motivatie te behouden'
+    ]
   },
   {
     id: 'breathing-focus',
@@ -53,7 +69,21 @@ const focusSessions: FocusSession[] = [
     duration: 10,
     description: 'Gebruik je ademhaling als anker voor je aandacht.',
     difficulty: 'beginner',
-    category: 'breathing'
+    category: 'breathing',
+    steps: [
+      'Ga comfortabel zitten met je rug recht',
+      'Sluit je ogen en ontspan je schouders',
+      'Adem 4 tellen in door je neus',
+      'Houd je adem 4 tellen vast',
+      'Adem 4 tellen uit door je mond',
+      'Herhaal dit patroon gedurende de sessie'
+    ],
+    tips: [
+      'Zorg voor een rustige omgeving zonder afleidingen',
+      'Zet je telefoon op stil of in een andere kamer',
+      'Als je gedachten afdwalen, breng je aandacht terug naar je ademhaling',
+      'Wees geduldig met jezelf - focus trainen kost tijd'
+    ]
   },
   {
     id: 'mindful-awareness',
@@ -61,7 +91,21 @@ const focusSessions: FocusSession[] = [
     duration: 15,
     description: 'Ontwikkel bewustzijn van je gedachten zonder erin mee te gaan.',
     difficulty: 'intermediate',
-    category: 'mindfulness'
+    category: 'mindfulness',
+    steps: [
+      'Neem een comfortabele zithouding aan',
+      'Sluit je ogen en begin met 3 diepe ademhalingen',
+      'Observeer je gedachten zonder ze te beoordelen',
+      'Let op lichamelijke sensaties en emoties',
+      'Wanneer je afgeleid raakt, keer terug naar je ademhaling',
+      'Eindig met 3 diepe ademhalingen en open langzaam je ogen'
+    ],
+    tips: [
+      'Gedachten zijn normaal - probeer ze niet te stoppen',
+      'Observeer je gedachten als wolken die voorbij drijven',
+      'Wees vriendelijk voor jezelf als je afgeleid raakt',
+      'Oefen dagelijks voor de beste resultaten'
+    ]
   },
   {
     id: 'visual-focus',
@@ -69,7 +113,21 @@ const focusSessions: FocusSession[] = [
     duration: 12,
     description: 'Train je ogen en geest om gefocust te blijven op visuele objecten.',
     difficulty: 'intermediate',
-    category: 'visualization'
+    category: 'visualization',
+    steps: [
+      'Kies een visueel object (kaars, steen, of foto)',
+      'Ga comfortabel zitten en plaats het object op ooghoogte',
+      'Kijk naar het object zonder je ogen te bewegen',
+      'Observeer alle details zonder te oordelen',
+      'Wanneer je gedachten afdwalen, keer terug naar het object',
+      'Blijf gefocust op het object gedurende de sessie'
+    ],
+    tips: [
+      'Kies een object dat je interessant vindt',
+      'Zorg voor goede verlichting',
+      'Blijf ontspannen en adem normaal',
+      'Oefen dagelijks voor betere resultaten'
+    ]
   },
   {
     id: 'advanced-concentration',
@@ -77,7 +135,22 @@ const focusSessions: FocusSession[] = [
     duration: 20,
     description: 'Intensieve concentratie training voor gevorderden.',
     difficulty: 'advanced',
-    category: 'concentration'
+    category: 'concentration',
+    steps: [
+      'Kies een complexe focuspunt (mandala, complexe vorm)',
+      'Ga comfortabel zitten en sluit je ogen',
+      'Visualiseer je focuspunt in je geest',
+      'Houd je aandacht vast op alle details',
+      'Wanneer je gedachten afdwalen, merk dit op zonder oordeel',
+      'Breng je aandacht terug naar je focuspunt',
+      'Blijf dit proces herhalen gedurende de sessie'
+    ],
+    tips: [
+      'Deze sessie is voor gevorderden - start met kortere sessies',
+      'Wees geduldig - geavanceerde concentratie kost tijd',
+      'Oefen regelmatig voor de beste resultaten',
+      'Track je progress en vier je successen'
+    ]
   },
   {
     id: 'body-scan-focus',
@@ -85,7 +158,21 @@ const focusSessions: FocusSession[] = [
     duration: 18,
     description: 'Systematisch door je lichaam gaan om focus en bewustzijn te ontwikkelen.',
     difficulty: 'intermediate',
-    category: 'mindfulness'
+    category: 'mindfulness',
+    steps: [
+      'Ga comfortabel liggen of zitten',
+      'Sluit je ogen en begin met 3 diepe ademhalingen',
+      'Start bij je tenen en scan je lichaam omhoog',
+      'Let op elke sensatie zonder te oordelen',
+      'Ga langzaam door elke lichaamsdeel',
+      'Eindig bij je hoofd en open langzaam je ogen'
+    ],
+    tips: [
+      'Ga langzaam en systematisch te werk',
+      'Wees geduldig met jezelf',
+      'Oefen regelmatig voor betere resultaten',
+      'Track je progress en vier je successen'
+    ]
   }
 ];
 
@@ -155,9 +242,8 @@ export default function FocusTrainingPage() {
   }, [isPlaying, timeRemaining, currentSession]);
 
   const startSession = (session: FocusSession) => {
-    setCurrentSession(session);
-    setTimeRemaining(session.duration * 60); // Convert minutes to seconds
-    setIsPlaying(true);
+    // Navigate to the session instruction page instead of starting directly
+    router.push(`/dashboard/mind-focus/focus-training/${session.id}`);
   };
 
   const pauseSession = () => {
