@@ -33,8 +33,10 @@ export default function OnboardingStatusV2Page() {
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Simple admin check
-  const isAdmin = user && profile && profile.role?.toLowerCase() === 'admin';
+  // Enhanced admin check that works even when profile is missing
+  const knownAdminEmails = ['chiel@media2net.nl', 'rick@toptiermen.eu', 'admin@toptiermen.com'];
+  const isAdmin = !!(profile?.role === 'admin' || 
+    (user?.email && knownAdminEmails.includes(user.email)));
 
   // Redirect if not admin
   useEffect(() => {
