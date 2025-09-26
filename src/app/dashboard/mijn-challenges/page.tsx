@@ -284,7 +284,7 @@ export default function MijnChallengesPage() {
   const [hasDismissedAlmost, setHasDismissedAlmost] = useState(false);
   const [preferencesLoaded, setPreferencesLoaded] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [missionToDelete, setChallengeToDelete] = useState<Challenge | null>(null);
+  const [challengeToDelete, setChallengeToDelete] = useState<Challenge | null>(null);
   
   // Challenge Library state
   const [showChallengeLibrary, setShowChallengeLibrary] = useState(true);
@@ -754,23 +754,22 @@ export default function MijnChallengesPage() {
   };
 
   // Delete mission
-  const deleteChallenge = async (missionId: string) => {
+  const deleteChallenge = async (challengeId: string) => {
     if (!user?.id) return;
 
-    console.log('🗑️ Deleting challenge:', missionId, 'for user:', user.id);
+    console.log('🗑️ Deleting challenge:', challengeId, 'for user:', user.id);
     try {
-      const response = await fetch('/api/missions-simple', {
-        method: 'POST',
+      const response = await fetch('/api/user-challenges', {
+        method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          action: 'delete',
           userId: user.id,
-          missionId: missionId
+          challengeId: challengeId
         })
       });
 
       if (!response.ok) {
-        throw new Error('Failed to delete mission');
+        throw new Error('Failed to delete challenge');
       }
 
       const data = await response.json();
@@ -793,15 +792,15 @@ export default function MijnChallengesPage() {
         toast.success(data.message || 'Challenge succesvol verwijderd! 💪');
       }
     } catch (err) {
-      console.error('Error deleting mission:', err);
+      console.error('Error deleting challenge:', err);
       toast.error('Fout bij het verwijderen van de challenge');
     }
   };
 
   // Handle delete confirmation
-  const handleDeleteClick = (mission: Challenge) => {
-    console.log('🗑️ Delete button clicked for mission:', mission.title, mission.id);
-    setChallengeToDelete(mission);
+  const handleDeleteClick = (challenge: Challenge) => {
+    console.log('🗑️ Delete button clicked for challenge:', challenge.title, challenge.id);
+    setChallengeToDelete(challenge);
     setShowDeleteConfirm(true);
     
     // Scroll to top to ensure modal is visible and centered
@@ -1354,7 +1353,7 @@ export default function MijnChallengesPage() {
         )}
 
         {/* Delete Confirmation Modal */}
-        {showDeleteConfirm && missionToDelete && (
+        {showDeleteConfirm && challengeToDelete && (
           <div 
             className="fixed inset-0 bg-black bg-opacity-50 z-[9999] flex items-center justify-center p-4"
             style={{ 
@@ -1394,7 +1393,7 @@ export default function MijnChallengesPage() {
                   </p>
                   <div className="bg-[#232D1A]/80 rounded-lg p-3 border border-red-600/30">
                     <p className="text-red-400 text-sm font-semibold">
-                      "{missionToDelete.title}"
+                      "{challengeToDelete.title}"
                     </p>
                   </div>
                 </div>
@@ -1415,7 +1414,7 @@ export default function MijnChallengesPage() {
                     Annuleren
                   </button>
                   <button
-                    onClick={() => deleteChallenge(missionToDelete.id)}
+                    onClick={() => deleteChallenge(challengeToDelete.id)}
                     className="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-6 py-3 rounded-lg transition-all duration-300 font-semibold"
                   >
                     Verwijderen

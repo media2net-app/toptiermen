@@ -85,109 +85,86 @@ export default function ModuleDetailPage() {
   }, [loading, error, moduleId]);
 
   const fetchModuleData = async () => {
-    if (!moduleId) {
-      console.log('Module page: Missing moduleId');
-      setError('Module ID ontbreekt');
+    if (!moduleId || !user?.id) {
+      console.log('Module page: Missing moduleId or user');
+      setError('Module ID of gebruiker ontbreekt');
       setLoading(false);
       return;
     }
 
-    console.log('Module page: Starting data fetch for:', { moduleId, user: user?.email || 'no user' });
+    // Check cache first
+    const cacheKey = `academy_module_${moduleId}`;
+    const cachedData = sessionStorage.getItem(cacheKey);
+    const cacheTimestamp = sessionStorage.getItem(`${cacheKey}_timestamp`);
+    const now = Date.now();
+    const cacheAge = cacheTimestamp ? now - parseInt(cacheTimestamp) : Infinity;
+    
+    // Use cache if less than 2 minutes old
+    if (cachedData && cacheAge < 2 * 60 * 1000) {
+      console.log('🎓 Module: Using cached data for module:', moduleId);
+      try {
+        const parsedData = JSON.parse(cachedData);
+        setModule(parsedData.module);
+        setLessons(parsedData.lessons);
+        setCompletedLessonIds(parsedData.completedLessonIds);
+        setPreviousModule(parsedData.previousModule);
+        setNextModule(parsedData.nextModule);
+        setAllModules(parsedData.allModules);
+        setLoading(false);
+        setError(null);
+        return;
+      } catch (err) {
+        console.warn('⚠️ Failed to parse cached data, fetching fresh...');
+      }
+    }
+
+    console.log('Module page: Starting data fetch for:', { moduleId, user: user.email });
     setLoading(true);
     setError(null);
 
-    // Add timeout to prevent infinite loading - increased for better reliability
-    const timeoutId = setTimeout(() => {
-      console.log('⏰ Module data fetch timeout - setting error');
-      setError('Timeout bij het laden van module data');
-      setLoading(false);
-    }, 30000); // Increased to 30 second timeout for better reliability
-
     try {
-      // Fetch all modules first to determine next module
-      const { data: allModulesData, error: allModulesError } = await supabase
-        .from('academy_modules')
-        .select('*')
-        .eq('status', 'published')
-        .order('order_index', { ascending: true });
-
-      if (allModulesError) {
-        console.error('❌ All modules error:', allModulesError);
-      } else {
-        setAllModules(allModulesData || []);
+      const response = await fetch(`/api/academy/module-data?userId=${user.id}&moduleId=${moduleId}`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      // Fetch current module data
-      const { data: moduleData, error: moduleError } = await supabase
-        .from('academy_modules')
-        .select('*')
-        .eq('id', moduleId)
-        .single();
-
-      if (moduleError || !moduleData) {
-        console.error('❌ Module error:', moduleError);
-        setError('Module niet gevonden');
-        setLoading(false);
-        return;
+      const data = await response.json();
+      
+      if (data.error) {
+        throw new Error(data.error);
       }
 
-      // Determine previous and next modules
-      if (allModulesData && allModulesData.length > 0) {
-        const currentIndex = allModulesData.findIndex(m => m.id === moduleData.id);
-        if (currentIndex > 0) {
-          setPreviousModule(allModulesData[currentIndex - 1]);
-        }
-        if (currentIndex < allModulesData.length - 1) {
-          setNextModule(allModulesData[currentIndex + 1]);
-        }
-      }
+      // Cache the data
+      const cacheData = {
+        module: data.module,
+        lessons: data.lessons,
+        completedLessonIds: data.completedLessonIds,
+        previousModule: data.previousModule,
+        nextModule: data.nextModule,
+        allModules: data.allModules
+      };
+      sessionStorage.setItem(cacheKey, JSON.stringify(cacheData));
+      sessionStorage.setItem(`${cacheKey}_timestamp`, now.toString());
 
+      // Update state with fetched data
+      setModule(data.module);
+      setLessons(data.lessons);
+      setCompletedLessonIds(data.completedLessonIds);
+      setPreviousModule(data.previousModule);
+      setNextModule(data.nextModule);
+      setAllModules(data.allModules);
 
-
-      // Fetch lessons for this module
-      const { data: lessonsData, error: lessonsError } = await supabase
-        .from('academy_lessons')
-        .select('*')
-        .eq('module_id', moduleId)
-        .eq('status', 'published')
-        .order('order_index', { ascending: true });
-
-      if (lessonsError || !lessonsData) {
-        console.error('❌ Lessons error:', lessonsError);
-        setError('Lessen niet gevonden');
-        setLoading(false);
-        return;
-      }
-
-      // Fetch user progress for this module (only if user is available)
-      let progressData: { lesson_id: string }[] | null = null;
-      if (user) {
-        const { data: userProgress } = await supabase
-          .from('user_lesson_progress')
-          .select('lesson_id')
-          .eq('user_id', user.id)
-          .eq('completed', true);
-        progressData = userProgress;
-      }
-
-      // Update state
-      setModule(moduleData);
-      setLessons(lessonsData);
-      setCompletedLessonIds(progressData?.map(p => p.lesson_id) || []);
-
-      console.log('✅ Module data loaded successfully:', {
-        module: moduleData.title,
-        lessonsCount: lessonsData.length,
-        completedCount: progressData?.length || 0
+      console.log('✅ Module data loaded and cached successfully:', {
+        module: data.module.title,
+        lessonsCount: data.lessons.length,
+        completedLessons: data.completedLessonIds.length
       });
 
-
-
-    } catch (error) {
-      console.error('❌ Fetch error:', error);
-      setError('Er is een fout opgetreden bij het laden van de module');
+    } catch (err) {
+      console.error('❌ Error fetching module data:', err);
+      setError(err instanceof Error ? err.message : 'Fout bij het laden van module data');
     } finally {
-      clearTimeout(timeoutId);
       setLoading(false);
     }
   };
@@ -195,6 +172,15 @@ export default function ModuleDetailPage() {
   useEffect(() => {
     if (moduleId) {
       console.log('🔄 Module page useEffect triggered:', { moduleId, user: user?.email || 'no user' });
+      
+      // Clear cache for other modules when navigating to a new module
+      const currentCacheKey = `academy_module_${moduleId}`;
+      Object.keys(sessionStorage).forEach(key => {
+        if (key.startsWith('academy_module_') && key !== currentCacheKey) {
+          sessionStorage.removeItem(key);
+          sessionStorage.removeItem(`${key}_timestamp`);
+        }
+      });
       
       // Always fetch data when moduleId changes
       fetchModuleData();
@@ -241,15 +227,27 @@ export default function ModuleDetailPage() {
       }
     };
 
+    // Enhanced focus handler for module navigation
+    const handleFocus = () => {
+      console.log('🎯 Module page focused, checking if we need to refresh...');
+      // Only refresh if we're in a loading state or have an error
+      if (loading || error) {
+        console.log('🔄 Refreshing due to loading/error state on focus...');
+        fetchModuleData();
+      }
+    };
+
     if (typeof window !== 'undefined') {
       document.addEventListener('visibilitychange', handleVisibilityChange);
       window.addEventListener('pageshow', handlePageShow);
+      window.addEventListener('focus', handleFocus);
     }
 
     return () => {
       if (typeof window !== 'undefined') {
         document.removeEventListener('visibilitychange', handleVisibilityChange);
         window.removeEventListener('pageshow', handlePageShow);
+        window.removeEventListener('focus', handleFocus);
       }
     };
   }, [loading, error, moduleId]);

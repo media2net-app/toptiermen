@@ -140,3 +140,41 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { userId, challengeId } = body;
+
+    if (!userId || !challengeId) {
+      return NextResponse.json({ error: 'User ID and Challenge ID are required' }, { status: 400 });
+    }
+
+    console.log('🗑️ Deleting user challenge:', { userId, challengeId });
+
+    // Delete the user challenge
+    const { data, error } = await supabaseAdmin
+      .from('user_challenges')
+      .delete()
+      .eq('user_id', userId)
+      .eq('id', challengeId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('❌ Error deleting user challenge:', error);
+      return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    }
+
+    console.log('✅ User challenge deleted successfully:', data);
+    return NextResponse.json({ 
+      success: true, 
+      message: 'Challenge succesvol verwijderd!',
+      deletedChallenge: data
+    });
+
+  } catch (error) {
+    console.error('❌ Unexpected error in delete user challenge API:', error);
+    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
+  }
+}
