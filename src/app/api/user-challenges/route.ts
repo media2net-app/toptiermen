@@ -34,8 +34,8 @@ export async function GET(request: NextRequest) {
             title,
             description,
             xp_reward,
-            category,
-            difficulty,
+            category_slug,
+            difficulty_level,
             duration_days
           )
         `)
@@ -92,8 +92,8 @@ export async function GET(request: NextRequest) {
         challenge_id: userChallenge.challenge_id,
         title: challengeData?.title || 'Daily Challenge',
         description: challengeData?.description || 'Complete this challenge daily',
-        category: challengeData?.category || 'General',
-        difficulty: challengeData?.difficulty || 'medium',
+        category: challengeData?.category_slug || 'general',
+        difficulty: challengeData?.difficulty_level || 'medium',
         xp_reward: challengeData?.xp_reward || 15,
         duration_days: challengeData?.duration_days || 30,
         status: userChallenge.status,
