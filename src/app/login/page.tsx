@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { EnvelopeIcon, LockClosedIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 
@@ -14,12 +14,9 @@ const LOGIN_CONFIG = {
 
 function LoginPageContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const { user, profile, isLoading: authLoading, login, isAdmin, getRedirectPath } = useAuth();
-  const loading = false; // Force loading to false to show login form
+  const { user, profile, login, isAdmin, getRedirectPath } = useAuth();
   
-  // ✅ FIX: Override auth loading to prevent infinite loading spinner
-  const effectiveLoading = false;
+  // ✅ FIX: Completely remove loading states to prevent hydration mismatch
   
   // ✅ PHASE 1: Simplified state management - Single state object
   const [loginState, setLoginState] = useState({
@@ -97,7 +94,8 @@ function LoginPageContent() {
   // ✅ FIXED: Single useEffect for logout status handling
   useEffect(() => {
     // Handle logout status with improved messaging
-    const logoutStatus = searchParams?.get('logout');
+    const urlParams = new URLSearchParams(window.location.search);
+    const logoutStatus = urlParams.get('logout');
     if (logoutStatus === 'success') {
       setLoginState(prev => ({ ...prev, error: '' }));
       // Show success message briefly
@@ -120,14 +118,13 @@ function LoginPageContent() {
         window.history.replaceState({}, '', url.toString());
       }
     }
-  }, [searchParams]);
+  }, []);
 
   // ✅ FIXED: Single useEffect for authentication redirect with better loading handling
   useEffect(() => {
     console.log('🔄 Redirect useEffect triggered:', { 
       user: user?.email, 
       profile: profile?.full_name, 
-      loading, 
       isLoading: loginState.isLoading, 
       isRedirecting: loginState.isRedirecting 
     });
@@ -148,7 +145,8 @@ function LoginPageContent() {
       // Determine redirect path - use fallback if getRedirectPath fails
       let targetPath = '/dashboard'; // Default fallback
       try {
-        const redirectTo = searchParams?.get('redirect') || undefined;
+        const urlParams = new URLSearchParams(window.location.search);
+        const redirectTo = urlParams.get('redirect') || undefined;
         targetPath = getRedirectPath(redirectTo);
         console.log('🎯 Target path determined:', targetPath);
       } catch (error) {
@@ -178,16 +176,15 @@ function LoginPageContent() {
           window.location.href = targetPath;
         }
       }, 1000); // Fallback after 1 second
-    } else if (!user && !loading) {
+    } else if (!user) {
       console.log('ℹ️ No authenticated user found, staying on login page');
     } else {
       console.log('⏸️ Redirect conditions not met:', { 
         hasUser: !!user, 
-        isLoading: loginState.isLoading,
-        loading 
+        isLoading: loginState.isLoading
       });
     }
-  }, [loading, user, profile, router, searchParams, loginState.isLoading]); // Updated dependencies
+  }, [user, profile, router, loginState.isLoading]); // Updated dependencies
 
   // ✅ NEW: Hide overlay when URL changes (user has been redirected)
   useEffect(() => {
@@ -352,12 +349,10 @@ function LoginPageContent() {
     }
   }
 
-  // ✅ FIX: Show login form immediately to prevent hydration issues
-  // Removed the isClient check that was causing hydration mismatch
-
+  // ✅ FIX: Always show login form - no loading states
   return (
     <div 
-      className={`min-h-screen flex items-center justify-center relative px-4 py-6 ${loginState.isLoading ? 'login-loading' : ''}`}
+      className="min-h-screen flex items-center justify-center relative px-4 py-6"
       style={{ backgroundColor: '#181F17' }}
     >
       <img src="/pattern.png" alt="pattern" className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none z-0" />
@@ -377,7 +372,6 @@ function LoginPageContent() {
         {process.env.NODE_ENV === 'development' && (
           <div className="mb-4 p-3 bg-[#181F17] border border-[#B6C948] rounded-lg text-xs">
             <p className="text-[#B6C948] font-bold mb-2">🔧 Debug Info:</p>
-            <p className="text-[#8BAE5A]">Loading: {loading ? '✅' : '❌'}</p>
             <p className="text-[#8BAE5A]">User: {user ? '✅' : '❌'}</p>
             <p className="text-[#8BAE5A]">Email: {loginState.email || 'Empty'}</p>
             <p className="text-[#8BAE5A]">Password Length: {loginState.password.length}</p>
