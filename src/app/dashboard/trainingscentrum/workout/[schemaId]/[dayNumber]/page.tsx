@@ -695,6 +695,11 @@ export default function WorkoutPage() {
         // Stop the global workout session completely
         stopWorkout();
         
+        // Force clear any remaining session state
+        setTimeout(() => {
+          stopWorkout();
+        }, 100);
+        
         // Close completion modal
         setShowCompletionModal(false);
         

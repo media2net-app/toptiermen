@@ -177,6 +177,7 @@ export function WorkoutSessionProvider({ children }: { children: ReactNode }) {
     setIsRestTimerRunning(false);
     // Clear localStorage
     localStorage.removeItem('activeWorkoutSession');
+    console.log('✅ Workout session completely cleared');
   };
 
   const updateSession = (updates: Partial<WorkoutSession>) => {

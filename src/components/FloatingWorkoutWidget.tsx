@@ -105,7 +105,8 @@ export default function FloatingWorkoutWidget({
     }
   };
 
-  if (!session) return null;
+  // Only show widget if there's an active session
+  if (!session || !session.isActive) return null;
 
   return (
     <AnimatePresence>
