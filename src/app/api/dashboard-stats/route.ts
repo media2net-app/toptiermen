@@ -146,14 +146,14 @@ async function fetchMissionsStats(userId: string) {
       return completionDate === today;
     }) || [];
 
-    // Combine missions and challenges
-    const total = missionsTotal + challengesTotal;
-    const completedToday = completedMissionsToday.length + completedChallengesToday.length;
-    const completedThisWeek = completedMissions.length + completedChallenges.length;
+    // Use only challenges for the challenge count (not missions)
+    const total = challengesTotal;
+    const completedToday = completedChallengesToday.length;
+    const completedThisWeek = completedChallenges.length;
     const progress = total > 0 ? Math.round((completedThisWeek / total) * 100) : 0;
 
-    console.log(`📊 Combined stats for user ${userId}: ${completedThisWeek}/${total} completed (${progress}%), ${completedToday} today`);
-    console.log(`   Missions: ${completedMissions.length}/${missionsTotal}, Challenges: ${completedChallenges.length}/${challengesTotal}`);
+    console.log(`📊 Challenge stats for user ${userId}: ${completedThisWeek}/${total} completed (${progress}%), ${completedToday} today`);
+    console.log(`   Challenges: ${completedChallenges.length}/${challengesTotal}, Missions: ${completedMissions.length}/${missionsTotal} (not counted)`);
 
     return {
       total,
