@@ -155,6 +155,14 @@ export default function MijnProfiel() {
       setLoading(true);
       setError(null);
       
+      console.log('Fetching all profile data...');
+      
+      // Add timeout to prevent infinite loading
+      const timeoutId = setTimeout(() => {
+        console.warn('Profile loading timeout reached, forcing completion...');
+        setLoading(false);
+      }, 15000); // 15 second timeout
+      
       // Fetch all data in parallel
       await Promise.all([
         fetchUserProfile(),
@@ -162,6 +170,9 @@ export default function MijnProfiel() {
         fetchAffiliateData(),
         fetchPushSubscription()
       ]);
+      
+      clearTimeout(timeoutId);
+      console.log('All profile data fetched successfully');
     } catch (error) {
       console.error('Error fetching data:', error);
       setError('Er is een fout opgetreden bij het laden van je profiel');
@@ -182,13 +193,17 @@ export default function MijnProfiel() {
         console.error('Error fetching profile:', error);
         // Create profile if it doesn't exist
         if (error.code === 'PGRST116') {
+          console.log('Profile not found, creating new profile...');
           await createUserProfile();
+        } else {
+          throw error; // Re-throw other errors
         }
       } else {
+        console.log('Profile found:', data);
         setProfile(data);
       }
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Error in fetchUserProfile:', error);
       throw error; // Re-throw to be caught by fetchAllData
     }
   };
@@ -294,6 +309,17 @@ export default function MijnProfiel() {
       setNewAffiliateCode(affiliateCode);
     } catch (error) {
       console.error('Error fetching affiliate data:', error);
+      // Set fallback data on error
+      const affiliateCode = `${profile?.full_name?.toUpperCase().replace(/\s+/g, '') || 'USER'}${user.id.slice(-6)}`;
+      setAffiliateData({
+        affiliate_code: affiliateCode,
+        total_referrals: 0,
+        active_referrals: 0,
+        total_earned: 0,
+        monthly_earnings: 0,
+        status: 'inactive'
+      });
+      setNewAffiliateCode(affiliateCode);
     }
   };
 
@@ -506,6 +532,8 @@ export default function MijnProfiel() {
     if (!user) return;
 
     try {
+      console.log('Creating new profile for user:', user.id);
+      
       const { data, error } = await supabase
         .from('profiles')
         .insert({
@@ -513,6 +541,8 @@ export default function MijnProfiel() {
           email: user?.email,
           full_name: (user as any)?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User',
           display_name: (user as any)?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
         })
         .select()
         .single();
@@ -521,10 +551,11 @@ export default function MijnProfiel() {
         console.error('Error creating profile:', error);
         throw error;
       } else {
+        console.log('Profile created successfully:', data);
         setProfile(data);
       }
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Error creating profile:', error);
       throw error;
     }
   };
