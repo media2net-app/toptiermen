@@ -15,6 +15,7 @@ interface Profile {
   website?: string;
   interests?: string[];
   main_goal?: string;
+  avatar_url?: string;
   created_at: string;
   updated_at: string;
 }
@@ -79,6 +80,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
             role: 'lid', // Default role
             full_name: email.split('@')[0],
             display_name: email.split('@')[0],
+            avatar_url: undefined,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
           } as Profile;
@@ -137,7 +139,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
       setLoading(false);
       setIsInitialized(true); // Mark as initialized even on timeout
       // Don't clear user state on timeout - this might cause unwanted redirects
-    }, 1000); // 1 second timeout for auth initialization
+    }, 500); // 0.5 second timeout for auth initialization
 
     getInitialSession().then(() => {
       clearTimeout(initTimeout);

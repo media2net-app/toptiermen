@@ -3,1160 +3,404 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Het belang van kracht, spiermassa en conditie - Ebook | Top Tier Men</title>
-    <meta name="description" content="Uitgebreide gids over het belang van kracht, spiermassa en conditie: praktische oefeningen, checklists en reflectie vragen voor persoonlijke groei.">
+    <title>Het Belang van Kracht, Spiermassa en Conditie - Top Tier Men</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.6;
-            color: #ffffff;
-            background: linear-gradient(135deg, #0A0F0A 0%, #181F17 50%, #232D1A 100%);
-            min-height: 100vh;
-        }
-
-        .container {
+            color: #333;
             max-width: 800px;
             margin: 0 auto;
-            padding: 2rem;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
         }
-
+        
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
         .header {
             text-align: center;
-            margin-bottom: 3rem;
-            padding: 2rem;
-            background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
-            border-radius: 20px;
-            border: 1px solid #3A4D23;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #667eea;
         }
-
-        .logo {
-            margin: 0 auto 1rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        h1 {
-            font-size: 2.5rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, #ffffff 0%, #8BAE5A 50%, #B6C948 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 0.5rem;
-        }
-
-        .subtitle {
-            color: #8BAE5A;
-            font-size: 1.1rem;
-            font-weight: 500;
-        }
-
-        .module-info {
-            background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
-            padding: 1rem;
-            border-radius: 10px;
-            margin: 1rem 0;
-            border-left: 4px solid #8BAE5A;
-        }
-
-        .section {
-            background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
-            margin-bottom: 2rem;
-            padding: 2rem;
-            border-radius: 15px;
-            border: 1px solid #3A4D23;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .section h2 {
-            color: #B6C948;
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .section h3 {
-            color: #8BAE5A;
-            font-size: 1.3rem;
-            font-weight: 600;
-            margin: 1.5rem 0 1rem;
-        }
-
-        .section p {
-            margin-bottom: 1rem;
-            color: #e0e0e0;
-        }
-
-        .section ul, .section ol {
-            margin: 1rem 0;
-            padding-left: 2rem;
-        }
-
-        .section li {
-            margin-bottom: 0.5rem;
-            color: #e0e0e0;
-        }
-
-        .highlight-box {
-            background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
-            padding: 1.5rem;
-            border-radius: 10px;
-            border-left: 4px solid #B6C948;
-            margin: 1.5rem 0;
-        }
-
-        .exercise-box {
-            background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%);
-            padding: 1.5rem;
-            border-radius: 10px;
-            border: 1px solid #8BAE5A;
-            margin: 1rem 0;
-        }
-
-        .exercise-box h4 {
-            color: #B6C948;
-            font-size: 1.1rem;
-            margin-bottom: 1rem;
-        }
-
-        .checklist {
-            background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
-            padding: 1.5rem;
-            border-radius: 10px;
-            border: 1px solid #3A4D23;
-            margin: 1rem 0;
-        }
-
-        .checklist-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 0.8rem;
-            padding: 0.5rem;
-            background: rgba(58, 77, 35, 0.3);
-            border-radius: 8px;
-        }
-
-        .checklist-item input[type="checkbox"] {
-            margin-right: 1rem;
-            width: 18px;
-            height: 18px;
-            accent-color: #8BAE5A;
-        }
-
-        .reflection-question {
-            background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
-            padding: 1.5rem;
-            border-radius: 10px;
-            border-left: 4px solid #B6C948;
-            margin: 1rem 0;
-        }
-
-        .reflection-question h4 {
-            color: #B6C948;
-            margin-bottom: 1rem;
-        }
-
-        .action-plan {
-            background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%);
-            padding: 2rem;
-            border-radius: 15px;
-            border: 2px solid #8BAE5A;
-            margin: 2rem 0;
-        }
-
-        .action-plan h3 {
-            color: #B6C948;
-            text-align: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .action-step {
-            background: rgba(139, 174, 90, 0.1);
-            padding: 1rem;
-            border-radius: 8px;
-            margin: 1rem 0;
-            border-left: 3px solid #8BAE5A;
-        }
-
-        .action-step h4 {
-            color: #8BAE5A;
-            margin-bottom: 0.5rem;
-        }
-
-        .icon {
-            width: 24px;
-            height: 24px;
-            display: inline-block;
-            margin-right: 0.5rem;
-        }
-
-        .footer {
-            text-align: center;
-            margin-top: 3rem;
-            padding: 2rem;
-            background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
-            border-radius: 15px;
-            border: 1px solid #3A4D23;
-        }
-
-        .footer p {
-            color: #8BAE5A;
-            margin-bottom: 1rem;
-        }
-
-        .ttm-brand {
-            color: #B6C948;
-            font-weight: 700;
-        }
-
         
-        /* Sticky Back Button */
-        .sticky-back-btn {
-            position: fixed;
-            top: 50%;
-            right: 20px;
-            transform: translateY(-50%);
-            z-index: 1000;
-            background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%);
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .header p {
+            color: #7f8c8d;
+            font-size: 1.2em;
+            font-style: italic;
+        }
+        
+        h2 {
+            color: #2c3e50;
+            border-left: 5px solid #667eea;
+            padding-left: 20px;
+            margin-top: 40px;
+            margin-bottom: 20px;
+        }
+        
+        h3 {
+            color: #34495e;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+        
+        h4 {
+            color: #667eea;
+            margin-top: 25px;
+            margin-bottom: 10px;
+        }
+        
+        .highlight-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 25px 0;
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .highlight-box h3 {
+            color: white;
+            margin-top: 0;
+        }
+        
+        .practical-tip {
+            background: #f8f9fa;
+            border-left: 4px solid #28a745;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 10px 10px 0;
+        }
+        
+        .practical-tip h4 {
+            color: #28a745;
+            margin-top: 0;
+        }
+        
+        ul {
+            padding-left: 20px;
+        }
+        
+        li {
+            margin-bottom: 8px;
+        }
+        
+        .example {
+            background: #e8f4fd;
+            border: 1px solid #bee5eb;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        
+        .example strong {
+            color: #0c5460;
+        }
+        
+        .conclusion {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-top: 40px;
+            text-align: center;
+        }
+        
+        .conclusion h2 {
             color: white;
             border: none;
-            border-radius: 50px;
-            padding: 15px 20px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            box-shadow: 0 8px 25px rgba(139, 174, 90, 0.3);
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            text-decoration: none;
-            min-width: 120px;
-            justify-content: center;
+            padding: 0;
+            margin-top: 0;
         }
-
-        .sticky-back-btn:hover {
-            background: linear-gradient(135deg, #B6C948 0%, #8BAE5A 100%);
-            transform: translateY(-50%) scale(1.05);
-            box-shadow: 0 12px 35px rgba(139, 174, 90, 0.4);
-        }
-
-        .sticky-back-btn:active {
-            transform: translateY(-50%) scale(0.95);
-        }
-
-        .sticky-back-btn svg {
-            width: 16px;
-            height: 16px;
-            fill: currentColor;
-        }
-
-@media (max-width: 768px) {
-            .container {
-                padding: 1rem;
-            }
-            
-            h1 {
-                font-size: 2rem;
-            }
-            
-            .section {
-                padding: 1.5rem;
-            }
         
-            .sticky-back-btn {
-                right: 10px;
-                padding: 12px 16px;
-                font-size: 12px;
-                min-width: 100px;
-            }
+        strong {
+            color: #2c3e50;
+        }
+        
+        .step-number {
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .warning-box {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .warning-box h4 {
+            color: #856404;
+            margin-top: 0;
+        }
+        
+        .benefit-box {
+            background: #f0f8ff;
+            border: 1px solid #b3d9ff;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .benefit-box h4 {
+            color: #0066cc;
+            margin-top: 0;
         }
     </style>
 </head>
 <body>
-    <!-- Sticky Back Button -->
-    <a href="/dashboard/academy/0d02e65a-c109-440d-9286-690b21fbdecb" class="sticky-back-btn" title="Terug naar Fysieke Dominantie Module">
-        <svg viewBox="0 0 24 24">
-            <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
-        </svg>
-        Terug
-    </a>
-    
-<div class="container">
-        <!-- Header -->
+    <div class="container">
         <div class="header">
-            <div class="logo">
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 59.5" style="width: 200px; height: 40px;">
-  <defs>
-    <style>
-      .st0 { fill: #969082; }
-      .st1 { fill: #f2f2f0; }
-    </style>
-  </defs>
-  <g>
-    <polygon class="st1" points="0 8 8.7 8 8.7 31.3 16.9 31.3 16.9 8 25.5 8 25.5 .5 0 .5 0 8"/>
-    <path class="st1" d="M52.3,2c-2.5-1.4-5.3-2-8.5-2s-6,.7-8.5,2c-2.5,1.4-4.4,3.2-5.8,5.6-1.4,2.4-2.1,5.1-2.1,8.3s.7,5.8,2.1,8.2c1.4,2.4,3.4,4.3,5.8,5.6,2.5,1.4,5.3,2,8.6,2s6-.7,8.5-2c2.5-1.4,4.4-3.2,5.8-5.6,1.4-2.4,2.1-5.1,2.1-8.2s-.7-5.9-2.1-8.3c-1.4-2.4-3.3-4.3-5.8-5.6ZM50.9,20.3c-.7,1.3-1.6,2.3-2.8,3-1.2.7-2.6,1.1-4.2,1.1s-3-.4-4.2-1.1c-1.2-.7-2.2-1.7-2.9-3-.7-1.3-1.1-2.7-1.1-4.4s.3-3.1,1-4.4c.7-1.3,1.6-2.3,2.9-3,1.2-.7,2.6-1.1,4.2-1.1s3,.4,4.2,1.1c1.2.7,2.2,1.7,2.9,3,.7,1.3,1,2.7,1,4.4s-.3,3.1-1,4.4Z"/>
-    <path class="st1" d="M82.9,1.8c-1.8-.9-3.8-1.4-6.2-1.4h-12.8v30.8h8.1v-9.2h4.6c2.3,0,4.4-.5,6.2-1.4,1.8-.9,3.2-2.2,4.2-3.8,1-1.6,1.5-3.5,1.5-5.6s-.5-4-1.5-5.6c-1-1.6-2.4-2.9-4.2-3.8ZM79.3,13.6c-.7.6-1.6.9-2.7.9h-4.4v-6.6h4.4c1.1,0,2,.3,2.7.9.7.6,1,1.4,1,2.4s-.3,1.8-1,2.4Z"/>
-    <polygon class="st1" points="99.8 8 108.5 8 108.5 31.3 116.6 31.3 116.6 8 125.3 8 125.3 .5 99.8 .5 99.8 8"/>
-    <rect class="st1" x="128.7" y=".5" width="8.1" height="30.8"/>
-    <polygon class="st1" points="150.3 19.5 160.4 19.5 160.4 12.2 150.3 12.2 150.3 8 162.8 8 162.8 .5 142.1 .5 142.1 31.3 163.1 31.3 163.1 23.8 150.3 23.8 150.3 19.5"/>
-    <path class="st1" d="M191.1,16.4c1-1.6,1.5-3.4,1.5-5.5s-.5-3.9-1.5-5.4c-1-1.6-2.4-2.8-4.2-3.7-1.8-.9-3.8-1.3-6.2-1.3h-12.8v30.8h8.1v-9.8h2.9l5.5,9.8h9.3l-6.8-11.2c1.7-.9,3-2.1,4-3.6ZM176.1,7.9h4.2c1.1,0,2,.3,2.7.9.7.6,1,1.3,1,2.2s-.2,1.1-.5,1.6c-.3.5-.8.8-1.3,1.1-.6.3-1.2.4-1.9.4h-4.2v-6.1Z"/>
-    <polygon class="st1" points="223.7 11.5 216.3 .5 207.2 .5 207.2 31.3 215.4 31.3 215.4 13.1 223.7 25.1 232 13.1 232 31.3 240.2 31.3 240.2 .5 231.1 .5 223.7 11.5"/>
-    <polygon class="st1" points="253.6 19.5 263.7 19.5 263.7 12.2 253.6 12.2 253.6 8 266.1 8 266.1 .5 245.5 .5 245.5 31.3 266.4 31.3 266.4 23.8 253.6 23.8 253.6 19.5"/>
-    <polygon class="st1" points="291.9 .5 291.9 17.4 279.8 .5 271.3 .5 271.3 31.3 279.4 31.3 279.4 13.7 291.9 31.3 300 31.3 300 .5 291.9 .5"/>
-  </g>
-  <g>
-    <path class="st0" d="M150.4,44c-.8-.5-1.6-.7-2.6-.7s-1.8.2-2.5.7c-.5.4-1,.8-1.3,1.4v-6.3h-1.8v15.6h1.7v-1.9c.4.6.9,1.1,1.4,1.4.7.5,1.5.7,2.5.7s1.9-.2,2.6-.7c.8-.5,1.3-1.2,1.8-2.1.4-.9.6-1.9.6-3s-.2-2.2-.6-3c-.4-.9-1-1.6-1.8-2ZM150.5,51.3c-.3.6-.7,1.1-1.3,1.5-.5.4-1.2.5-1.9.5s-1.2-.2-1.7-.5c-.5-.4-.9-.9-1.2-1.5-.3-.6-.4-1.4-.4-2.2s.1-1.6.4-2.2c.3-.6.7-1.1,1.2-1.5.5-.4,1.1-.5,1.7-.5s1.3.2,1.9.5c.5.4,1,.9,1.3,1.5.3.6.5,1.4.5,2.2s-.2,1.6-.5,2.2Z"/>
-    <path class="st0" d="M159.3,52.6l-3.8-9h-1.9l4.8,11.1-.8,1.8c-.2.4-.4.7-.7.9-.3.2-.6.3-1,.3s-.4,0-.6-.1c-.3,0-.6-.2-.9-.3l-.7,1.5c.4.2.8.3,1.2.4s.7.2,1,.2c.7,0,1.2-.1,1.6-.4.4-.3.8-.6,1.1-1.1.3-.5.6-1,.9-1.7l5.3-12.7h-1.9l-3.7,9Z"/>
-    <path class="st0" d="M180.3,47.9c.8-.4,1.5-1,1.9-1.7.5-.7.7-1.5.7-2.4s-.2-1.7-.7-2.4-1-1.3-1.8-1.7c-.8-.4-1.7-.6-2.7-.6h-5.1v15.6h1.9v-6.1h2.9c.1,0,.2,0,.4,0l3.6,6.1h2.1l-3.8-6.5c.2,0,.4-.1,.5-.2ZM174.6,46.8v-6h3.1c1,0,1.8.3,2.4.8.6.6.9,1.3.9,2.2s-.1,1.1-.4,1.5c-.3.5-.6.8-1.1,1.1-.4.3-.9.4-1.5.4h-3.5Z"/>
-    <path class="st0" d="M187.1,38.7c-.3,0-.6.1-.8.3-.2.2-.3.5-.3.8s.1.6.3.8c.2.2.5.3.8.3s.6-.1.8-.3c.2-.2.3-.5.3-.8s-.1-.6-.3-.8c-.2-.2-.5-.3-.8-.3Z"/>
-    <rect class="st0" x="186.2" y="43.5" width="1.8" height="11.1"/>
-    <path class="st0" d="M198.1,52.7c-.6.4-1.2.6-1.9.6s-1.4-.2-1.9-.5c-.6-.4-1-.8-1.3-1.5s-.5-1.4-.5-2.2.2-1.5.5-2.2.8-1.1,1.3-1.5c.6-.4,1.2-.5,1.9-.5s1.4.2,1.9.5,1,.8,1.3,1.4l1.6-.7c-.4-.9-1.1-1.6-1.9-2.1-.8-.5-1.8-.7-2.9-.7s-2,.2-2.9.7-1.5,1.2-2,2.1c-.5.9-.7,1.9-.7,3s.2,2.2.7,3c.5.9,1.1,1.6,2,2.1.8.5,1.8.7,2.9.7s2-.3,2.9-.8c.8-.5,1.5-1.3,1.9-2.2l-1.6-.7c-.3.7-.7,1.2-1.3,1.6Z"/>
-    <polygon class="st0" points="212.1 43.5 209.8 43.5 205.1 48.6 205.1 39.1 203.3 39.1 203.3 54.7 205.1 54.7 205.1 51 206.7 49.3 210.3 54.7 212.5 54.7 207.9 48 212.1 43.5"/>
-    <path class="st0" d="M230.4,51.6c-.5.5-1.1.9-1.7,1.2-.6.3-1.3.4-2,.4-1.1,0-2.1-.3-2.9-.8-.9-.5-1.5-1.3-2-2.3-.5-1-.7-2.1-.7-3.3s.2-2.3.7-3.3c.5-.9,1.2-1.7,2-2.2.9-.5,1.8-.8,2.9-.8s1.4.1,2,.4c.6.3,1.2.6,1.7,1.1.5.5.9,1,1.2,1.6l1.6-.8c-.4-.8-.9-1.5-1.6-2.1-.7-.6-1.5-1.1-2.3-1.4-.9-.3-1.8-.5-2.7-.5-1.5,0-2.8.3-3.9,1-1.1.7-2,1.6-2.7,2.8-.6,1.2-1,2.6-1,4.2s.3,3,1,4.2c.7,1.2,1.6,2.2,2.7,2.8s2.5,1,3.9,1,1.8-.2,2.7-.5,1.6-.9,2.3-1.5c.7-.6,1.2-1.4,1.6-2.2l-1.6-.8c-.3.7-.7,1.2-1.2,1.7Z"/>
-    <path class="st0" d="M243.2,49.3c0,1.2-.3,2.2-.8,2.9-.5.7-1.3,1-2.3,1s-1.1-.1-1.5-.3c-.5-.2-.8-.6-1.1-1.2s-.4-1.4-.4-2.5v-5.7h-1.8v6.2c0,1.2.2,2.2.5,3,.4.8.9,1.3,1.5,1.7.7.3,1.4.5,2.3.5s1.7-.2,2.4-.7c.5-.3.8-.7,1.1-1.3v1.7h1.8v-11.1h-1.8v5.8Z"/>
-    <rect class="st0" x="248.2" y="43.5" width="1.8" height="11.1"/>
-    <path class="st0" d="M249.1,38.7c-.3,0-.6.1-.8.3-.2.2-.3.5-.3.8s.1.6.3.8c.2.2.5.3.8.3s.6-.1.8-.3c.2-.2.3-.5.3-.8s-.1-.6-.3-.8c-.2-.2-.5-.3-.8-.3Z"/>
-    <path class="st0" d="M255,38.7c-.3,0-.6.1-.8.3-.2.2-.3.5-.3.8s.1.6.3.8.5.3.8.3.6-.1.8-.3c.2-.2.3-.5.3-.8s-.1-.6-.3-.8c-.2-.2-.5-.3-.8-.3Z"/>
-    <path class="st0" d="M254.1,55.9c0,1.3-.5,1.9-1.5,1.9s-.3,0-.6-.1c-.2,0-.5-.2-.9-.3l-.7,1.5c.8.4,1.5.6,2.1.6,1.1,0,2-.3,2.5-.9s.8-1.5.8-2.6v-12.4h-1.8v12.3Z"/>
-    <path class="st0" d="M267.5,44c-.8-.5-1.6-.7-2.6-.7s-1.8.2-2.5.7c-.5.4-1,.8-1.3,1.4v-1.9h-1.8v15.6h1.8v-6.3c.3.6.8,1,1.3,1.4.7.5,1.5.7,2.5.7s1.9-.2,2.6-.7,1.3-1.2,1.8-2.1c.4-.9.6-1.9.6-3s-.2-2.2-.6-3-1-1.6-1.8-2ZM267.6,51.3c-.3.6-.7,1.1-1.3,1.5-.5.4-1.2.5-1.9.5s-1.2-.2-1.7-.5c-.5-.4-.9-.9-1.2-1.5s-.4-1.4-.4-2.2.1-1.6.4-2.2c.3-.6.7-1.1,1.2-1.5s1.1-.5,1.7-.5,1.3.2,1.9.5,1,.9,1.3,1.5c.3.6.5,1.4.5,2.2s-.2,1.6-.5,2.2Z"/>
-    <path class="st0" d="M281.6,46.2c-.4-.9-1-1.6-1.8-2.1-.8-.5-1.7-.8-2.7-.8s-2,.2-2.8.7-1.5,1.2-1.9,2.1c-.5.9-.7,1.9-.7,3s.2,2.2.7,3c.5.9,1.1,1.6,1.9,2.1.8.5,1.8.7,2.9.7s1.5-.1,2.1-.4c.6-.2,1.2-.6,1.6-1,.5-.4.8-.9,1.1-1.5l-1.5-.8c-.3.6-.7,1.1-1.3,1.5s-1.2.6-2,.6-1.4-.2-2-.5c-.6-.3-1-.8-1.3-1.5-.3-.5-.4-1.2-.5-1.9h8.7c0-1.2-.2-2.3-.6-3.2ZM275.4,45.3c.5-.3,1.1-.4,1.7-.4s1.2.1,1.6.4c.5.3.9.7,1.1,1.2.2.4.4.9.4,1.5h-6.7c0-.6.2-1.1.5-1.5.3-.5.8-.9,1.3-1.2Z"/>
-    <path class="st0" d="M286.3,45.6v-2h-1.8v11.1h1.8v-6.1c0-.8.2-1.5.6-2,.4-.5.9-.8,1.5-1.1s1.2-.3,1.9-.3v-1.7c-.8,0-1.6.2-2.3.5-.7.3-1.2.8-1.7,1.5Z"/>
-    <path class="st0" d="M298.5,49.1c-.5-.3-1.1-.6-1.8-.8l-1.1-.3c-.6-.2-1.1-.4-1.4-.6-.3-.3-.5-.5-.5-.8,0-.5.2-.9.6-1.2.4-.3.9-.4,1.6-.4s1.2.1,1.6.3c.4.2.8.6,1,1.1l1.6-.7c-.2-.5-.5-.9-.8-1.2-.4-.3-.8-.6-1.4-.8-.5-.2-1.1-.3-1.8-.3-1.4,0-2.4.3-3.1.9-.7.6-1,1.4-1,2.5s.3,1.3.8,1.8c.6.5,1.4.9,2.4,1.2l1.1.3c.7.2,1.2.4,1.5.7.3.3.5.7.5,1.1s-.2.9-.7,1.2c-.5.3-1.1.4-1.8.4s-1.2-.2-1.7-.5c-.5-.3-.9-.7-1.1-1.2l-1.6.6c.2.5.5.9.9,1.3.4.4.9.7,1.5,1,.6.2,1.3.4,2.1.4s1.5-.1,2.1-.4c.6-.3,1.1-.6,1.4-1.1.4-.5.5-1.1.5-1.7s-.1-1-.4-1.4c-.3-.4-.6-.8-1.1-1.2Z"/>
-  </g>
-</svg></div>
-            <h1>Het belang van kracht, spiermassa en conditie</h1>
-            <p class="subtitle">Complete Gids voor Praktische Toepassing</p>
-            <div class="module-info">
-                <strong>Module 03: Fysieke Dominantie</strong> | <strong>Les 02: Het belang van kracht, spiermassa en conditie</strong>
-            </div>
+            <h1>Het Belang van Kracht, Spiermassa en Conditie</h1>
+            <p>Waarom sterke spieren en een goede conditie zo belangrijk zijn</p>
         </div>
 
-        <!-- Uitgebreide Samenvatting -->
-        <div class="section">
-            <h2>📚 Uitgebreide Samenvatting van de Les</h2>
-            
-            <div class="highlight-box">
-                <h4>🎯 Les Overzicht</h4>
-                <p>In deze les hebben we het belang van kracht, spiermassa en conditie behandeld. Dit is een cruciaal onderdeel van je ontwikkeling als Top Tier Man en vormt de basis voor verdere groei en prestaties.</p>
-            </div>
-
-            <h3>Belangrijkste Inzichten</h3>
-            <ul>
-                <li><strong>De drie pijlers van fysieke dominantie:</strong> Een fundamenteel concept dat je dagelijks kunt toepassen</li><li><strong>1. Kracht:</strong> Een fundamenteel concept dat je dagelijks kunt toepassen</li><li><strong>Wat kracht is::</strong> Een fundamenteel concept dat je dagelijks kunt toepassen</li><li><strong>Waarom kracht belangrijk is::</strong> Een fundamenteel concept dat je dagelijks kunt toepassen</li><li><strong>2. Spiermassa:</strong> Een fundamenteel concept dat je dagelijks kunt toepassen</li>
-                <li><strong>Praktische Toepassing:</strong> Het verschil tussen kennis en wijsheid ligt in de dagelijkse implementatie</li>
-                <li><strong>Consistentie:</strong> Kleine, dagelijkse acties leiden tot grote, langetermijn resultaten</li>
-            </ul>
-
-            <h3>Waarom Dit Belangrijk Is</h3>
-            <p>De concepten uit deze les zijn niet alleen theoretisch interessant, maar vormen de praktische basis voor je dagelijkse leven. Door deze principes consequent toe te passen, bouw je aan een sterke fundering voor alle andere aspecten van je ontwikkeling.</p>
-
-            <h3>Wat is Kracht Precies?</h3>
-            <p>Kracht is het vermogen om weerstand te overwinnen en fysieke prestaties te leveren. Het is niet alleen over spierkracht, maar over het vermogen om je lichaam te gebruiken om doelen te bereiken en uitdagingen aan te gaan.</p>
-            
-            <p>Denk aan kracht als de "fundering" van alle fysieke prestaties. Net zoals een gebouw een sterke fundering nodig heeft, heeft je lichaam kracht nodig voor alle andere prestaties. Zonder kracht blijf je zwak. Met kracht word je onverzettelijk.</p>
-
-            <h3>De 5 Fundamentele Pijlers van Kracht</h3>
-            <p>Kracht is gebouwd op vijf fundamentele pijlers die samen een onverzettelijke fysieke basis creëren. Deze pijlers zijn de basis van alle kracht prestaties.</p>
-            
-            <h4>1. Spierkracht en Power</h4>
-            <p>Spierkracht en power zijn de eerste pijler van kracht. Het is het vermogen om maximale kracht te genereren in korte tijd.</p>
-            
-            <p><strong>Spierkracht Principes:</strong></p>
-            <ul>
-                <li><strong>Maximale Kracht:</strong> De hoogste kracht die je kunt genereren</li>
-                <li><strong>Explosieve Power:</strong> Kracht genereren in korte tijd</li>
-                <li><strong>Functionele Kracht:</strong> Kracht die praktisch toepasbaar is</li>
-                <li><strong>Relatieve Kracht:</strong> Kracht in verhouding tot je lichaamsgewicht</li>
-            </ul>
-            
-            <h4>2. Spiermassa en Spiergroei</h4>
-            <p>Spiermassa en spiergroei zijn de tweede pijler van kracht. Het is de hoeveelheid spierweefsel die je hebt en hoe goed het ontwikkeld is.</p>
-            
-            <p><strong>Spiermassa Principes:</strong></p>
-            <ul>
-                <li><strong>Spiergroei:</strong> Het ontwikkelen van meer spierweefsel</li>
-                <li><strong>Spierkwaliteit:</strong> De kwaliteit van je spierweefsel</li>
-                <li><strong>Spierbalans:</strong> Evenwicht tussen verschillende spiergroepen</li>
-                <li><strong>Spierfunctionaliteit:</strong> Hoe goed je spieren functioneren</li>
-            </ul>
-            
-            <h4>3. Conditie en Uithoudingsvermogen</h4>
-            <p>Conditie en uithoudingsvermogen zijn de derde pijler van kracht. Het is het vermogen om langdurig prestaties te leveren.</p>
-            
-            <p><strong>Conditie Principes:</strong></p>
-            <ul>
-                <li><strong>Cardiovasculaire Conditie:</strong> Het vermogen van je hart en longen</li>
-                <li><strong>Spieruithoudingsvermogen:</strong> Het vermogen van je spieren om lang te presteren</li>
-                <li><strong>Energie Management:</strong> Hoe goed je energie gebruikt</li>
-                <li><strong>Herstel Vermogen:</strong> Hoe snel je herstelt van inspanning</li>
-            </ul>
-            
-            <h4>4. Flexibiliteit en Mobiliteit</h4>
-            <p>Flexibiliteit en mobiliteit zijn de vierde pijler van kracht. Het is het vermogen om je gewrichten en spieren volledig te gebruiken.</p>
-            
-            <p><strong>Flexibiliteit Principes:</strong></p>
-            <ul>
-                <li><strong>Gewrichtsmobiliteit:</strong> Het vermogen van je gewrichten om te bewegen</li>
-                <li><strong>Spierflexibiliteit:</strong> Het vermogen van je spieren om te rekken</li>
-                <li><strong>Bewegingsbereik:</strong> Het volledige bewegingsbereik van je gewrichten</li>
-                <li><strong>Functionele Mobiliteit:</strong> Mobiliteit die praktisch toepasbaar is</li>
-            </ul>
-            
-            <h4>5. Stabiliteit en Balans</h4>
-            <p>Stabiliteit en balans zijn de vijfde pijler van kracht. Het is het vermogen om controle te behouden over je lichaam.</p>
-            
-            <p><strong>Stabiliteit Principes:</strong></p>
-            <ul>
-                <li><strong>Core Stabiliteit:</strong> De stabiliteit van je romp</li>
-                <li><strong>Gewrichtsstabiliteit:</strong> De stabiliteit van je gewrichten</li>
-                <li><strong>Proprioceptie:</strong> Je bewustzijn van je lichaamspositie</li>
-                <li><strong>Functionele Stabiliteit:</strong> Stabiliteit die praktisch toepasbaar is</li>
-            </ul>
-
-            <h3>Waarom Kracht zo Belangrijk is</h3>
-            <p>Kracht is zo belangrijk omdat het de fundering vormt voor alle andere fysieke prestaties. Zonder kracht kun je geen andere fysieke doelen bereiken.</p>
-            
-            <h4>Fysieke Prestaties en Doelen</h4>
-            <p>Kracht is de basis voor alle fysieke prestaties. Of je nu wilt afvallen, spieren wilt opbouwen, of je conditie wilt verbeteren, kracht is altijd de eerste stap.</p>
-            
-            <p><strong>Fysieke Prestatie Voordelen:</strong></p>
-            <ul>
-                <li><strong>Betere Prestaties:</strong> Alle fysieke prestaties verbeteren door kracht</li>
-                <li><strong>Meer Energie:</strong> Kracht geeft je meer energie voor dagelijkse activiteiten</li>
-                <li><strong>Betere Houding:</strong> Kracht helpt je om een betere houding te behouden</li>
-                <li><strong>Minder Blessures:</strong> Kracht helpt je om blessures te voorkomen</li>
-            </ul>
-            
-            <h4>Mentale en Emotionele Voordelen</h4>
-            <p>Kracht heeft niet alleen fysieke voordelen, maar ook mentale en emotionele voordelen. Het geeft je zelfvertrouwen en mentale kracht.</p>
-            
-            <p><strong>Mentale Voordelen:</strong></p>
-            <ul>
-                <li><strong>Zelfvertrouwen:</strong> Kracht geeft je zelfvertrouwen in je vermogen</li>
-                <li><strong>Mentale Kracht:</strong> Fysieke kracht ontwikkelt mentale kracht</li>
-                <li><strong>Discipline:</strong> Kracht training ontwikkelt discipline</li>
-                <li><strong>Doorzettingsvermogen:</strong> Kracht training ontwikkelt doorzettingsvermogen</li>
-            </ul>
-            
-            <h4>Lange Termijn Gezondheid</h4>
-            <p>Kracht is essentieel voor lange termijn gezondheid. Het helpt je om gezond en actief te blijven naarmate je ouder wordt.</p>
-            
-            <p><strong>Gezondheid Voordelen:</strong></p>
-            <ul>
-                <li><strong>Botdichtheid:</strong> Kracht training verhoogt botdichtheid</li>
-                <li><strong>Spierbehoud:</strong> Kracht training helpt spierverlies te voorkomen</li>
-                <li><strong>Stofwisseling:</strong> Kracht training verhoogt je stofwisseling</li>
-                <li><strong>Immuunsysteem:</strong> Kracht training versterkt je immuunsysteem</li>
-            </ul>
-
-            <h3>Hoe Kracht Werkt in je Hersenen</h3>
-            <p>Kracht werkt door specifieke neurologische processen die je hersenen trainen om kracht en prestaties te ontwikkelen. Deze processen maken kracht automatisch.</p>
-            
-            <h4>Neurologische Basis van Kracht</h4>
-            <p>Kracht werkt door het trainen van je voorste deel van je hersenen en het ontwikkelen van nieuwe verbindingen. Wanneer je kracht ontwikkelt, train je je hersenen om kracht en prestaties te ontwikkelen.</p>
-            
-            <p><strong>Neurologische Processen:</strong></p>
-            <ul>
-                <li><strong>Voorste Hersenen Training:</strong> Je planning en besluitvorming trainen voor kracht</li>
-                <li><strong>Nieuwe Verbindingen Ontwikkelen:</strong> Nieuwe paden ontwikkelen voor kracht gedrag</li>
-                <li><strong>Automatisering:</strong> Kracht gedrag automatisch maken</li>
-                <li><strong>Consistentie:</strong> Consistent handelen naar je kracht doelen</li>
-            </ul>
-            
-            <h4>Hoe Kracht je Hersenen Verandert</h4>
-            <p>Kracht verandert je hersenen door het ontwikkelen van nieuwe neurale paden die specifiek zijn voor kracht gedrag. Deze paden maken kracht automatisch en natuurlijk.</p>
-            
-            <p><strong>Hersenen Veranderingen:</strong></p>
-            <ul>
-                <li><strong>Nieuwe Neurale Paden:</strong> Nieuwe paden ontwikkelen voor kracht gedrag</li>
-                <li><strong>Versterkte Verbindingen:</strong> Bestaande verbindingen versterken voor kracht</li>
-                <li><strong>Automatische Processen:</strong> Automatische processen ontwikkelen voor kracht</li>
-                <li><strong>Consistentie:</strong> Consistent handelen naar je kracht doelen</li>
-            </ul>
-
-            <h3>Waarom Kracht Moeilijk Voelt</h3>
-            <p>Kracht voelt moeilijk omdat het een fundamentele verandering vereist in je lichaam en geest. Het is niet alleen een fysieke verandering, maar een mentale verandering.</p>
-            
-            <h4>Fysieke Uitdagingen</h4>
-            <p>Kracht ontwikkeling vereist fysieke uitdagingen die je lichaam en geest testen. Het is niet gemakkelijk om je grenzen te verleggen.</p>
-            
-            <p><strong>Fysieke Uitdagingen:</strong></p>
-            <ul>
-                <li><strong>Fysieke Pijn:</strong> Kracht training kan fysiek pijnlijk zijn</li>
-                <li><strong>Vermoeidheid:</strong> Kracht training vereist veel energie</li>
-                <li><strong>Blessures:</strong> Kracht training kan leiden tot blessures</li>
-                <li><strong>Herstel:</strong> Kracht training vereist tijd voor herstel</li>
-            </ul>
-            
-            <h4>Mentale Uitdagingen</h4>
-            <p>Kracht ontwikkeling vereist mentale uitdagingen die je geest testen. Het is niet gemakkelijk om mentaal sterk te blijven.</p>
-            
-            <p><strong>Mentale Uitdagingen:</strong></p>
-            <ul>
-                <li><strong>Discipline:</strong> Kracht training vereist discipline</li>
-                <li><strong>Doorzettingsvermogen:</strong> Kracht training vereist doorzettingsvermogen</li>
-                <li><strong>Motivatie:</strong> Kracht training vereist motivatie</li>
-                <li><strong>Focus:</strong> Kracht training vereist focus</li>
-            </ul>
-            
-            <h4>Hoe Kracht Uitdagingen Overwint</h4>
-            <p>Kracht overwint uitdagingen door het ontwikkelen van nieuwe gewoonten en automatische responsen. Deze gewoonten maken kracht natuurlijk en automatisch.</p>
-            
-            <p><strong>Uitdaging Overwinnende Strategieën:</strong></p>
-            <ul>
-                <li><strong>Gewoonte Ontwikkeling:</strong> Nieuwe gewoonten ontwikkelen voor kracht</li>
-                <li><strong>Automatische Respons:</strong> Automatische responsen ontwikkelen voor kracht</li>
-                <li><strong>Mentale Versterking:</strong> Je mentale kracht versterken voor kracht</li>
-                <li><strong>Systemen Bouwen:</strong> Systemen bouwen die kracht ondersteunen</li>
-            </ul>
-
-            <h3>De 3 Fundamentele Bouwstenen van Kracht</h3>
-            <p>Kracht is gebouwd op drie fundamentele bouwstenen die samen een onverzettelijke fysieke basis creëren. Deze bouwstenen zijn de basis van alle kracht prestaties.</p>
-            
-            <h4>1. Spierkracht en Power</h4>
-            <p>Spierkracht en power zijn de eerste bouwsteen van kracht. Het is het vermogen om maximale kracht te genereren in korte tijd.</p>
-            
-            <p><strong>Spierkracht Principes:</strong></p>
-            <ul>
-                <li><strong>Maximale Kracht:</strong> De hoogste kracht die je kunt genereren</li>
-                <li><strong>Explosieve Power:</strong> Kracht genereren in korte tijd</li>
-                <li><strong>Functionele Kracht:</strong> Kracht die praktisch toepasbaar is</li>
-                <li><strong>Relatieve Kracht:</strong> Kracht in verhouding tot je lichaamsgewicht</li>
-            </ul>
-            
-            <h4>2. Spiermassa en Hypertrofie</h4>
-            <p>Spiermassa en hypertrofie zijn de tweede bouwsteen van kracht. Het is de hoeveelheid spierweefsel die je hebt en hoe goed het ontwikkeld is.</p>
-            
-            <p><strong>Spiermassa Principes:</strong></p>
-            <ul>
-                <li><strong>Spiergroei:</strong> Het ontwikkelen van meer spierweefsel</li>
-                <li><strong>Spierkwaliteit:</strong> De kwaliteit van je spierweefsel</li>
-                <li><strong>Spierbalans:</strong> Evenwicht tussen verschillende spiergroepen</li>
-                <li><strong>Spierfunctionaliteit:</strong> Hoe goed je spieren functioneren</li>
-            </ul>
-            
-            <h4>3. Conditie en Uithoudingsvermogen</h4>
-            <p>Conditie en uithoudingsvermogen zijn de derde bouwsteen van kracht. Het is het vermogen om langdurig prestaties te leveren.</p>
-            
-            <p><strong>Conditie Principes:</strong></p>
-            <ul>
-                <li><strong>Cardiovasculaire Conditie:</strong> Het vermogen van je hart en longen</li>
-                <li><strong>Spieruithoudingsvermogen:</strong> Het vermogen van je spieren om lang te presteren</li>
-                <li><strong>Energie Management:</strong> Hoe goed je energie gebruikt</li>
-                <li><strong>Herstel Vermogen:</strong> Hoe snel je herstelt van inspanning</li>
-            </ul>
-
-            <h3>Kracht in de Praktijk: Concrete Voorbeelden</h3>
-            <p>Kracht is niet alleen theoretisch - het is praktisch en toepasbaar in je dagelijks leven. Hier zijn concrete voorbeelden van hoe kracht werkt in de praktijk.</p>
-            
-            <h4>Voorbeeld 1: Werk en Carrière</h4>
-            <p>Een persoon met kracht benadert zijn werk met energie en uithoudingsvermogen. Hij gebruikt zijn fysieke kracht om mentale kracht te ontwikkelen.</p>
-            
-            <p><strong>Kracht Toepassing:</strong></p>
-            <ul>
-                <li><strong>Energie en Uithoudingsvermogen:</strong> Kracht geeft je energie voor lange werkdagen</li>
-                <li><strong>Mentale Kracht:</strong> Fysieke kracht ontwikkelt mentale kracht</li>
-                <li><strong>Zelfvertrouwen:</strong> Kracht geeft je zelfvertrouwen in je vermogen</li>
-                <li><strong>Discipline:</strong> Kracht training ontwikkelt discipline</li>
-            </ul>
-            
-            <h4>Voorbeeld 2: Sociale Situaties</h4>
-            <p>Een persoon met kracht benadert sociale situaties met zelfvertrouwen en aanwezigheid. Hij gebruikt zijn fysieke kracht om mentale kracht te ontwikkelen.</p>
-            
-            <p><strong>Kracht Toepassing:</strong></p>
-            <ul>
-                <li><strong>Zelfvertrouwen:</strong> Kracht geeft je zelfvertrouwen in sociale situaties</li>
-                <li><strong>Aanwezigheid:</strong> Kracht geeft je een sterke aanwezigheid</li>
-                <li><strong>Mentale Kracht:</strong> Fysieke kracht ontwikkelt mentale kracht</li>
-                <li><strong>Discipline:</strong> Kracht training ontwikkelt discipline</li>
-            </ul>
-            
-            <h4>Voorbeeld 3: Persoonlijke Relaties</h4>
-            <p>Een persoon met kracht benadert persoonlijke relaties met energie en vitaliteit. Hij gebruikt zijn fysieke kracht om mentale kracht te ontwikkelen.</p>
-            
-            <p><strong>Kracht Toepassing:</strong></p>
-            <ul>
-                <li><strong>Energie en Vitaliteit:</strong> Kracht geeft je energie voor relaties</li>
-                <li><strong>Mentale Kracht:</strong> Fysieke kracht ontwikkelt mentale kracht</li>
-                <li><strong>Zelfvertrouwen:</strong> Kracht geeft je zelfvertrouwen in relaties</li>
-                <li><strong>Discipline:</strong> Kracht training ontwikkelt discipline</li>
-            </ul>
-            
-            <h4>Voorbeeld 4: Persoonlijke Groei</h4>
-            <p>Een persoon met kracht benadert persoonlijke groei met discipline en doorzettingsvermogen. Hij gebruikt zijn fysieke kracht om mentale kracht te ontwikkelen.</p>
-            
-            <p><strong>Kracht Toepassing:</strong></p>
-            <ul>
-                <li><strong>Discipline:</strong> Kracht training ontwikkelt discipline</li>
-                <li><strong>Doorzettingsvermogen:</strong> Kracht training ontwikkelt doorzettingsvermogen</li>
-                <li><strong>Mentale Kracht:</strong> Fysieke kracht ontwikkelt mentale kracht</li>
-                <li><strong>Zelfvertrouwen:</strong> Kracht geeft je zelfvertrouwen in groei</li>
-            </ul>
-
-            <h3>Kracht en Obstakels</h3>
-            <p>Kracht wordt getest door obstakels. Het zijn de obstakels die kracht zo krachtig maken. Wanneer je obstakels overwint met kracht, ontwikkel je onverzettelijke kracht.</p>
-            
-            <h4>Veelvoorkomende Obstakels en Oplossingen</h4>
-            <p>Er zijn veel obstakels die kracht kunnen testen. Hier zijn de meest voorkomende obstakels en hoe je ze kunt overwinnen met kracht.</p>
-            
-            <p><strong>Obstakel 1: Fysieke Pijn</strong></p>
-            <ul>
-                <li><strong>Het Probleem:</strong> Kracht training kan fysiek pijnlijk zijn</li>
-                <li><strong>Kracht Oplossing:</strong> Pijn overwinnen door mentale kracht</li>
-                <li><strong>Strategie:</strong> Mentale kracht gebruiken tegen fysieke pijn</li>
-            </ul>
-            
-            <p><strong>Obstakel 2: Vermoeidheid</strong></p>
-            <ul>
-                <li><strong>Het Probleem:</strong> Kracht training vereist veel energie</li>
-                <li><strong>Kracht Oplossing:</strong> Vermoeidheid overwinnen door discipline</li>
-                <li><strong>Strategie:</strong> Discipline gebruiken tegen vermoeidheid</li>
-            </ul>
-            
-            <p><strong>Obstakel 3: Blessures</strong></p>
-            <ul>
-                <li><strong>Het Probleem:</strong> Kracht training kan leiden tot blessures</li>
-                <li><strong>Kracht Oplossing:</strong> Blessures voorkomen door goede techniek</li>
-                <li><strong>Strategie:</strong> Goede techniek gebruiken om blessures te voorkomen</li>
-            </ul>
-            
-            <p><strong>Obstakel 4: Gebrek aan Motivatie</strong></p>
-            <ul>
-                <li><strong>Het Probleem:</strong> Kracht training vereist motivatie</li>
-                <li><strong>Kracht Oplossing:</strong> Motivatie opbouwen door doelen</li>
-                <li><strong>Strategie:</strong> Doelen gebruiken om motivatie op te bouwen</li>
-            </ul>
-
-            <h3>Kracht in Crisis</h3>
-            <p>Kracht wordt het meest getest in crisis. Het is in crisis dat kracht zijn ware kracht toont. Wanneer alles instort, is kracht je anker.</p>
-            
-            <h4>Hoe Kracht Helpt in Crisis</h4>
-            <p>Kracht helpt in crisis door je te geven wat je nodig hebt om te functioneren wanneer alles instort. Het geeft je energie, uithoudingsvermogen, en mentale kracht wanneer je het meest nodig hebt.</p>
-            
-            <p><strong>Crisis Voordelen:</strong></p>
-            <ul>
-                <li><strong>Energie:</strong> Kracht geeft je energie in crisis</li>
-                <li><strong>Uithoudingsvermogen:</strong> Kracht geeft je uithoudingsvermogen in crisis</li>
-                <li><strong>Mentale Kracht:</strong> Kracht geeft je mentale kracht in crisis</li>
-                <li><strong>Zelfvertrouwen:</strong> Kracht geeft je zelfvertrouwen in crisis</li>
-            </ul>
-            
-            <h4>Crisis Kracht Strategieën</h4>
-            <p>Er zijn specifieke strategieën die je kunt gebruiken om kracht te ontwikkelen in crisis. Deze strategieën helpen je om te functioneren wanneer alles instort.</p>
-            
-            <p><strong>Strategie 1: Fysieke Kracht</strong></p>
-            <ul>
-                <li><strong>Principe:</strong> Fysieke kracht behouden, ongeacht de crisis</li>
-                <li><strong>Toepassing:</strong> Fysieke kracht gebruiken voor energie</li>
-                <li><strong>Voordeel:</strong> Fysieke kracht geeft je energie in crisis</li>
-            </ul>
-            
-            <p><strong>Strategie 2: Mentale Kracht</strong></p>
-            <ul>
-                <li><strong>Principe:</strong> Mentale kracht behouden, ongeacht de crisis</li>
-                <li><strong>Toepassing:</strong> Mentale kracht gebruiken voor focus</li>
-                <li><strong>Voordeel:</strong> Mentale kracht geeft je focus in crisis</li>
-            </ul>
-            
-            <p><strong>Strategie 3: Discipline</strong></p>
-            <ul>
-                <li><strong>Principe:</strong> Discipline behouden, ongeacht de crisis</li>
-                <li><strong>Toepassing:</strong> Discipline gebruiken voor consistentie</li>
-                <li><strong>Voordeel:</strong> Discipline geeft je consistentie in crisis</li>
-            </ul>
-
-            <h3>Kracht en Persoonlijke Groei</h3>
-            <p>Kracht is niet alleen krachtig - het is transformerend. Wanneer je kracht ontwikkelt, transformeer je jezelf in een onverzettelijke kracht.</p>
-            
-            <h4>Hoe Kracht je Transformeert</h4>
-            <p>Kracht transformeert je door het ontwikkelen van nieuwe capaciteiten en het versterken van bestaande capaciteiten. Deze transformatie maakt je onverzettelijk.</p>
-            
-            <p><strong>Transformatie Gebieden:</strong></p>
-            <ul>
-                <li><strong>Fysieke Transformatie:</strong> Je lichaam transformeren in kracht</li>
-                <li><strong>Mentale Transformatie:</strong> Je geest transformeren in kracht</li>
-                <li><strong>Emotionele Transformatie:</strong> Je emoties transformeren in kracht</li>
-                <li><strong>Spirituele Transformatie:</strong> Je ziel transformeren in kracht</li>
-            </ul>
-            
-            <h4>Persoonlijke Groei Door Kracht</h4>
-            <p>Kracht bevordert persoonlijke groei door het ontwikkelen van nieuwe capaciteiten en het versterken van bestaande capaciteiten. Deze groei maakt je onverzettelijk.</p>
-            
-            <p><strong>Groei Gebieden:</strong></p>
-            <ul>
-                <li><strong>Fysieke Groei:</strong> Je lichaam ontwikkelen tot kracht</li>
-                <li><strong>Mentale Groei:</strong> Je geest ontwikkelen tot kracht</li>
-                <li><strong>Emotionele Groei:</strong> Je emoties ontwikkelen tot kracht</li>
-                <li><strong>Spirituele Groei:</strong> Je ziel ontwikkelen tot kracht</li>
-            </ul>
-
-            <h3>Geavanceerde Kracht Strategieën</h3>
-            <p>Zodra je de basis van kracht onder de knie hebt, kun je geavanceerde strategieën gebruiken om je kracht naar het volgende niveau te tillen. Deze strategieën maken kracht nog krachtiger.</p>
-            
-            <h4>1. Kracht Environment Design</h4>
-            <p>Richt je omgeving in om kracht te ondersteunen. Je omgeving is de sterkste kracht in je leven voor kracht ontwikkeling.</p>
-            
-            <p><strong>Environment Design Strategieën:</strong></p>
-            <ul>
-                <li><strong>Visuele Herinneringen:</strong> Plaats objecten in je omgeving die kracht herinneren</li>
-                <li><strong>Sociale Omgeving:</strong> Omring jezelf met mensen die kracht hebben</li>
-                <li><strong>Informatie Input:</strong> Consumeer content die kracht ondersteunt</li>
-                <li><strong>Fysieke Ruimte:</strong> Richt je ruimte in om kracht te ondersteunen</li>
-            </ul>
-            
-            <h4>2. Kracht Implementation Intentions</h4>
-            <p>Ontwikkel specifieke plannen voor hoe je kracht gebruikt in verschillende situaties. Deze plannen maken kracht automatisch.</p>
-            
-            <p><strong>Implementation Intentions Voorbeelden:</strong></p>
-            <ul>
-                <li>"Als ik gestrest ben, dan gebruik ik kracht om energie te krijgen"</li>
-                <li>"Als ik moe ben, dan gebruik ik kracht om uithoudingsvermogen te krijgen"</li>
-                <li>"Als ik bang ben, dan gebruik ik kracht om moed te krijgen"</li>
-                <li>"Als ik twijfel, dan gebruik ik kracht om zelfvertrouwen te krijgen"</li>
-            </ul>
-            
-            <h4>3. Kracht Habit Stacking</h4>
-            <p>Koppel kracht aan bestaande gewoonten. Dit maakt het makkelijker om kracht te ontwikkelen.</p>
-            
-            <p><strong>Habit Stacking Voorbeelden:</strong></p>
-            <ul>
-                <li>"Na het tandenpoetsen, dan oefen ik kracht"</li>
-                <li>"Na het ontbijt, dan oefen ik kracht"</li>
-                <li>"Na het avondeten, dan oefen ik kracht"</li>
-                <li>"Voor het slapen, dan oefen ik kracht"</li>
-            </ul>
-            
-            <h4>4. Kracht Temptation Bundling</h4>
-            <p>Koppel kracht aan activiteiten die je leuk vindt. Dit maakt kracht aantrekkelijker.</p>
-            
-            <p><strong>Temptation Bundling Voorbeelden:</strong></p>
-            <ul>
-                <li>Luister naar kracht podcasts tijdens het sporten</li>
-                <li>Lees kracht boeken tijdens het reizen</li>
-                <li>Doe kracht oefeningen tijdens het wandelen</li>
-                <li>Bekijk kracht video's tijdens het eten</li>
-            </ul>
-            
-            <h4>5. Kracht The Two-Day Rule</h4>
-            <p>Streef ernaar om nooit twee dagen achter elkaar te missen met kracht ontwikkeling. Dit zorgt voor consistentie.</p>
-            
-            <p><strong>Two-Day Rule Implementatie:</strong></p>
-            <ul>
-                <li>Als je een dag mist, zorg er dan voor dat je de volgende dag terugkomt</li>
-                <li>Gebruik dit als een minimum standaard voor kracht ontwikkeling</li>
-                <li>Focus op consistentie, niet op perfectie</li>
-            </ul>
-            
-            <div class="highlight-box">
-                <h4>🎯 Belangrijke Herinnering</h4>
-                <p>Kracht is niet alleen krachtig - het is transformerend. Het is de fundering van alle fysieke prestaties die je energie, uithoudingsvermogen, en mentale kracht geeft. Wanneer je kracht ontwikkelt, ontwikkel je de basis voor onverzettelijke prestaties.</p>
-            </div>
+        <div class="highlight-box">
+            <h3>🎯 Wat je gaat leren</h3>
+            <p>In dit ebook leer je waarom kracht, spiermassa en conditie zo belangrijk zijn voor je gezondheid en welzijn. Geen moeilijke theorieën, maar praktische uitleg die je meteen kunt begrijpen en toepassen.</p>
         </div>
 
-        <!-- Praktische Oefeningen en Opdrachten -->
-        <div class="section">
-            <h2>💪 Praktische Oefeningen en Opdrachten</h2>
+        <h2>Waarom zijn Kracht, Spiermassa en Conditie Belangrijk?</h2>
+        <p>Kracht, spiermassa en conditie zijn de basis van een gezond en sterk lichaam. Ze helpen je om beter te functioneren in het dagelijks leven en je langer gezond te blijven.</p>
 
-            <div class="exercise-box">
-                <h4>Oefening 1: Zelf-Assessment</h4>
-                <p><strong>Doel:</strong> Evalueer je huidige situatie en identificeer verbeterpunten.</p>
-                <p><strong>Actie:</strong> Beantwoord de volgende vragen eerlijk en noteer je antwoorden:</p>
-                <ul>
-                    <li>Hoe pas je momenteel de concepten uit deze les toe in je dagelijkse leven?</li>
-                    <li>Welke aspecten vind je het moeilijkst om te implementeren?</li>
-                    <li>Wat zijn je grootste uitdagingen op dit gebied?</li>
-                    <li>Welke kleine veranderingen kun je vandaag nog maken?</li>
-                </ul>
-            </div>
-
-            <div class="exercise-box">
-                <h4>Oefening 2: Dagelijkse Implementatie</h4>
-                <p><strong>Doel:</strong> Maak de concepten onderdeel van je dagelijkse routine.</p>
-                <p><strong>Actie:</strong> Kies 3 specifieke acties die je deze week gaat uitvoeren:</p>
-                <ul>
-                    <li>Actie 1: _________________________________</li>
-                    <li>Actie 2: _________________________________</li>
-                    <li>Actie 3: _________________________________</li>
-                </ul>
-            </div>
-
-            <div class="exercise-box">
-                <h4>Oefening 3: Progressie Tracking</h4>
-                <p><strong>Doel:</strong> Monitor je voortgang en pas je aanpak aan.</p>
-                <p><strong>Actie:</strong> Houd deze week bij:</p>
-                <ul>
-                    <li>Dagelijkse implementatie van de concepten</li>
-                    <li>Uitdagingen die je tegenkomt</li>
-                    <li>Momenten van succes en doorbraak</li>
-                    <li>Aanpassingen die je moet maken</li>
-                </ul>
-            </div>
+        <div class="practical-tip">
+            <h4>💡 Denk aan je lichaam als een auto</h4>
+            <p>Je lichaam is als een auto. Kracht is de motor, spiermassa is de carrosserie, en conditie is de brandstof. Zonder een sterke motor, stevige carrosserie en goede brandstof kan je auto niet goed rijden.</p>
         </div>
 
-        <!-- Dagelijkse Checklists en Routines -->
-        <div class="section">
-            <h2>✅ Dagelijkse Checklists en Routines</h2>
-
-            <h3>Ochtend Routine</h3>
-            <div class="checklist">
-                <div class="checklist-item">
-                    <input type="checkbox" id="morning1">
-                    <label for="morning1">Herinner jezelf aan de belangrijkste concepten uit deze les</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="morning2">
-                    <label for="morning2">Plan je dag met de principes in gedachten</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="morning3">
-                    <label for="morning3">Stel jezelf een specifiek doel voor vandaag</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="morning4">
-                    <label for="morning4">Visualiseer hoe je de concepten gaat toepassen</label>
-                </div>
-            </div>
-
-            <h3>Dagelijkse Implementatie</h3>
-            <div class="checklist">
-                <div class="checklist-item">
-                    <input type="checkbox" id="daily1">
-                    <label for="daily1">Pas de concepten toe in je dagelijkse activiteiten</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="daily2">
-                    <label for="daily2">Wees bewust van momenten waar je kunt groeien</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="daily3">
-                    <label for="daily3">Leer van uitdagingen en tegenslagen</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="daily4">
-                    <label for="daily4">Celebreer kleine overwinningen</label>
-                </div>
-            </div>
-
-            <h3>Avond Reflectie</h3>
-            <div class="checklist">
-                <div class="checklist-item">
-                    <input type="checkbox" id="evening1">
-                    <label for="evening1">Evalueer hoe je dag is verlopen</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="evening2">
-                    <label for="evening2">Identificeer wat goed ging en wat beter kan</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="evening3">
-                    <label for="evening3">Plan verbeteringen voor morgen</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="evening4">
-                    <label for="evening4">Wees dankbaar voor je groei en leerervaringen</label>
-                </div>
-            </div>
-        </div>
-
-        <!-- Reflectie Vragen -->
-        <div class="section">
-            <h2>🤔 Reflectie Vragen voor Persoonlijke Groei</h2>
-
-            <div class="reflection-question">
-                <h4>Vraag 1: Huidige Situatie</h4>
-                <p>Hoe zou je je huidige implementatie van de concepten uit deze les beoordelen op een schaal van 1-10? Wat zijn de specifieke gebieden waar je de meeste groei kunt maken?</p>
-            </div>
-
-            <div class="reflection-question">
-                <h4>Vraag 2: Uitdagingen</h4>
-                <p>Welke uitdagingen kom je tegen bij het toepassen van deze concepten? Hoe kun je deze uitdagingen omzetten in kansen voor groei?</p>
-            </div>
-
-            <div class="reflection-question">
-                <h4>Vraag 3: Impact</h4>
-                <p>Welke positieve veranderingen heb je al gemerkt sinds je begonnen bent met het toepassen van deze concepten? Hoe heeft dit je leven beïnvloed?</p>
-            </div>
-
-            <div class="reflection-question">
-                <h4>Vraag 4: Toekomst</h4>
-                <p>Hoe ziet je ideale implementatie van deze concepten eruit over 3 maanden? Welke specifieke doelen stel je jezelf?</p>
-            </div>
-
-            <div class="reflection-question">
-                <h4>Vraag 5: Ondersteuning</h4>
-                <p>Welke ondersteuning heb je nodig om deze concepten beter te kunnen toepassen? Hoe kun je jezelf en anderen helpen om te groeien?</p>
-            </div>
-        </div>
-
-        <!-- Volgende Stappen en Actieplan -->
-        <div class="section">
-            <h2>🚀 Volgende Stappen en Actieplan</h2>
-
-            <div class="action-plan">
-                <h3>30-Dagen Implementatie Plan</h3>
-
-                <div class="action-step">
-                    <h4>Week 1: Bewustwording en Baseline</h4>
-                    <ul>
-                        <li>Voltooi de zelf-assessment oefening</li>
-                        <li>Implementeer de ochtend routine</li>
-                        <li>Begin met dagelijkse bewustwording van de concepten</li>
-                        <li>Start met het bijhouden van je voortgang</li>
-                    </ul>
-                </div>
-
-                <div class="action-step">
-                    <h4>Week 2: Dagelijkse Implementatie</h4>
-                    <ul>
-                        <li>Pas de concepten toe in je dagelijkse activiteiten</li>
-                        <li>Focus op consistentie boven perfectie</li>
-                        <li>Identificeer en adresseer uitdagingen</li>
-                        <li>Bouw momentum op door kleine overwinningen</li>
-                    </ul>
-                </div>
-
-                <div class="action-step">
-                    <h4>Week 3: Optimalisatie en Verfijning</h4>
-                    <ul>
-                        <li>Evalueer je voortgang en pas je aanpak aan</li>
-                        <li>Verhoog de intensiteit waar mogelijk</li>
-                        <li>Integreer de concepten in nieuwe situaties</li>
-                        <li>Zoek naar manieren om anderen te helpen</li>
-                    </ul>
-                </div>
-
-                <div class="action-step">
-                    <h4>Week 4: Consolidatie en Planning</h4>
-                    <ul>
-                        <li>Consolideer je nieuwe gewoonten</li>
-                        <li>Plan voor langetermijn implementatie</li>
-                        <li>Stel nieuwe, uitdagende doelen</li>
-                        <li>Deel je ervaringen en leer van anderen</li>
-                    </ul>
-                </div>
-            </div>
-
-            <h3>Langetermijn Strategieën</h3>
+        <h2>Wat is Kracht?</h2>
+        <p>Kracht is het vermogen van je spieren om kracht te leveren. Het is niet alleen belangrijk voor het tillen van zware dingen, maar ook voor alledaagse activiteiten.</p>
+        
+        <div class="benefit-box">
+            <h4>💪 Kracht helpt je met:</h4>
             <ul>
-                <li><strong>Maand 2-3:</strong> Verdieping en geavanceerde toepassing</li>
-                <li><strong>Maand 4-6:</strong> Integratie met andere ontwikkelingsgebieden</li>
-                <li><strong>Maand 6+:</strong> Mentorschap en doorgeven van kennis</li>
+                <li><strong>Dagelijkse activiteiten:</strong> Boodschappen tillen, trappen lopen</li>
+                <li><strong>Blessures voorkomen:</strong> Sterke spieren beschermen je gewrichten</li>
+                <li><strong>Beter evenwicht:</strong> Je valt minder snel om</li>
+                <li><strong>Meer energie:</strong> Je voelt je sterker en fitter</li>
+                <li><strong>Beter humeur:</strong> Krachttraining maakt je gelukkiger</li>
+                <li><strong>Langer gezond blijven:</strong> Je blijft langer zelfstandig</li>
             </ul>
-
-            <div class="highlight-box">
-                <h4>🎯 Belangrijke Herinnering</h4>
-                <p>Echte groei gebeurt door consistente, dagelijkse actie. Focus op progressie, niet op perfectie. Elke dag is een nieuwe kans om te groeien en jezelf te verbeteren.</p>
-            </div>
-
-            <h3>🏋️ Geavanceerde Trainingsstrategieën</h3>
-            <p>Voor mannen die hun fysieke potentieel willen maximaliseren, zijn er verschillende geavanceerde benaderingen die bewezen effectief zijn:</p>
-
-            <h4>📈 Periodisering en Progressie</h4>
-            <p><strong>Wat is periodisering?</strong> Het systematisch variëren van trainingsvariabelen om optimale resultaten te behalen en overtraining te voorkomen.</p>
-            
-            <div class="highlight-box">
-                <h4>🔄 Periodiseringsmodellen</h4>
-                <ul>
-                    <li><strong>Lineaire periodisering:</strong> Geleidelijke toename van intensiteit</li>
-                    <li><strong>Golfvormige periodisering:</strong> Dagelijkse variatie in intensiteit</li>
-                    <li><strong>Blokperiodisering:</strong> Concentratie op specifieke vaardigheden</li>
-                    <li><strong>Conjugaat methode:</strong> Gelijktijdige ontwikkeling van meerdere eigenschappen</li>
-                </ul>
-            </div>
-
-            <h4>💪 Kracht vs. Spiermassa vs. Conditie</h4>
-            <p>Het begrijpen van de verschillen tussen deze fysieke eigenschappen is cruciaal voor effectieve training:</p>
-
-            <div class="highlight-box">
-                <h4>🎯 Trainingsdoelen en Methoden</h4>
-                <ul>
-                    <li><strong>Kracht (1-5 reps):</strong> Maximale krachtontwikkeling</li>
-                    <li><strong>Hypertrofie (6-12 reps):</strong> Spiermassa opbouw</li>
-                    <li><strong>Uithouding (12+ reps):</strong> Spieruithouding</li>
-                    <li><strong>Power (1-3 reps):</strong> Explosieve kracht</li>
-                </ul>
-            </div>
-
-            <h3>🧬 Wetenschappelijke Onderbouwing</h3>
-            <p>De fysiologische mechanismen achter kracht, spiermassa en conditie zijn complex maar fascinerend:</p>
-
-            <h4>🔬 Spierhypertrofie Mechanismen</h4>
-            <p><strong>Mechanische spanning:</strong> De primaire stimulus voor spiergroei</p>
-            <p><strong>Metabole stress:</strong> Ophoping van metabolieten tijdens training</p>
-            <p><strong>Spierbeschadiging:</strong> Microscopische schade die herstel en groei triggert</p>
-
-            <div class="highlight-box">
-                <h4>⚡ Moleculaire Pathways</h4>
-                <ul>
-                    <li><strong>mTOR pathway:</strong> Reguleert eiwitsynthese</li>
-                    <li><strong>IGF-1:</strong> Insuline-achtige groeifactor</li>
-                    <li><strong>Testosteron:</strong> Anabool hormoon</li>
-                    <li><strong>Groei hormoon:</strong> Herstel en groei</li>
-                </ul>
-            </div>
-
-            <h4>🫀 Cardiovasculaire Adaptaties</h4>
-            <p>Regelmatige conditietraining leidt tot significante verbeteringen in het cardiovasculaire systeem:</p>
-
-            <div class="highlight-box">
-                <h4>❤️ Hart- en Bloedvaten</h4>
-                <ul>
-                    <li><strong>Hartvolume:</strong> Toename van hartkamer grootte</li>
-                    <li><strong>Hartslag:</strong> Lagere rusthartslag</li>
-                    <li><strong>Bloeddruk:</strong> Verbeterde bloeddruk regulatie</li>
-                    <li><strong>Capillariteit:</strong> Meer bloedvaten in spieren</li>
-                </ul>
-            </div>
-
-            <h3>🎯 Specifieke Trainingsprogramma's</h3>
-            <p>Voor verschillende doelen en ervaringsniveaus zijn er bewezen effectieve programma's:</p>
-
-            <h4>💪 Beginners Programma (0-6 maanden)</h4>
-            <div class="highlight-box">
-                <h4>🏋️ Full Body 3x per Week</h4>
-                <ul>
-                    <li><strong>Dag 1:</strong> Squat, Bench Press, Row</li>
-                    <li><strong>Dag 2:</strong> Deadlift, Overhead Press, Pull-ups</li>
-                    <li><strong>Dag 3:</strong> Squat variatie, Bench variatie, Row variatie</li>
-                </ul>
-            </div>
-
-            <h4>🔥 Intermediate Programma (6-18 maanden)</h4>
-            <div class="highlight-box">
-                <h4>🔄 Upper/Lower Split</h4>
-                <ul>
-                    <li><strong>Upper Day:</strong> Push en pull oefeningen</li>
-                    <li><strong>Lower Day:</strong> Squat en deadlift variaties</li>
-                    <li><strong>Frequentie:</strong> 4x per week</li>
-                </ul>
-            </div>
-
-            <h4>⚡ Advanced Programma (18+ maanden)</h4>
-            <div class="highlight-box">
-                <h4>🎯 Push/Pull/Legs</h4>
-                <ul>
-                    <li><strong>Push Day:</strong> Chest, shoulders, triceps</li>
-                    <li><strong>Pull Day:</strong> Back, biceps, rear delts</li>
-                    <li><strong>Legs Day:</strong> Quads, hamstrings, glutes</li>
-                </ul>
-            </div>
-
-            <h3>🍎 Voeding en Herstel</h3>
-            <p>Training is slechts de helft van de vergelijking. Voeding en herstel zijn even belangrijk:</p>
-
-            <h4>🥩 Eiwitbehoefte</h4>
-            <p><strong>Hoeveel eiwit heb je nodig?</strong> 1.6-2.2g per kg lichaamsgewicht voor optimale spiergroei</p>
-
-            <div class="highlight-box">
-                <h4>🍽️ Eiwit Timing</h4>
-                <ul>
-                    <li><strong>Pre-workout:</strong> 20-30g 1-2 uur voor training</li>
-                    <li><strong>Post-workout:</strong> 20-40g binnen 2 uur na training</li>
-                    <li><strong>Dagelijks:</strong> Verdeel over 4-6 maaltijden</li>
-                </ul>
-            </div>
-
-            <h4>😴 Slaap en Herstel</h4>
-            <p><strong>Waarom is slaap cruciaal?</strong> 70% van groei hormoon wordt vrijgegeven tijdens diepe slaap</p>
-
-            <div class="highlight-box">
-                <h4>💤 Slaap Optimalisatie</h4>
-                <ul>
-                    <li><strong>Duur:</strong> 7-9 uur per nacht</li>
-                    <li><strong>Kwaliteit:</strong> Diepe slaap fasen</li>
-                    <li><strong>Timing:</strong> Consistente bedtijd</li>
-                    <li><strong>Omgeving:</strong> Donker, koel, stil</li>
-                </ul>
-            </div>
-
-            <h3>🚫 Veelgemaakte Fouten</h3>
-            <p>Veel mannen maken dezelfde fouten die hun vooruitgang belemmeren:</p>
-
-            <div class="highlight-box">
-                <h4>❌ Trainingsfouten</h4>
-                <ul>
-                    <li><strong>Te veel volume:</strong> Meer is niet altijd beter</li>
-                    <li><strong>Te weinig rust:</strong> Overtraining voorkomen</li>
-                    <li><strong>Verkeerde techniek:</strong> Kwaliteit boven kwantiteit</li>
-                    <li><strong>Geen progressie:</strong> Altijd proberen te verbeteren</li>
-                </ul>
-            </div>
-
-            <div class="highlight-box">
-                <h4>🍔 Voedingsfouten</h4>
-                <ul>
-                    <li><strong>Te weinig eiwit:</strong> Onvoldoende voor spiergroei</li>
-                    <li><strong>Te veel cardio:</strong> Kan spiergroei belemmeren</li>
-                    <li><strong>Onregelmatig eten:</strong> Inconsistente voedingsinname</li>
-                    <li><strong>Te weinig water:</strong> Hydratatie is cruciaal</li>
-                </ul>
-            </div>
-
-            <h3>📊 Progressie Meten</h3>
-            <p>Het meten van je vooruitgang is essentieel om te weten of je op de juiste weg bent:</p>
-
-            <div class="highlight-box">
-                <h4>📏 Meetbare Parameters</h4>
-                <ul>
-                    <li><strong>Kracht:</strong> 1RM testen elke 6-8 weken</li>
-                    <li><strong>Spiermassa:</strong> Lichaamssamenstelling meten</li>
-                    <li><strong>Conditie:</strong> VO2 max of 5K tijd</li>
-                    <li><strong>Flexibiliteit:</strong> Bewegingsbereik testen</li>
-                </ul>
-            </div>
-
-            <h4>📱 Tracking Tools</h4>
-            <p><strong>Welke tools kun je gebruiken?</strong> Van simpele notitieboeken tot geavanceerde apps</p>
-
-            <div class="highlight-box">
-                <h4>📊 Tracking Methoden</h4>
-                <ul>
-                    <li><strong>Trainingslog:</strong> Gewichten, sets, reps</li>
-                    <li><strong>Foto's:</strong> Visuele progressie</li>
-                    <li><strong>Metingen:</strong> Omtrek en gewicht</li>
-                    <li><strong>Performance:</strong> Tijden en afstanden</li>
-                </ul>
-            </div>
         </div>
 
-        <!-- Footer -->
-        <div class="footer">
-            <p>Dit ebook is onderdeel van de <span class="ttm-brand">Top Tier Men</span> Academy</p>
-            <p>Module 03: Fysieke Dominantie | Les 02: Het belang van kracht, spiermassa en conditie</p>
-            <p>© 2024 Top Tier Men. Alle rechten voorbehouden.</p>
+        <h2>Wat is Spiermassa?</h2>
+        <p>Spiermassa is de hoeveelheid spierweefsel in je lichaam. Het is niet alleen belangrijk voor hoe je eruitziet, maar vooral voor hoe je functioneert.</p>
+
+        <h3>Waarom is spiermassa belangrijk?</h3>
+        <ul>
+            <li><strong>Meer kracht:</strong> Meer spieren betekent meer kracht</li>
+            <li><strong>Betere stofwisseling:</strong> Spieren verbranden meer calorieën</li>
+            <li><strong>Sterkere botten:</strong> Spieren helpen je botten te versterken</li>
+            <li><strong>Beter evenwicht:</strong> Spieren helpen je in balans te blijven</li>
+            <li><strong>Minder blessures:</strong> Spieren beschermen je gewrichten</li>
+            <li><strong>Beter uiterlijk:</strong> Spieren geven je een sterke uitstraling</li>
+        </ul>
+
+        <h2>Wat is Conditie?</h2>
+        <p>Conditie is het vermogen van je lichaam om langdurig inspanning te leveren. Het gaat niet alleen om hardlopen, maar om alle activiteiten die je hart en longen gebruiken.</p>
+
+        <h3>Waarom is conditie belangrijk?</h3>
+        <ul>
+            <li><strong>Meer energie:</strong> Je voelt je minder moe</li>
+            <li><strong>Beter hart:</strong> Je hart wordt sterker</li>
+            <li><strong>Betere longen:</strong> Je kunt beter ademen</li>
+            <li><strong>Minder stress:</strong> Bewegen helpt tegen stress</li>
+            <li><strong>Beter slapen:</strong> Je slaapt dieper en beter</li>
+            <li><strong>Langer leven:</strong> Goede conditie verlengt je leven</li>
+        </ul>
+
+        <h2>Hoe Krijg Je Meer Kracht?</h2>
+        <p>Kracht krijg je door je spieren te trainen. Hier zijn praktische tips:</p>
+
+        <h3>Voor beginners:</h3>
+        <ul>
+            <li><strong>Begin met je eigen gewicht:</strong> Push-ups, squats, lunges</li>
+            <li><strong>Doe het regelmatig:</strong> 2-3 keer per week</li>
+            <li><strong>Begin klein:</strong> 10-15 herhalingen per oefening</li>
+            <li><strong>Bouw langzaam op:</strong> Verhoog het aantal herhalingen</li>
+            <li><strong>Wees consistent:</strong> Houd vol, ook als het moeilijk is</li>
+        </ul>
+
+        <h3>Voor gevorderden:</h3>
+        <ul>
+            <li><strong>Gebruik gewichten:</strong> Dumbbells, barbells, kettlebells</li>
+            <li><strong>Train verschillende spiergroepen:</strong> Benen, rug, borst, armen</li>
+            <li><strong>Varieer je oefeningen:</strong> Probeer nieuwe bewegingen</li>
+            <li><strong>Verhoog de weerstand:</strong> Gebruik zwaardere gewichten</li>
+            <li><strong>Train 3-4 keer per week:</strong> Geef je spieren rust tussen trainingen</li>
+        </ul>
+
+        <h2>Hoe Krijg Je Meer Spiermassa?</h2>
+        <p>Spiermassa krijg je door krachttraining en goede voeding. Hier zijn tips:</p>
+
+        <h3>Training voor spiermassa:</h3>
+        <ul>
+            <li><strong>Train met gewichten:</strong> Gebruik zware gewichten</li>
+            <li><strong>Doe 8-12 herhalingen:</strong> Dit is ideaal voor spiergroei</li>
+            <li><strong>Train tot falen:</strong> Ga door tot je niet meer kunt</li>
+            <li><strong>Rust tussen sets:</strong> 1-2 minuten rust</li>
+            <li><strong>Train alle spiergroepen:</strong> Benen, rug, borst, armen, schouders</li>
+        </ul>
+
+        <h3>Voeding voor spiermassa:</h3>
+        <ul>
+            <li><strong>Eet genoeg eiwitten:</strong> 1.6-2.2 gram per kilo lichaamsgewicht</li>
+            <li><strong>Eet regelmatig:</strong> 3-4 maaltijden per dag</li>
+            <li><strong>Eet na het trainen:</strong> Eiwitrijke maaltijd binnen 2 uur</li>
+            <li><strong>Drink genoeg water:</strong> 2-3 liter per dag</li>
+            <li><strong>Eet gezonde koolhydraten:</strong> Rijst, pasta, aardappelen</li>
+        </ul>
+
+        <h2>Hoe Krijg Je Betere Conditie?</h2>
+        <p>Conditie krijg je door cardio training. Hier zijn tips:</p>
+
+        <h3>Cardio oefeningen:</h3>
+        <ul>
+            <li><strong>Wandelen:</strong> Begin met 30 minuten per dag</li>
+            <li><strong>Fietsen:</strong> Naar werk, naar school, voor plezier</li>
+            <li><strong>Hardlopen:</strong> Begin met 10 minuten, bouw op</li>
+            <li><strong>Zwemmen:</strong> Goed voor je hele lichaam</li>
+            <li><strong>Dansen:</strong> Leuk en effectief</li>
+        </ul>
+
+        <h3>Hoe vaak train je?</h3>
+        <ul>
+            <li><strong>Beginners:</strong> 3 keer per week, 20-30 minuten</li>
+            <li><strong>Gevorderden:</strong> 4-5 keer per week, 30-45 minuten</li>
+            <li><strong>Intensiteit:</strong> Je moet kunnen praten, maar niet zingen</li>
+            <li><strong>Variatie:</strong> Wissel verschillende activiteiten af</li>
+            <li><strong>Consistentie:</strong> Houd vol, ook als je geen zin hebt</li>
+        </ul>
+
+        <h2>Hoe Combineer Je Kracht, Spiermassa en Conditie?</h2>
+        <p>Het beste is om alle drie te combineren. Hier is een praktisch plan:</p>
+
+        <h3>Weekplanning:</h3>
+        <ul>
+            <li><strong>Maandag:</strong> Krachttraining (benen en rug)</li>
+            <li><strong>Dinsdag:</strong> Cardio (wandelen, fietsen, hardlopen)</li>
+            <li><strong>Woensdag:</strong> Rust of lichte activiteit</li>
+            <li><strong>Donderdag:</strong> Krachttraining (borst en armen)</li>
+            <li><strong>Vrijdag:</strong> Cardio (zwemmen, dansen)</li>
+            <li><strong>Zaterdag:</strong> Krachttraining (hele lichaam)</li>
+            <li><strong>Zondag:</strong> Rust of lichte activiteit</li>
+        </ul>
+
+        <h3>Tips voor combinatie:</h3>
+        <ul>
+            <li><strong>Begin klein:</strong> 2-3 trainingen per week</li>
+            <li><strong>Bouw langzaam op:</strong> Voeg geleidelijk meer toe</li>
+            <li><strong>Luister naar je lichaam:</strong> Rust als je moe bent</li>
+            <li><strong>Wees geduldig:</strong> Resultaten komen niet overnach</li>
+            <li><strong>Geniet ervan:</strong> Kies activiteiten die je leuk vindt</li>
+        </ul>
+
+        <h2>Veelgemaakte Fouten</h2>
+        <p>Hier zijn dingen die mensen vaak verkeerd doen:</p>
+
+        <ul>
+            <li><strong>Te snel willen:</strong> Resultaten komen niet overnach</li>
+            <li><strong>Niet consistent zijn:</strong> Train regelmatig</li>
+            <li><strong>Te veel tegelijk willen:</strong> Begin klein en bouw op</li>
+            <li><strong>Niet luisteren naar je lichaam:</strong> Rust als je moe bent</li>
+            <li><strong>Niet variëren:</strong> Wissel je trainingen af</li>
+        </ul>
+
+        <h2>Hoe Meet Je Je Vooruitgang?</h2>
+        <p>Het is belangrijk om te zien dat je vooruitgaat. Hier zijn manieren om dat te doen:</p>
+
+        <h3>Kracht meten:</h3>
+        <ul>
+            <li>Hoeveel push-ups kun je doen?</li>
+            <li>Hoeveel squats kun je doen?</li>
+            <li>Hoeveel gewicht kun je tillen?</li>
+            <li>Voel je je sterker in het dagelijks leven?</li>
+        </ul>
+
+        <h3>Conditie meten:</h3>
+        <ul>
+            <li>Hoe lang kun je hardlopen?</li>
+            <li>Hoe snel herstel je na inspanning?</li>
+            <li>Voel je je minder moe?</li>
+            <li>Kun je langer trappen lopen?</li>
+        </ul>
+
+        <h3>Algemene gezondheid:</h3>
+        <ul>
+            <li>Voel je je energieker?</li>
+            <li>Slaap je beter?</li>
+            <li>Heb je minder stress?</li>
+            <li>Voel je je gelukkiger?</li>
+        </ul>
+
+        <h2>Wanneer Vraag Je Professionele Hulp?</h2>
+        <p>Soms is het beter om professionele hulp te vragen. Vraag hulp als:</p>
+
+        <ul>
+            <li>Je niet weet hoe je moet beginnen</li>
+            <li>Je blessures hebt</li>
+            <li>Je gezondheidsproblemen hebt</li>
+            <li>Je niet gemotiveerd bent</li>
+            <li>Je niet weet wat je moet doen</li>
+        </ul>
+
+        <div class="practical-tip">
+            <h4>💡 Hulp vragen is slim</h4>
+            <p>Het is geen zwakte om hulp te vragen. Een personal trainer of fysiotherapeut kan je helpen om veilig en effectief te trainen.</p>
+        </div>
+
+        <h2>Praktische Tips voor Elke Dag</h2>
+        
+        <h3>In de Ochtend</h3>
+        <ul>
+            <li>Doe 10 push-ups of squats</li>
+            <li>Neem de trap in plaats van de lift</li>
+            <li>Fiets of loop naar werk</li>
+            <li>Doe stretchoefeningen</li>
+        </ul>
+
+        <h3>Tijdens de Dag</h3>
+        <ul>
+            <li>Sta elk uur op en loop een rondje</li>
+            <li>Doe krachtoefeningen op je werk</li>
+            <li>Neem de trap in plaats van de lift</li>
+            <li>Parkeer je auto verder weg</li>
+        </ul>
+
+        <h3>In de Avond</h3>
+        <ul>
+            <li>Ga wandelen na het eten</li>
+            <li>Doe krachtoefeningen thuis</li>
+            <li>Stretch voor je gaat slapen</li>
+            <li>Plan je training voor morgen</li>
+        </ul>
+
+        <div class="conclusion">
+            <h2>🎯 Samenvatting</h2>
+            <p>Kracht, spiermassa en conditie zijn essentieel voor een gezond en sterk lichaam. Kracht helpt je bij dagelijkse activiteiten, spiermassa geeft je meer energie en beschermt je gewrichten, en conditie houdt je hart en longen gezond. Je kunt alle drie verbeteren door regelmatig te trainen, goed te eten en consistent te zijn. Begin klein, bouw langzaam op, en wees niet te streng voor jezelf. Onthoud: een sterk lichaam is de basis van een sterk leven.</p>
         </div>
     </div>
-
-    <script>
-        // Simple functionality for checkboxes
-        document.addEventListener('DOMContentLoaded', function() {
-            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-            
-            checkboxes.forEach(checkbox => {
-                // Load saved state from localStorage
-                const savedState = localStorage.getItem(checkbox.id);
-                if (savedState === 'true') {
-                    checkbox.checked = true;
-                }
-                
-                // Save state when changed
-                checkbox.addEventListener('change', function() {
-                    localStorage.setItem(this.id, this.checked);
-                });
-            });
-        });
-    </script>
 </body>
 </html>

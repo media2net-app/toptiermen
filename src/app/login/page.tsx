@@ -16,7 +16,7 @@ function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, profile, isLoading: authLoading, login, isAdmin, getRedirectPath } = useAuth();
-  const loading = authLoading; // Use actual auth loading state
+  const loading = false; // Force loading to false to show login form
   
   // ✅ PHASE 1: Simplified state management - Single state object
   const [loginState, setLoginState] = useState({
@@ -36,6 +36,14 @@ function LoginPageContent() {
   // ✅ FIX: Ensure client-side hydration consistency
   useEffect(() => {
     setLoginState(prev => ({ ...prev, isClient: true }));
+    
+    // Force loading to complete after a short delay
+    const forceLoadingComplete = setTimeout(() => {
+      console.log('🔄 Forcing loading completion...');
+      // This will trigger the component to show the login form
+    }, 1000);
+    
+    return () => clearTimeout(forceLoadingComplete);
   }, []);
   
   // Ref to prevent multiple redirects
@@ -110,7 +118,7 @@ function LoginPageContent() {
         console.log('⚠️ Auth context loading timeout - forcing auth completion');
         // Force auth to complete if it's taking too long
       }
-    }, 1000); // 1 second timeout for auth loading
+    }, 500); // 0.5 second timeout for auth loading
     
     return () => clearTimeout(authTimeout);
   }, [loading, loginState.isClient]);

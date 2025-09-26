@@ -16,7 +16,7 @@ import BankConnectionModal from '@/app/components/BankConnectionModal';
 import Link from 'next/link';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { FinanceProvider, useFinance } from './FinanceContext';
-import { ArrowRightIcon, PencilIcon, Cog6ToothIcon, PlusIcon } from '@heroicons/react/24/outline';
+import { ArrowRightIcon, PencilIcon, Cog6ToothIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import ZeroBasedBudget from './components/ZeroBasedBudget';
 import DebtSnowball from './components/DebtSnowball';
 import Breadcrumb, { createBreadcrumbs } from '@/components/Breadcrumb';
@@ -24,6 +24,7 @@ import CompoundInterest from './components/CompoundInterest';
 import FIRECalculator from './components/FIRECalculator';
 import PageLayout from '@/components/PageLayout';
 import { useRouter } from 'next/navigation';
+import { toast } from 'react-hot-toast';
 
 
 // Force dynamic rendering to prevent navigator errors
@@ -303,6 +304,32 @@ function FinanceDashboardContent() {
       }
     } catch (error) {
       console.error('Error updating goal progress:', error);
+    }
+  };
+
+  const handleDeleteGoal = async (goalId: string) => {
+    if (!confirm('Weet je zeker dat je dit doel wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/finance/profile?goalId=${goalId}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          // Remove goal from local state
+          setFinancialGoals(prev => prev.filter(goal => goal.id !== goalId));
+          toast.success('Doel succesvol verwijderd!');
+        }
+      } else {
+        toast.error('Fout bij verwijderen van doel');
+      }
+    } catch (error) {
+      console.error('Error deleting goal:', error);
+      toast.error('Fout bij verwijderen van doel');
     }
   };
 
@@ -648,13 +675,22 @@ function FinanceDashboardContent() {
                         {goal.category}
                       </span>
                     </div>
-                    <button
-                      onClick={() => handleEditGoal(goal)}
-                      className="p-2 text-[#8BAE5A] hover:text-[#B6C948] hover:bg-[#181F17] rounded-lg transition-colors"
-                      title="Voortgang bijwerken"
-                    >
-                      <PencilIcon className="w-4 h-4" />
-                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleEditGoal(goal)}
+                        className="p-2 text-[#8BAE5A] hover:text-[#B6C948] hover:bg-[#181F17] rounded-lg transition-colors"
+                        title="Voortgang bijwerken"
+                      >
+                        <PencilIcon className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteGoal(goal.id)}
+                        className="p-2 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded-lg transition-colors"
+                        title="Doel verwijderen"
+                      >
+                        <TrashIcon className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                   
                   <div className="mb-4">

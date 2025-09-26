@@ -34,6 +34,7 @@ interface Exercise {
   currentSet: number;
   notes?: string;
   videoUrl?: string;
+  weights?: number[]; // Array to store weight for each set
 }
 
 interface WorkoutSession {
@@ -71,7 +72,9 @@ export default function WorkoutPage() {
   const [loading, setLoading] = useState(true);
   const [showVideoModal, setShowVideoModal] = useState(false);
   const [showCompletionModal, setShowCompletionModal] = useState(false);
+  const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
   const [workoutEndTime, setWorkoutEndTime] = useState(0); // Store the final workout time when completed
+  const [isWorkoutCompleted, setIsWorkoutCompleted] = useState(false); // Flag to prevent re-starting workout
   // const [showWorkoutPlayerModal, setShowWorkoutPlayerModal] = useState(false); // Removed - component doesn't exist
 
   // Sample exercises - in real app, fetch from API
@@ -84,7 +87,8 @@ export default function WorkoutPage() {
       rest: '120s',
       completed: false,
       currentSet: 0,
-      videoUrl: undefined // Will be fetched from exercises table
+      videoUrl: undefined, // Will be fetched from exercises table
+      weights: []
     },
     {
       id: '2',
@@ -94,7 +98,8 @@ export default function WorkoutPage() {
       rest: '90s',
       completed: false,
       currentSet: 0,
-      videoUrl: undefined // Will be fetched from exercises table
+      videoUrl: undefined, // Will be fetched from exercises table
+      weights: []
     },
     {
       id: '3',
@@ -104,7 +109,8 @@ export default function WorkoutPage() {
       rest: '90s',
       completed: false,
       currentSet: 0,
-      videoUrl: undefined // Will be fetched from exercises table
+      videoUrl: undefined, // Will be fetched from exercises table
+      weights: []
     },
     {
       id: '4',
@@ -114,13 +120,20 @@ export default function WorkoutPage() {
       rest: '60s',
       completed: false,
       currentSet: 0,
-      videoUrl: undefined // Will be fetched from exercises table
+      videoUrl: undefined, // Will be fetched from exercises table
+      weights: []
     }
   ];
 
   useEffect(() => {
     // Only run on client side to prevent hydration issues
     if (typeof window === 'undefined') return;
+    
+    // Don't load if workout is already completed
+    if (isWorkoutCompleted) {
+      console.log('🛑 Workout already completed, skipping load');
+      return;
+    }
     
     console.log('🔄 useEffect triggered with:', { sessionId, schemaId, dayNumber, user: !!user });
     
@@ -132,7 +145,7 @@ export default function WorkoutPage() {
       // Load exercises from database for the current schema and day
       loadExercisesFromDatabase();
     }
-  }, [sessionId, schemaId, dayNumber, user?.id]);
+  }, [sessionId, schemaId, dayNumber, user?.id, isWorkoutCompleted]);
 
   const getVideoUrlForExercise = async (exerciseName: string): Promise<string | undefined> => {
     try {
@@ -692,26 +705,22 @@ export default function WorkoutPage() {
       if (response.ok && responseData.success) {
         console.log('✅ Workout completed successfully, stopping session and navigating...');
         
+        // Set completion flag to prevent re-loading
+        setIsWorkoutCompleted(true);
+        
         // Stop the global workout session completely
         stopWorkout();
-        
-        // Force clear any remaining session state
-        setTimeout(() => {
-          stopWorkout();
-        }, 100);
         
         // Close completion modal
         setShowCompletionModal(false);
         
         toast.success('Workout voltooid! 🎉');
         
-        // Navigate to training overview
-        router.push('/dashboard/mijn-trainingen');
-        
-        // Force refresh to show updated progress
+        // Navigate to training overview with a small delay to ensure state is cleared
         setTimeout(() => {
-          window.location.reload();
-        }, 100);
+          // Use window.location.href to force navigation and prevent re-triggering
+          window.location.href = '/dashboard/mijn-trainingen';
+        }, 200);
       } else {
         console.error('❌ Workout completion failed:', responseData);
         toast.error('Fout bij voltooien workout: ' + (responseData.error || 'Onbekende fout'));
@@ -783,12 +792,7 @@ export default function WorkoutPage() {
               <p className="text-[#8BAE5A]">Interactive Workout</p>
             </div>
 
-            <div className="text-right">
-              <div className="text-2xl font-bold text-[#FFD700]">
-                {formatTime(globalSession?.workoutTime || 0)}
-              </div>
-              <div className="text-sm text-gray-400">Workout tijd</div>
-            </div>
+            <div className="w-32"></div> {/* Spacer to maintain layout */}
           </div>
 
           {/* Workout Controls */}
@@ -948,7 +952,7 @@ export default function WorkoutPage() {
               {exercises.map((exercise, index) => (
                 <div
                   key={exercise.id}
-                  className={`flex items-center justify-between p-4 rounded-lg transition-all ${
+                  className={`p-4 rounded-lg transition-all ${
                     index === currentExerciseIndex
                       ? 'bg-[#232D1A] border border-[#8BAE5A]'
                       : exercise.completed
@@ -956,50 +960,176 @@ export default function WorkoutPage() {
                       : 'bg-[#0F1419]/50 border border-[#3A4D23]'
                   }`}
                 >
-                  <div className="flex items-center">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-3 ${
-                      exercise.completed
-                        ? 'bg-green-500'
-                        : index === currentExerciseIndex
-                        ? 'bg-[#8BAE5A]'
-                        : 'bg-[#3A4D23]'
-                    }`}>
-                      {exercise.completed ? (
-                        <CheckIcon className="w-4 h-4 text-white" />
-                      ) : (
-                        <span className="text-white text-sm font-semibold">{index + 1}</span>
-                      )}
+                  {/* Exercise Header */}
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-3 ${
+                        exercise.completed
+                          ? 'bg-green-500'
+                          : index === currentExerciseIndex
+                          ? 'bg-[#8BAE5A]'
+                          : 'bg-[#3A4D23]'
+                      }`}>
+                        {exercise.completed ? (
+                          <CheckIcon className="w-4 h-4 text-white" />
+                        ) : (
+                          <span className="text-white text-sm font-semibold">{index + 1}</span>
+                        )}
+                      </div>
+                      <div>
+                        <div className="font-semibold text-white">{exercise.name}</div>
+                        <div className="text-sm text-gray-400">
+                          {exercise.currentSet}/{exercise.sets} sets voltooid
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <div className="font-semibold text-white">{exercise.name}</div>
-                      <div className="text-sm text-gray-400">
-                        {exercise.currentSet}/{exercise.sets} sets voltooid
+                    
+                    <div className="flex items-center gap-2">
+                      {/* Video Button */}
+                      {exercise.videoUrl && (
+                        <button
+                          onClick={() => {
+                            setSelectedExercise(exercise);
+                            setShowVideoModal(true);
+                          }}
+                          className="p-2 bg-[#8BAE5A] text-white rounded-lg hover:bg-[#7A9D4A] transition-colors"
+                          title="Bekijk video"
+                        >
+                          <VideoCameraIcon className="w-4 h-4" />
+                        </button>
+                      )}
+                      
+                      <div className="text-right">
+                        <div className="text-sm text-[#8BAE5A]">{exercise.reps} reps</div>
+                        <div className="text-xs text-gray-400">{exercise.rest} rust</div>
                       </div>
                     </div>
                   </div>
-                  
-                  <div className="text-right">
-                    <div className="text-sm text-[#8BAE5A]">{exercise.reps} reps</div>
-                    <div className="text-xs text-gray-400">{exercise.rest} rust</div>
-                  </div>
+
+                  {/* Weight Registration for Each Set */}
+                  {exercise.currentSet > 0 && (
+                    <div className="mt-3 p-3 bg-[#1A1A1A] rounded-lg">
+                      <div className="text-sm font-medium text-white mb-2">Gewicht per set:</div>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        {Array.from({ length: exercise.sets }, (_, setIndex) => (
+                          <div key={setIndex} className="flex flex-col">
+                            <label className="text-xs text-gray-400 mb-1">Set {setIndex + 1}</label>
+                            <input
+                              type="number"
+                              placeholder="kg"
+                              value={exercise.weights?.[setIndex] || ''}
+                              onChange={async (e) => {
+                                const weight = parseFloat(e.target.value) || 0;
+                                const newWeights = [...(exercise.weights || [])];
+                                newWeights[setIndex] = weight;
+                                
+                                // Update local state
+                                const updatedExercises = exercises.map(ex => 
+                                  ex.id === exercise.id 
+                                    ? { ...ex, weights: newWeights }
+                                    : ex
+                                );
+                                setExercises(updatedExercises);
+
+                                // Save to database if weight > 0
+                                if (weight > 0 && session?.id) {
+                                  try {
+                                    const response = await fetch('/api/training/save-weight', {
+                                      method: 'POST',
+                                      headers: { 'Content-Type': 'application/json' },
+                                      body: JSON.stringify({
+                                        userId: user?.id,
+                                        sessionId: session.id,
+                                        exerciseId: exercise.id,
+                                        setNumber: setIndex + 1,
+                                        weight: weight
+                                      })
+                                    });
+
+                                    if (response.ok) {
+                                      console.log('✅ Weight saved for set', setIndex + 1, ':', weight, 'kg');
+                                    } else {
+                                      console.error('❌ Failed to save weight data');
+                                    }
+                                  } catch (error) {
+                                    console.error('❌ Error saving weight:', error);
+                                  }
+                                }
+                              }}
+                              className="w-full px-2 py-1 text-sm bg-[#232D1A] border border-[#3A4D23] rounded text-white placeholder-gray-500 focus:border-[#8BAE5A] focus:outline-none"
+                              disabled={setIndex >= exercise.currentSet}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                      
+                      {/* Progress Summary */}
+                      {exercise.weights && exercise.weights.some(w => w > 0) && (
+                        <div className="mt-2 text-xs text-gray-400">
+                          Gemiddeld gewicht: {Math.round(
+                            exercise.weights.filter(w => w > 0).reduce((a, b) => a + b, 0) / 
+                            exercise.weights.filter(w => w > 0).length
+                          )}kg
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
           </div>
         </div>
+
+        {/* Workout Timer - Fixed at bottom of content */}
+        {isWorkoutActive && globalSession && (
+          <div className="mt-8 p-4 bg-gradient-to-r from-[#3A4D23] to-[#4A5D33] border border-[#8BAE5A]/30 rounded-lg">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 bg-[#8BAE5A] rounded-full flex items-center justify-center">
+                  <FireIcon className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-white">Workout Actief</h3>
+                  <p className="text-sm text-gray-300">{currentExercise?.name || 'Oefening'}</p>
+                </div>
+              </div>
+              
+              <div className="text-right">
+                <div className="text-2xl font-bold text-[#FFD700]">
+                  {formatTime(globalSession.workoutTime || 0)}
+                </div>
+                <div className="text-sm text-gray-400">Workout tijd</div>
+              </div>
+            </div>
+            
+            {/* Progress Bar */}
+            <div className="mt-4">
+              <div className="flex justify-between text-sm text-gray-400 mb-2">
+                <span>Voortgang: {completedExercises}/{totalExercises} oefeningen</span>
+                <span>{Math.round((completedExercises / totalExercises) * 100)}%</span>
+              </div>
+              <div className="w-full bg-[#232D1A] rounded-full h-2">
+                <div 
+                  className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] h-2 rounded-full transition-all duration-500"
+                  style={{ width: `${Math.round((completedExercises / totalExercises) * 100)}%` }}
+                ></div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Workout Video Modal */}
       <WorkoutVideoModal
         isOpen={showVideoModal}
         onClose={() => setShowVideoModal(false)}
-        exerciseName={currentExercise?.name || ''}
-        videoUrl={currentExercise?.videoUrl}
-        exerciseDetails={currentExercise ? {
-          sets: currentExercise.sets,
-          reps: currentExercise.reps,
-          rest: currentExercise.rest,
-          notes: currentExercise.notes
+        exerciseName={selectedExercise?.name || ''}
+        videoUrl={selectedExercise?.videoUrl}
+        exerciseDetails={selectedExercise ? {
+          sets: selectedExercise.sets,
+          reps: selectedExercise.reps,
+          rest: selectedExercise.rest,
+          notes: selectedExercise.notes
         } : undefined}
       />
 
@@ -1015,14 +1145,14 @@ export default function WorkoutPage() {
 
       {/* Workout Player Modal - Removed - component doesn't exist */}
 
-      {/* Floating Workout Widget with completion callback */}
-      {globalSession && (
+      {/* Floating Workout Widget - Disabled on workout page, using built-in timer instead */}
+      {/* {globalSession && (
         <FloatingWorkoutWidget
           session={globalSession}
           onResume={() => {}}
           onShowCompletion={showWorkoutCompletion}
         />
-      )}
+      )} */}
     </ClientLayout>
   );
 } 

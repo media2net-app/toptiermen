@@ -27,12 +27,10 @@ import {
 } from '@heroicons/react/24/solid';
 import DebugPanel from '@/components/DebugPanel';
 import TestUserVideoModal from '@/components/TestUserVideoModal';
-import TestUserFeedback from '@/components/TestUserFeedback';
 import PWAInstallPrompt from '@/components/PWAInstallPrompt';
 import V2MonitoringDashboard from '@/components/V2MonitoringDashboard';
 import V2PerformanceAlerts from '@/components/V2PerformanceAlerts';
 import CacheIssueHelper from '@/components/CacheIssueHelper';
-import SupportButton from '@/components/SupportButton';
 
 // Workout Widget Component
 const WorkoutWidget = () => {
@@ -1507,16 +1505,7 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
 
         {typeof window !== 'undefined' && showDebug && <DebugPanel />}
 
-        {typeof window !== 'undefined' && (
-          <TestUserFeedback 
-            isTestUser={isTestUser}
-            currentPage={pathname || '/'}
-            userRole={profile?.role}
-            onNoteCreated={(note) => {
-              console.log('Test note created:', note);
-            }}
-          />
-        )}
+        {/* TestUserFeedback - Removed */}
 
         {typeof window !== 'undefined' && <PWAInstallPrompt />}
         
@@ -1529,8 +1518,7 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
         {/* 2.0.1: Cache issue helper - DISABLED TO PREVENT INFINITE MODAL */}
         {/* <CacheIssueHelper /> */}
         
-        {/* Support Button - Fixed position */}
-        {typeof window !== 'undefined' && <SupportButton />}
+        {/* Support Button - Removed */}
         
         {/* Floating Workout Widget */}
         {typeof window !== 'undefined' && <WorkoutWidget />}

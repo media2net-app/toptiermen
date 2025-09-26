@@ -3,861 +3,376 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Een Onbreekbare Mindset - Ebook | Top Tier Men</title>
-    <meta name="description" content="Uitgebreide gids over een onbreekbare mindset: praktische oefeningen, checklists en reflectie vragen voor persoonlijke groei.">
+    <title>Een Onbreekbare Mindset - Top Tier Men</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.6;
-            color: #ffffff;
-            background: linear-gradient(135deg, #0A0F0A 0%, #181F17 50%, #232D1A 100%);
-            min-height: 100vh;
-        }
-
-        .container {
+            color: #333;
             max-width: 800px;
             margin: 0 auto;
-            padding: 2rem;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
         }
-
+        
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
         .header {
             text-align: center;
-            margin-bottom: 3rem;
-            padding: 2rem;
-            background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
-            border-radius: 20px;
-            border: 1px solid #3A4D23;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #667eea;
         }
-
-        .logo {
-            margin: 0 auto 1rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        h1 {
-            font-size: 2.5rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, #ffffff 0%, #8BAE5A 50%, #B6C948 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 0.5rem;
-        }
-
-        .subtitle {
-            color: #8BAE5A;
-            font-size: 1.1rem;
-            font-weight: 500;
-        }
-
-        .module-info {
-            background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
-            padding: 1rem;
-            border-radius: 10px;
-            margin: 1rem 0;
-            border-left: 4px solid #8BAE5A;
-        }
-
-        .section {
-            background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
-            margin-bottom: 2rem;
-            padding: 2rem;
-            border-radius: 15px;
-            border: 1px solid #3A4D23;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .section h2 {
-            color: #B6C948;
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .section h3 {
-            color: #8BAE5A;
-            font-size: 1.3rem;
-            font-weight: 600;
-            margin: 1.5rem 0 1rem;
-        }
-
-        .section p {
-            margin-bottom: 1rem;
-            color: #e0e0e0;
-        }
-
-        .section ul, .section ol {
-            margin: 1rem 0;
-            padding-left: 2rem;
-        }
-
-        .section li {
-            margin-bottom: 0.5rem;
-            color: #e0e0e0;
-        }
-
-        .highlight-box {
-            background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
-            padding: 1.5rem;
-            border-radius: 10px;
-            border-left: 4px solid #B6C948;
-            margin: 1.5rem 0;
-        }
-
-        .exercise-box {
-            background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%);
-            padding: 1.5rem;
-            border-radius: 10px;
-            border: 1px solid #8BAE5A;
-            margin: 1rem 0;
-        }
-
-        .exercise-box h4 {
-            color: #B6C948;
-            font-size: 1.1rem;
-            margin-bottom: 1rem;
-        }
-
-        .checklist {
-            background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
-            padding: 1.5rem;
-            border-radius: 10px;
-            border: 1px solid #3A4D23;
-            margin: 1rem 0;
-        }
-
-        .checklist-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 0.8rem;
-            padding: 0.5rem;
-            background: rgba(58, 77, 35, 0.3);
-            border-radius: 8px;
-        }
-
-        .checklist-item input[type="checkbox"] {
-            margin-right: 1rem;
-            width: 18px;
-            height: 18px;
-            accent-color: #8BAE5A;
-        }
-
-        .reflection-question {
-            background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
-            padding: 1.5rem;
-            border-radius: 10px;
-            border-left: 4px solid #B6C948;
-            margin: 1rem 0;
-        }
-
-        .reflection-question h4 {
-            color: #B6C948;
-            margin-bottom: 1rem;
-        }
-
-        .action-plan {
-            background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%);
-            padding: 2rem;
-            border-radius: 15px;
-            border: 2px solid #8BAE5A;
-            margin: 2rem 0;
-        }
-
-        .action-plan h3 {
-            color: #B6C948;
-            text-align: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .action-step {
-            background: rgba(139, 174, 90, 0.1);
-            padding: 1rem;
-            border-radius: 8px;
-            margin: 1rem 0;
-            border-left: 3px solid #8BAE5A;
-        }
-
-        .action-step h4 {
-            color: #8BAE5A;
-            margin-bottom: 0.5rem;
-        }
-
-        .icon {
-            width: 24px;
-            height: 24px;
-            display: inline-block;
-            margin-right: 0.5rem;
-        }
-
-        .footer {
-            text-align: center;
-            margin-top: 3rem;
-            padding: 2rem;
-            background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
-            border-radius: 15px;
-            border: 1px solid #3A4D23;
-        }
-
-        .footer p {
-            color: #8BAE5A;
-            margin-bottom: 1rem;
-        }
-
-        .ttm-brand {
-            color: #B6C948;
-            font-weight: 700;
-        }
-
         
-        /* Sticky Back Button */
-        .sticky-back-btn {
-            position: fixed;
-            top: 50%;
-            right: 20px;
-            transform: translateY(-50%);
-            z-index: 1000;
-            background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%);
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .header p {
+            color: #7f8c8d;
+            font-size: 1.2em;
+            font-style: italic;
+        }
+        
+        h2 {
+            color: #2c3e50;
+            border-left: 5px solid #667eea;
+            padding-left: 20px;
+            margin-top: 40px;
+            margin-bottom: 20px;
+        }
+        
+        h3 {
+            color: #34495e;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+        
+        h4 {
+            color: #667eea;
+            margin-top: 25px;
+            margin-bottom: 10px;
+        }
+        
+        .highlight-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 25px 0;
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .highlight-box h3 {
+            color: white;
+            margin-top: 0;
+        }
+        
+        .practical-tip {
+            background: #f8f9fa;
+            border-left: 4px solid #28a745;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 10px 10px 0;
+        }
+        
+        .practical-tip h4 {
+            color: #28a745;
+            margin-top: 0;
+        }
+        
+        ul {
+            padding-left: 20px;
+        }
+        
+        li {
+            margin-bottom: 8px;
+        }
+        
+        .example {
+            background: #e8f4fd;
+            border: 1px solid #bee5eb;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        
+        .example strong {
+            color: #0c5460;
+        }
+        
+        .conclusion {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-top: 40px;
+            text-align: center;
+        }
+        
+        .conclusion h2 {
             color: white;
             border: none;
-            border-radius: 50px;
-            padding: 15px 20px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            box-shadow: 0 8px 25px rgba(139, 174, 90, 0.3);
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            text-decoration: none;
-            min-width: 120px;
-            justify-content: center;
+            padding: 0;
+            margin-top: 0;
         }
-
-        .sticky-back-btn:hover {
-            background: linear-gradient(135deg, #B6C948 0%, #8BAE5A 100%);
-            transform: translateY(-50%) scale(1.05);
-            box-shadow: 0 12px 35px rgba(139, 174, 90, 0.4);
-        }
-
-        .sticky-back-btn:active {
-            transform: translateY(-50%) scale(0.95);
-        }
-
-        .sticky-back-btn svg {
-            width: 16px;
-            height: 16px;
-            fill: currentColor;
-        }
-
-@media (max-width: 768px) {
-            .container {
-                padding: 1rem;
-            }
-            
-            h1 {
-                font-size: 2rem;
-            }
-            
-            .section {
-                padding: 1.5rem;
-            }
         
-            .sticky-back-btn {
-                right: 10px;
-                padding: 12px 16px;
-                font-size: 12px;
-                min-width: 100px;
-            }
+        strong {
+            color: #2c3e50;
+        }
+        
+        .step-number {
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .warning-box {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .warning-box h4 {
+            color: #856404;
+            margin-top: 0;
         }
     </style>
 </head>
 <body>
-    <!-- Sticky Back Button -->
-    <a href="/dashboard/academy/c66b25e3-869f-4c2c-8037-a552726c6b62" class="sticky-back-btn" title="Terug naar Mentale Kracht & Weerbaarheid Module">
-        <svg viewBox="0 0 24 24">
-            <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
-        </svg>
-        Terug
-    </a>
-    
-<div class="container">
-        <!-- Header -->
+    <div class="container">
         <div class="header">
-            <div class="logo">
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 59.5" style="width: 200px; height: 40px;">
-  <defs>
-    <style>
-      .st0 { fill: #969082; }
-      .st1 { fill: #f2f2f0; }
-    </style>
-  </defs>
-  <g>
-    <polygon class="st1" points="0 8 8.7 8 8.7 31.3 16.9 31.3 16.9 8 25.5 8 25.5 .5 0 .5 0 8"/>
-    <path class="st1" d="M52.3,2c-2.5-1.4-5.3-2-8.5-2s-6,.7-8.5,2c-2.5,1.4-4.4,3.2-5.8,5.6-1.4,2.4-2.1,5.1-2.1,8.3s.7,5.8,2.1,8.2c1.4,2.4,3.4,4.3,5.8,5.6,2.5,1.4,5.3,2,8.6,2s6-.7,8.5-2c2.5-1.4,4.4-3.2,5.8-5.6,1.4-2.4,2.1-5.1,2.1-8.2s-.7-5.9-2.1-8.3c-1.4-2.4-3.3-4.3-5.8-5.6ZM50.9,20.3c-.7,1.3-1.6,2.3-2.8,3-1.2.7-2.6,1.1-4.2,1.1s-3-.4-4.2-1.1c-1.2-.7-2.2-1.7-2.9-3-.7-1.3-1.1-2.7-1.1-4.4s.3-3.1,1-4.4c.7-1.3,1.6-2.3,2.9-3,1.2-.7,2.6-1.1,4.2-1.1s3,.4,4.2,1.1c1.2.7,2.2,1.7,2.9,3,.7,1.3,1,2.7,1,4.4s-.3,3.1-1,4.4Z"/>
-    <path class="st1" d="M82.9,1.8c-1.8-.9-3.8-1.4-6.2-1.4h-12.8v30.8h8.1v-9.2h4.6c2.3,0,4.4-.5,6.2-1.4,1.8-.9,3.2-2.2,4.2-3.8,1-1.6,1.5-3.5,1.5-5.6s-.5-4-1.5-5.6c-1-1.6-2.4-2.9-4.2-3.8ZM79.3,13.6c-.7.6-1.6.9-2.7.9h-4.4v-6.6h4.4c1.1,0,2,.3,2.7.9.7.6,1,1.4,1,2.4s-.3,1.8-1,2.4Z"/>
-    <polygon class="st1" points="99.8 8 108.5 8 108.5 31.3 116.6 31.3 116.6 8 125.3 8 125.3 .5 99.8 .5 99.8 8"/>
-    <rect class="st1" x="128.7" y=".5" width="8.1" height="30.8"/>
-    <polygon class="st1" points="150.3 19.5 160.4 19.5 160.4 12.2 150.3 12.2 150.3 8 162.8 8 162.8 .5 142.1 .5 142.1 31.3 163.1 31.3 163.1 23.8 150.3 23.8 150.3 19.5"/>
-    <path class="st1" d="M191.1,16.4c1-1.6,1.5-3.4,1.5-5.5s-.5-3.9-1.5-5.4c-1-1.6-2.4-2.8-4.2-3.7-1.8-.9-3.8-1.3-6.2-1.3h-12.8v30.8h8.1v-9.8h2.9l5.5,9.8h9.3l-6.8-11.2c1.7-.9,3-2.1,4-3.6ZM176.1,7.9h4.2c1.1,0,2,.3,2.7.9.7.6,1,1.3,1,2.2s-.2,1.1-.5,1.6c-.3.5-.8.8-1.3,1.1-.6.3-1.2.4-1.9.4h-4.2v-6.1Z"/>
-    <polygon class="st1" points="223.7 11.5 216.3 .5 207.2 .5 207.2 31.3 215.4 31.3 215.4 13.1 223.7 25.1 232 13.1 232 31.3 240.2 31.3 240.2 .5 231.1 .5 223.7 11.5"/>
-    <polygon class="st1" points="253.6 19.5 263.7 19.5 263.7 12.2 253.6 12.2 253.6 8 266.1 8 266.1 .5 245.5 .5 245.5 31.3 266.4 31.3 266.4 23.8 253.6 23.8 253.6 19.5"/>
-    <polygon class="st1" points="291.9 .5 291.9 17.4 279.8 .5 271.3 .5 271.3 31.3 279.4 31.3 279.4 13.7 291.9 31.3 300 31.3 300 .5 291.9 .5"/>
-  </g>
-  <g>
-    <path class="st0" d="M150.4,44c-.8-.5-1.6-.7-2.6-.7s-1.8.2-2.5.7c-.5.4-1,.8-1.3,1.4v-6.3h-1.8v15.6h1.7v-1.9c.4.6.9,1.1,1.4,1.4.7.5,1.5.7,2.5.7s1.9-.2,2.6-.7c.8-.5,1.3-1.2,1.8-2.1.4-.9.6-1.9.6-3s-.2-2.2-.6-3c-.4-.9-1-1.6-1.8-2ZM150.5,51.3c-.3.6-.7,1.1-1.3,1.5-.5.4-1.2.5-1.9.5s-1.2-.2-1.7-.5c-.5-.4-.9-.9-1.2-1.5-.3-.6-.4-1.4-.4-2.2s.1-1.6.4-2.2c.3-.6.7-1.1,1.2-1.5.5-.4,1.1-.5,1.7-.5s1.3.2,1.9.5c.5.4,1,.9,1.3,1.5.3.6.5,1.4.5,2.2s-.2,1.6-.5,2.2Z"/>
-    <path class="st0" d="M159.3,52.6l-3.8-9h-1.9l4.8,11.1-.8,1.8c-.2.4-.4.7-.7.9-.3.2-.6.3-1,.3s-.4,0-.6-.1c-.3,0-.6-.2-.9-.3l-.7,1.5c.4.2.8.3,1.2.4s.7.2,1,.2c.7,0,1.2-.1,1.6-.4.4-.3.8-.6,1.1-1.1.3-.5.6-1,.9-1.7l5.3-12.7h-1.9l-3.7,9Z"/>
-    <path class="st0" d="M180.3,47.9c.8-.4,1.5-1,1.9-1.7.5-.7.7-1.5.7-2.4s-.2-1.7-.7-2.4-1-1.3-1.8-1.7c-.8-.4-1.7-.6-2.7-.6h-5.1v15.6h1.9v-6.1h2.9c.1,0,.2,0,.4,0l3.6,6.1h2.1l-3.8-6.5c.2,0,.4-.1,.5-.2ZM174.6,46.8v-6h3.1c1,0,1.8.3,2.4.8.6.6.9,1.3.9,2.2s-.1,1.1-.4,1.5c-.3.5-.6.8-1.1,1.1-.4.3-.9.4-1.5.4h-3.5Z"/>
-    <path class="st0" d="M187.1,38.7c-.3,0-.6.1-.8.3-.2.2-.3.5-.3.8s.1.6.3.8c.2.2.5.3.8.3s.6-.1.8-.3c.2-.2.3-.5.3-.8s-.1-.6-.3-.8c-.2-.2-.5-.3-.8-.3Z"/>
-    <rect class="st0" x="186.2" y="43.5" width="1.8" height="11.1"/>
-    <path class="st0" d="M198.1,52.7c-.6.4-1.2.6-1.9.6s-1.4-.2-1.9-.5c-.6-.4-1-.8-1.3-1.5s-.5-1.4-.5-2.2.2-1.5.5-2.2.8-1.1,1.3-1.5c.6-.4,1.2-.5,1.9-.5s1.4.2,1.9.5,1,.8,1.3,1.4l1.6-.7c-.4-.9-1.1-1.6-1.9-2.1-.8-.5-1.8-.7-2.9-.7s-2,.2-2.9.7-1.5,1.2-2,2.1c-.5.9-.7,1.9-.7,3s.2,2.2.7,3c.5.9,1.1,1.6,2,2.1.8.5,1.8.7,2.9.7s2-.3,2.9-.8c.8-.5,1.5-1.3,1.9-2.2l-1.6-.7c-.3.7-.7,1.2-1.3,1.6Z"/>
-    <polygon class="st0" points="212.1 43.5 209.8 43.5 205.1 48.6 205.1 39.1 203.3 39.1 203.3 54.7 205.1 54.7 205.1 51 206.7 49.3 210.3 54.7 212.5 54.7 207.9 48 212.1 43.5"/>
-    <path class="st0" d="M230.4,51.6c-.5.5-1.1.9-1.7,1.2-.6.3-1.3.4-2,.4-1.1,0-2.1-.3-2.9-.8-.9-.5-1.5-1.3-2-2.3-.5-1-.7-2.1-.7-3.3s.2-2.3.7-3.3c.5-.9,1.2-1.7,2-2.2.9-.5,1.8-.8,2.9-.8s1.4.1,2,.4c.6.3,1.2.6,1.7,1.1.5.5.9,1,1.2,1.6l1.6-.8c-.4-.8-.9-1.5-1.6-2.1-.7-.6-1.5-1.1-2.3-1.4-.9-.3-1.8-.5-2.7-.5-1.5,0-2.8.3-3.9,1-1.1.7-2,1.6-2.7,2.8-.6,1.2-1,2.6-1,4.2s.3,3,1,4.2c.7,1.2,1.6,2.2,2.7,2.8s2.5,1,3.9,1,1.8-.2,2.7-.5,1.6-.9,2.3-1.5c.7-.6,1.2-1.4,1.6-2.2l-1.6-.8c-.3.7-.7,1.2-1.2,1.7Z"/>
-    <path class="st0" d="M243.2,49.3c0,1.2-.3,2.2-.8,2.9-.5.7-1.3,1-2.3,1s-1.1-.1-1.5-.3c-.5-.2-.8-.6-1.1-1.2s-.4-1.4-.4-2.5v-5.7h-1.8v6.2c0,1.2.2,2.2.5,3,.4.8.9,1.3,1.5,1.7.7.3,1.4.5,2.3.5s1.7-.2,2.4-.7c.5-.3.8-.7,1.1-1.3v1.7h1.8v-11.1h-1.8v5.8Z"/>
-    <rect class="st0" x="248.2" y="43.5" width="1.8" height="11.1"/>
-    <path class="st0" d="M249.1,38.7c-.3,0-.6.1-.8.3-.2.2-.3.5-.3.8s.1.6.3.8c.2.2.5.3.8.3s.6-.1.8-.3c.2-.2.3-.5.3-.8s-.1-.6-.3-.8c-.2-.2-.5-.3-.8-.3Z"/>
-    <path class="st0" d="M255,38.7c-.3,0-.6.1-.8.3-.2.2-.3.5-.3.8s.1.6.3.8.5.3.8.3.6-.1.8-.3c.2-.2.3-.5.3-.8s-.1-.6-.3-.8c-.2-.2-.5-.3-.8-.3Z"/>
-    <path class="st0" d="M254.1,55.9c0,1.3-.5,1.9-1.5,1.9s-.3,0-.6-.1c-.2,0-.5-.2-.9-.3l-.7,1.5c.8.4,1.5.6,2.1.6,1.1,0,2-.3,2.5-.9s.8-1.5.8-2.6v-12.4h-1.8v12.3Z"/>
-    <path class="st0" d="M267.5,44c-.8-.5-1.6-.7-2.6-.7s-1.8.2-2.5.7c-.5.4-1,.8-1.3,1.4v-1.9h-1.8v15.6h1.8v-6.3c.3.6.8,1,1.3,1.4.7.5,1.5.7,2.5.7s1.9-.2,2.6-.7,1.3-1.2,1.8-2.1c.4-.9.6-1.9.6-3s-.2-2.2-.6-3-1-1.6-1.8-2ZM267.6,51.3c-.3.6-.7,1.1-1.3,1.5-.5.4-1.2.5-1.9.5s-1.2-.2-1.7-.5c-.5-.4-.9-.9-1.2-1.5s-.4-1.4-.4-2.2.1-1.6.4-2.2c.3-.6.7-1.1,1.2-1.5s1.1-.5,1.7-.5,1.3.2,1.9.5,1,.9,1.3,1.5c.3.6.5,1.4.5,2.2s-.2,1.6-.5,2.2Z"/>
-    <path class="st0" d="M281.6,46.2c-.4-.9-1-1.6-1.8-2.1-.8-.5-1.7-.8-2.7-.8s-2,.2-2.8.7-1.5,1.2-1.9,2.1c-.5.9-.7,1.9-.7,3s.2,2.2.7,3c.5.9,1.1,1.6,1.9,2.1.8.5,1.8.7,2.9.7s1.5-.1,2.1-.4c.6-.2,1.2-.6,1.6-1,.5-.4.8-.9,1.1-1.5l-1.5-.8c-.3.6-.7,1.1-1.3,1.5s-1.2.6-2,.6-1.4-.2-2-.5c-.6-.3-1-.8-1.3-1.5-.3-.5-.4-1.2-.5-1.9h8.7c0-1.2-.2-2.3-.6-3.2ZM275.4,45.3c.5-.3,1.1-.4,1.7-.4s1.2.1,1.6.4c.5.3.9.7,1.1,1.2.2.4.4.9.4,1.5h-6.7c0-.6.2-1.1.5-1.5.3-.5.8-.9,1.3-1.2Z"/>
-    <path class="st0" d="M286.3,45.6v-2h-1.8v11.1h1.8v-6.1c0-.8.2-1.5.6-2,.4-.5.9-.8,1.5-1.1s1.2-.3,1.9-.3v-1.7c-.8,0-1.6.2-2.3.5-.7.3-1.2.8-1.7,1.5Z"/>
-    <path class="st0" d="M298.5,49.1c-.5-.3-1.1-.6-1.8-.8l-1.1-.3c-.6-.2-1.1-.4-1.4-.6-.3-.3-.5-.5-.5-.8,0-.5.2-.9.6-1.2.4-.3.9-.4,1.6-.4s1.2.1,1.6.3c.4.2.8.6,1,1.1l1.6-.7c-.2-.5-.5-.9-.8-1.2-.4-.3-.8-.6-1.4-.8-.5-.2-1.1-.3-1.8-.3-1.4,0-2.4.3-3.1.9-.7.6-1,1.4-1,2.5s.3,1.3.8,1.8c.6.5,1.4.9,2.4,1.2l1.1.3c.7.2,1.2.4,1.5.7.3.3.5.7.5,1.1s-.2.9-.7,1.2c-.5.3-1.1.4-1.8.4s-1.2-.2-1.7-.5c-.5-.3-.9-.7-1.1-1.2l-1.6.6c.2.5.5.9.9,1.3.4.4.9.7,1.5,1,.6.2,1.3.4,2.1.4s1.5-.1,2.1-.4c.6-.3,1.1-.6,1.4-1.1.4-.5.5-1.1.5-1.7s-.1-1-.4-1.4c-.3-.4-.6-.8-1.1-1.2Z"/>
-  </g>
-</svg></div>
             <h1>Een Onbreekbare Mindset</h1>
-            <p class="subtitle">Complete Gids voor Praktische Toepassing</p>
-            <div class="module-info">
-                <strong>Module 04: Mentale Kracht/Weerbaarheid</strong> | <strong>Les 02: Een Onbreekbare Mindset</strong>
-            </div>
+            <p>Hoe je je hoofd sterk houdt, wat er ook gebeurt</p>
         </div>
 
-        <!-- Uitgebreide Samenvatting -->
-        <div class="section">
-            <h2>📚 Uitgebreide Samenvatting van de Les</h2>
-            
-            <div class="highlight-box">
-                <h4>🎯 Les Overzicht</h4>
-                <p>In deze les hebben we een onbreekbare mindset behandeld. Dit is een cruciaal onderdeel van je ontwikkeling als Top Tier Man en vormt de basis voor verdere groei en prestaties.</p>
-            </div>
-
-            <h3>Belangrijkste Inzichten</h3>
-            <ul>
-                <li><strong>Wat een onbreekbare mindset is:</strong> Een fundamenteel concept dat je dagelijks kunt toepassen</li><li><strong>Onbreekbare mindset = Een manier van denken die je helpt om tegenslagen te overwinnen.:</strong> Een fundamenteel concept dat je dagelijks kunt toepassen</li><li><strong>De kenmerken van een onbreekbare mindset:</strong> Een fundamenteel concept dat je dagelijks kunt toepassen</li><li><strong>Voorbeelden::</strong> Een fundamenteel concept dat je dagelijks kunt toepassen</li><li><strong>Waarom dit werkt: Deze mindset helpt je om door moeilijke tijden heen te komen.:</strong> Een fundamenteel concept dat je dagelijks kunt toepassen</li>
-                <li><strong>Praktische Toepassing:</strong> Het verschil tussen kennis en wijsheid ligt in de dagelijkse implementatie</li>
-                <li><strong>Consistentie:</strong> Kleine, dagelijkse acties leiden tot grote, langetermijn resultaten</li>
-            </ul>
-
-            <h3>Waarom Dit Belangrijk Is</h3>
-            <p>De concepten uit deze les zijn niet alleen theoretisch interessant, maar vormen de praktische basis voor je dagelijkse leven. Door deze principes consequent toe te passen, bouw je aan een sterke fundering voor alle andere aspecten van je ontwikkeling.</p>
-            <h3>Hoe een Onbreekbare Mindset Werkt</h3>
-            <p>Een onbreekbare mindset is gebaseerd op solide wetenschappelijk onderzoek in de psychologie, hersenwetenschap en positieve psychologie. Het begrijpen van deze wetenschap helpt je om een onbreekbare mindset effectiever te ontwikkelen.</p>
-
-            <h3>De Vier Pijlers van een Onbreekbare Mindset</h3>
-            <p>Een onbreekbare mindset rust op vier fundamentele pijlers die samen een solide basis vormen voor het overwinnen van uitdagingen en het bereiken van doelen.</p>
-
-            <h4>1. Emotionele Veerkracht</h4>
-            <p>Het vermogen om emotioneel stabiel te blijven tijdens stressvolle situaties. Dit omvat:</p>
-            <ul>
-                <li>Emotionele regulatie</li>
-                <li>Stress management</li>
-                <li>Emotionele expressie</li>
-                <li>Empathie en compassie</li>
-                <li>Emotionele veerkracht</li>
-            </ul>
-
-            <h4>2. Cognitieve Flexibiliteit</h4>
-            <p>Het vermogen om je denken aan te passen aan nieuwe situaties en uitdagingen. Dit omvat:</p>
-            <ul>
-                <li>Probleemoplossend denken</li>
-                <li>Creativiteit en innovatie</li>
-                <li>Adaptatievermogen</li>
-                <li>Kritisch denken</li>
-                <li>Open-mindedness</li>
-            </ul>
-
-            <h4>3. Sociale Verbinding</h4>
-            <p>Het vermogen om betekenisvolle relaties op te bouwen en te onderhouden. Dit omvat:</p>
-            <ul>
-                <li>Sociale vaardigheden</li>
-                <li>Empathie en compassie</li>
-                <li>Communicatie</li>
-                <li>Conflict resolutie</li>
-                <li>Support netwerken</li>
-            </ul>
-
-            <h4>4. Zelfeffectiviteit</h4>
-            <p>Het geloof in je eigen capaciteiten om doelen te bereiken en uitdagingen aan te gaan. Dit omvat:</p>
-            <ul>
-                <li>Zelfvertrouwen</li>
-                <li>Zelfbewustzijn</li>
-                <li>Zelfmotivatie</li>
-                <li>Zelfregulatie</li>
-                <li>Zelfverbetering</li>
-            </ul>
-
-            <h3>De Neurologische Basis van een Onbreekbare Mindset</h3>
-            <p>Een onbreekbare mindset heeft een duidelijke neurologische basis. Het begrijpen van deze mechanismen helpt je om een onbreekbare mindset effectiever te ontwikkelen.</p>
-
-            <h4>Voorste deel van je hersenen</h4>
-            <p>Het controlecentrum van de hersenen dat verantwoordelijk is voor:</p>
-            <ul>
-                <li>Executieve functies</li>
-                <li>Impulscontrole</li>
-                <li>Planning en organisatie</li>
-                <li>Besluitvorming</li>
-                <li>Emotionele regulatie</li>
-            </ul>
-
-            <h4>Emotionele centrum</h4>
-            <p>Het emotionele centrum van de hersenen dat betrokken is bij:</p>
-            <ul>
-                <li>Angst en stress respons</li>
-                <li>Emotionele herkenning</li>
-                <li>Geheugen consolidatie</li>
-                <li>Sociale interactie</li>
-                <li>Veiligheid en overleving</li>
-            </ul>
-
-            <h4>Geheugencentrum</h4>
-            <p>Het geheugencentrum dat cruciaal is voor:</p>
-            <ul>
-                <li>Leren en geheugen</li>
-                <li>Ruimtelijke navigatie</li>
-                <li>Emotionele context</li>
-                <li>Hersenplasticiteit</li>
-                <li>Stress regulatie</li>
-            </ul>
-
-            <h3>De Psychologie van een Onbreekbare Mindset</h3>
-            <p>Een onbreekbare mindset wordt beïnvloed door verschillende psychologische factoren. Het begrijpen van deze factoren helpt je om een onbreekbare mindset te ontwikkelen.</p>
-
-            <h4>Mindset en Overtuigingen</h4>
-            <p>Je mindset en overtuigingen bepalen grotendeels je onbreekbare mindset. Dit omvat:</p>
-            <ul>
-                <li>Growth mindset vs. fixed mindset</li>
-                <li>Zelflimiterende overtuigingen</li>
-                <li>Empowerende overtuigingen</li>
-                <li>Geloof in eigen kunnen</li>
-                <li>Optimisme vs. pessimisme</li>
-            </ul>
-
-            <h4>Emotionele Intelligentie</h4>
-            <p>Het vermogen om emoties te herkennen, te begrijpen en te beheren. Dit omvat:</p>
-            <ul>
-                <li>Zelfbewustzijn</li>
-                <li>Zelfregulatie</li>
-                <li>Motivatie</li>
-                <li>Empathie</li>
-                <li>Sociale vaardigheden</li>
-            </ul>
-
-            <h4>Stress Management</h4>
-            <p>Het vermogen om effectief om te gaan met stress en druk. Dit omvat:</p>
-            <ul>
-                <li>Stress herkenning</li>
-                <li>Coping strategieën</li>
-                <li>Relaxatie technieken</li>
-                <li>Time management</li>
-                <li>Prioriteiten stellen</li>
-            </ul>
-
-            <h3>De Praktische Toepassing van een Onbreekbare Mindset</h3>
-            <p>Een onbreekbare mindset is niet alleen theoretisch, maar moet dagelijks worden toegepast. Hier zijn praktische manieren om een onbreekbare mindset te ontwikkelen.</p>
-
-            <h4>Dagelijkse Oefeningen</h4>
-            <ul>
-                <li>Meditatie en mindfulness</li>
-                <li>Journaling en reflectie</li>
-                <li>Gratitude oefeningen</li>
-                <li>Visualisatie technieken</li>
-                <li>Ademhalingsoefeningen</li>
-            </ul>
-
-            <h4>Uitdagingen en Groei</h4>
-            <ul>
-                <li>Comfort zone verlaten</li>
-                <li>Nieuwe vaardigheden leren</li>
-                <li>Falen als leermoment</li>
-                <li>Feedback vragen en ontvangen</li>
-                <li>Doelen stellen en nastreven</li>
-            </ul>
-
-            <h4>Sociale Verbinding</h4>
-            <ul>
-                <li>Mentor relaties</li>
-                <li>Peer support</li>
-                <li>Community betrokkenheid</li>
-                <li>Professionele netwerken</li>
-                <li>Familie en vriendschappen</li>
-            </ul>
-
-            <h3>De Obstakels voor een Onbreekbare Mindset</h3>
-            <p>Er zijn verschillende obstakels die de ontwikkeling van een onbreekbare mindset kunnen belemmeren. Het herkennen van deze obstakels is de eerste stap naar het overwinnen ervan.</p>
-
-            <h4>Zelflimiterende Overtuigingen</h4>
-            <ul>
-                <li>"Ik ben niet goed genoeg"</li>
-                <li>"Ik kan dit niet"</li>
-                <li>"Het is te moeilijk"</li>
-                <li>"Ik ben niet intelligent genoeg"</li>
-                <li>"Ik verdien het niet"</li>
-            </ul>
-
-            <h4>Angst en Onzekerheid</h4>
-            <ul>
-                <li>Faalangst</li>
-                <li>Perfectionisme</li>
-                <li>Sociale angst</li>
-                <li>Veranderingsangst</li>
-                <li>Onbekendheid angst</li>
-            </ul>
-
-            <h4>Negatieve Denkpatronen</h4>
-            <ul>
-                <li>Catastrofiseren</li>
-                <li>Zwart-wit denken</li>
-                <li>Overgeneraliseren</li>
-                <li>Personaliserend</li>
-                <li>Filteren</li>
-            </ul>
-
-            <h3>Strategieën voor het Ontwikkelen van een Onbreekbare Mindset</h3>
-            <p>Er zijn verschillende bewezen strategieën voor het ontwikkelen van een onbreekbare mindset. Deze strategieën kunnen worden aangepast aan je persoonlijke situatie en doelen.</p>
-
-            <h4>Cognitieve Herstructurering</h4>
-            <ul>
-                <li>Negatieve gedachten identificeren</li>
-                <li>Gedachten uitdagen</li>
-                <li>Alternatieve perspectieven zoeken</li>
-                <li>Bewijs verzamelen</li>
-                <li>Nieuwe gedachten formuleren</li>
-            </ul>
-
-            <h4>Emotionele Regulatie</h4>
-            <ul>
-                <li>Emoties herkennen en accepteren</li>
-                <li>Emotionele triggers identificeren</li>
-                <li>Coping strategieën ontwikkelen</li>
-                <li>Stress management</li>
-                <li>Relaxatie technieken</li>
-            </ul>
-
-            <h4>Gedragsverandering</h4>
-            <ul>
-                <li>Nieuwe gewoonten ontwikkelen</li>
-                <li>Oude gewoonten doorbreken</li>
-                <li>Consistentie opbouwen</li>
-                <li>Vooruitgang monitoren</li>
-                <li>Beloningen inbouwen</li>
-            </ul>
-
-            <h3>De Langetermijn Voordelen van een Onbreekbare Mindset</h3>
-            <p>Het ontwikkelen van een onbreekbare mindset heeft talrijke langetermijn voordelen voor je persoonlijke en professionele leven.</p>
-
-            <h4>Persoonlijke Voordelen</h4>
-            <ul>
-                <li>Verhoogd zelfvertrouwen</li>
-                <li>Betere emotionele stabiliteit</li>
-                <li>Verbeterde relaties</li>
-                <li>Grotere veerkracht</li>
-                <li>Hogere levenskwaliteit</li>
-            </ul>
-
-            <h4>Professionele Voordelen</h4>
-            <ul>
-                <li>Betere prestaties</li>
-                <li>Effectievere leiderschap</li>
-                <li>Verbeterde communicatie</li>
-                <li>Grotere productiviteit</li>
-                <li>Meer carrièremogelijkheden</li>
-            </ul>
-
-            <h4>Gezondheidsvoordelen</h4>
-            <ul>
-                <li>Lagere stress niveaus</li>
-                <li>Betere slaapkwaliteit</li>
-                <li>Sterker immuunsysteem</li>
-                <li>Verbeterde mentale gezondheid</li>
-                <li>Langere levensduur</li>
-            </ul>
-
-            <h3>Het Monitoren van een Onbreekbare Mindset</h3>
-            <p>Het is belangrijk om je onbreekbare mindset regelmatig te monitoren en te evalueren. Dit helpt je om vooruitgang te zien en waar nodig aanpassingen te maken.</p>
-
-            <h4>Zelfevaluatie</h4>
-            <ul>
-                <li>Dagelijkse reflectie</li>
-                <li>Wekelijkse evaluatie</li>
-                <li>Maandelijkse review</li>
-                <li>Jaarlijkse assessment</li>
-                <li>360-graden feedback</li>
-            </ul>
-
-            <h4>Meetbare Indicatoren</h4>
-            <ul>
-                <li>Stress niveaus</li>
-                <li>Emotionele stabiliteit</li>
-                <li>Productiviteit</li>
-                <li>Relatie kwaliteit</li>
-                <li>Doel bereiking</li>
-            </ul>
-
-            <h3>De Toekomst van een Onbreekbare Mindset</h3>
-            <p>Een onbreekbare mindset blijft evolueren met nieuwe inzichten en technieken. Het is belangrijk om op de hoogte te blijven van nieuwe ontwikkelingen.</p>
-
-            <h4>Nieuwe Technologieën</h4>
-            <ul>
-                <li>Neurofeedback</li>
-                <li>Virtual reality training</li>
-                <li>AI-gebaseerde coaching</li>
-                <li>Wearable devices</li>
-                <li>Mobile apps</li>
-            </ul>
-
-            <h4>Onderzoek en Ontwikkeling</h4>
-            <ul>
-                <li>Neurowetenschap</li>
-                <li>Positieve psychologie</li>
-                <li>Mindfulness onderzoek</li>
-                <li>Resilience studies</li>
-                <li>Performance psychology</li>
-            </ul>
+        <div class="highlight-box">
+            <h3>🎯 Wat je gaat leren</h3>
+            <p>In dit ebook leer je hoe je een onbreekbare mindset opbouwt. Een mindset die niet breekt als het moeilijk wordt, die je helpt om door te gaan als anderen opgeven, en die je sterker maakt van elke tegenslag.</p>
         </div>
 
-        <!-- Praktische Oefeningen en Opdrachten -->
-        <div class="section">
-            <h2>💪 Praktische Oefeningen en Opdrachten</h2>
+        <h2>Wat is een Onbreekbare Mindset?</h2>
+        <p>Een onbreekbare mindset betekent dat je hoofd niet breekt als het moeilijk wordt. Het betekent dat je kunt omgaan met problemen zonder in paniek te raken, dat je kunt leren van fouten zonder op te geven, en dat je sterker wordt van elke uitdaging.</p>
 
-            <div class="exercise-box">
-                <h4>Oefening 1: Zelf-Assessment</h4>
-                <p><strong>Doel:</strong> Evalueer je huidige situatie en identificeer verbeterpunten.</p>
-                <p><strong>Actie:</strong> Beantwoord de volgende vragen eerlijk en noteer je antwoorden:</p>
-                <ul>
-                    <li>Hoe pas je momenteel de concepten uit deze les toe in je dagelijkse leven?</li>
-                    <li>Welke aspecten vind je het moeilijkst om te implementeren?</li>
-                    <li>Wat zijn je grootste uitdagingen op dit gebied?</li>
-                    <li>Welke kleine veranderingen kun je vandaag nog maken?</li>
-                </ul>
-            </div>
-
-            <div class="exercise-box">
-                <h4>Oefening 2: Dagelijkse Implementatie</h4>
-                <p><strong>Doel:</strong> Maak de concepten onderdeel van je dagelijkse routine.</p>
-                <p><strong>Actie:</strong> Kies 3 specifieke acties die je deze week gaat uitvoeren:</p>
-                <ul>
-                    <li>Actie 1: _________________________________</li>
-                    <li>Actie 2: _________________________________</li>
-                    <li>Actie 3: _________________________________</li>
-                </ul>
-            </div>
-
-            <div class="exercise-box">
-                <h4>Oefening 3: Progressie Tracking</h4>
-                <p><strong>Doel:</strong> Monitor je voortgang en pas je aanpak aan.</p>
-                <p><strong>Actie:</strong> Houd deze week bij:</p>
-                <ul>
-                    <li>Dagelijkse implementatie van de concepten</li>
-                    <li>Uitdagingen die je tegenkomt</li>
-                    <li>Momenten van succes en doorbraak</li>
-                    <li>Aanpassingen die je moet maken</li>
-                </ul>
-            </div>
+        <div class="practical-tip">
+            <h4>💡 Denk aan een boom</h4>
+            <p>Een sterke boom buigt mee met de wind maar breekt niet. Een onbreekbare mindset werkt hetzelfde: je buigt mee met problemen maar je breekt niet. Je past je aan maar je geeft je principes niet op.</p>
         </div>
 
-        <!-- Dagelijkse Checklists en Routines -->
-        <div class="section">
-            <h2>✅ Dagelijkse Checklists en Routines</h2>
+        <h2>Waarom is dit Belangrijk?</h2>
+        <p>Met een onbreekbare mindset kun je:</p>
+        <ul>
+            <li><strong>Elke uitdaging aanpakken</strong> zonder bang te zijn</li>
+            <li><strong>Leren van elke fout</strong> in plaats van op te geven</li>
+            <li><strong>Anderen helpen</strong> als zij het moeilijk hebben</li>
+            <li><strong>Doelen bereiken</strong> die anderen onmogelijk vinden</li>
+            <li><strong>Een voorbeeld zijn</strong> voor anderen</li>
+        </ul>
 
-            <h3>Ochtend Routine</h3>
-            <div class="checklist">
-                <div class="checklist-item">
-                    <input type="checkbox" id="morning1">
-                    <label for="morning1">Herinner jezelf aan de belangrijkste concepten uit deze les</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="morning2">
-                    <label for="morning2">Plan je dag met de principes in gedachten</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="morning3">
-                    <label for="morning3">Stel jezelf een specifiek doel voor vandaag</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="morning4">
-                    <label for="morning4">Visualiseer hoe je de concepten gaat toepassen</label>
-                </div>
-            </div>
-
-            <h3>Dagelijkse Implementatie</h3>
-            <div class="checklist">
-                <div class="checklist-item">
-                    <input type="checkbox" id="daily1">
-                    <label for="daily1">Pas de concepten toe in je dagelijkse activiteiten</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="daily2">
-                    <label for="daily2">Wees bewust van momenten waar je kunt groeien</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="daily3">
-                    <label for="daily3">Leer van uitdagingen en tegenslagen</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="daily4">
-                    <label for="daily4">Celebreer kleine overwinningen</label>
-                </div>
-            </div>
-
-            <h3>Avond Reflectie</h3>
-            <div class="checklist">
-                <div class="checklist-item">
-                    <input type="checkbox" id="evening1">
-                    <label for="evening1">Evalueer hoe je dag is verlopen</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="evening2">
-                    <label for="evening2">Identificeer wat goed ging en wat beter kan</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="evening3">
-                    <label for="evening3">Plan verbeteringen voor morgen</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="evening4">
-                    <label for="evening4">Wees dankbaar voor je groei en leerervaringen</label>
-                </div>
-            </div>
+        <h2>De 5 Bouwstenen van een Onbreekbare Mindset</h2>
+        
+        <h3><span class="step-number">1</span>Optimisme</h3>
+        <p>Optimisme betekent dat je gelooft dat dingen goed kunnen uitpakken, ook als het nu moeilijk is. Het betekent niet dat je doet alsof alles perfect is, maar dat je gelooft in oplossingen.</p>
+        
+        <div class="example">
+            <strong>Voorbeeld:</strong> Je verliest je baan. In plaats van te denken "mijn leven is voorbij", denk je "dit is een kans om iets beters te vinden".
         </div>
 
-        <!-- Reflectie Vragen -->
-        <div class="section">
-            <h2>🤔 Reflectie Vragen voor Persoonlijke Groei</h2>
-
-            <div class="reflection-question">
-                <h4>Vraag 1: Huidige Situatie</h4>
-                <p>Hoe zou je je huidige implementatie van de concepten uit deze les beoordelen op een schaal van 1-10? Wat zijn de specifieke gebieden waar je de meeste groei kunt maken?</p>
-            </div>
-
-            <div class="reflection-question">
-                <h4>Vraag 2: Uitdagingen</h4>
-                <p>Welke uitdagingen kom je tegen bij het toepassen van deze concepten? Hoe kun je deze uitdagingen omzetten in kansen voor groei?</p>
-            </div>
-
-            <div class="reflection-question">
-                <h4>Vraag 3: Impact</h4>
-                <p>Welke positieve veranderingen heb je al gemerkt sinds je begonnen bent met het toepassen van deze concepten? Hoe heeft dit je leven beïnvloed?</p>
-            </div>
-
-            <div class="reflection-question">
-                <h4>Vraag 4: Toekomst</h4>
-                <p>Hoe ziet je ideale implementatie van deze concepten eruit over 3 maanden? Welke specifieke doelen stel je jezelf?</p>
-            </div>
-
-            <div class="reflection-question">
-                <h4>Vraag 5: Ondersteuning</h4>
-                <p>Welke ondersteuning heb je nodig om deze concepten beter te kunnen toepassen? Hoe kun je jezelf en anderen helpen om te groeien?</p>
-            </div>
+        <h3><span class="step-number">2</span>Doorzettingsvermogen</h3>
+        <p>Doorzettingsvermogen betekent dat je niet opgeeft als het moeilijk wordt. Je blijft proberen, ook al duurt het lang of gaat het niet zoals je wilt.</p>
+        
+        <div class="example">
+            <strong>Voorbeeld:</strong> Je wilt een nieuwe vaardigheid leren maar het gaat langzaam. In plaats van op te geven, oefen je elke dag een beetje.
         </div>
 
-        <!-- Volgende Stappen en Actieplan -->
-        <div class="section">
-            <h2>🚀 Volgende Stappen en Actieplan</h2>
-
-            <div class="action-plan">
-                <h3>30-Dagen Implementatie Plan</h3>
-
-                <div class="action-step">
-                    <h4>Week 1: Bewustwording en Baseline</h4>
-                    <ul>
-                        <li>Voltooi de zelf-assessment oefening</li>
-                        <li>Implementeer de ochtend routine</li>
-                        <li>Begin met dagelijkse bewustwording van de concepten</li>
-                        <li>Start met het bijhouden van je voortgang</li>
-                    </ul>
-                </div>
-
-                <div class="action-step">
-                    <h4>Week 2: Dagelijkse Implementatie</h4>
-                    <ul>
-                        <li>Pas de concepten toe in je dagelijkse activiteiten</li>
-                        <li>Focus op consistentie boven perfectie</li>
-                        <li>Identificeer en adresseer uitdagingen</li>
-                        <li>Bouw momentum op door kleine overwinningen</li>
-                    </ul>
-                </div>
-
-                <div class="action-step">
-                    <h4>Week 3: Optimalisatie en Verfijning</h4>
-                    <ul>
-                        <li>Evalueer je voortgang en pas je aanpak aan</li>
-                        <li>Verhoog de intensiteit waar mogelijk</li>
-                        <li>Integreer de concepten in nieuwe situaties</li>
-                        <li>Zoek naar manieren om anderen te helpen</li>
-                    </ul>
-                </div>
-
-                <div class="action-step">
-                    <h4>Week 4: Consolidatie en Planning</h4>
-                    <ul>
-                        <li>Consolideer je nieuwe gewoonten</li>
-                        <li>Plan voor langetermijn implementatie</li>
-                        <li>Stel nieuwe, uitdagende doelen</li>
-                        <li>Deel je ervaringen en leer van anderen</li>
-                    </ul>
-                </div>
-            </div>
-
-            <h3>Langetermijn Strategieën</h3>
-            <ul>
-                <li><strong>Maand 2-3:</strong> Verdieping en geavanceerde toepassing</li>
-                <li><strong>Maand 4-6:</strong> Integratie met andere ontwikkelingsgebieden</li>
-                <li><strong>Maand 6+:</strong> Mentorschap en doorgeven van kennis</li>
-            </ul>
-
-            <div class="highlight-box">
-                <h4>🎯 Belangrijke Herinnering</h4>
-                <p>Echte groei gebeurt door consistente, dagelijkse actie. Focus op progressie, niet op perfectie. Elke dag is een nieuwe kans om te groeien en jezelf te verbeteren.</p>
-            </div>
+        <h3><span class="step-number">3</span>Zelfvertrouwen</h3>
+        <p>Zelfvertrouwen betekent dat je gelooft in je eigen kunnen. Je weet dat je dingen kunt leren en verbeteren, ook als je het nog niet perfect kunt.</p>
+        
+        <div class="example">
+            <strong>Voorbeeld:</strong> Je moet een presentatie geven maar bent nerveus. Je denkt: "Ik heb me goed voorbereid, ik kan dit".
         </div>
 
-        <!-- Footer -->
-        <div class="footer">
-            <p>Dit ebook is onderdeel van de <span class="ttm-brand">Top Tier Men</span> Academy</p>
-            <p>Module 04: Mentale Kracht/Weerbaarheid | Les 02: Een Onbreekbare Mindset</p>
-            <p>© 2024 Top Tier Men. Alle rechten voorbehouden.</p>
+        <h3><span class="step-number">4</span>Flexibiliteit</h3>
+        <p>Flexibiliteit betekent dat je je plan kunt aanpassen als het niet werkt. Je bent niet koppig en probeert andere manieren om je doel te bereiken.</p>
+        
+        <div class="example">
+            <strong>Voorbeeld:</strong> Je wilt afvallen door te sporten maar je knie doet pijn. In plaats van op te geven, ga je zwemmen of fietsen.
+        </div>
+
+        <h3><span class="step-number">5</span>Leren van Fouten</h3>
+        <p>Leren van fouten betekent dat je elke fout ziet als een kans om beter te worden. Je wordt niet boos op jezelf maar kijkt naar wat je kunt leren.</p>
+        
+        <div class="example">
+            <strong>Voorbeeld:</strong> Je maakt een fout op je werk. In plaats van jezelf te straffen, vraag je je af: "Wat kan ik hier van leren?"
+        </div>
+
+        <h2>Hoe Herken Je een Zwakke Mindset?</h2>
+        <p>Iedereen heeft wel eens een zwakke mindset. Hier zijn signalen dat je je mindset kunt versterken:</p>
+        
+        <ul>
+            <li><strong>Je geeft snel op</strong> als iets moeilijk wordt</li>
+            <li><strong>Je wordt boos</strong> als dingen niet gaan zoals je wilt</li>
+            <li><strong>Je vermijdt nieuwe dingen</strong> omdat je bang bent om te falen</li>
+            <li><strong>Je maakt je zorgen</strong> over dingen die misschien niet gebeuren</li>
+            <li><strong>Je vergelijkt jezelf</strong> constant met anderen</li>
+            <li><strong>Je denkt negatief</strong> over jezelf en je mogelijkheden</li>
+        </ul>
+
+        <div class="warning-box">
+            <h4>⚠️ Let op</h4>
+            <p>Het is normaal om deze gevoelens te hebben. Het belangrijkste is dat je ze herkent en eraan wilt werken. Dat is al de eerste stap naar een sterkere mindset.</p>
+        </div>
+
+        <h2>Hoe Bouw Je een Onbreekbare Mindset Op?</h2>
+        <p>Een onbreekbare mindset bouw je niet op in één dag. Het is een proces dat tijd kost, maar iedereen kan het leren.</p>
+
+        <h3>Dagelijkse Oefeningen</h3>
+        <ul>
+            <li><strong>Begin elke dag positief:</strong> Denk aan één ding waar je naar uitkijkt</li>
+            <li><strong>Stel jezelf een uitdaging:</strong> Doe elke dag iets wat je normaal zou vermijden</li>
+            <li><strong>Schrijf op wat goed ging:</strong> Aan het eind van elke dag, schrijf 3 dingen op die goed gingen</li>
+            <li><strong>Adem diep in:</strong> Als je gestrest bent, tel tot 10 en adem diep</li>
+            <li><strong>Praat positief tegen jezelf:</strong> Zeg tegen jezelf wat je tegen een goede vriend zou zeggen</li>
+        </ul>
+
+        <h3>Weekelijkse Oefeningen</h3>
+        <ul>
+            <li><strong>Probeer iets nieuws:</strong> Elke week iets doen wat je nog nooit hebt gedaan</li>
+            <li><strong>Kijk naar je fouten:</strong> Wat kun je leren van wat er misging?</li>
+            <li><strong>Doe iets moeilijks:</strong> Kies één taak die je uitstelt en doe hem</li>
+            <li><strong>Help iemand anders:</strong> Het helpt je om je eigen problemen in perspectief te zien</li>
+            <li><strong>Lees of luister naar inspirerende verhalen:</strong> Van mensen die moeilijke dingen hebben overwonnen</li>
+        </ul>
+
+        <h3>Maandelijkse Oefeningen</h3>
+        <ul>
+            <li><strong>Stel een groot doel:</strong> Iets wat je in een maand wilt bereiken</li>
+            <li><strong>Kijk terug op je vooruitgang:</strong> Wat heb je geleerd deze maand?</li>
+            <li><strong>Plan je volgende uitdaging:</strong> Wat wil je volgende maand proberen?</li>
+            <li><strong>Vier je successen:</strong> Wat heb je deze maand bereikt?</li>
+        </ul>
+
+        <h2>Veelgemaakte Fouten</h2>
+        <p>Hier zijn dingen die mensen vaak verkeerd doen als ze hun mindset proberen te versterken:</p>
+
+        <ul>
+            <li><strong>Te snel willen:</strong> Een sterke mindset bouw je niet op in één dag</li>
+            <li><strong>Alles tegelijk willen:</strong> Begin met één ding en bouw langzaam op</li>
+            <li><strong>Perfect willen zijn:</strong> Fouten maken is normaal en leerzaam</li>
+            <li><strong>Alleen focussen op problemen:</strong> Kijk ook naar wat goed gaat</li>
+            <li><strong>Niet om hulp vragen:</strong> Sterke mensen weten wanneer ze hulp nodig hebben</li>
+            <li><strong>Vergelijken met anderen:</strong> Focus op je eigen vooruitgang</li>
+        </ul>
+
+        <h2>Hoe Blijf Je Sterk in Moeilijke Tijden?</h2>
+        <p>Iedereen heeft wel eens moeilijke tijden. Hier zijn manieren om sterk te blijven:</p>
+
+        <h3>Als je je verdrietig voelt</h3>
+        <ul>
+            <li>Praat met iemand die je vertrouwt</li>
+            <li>Doe iets wat je normaal leuk vindt</li>
+            <li>Beweeg, ook al heb je geen zin</li>
+            <li>Eet gezond en slaap genoeg</li>
+            <li>Onthoud dat gevoelens tijdelijk zijn</li>
+        </ul>
+
+        <h3>Als je je angstig voelt</h3>
+        <ul>
+            <li>Adem diep in en uit</li>
+            <li>Stel jezelf de vraag: "Wat is het ergste dat kan gebeuren?"</li>
+            <li>Focus op wat je kunt controleren</li>
+            <li>Praat over je angsten met iemand</li>
+            <li>Doe iets wat je afleidt</li>
+        </ul>
+
+        <h3>Als je je boos voelt</h3>
+        <ul>
+            <li>Tel tot 10 voordat je reageert</li>
+            <li>Ga even weg uit de situatie</li>
+            <li>Beweeg om je energie kwijt te raken</li>
+            <li>Praat over wat je boos maakt</li>
+            <li>Zoek naar oplossingen in plaats van problemen</li>
+        </ul>
+
+        <h2>Hoe Help Je Anderen met Hun Mindset?</h2>
+        <p>Als je zelf een sterke mindset hebt, kun je anderen helpen om ook sterker te worden:</p>
+
+        <ul>
+            <li><strong>Luister zonder oordeel:</strong> Laat anderen hun verhaal vertellen</li>
+            <li><strong>Stel vragen:</strong> Help anderen om zelf oplossingen te vinden</li>
+            <li><strong>Geef hoop:</strong> Herinner anderen aan hun sterke punten</li>
+            <li><strong>Wees een voorbeeld:</strong> Laat zien hoe je omgaat met moeilijke situaties</li>
+            <li><strong>Moedig aan:</strong> Vier de successen van anderen</li>
+        </ul>
+
+        <h2>Wanneer Vraag Je Professionele Hulp?</h2>
+        <p>Soms is het beter om professionele hulp te vragen. Vraag hulp als:</p>
+
+        <ul>
+            <li>Je je constant verdrietig of angstig voelt</li>
+            <li>Je niet meer kunt slapen of eten</li>
+            <li>Je gedachten hebt over jezelf pijn doen</li>
+            <li>Je problemen hebt met alcohol of drugs</li>
+            <li>Je relaties lijden onder je problemen</li>
+            <li>Je gevoelens je dagelijks leven beïnvloeden</li>
+        </ul>
+
+        <div class="practical-tip">
+            <h4>💡 Hulp vragen is sterk</h4>
+            <p>Het is geen zwakte om hulp te vragen. Sterke mensen weten wanneer ze hulp nodig hebben en durven erom te vragen. Professionele hulp kan je helpen om sneller en beter te herstellen.</p>
+        </div>
+
+        <h2>Praktische Tips voor Elke Dag</h2>
+        
+        <h3>In de Ochtend</h3>
+        <ul>
+            <li>Sta op met een positieve gedachte</li>
+            <li>Doe 5 minuten ademhalingsoefeningen</li>
+            <li>Stel je voor hoe je dag goed gaat verlopen</li>
+            <li>Eet iets gezonds voor ontbijt</li>
+            <li>Zeg tegen jezelf: "Ik kan dit"</li>
+        </ul>
+
+        <h3>Op het Werk</h3>
+        <ul>
+            <li>Begin met de moeilijkste taak</li>
+            <li>Neem regelmatig pauze</li>
+            <li>Praat met collega's over je werk</li>
+            <li>Vier kleine successen</li>
+            <li>Vraag om feedback</li>
+        </ul>
+
+        <h3>In de Avond</h3>
+        <ul>
+            <li>Schrijf op wat goed ging</li>
+            <li>Plan morgen, maar niet te gedetailleerd</li>
+            <li>Doe iets ontspannends</li>
+            <li>Ga op tijd naar bed</li>
+            <li>Denk aan één ding waar je dankbaar voor bent</li>
+        </ul>
+
+        <div class="conclusion">
+            <h2>🎯 Samenvatting</h2>
+            <p>Een onbreekbare mindset betekent dat je hoofd niet breekt als het moeilijk wordt. Het bestaat uit 5 delen: optimisme, doorzettingsvermogen, zelfvertrouwen, flexibiliteit, en leren van fouten. Je kunt het leren door dagelijks te oefenen, klein te beginnen, en hulp te vragen als je het nodig hebt. Onthoud: iedereen kan een sterke mindset opbouwen, het is geen talent maar een vaardigheid die je kunt leren. En als je zelf sterk bent, kun je anderen helpen om ook sterker te worden.</p>
         </div>
     </div>
-
-    <script>
-        // Simple functionality for checkboxes
-        document.addEventListener('DOMContentLoaded', function() {
-            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-            
-            checkboxes.forEach(checkbox => {
-                // Load saved state from localStorage
-                const savedState = localStorage.getItem(checkbox.id);
-                if (savedState === 'true') {
-                    checkbox.checked = true;
-                }
-                
-                // Save state when changed
-                checkbox.addEventListener('change', function() {
-                    localStorage.setItem(this.id, this.checked);
-                });
-            });
-        });
-    </script>
 </body>
 </html>

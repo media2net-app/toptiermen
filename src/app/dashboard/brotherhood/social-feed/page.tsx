@@ -399,13 +399,21 @@ const SocialFeedPage = () => {
           <div className="flex items-start gap-3 sm:gap-4">
             {/* User avatar */}
             <div className="flex-shrink-0">
-              <Image 
-                src="/profielfoto.png" 
-                alt={profile?.full_name || "User"} 
-                width={48} 
-                height={48} 
-                className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-[#8BAE5A] object-cover" 
-              />
+              {profile?.avatar_url ? (
+                <Image 
+                  src={profile.avatar_url} 
+                  alt={profile?.full_name || "User"} 
+                  width={48} 
+                  height={48} 
+                  className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-[#8BAE5A] object-cover" 
+                />
+              ) : (
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-[#8BAE5A] bg-[#8BAE5A] flex items-center justify-center">
+                  <span className="text-[#232D1A] font-bold text-sm sm:text-base">
+                    {profile?.full_name?.charAt(0)?.toUpperCase() || user?.email?.charAt(0)?.toUpperCase() || 'U'}
+                  </span>
+                </div>
+              )}
             </div>
             
             {/* Post input */}
@@ -540,13 +548,21 @@ const SocialFeedPage = () => {
             <div key={post.id} className="bg-[#232D1A]/80 rounded-xl shadow-xl border border-[#3A4D23]/40 p-4 sm:p-6">
               {/* Post header */}
               <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
-                <Image 
-                  src={post.user.avatar_url || "/profielfoto.png"} 
-                  alt={post.user.full_name} 
-                  width={40} 
-                  height={40} 
-                  className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-[#8BAE5A] object-cover flex-shrink-0" 
-                />
+                {post.user.avatar_url ? (
+                  <Image 
+                    src={post.user.avatar_url} 
+                    alt={post.user.full_name} 
+                    width={40} 
+                    height={40} 
+                    className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-[#8BAE5A] object-cover flex-shrink-0" 
+                  />
+                ) : (
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-[#8BAE5A] bg-[#8BAE5A] flex items-center justify-center flex-shrink-0">
+                    <span className="text-[#232D1A] font-bold text-xs sm:text-sm">
+                      {post.user.full_name?.charAt(0)?.toUpperCase() || 'U'}
+                    </span>
+                  </div>
+                )}
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center flex-wrap gap-1 sm:gap-2">
                     <span className="font-semibold text-white text-sm sm:text-base truncate">
@@ -662,13 +678,21 @@ const SocialFeedPage = () => {
             {/* Original Post */}
             <div className="p-6 border-b border-[#3A4D23] bg-[#181F17]">
               <div className="flex items-center gap-3 mb-4">
-                <Image 
-                  src={selectedPost.user.avatar_url || "/profielfoto.png"} 
-                  alt={selectedPost.user.full_name} 
-                  width={40} 
-                  height={40} 
-                  className="w-10 h-10 rounded-full border-2 border-[#8BAE5A] object-cover" 
-                />
+                {selectedPost.user.avatar_url ? (
+                  <Image 
+                    src={selectedPost.user.avatar_url} 
+                    alt={selectedPost.user.full_name} 
+                    width={40} 
+                    height={40} 
+                    className="w-10 h-10 rounded-full border-2 border-[#8BAE5A] object-cover" 
+                  />
+                ) : (
+                  <div className="w-10 h-10 rounded-full border-2 border-[#8BAE5A] bg-[#8BAE5A] flex items-center justify-center">
+                    <span className="text-[#232D1A] font-bold text-sm">
+                      {selectedPost.user.full_name?.charAt(0)?.toUpperCase() || 'U'}
+                    </span>
+                  </div>
+                )}
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="font-semibold text-white">{selectedPost.user.full_name}</span>
@@ -697,13 +721,21 @@ const SocialFeedPage = () => {
               ) : (
                 comments.map((comment) => (
                   <div key={comment.id} className="flex gap-3">
-                    <Image 
-                      src={comment.user.avatar_url || "/profielfoto.png"} 
-                      alt={comment.user.full_name} 
-                      width={32} 
-                      height={32} 
-                      className="w-8 h-8 rounded-full border border-[#8BAE5A] object-cover flex-shrink-0" 
-                    />
+                    {comment.user.avatar_url ? (
+                      <Image 
+                        src={comment.user.avatar_url} 
+                        alt={comment.user.full_name} 
+                        width={32} 
+                        height={32} 
+                        className="w-8 h-8 rounded-full border border-[#8BAE5A] object-cover flex-shrink-0" 
+                      />
+                    ) : (
+                      <div className="w-8 h-8 rounded-full border border-[#8BAE5A] bg-[#8BAE5A] flex items-center justify-center flex-shrink-0">
+                        <span className="text-[#232D1A] font-bold text-xs">
+                          {comment.user.full_name?.charAt(0)?.toUpperCase() || 'U'}
+                        </span>
+                      </div>
+                    )}
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
                         <span className="font-semibold text-white text-sm">{comment.user.full_name}</span>
@@ -719,13 +751,21 @@ const SocialFeedPage = () => {
             {/* Add Comment */}
             <div className="p-6 border-t border-[#3A4D23] bg-[#181F17]">
               <div className="flex gap-3">
-                <Image 
-                  src="/profielfoto.png" 
-                  alt={profile?.full_name || "User"} 
-                  width={32} 
-                  height={32} 
-                  className="w-8 h-8 rounded-full border border-[#8BAE5A] object-cover flex-shrink-0" 
-                />
+                {profile?.avatar_url ? (
+                  <Image 
+                    src={profile.avatar_url} 
+                    alt={profile?.full_name || "User"} 
+                    width={32} 
+                    height={32} 
+                    className="w-8 h-8 rounded-full border border-[#8BAE5A] object-cover flex-shrink-0" 
+                  />
+                ) : (
+                  <div className="w-8 h-8 rounded-full border border-[#8BAE5A] bg-[#8BAE5A] flex items-center justify-center flex-shrink-0">
+                    <span className="text-[#232D1A] font-bold text-xs">
+                      {profile?.full_name?.charAt(0)?.toUpperCase() || user?.email?.charAt(0)?.toUpperCase() || 'U'}
+                    </span>
+                  </div>
+                )}
                 <div className="flex-1">
                   <div className="relative">
                     <textarea

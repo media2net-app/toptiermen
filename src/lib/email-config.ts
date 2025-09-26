@@ -49,10 +49,10 @@ export const mailgunConfig: EmailConfig = {
 // Function to get current email configuration
 export function getEmailConfig(): EmailConfig {
   // You can switch providers here by changing the return value
-  // return mailgunConfig; // BACK TO MAILGUN - SMTP HAS HELO ISSUES
+  return mailgunConfig; // BACK TO MAILGUN - SMTP HAS HELO ISSUES
   
   // To use SMTP (HELO issues):
-  return currentSmtpConfig;
+  // return currentSmtpConfig;
   
   // To use SendGrid:
   // return sendgridConfig;

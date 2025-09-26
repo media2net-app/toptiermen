@@ -40,6 +40,7 @@ async function fetchDashboardStats(userId: string) {
     // Fetch all stats in parallel
     const [
       missionsStats,
+      challengesStats,
       trainingStats,
       mindFocusStats,
       boekenkamerStats,
@@ -51,6 +52,8 @@ async function fetchDashboardStats(userId: string) {
     ] = await Promise.all([
       // Missions stats
       fetchMissionsStats(userId),
+      // Challenges stats
+      fetchChallengesStats(userId),
       // Training stats
       fetchTrainingStats(userId),
       // Mind & Focus stats
@@ -71,6 +74,7 @@ async function fetchDashboardStats(userId: string) {
 
     const stats = {
       missions: missionsStats,
+      challenges: challengesStats,
       training: trainingStats,
       mindFocus: mindFocusStats,
       boekenkamer: boekenkamerStats,
@@ -167,6 +171,89 @@ async function fetchMissionsStats(userId: string) {
   }
 }
 
+async function fetchChallengesStats(userId: string) {
+  try {
+    console.log('🏆 Fetching challenges stats for user:', userId);
+    
+    // Get challenges from the user_challenges table
+    const { data: challenges, error: challengesError } = await supabaseAdmin
+      .from('user_challenges')
+      .select(`
+        id, 
+        challenge_id,
+        status,
+        progress_percentage,
+        current_streak,
+        start_date,
+        completion_date,
+        challenges (
+          id,
+          title,
+          xp_reward
+        )
+      `)
+      .eq('user_id', userId);
+
+    if (challengesError) {
+      console.log('⚠️ Error fetching challenges:', challengesError);
+      return {
+        total: 0,
+        completedToday: 0,
+        completedThisWeek: 0,
+        progress: 0
+      };
+    }
+
+    // Process challenges
+    const challengesTotal = challenges?.length || 0;
+    const activeChallenges = challenges?.filter(challenge => challenge.status === 'active') || [];
+    const completedChallenges = challenges?.filter(challenge => challenge.completion_date) || [];
+    
+    // Count challenges completed today
+    const today = new Date().toISOString().split('T')[0];
+    const completedChallengesToday = challenges?.filter(challenge => {
+      if (!challenge.completion_date) return false;
+      const completionDate = new Date(challenge.completion_date).toISOString().split('T')[0];
+      return completionDate === today;
+    }) || [];
+
+    // Count challenges completed this week
+    const weekStart = new Date();
+    weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+    const weekStartStr = weekStart.toISOString().split('T')[0];
+    
+    const completedChallengesThisWeek = challenges?.filter(challenge => {
+      if (!challenge.completion_date) return false;
+      const completionDate = new Date(challenge.completion_date).toISOString().split('T')[0];
+      return completionDate >= weekStartStr;
+    }) || [];
+
+    // Calculate progress
+    const progress = challengesTotal > 0 ? Math.round((completedChallenges.length / challengesTotal) * 100) : 0;
+
+    console.log('✅ Challenges stats calculated:', {
+      total: challengesTotal,
+      completedToday: completedChallengesToday.length,
+      completedThisWeek: completedChallengesThisWeek.length,
+      progress
+    });
+
+    return {
+      total: challengesTotal,
+      completedToday: completedChallengesToday.length,
+      completedThisWeek: completedChallengesThisWeek.length,
+      progress
+    };
+  } catch (error) {
+    console.error('❌ Error fetching challenges stats:', error);
+    return { 
+      total: 0, 
+      completedToday: 0, 
+      completedThisWeek: 0, 
+      progress: 0 
+    };
+  }
+}
 
 async function fetchTrainingStats(userId: string) {
   try {
@@ -200,7 +287,11 @@ async function fetchTrainingStats(userId: string) {
         currentDay: 0,
         totalDays: 0,
         weeklySessions: 0,
-        progress: 0
+        progress: 0,
+        schemaName: undefined,
+        completedDaysThisWeek: 0,
+        currentWeek: 0,
+        totalWeeks: 8
       };
     }
 
@@ -212,7 +303,11 @@ async function fetchTrainingStats(userId: string) {
         currentDay: 0,
         totalDays: 0,
         weeklySessions: 0,
-        progress: 0
+        progress: 0,
+        schemaName: undefined,
+        completedDaysThisWeek: 0,
+        currentWeek: 0,
+        totalWeeks: 8
       };
     }
 
@@ -230,7 +325,11 @@ async function fetchTrainingStats(userId: string) {
         currentDay: 0,
         totalDays: 0,
         weeklySessions: 0,
-        progress: 0
+        progress: 0,
+        schemaName: undefined,
+        completedDaysThisWeek: 0,
+        currentWeek: 0,
+        totalWeeks: 8
       };
     }
 
@@ -251,12 +350,24 @@ async function fetchTrainingStats(userId: string) {
     const currentDay = Math.min(Math.max(daysDiff + 1, 1), totalDays);
     const progress = Math.round((currentDay / totalDays) * 100);
 
+    // Calculate current week (1-8)
+    const currentWeek = Math.ceil(currentDay / 7);
+    const totalWeeks = 8;
+    
+    // Calculate completed days this week
+    const daysInCurrentWeek = Math.min(7, totalDays - (currentWeek - 1) * 7);
+    const completedDaysThisWeek = Math.min(currentDay - (currentWeek - 1) * 7, daysInCurrentWeek);
+
     return {
       hasActiveSchema: true,
       currentDay,
       totalDays,
       weeklySessions,
-      progress: Math.min(progress, 100)
+      progress: Math.min(progress, 100),
+      schemaName: schema.name,
+      completedDaysThisWeek: Math.max(0, completedDaysThisWeek),
+      currentWeek: Math.min(currentWeek, totalWeeks),
+      totalWeeks
     };
   } catch (error) {
     console.error('❌ Error fetching training stats:', error);
@@ -265,32 +376,174 @@ async function fetchTrainingStats(userId: string) {
       currentDay: 0,
       totalDays: 0,
       weeklySessions: 0,
-      progress: 0
+      progress: 0,
+      schemaName: undefined,
+      completedDaysThisWeek: 0,
+      currentWeek: 0,
+      totalWeeks: 8
     };
   }
 }
 
 async function fetchMindFocusStats(userId: string) {
   try {
-    // For now, return default values since mind & focus system might not be fully implemented
+    console.log('🧘 Fetching mind focus stats for user:', userId);
+    
+    // Check if user has a mind profile
+    const { data: profile, error: profileError } = await supabaseAdmin
+      .from('user_mind_profiles')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
+
+    if (profileError && profileError.code !== 'PGRST116') {
+      console.log('⚠️ Error fetching mind profile:', profileError);
+      return {
+        total: 0,
+        completedToday: 0,
+        progress: 0,
+        hasProfile: false,
+        stressLevel: 0,
+        personalGoals: [],
+        currentStreak: 0
+      };
+    }
+
+    // If no profile exists, return default values
+    if (!profile) {
+      console.log('📝 No mind profile found for user');
+      return {
+        total: 0,
+        completedToday: 0,
+        progress: 0,
+        hasProfile: false,
+        stressLevel: 0,
+        personalGoals: [],
+        currentStreak: 0
+      };
+    }
+
+    // Get recent sessions for progress calculation
+    const { data: sessions, error: sessionsError } = await supabaseAdmin
+      .from('mind_sessions')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(30);
+
+    if (sessionsError) {
+      console.log('⚠️ Error fetching sessions:', sessionsError);
+    }
+
+    // Calculate stats
+    const totalSessions = sessions?.length || 0;
+    const completedSessions = sessions?.filter(s => s.completed).length || 0;
+    const progress = totalSessions > 0 ? Math.round((completedSessions / totalSessions) * 100) : 0;
+
+    // Calculate today's sessions
+    const today = new Date().toISOString().split('T')[0];
+    const completedToday = sessions?.filter(s => 
+      s.created_at.startsWith(today) && s.completed
+    ).length || 0;
+
+    // Get current stress level from latest session or profile
+    let currentStressLevel = 0;
+    if (sessions && sessions.length > 0) {
+      const latestSession = sessions.find(s => s.stress_after);
+      currentStressLevel = latestSession?.stress_after || 0;
+    } else if (profile.stress_assessment) {
+      // Use initial stress assessment if no sessions yet
+      const stressAssessment = profile.stress_assessment;
+      currentStressLevel = stressAssessment.workStress || 0;
+    }
+
+    // Get personal goals
+    const personalGoals = profile.personal_goals || [];
+
+    // Calculate current streak
+    const currentStreak = calculateMindFocusStreak(sessions || []);
+
+    console.log('✅ Mind focus stats calculated:', {
+      hasProfile: true,
+      totalSessions,
+      completedToday,
+      currentStressLevel,
+      personalGoals: personalGoals.length,
+      currentStreak
+    });
+
     return {
-      total: 0,
-      completedToday: 0,
-      progress: 0
+      total: totalSessions,
+      completedToday,
+      progress,
+      hasProfile: true,
+      stressLevel: currentStressLevel,
+      personalGoals,
+      currentStreak
     };
+
   } catch (error) {
-    console.error('Error fetching mind focus stats:', error);
-    return { total: 0, completedToday: 0, progress: 0 };
+    console.error('❌ Error fetching mind focus stats:', error);
+    return { 
+      total: 0, 
+      completedToday: 0, 
+      progress: 0,
+      hasProfile: false,
+      stressLevel: 0,
+      personalGoals: [],
+      currentStreak: 0
+    };
   }
+}
+
+function calculateMindFocusStreak(sessions: any[]): number {
+  if (!sessions || sessions.length === 0) return 0;
+  
+  const today = new Date();
+  let streak = 0;
+  
+  for (let i = 0; i < 30; i++) { // Check last 30 days
+    const checkDate = new Date(today);
+    checkDate.setDate(today.getDate() - i);
+    const dateStr = checkDate.toISOString().split('T')[0];
+    
+    const daySessions = sessions.filter(s => 
+      s.created_at.startsWith(dateStr) && s.completed
+    );
+    
+    if (daySessions.length > 0) {
+      streak++;
+    } else if (i > 0) { // Don't break streak on first day
+      break;
+    }
+  }
+  
+  return streak;
 }
 
 async function fetchBoekenkamerStats(userId: string) {
   try {
-    // Get total books read
-    const { data: totalBooks, error: totalError } = await supabaseAdmin
-      .from('book_reviews')
+    console.log('📚 Fetching boekenkamer stats for user:', userId);
+    
+    // Get total number of available books
+    const { data: allBooks, error: allBooksError } = await supabaseAdmin
+      .from('books')
       .select('id')
+      .eq('status', 'published');
+
+    if (allBooksError) {
+      console.log('⚠️ Error fetching total books:', allBooksError);
+    }
+
+    // Get books read by user
+    const { data: readBooks, error: readBooksError } = await supabaseAdmin
+      .from('book_reviews')
+      .select('id, book_id')
       .eq('user_id', userId);
+
+    if (readBooksError) {
+      console.log('⚠️ Error fetching read books:', readBooksError);
+    }
 
     // Get books completed today
     const today = new Date().toISOString().split('T')[0];
@@ -301,18 +554,40 @@ async function fetchBoekenkamerStats(userId: string) {
       .gte('created_at', `${today}T00:00:00`)
       .lte('created_at', `${today}T23:59:59`);
 
-    const total = totalBooks?.length || 0;
+    if (todayError) {
+      console.log('⚠️ Error fetching today\'s completed books:', todayError);
+    }
+
+    const totalBooks = allBooks?.length || 0;
+    const readBooksCount = readBooks?.length || 0;
     const completedTodayCount = completedToday?.length || 0;
-    const progress = total > 0 ? Math.round((completedTodayCount / total) * 100) : 0;
+    
+    // Calculate progress based on read books vs total available books
+    const progress = totalBooks > 0 ? Math.round((readBooksCount / totalBooks) * 100) : 0;
+
+    console.log('✅ Boekenkamer stats calculated:', {
+      totalBooks,
+      readBooksCount,
+      completedTodayCount,
+      progress
+    });
 
     return {
-      total,
+      total: readBooksCount, // For backward compatibility
       completedToday: completedTodayCount,
-      progress
+      progress,
+      totalBooks,
+      readBooks: readBooksCount
     };
   } catch (error) {
-    console.error('Error fetching boekenkamer stats:', error);
-    return { total: 0, completedToday: 0, progress: 0 };
+    console.error('❌ Error fetching boekenkamer stats:', error);
+    return { 
+      total: 0, 
+      completedToday: 0, 
+      progress: 0,
+      totalBooks: 0,
+      readBooks: 0
+    };
   }
 }
 
@@ -471,46 +746,85 @@ async function fetchUserBadges(userId: string) {
 
 async function fetchFinanceStats(userId: string) {
   try {
-    // Get user's financial data (if available)
-    const { data: userProfile, error } = await supabaseAdmin
-      .from('profiles')
-      .select('points, rank')
-      .eq('id', userId)
+    console.log('💰 Fetching finance stats for user:', userId);
+
+    // Get user's financial profile
+    const { data: financialProfile, error: profileError } = await supabaseAdmin
+      .from('user_financial_profiles')
+      .select('*')
+      .eq('user_id', userId)
       .single();
 
-    if (error) {
+    if (profileError && profileError.code !== 'PGRST116') {
+      console.log('⚠️ Error fetching financial profile:', profileError);
       return {
         netWorth: 0,
         monthlyIncome: 0,
         savings: 0,
         investments: 0,
-        progress: 0
+        progress: 0,
+        hasProfile: false
       };
     }
 
-    // For now, calculate based on XP/points as a proxy for financial progress
-    const totalXP = userProfile.points || 0;
-    const netWorth = Math.round(totalXP * 10); // Simple calculation
-    const monthlyIncome = Math.round(totalXP * 2);
-    const savings = Math.round(totalXP * 3);
-    const investments = Math.round(totalXP * 5);
-    const progress = Math.min(Math.round((totalXP / 1000) * 100), 100);
+    // If no financial profile exists, return default values
+    if (!financialProfile) {
+      console.log('📝 No financial profile found for user');
+      return {
+        netWorth: 0,
+        monthlyIncome: 0,
+        savings: 0,
+        investments: 0,
+        progress: 0,
+        hasProfile: false
+      };
+    }
+
+    // Get financial goals to calculate progress
+    const { data: goals, error: goalsError } = await supabaseAdmin
+      .from('financial_goals')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('status', 'active');
+
+    if (goalsError) {
+      console.log('⚠️ Error fetching financial goals:', goalsError);
+    }
+
+    // Calculate progress based on goals
+    let progress = 0;
+    if (goals && goals.length > 0) {
+      const totalProgress = goals.reduce((sum, goal) => {
+        const goalProgress = goal.target_amount > 0 ? (goal.current_amount / goal.target_amount) * 100 : 0;
+        return sum + Math.min(goalProgress, 100);
+      }, 0);
+      progress = Math.round(totalProgress / goals.length);
+    }
+
+    console.log('✅ Finance stats calculated:', {
+      netWorth: financialProfile.net_worth,
+      monthlyIncome: financialProfile.monthly_income,
+      progress,
+      goalsCount: goals?.length || 0
+    });
 
     return {
-      netWorth,
-      monthlyIncome,
-      savings,
-      investments,
-      progress
+      netWorth: financialProfile.net_worth || 0,
+      monthlyIncome: financialProfile.monthly_income || 0,
+      savings: financialProfile.savings_rate_percentage || 0,
+      investments: financialProfile.passive_income_goal || 0,
+      progress,
+      hasProfile: true
     };
   } catch (error) {
-    console.error('Error fetching finance stats:', error);
+    console.error('❌ Error fetching finance stats:', error);
     return {
       netWorth: 0,
       monthlyIncome: 0,
       savings: 0,
       investments: 0,
-      progress: 0
+      progress: 0,
+      hasProfile: false
     };
   }
 }

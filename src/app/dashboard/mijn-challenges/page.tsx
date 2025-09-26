@@ -351,14 +351,12 @@ export default function MijnChallengesPage() {
 
       if (response.ok) {
         // Reload challenges to show the new one
-        const updatedResponse = await fetch(`/api/missions-simple?userId=${user.id}`);
+        const updatedResponse = await fetch(`/api/user-challenges?userId=${user.id}`);
         if (updatedResponse.ok) {
           const data = await updatedResponse.json();
-          const updatedChallenges = data.missions.map((mission: Challenge) => ({
-            ...mission,
-            done: mission.type === 'Dagelijks' 
-              ? isChallengeCompletedToday(mission.last_completion_date)
-              : mission.done
+          const updatedChallenges = data.challenges.map((challenge: any) => ({
+            ...challenge,
+            done: challenge.done || isChallengeCompletedToday(challenge.last_completion_date)
           }));
           setChallenges(updatedChallenges);
           setSummary(data.summary);
@@ -442,39 +440,20 @@ export default function MijnChallengesPage() {
         setLoading(true);
         setError(null);
 
-        const response = await fetch(`/api/missions-simple?userId=${user.id}`);
+        const response = await fetch(`/api/user-challenges?userId=${user.id}`);
         if (!response.ok) {
           throw new Error('Failed to load challenges');
         }
 
         const data = await response.json();
         
-        // Add created_at to challenges that don't have it and update daily tracking
-        const updatedChallenges = data.missions.map((mission: Challenge, index: number) => {
-          let missionWithDate = mission;
-          
-          // Add created_at if missing
-          if (!mission.created_at) {
-            // For existing challenges without created_at, use a default date
-            // Most challenges were added yesterday, some today
-            const isRecent = index < 2; // First 2 challenges are from today
-            const defaultDate = isRecent ? new Date() : new Date(Date.now() - 24 * 60 * 60 * 1000); // Yesterday
-            missionWithDate = {
-              ...mission,
-              created_at: defaultDate.toISOString()
-            };
-          }
-          
-          // Update daily tracking
-          return {
-            ...missionWithDate,
-            done: mission.type === 'Dagelijks' 
-              ? isChallengeCompletedToday(mission.last_completion_date)
-              : mission.done
-          };
-        });
+        // Process challenges data
+        const processedChallenges = data.challenges.map((challenge: any) => ({
+          ...challenge,
+          done: challenge.done || isChallengeCompletedToday(challenge.last_completion_date)
+        }));
 
-        setChallenges(updatedChallenges);
+        setChallenges(processedChallenges);
         setSummary(data.summary);
       } catch (err) {
         console.error('Error loading challenges:', err);
@@ -579,18 +558,18 @@ export default function MijnChallengesPage() {
     loadUserPreferences();
   }, [user?.id]);
 
-  // Toggle mission completion
-  const toggleChallenge = async (missionId: string) => {
+  // Toggle challenge completion
+  const toggleChallenge = async (challengeId: string) => {
     if (!user?.id) return;
 
     try {
-      const response = await fetch('/api/missions-simple', {
+      const response = await fetch('/api/user-challenges/toggle', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          action: 'toggle',
           userId: user.id,
-          missionId: missionId
+          challengeId: challengeId,
+          action: 'toggle'
         })
       });
 
@@ -602,14 +581,12 @@ export default function MijnChallengesPage() {
 
       if (data.success) {
         // Reload challenges to get updated summary
-        const updatedResponse = await fetch(`/api/missions-simple?userId=${user.id}`);
+        const updatedResponse = await fetch(`/api/user-challenges?userId=${user.id}`);
         if (updatedResponse.ok) {
           const updatedData = await updatedResponse.json();
-          const updatedChallenges = updatedData.missions.map((mission: Challenge) => ({
-            ...mission,
-            done: mission.type === 'Dagelijks' 
-              ? isChallengeCompletedToday(mission.last_completion_date)
-              : mission.done
+          const updatedChallenges = updatedData.challenges.map((challenge: any) => ({
+            ...challenge,
+            done: challenge.done || isChallengeCompletedToday(challenge.last_completion_date)
           }));
           setChallenges(updatedChallenges);
           setSummary(updatedData.summary);
@@ -653,14 +630,12 @@ export default function MijnChallengesPage() {
 
       if (data.success) {
         // Reload challenges to get updated summary
-        const updatedResponse = await fetch(`/api/missions-simple?userId=${user.id}`);
+        const updatedResponse = await fetch(`/api/user-challenges?userId=${user.id}`);
         if (updatedResponse.ok) {
           const updatedData = await updatedResponse.json();
-          const updatedChallenges = updatedData.missions.map((mission: Challenge) => ({
-            ...mission,
-            done: mission.type === 'Dagelijks' 
-              ? isChallengeCompletedToday(mission.last_completion_date)
-              : mission.done
+          const updatedChallenges = updatedData.challenges.map((challenge: any) => ({
+            ...challenge,
+            done: challenge.done || isChallengeCompletedToday(challenge.last_completion_date)
           }));
           setChallenges(updatedChallenges);
           setSummary(updatedData.summary);
@@ -765,14 +740,12 @@ export default function MijnChallengesPage() {
 
       if (data.success) {
         // Reload challenges to get updated summary
-        const updatedResponse = await fetch(`/api/missions-simple?userId=${user.id}`);
+        const updatedResponse = await fetch(`/api/user-challenges?userId=${user.id}`);
         if (updatedResponse.ok) {
           const updatedData = await updatedResponse.json();
-          const updatedChallenges = updatedData.missions.map((mission: Challenge) => ({
-            ...mission,
-            done: mission.type === 'Dagelijks' 
-              ? isChallengeCompletedToday(mission.last_completion_date)
-              : mission.done
+          const updatedChallenges = updatedData.challenges.map((challenge: any) => ({
+            ...challenge,
+            done: challenge.done || isChallengeCompletedToday(challenge.last_completion_date)
           }));
           setChallenges(updatedChallenges);
           setSummary(updatedData.summary);

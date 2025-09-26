@@ -125,7 +125,37 @@ export async function POST(request: NextRequest) {
     const end = new Date(start);
     end.setDate(end.getDate() + (8 * 7)); // 8 weeks
 
-    // First, deactivate all existing active periods for this user
+    // First, check if user has an existing active schema
+    const { data: existingPeriods, error: checkError } = await supabase
+      .from('user_schema_periods')
+      .select('training_schema_id')
+      .eq('user_id', actualUserId)
+      .eq('status', 'active')
+      .single();
+
+    // If user has an existing active schema and is switching to a different one, reset all training data
+    if (existingPeriods && existingPeriods.training_schema_id !== schemaId) {
+      console.log('🔄 User switching schemas, resetting all training data...');
+      
+      try {
+        // Call the reset API to clear all training data
+        const resetResponse = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/reset-training-data`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: actualUserId, newSchemaId: schemaId })
+        });
+
+        if (resetResponse.ok) {
+          console.log('✅ Training data reset successfully');
+        } else {
+          console.log('⚠️ Warning: Failed to reset training data, continuing with schema switch');
+        }
+      } catch (error) {
+        console.log('⚠️ Warning: Error calling reset API, continuing with schema switch:', error);
+      }
+    }
+
+    // Deactivate all existing active periods for this user
     const { error: deactivateError } = await supabase
       .from('user_schema_periods')
       .update({ status: 'completed' })

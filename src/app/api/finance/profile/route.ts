@@ -166,3 +166,43 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const goalId = searchParams.get('goalId');
+
+    if (!goalId) {
+      return NextResponse.json({ error: 'Goal ID is required' }, { status: 400 });
+    }
+
+    console.log('🗑️ Deleting financial goal:', goalId);
+
+    // Delete the goal by setting status to 'deleted'
+    const { data: deletedGoal, error: deleteError } = await supabaseAdmin
+      .from('financial_goals')
+      .update({
+        status: 'deleted',
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', goalId)
+      .select()
+      .single();
+
+    if (deleteError) {
+      console.error('Error deleting financial goal:', deleteError);
+      return NextResponse.json({ error: 'Failed to delete financial goal' }, { status: 500 });
+    }
+
+    console.log('✅ Financial goal deleted successfully:', deletedGoal);
+
+    return NextResponse.json({ 
+      success: true, 
+      message: 'Financial goal deleted successfully' 
+    });
+
+  } catch (error) {
+    console.error('Error in finance profile DELETE API:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}

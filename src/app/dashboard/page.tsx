@@ -23,22 +23,38 @@ interface DashboardStats {
     completedThisWeek: number;
     progress: number;
   };
+  challenges: {
+    total: number;
+    completedToday: number;
+    completedThisWeek: number;
+    progress: number;
+  };
   training: {
     hasActiveSchema: boolean;
     currentDay: number;
     totalDays: number;
     weeklySessions: number;
     progress: number;
+    schemaName?: string;
+    completedDaysThisWeek?: number;
+    currentWeek?: number;
+    totalWeeks?: number;
   };
   mindFocus: {
     total: number;
     completedToday: number;
     progress: number;
+    hasProfile?: boolean;
+    stressLevel?: number;
+    personalGoals?: string[];
+    currentStreak?: number;
   };
   boekenkamer: {
     total: number;
     completedToday: number;
     progress: number;
+    totalBooks?: number;
+    readBooks?: number;
   };
   finance: {
     netWorth: number;
@@ -46,6 +62,7 @@ interface DashboardStats {
     savings: number;
     investments: number;
     progress: number;
+    hasProfile?: boolean;
   };
   brotherhood: {
     totalMembers: number;
@@ -237,10 +254,11 @@ export default function Dashboard() {
           // Set minimal fallback data (not mock, just empty)
           setStats({
             missions: { total: 0, completedToday: 0, completedThisWeek: 0, progress: 0 },
-            training: { hasActiveSchema: false, currentDay: 0, totalDays: 0, weeklySessions: 0, progress: 0 },
-            mindFocus: { total: 0, completedToday: 0, progress: 0 },
-            boekenkamer: { total: 0, completedToday: 0, progress: 0 },
-            finance: { netWorth: 0, monthlyIncome: 0, savings: 0, investments: 0, progress: 0 },
+            challenges: { total: 0, completedToday: 0, completedThisWeek: 0, progress: 0 },
+            training: { hasActiveSchema: false, currentDay: 0, totalDays: 0, weeklySessions: 0, progress: 0, schemaName: undefined, completedDaysThisWeek: 0, currentWeek: 0, totalWeeks: 8 },
+            mindFocus: { total: 0, completedToday: 0, progress: 0, hasProfile: false, stressLevel: 0, personalGoals: [], currentStreak: 0 },
+            boekenkamer: { total: 0, completedToday: 0, progress: 0, totalBooks: 0, readBooks: 0 },
+            finance: { netWorth: 0, monthlyIncome: 0, savings: 0, investments: 0, progress: 0, hasProfile: false },
             brotherhood: { totalMembers: 0, activeMembers: 0, communityScore: 0, progress: 0 },
             academy: { totalCourses: 0, completedCourses: 0, learningProgress: 0, progress: 0 },
             xp: { 
@@ -263,10 +281,11 @@ export default function Dashboard() {
         // Set minimal fallback data (not mock, just empty)
         setStats({
           missions: { total: 0, completedToday: 0, completedThisWeek: 0, progress: 0 },
-          training: { hasActiveSchema: false, currentDay: 0, totalDays: 0, weeklySessions: 0, progress: 0 },
-          mindFocus: { total: 0, completedToday: 0, progress: 0 },
-          boekenkamer: { total: 0, completedToday: 0, progress: 0 },
-          finance: { netWorth: 0, monthlyIncome: 0, savings: 0, investments: 0, progress: 0 },
+          challenges: { total: 0, completedToday: 0, completedThisWeek: 0, progress: 0 },
+          training: { hasActiveSchema: false, currentDay: 0, totalDays: 0, weeklySessions: 0, progress: 0, schemaName: undefined, completedDaysThisWeek: 0, currentWeek: 0, totalWeeks: 8 },
+          mindFocus: { total: 0, completedToday: 0, progress: 0, hasProfile: false, stressLevel: 0, personalGoals: [], currentStreak: 0 },
+          boekenkamer: { total: 0, completedToday: 0, progress: 0, totalBooks: 0, readBooks: 0 },
+          finance: { netWorth: 0, monthlyIncome: 0, savings: 0, investments: 0, progress: 0, hasProfile: false },
           brotherhood: { totalMembers: 0, activeMembers: 0, communityScore: 0, progress: 0 },
                       academy: { totalCourses: 0, completedCourses: 0, learningProgress: 0, progress: 0 },
           xp: { 
@@ -447,19 +466,19 @@ export default function Dashboard() {
           {/* Dashboard Content */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8 animate-fade-in-up">
             {/* Mijn Challenges */}
-            <Link href="/dashboard/mijn-challenges" className={`bg-gradient-to-br from-[#181F17] to-[#232D1A] border rounded-xl p-4 sm:p-6 text-center transition-transform duration-300 cursor-pointer block ${
-              stats?.missions.completedToday === stats?.missions.total && (stats?.missions.total || 0) > 0
+            <Link href="/dashboard/mijn-challenges" className={`bg-gradient-to-br from-[#181F17] to-[#232D1A] border rounded-xl p-4 sm:p-6 text-left transition-transform duration-300 cursor-pointer block ${
+              stats?.challenges.completedToday === stats?.challenges.total && (stats?.challenges.total || 0) > 0
                 ? 'border-[#8BAE5A] shadow-2xl shadow-[#8BAE5A]/20 hover:scale-105 hover:shadow-[#8BAE5A]/40'
                 : 'border-[#3A4D23]/30 hover:scale-105 hover:shadow-2xl hover:border-[#8BAE5A]/50'
             }`}>
               <div className="flex items-center justify-between mb-3 sm:mb-4">
                 <h3 className="text-lg sm:text-xl font-bold text-white">Mijn Challenges</h3>
                 <span className={`text-xl sm:text-2xl ${
-                  stats?.missions.completedToday === stats?.missions.total && (stats?.missions.total || 0) > 0
+                  stats?.challenges.completedToday === stats?.challenges.total && (stats?.challenges.total || 0) > 0
                     ? 'text-[#FFD700]'
                     : 'text-[#8BAE5A]'
                 }`}>
-                  {stats?.missions.completedToday === stats?.missions.total && (stats?.missions.total || 0) > 0 ? (
+                  {stats?.challenges.completedToday === stats?.challenges.total && (stats?.challenges.total || 0) > 0 ? (
                     <TrophyIcon className="w-6 h-6" />
                   ) : (
                     <CheckCircleIcon className="w-6 h-6" />
@@ -467,55 +486,85 @@ export default function Dashboard() {
                 </span>
               </div>
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-2xl sm:text-3xl font-bold text-[#FFD700]">{stats?.missions.completedToday || 0}/{stats?.missions.total || 0}</span>
+                <span className="text-2xl sm:text-3xl font-bold text-[#FFD700]">{stats?.challenges.completedToday || 0}/{stats?.challenges.total || 0}</span>
                 <span className={`text-sm sm:text-base ${
-                  stats?.missions.completedToday === stats?.missions.total && (stats?.missions.total || 0) > 0
+                  stats?.challenges.completedToday === stats?.challenges.total && (stats?.challenges.total || 0) > 0
                     ? 'text-[#FFD700] font-bold'
                     : 'text-[#8BAE5A]'
                 }`}>
-                  {stats?.missions.completedToday === stats?.missions.total && (stats?.missions.total || 0) > 0 ? 'VOLBRACHT!' : 'volbracht'}
+                  {stats?.challenges.completedToday === stats?.challenges.total && (stats?.challenges.total || 0) > 0 ? 'VOLBRACHT!' : 'volbracht'}
                 </span>
               </div>
               <div className="w-full h-2 bg-[#3A4D23]/40 rounded-full">
                 <div 
                   className={`h-2 rounded-full transition-all duration-700 ${
-                    stats?.missions.completedToday === stats?.missions.total && (stats?.missions.total || 0) > 0
+                    stats?.challenges.completedToday === stats?.challenges.total && (stats?.challenges.total || 0) > 0
                       ? 'bg-gradient-to-r from-[#FFD700] to-[#f0a14f]'
                       : 'bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f]'
                   }`}
-                  style={{ width: `${stats?.missions.progress || 0}%` }}
+                  style={{ width: `${stats?.challenges.progress || 0}%` }}
                 ></div>
               </div>
               <div className={`text-xs mt-2 ${
-                stats?.missions.completedToday === stats?.missions.total && (stats?.missions.total || 0) > 0
+                stats?.challenges.completedToday === stats?.challenges.total && (stats?.challenges.total || 0) > 0
                   ? 'text-[#FFD700] font-semibold'
                   : 'text-gray-400'
               }`}>
-                {stats?.missions.completedToday === stats?.missions.total && (stats?.missions.total || 0) > 0 
+                {stats?.challenges.completedToday === stats?.challenges.total && (stats?.challenges.total || 0) > 0 
                   ? '🎉 Perfecte dag behaald!' 
-                  : `${stats?.missions.completedToday || 0} vandaag`
+                  : `${stats?.challenges.completedToday || 0} vandaag`
                 }
               </div>
             </Link>
 
 
             {/* Mijn Trainingen */}
-            <Link href="/dashboard/mijn-trainingen" className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-4 sm:p-6 text-center transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#8BAE5A]/50 cursor-pointer block">
+            <Link href="/dashboard/mijn-trainingen" className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-4 sm:p-6 text-left transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#8BAE5A]/50 cursor-pointer block">
               <div className="flex items-center justify-between mb-3 sm:mb-4">
                 <h3 className="text-lg sm:text-xl font-bold text-white">Mijn Trainingen</h3>
                 <DumbbellIcon className="w-6 h-6 text-[#8BAE5A]" />
               </div>
               <div className="space-y-2 sm:space-y-3">
-                <div>
-                  <div className="text-xs sm:text-sm text-[#8BAE5A] mb-1">Schema status:</div>
-                  <div className="text-white font-semibold text-sm sm:text-base">
-                    {stats?.training.hasActiveSchema ? 'Actief' : 'Geen schema'}
+                {/* Schema naam */}
+                {stats?.training.schemaName && (
+                  <div className="text-left">
+                    <div className="text-xs sm:text-sm text-[#8BAE5A] mb-1">Actief schema:</div>
+                    <div className="text-white font-semibold text-sm sm:text-base truncate">
+                      {stats.training.schemaName}
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-2 mt-2 sm:mt-3">
-                  <span className="text-xl sm:text-2xl font-bold text-[#FFD700]">{stats?.training.weeklySessions || 0}</span>
-                  <span className="text-[#8BAE5A] text-sm sm:text-base">trainingen/week</span>
-                </div>
+                )}
+                
+                {/* Week progressie */}
+                {stats?.training.currentWeek && stats?.training.totalWeeks && (
+                  <div className="text-left">
+                    <div className="text-xs sm:text-sm text-[#8BAE5A] mb-1">Week:</div>
+                    <div className="text-white font-semibold text-sm sm:text-base">
+                      {stats.training.currentWeek}/{stats.training.totalWeeks}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Dagen deze week */}
+                {stats?.training.completedDaysThisWeek !== undefined && stats?.training.weeklySessions && (
+                  <div className="text-left">
+                    <div className="text-xs sm:text-sm text-[#8BAE5A] mb-1">Dagen deze week:</div>
+                    <div className="text-white font-semibold text-sm sm:text-base">
+                      {stats.training.completedDaysThisWeek}/{stats.training.weeklySessions}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Fallback voor oude data */}
+                {!stats?.training.schemaName && (
+                  <div>
+                    <div className="text-xs sm:text-sm text-[#8BAE5A] mb-1">Schema status:</div>
+                    <div className="text-white font-semibold text-sm sm:text-base">
+                      {stats?.training.hasActiveSchema ? 'Actief' : 'Geen schema'}
+                    </div>
+                  </div>
+                )}
+                
                 <div className="w-full h-2 bg-[#3A4D23]/40 rounded-full">
                   <div 
                     className="h-2 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] rounded-full transition-all duration-700" 
@@ -526,70 +575,147 @@ export default function Dashboard() {
             </Link>
 
             {/* Mind & Focus */}
-            <Link href="/dashboard/mind-en-focus" className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-4 sm:p-6 text-center transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#8BAE5A]/50 cursor-pointer block">
+            <Link href="/dashboard/mind-en-focus" className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-4 sm:p-6 text-left transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#8BAE5A]/50 cursor-pointer block">
               <div className="flex items-center justify-between mb-3 sm:mb-4">
                 <h3 className="text-lg sm:text-xl font-bold text-white">Mind & Focus</h3>
                 <BrainIcon className="w-6 h-6 text-[#8BAE5A]" />
               </div>
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-2xl sm:text-3xl font-bold text-[#FFD700]">{stats?.mindFocus.completedToday || 0}/{stats?.mindFocus.total || 0}</span>
-                <span className="text-[#8BAE5A] text-sm sm:text-base">volbracht</span>
-              </div>
-              <div className="w-full h-2 bg-[#3A4D23]/40 rounded-full">
-                <div 
-                  className="h-2 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] rounded-full transition-all duration-700" 
-                  style={{ width: `${stats?.mindFocus.progress || 0}%` }}
-                ></div>
-              </div>
-              <div className="text-xs text-gray-400 mt-2">
-                Meditatie & Focus
-              </div>
+              
+              {/* Geen profiel - Start intake */}
+              {!stats?.mindFocus.hasProfile && (
+                <div className="space-y-2 sm:space-y-3">
+                  <div className="text-left">
+                    <div className="text-xs sm:text-sm text-[#8BAE5A] mb-1">Status:</div>
+                    <div className="text-white font-semibold text-sm sm:text-base">Start intake</div>
+                  </div>
+                  <div className="text-xs text-gray-400">
+                    Maak je persoonlijke stress management profiel
+                  </div>
+                </div>
+              )}
+              
+              {/* Wel profiel - Toon persoonlijke doelen en stress level */}
+              {stats?.mindFocus.hasProfile && (
+                <div className="space-y-2 sm:space-y-3">
+                  {/* Stress level */}
+                  {stats.mindFocus.stressLevel !== undefined && (
+                    <div className="text-left">
+                      <div className="text-xs sm:text-sm text-[#8BAE5A] mb-1">Huidige stress:</div>
+                      <div className="text-white font-semibold text-sm sm:text-base">
+                        {stats.mindFocus.stressLevel}/10
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Persoonlijke doelen */}
+                  {stats.mindFocus.personalGoals && stats.mindFocus.personalGoals.length > 0 && (
+                    <div className="text-left">
+                      <div className="text-xs sm:text-sm text-[#8BAE5A] mb-1">Doelen:</div>
+                      <div className="text-white font-semibold text-sm sm:text-base">
+                        {stats.mindFocus.personalGoals.length} actief
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Streak */}
+                  {stats.mindFocus.currentStreak && stats.mindFocus.currentStreak > 0 && (
+                    <div className="text-left">
+                      <div className="text-xs sm:text-sm text-[#8BAE5A] mb-1">Streak:</div>
+                      <div className="text-white font-semibold text-sm sm:text-base">
+                        {stats.mindFocus.currentStreak} dagen
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Progress bar */}
+                  <div className="w-full h-2 bg-[#3A4D23]/40 rounded-full">
+                    <div 
+                      className="h-2 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] rounded-full transition-all duration-700" 
+                      style={{ width: `${stats?.mindFocus.progress || 0}%` }}
+                    ></div>
+                  </div>
+                  
+                  <div className="text-xs text-gray-400">
+                    Meditatie & Focus
+                  </div>
+                </div>
+              )}
             </Link>
 
             {/* Boekenkamer */}
-            <Link href="/dashboard/boekenkamer" className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-4 sm:p-6 text-center transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#8BAE5A]/50 cursor-pointer block">
+            <Link href="/dashboard/boekenkamer" className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-4 sm:p-6 text-left transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#8BAE5A]/50 cursor-pointer block">
               <div className="flex items-center justify-between mb-3 sm:mb-4">
                 <h3 className="text-lg sm:text-xl font-bold text-white">Boekenkamer</h3>
                 <BookOpenIcon className="w-6 h-6 text-[#8BAE5A]" />
               </div>
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-2xl sm:text-3xl font-bold text-[#FFD700]">{stats?.boekenkamer.completedToday || 0}/{stats?.boekenkamer.total || 0}</span>
-                <span className="text-[#8BAE5A] text-sm sm:text-base">volbracht</span>
-              </div>
-              <div className="w-full h-2 bg-[#3A4D23]/40 rounded-full">
-                <div 
-                  className="h-2 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] rounded-full transition-all duration-700" 
-                  style={{ width: `${stats?.boekenkamer.progress || 0}%` }}
-                ></div>
-              </div>
-              <div className="text-xs text-gray-400 mt-2">
-                Lezen & Kennis
+              
+              {/* Toon gelezen boeken vs totaal beschikbare boeken */}
+              <div className="space-y-2 sm:space-y-3">
+                <div className="text-left">
+                  <div className="text-xs sm:text-sm text-[#8BAE5A] mb-1">Boeken gelezen:</div>
+                  <div className="text-white font-semibold text-sm sm:text-base">
+                    {stats?.boekenkamer.readBooks || 0}/{stats?.boekenkamer.totalBooks || 0}
+                  </div>
+                </div>
+                
+                {/* Vandaag voltooid */}
+                {stats?.boekenkamer.completedToday && stats.boekenkamer.completedToday > 0 && (
+                  <div className="text-left">
+                    <div className="text-xs sm:text-sm text-[#8BAE5A] mb-1">Vandaag:</div>
+                    <div className="text-white font-semibold text-sm sm:text-base">
+                      {stats.boekenkamer.completedToday} voltooid
+                    </div>
+                  </div>
+                )}
+                
+                {/* Progress bar */}
+                <div className="w-full h-2 bg-[#3A4D23]/40 rounded-full">
+                  <div 
+                    className="h-2 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] rounded-full transition-all duration-700" 
+                    style={{ width: `${stats?.boekenkamer.progress || 0}%` }}
+                  ></div>
+                </div>
+                
+                <div className="text-xs text-gray-400">
+                  Lezen & Kennis
+                </div>
               </div>
             </Link>
 
             {/* Finance & Business */}
-            <Link href="/dashboard/finance-en-business" className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-4 sm:p-6 text-center transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#8BAE5A]/50 cursor-pointer block">
+            <Link href="/dashboard/finance-en-business" className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-4 sm:p-6 text-left transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#8BAE5A]/50 cursor-pointer block">
               <div className="flex items-center justify-between mb-3 sm:mb-4">
                 <h3 className="text-lg sm:text-xl font-bold text-white">Finance & Business</h3>
                 <CurrencyDollarIcon className="w-6 h-6 text-[#8BAE5A]" />
               </div>
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-2xl sm:text-3xl font-bold text-[#FFD700]">€{stats?.finance?.netWorth?.toLocaleString() || '0'}</span>
-                <span className="text-[#8BAE5A] text-sm sm:text-base">Netto Waarde</span>
-              </div>
-              <div className="w-full h-2 bg-[#3A4D23]/40 rounded-full">
-                <div 
-                  className="h-2 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] rounded-full transition-all duration-700" 
-                  style={{ width: `${stats?.finance?.progress || 0}%` }}
-                ></div>
-              </div>
-              <div className="text-xs text-gray-400 mt-2">
-                Financiële Groei
-              </div>
+              {stats?.finance?.hasProfile ? (
+                <>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-2xl sm:text-3xl font-bold text-[#FFD700]">€{stats?.finance?.netWorth?.toLocaleString() || '0'}</span>
+                    <span className="text-[#8BAE5A] text-sm sm:text-base">Netto Waarde</span>
+                  </div>
+                  <div className="w-full h-2 bg-[#3A4D23]/40 rounded-full">
+                    <div 
+                      className="h-2 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] rounded-full transition-all duration-700" 
+                      style={{ width: `${stats?.finance?.progress || 0}%` }}
+                    ></div>
+                  </div>
+                  <div className="text-xs text-gray-400 mt-2">
+                    Financiële Groei
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="text-left py-4">
+                    <div className="text-lg sm:text-xl font-bold text-[#8BAE5A] mb-2">Start Profiel</div>
+                    <div className="text-xs text-gray-400">Maak je financiële profiel aan</div>
+                  </div>
+                </>
+              )}
             </Link>
 
             {/* Brotherhood */}
-            <Link href="/dashboard/brotherhood" className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-4 sm:p-6 text-center transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#8BAE5A]/50 cursor-pointer block">
+            <Link href="/dashboard/brotherhood" className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-4 sm:p-6 text-left transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#8BAE5A]/50 cursor-pointer block">
               <div className="flex items-center justify-between mb-3 sm:mb-4">
                 <h3 className="text-lg sm:text-xl font-bold text-white">Brotherhood</h3>
                 <div className="w-6 h-6 bg-[#8BAE5A] rounded-full flex items-center justify-center">
@@ -612,25 +738,56 @@ export default function Dashboard() {
             </Link>
 
             {/* Academy */}
-            <Link href="/dashboard/academy" className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-4 sm:p-6 text-center transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#8BAE5A]/50 cursor-pointer block">
+            <Link href="/dashboard/academy" className={`border rounded-xl p-4 sm:p-6 text-left transition-transform duration-300 cursor-pointer block ${
+              stats?.academy?.completedCourses === stats?.academy?.totalCourses && (stats?.academy?.totalCourses || 0) > 0
+                ? 'bg-[#3A4D23] border-[#8BAE5A] shadow-2xl shadow-[#8BAE5A]/20 hover:scale-105 hover:shadow-[#8BAE5A]/40'
+                : 'bg-gradient-to-br from-[#181F17] to-[#232D1A] border-[#3A4D23]/30 hover:scale-105 hover:shadow-2xl hover:border-[#8BAE5A]/50'
+            }`}>
               <div className="flex items-center justify-between mb-3 sm:mb-4">
                 <h3 className="text-lg sm:text-xl font-bold text-white">Academy</h3>
-                <div className="w-6 h-6 bg-[#8BAE5A] rounded-full flex items-center justify-center">
+                <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                  stats?.academy?.completedCourses === stats?.academy?.totalCourses && (stats?.academy?.totalCourses || 0) > 0
+                    ? 'bg-[#FFD700]'
+                    : 'bg-[#8BAE5A]'
+                }`}>
                   <span className="text-white text-xs font-bold">A</span>
                 </div>
               </div>
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-2xl sm:text-3xl font-bold text-[#FFD700]">{stats?.academy?.completedCourses || 0}/{stats?.academy?.totalCourses || 0}</span>
-                <span className="text-[#8BAE5A] text-sm sm:text-base">cursussen</span>
+                <span className={`text-2xl sm:text-3xl font-bold ${
+                  stats?.academy?.completedCourses === stats?.academy?.totalCourses && (stats?.academy?.totalCourses || 0) > 0
+                    ? 'text-[#FFD700]'
+                    : 'text-[#FFD700]'
+                }`}>
+                  {stats?.academy?.completedCourses || 0}/{stats?.academy?.totalCourses || 0}
+                </span>
+                <span className={`text-sm sm:text-base ${
+                  stats?.academy?.completedCourses === stats?.academy?.totalCourses && (stats?.academy?.totalCourses || 0) > 0
+                    ? 'text-[#FFD700] font-bold'
+                    : 'text-[#8BAE5A]'
+                }`}>
+                  {stats?.academy?.completedCourses === stats?.academy?.totalCourses && (stats?.academy?.totalCourses || 0) > 0 ? 'VOLBRACHT!' : 'cursussen'}
+                </span>
               </div>
               <div className="w-full h-2 bg-[#3A4D23]/40 rounded-full">
                 <div 
-                  className="h-2 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] rounded-full transition-all duration-700" 
+                  className={`h-2 rounded-full transition-all duration-700 ${
+                    stats?.academy?.completedCourses === stats?.academy?.totalCourses && (stats?.academy?.totalCourses || 0) > 0
+                      ? 'bg-gradient-to-r from-[#FFD700] to-[#f0a14f]'
+                      : 'bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f]'
+                  }`}
                   style={{ width: `${stats?.academy?.progress || 0}%` }}
                 ></div>
               </div>
-              <div className="text-xs text-gray-400 mt-2">
-                Kennis & Vaardigheden
+              <div className={`text-xs mt-2 ${
+                stats?.academy?.completedCourses === stats?.academy?.totalCourses && (stats?.academy?.totalCourses || 0) > 0
+                  ? 'text-[#FFD700] font-semibold'
+                  : 'text-gray-400'
+              }`}>
+                {stats?.academy?.completedCourses === stats?.academy?.totalCourses && (stats?.academy?.totalCourses || 0) > 0 
+                  ? '🎉 Academy voltooid!' 
+                  : 'Kennis & Vaardigheden'
+                }
               </div>
             </Link>
           </div>

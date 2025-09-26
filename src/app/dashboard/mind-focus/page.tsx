@@ -727,16 +727,16 @@ export default function MindFocusPage() {
           className="bg-[#1A2A1A] rounded-xl shadow-2xl border border-[#2A3A1A] overflow-hidden"
         >
           {/* Header */}
-          <div className="bg-gradient-to-r from-[#2A3A1A] to-[#3A4A2A] px-12 py-12 text-center">
-            <div className="flex justify-center mb-6">
-              <div className="p-6 bg-[#B6C948]/20 rounded-2xl">
-                <CpuChipIcon className="w-16 h-16 text-[#B6C948]" />
+          <div className="bg-gradient-to-r from-[#2A3A1A] to-[#3A4A2A] px-4 sm:px-8 lg:px-12 py-6 sm:py-8 lg:py-12 text-center">
+            <div className="flex justify-center mb-3 sm:mb-4 lg:mb-6">
+              <div className="p-3 sm:p-4 lg:p-6 bg-[#B6C948]/20 rounded-xl sm:rounded-2xl">
+                <CpuChipIcon className="w-8 h-8 sm:w-12 sm:h-12 lg:w-16 lg:h-16 text-[#B6C948]" />
               </div>
             </div>
-            <h1 className="text-5xl font-bold text-[#B6C948] mb-4">
+            <h1 className="text-2xl sm:text-3xl lg:text-5xl font-bold text-[#B6C948] mb-2 sm:mb-3 lg:mb-4">
               🧠 Mind & Focus
             </h1>
-            <p className="text-[#8BAE5A] text-xl max-w-2xl mx-auto">
+            <p className="text-[#8BAE5A] text-sm sm:text-base lg:text-xl max-w-2xl mx-auto">
               Jouw persoonlijke stress management en focus training hub
             </p>
           </div>
@@ -746,8 +746,8 @@ export default function MindFocusPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12 mb-8 sm:mb-12">
               {/* Wat is Mind & Focus */}
               <div>
-                <h2 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6 flex items-center">
-                  <FireIcon className="w-6 h-6 sm:w-8 sm:h-8 text-[#B6C948] mr-2 sm:mr-3" />
+                <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-white mb-3 sm:mb-4 lg:mb-6 flex items-center">
+                  <FireIcon className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-[#B6C948] mr-2 sm:mr-3" />
                   Wat is Mind & Focus?
                 </h2>
                 <div className="space-y-4 text-[#8BAE5A]">
@@ -764,8 +764,8 @@ export default function MindFocusPage() {
 
               {/* Wat krijg je */}
               <div>
-                <h2 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6 flex items-center">
-                  <TagIcon className="w-6 h-6 sm:w-8 sm:h-8 text-[#B6C948] mr-2 sm:mr-3" />
+                <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-white mb-3 sm:mb-4 lg:mb-6 flex items-center">
+                  <TagIcon className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-[#B6C948] mr-2 sm:mr-3" />
                   Wat krijg je?
                 </h2>
                 <div className="space-y-4">
@@ -804,32 +804,32 @@ export default function MindFocusPage() {
 
             {/* Hoe werkt het */}
             <div className="mb-12">
-              <h2 className="text-xl sm:text-2xl font-bold text-white mb-6 sm:mb-8 text-center">
+              <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-white mb-4 sm:mb-6 lg:mb-8 text-center">
                 Hoe werkt het?
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-[#B6C948]/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <span className="text-2xl font-bold text-[#B6C948]">1</span>
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-[#B6C948]/20 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                    <span className="text-lg sm:text-xl lg:text-2xl font-bold text-[#B6C948]">1</span>
                   </div>
-                  <h3 className="text-lg font-semibold text-white mb-2">Intake</h3>
-                  <p className="text-[#8BAE5A] text-sm">Vul een korte intake in over je stress levels en levensstijl</p>
+                  <h3 className="text-base sm:text-lg font-semibold text-white mb-2">Intake</h3>
+                  <p className="text-[#8BAE5A] text-xs sm:text-sm">Vul een korte intake in over je stress levels en levensstijl</p>
                 </div>
                 
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-[#B6C948]/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <span className="text-2xl font-bold text-[#B6C948]">2</span>
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-[#B6C948]/20 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                    <span className="text-lg sm:text-xl lg:text-2xl font-bold text-[#B6C948]">2</span>
                   </div>
-                  <h3 className="text-lg font-semibold text-white mb-2">Plan</h3>
-                  <p className="text-[#8BAE5A] text-sm">Krijg een op maat gemaakt plan met meditatie sessies</p>
+                  <h3 className="text-base sm:text-lg font-semibold text-white mb-2">Plan</h3>
+                  <p className="text-[#8BAE5A] text-xs sm:text-sm">Krijg een op maat gemaakt plan met meditatie sessies</p>
                 </div>
                 
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-[#B6C948]/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <span className="text-2xl font-bold text-[#B6C948]">3</span>
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-[#B6C948]/20 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                    <span className="text-lg sm:text-xl lg:text-2xl font-bold text-[#B6C948]">3</span>
                   </div>
-                  <h3 className="text-lg font-semibold text-white mb-2">Train</h3>
-                  <p className="text-[#8BAE5A] text-sm">Start met je dagelijkse routine en track je progress</p>
+                  <h3 className="text-base sm:text-lg font-semibold text-white mb-2">Train</h3>
+                  <p className="text-[#8BAE5A] text-xs sm:text-sm">Start met je dagelijkse routine en track je progress</p>
                 </div>
               </div>
             </div>
@@ -1311,8 +1311,8 @@ export default function MindFocusPage() {
         <div className="bg-gradient-to-r from-[#2A3A1A] to-[#3A4A2A] rounded-xl p-4 sm:p-6 lg:p-8 text-[#B6C948] mb-4 sm:mb-6 lg:mb-8">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-1 sm:mb-2">🧠 Mind & Focus Dashboard</h1>
-              <p className="text-[#8BAE5A] text-sm sm:text-base">Jouw persoonlijke stress management hub</p>
+              <h1 className="text-lg sm:text-xl lg:text-2xl font-bold mb-1 sm:mb-2">🧠 Mind & Focus Dashboard</h1>
+              <p className="text-[#8BAE5A] text-xs sm:text-sm">Jouw persoonlijke stress management hub</p>
             </div>
             <div className="text-left sm:text-right">
               <div className="text-xl sm:text-2xl font-bold">
@@ -1330,44 +1330,44 @@ export default function MindFocusPage() {
         {/* Quick Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-4 sm:mb-6 lg:mb-8">
           <div className="bg-[#1A2A1A] rounded-xl shadow-2xl border border-[#2A3A1A] p-3 sm:p-4 lg:p-6">
-            <div className="text-2xl sm:text-3xl font-bold text-white mb-1 sm:mb-2">
+            <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-1 sm:mb-2">
               {isLoadingDashboardData ? (
-                <div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-[#B6C948]"></div>
+                <div className="animate-spin rounded-full h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 border-b-2 border-[#B6C948]"></div>
               ) : (
                 dashboardData?.sessionsThisWeek || 0
               )}
             </div>
-            <div className="text-[#8BAE5A] text-sm sm:text-base">Sessies deze week</div>
+            <div className="text-[#8BAE5A] text-xs sm:text-sm">Sessies deze week</div>
           </div>
           <div className="bg-[#1A2A1A] rounded-xl shadow-2xl border border-[#2A3A1A] p-3 sm:p-4 lg:p-6">
-            <div className="text-2xl sm:text-3xl font-bold text-white mb-1 sm:mb-2">
+            <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-1 sm:mb-2">
               {isLoadingDashboardData ? (
-                <div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-[#B6C948]"></div>
+                <div className="animate-spin rounded-full h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 border-b-2 border-[#B6C948]"></div>
               ) : (
                 dashboardData?.currentStressLevel || currentStressLevel
               )}
             </div>
-            <div className="text-[#8BAE5A] text-sm sm:text-base">Huidige stress level</div>
+            <div className="text-[#8BAE5A] text-xs sm:text-sm">Huidige stress level</div>
           </div>
           <div className="bg-[#1A2A1A] rounded-xl shadow-2xl border border-[#2A3A1A] p-3 sm:p-4 lg:p-6">
-            <div className="text-2xl sm:text-3xl font-bold text-white mb-1 sm:mb-2">
+            <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-1 sm:mb-2">
               {isLoadingDashboardData ? (
-                <div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-[#B6C948]"></div>
+                <div className="animate-spin rounded-full h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 border-b-2 border-[#B6C948]"></div>
               ) : (
                 dashboardData?.totalSessions || 0
               )}
             </div>
-            <div className="text-[#8BAE5A] text-sm sm:text-base">Totaal sessies</div>
+            <div className="text-[#8BAE5A] text-xs sm:text-sm">Totaal sessies</div>
           </div>
           <div className="bg-[#1A2A1A] rounded-xl shadow-2xl border border-[#2A3A1A] p-3 sm:p-4 lg:p-6">
-            <div className="text-2xl sm:text-3xl font-bold text-white mb-1 sm:mb-2">
+            <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-1 sm:mb-2">
               {isLoadingDashboardData ? (
-                <div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-[#B6C948]"></div>
+                <div className="animate-spin rounded-full h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 border-b-2 border-[#B6C948]"></div>
               ) : (
                 `${dashboardData?.focusImprovement || 0}%`
               )}
             </div>
-            <div className="text-[#8BAE5A] text-sm sm:text-base">Focus verbetering</div>
+            <div className="text-[#8BAE5A] text-xs sm:text-sm">Focus verbetering</div>
           </div>
         </div>
 

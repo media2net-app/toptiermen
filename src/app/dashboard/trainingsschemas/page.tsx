@@ -1209,6 +1209,28 @@ function TrainingschemasContent() {
         return;
       }
       
+      // Clear localStorage training data when switching schemas
+      if (currentSchemaPeriod && currentSchemaPeriod.training_schema_id !== schemaId) {
+        console.log('🔄 Switching schemas, clearing localStorage training data...');
+        try {
+          // Clear all training-related localStorage items
+          const keysToRemove: string[] = [];
+          for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && (key.includes('completedWeeks_') || key.includes('training_') || key.includes('workout_'))) {
+              keysToRemove.push(key);
+            }
+          }
+          keysToRemove.forEach(key => localStorage.removeItem(key));
+          console.log('✅ localStorage training data cleared');
+        } catch (error) {
+          console.log('⚠️ Warning: Could not clear localStorage:', error);
+        }
+      }
+      
+      // Set selected schema immediately for instant UI feedback
+      setSelectedTrainingSchema(schemaId);
+      
       // Check if user.id is an email and convert to UUID if needed
       let actualUserId = user.id;
       if (user.id.includes('@')) {
@@ -1246,8 +1268,6 @@ function TrainingschemasContent() {
       console.log('📡 Schema selection API response:', { status: response.status, data });
       
       if (response.ok && data.success) {
-        setSelectedTrainingSchema(schemaId);
-        
         // Transform the API response to match the expected format
         const transformedData = {
           id: data.data.selected_schema_id,
@@ -1271,9 +1291,8 @@ function TrainingschemasContent() {
           // Only redirect to Mijn trainingen if NOT in onboarding
           if (isCompleted && !showOnboardingStep3) {
           console.log('🔄 Redirecting to Mijn trainingen...');
-          setTimeout(() => {
-            router.push('/dashboard/mijn-trainingen');
-          }, 1500); // Small delay to show the success message
+          // Direct redirect without delay
+          router.push('/dashboard/mijn-trainingen');
           } else {
             console.log('🎯 Onboarding active - NOT redirecting to Mijn trainingen');
         }
@@ -2656,20 +2675,20 @@ function TrainingschemasContent() {
                         <button
                           onClick={() => {
                             console.log('🔘 Select button clicked:', { schemaId: schema.id, isLocked, schemaName: schema.name });
-                            if (!isLocked && !(selectedTrainingSchema === schema.id && currentSchemaPeriod?.status === 'active')) {
+                            if (!isLocked && selectedTrainingSchema !== schema.id) {
                               selectTrainingSchema(schema.id);
                             }
                           }}
-                          disabled={isLocked || (selectedTrainingSchema === schema.id && currentSchemaPeriod?.status === 'active')}
+                          disabled={isLocked}
                           className={`flex-1 py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium transition-colors text-xs sm:text-sm ${
-                            isLocked || (selectedTrainingSchema === schema.id && currentSchemaPeriod?.status === 'active')
+                            isLocked
                               ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
                               : selectedTrainingSchema === schema.id
                               ? 'bg-[#8BAE5A] text-[#232D1A] shadow-lg shadow-[#8BAE5A]/20'
                               : 'bg-[#3A4D23] text-white hover:bg-[#4A5D33]'
                           }`}
                         >
-                          {isPlaceholder ? 'Binnenkort' : isLocked ? 'Vergrendeld' : selectedTrainingSchema === schema.id ? (currentSchemaPeriod?.status === 'active' ? 'Actief' : 'Geselecteerd') : 'Selecteer Schema'}
+                          {isPlaceholder ? 'Binnenkort' : isLocked ? 'Vergrendeld' : selectedTrainingSchema === schema.id ? 'Actief' : 'Selecteer Schema'}
                         </button>
                         <button
                           onClick={() => !isLocked && handlePrintSchema(schema.id)}
