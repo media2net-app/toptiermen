@@ -192,6 +192,66 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     };
   }, []);
 
+  // Session timeout handler - prevents users from getting stuck
+  useEffect(() => {
+    if (!user) return;
+
+    const checkSessionValidity = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.log('❌ Session validation error:', error.message);
+          setError('Session expired. Please log in again.');
+          setUser(null);
+          setProfile(null);
+          return;
+        }
+        
+        if (!session) {
+          console.log('❌ No valid session found');
+          setError('Session expired. Please log in again.');
+          setUser(null);
+          setProfile(null);
+          return;
+        }
+        
+        // Check if session is expired
+        const now = Math.floor(Date.now() / 1000);
+        const expiresAt = session.expires_at || 0;
+        
+        if (now >= expiresAt) {
+          console.log('❌ Session expired');
+          setError('Session expired. Please log in again.');
+          setUser(null);
+          setProfile(null);
+          // Clear the expired session
+          await supabase.auth.signOut();
+        }
+      } catch (error) {
+        console.error('❌ Session check error:', error);
+        setError('Session validation failed. Please refresh the page.');
+      }
+    };
+
+    // Check session validity every 5 minutes
+    const sessionCheckInterval = setInterval(checkSessionValidity, 5 * 60 * 1000);
+    
+    // Also check on page visibility change (when user comes back to tab)
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        checkSessionValidity();
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      clearInterval(sessionCheckInterval);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [user]);
+
   // Helper function to log login attempts
   const logLoginAttempt = async (email: string, success: boolean, errorMessage?: string, userId?: string) => {
     try {

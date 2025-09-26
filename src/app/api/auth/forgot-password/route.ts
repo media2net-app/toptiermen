@@ -50,7 +50,8 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    // First, check if user exists in profiles table
+    // Step 1: Check if user exists in profiles table
+    console.log('🔍 Step 1: Checking profiles table...');
     const { data: profile, error: profileError } = await supabaseAdmin
       .from('profiles')
       .select('id, email, full_name, display_name, package_type')
@@ -58,16 +59,17 @@ export async function POST(request: NextRequest) {
       .single();
         
     if (profileError || !profile) {
-      console.log('❌ User not found in profiles');
+      console.log('❌ User not found in profiles:', profileError);
       return NextResponse.json({
         success: false,
         error: 'Geen account gevonden met dit e-mailadres'
       }, { status: 404 });
     }
     
-    console.log('✅ User found in profiles:', profile.email);
+    console.log('✅ Step 1: User found in profiles:', profile.email);
 
-    // Now check if user exists in auth
+    // Step 2: Check if user exists in auth
+    console.log('🔍 Step 2: Checking auth users...');
     const { data: authUsers, error: listError } = await supabaseAdmin.auth.admin.listUsers();
     
     if (listError) {
@@ -79,85 +81,45 @@ export async function POST(request: NextRequest) {
     }
 
     let user = authUsers.users.find(u => u.email === email);
+    console.log('🔍 Step 2: Found user in auth:', !!user);
     
-    // If user doesn't exist in auth, try to find them first
+    // If user doesn't exist in auth, create one
     if (!user) {
-      console.log('🔍 User not found in auth, trying to find existing user...');
+      console.log('🔍 Step 2: User not found in auth, creating new auth account...');
       
-      // Try multiple times to find the user (sometimes users exist but aren't immediately visible)
-      for (let attempt = 1; attempt <= 3; attempt++) {
-        console.log(`🔄 Attempt ${attempt} to find user in auth...`);
-        
-        const { data: retryAuthUsers, error: retryError } = await supabaseAdmin.auth.admin.listUsers();
-        
-        if (!retryError && retryAuthUsers) {
-          const foundUser = retryAuthUsers.users.find((u: any) => u.email === email);
-          if (foundUser) {
-            console.log(`✅ Found user on attempt ${attempt}:`, foundUser.id);
-            user = foundUser;
-            break;
-          }
+      const tempPassword = generateTempPassword();
+      const { data: newAuthUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
+        email: email,
+        password: tempPassword,
+        email_confirm: true,
+        user_metadata: {
+          full_name: profile.full_name || profile.display_name,
+          admin_created: true
         }
-        
-        // Wait before retry
-        if (attempt < 3) {
-          await new Promise(resolve => setTimeout(resolve, 1000));
-        }
-      }
+      });
       
-      // If still not found, try to create a new auth account
-      if (!user) {
-        console.log('🔍 User still not found, creating new auth account...');
-        
-        const tempPassword = generateTempPassword();
-        const { data: newAuthUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
-          email: email,
-          password: tempPassword,
-          email_confirm: true,
-          user_metadata: {
-            full_name: profile.full_name || profile.display_name,
-            admin_created: true
-          }
-        });
-        
-        if (createError) {
-          console.error('❌ Error creating auth account:', createError);
-          
-          // If user already exists but not visible, this is a sync issue
-          if (createError.message.includes('already been registered') || createError.message.includes('email_exists')) {
-            console.log('🔄 User exists but has sync issues, trying one more time...');
-            
-            // One final attempt to find the user
-            const { data: finalAuthUsers, error: finalError } = await supabaseAdmin.auth.admin.listUsers();
-            
-            if (!finalError && finalAuthUsers) {
-              const foundUser = finalAuthUsers.users.find((u: any) => u.email === email);
-              if (foundUser) {
-                console.log(`✅ Found user on final attempt:`, foundUser.id);
-                user = foundUser;
-              }
-            }
-          }
-          
-          if (!user) {
-            console.error('❌ Could not find or create auth user after all attempts');
-            return NextResponse.json({
-              success: false,
-              error: 'Account bestaat maar er is een technisch probleem. Neem contact op met de beheerder.'
-            }, { status: 500 });
-          }
-        } else {
-          user = newAuthUser.user;
-          console.log('✅ Auth account created for:', email);
-        }
+      if (createError) {
+        console.error('❌ Error creating auth account:', createError);
+        return NextResponse.json({
+          success: false,
+          error: 'Account bestaat maar er is een technisch probleem. Neem contact op met de beheerder.',
+          errorDetails: createError.message
+        }, { status: 500 });
+      } else {
+        user = newAuthUser.user;
+        console.log('✅ Step 2: Auth account created for:', email);
       }
+    } else {
+      console.log('✅ Step 2: User found in auth:', user.id);
     }
 
-    // Generate new temporary password
+    // Step 3: Generate new temporary password
+    console.log('🔍 Step 3: Generating new password...');
     const newTempPassword = generateTempPassword();
+    console.log('✅ Step 3: Generated password:', newTempPassword);
     
-    // Update user password in Supabase Auth
-    console.log(`🔄 Updating password for user ${user.id} with password: ${newTempPassword} (length: ${newTempPassword.length})`);
+    // Step 4: Update user password in Supabase Auth
+    console.log('🔍 Step 4: Updating password for user:', user.id);
     
     const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
       user.id,
@@ -168,18 +130,16 @@ export async function POST(request: NextRequest) {
       console.error('❌ Error updating user password:', updateError);
       return NextResponse.json({
         success: false,
-        error: 'Fout bij het resetten van wachtwoord'
+        error: 'Fout bij het resetten van wachtwoord',
+        errorDetails: updateError.message
       }, { status: 500 });
     }
     
-    console.log(`✅ Password successfully updated for user ${user.id}`);
-
-    console.log('✅ Password reset completed successfully for:', email);
-    console.log(`🔑 New password: ${newTempPassword}`);
+    console.log('✅ Step 4: Password successfully updated for user:', user.id);
     
-    // Send password reset email via Mailgun
+    // Step 5: Send password reset email via Mailgun
+    console.log('🔍 Step 5: Sending password reset email...');
     try {
-      console.log('📧 Sending password reset email via Mailgun...');
       const emailService = new EmailService();
       
       const success = await emailService.sendEmail(
@@ -201,23 +161,45 @@ export async function POST(request: NextRequest) {
       );
 
       if (success) {
-        console.log('✅ Password reset email sent successfully to:', email);
+        console.log('✅ Step 5: Password reset email sent successfully to:', email);
         return NextResponse.json({
           success: true,
-          message: 'Nieuw wachtwoord is gegenereerd en naar je e-mailadres gestuurd. Controleer je inbox (en spam folder).'
+          message: 'Nieuw wachtwoord is gegenereerd en naar je e-mailadres gestuurd. Controleer je inbox (en spam folder).',
+          steps: {
+            profiles_check: '✅ User found in profiles',
+            auth_check: '✅ User found/created in auth',
+            password_generation: '✅ Password generated',
+            password_update: '✅ Password updated',
+            email_sending: '✅ Email sent successfully'
+          }
         });
       } else {
-        console.error('❌ Failed to send password reset email');
+        console.error('❌ Step 5: Failed to send password reset email');
         return NextResponse.json({
           success: false,
-          error: 'Wachtwoord is gereset maar e-mail kon niet worden verzonden. Neem contact op met de beheerder.'
+          error: 'Wachtwoord is gereset maar e-mail kon niet worden verzonden. Neem contact op met de beheerder.',
+          steps: {
+            profiles_check: '✅ User found in profiles',
+            auth_check: '✅ User found/created in auth',
+            password_generation: '✅ Password generated',
+            password_update: '✅ Password updated',
+            email_sending: '❌ Email sending failed'
+          }
         }, { status: 500 });
       }
     } catch (emailError) {
-      console.error('❌ Error sending password reset email:', emailError);
+      console.error('❌ Step 5: Error sending password reset email:', emailError);
       return NextResponse.json({
         success: false,
-        error: 'Wachtwoord is gereset maar e-mail kon niet worden verzonden. Neem contact op met de beheerder.'
+        error: 'Wachtwoord is gereset maar e-mail kon niet worden verzonden. Neem contact op met de beheerder.',
+        errorDetails: emailError.message,
+        steps: {
+          profiles_check: '✅ User found in profiles',
+          auth_check: '✅ User found/created in auth',
+          password_generation: '✅ Password generated',
+          password_update: '✅ Password updated',
+          email_sending: '❌ Email error occurred'
+        }
       }, { status: 500 });
     }
 

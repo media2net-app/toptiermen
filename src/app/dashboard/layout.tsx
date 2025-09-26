@@ -9,6 +9,8 @@ import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 // import { useV2Cache } from '@/lib/v2-cache-strategy';
 import { DebugProvider } from '@/contexts/DebugContext';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { SessionRecovery } from '@/components/SessionRecovery';
+import { SessionTimeoutWarning } from '@/components/SessionTimeoutWarning';
 import DashboardContent from './DashboardContent';
 
 // Force dynamic rendering to prevent navigator errors
@@ -150,9 +152,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <ErrorBoundary>
       <DebugProvider>
-        <DashboardContent>
-          {children}
-        </DashboardContent>
+        <SessionRecovery>
+          <SessionTimeoutWarning timeoutMinutes={30} warningMinutes={5} />
+          <DashboardContent>
+            {children}
+          </DashboardContent>
+        </SessionRecovery>
       </DebugProvider>
     </ErrorBoundary>
   );

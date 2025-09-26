@@ -15,5 +15,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     flowType: 'pkce', // Use PKCE flow for better security and session management
     storage: typeof window !== 'undefined' ? window.localStorage : undefined, // Explicitly use localStorage
     storageKey: 'sb-toptiermen-auth-token', // Custom storage key
+    // Enhanced session management
+    debug: process.env.NODE_ENV === 'development'
   }
 });
