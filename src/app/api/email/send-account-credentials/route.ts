@@ -49,9 +49,33 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ Auth user found:', authUser.id);
 
-    // For now, we'll use a known password or generate a new one
-    // Since we can't retrieve the actual password from Supabase auth, we'll generate a new one
-    const tempPassword = 'Lemicky2025!';
+    // Generate a secure random password
+    function generateTempPassword(): string {
+      const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      const lowercase = 'abcdefghijklmnopqrstuvwxyz';
+      const numbers = '0123456789';
+      const symbols = '!@#$%^&*()_+-=[]{}|;:,.<>?';
+      
+      let password = '';
+      
+      // Ensure at least one character from each category
+      password += uppercase[Math.floor(Math.random() * uppercase.length)];
+      password += lowercase[Math.floor(Math.random() * lowercase.length)];
+      password += numbers[Math.floor(Math.random() * numbers.length)];
+      password += symbols[Math.floor(Math.random() * symbols.length)];
+      
+      // Fill the rest with random characters
+      const allChars = uppercase + lowercase + numbers + symbols;
+      for (let i = 4; i < 12; i++) {
+        password += allChars[Math.floor(Math.random() * allChars.length)];
+      }
+      
+      // Shuffle the password
+      return password.split('').sort(() => Math.random() - 0.5).join('');
+    }
+    
+    const tempPassword = generateTempPassword();
+    console.log('🔐 Generated random password:', tempPassword);
     
     // Update the user's password in auth to ensure synchronization
     try {
