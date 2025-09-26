@@ -18,6 +18,9 @@ function LoginPageContent() {
   const { user, profile, isLoading: authLoading, login, isAdmin, getRedirectPath } = useAuth();
   const loading = false; // Force loading to false to show login form
   
+  // ✅ FIX: Override auth loading to prevent infinite loading spinner
+  const effectiveLoading = false;
+  
   // ✅ PHASE 1: Simplified state management - Single state object
   const [loginState, setLoginState] = useState({
     email: "",

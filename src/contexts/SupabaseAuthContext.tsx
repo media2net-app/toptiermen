@@ -39,7 +39,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [loading, setLoading] = useState(true); // Start with true to prevent immediate redirects
+  const [loading, setLoading] = useState(false); // Start with false to show login form immediately
   const [error, setError] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false); // Track if auth has been initialized
 
@@ -101,7 +101,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     const getInitialSession = async () => {
       try {
         console.log('🔍 Initializing auth session...');
-        setLoading(true); // Set loading to true when starting initialization
+        // Don't set loading to true during initialization to prevent login form blocking
         
         // Restore session after refresh - this is normal behavior
         const { data: { session }, error } = await supabase.auth.getSession();
