@@ -328,38 +328,56 @@ export default function MijnChallengesPage() {
   const addSuggestedChallenge = async (suggestedChallenge: SuggestedChallenge) => {
     if (!user?.id) return;
 
-    const newChallenge = {
-      title: suggestedChallenge.title,
-      type: 'Dagelijks',
-      category: suggestedChallenge.category,
-      icon: suggestedChallenge.icon,
-      xp_reward: suggestedChallenge.xp_reward
-    };
-
     try {
-      const response = await fetch('/api/missions-simple', {
+      // First, create a new challenge in the challenges table
+      const createChallengeResponse = await fetch('/api/challenges', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          userId: user.id,
-          action: 'create',
-          mission: newChallenge
-        }),
+          title: suggestedChallenge.title,
+          description: suggestedChallenge.description,
+          category_slug: suggestedChallenge.category.toLowerCase(),
+          difficulty_level: suggestedChallenge.difficulty,
+          duration_days: 30,
+          xp_reward: suggestedChallenge.xp_reward,
+          status: 'active'
+        })
       });
 
-      if (response.ok) {
+      if (!createChallengeResponse.ok) {
+        throw new Error('Failed to create challenge');
+      }
+
+      const challengeData = await createChallengeResponse.json();
+      const challengeId = challengeData.challenge.id;
+
+      // Then add it to user challenges
+      const addToUserResponse = await fetch('/api/user-challenges/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user.id,
+          challengeId: challengeId
+        })
+      });
+
+      if (!addToUserResponse.ok) {
+        throw new Error('Failed to add challenge to user');
+      }
+
+      const data = await addToUserResponse.json();
+
+      if (data.success) {
         // Reload challenges to show the new one
         const updatedResponse = await fetch(`/api/user-challenges?userId=${user.id}`);
         if (updatedResponse.ok) {
-          const data = await updatedResponse.json();
-          const updatedChallenges = data.challenges.map((challenge: any) => ({
+          const updatedData = await updatedResponse.json();
+          const updatedChallenges = updatedData.challenges.map((challenge: any) => ({
             ...challenge,
             done: challenge.done || isChallengeCompletedToday(challenge.last_completion_date)
           }));
           setChallenges(updatedChallenges);
-          setSummary(data.summary);
+          setSummary(updatedData.summary);
         }
         
         toast.success(`Challenge "${suggestedChallenge.title}" toegevoegd!`);
@@ -370,11 +388,9 @@ export default function MijnChallengesPage() {
           setShowContinueButton(true);
           toast.success('Perfect! Je hebt 3 challenges toegevoegd. Klik op "Ga verder" om door te gaan.');
         }
-      } else {
-        throw new Error('Failed to add mission');
       }
     } catch (error) {
-      console.error('Error adding suggested mission:', error);
+      console.error('Error adding suggested challenge:', error);
       toast.error('Er is een fout opgetreden bij het toevoegen van de challenge.');
     }
   };
