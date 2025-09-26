@@ -177,11 +177,49 @@ export async function POST(request: NextRequest) {
     console.log('✅ Password reset completed successfully for:', email);
     console.log(`🔑 New password: ${newTempPassword}`);
     
-    return NextResponse.json({
-      success: true,
-      message: 'Nieuw wachtwoord is gegenereerd. Neem contact op met de beheerder voor het nieuwe wachtwoord.',
-      password: newTempPassword // Only for testing - remove in production
-    });
+    // Send password reset email via Mailgun
+    try {
+      console.log('📧 Sending password reset email via Mailgun...');
+      const emailService = new EmailService();
+      
+      const success = await emailService.sendEmail(
+        email,
+        '🔐 Je Nieuwe Top Tier Men Wachtwoord - Wachtwoord Reset',
+        'password-reset',
+        {
+          name: profile.full_name || profile.display_name || 'Gebruiker',
+          email: email,
+          tempPassword: newTempPassword,
+          platformUrl: 'https://platform.toptiermen.eu',
+          loginUrl: 'https://platform.toptiermen.eu/login',
+          packageType: profile.package_type || 'Premium Tier',
+          supportEmail: 'support@toptiermen.eu'
+        },
+        {
+          tracking: true
+        }
+      );
+
+      if (success) {
+        console.log('✅ Password reset email sent successfully to:', email);
+        return NextResponse.json({
+          success: true,
+          message: 'Nieuw wachtwoord is gegenereerd en naar je e-mailadres gestuurd. Controleer je inbox (en spam folder).'
+        });
+      } else {
+        console.error('❌ Failed to send password reset email');
+        return NextResponse.json({
+          success: false,
+          error: 'Wachtwoord is gereset maar e-mail kon niet worden verzonden. Neem contact op met de beheerder.'
+        }, { status: 500 });
+      }
+    } catch (emailError) {
+      console.error('❌ Error sending password reset email:', emailError);
+      return NextResponse.json({
+        success: false,
+        error: 'Wachtwoord is gereset maar e-mail kon niet worden verzonden. Neem contact op met de beheerder.'
+      }, { status: 500 });
+    }
 
   } catch (error) {
     console.error('❌ Forgot password error:', error);
