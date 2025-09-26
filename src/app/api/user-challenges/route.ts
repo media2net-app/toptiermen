@@ -12,35 +12,73 @@ export async function GET(request: NextRequest) {
 
     console.log('📋 Fetching user challenges for user:', userId);
 
-    // Get user challenges with challenge details
-    const { data: userChallenges, error: challengesError } = await supabaseAdmin
-      .from('user_challenges')
-      .select(`
-        id,
-        challenge_id,
-        status,
-        progress_percentage,
-        current_streak,
-        start_date,
-        completion_date,
-        created_at,
-        updated_at,
-        challenges (
-          id,
-          title,
-          description,
-          xp_reward,
-          category,
-          difficulty,
-          duration_days
-        )
-      `)
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false });
+    // First try to get user challenges with challenge details
+    let userChallenges: any[] = [];
+    let challengesError: any = null;
 
+    try {
+      const { data, error } = await supabaseAdmin
+        .from('user_challenges')
+        .select(`
+          id,
+          challenge_id,
+          status,
+          progress_percentage,
+          current_streak,
+          start_date,
+          completion_date,
+          created_at,
+          updated_at,
+          challenges (
+            id,
+            title,
+            description,
+            xp_reward,
+            category,
+            difficulty,
+            duration_days
+          )
+        `)
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+
+      userChallenges = data || [];
+      challengesError = error;
+    } catch (err) {
+      console.log('⚠️ Challenges table join failed, trying fallback...');
+      challengesError = err;
+    }
+
+    // If the join failed, try without the challenges table
     if (challengesError) {
-      console.error('❌ Error fetching user challenges:', challengesError);
-      return NextResponse.json({ error: 'Failed to fetch challenges' }, { status: 500 });
+      console.log('🔄 Trying fallback approach without challenges table...');
+      try {
+        const { data: fallbackData, error: fallbackError } = await supabaseAdmin
+          .from('user_challenges')
+          .select(`
+            id,
+            challenge_id,
+            status,
+            progress_percentage,
+            current_streak,
+            start_date,
+            completion_date,
+            created_at,
+            updated_at
+          `)
+          .eq('user_id', userId)
+          .order('created_at', { ascending: false });
+
+        if (fallbackError) {
+          console.error('❌ Error fetching user challenges (fallback):', fallbackError);
+          return NextResponse.json({ error: 'Failed to fetch challenges' }, { status: 500 });
+        }
+
+        userChallenges = fallbackData || [];
+      } catch (fallbackErr) {
+        console.error('❌ Fallback also failed:', fallbackErr);
+        return NextResponse.json({ error: 'Failed to fetch challenges' }, { status: 500 });
+      }
     }
 
     // Process challenges data
@@ -52,11 +90,11 @@ export async function GET(request: NextRequest) {
       return {
         id: userChallenge.id,
         challenge_id: userChallenge.challenge_id,
-        title: challengeData?.title || 'Unknown Challenge',
-        description: challengeData?.description || '',
+        title: challengeData?.title || 'Daily Challenge',
+        description: challengeData?.description || 'Complete this challenge daily',
         category: challengeData?.category || 'General',
         difficulty: challengeData?.difficulty || 'medium',
-        xp_reward: challengeData?.xp_reward || 0,
+        xp_reward: challengeData?.xp_reward || 15,
         duration_days: challengeData?.duration_days || 30,
         status: userChallenge.status,
         progress_percentage: userChallenge.progress_percentage || 0,
