@@ -5,6 +5,9 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { EnvelopeIcon, LockClosedIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 
+// Force dynamic rendering to prevent BAILOUT_TO_CLIENT_SIDE_RENDERING
+export const dynamic = 'force-dynamic';
+
 // Simplified configuration
 const LOGIN_CONFIG = {
   redirectTimeout: 3000, // Reduced from 5000
@@ -91,8 +94,11 @@ function LoginPageContent() {
   // ✅ FIX: Removed isClient logic to prevent hydration mismatch
 
 
-  // ✅ FIXED: Single useEffect for logout status handling
+  // ✅ FIXED: Single useEffect for logout status handling - moved to client-side only
   useEffect(() => {
+    // Only run on client side
+    if (typeof window === 'undefined') return;
+    
     // Handle logout status with improved messaging
     const urlParams = new URLSearchParams(window.location.search);
     const logoutStatus = urlParams.get('logout');
@@ -101,22 +107,18 @@ function LoginPageContent() {
       // Show success message briefly
       console.log('✅ Logout successful, ready for new login');
       // Clean URL
-      if (typeof window !== 'undefined') {
-        const url = new URL(window.location.href);
-        url.searchParams.delete('logout');
-        url.searchParams.delete('t');
-        window.history.replaceState({}, '', url.toString());
-      }
+      const url = new URL(window.location.href);
+      url.searchParams.delete('logout');
+      url.searchParams.delete('t');
+      window.history.replaceState({}, '', url.toString());
     } else if (logoutStatus === 'error') {
       setLoginState(prev => ({ ...prev, error: 'Er is een fout opgetreden bij het uitloggen. Je sessie is gewist, probeer opnieuw in te loggen.' }));
       console.log('⚠️ Logout error occurred, but session should be cleared');
       // Clean URL
-      if (typeof window !== 'undefined') {
-        const url = new URL(window.location.href);
-        url.searchParams.delete('logout');
-        url.searchParams.delete('t');
-        window.history.replaceState({}, '', url.toString());
-      }
+      const url = new URL(window.location.href);
+      url.searchParams.delete('logout');
+      url.searchParams.delete('t');
+      window.history.replaceState({}, '', url.toString());
     }
   }, []);
 
@@ -145,9 +147,14 @@ function LoginPageContent() {
       // Determine redirect path - use fallback if getRedirectPath fails
       let targetPath = '/dashboard'; // Default fallback
       try {
-        const urlParams = new URLSearchParams(window.location.search);
-        const redirectTo = urlParams.get('redirect') || undefined;
-        targetPath = getRedirectPath(redirectTo);
+        // Only access window on client side
+        if (typeof window !== 'undefined') {
+          const urlParams = new URLSearchParams(window.location.search);
+          const redirectTo = urlParams.get('redirect') || undefined;
+          targetPath = getRedirectPath(redirectTo);
+        } else {
+          targetPath = getRedirectPath(undefined);
+        }
         console.log('🎯 Target path determined:', targetPath);
       } catch (error) {
         console.warn('⚠️ getRedirectPath failed, using fallback:', error);
