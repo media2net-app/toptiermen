@@ -285,8 +285,8 @@ export function OnboardingV2Provider({ children }: { children: React.ReactNode }
       loadOnboardingStatus();
     } else {
       console.log('🔍 No user, resetting onboarding states');
-      // Reset all states when user logs out
-      setIsLoading(false);
+      // CRITICAL: Keep loading true briefly during logout to prevent flash
+      setIsLoading(true);
       setIsCompleted(false);
       setCurrentStep(null);
       setAvailableSteps([]);
@@ -295,6 +295,12 @@ export function OnboardingV2Provider({ children }: { children: React.ReactNode }
       setHasNutritionAccess(false);
       setIsAdmin(false);
       setIsBasic(false);
+      
+      // Set loading to false after a brief delay to prevent onboarding flash
+      setTimeout(() => {
+        console.log('🏁 Logout complete, setting loading to false');
+        setIsLoading(false);
+      }, 200); // Small delay to prevent flash
     }
   }, [user?.email]);
 

@@ -173,7 +173,10 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
   // Get menu with conditional onboarding button - ENHANCED LOGIC
   // CRITICAL: Always pass loading state to prevent flash
   const onboardingCompleted = actualOnboardingStatus?.onboarding_completed ?? isCompleted;
-  const mobileMenu = getMenu(onboardingCompleted, isLoading);
+  // CRITICAL: During logout, always use loading state to prevent flash
+  const isLoggingOut = !user; // Check if user is null (logged out)
+  const effectiveLoading = isLoading || isLoggingOut;
+  const mobileMenu = getMenu(onboardingCompleted, effectiveLoading);
   
   console.log('🔍 MobileSidebarContent menu calculation:', {
     actualOnboardingStatus: actualOnboardingStatus?.onboarding_completed,
@@ -572,7 +575,10 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
   // Get menu with conditional onboarding button - ENHANCED LOGIC
   // CRITICAL: Always pass loading state to prevent flash
   const onboardingCompleted = actualOnboardingStatus?.onboarding_completed ?? isCompleted;
-  const menu = getMenu(onboardingCompleted, isLoading);
+  // CRITICAL: During logout, always use loading state to prevent flash
+  const isLoggingOutDesktop = !user; // Check if user is null (logged out)
+  const effectiveLoadingDesktop = isLoading || isLoggingOutDesktop;
+  const menu = getMenu(onboardingCompleted, effectiveLoadingDesktop);
   
   console.log('🔍 SidebarContent menu calculation:', {
     actualOnboardingStatus: actualOnboardingStatus?.onboarding_completed,
@@ -747,9 +753,11 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
 
   // Calculate menu once to avoid multiple calls
   // Use loading state to prevent flash during initial load
+  const isLoggingOutSidebar = !user; // Check if user is null (logged out)
+  const effectiveLoadingSidebar = isLoading || isLoggingOutSidebar;
   const sidebarMenu = getMenu(
-    isLoading ? undefined : (actualOnboardingStatus?.onboarding_completed || isCompleted), 
-    isLoading
+    effectiveLoadingSidebar ? undefined : (actualOnboardingStatus?.onboarding_completed || isCompleted), 
+    effectiveLoadingSidebar
   );
   
   return (
