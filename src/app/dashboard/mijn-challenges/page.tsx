@@ -611,22 +611,43 @@ export default function MijnChallengesPage() {
     if (!user?.id || !newChallenge.title.trim()) return;
 
     try {
-      const response = await fetch('/api/missions-simple', {
+      // First, create a new challenge in the challenges table
+      const createChallengeResponse = await fetch('/api/challenges', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          action: 'create',
-          userId: user.id,
           title: newChallenge.title,
-          type: newChallenge.type
+          description: `Persoonlijke challenge: ${newChallenge.title}`,
+          category_slug: 'personal',
+          difficulty_level: 'medium',
+          duration_days: 30,
+          xp_reward: 50,
+          status: 'active'
         })
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to create mission');
+      if (!createChallengeResponse.ok) {
+        throw new Error('Failed to create challenge');
       }
 
-      const data = await response.json();
+      const challengeData = await createChallengeResponse.json();
+      const challengeId = challengeData.challenge.id;
+
+      // Then add it to user challenges
+      const addToUserResponse = await fetch('/api/user-challenges/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user.id,
+          challengeId: challengeId
+        })
+      });
+
+      if (!addToUserResponse.ok) {
+        throw new Error('Failed to add challenge to user');
+      }
+
+      const data = await addToUserResponse.json();
 
       if (data.success) {
         // Reload challenges to get updated summary
@@ -651,7 +672,7 @@ export default function MijnChallengesPage() {
         }
       }
     } catch (err) {
-      console.error('Error creating mission:', err);
+      console.error('Error creating challenge:', err);
       toast.error('Fout bij het toevoegen van de challenge');
     }
   };
