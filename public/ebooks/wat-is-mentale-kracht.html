@@ -3,136 +3,184 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wat is Mentale Kracht? - Top Tier Men</title>
+    <title>Wat is Mentale Kracht? - Ebook | Top Tier Men</title>
+    <meta name="description" content="Uitgebreide gids over mentale kracht: praktische oefeningen, checklists en reflectie vragen voor persoonlijke groei.">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             line-height: 1.6;
-            color: #333;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #ffffff;
+            background: linear-gradient(135deg, #0A0F0A 0%, #181F17 50%, #232D1A 100%);
             min-height: 100vh;
         }
-        
+
         .container {
-            background: white;
-            border-radius: 15px;
-            padding: 40px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
         }
-        
+
         .header {
             text-align: center;
-            margin-bottom: 40px;
-            padding-bottom: 20px;
-            border-bottom: 3px solid #667eea;
+            margin-bottom: 3rem;
+            padding: 2rem;
+            background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+            border-radius: 20px;
+            border: 1px solid #3A4D23;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
-        
-        .header h1 {
-            color: #2c3e50;
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+
+        .logo {
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        
-        .header p {
-            color: #7f8c8d;
-            font-size: 1.2em;
-            font-style: italic;
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff 0%, #8BAE5A 50%, #B6C948 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            text-align: center;
         }
-        
+
+        .subtitle {
+            color: #8BAE5A;
+            font-size: 1.2rem;
+            font-weight: 500;
+            margin-bottom: 2rem;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 1px solid #8BAE5A;
+            margin-bottom: 2rem;
+        }
+
+        .back-button:hover {
+            background: linear-gradient(135deg, #4A5D33 0%, #5A6D43 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(139, 174, 90, 0.3);
+        }
+
         h2 {
-            color: #2c3e50;
-            border-left: 5px solid #667eea;
-            padding-left: 20px;
-            margin-top: 40px;
+            color: #8BAE5A;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 2.5rem 0 1.5rem 0;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #3A4D23;
             margin-bottom: 20px;
         }
         
         h3 {
-            color: #34495e;
-            margin-top: 30px;
-            margin-bottom: 15px;
+            color: #B6C948;
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin: 2rem 0 1rem 0;
         }
         
         h4 {
-            color: #667eea;
-            margin-top: 25px;
-            margin-bottom: 10px;
+            color: #8BAE5A;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 1.5rem 0 0.8rem 0;
         }
         
         .highlight-box {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 25px;
-            border-radius: 10px;
-            margin: 25px 0;
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+            background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+            color: #ffffff;
+            padding: 2rem;
+            border-radius: 15px;
+            margin: 2rem 0;
+            border: 1px solid #8BAE5A;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
         
         .highlight-box h3 {
-            color: white;
+            color: #B6C948;
             margin-top: 0;
         }
         
         .practical-tip {
-            background: #f8f9fa;
-            border-left: 4px solid #28a745;
-            padding: 20px;
-            margin: 20px 0;
-            border-radius: 0 10px 10px 0;
+            background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+            border-left: 4px solid #8BAE5A;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0 15px 15px 0;
+            border: 1px solid #3A4D23;
         }
         
         .practical-tip h4 {
-            color: #28a745;
+            color: #8BAE5A;
             margin-top: 0;
         }
         
         ul {
-            padding-left: 20px;
+            padding-left: 1.5rem;
         }
         
         li {
-            margin-bottom: 8px;
+            margin-bottom: 0.8rem;
+            color: #ffffff;
         }
         
         .example {
-            background: #e8f4fd;
-            border: 1px solid #bee5eb;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
+            background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+            border: 1px solid #3A4D23;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin: 1.5rem 0;
         }
         
         .example strong {
-            color: #0c5460;
+            color: #8BAE5A;
         }
         
         .conclusion {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            color: white;
-            padding: 30px;
-            border-radius: 15px;
-            margin-top: 40px;
+            background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+            color: #ffffff;
+            padding: 2.5rem;
+            border-radius: 20px;
+            margin-top: 2.5rem;
             text-align: center;
+            border: 1px solid #8BAE5A;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
         }
         
         .conclusion h2 {
-            color: white;
+            color: #B6C948;
             border: none;
             padding: 0;
             margin-top: 0;
         }
         
         strong {
-            color: #2c3e50;
+            color: #B6C948;
         }
         
         .step-number {
-            background: #667eea;
-            color: white;
+            background: #8BAE5A;
+            color: #ffffff;
             width: 30px;
             height: 30px;
             border-radius: 50%;
@@ -146,9 +194,18 @@
 </head>
 <body>
     <div class="container">
+        <a href="javascript:history.back()" class="back-button">
+            ← Terug naar Academy
+        </a>
+        
         <div class="header">
+            <div class="logo">
+                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M20 0L24.5 15.5L40 20L24.5 24.5L20 40L15.5 24.5L0 20L15.5 15.5L20 0Z" fill="#8BAE5A"/>
+                </svg>
+            </div>
             <h1>Wat is Mentale Kracht?</h1>
-            <p>De basis van een sterke mindset voor elke man</p>
+            <p class="subtitle">De basis van een sterke mindset voor elke man</p>
         </div>
 
         <div class="highlight-box">

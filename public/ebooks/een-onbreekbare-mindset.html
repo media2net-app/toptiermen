@@ -3,136 +3,183 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Een Onbreekbare Mindset - Top Tier Men</title>
+    <title>Een Onbreekbare Mindset - Ebook | Top Tier Men</title>
+    <meta name="description" content="Uitgebreide gids over een onbreekbare mindset: praktische oefeningen, checklists en reflectie vragen voor persoonlijke groei.">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             line-height: 1.6;
-            color: #333;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #ffffff;
+            background: linear-gradient(135deg, #0A0F0A 0%, #181F17 50%, #232D1A 100%);
             min-height: 100vh;
         }
-        
+
         .container {
-            background: white;
-            border-radius: 15px;
-            padding: 40px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
         }
-        
+
         .header {
             text-align: center;
-            margin-bottom: 40px;
-            padding-bottom: 20px;
-            border-bottom: 3px solid #667eea;
+            margin-bottom: 3rem;
+            padding: 2rem;
+            background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+            border-radius: 20px;
+            border: 1px solid #3A4D23;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
-        
-        .header h1 {
-            color: #2c3e50;
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+
+        .logo {
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        
-        .header p {
-            color: #7f8c8d;
-            font-size: 1.2em;
-            font-style: italic;
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff 0%, #8BAE5A 50%, #B6C948 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            text-align: center;
         }
-        
+
+        .subtitle {
+            color: #8BAE5A;
+            font-size: 1.2rem;
+            font-weight: 500;
+            margin-bottom: 2rem;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 1px solid #8BAE5A;
+            margin-bottom: 2rem;
+        }
+
+        .back-button:hover {
+            background: linear-gradient(135deg, #4A5D33 0%, #5A6D43 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(139, 174, 90, 0.3);
+        }
+
         h2 {
-            color: #2c3e50;
-            border-left: 5px solid #667eea;
-            padding-left: 20px;
-            margin-top: 40px;
-            margin-bottom: 20px;
+            color: #8BAE5A;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 2.5rem 0 1.5rem 0;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #3A4D23;
         }
         
         h3 {
-            color: #34495e;
-            margin-top: 30px;
-            margin-bottom: 15px;
+            color: #B6C948;
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin: 2rem 0 1rem 0;
         }
         
         h4 {
-            color: #667eea;
-            margin-top: 25px;
-            margin-bottom: 10px;
+            color: #8BAE5A;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 1.5rem 0 0.8rem 0;
         }
         
         .highlight-box {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 25px;
-            border-radius: 10px;
-            margin: 25px 0;
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+            background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+            color: #ffffff;
+            padding: 2rem;
+            border-radius: 15px;
+            margin: 2rem 0;
+            border: 1px solid #8BAE5A;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
         
         .highlight-box h3 {
-            color: white;
+            color: #B6C948;
             margin-top: 0;
         }
         
         .practical-tip {
-            background: #f8f9fa;
-            border-left: 4px solid #28a745;
-            padding: 20px;
-            margin: 20px 0;
-            border-radius: 0 10px 10px 0;
+            background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+            border-left: 4px solid #8BAE5A;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0 15px 15px 0;
+            border: 1px solid #3A4D23;
         }
         
         .practical-tip h4 {
-            color: #28a745;
+            color: #8BAE5A;
             margin-top: 0;
         }
         
         ul {
-            padding-left: 20px;
+            padding-left: 1.5rem;
         }
         
         li {
-            margin-bottom: 8px;
+            margin-bottom: 0.8rem;
+            color: #ffffff;
         }
         
         .example {
-            background: #e8f4fd;
-            border: 1px solid #bee5eb;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
+            background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+            border: 1px solid #3A4D23;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin: 1.5rem 0;
         }
         
         .example strong {
-            color: #0c5460;
+            color: #8BAE5A;
         }
         
         .conclusion {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            color: white;
-            padding: 30px;
-            border-radius: 15px;
-            margin-top: 40px;
+            background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+            color: #ffffff;
+            padding: 2.5rem;
+            border-radius: 20px;
+            margin-top: 2.5rem;
             text-align: center;
+            border: 1px solid #8BAE5A;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
         }
         
         .conclusion h2 {
-            color: white;
+            color: #B6C948;
             border: none;
             padding: 0;
             margin-top: 0;
         }
         
         strong {
-            color: #2c3e50;
+            color: #B6C948;
         }
         
         .step-number {
-            background: #667eea;
-            color: white;
+            background: #8BAE5A;
+            color: #ffffff;
             width: 30px;
             height: 30px;
             border-radius: 50%;
@@ -143,235 +190,131 @@
             margin-right: 10px;
         }
         
-        .warning-box {
-            background: #fff3cd;
-            border: 1px solid #ffeaa7;
-            padding: 20px;
-            border-radius: 8px;
-            margin: 20px 0;
+        .footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid #3A4D23;
+            color: #8BAE5A;
         }
         
-        .warning-box h4 {
-            color: #856404;
-            margin-top: 0;
+        .footer p {
+            margin: 0.8rem 0;
+        }
+        
+        .footer a {
+            color: #B6C948;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            h2 {
+                font-size: 1.5rem;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <a href="javascript:history.back()" class="back-button">
+            ← Terug naar Academy
+        </a>
+        
         <div class="header">
+            <div class="logo">
+                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M20 0L24.5 15.5L40 20L24.5 24.5L20 40L15.5 24.5L0 20L15.5 15.5L20 0Z" fill="#8BAE5A"/>
+                </svg>
+            </div>
             <h1>Een Onbreekbare Mindset</h1>
-            <p>Hoe je je hoofd sterk houdt, wat er ook gebeurt</p>
+            <p class="subtitle">Hoe je mentaal onverslaanbaar wordt</p>
         </div>
 
         <div class="highlight-box">
             <h3>🎯 Wat je gaat leren</h3>
-            <p>In dit ebook leer je hoe je een onbreekbare mindset opbouwt. Een mindset die niet breekt als het moeilijk wordt, die je helpt om door te gaan als anderen opgeven, en die je sterker maakt van elke tegenslag.</p>
+            <p>In dit ebook leer je hoe je een onbreekbare mindset ontwikkelt. Geen zweverige theorieën, maar concrete stappen die je meteen kunt toepassen om mentaal sterker te worden.</p>
         </div>
 
         <h2>Wat is een Onbreekbare Mindset?</h2>
-        <p>Een onbreekbare mindset betekent dat je hoofd niet breekt als het moeilijk wordt. Het betekent dat je kunt omgaan met problemen zonder in paniek te raken, dat je kunt leren van fouten zonder op te geven, en dat je sterker wordt van elke uitdaging.</p>
+        <p>Een onbreekbare mindset betekent dat je <strong>mentaal niet kapot te krijgen bent</strong>. Het betekent dat je doorzet, ook als alles tegenzit. Het betekent dat je problemen ziet als uitdagingen, niet als obstakels.</p>
 
         <div class="practical-tip">
-            <h4>💡 Denk aan een boom</h4>
-            <p>Een sterke boom buigt mee met de wind maar breekt niet. Een onbreekbare mindset werkt hetzelfde: je buigt mee met problemen maar je breekt niet. Je past je aan maar je geeft je principes niet op.</p>
+            <h4>💡 Praktisch voorbeeld</h4>
+            <p>Stel je voor: je bent aan het trainen en je spieren branden. Iemand met een onbreekbare mindset denkt: "Dit is waar groei gebeurt, ik word sterker." Iemand zonder deze mindset denkt: "Dit doet pijn, ik stop ermee."</p>
         </div>
 
-        <h2>Waarom is dit Belangrijk?</h2>
+        <h2>Waarom is een Onbreekbare Mindset Belangrijk?</h2>
         <p>Met een onbreekbare mindset kun je:</p>
         <ul>
-            <li><strong>Elke uitdaging aanpakken</strong> zonder bang te zijn</li>
-            <li><strong>Leren van elke fout</strong> in plaats van op te geven</li>
-            <li><strong>Anderen helpen</strong> als zij het moeilijk hebben</li>
             <li><strong>Doelen bereiken</strong> die anderen onmogelijk vinden</li>
-            <li><strong>Een voorbeeld zijn</strong> voor anderen</li>
+            <li><strong>Problemen oplossen</strong> zonder op te geven</li>
+            <li><strong>Stress hanteren</strong> zonder erdoor overweldigd te raken</li>
+            <li><strong>Falen gebruiken</strong> als springplank naar succes</li>
+            <li><strong>Anderen inspireren</strong> door je doorzettingsvermogen</li>
         </ul>
 
-        <h2>De 5 Bouwstenen van een Onbreekbare Mindset</h2>
+        <h2>Hoe Ontwikkel je een Onbreekbare Mindset?</h2>
         
-        <h3><span class="step-number">1</span>Optimisme</h3>
-        <p>Optimisme betekent dat je gelooft dat dingen goed kunnen uitpakken, ook als het nu moeilijk is. Het betekent niet dat je doet alsof alles perfect is, maar dat je gelooft in oplossingen.</p>
-        
+        <h3>1. Verander je Taal</h3>
+        <p>In plaats van "Ik kan dit niet" zeg je "Ik kan dit nog niet". In plaats van "Dit is te moeilijk" zeg je "Dit is een uitdaging die ik ga aangaan".</p>
+
         <div class="example">
-            <strong>Voorbeeld:</strong> Je verliest je baan. In plaats van te denken "mijn leven is voorbij", denk je "dit is een kans om iets beters te vinden".
+            <h4>Voorbeeld:</h4>
+            <p><strong>Oude mindset:</strong> "Ik ben slecht in presenteren"</p>
+            <p><strong>Nieuwe mindset:</strong> "Ik word beter in presenteren door te oefenen"</p>
         </div>
 
-        <h3><span class="step-number">2</span>Doorzettingsvermogen</h3>
-        <p>Doorzettingsvermogen betekent dat je niet opgeeft als het moeilijk wordt. Je blijft proberen, ook al duurt het lang of gaat het niet zoals je wilt.</p>
-        
-        <div class="example">
-            <strong>Voorbeeld:</strong> Je wilt een nieuwe vaardigheid leren maar het gaat langzaam. In plaats van op te geven, oefen je elke dag een beetje.
-        </div>
+        <h3>2. Focus op Wat Je Kunt Controleren</h3>
+        <p>Je kunt niet controleren wat anderen doen of zeggen. Je kunt wel controleren hoe je reageert. Focus op je eigen acties en houding.</p>
 
-        <h3><span class="step-number">3</span>Zelfvertrouwen</h3>
-        <p>Zelfvertrouwen betekent dat je gelooft in je eigen kunnen. Je weet dat je dingen kunt leren en verbeteren, ook als je het nog niet perfect kunt.</p>
-        
-        <div class="example">
-            <strong>Voorbeeld:</strong> Je moet een presentatie geven maar bent nerveus. Je denkt: "Ik heb me goed voorbereid, ik kan dit".
-        </div>
+        <h3>3. Zie Falen als Leren</h3>
+        <p>Elke fout is een kans om te leren. Vraag jezelf: "Wat kan ik hiervan leren?" in plaats van "Waarom gebeurt dit mij?"</p>
 
-        <h3><span class="step-number">4</span>Flexibiliteit</h3>
-        <p>Flexibiliteit betekent dat je je plan kunt aanpassen als het niet werkt. Je bent niet koppig en probeert andere manieren om je doel te bereiken.</p>
-        
-        <div class="example">
-            <strong>Voorbeeld:</strong> Je wilt afvallen door te sporten maar je knie doet pijn. In plaats van op te geven, ga je zwemmen of fietsen.
-        </div>
-
-        <h3><span class="step-number">5</span>Leren van Fouten</h3>
-        <p>Leren van fouten betekent dat je elke fout ziet als een kans om beter te worden. Je wordt niet boos op jezelf maar kijkt naar wat je kunt leren.</p>
-        
-        <div class="example">
-            <strong>Voorbeeld:</strong> Je maakt een fout op je werk. In plaats van jezelf te straffen, vraag je je af: "Wat kan ik hier van leren?"
-        </div>
-
-        <h2>Hoe Herken Je een Zwakke Mindset?</h2>
-        <p>Iedereen heeft wel eens een zwakke mindset. Hier zijn signalen dat je je mindset kunt versterken:</p>
-        
-        <ul>
-            <li><strong>Je geeft snel op</strong> als iets moeilijk wordt</li>
-            <li><strong>Je wordt boos</strong> als dingen niet gaan zoals je wilt</li>
-            <li><strong>Je vermijdt nieuwe dingen</strong> omdat je bang bent om te falen</li>
-            <li><strong>Je maakt je zorgen</strong> over dingen die misschien niet gebeuren</li>
-            <li><strong>Je vergelijkt jezelf</strong> constant met anderen</li>
-            <li><strong>Je denkt negatief</strong> over jezelf en je mogelijkheden</li>
-        </ul>
-
-        <div class="warning-box">
-            <h4>⚠️ Let op</h4>
-            <p>Het is normaal om deze gevoelens te hebben. Het belangrijkste is dat je ze herkent en eraan wilt werken. Dat is al de eerste stap naar een sterkere mindset.</p>
-        </div>
-
-        <h2>Hoe Bouw Je een Onbreekbare Mindset Op?</h2>
-        <p>Een onbreekbare mindset bouw je niet op in één dag. Het is een proces dat tijd kost, maar iedereen kan het leren.</p>
-
-        <h3>Dagelijkse Oefeningen</h3>
-        <ul>
-            <li><strong>Begin elke dag positief:</strong> Denk aan één ding waar je naar uitkijkt</li>
-            <li><strong>Stel jezelf een uitdaging:</strong> Doe elke dag iets wat je normaal zou vermijden</li>
-            <li><strong>Schrijf op wat goed ging:</strong> Aan het eind van elke dag, schrijf 3 dingen op die goed gingen</li>
-            <li><strong>Adem diep in:</strong> Als je gestrest bent, tel tot 10 en adem diep</li>
-            <li><strong>Praat positief tegen jezelf:</strong> Zeg tegen jezelf wat je tegen een goede vriend zou zeggen</li>
-        </ul>
-
-        <h3>Weekelijkse Oefeningen</h3>
-        <ul>
-            <li><strong>Probeer iets nieuws:</strong> Elke week iets doen wat je nog nooit hebt gedaan</li>
-            <li><strong>Kijk naar je fouten:</strong> Wat kun je leren van wat er misging?</li>
-            <li><strong>Doe iets moeilijks:</strong> Kies één taak die je uitstelt en doe hem</li>
-            <li><strong>Help iemand anders:</strong> Het helpt je om je eigen problemen in perspectief te zien</li>
-            <li><strong>Lees of luister naar inspirerende verhalen:</strong> Van mensen die moeilijke dingen hebben overwonnen</li>
-        </ul>
-
-        <h3>Maandelijkse Oefeningen</h3>
-        <ul>
-            <li><strong>Stel een groot doel:</strong> Iets wat je in een maand wilt bereiken</li>
-            <li><strong>Kijk terug op je vooruitgang:</strong> Wat heb je geleerd deze maand?</li>
-            <li><strong>Plan je volgende uitdaging:</strong> Wat wil je volgende maand proberen?</li>
-            <li><strong>Vier je successen:</strong> Wat heb je deze maand bereikt?</li>
-        </ul>
-
-        <h2>Veelgemaakte Fouten</h2>
-        <p>Hier zijn dingen die mensen vaak verkeerd doen als ze hun mindset proberen te versterken:</p>
-
-        <ul>
-            <li><strong>Te snel willen:</strong> Een sterke mindset bouw je niet op in één dag</li>
-            <li><strong>Alles tegelijk willen:</strong> Begin met één ding en bouw langzaam op</li>
-            <li><strong>Perfect willen zijn:</strong> Fouten maken is normaal en leerzaam</li>
-            <li><strong>Alleen focussen op problemen:</strong> Kijk ook naar wat goed gaat</li>
-            <li><strong>Niet om hulp vragen:</strong> Sterke mensen weten wanneer ze hulp nodig hebben</li>
-            <li><strong>Vergelijken met anderen:</strong> Focus op je eigen vooruitgang</li>
-        </ul>
-
-        <h2>Hoe Blijf Je Sterk in Moeilijke Tijden?</h2>
-        <p>Iedereen heeft wel eens moeilijke tijden. Hier zijn manieren om sterk te blijven:</p>
-
-        <h3>Als je je verdrietig voelt</h3>
-        <ul>
-            <li>Praat met iemand die je vertrouwt</li>
-            <li>Doe iets wat je normaal leuk vindt</li>
-            <li>Beweeg, ook al heb je geen zin</li>
-            <li>Eet gezond en slaap genoeg</li>
-            <li>Onthoud dat gevoelens tijdelijk zijn</li>
-        </ul>
-
-        <h3>Als je je angstig voelt</h3>
-        <ul>
-            <li>Adem diep in en uit</li>
-            <li>Stel jezelf de vraag: "Wat is het ergste dat kan gebeuren?"</li>
-            <li>Focus op wat je kunt controleren</li>
-            <li>Praat over je angsten met iemand</li>
-            <li>Doe iets wat je afleidt</li>
-        </ul>
-
-        <h3>Als je je boos voelt</h3>
-        <ul>
-            <li>Tel tot 10 voordat je reageert</li>
-            <li>Ga even weg uit de situatie</li>
-            <li>Beweeg om je energie kwijt te raken</li>
-            <li>Praat over wat je boos maakt</li>
-            <li>Zoek naar oplossingen in plaats van problemen</li>
-        </ul>
-
-        <h2>Hoe Help Je Anderen met Hun Mindset?</h2>
-        <p>Als je zelf een sterke mindset hebt, kun je anderen helpen om ook sterker te worden:</p>
-
-        <ul>
-            <li><strong>Luister zonder oordeel:</strong> Laat anderen hun verhaal vertellen</li>
-            <li><strong>Stel vragen:</strong> Help anderen om zelf oplossingen te vinden</li>
-            <li><strong>Geef hoop:</strong> Herinner anderen aan hun sterke punten</li>
-            <li><strong>Wees een voorbeeld:</strong> Laat zien hoe je omgaat met moeilijke situaties</li>
-            <li><strong>Moedig aan:</strong> Vier de successen van anderen</li>
-        </ul>
-
-        <h2>Wanneer Vraag Je Professionele Hulp?</h2>
-        <p>Soms is het beter om professionele hulp te vragen. Vraag hulp als:</p>
-
-        <ul>
-            <li>Je je constant verdrietig of angstig voelt</li>
-            <li>Je niet meer kunt slapen of eten</li>
-            <li>Je gedachten hebt over jezelf pijn doen</li>
-            <li>Je problemen hebt met alcohol of drugs</li>
-            <li>Je relaties lijden onder je problemen</li>
-            <li>Je gevoelens je dagelijks leven beïnvloeden</li>
-        </ul>
+        <h3>4. Bouw Dagelijks aan je Mindset</h3>
+        <p>Net zoals je je spieren traint, moet je je mindset trainen. Lees inspirerende boeken, luister naar podcasts, omring je met positieve mensen.</p>
 
         <div class="practical-tip">
-            <h4>💡 Hulp vragen is sterk</h4>
-            <p>Het is geen zwakte om hulp te vragen. Sterke mensen weten wanneer ze hulp nodig hebben en durven erom te vragen. Professionele hulp kan je helpen om sneller en beter te herstellen.</p>
+            <h4>💡 Dagelijkse oefening</h4>
+            <p>Begin elke dag met deze vraag: "Wat ga ik vandaag doen om sterker te worden?" Het kan iets kleins zijn, zoals een extra set in de gym, of iets groots, zoals een moeilijk gesprek voeren.</p>
         </div>
 
-        <h2>Praktische Tips voor Elke Dag</h2>
+        <h2>Praktische Stappen voor Vandaag</h2>
         
-        <h3>In de Ochtend</h3>
-        <ul>
-            <li>Sta op met een positieve gedachte</li>
-            <li>Doe 5 minuten ademhalingsoefeningen</li>
-            <li>Stel je voor hoe je dag goed gaat verlopen</li>
-            <li>Eet iets gezonds voor ontbijt</li>
-            <li>Zeg tegen jezelf: "Ik kan dit"</li>
-        </ul>
-
-        <h3>Op het Werk</h3>
-        <ul>
-            <li>Begin met de moeilijkste taak</li>
-            <li>Neem regelmatig pauze</li>
-            <li>Praat met collega's over je werk</li>
-            <li>Vier kleine successen</li>
-            <li>Vraag om feedback</li>
-        </ul>
-
-        <h3>In de Avond</h3>
-        <ul>
-            <li>Schrijf op wat goed ging</li>
-            <li>Plan morgen, maar niet te gedetailleerd</li>
-            <li>Doe iets ontspannends</li>
-            <li>Ga op tijd naar bed</li>
-            <li>Denk aan één ding waar je dankbaar voor bent</li>
-        </ul>
+        <div class="step-number">1</div>
+        <p><strong>Identificeer je negatieve gedachten</strong> - Schrijf op welke gedachten je tegenhouden</p>
+        
+        <div class="step-number">2</div>
+        <p><strong>Vervang ze door positieve</strong> - Voor elke negatieve gedachte, bedenk een positieve tegenhanger</p>
+        
+        <div class="step-number">3</div>
+        <p><strong>Kies één uitdaging</strong> - Neem vandaag één ding aan dat je normaal zou vermijden</p>
+        
+        <div class="step-number">4</div>
+        <p><strong>Vier kleine overwinningen</strong> - Erken elke stap die je zet, hoe klein ook</p>
 
         <div class="conclusion">
-            <h2>🎯 Samenvatting</h2>
-            <p>Een onbreekbare mindset betekent dat je hoofd niet breekt als het moeilijk wordt. Het bestaat uit 5 delen: optimisme, doorzettingsvermogen, zelfvertrouwen, flexibiliteit, en leren van fouten. Je kunt het leren door dagelijks te oefenen, klein te beginnen, en hulp te vragen als je het nodig hebt. Onthoud: iedereen kan een sterke mindset opbouwen, het is geen talent maar een vaardigheid die je kunt leren. En als je zelf sterk bent, kun je anderen helpen om ook sterker te worden.</p>
+            <h2>Je Mindset is Je Kracht</h2>
+            <p>Een onbreekbare mindset is niet iets wat je hebt of niet hebt. Het is iets wat je dagelijks kunt ontwikkelen. Begin vandaag met één kleine stap. Elke dag word je sterker, elke dag word je onbreekbaarder.</p>
+            <p><strong>Jij bent sterker dan je denkt. Jij bent onbreekbaar.</strong></p>
+        </div>
+
+        <div class="footer">
+            <p><strong>Top Tier Men</strong> - Waar echte mannen groeien</p>
+            <p>© 2024 Top Tier Men. Alle rechten voorbehouden.</p>
+            <p><a href="https://platform.toptiermen.eu">Bezoek ons platform</a> voor meer content en community.</p>
         </div>
     </div>
 </body>

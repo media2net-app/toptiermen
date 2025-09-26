@@ -3,136 +3,183 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wordt een Onbreekbare Man - Top Tier Men</title>
+    <title>Wordt een Onbreekbare Man - Ebook | Top Tier Men</title>
+    <meta name="description" content="Uitgebreide gids over hoe je een onbreekbare man wordt: praktische oefeningen, checklists en reflectie vragen voor persoonlijke groei.">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             line-height: 1.6;
-            color: #333;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #ffffff;
+            background: linear-gradient(135deg, #0A0F0A 0%, #181F17 50%, #232D1A 100%);
             min-height: 100vh;
         }
-        
+
         .container {
-            background: white;
-            border-radius: 15px;
-            padding: 40px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
         }
-        
+
         .header {
             text-align: center;
-            margin-bottom: 40px;
-            padding-bottom: 20px;
-            border-bottom: 3px solid #667eea;
+            margin-bottom: 3rem;
+            padding: 2rem;
+            background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+            border-radius: 20px;
+            border: 1px solid #3A4D23;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
-        
-        .header h1 {
-            color: #2c3e50;
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+
+        .logo {
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        
-        .header p {
-            color: #7f8c8d;
-            font-size: 1.2em;
-            font-style: italic;
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff 0%, #8BAE5A 50%, #B6C948 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            text-align: center;
         }
-        
+
+        .subtitle {
+            color: #8BAE5A;
+            font-size: 1.2rem;
+            font-weight: 500;
+            margin-bottom: 2rem;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 1px solid #8BAE5A;
+            margin-bottom: 2rem;
+        }
+
+        .back-button:hover {
+            background: linear-gradient(135deg, #4A5D33 0%, #5A6D43 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(139, 174, 90, 0.3);
+        }
+
         h2 {
-            color: #2c3e50;
-            border-left: 5px solid #667eea;
-            padding-left: 20px;
-            margin-top: 40px;
-            margin-bottom: 20px;
+            color: #8BAE5A;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 2.5rem 0 1.5rem 0;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #3A4D23;
         }
         
         h3 {
-            color: #34495e;
-            margin-top: 30px;
-            margin-bottom: 15px;
+            color: #B6C948;
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin: 2rem 0 1rem 0;
         }
         
         h4 {
-            color: #667eea;
-            margin-top: 25px;
-            margin-bottom: 10px;
+            color: #8BAE5A;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 1.5rem 0 0.8rem 0;
         }
         
         .highlight-box {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 25px;
-            border-radius: 10px;
-            margin: 25px 0;
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+            background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+            color: #ffffff;
+            padding: 2rem;
+            border-radius: 15px;
+            margin: 2rem 0;
+            border: 1px solid #8BAE5A;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
         
         .highlight-box h3 {
-            color: white;
+            color: #B6C948;
             margin-top: 0;
         }
         
         .practical-tip {
-            background: #f8f9fa;
-            border-left: 4px solid #28a745;
-            padding: 20px;
-            margin: 20px 0;
-            border-radius: 0 10px 10px 0;
+            background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+            border-left: 4px solid #8BAE5A;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0 15px 15px 0;
+            border: 1px solid #3A4D23;
         }
         
         .practical-tip h4 {
-            color: #28a745;
+            color: #8BAE5A;
             margin-top: 0;
         }
         
         ul {
-            padding-left: 20px;
+            padding-left: 1.5rem;
         }
         
         li {
-            margin-bottom: 8px;
+            margin-bottom: 0.8rem;
+            color: #ffffff;
         }
         
         .example {
-            background: #e8f4fd;
-            border: 1px solid #bee5eb;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
+            background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+            border: 1px solid #3A4D23;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin: 1.5rem 0;
         }
         
         .example strong {
-            color: #0c5460;
+            color: #8BAE5A;
         }
         
         .conclusion {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            color: white;
-            padding: 30px;
-            border-radius: 15px;
-            margin-top: 40px;
+            background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+            color: #ffffff;
+            padding: 2.5rem;
+            border-radius: 20px;
+            margin-top: 2.5rem;
             text-align: center;
+            border: 1px solid #8BAE5A;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
         }
         
         .conclusion h2 {
-            color: white;
+            color: #B6C948;
             border: none;
             padding: 0;
             margin-top: 0;
         }
         
         strong {
-            color: #2c3e50;
+            color: #B6C948;
         }
         
         .step-number {
-            background: #667eea;
-            color: white;
+            background: #8BAE5A;
+            color: #ffffff;
             width: 30px;
             height: 30px;
             border-radius: 50%;
@@ -143,245 +190,157 @@
             margin-right: 10px;
         }
         
-        .warning-box {
-            background: #fff3cd;
-            border: 1px solid #ffeaa7;
-            padding: 20px;
-            border-radius: 8px;
-            margin: 20px 0;
+        .footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid #3A4D23;
+            color: #8BAE5A;
         }
         
-        .warning-box h4 {
-            color: #856404;
-            margin-top: 0;
+        .footer p {
+            margin: 0.8rem 0;
         }
         
-        .qualities-box {
-            background: #f0f8ff;
-            border: 1px solid #b3d9ff;
-            padding: 20px;
-            border-radius: 8px;
-            margin: 20px 0;
+        .footer a {
+            color: #B6C948;
+            text-decoration: none;
+            font-weight: 600;
         }
         
-        .qualities-box h4 {
-            color: #0066cc;
-            margin-top: 0;
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            h2 {
+                font-size: 1.5rem;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <a href="javascript:history.back()" class="back-button">
+            ← Terug naar Academy
+        </a>
+        
         <div class="header">
+            <div class="logo">
+                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M20 0L24.5 15.5L40 20L24.5 24.5L20 40L15.5 24.5L0 20L15.5 15.5L20 0Z" fill="#8BAE5A"/>
+                </svg>
+            </div>
             <h1>Wordt een Onbreekbare Man</h1>
-            <p>De complete gids voor mentale kracht en karakter</p>
+            <p class="subtitle">De ultieme gids naar mentale en fysieke kracht</p>
         </div>
 
         <div class="highlight-box">
             <h3>🎯 Wat je gaat leren</h3>
-            <p>In dit ebook leer je hoe je een onbreekbare man wordt. Iemand die sterk is van binnen, die anderen kan helpen, en die niet breekt als het moeilijk wordt. Geen macho gedrag, maar echte innerlijke kracht.</p>
+            <p>In dit ebook leer je hoe je een onbreekbare man wordt. Geen oppervlakkige tips, maar diepgaande principes die je leven fundamenteel veranderen.</p>
         </div>
 
-        <h2>Wat is een Onbreekbare Man?</h2>
-        <p>Een onbreekbare man is iemand die sterk is van binnen. Het betekent niet dat je nooit bang bent of nooit fouten maakt. Het betekent dat je sterk genoeg bent om je angsten onder ogen te zien, om van je fouten te leren, en om anderen te helpen als zij het moeilijk hebben.</p>
+        <h2>Wat Betekent het om een Onbreekbare Man te Zijn?</h2>
+        <p>Een onbreekbare man is iemand die <strong>mentaal en fysiek onverslaanbaar is</strong>. Het betekent dat je niet omvalt bij de eerste tegenslag, dat je doorzet als het moeilijk wordt, en dat je anderen inspireert door je kracht.</p>
 
         <div class="practical-tip">
-            <h4>💡 Denk aan een eik</h4>
-            <p>Een eik is sterk en stevig, maar buigt mee met de wind. Een onbreekbare man is hetzelfde: sterk van binnen, maar flexibel genoeg om mee te buigen met het leven. Hij breekt niet, maar hij is ook niet stijf en onbuigzaam.</p>
+            <h4>💡 Praktisch voorbeeld</h4>
+            <p>Stel je voor: je verliest je baan. Een onbreekbare man denkt: "Dit is een kans om iets beters te vinden." Een zwakke man denkt: "Mijn leven is voorbij, ik kan niets meer."</p>
         </div>
 
-        <h2>Waarom is dit Belangrijk?</h2>
-        <p>Als onbreekbare man kun je:</p>
+        <h2>De 5 Pijlers van een Onbreekbare Man</h2>
+        
+        <h3>1. Mentale Kracht</h3>
+        <p>Je hoofd is je sterkste wapen. Train je geest zoals je je lichaam traint. Lees, leer, en ontwikkel een groeimindset die je helpt om uitdagingen aan te gaan.</p>
+
+        <h3>2. Fysieke Kracht</h3>
+        <p>Een sterk lichaam geeft je vertrouwen en energie. Train regelmatig, eet goed, en zorg voor je gezondheid. Je lichaam is je tempel.</p>
+
+        <h3>3. Emotionele Stabiliteit</h3>
+        <p>Je kunt je emoties controleren in plaats van dat ze jou controleren. Leer omgaan met stress, angst, en woede op een gezonde manier.</p>
+
+        <h3>4. Morele Integriteit</h3>
+        <p>Doe wat juist is, ook als het moeilijk is. Houd je aan je waarden en principes, ook als anderen dat niet doen.</p>
+
+        <h3>5. Sociale Verbinding</h3>
+        <p>Een echte man bouwt anderen op in plaats van ze af te breken. Wees een leider, een mentor, en een steunpilaar voor anderen.</p>
+
+        <h2>Hoe Word je een Onbreekbare Man?</h2>
+        
+        <div class="step-number">1</div>
+        <p><strong>Stel hoge standaarden</strong> - Verwacht meer van jezelf dan anderen van je verwachten</p>
+        
+        <div class="step-number">2</div>
+        <p><strong>Omarm uitdagingen</strong> - Zie moeilijkheden als kansen om te groeien</p>
+        
+        <div class="step-number">3</div>
+        <p><strong>Blijf leren</strong> - Een onbreekbare man weet dat hij altijd kan verbeteren</p>
+        
+        <div class="step-number">4</div>
+        <p><strong>Help anderen</strong> - Echte kracht toon je door anderen te helpen groeien</p>
+        
+        <div class="step-number">5</div>
+        <p><strong>Blijf trouw aan je waarden</strong> - Ook als het moeilijk is</p>
+
+        <h2>Dagelijkse Gewoonten van Onbreekbare Mannen</h2>
         <ul>
-            <li><strong>Je familie beschermen</strong> en voor hen zorgen</li>
-            <li><strong>Anderen helpen</strong> als zij het moeilijk hebben</li>
-            <li><strong>Doelen bereiken</strong> die anderen onmogelijk vinden</li>
-            <li><strong>Een voorbeeld zijn</strong> voor anderen</li>
-            <li><strong>Het verschil maken</strong> in de wereld</li>
+            <li><strong>Vroege ochtend routine</strong> - Sta vroeg op en begin je dag met intentie</li>
+            <li><strong>Fysieke training</strong> - Train je lichaam elke dag, hoe kort ook</li>
+            <li><strong>Mentale training</strong> - Lees, leer, en ontwikkel je geest</li>
+            <li><strong>Reflectie</strong> - Neem tijd om na te denken over je dag</li>
+            <li><strong>Gratitude</strong> - Wees dankbaar voor wat je hebt</li>
         </ul>
 
-        <h2>De 7 Eigenschappen van een Onbreekbare Man</h2>
-        
-        <h3><span class="step-number">1</span>Eerlijkheid</h3>
-        <p>Een onbreekbare man is eerlijk tegen zichzelf en tegen anderen. Hij liegt niet, bedriegt niet, en houdt zijn woord.</p>
-        
         <div class="example">
-            <strong>Voorbeeld:</strong> Je hebt een fout gemaakt op je werk. In plaats van het te verbergen, ga je naar je baas en vertel je wat er is gebeurd. Je neemt verantwoordelijkheid en bedenkt hoe je het kunt oplossen.
+            <h4>Voorbeeld dagroutine:</h4>
+            <p><strong>05:00</strong> - Opstaan en koud douchen</p>
+            <p><strong>05:30</strong> - Meditatie of reflectie</p>
+            <p><strong>06:00</strong> - Training (kracht of cardio)</p>
+            <p><strong>07:00</strong> - Gezonde ontbijt</p>
+            <p><strong>07:30</strong> - Lezen of leren</p>
         </div>
 
-        <h3><span class="step-number">2</span>Moed</h3>
-        <p>Een onbreekbare man heeft moed om dingen te doen die eng zijn, om voor anderen op te komen, en om zijn principes te verdedigen.</p>
-        
-        <div class="example">
-            <strong>Voorbeeld:</strong> Je ziet dat iemand wordt gepest. In plaats van weg te kijken, ga je erheen en help je de persoon die wordt gepest. Je bent misschien bang, maar je doet het toch.
-        </div>
-
-        <h3><span class="step-number">3</span>Zelfbeheersing</h3>
-        <p>Een onbreekbare man kan zijn emoties onder controle houden. Hij wordt niet meteen boos, reageert niet impulsief, en denkt na voordat hij handelt.</p>
-        
-        <div class="example">
-            <strong>Voorbeeld:</strong> Iemand maakt je boos. In plaats van meteen te reageren, tel je tot 10, adem je diep in, en reageer je rustig en respectvol.
-        </div>
-
-        <h3><span class="step-number">4</span>Doorzettingsvermogen</h3>
-        <p>Een onbreekbare man geeft niet op als het moeilijk wordt. Hij blijft proberen, ook al duurt het lang of gaat het niet zoals hij wil.</p>
-        
-        <div class="example">
-            <strong>Voorbeeld:</strong> Je wilt een nieuwe vaardigheid leren maar het gaat langzaam. In plaats van op te geven, oefen je elke dag een beetje en blijf je volhouden.
-        </div>
-
-        <h3><span class="step-number">5</span>Empathie</h3>
-        <p>Een onbreekbare man kan zich inleven in anderen. Hij begrijpt hoe anderen zich voelen en kan hen helpen zonder oordeel.</p>
-        
-        <div class="example">
-            <strong>Voorbeeld:</strong> Je vriend is verdrietig omdat hij zijn baan is kwijtgeraakt. In plaats van hem te vertellen dat hij moet stoppen met klagen, luister je naar hem en help je hem om een plan te maken.
-        </div>
-
-        <h3><span class="step-number">6</span>Nederigheid</h3>
-        <p>Een onbreekbare man is nederig. Hij denkt niet dat hij beter is dan anderen, leert van zijn fouten, en vraag om hulp als hij het nodig heeft.</p>
-        
-        <div class="example">
-            <strong>Voorbeeld:</strong> Je maakt een fout en iemand wijst je erop. In plaats van je te verdedigen, luister je naar de feedback, bedank je de persoon, en probeer je het beter te doen.
-        </div>
-
-        <h3><span class="step-number">7</span>Verantwoordelijkheid</h3>
-        <p>Een onbreekbare man neemt verantwoordelijkheid voor zijn acties. Hij geeft anderen niet de schuld van zijn problemen en werkt aan oplossingen.</p>
-        
-        <div class="example">
-            <strong>Voorbeeld:</strong> Je hebt een ruzie met je partner. In plaats van haar de schuld te geven, kijk je naar wat je zelf hebt gedaan en hoe je het kunt oplossen.
-        </div>
-
-        <h2>Hoe Word Je een Onbreekbare Man?</h2>
-        <p>Een onbreekbare man word je niet in één dag. Het is een proces dat tijd kost, maar iedereen kan het leren.</p>
-
-        <h3>Dagelijkse Oefeningen</h3>
+        <h2>De Mindset van een Onbreekbare Man</h2>
+        <p>Een onbreekbare man denkt anders dan anderen:</p>
         <ul>
-            <li><strong>Begin elke dag positief:</strong> Denk aan één ding waar je naar uitkijkt</li>
-            <li><strong>Doe iets moeilijks:</strong> Elke dag iets doen wat je normaal zou vermijden</li>
-            <li><strong>Help iemand anders:</strong> Elke dag iets doen voor iemand anders</li>
-            <li><strong>Wees eerlijk:</strong> Zeg de waarheid, ook als het moeilijk is</li>
-            <li><strong>Oefen zelfbeheersing:</strong> Tel tot 10 voordat je reageert op problemen</li>
-        </ul>
-
-        <h3>Weekelijkse Oefeningen</h3>
-        <ul>
-            <li><strong>Probeer iets nieuws:</strong> Elke week iets doen wat je nog nooit hebt gedaan</li>
-            <li><strong>Oefen moed:</strong> Elke week iets doen wat je eng vindt</li>
-            <li><strong>Help anderen:</strong> Elke week iemand helpen die het moeilijk heeft</li>
-            <li><strong>Leer van je fouten:</strong> Kijk naar wat je kunt leren van moeilijke situaties</li>
-            <li><strong>Vier je successen:</strong> Wat heb je deze week goed gedaan?</li>
-        </ul>
-
-        <h3>Maandelijkse Oefeningen</h3>
-        <ul>
-            <li><strong>Stel een groot doel:</strong> Iets wat je deze maand wilt bereiken</li>
-            <li><strong>Kijk terug op je vooruitgang:</strong> Wat heb je geleerd deze maand?</li>
-            <li><strong>Plan je volgende uitdaging:</strong> Wat wil je volgende maand proberen?</li>
-            <li><strong>Vier je successen:</strong> Wat heb je deze maand bereikt?</li>
-        </ul>
-
-        <h2>Veelgemaakte Fouten</h2>
-        <p>Hier zijn dingen die mensen vaak verkeerd doen als ze proberen een onbreekbare man te worden:</p>
-
-        <ul>
-            <li><strong>Te snel willen:</strong> Een onbreekbare man word je niet in één dag</li>
-            <li><strong>Alles tegelijk willen:</strong> Begin met één eigenschap en bouw langzaam op</li>
-            <li><strong>Perfect willen zijn:</strong> Fouten maken is normaal en leerzaam</li>
-            <li><strong>Alleen focussen op jezelf:</strong> Kijk ook naar hoe je anderen kunt helpen</li>
-            <li><strong>Niet om hulp vragen:</strong> Sterke mannen weten wanneer ze hulp nodig hebben</li>
-            <li><strong>Vergelijken met anderen:</strong> Focus op je eigen vooruitgang</li>
-        </ul>
-
-        <h2>Hoe Blijf Je Sterk in Moeilijke Tijden?</h2>
-        <p>Iedereen heeft wel eens moeilijke tijden. Hier zijn manieren om sterk te blijven:</p>
-
-        <h3>Als je je verdrietig voelt</h3>
-        <ul>
-            <li>Praat met iemand die je vertrouwt</li>
-            <li>Doe iets wat je normaal leuk vindt</li>
-            <li>Beweeg, ook al heb je geen zin</li>
-            <li>Eet gezond en slaap genoeg</li>
-            <li>Onthoud dat gevoelens tijdelijk zijn</li>
-        </ul>
-
-        <h3>Als je je angstig voelt</h3>
-        <ul>
-            <li>Adem diep in en uit</li>
-            <li>Stel jezelf de vraag: "Wat is het ergste dat kan gebeuren?"</li>
-            <li>Focus op wat je kunt controleren</li>
-            <li>Praat over je angsten met iemand</li>
-            <li>Doe iets wat je afleidt</li>
-        </ul>
-
-        <h3>Als je je boos voelt</h3>
-        <ul>
-            <li>Tel tot 10 voordat je reageert</li>
-            <li>Ga even weg uit de situatie</li>
-            <li>Beweeg om je energie kwijt te raken</li>
-            <li>Praat over wat je boos maakt</li>
-            <li>Zoek naar oplossingen in plaats van problemen</li>
-        </ul>
-
-        <h2>Hoe Help Je Anderen om Sterk te Worden?</h2>
-        <p>Als je zelf sterk bent, kun je anderen helpen om ook sterk te worden:</p>
-
-        <ul>
-            <li><strong>Luister zonder oordeel:</strong> Laat anderen hun verhaal vertellen</li>
-            <li><strong>Stel vragen:</strong> Help anderen om zelf oplossingen te vinden</li>
-            <li><strong>Geef hoop:</strong> Herinner anderen aan hun sterke punten</li>
-            <li><strong>Wees een voorbeeld:</strong> Laat zien hoe je omgaat met moeilijke situaties</li>
-            <li><strong>Moedig aan:</strong> Vier de successen van anderen</li>
-        </ul>
-
-        <h2>Wanneer Vraag Je Professionele Hulp?</h2>
-        <p>Soms is het beter om professionele hulp te vragen. Vraag hulp als:</p>
-
-        <ul>
-            <li>Je je constant verdrietig of angstig voelt</li>
-            <li>Je niet meer kunt slapen of eten</li>
-            <li>Je gedachten hebt over jezelf pijn doen</li>
-            <li>Je problemen hebt met alcohol of drugs</li>
-            <li>Je relaties lijden onder je problemen</li>
-            <li>Je gevoelens je dagelijks leven beïnvloeden</li>
+            <li><strong>"Ik kan dit"</strong> in plaats van "Dit is te moeilijk"</li>
+            <li><strong>"Wat kan ik leren?"</strong> in plaats van "Waarom overkomt mij dit?"</li>
+            <li><strong>"Hoe kan ik helpen?"</strong> in plaats van "Wat kan ik krijgen?"</li>
+            <li><strong>"Ik word sterker"</strong> in plaats van "Ik ben zwak"</li>
         </ul>
 
         <div class="practical-tip">
-            <h4>💡 Hulp vragen is sterk</h4>
-            <p>Het is geen zwakte om hulp te vragen. Sterke mannen weten wanneer ze hulp nodig hebben en durven erom te vragen. Professionele hulp kan je helpen om sneller en beter te herstellen.</p>
+            <h4>💡 Dagelijkse oefening</h4>
+            <p>Elke ochtend, vraag jezelf: "Wat ga ik vandaag doen om een betere man te worden?" Elke avond, vraag jezelf: "Hoe ben ik vandaag gegroeid?"</p>
         </div>
 
-        <h2>Praktische Tips voor Elke Dag</h2>
-        
-        <h3>In de Ochtend</h3>
+        <h2>Obstakels Overwinnen</h2>
+        <p>Een onbreekbare man ziet obstakels niet als problemen, maar als kansen:</p>
         <ul>
-            <li>Sta op met een positieve gedachte</li>
-            <li>Doe 5 minuten ademhalingsoefeningen</li>
-            <li>Stel je voor hoe je dag goed gaat verlopen</li>
-            <li>Eet iets gezonds voor ontbijt</li>
-            <li>Zeg tegen jezelf: "Ik kan dit"</li>
-        </ul>
-
-        <h3>Op het Werk</h3>
-        <ul>
-            <li>Begin met de moeilijkste taak</li>
-            <li>Neem regelmatig pauze</li>
-            <li>Praat met collega's over je werk</li>
-            <li>Vier kleine successen</li>
-            <li>Vraag om feedback</li>
-        </ul>
-
-        <h3>In de Avond</h3>
-        <ul>
-            <li>Schrijf op wat goed ging</li>
-            <li>Plan morgen, maar niet te gedetailleerd</li>
-            <li>Doe iets ontspannends</li>
-            <li>Ga op tijd naar bed</li>
-            <li>Denk aan één ding waar je dankbaar voor bent</li>
+            <li><strong>Falen</strong> - Een kans om te leren en sterker te worden</li>
+            <li><strong>Kritiek</strong> - Feedback om te verbeteren</li>
+            <li><strong>Verandering</strong> - Een kans om te groeien</li>
+            <li><strong>Stress</strong> - Een kans om je kracht te tonen</li>
         </ul>
 
         <div class="conclusion">
-            <h2>🎯 Samenvatting</h2>
-            <p>Een onbreekbare man is iemand die sterk is van binnen. Het betekent niet dat je nooit bang bent of nooit fouten maakt. Het betekent dat je sterk genoeg bent om je angsten onder ogen te zien, om van je fouten te leren, en om anderen te helpen als zij het moeilijk hebben. Je kunt het leren door dagelijks te oefenen, klein te beginnen, en hulp te vragen als je het nodig hebt. Onthoud: iedereen kan een onbreekbare man worden, het is geen talent maar een vaardigheid die je kunt leren. En als je zelf sterk bent, kun je anderen helpen om ook sterk te worden.</p>
+            <h2>Jij Bent Onbreekbaar</h2>
+            <p>Een onbreekbare man wordt niet geboren, hij wordt gemaakt. Door dagelijkse keuzes, door discipline, door doorzettingsvermogen. Begin vandaag met één kleine stap. Elke dag word je sterker, elke dag word je onbreekbaarder.</p>
+            <p><strong>Jij hebt de kracht om onbreekbaar te worden. Begin vandaag.</strong></p>
+        </div>
+
+        <div class="footer">
+            <p><strong>Top Tier Men</strong> - Waar echte mannen groeien</p>
+            <p>© 2024 Top Tier Men. Alle rechten voorbehouden.</p>
+            <p><a href="https://platform.toptiermen.eu">Bezoek ons platform</a> voor meer content en community.</p>
         </div>
     </div>
 </body>

@@ -3,136 +3,183 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mentale Weerbaarheid in de Praktijk - Top Tier Men</title>
+    <title>Mentale Weerbaarheid in de Praktijk - Ebook | Top Tier Men</title>
+    <meta name="description" content="Uitgebreide gids over mentale weerbaarheid in de praktijk: praktische oefeningen, checklists en reflectie vragen voor persoonlijke groei.">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             line-height: 1.6;
-            color: #333;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #ffffff;
+            background: linear-gradient(135deg, #0A0F0A 0%, #181F17 50%, #232D1A 100%);
             min-height: 100vh;
         }
-        
+
         .container {
-            background: white;
-            border-radius: 15px;
-            padding: 40px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
         }
-        
+
         .header {
             text-align: center;
-            margin-bottom: 40px;
-            padding-bottom: 20px;
-            border-bottom: 3px solid #667eea;
+            margin-bottom: 3rem;
+            padding: 2rem;
+            background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+            border-radius: 20px;
+            border: 1px solid #3A4D23;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
-        
-        .header h1 {
-            color: #2c3e50;
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+
+        .logo {
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        
-        .header p {
-            color: #7f8c8d;
-            font-size: 1.2em;
-            font-style: italic;
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff 0%, #8BAE5A 50%, #B6C948 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            text-align: center;
         }
-        
+
+        .subtitle {
+            color: #8BAE5A;
+            font-size: 1.2rem;
+            font-weight: 500;
+            margin-bottom: 2rem;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 1px solid #8BAE5A;
+            margin-bottom: 2rem;
+        }
+
+        .back-button:hover {
+            background: linear-gradient(135deg, #4A5D33 0%, #5A6D43 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(139, 174, 90, 0.3);
+        }
+
         h2 {
-            color: #2c3e50;
-            border-left: 5px solid #667eea;
-            padding-left: 20px;
-            margin-top: 40px;
-            margin-bottom: 20px;
+            color: #8BAE5A;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 2.5rem 0 1.5rem 0;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #3A4D23;
         }
         
         h3 {
-            color: #34495e;
-            margin-top: 30px;
-            margin-bottom: 15px;
+            color: #B6C948;
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin: 2rem 0 1rem 0;
         }
         
         h4 {
-            color: #667eea;
-            margin-top: 25px;
-            margin-bottom: 10px;
+            color: #8BAE5A;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 1.5rem 0 0.8rem 0;
         }
         
         .highlight-box {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 25px;
-            border-radius: 10px;
-            margin: 25px 0;
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+            background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+            color: #ffffff;
+            padding: 2rem;
+            border-radius: 15px;
+            margin: 2rem 0;
+            border: 1px solid #8BAE5A;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
         
         .highlight-box h3 {
-            color: white;
+            color: #B6C948;
             margin-top: 0;
         }
         
         .practical-tip {
-            background: #f8f9fa;
-            border-left: 4px solid #28a745;
-            padding: 20px;
-            margin: 20px 0;
-            border-radius: 0 10px 10px 0;
+            background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+            border-left: 4px solid #8BAE5A;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0 15px 15px 0;
+            border: 1px solid #3A4D23;
         }
         
         .practical-tip h4 {
-            color: #28a745;
+            color: #8BAE5A;
             margin-top: 0;
         }
         
         ul {
-            padding-left: 20px;
+            padding-left: 1.5rem;
         }
         
         li {
-            margin-bottom: 8px;
+            margin-bottom: 0.8rem;
+            color: #ffffff;
         }
         
         .example {
-            background: #e8f4fd;
-            border: 1px solid #bee5eb;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
+            background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+            border: 1px solid #3A4D23;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin: 1.5rem 0;
         }
         
         .example strong {
-            color: #0c5460;
+            color: #8BAE5A;
         }
         
         .conclusion {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            color: white;
-            padding: 30px;
-            border-radius: 15px;
-            margin-top: 40px;
+            background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+            color: #ffffff;
+            padding: 2.5rem;
+            border-radius: 20px;
+            margin-top: 2.5rem;
             text-align: center;
+            border: 1px solid #8BAE5A;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
         }
         
         .conclusion h2 {
-            color: white;
+            color: #B6C948;
             border: none;
             padding: 0;
             margin-top: 0;
         }
         
         strong {
-            color: #2c3e50;
+            color: #B6C948;
         }
         
         .step-number {
-            background: #667eea;
-            color: white;
+            background: #8BAE5A;
+            color: #ffffff;
             width: 30px;
             height: 30px;
             border-radius: 50%;
@@ -143,276 +190,140 @@
             margin-right: 10px;
         }
         
-        .warning-box {
-            background: #fff3cd;
-            border: 1px solid #ffeaa7;
-            padding: 20px;
-            border-radius: 8px;
-            margin: 20px 0;
+        .footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid #3A4D23;
+            color: #8BAE5A;
         }
         
-        .warning-box h4 {
-            color: #856404;
-            margin-top: 0;
+        .footer p {
+            margin: 0.8rem 0;
         }
         
-        .scenario-box {
-            background: #f0f8ff;
-            border: 1px solid #b3d9ff;
-            padding: 20px;
-            border-radius: 8px;
-            margin: 20px 0;
+        .footer a {
+            color: #B6C948;
+            text-decoration: none;
+            font-weight: 600;
         }
         
-        .scenario-box h4 {
-            color: #0066cc;
-            margin-top: 0;
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            h2 {
+                font-size: 1.5rem;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <a href="javascript:history.back()" class="back-button">
+            ← Terug naar Academy
+        </a>
+        
         <div class="header">
+            <div class="logo">
+                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M20 0L24.5 15.5L40 20L24.5 24.5L20 40L15.5 24.5L0 20L15.5 15.5L20 0Z" fill="#8BAE5A"/>
+                </svg>
+            </div>
             <h1>Mentale Weerbaarheid in de Praktijk</h1>
-            <p>Hoe je sterk blijft in echte situaties</p>
+            <p class="subtitle">Hoe je mentaal sterk blijft in moeilijke tijden</p>
         </div>
 
         <div class="highlight-box">
             <h3>🎯 Wat je gaat leren</h3>
-            <p>In dit ebook leer je hoe je mentale weerbaarheid toepast in echte situaties. Geen theorie, maar praktische voorbeelden van hoe je sterk blijft als het moeilijk wordt op je werk, thuis, of in je relaties.</p>
+            <p>In dit ebook leer je concrete technieken om mentaal weerbaar te worden. Geen theoretische verhalen, maar praktische oefeningen die je meteen kunt toepassen.</p>
         </div>
 
-        <h2>Wat is Mentale Weerbaarheid in de Praktijk?</h2>
-        <p>Mentale weerbaarheid in de praktijk betekent dat je sterk blijft in echte situaties. Het betekent dat je kunt omgaan met problemen op je werk, thuis, of in je relaties zonder in paniek te raken of op te geven.</p>
+        <h2>Wat is Mentale Weerbaarheid?</h2>
+        <p>Mentale weerbaarheid betekent dat je <strong>mentaal sterk genoeg bent om moeilijke situaties aan te kunnen</strong>. Het betekent dat je niet omvalt bij de eerste tegenslag, maar dat je opstaat en doorgaat.</p>
 
         <div class="practical-tip">
-            <h4>💡 Denk aan een soldaat</h4>
-            <p>Een soldaat oefent niet alleen in de kazerne, maar moet ook sterk blijven in echte gevechten. Mentale weerbaarheid werkt hetzelfde: je oefent niet alleen in je hoofd, maar past het toe in echte situaties.</p>
+            <h4>💡 Praktisch voorbeeld</h4>
+            <p>Stel je voor: je krijgt kritiek op je werk. Iemand met mentale weerbaarheid denkt: "Ik ga kijken wat ik kan leren van deze feedback." Iemand zonder weerbaarheid denkt: "Ik ben een mislukking, ik kan niets goed doen."</p>
         </div>
 
-        <h2>Waarom is dit Belangrijk?</h2>
-        <p>Met praktische mentale weerbaarheid kun je:</p>
+        <h2>Waarom is Mentale Weerbaarheid Belangrijk?</h2>
+        <p>Met mentale weerbaarheid kun je:</p>
         <ul>
-            <li><strong>Problemen op je werk oplossen</strong> zonder stress</li>
-            <li><strong>Ruzies thuis voorkomen</strong> of oplossen</li>
-            <li><strong>Moeilijke gesprekken voeren</strong> zonder boos te worden</li>
-            <li><strong>Anderen helpen</strong> als zij het moeilijk hebben</li>
-            <li><strong>Doelen bereiken</strong> ondanks tegenslagen</li>
+            <li><strong>Stress hanteren</strong> zonder erdoor overweldigd te raken</li>
+            <li><strong>Kritiek ontvangen</strong> zonder je persoonlijk aangevallen te voelen</li>
+            <li><strong>Falen verwerken</strong> en er sterker uitkomen</li>
+            <li><strong>Veranderingen accepteren</strong> en er flexibel mee omgaan</li>
+            <li><strong>Anderen helpen</strong> omdat je zelf stabiel bent</li>
         </ul>
 
-        <h2>5 Praktische Situaties en Hoe Je Ermee Omgaat</h2>
+        <h2>Hoe Bouw je Mentale Weerbaarheid Op?</h2>
         
-        <h3><span class="step-number">1</span>Problemen op je Werk</h3>
-        <p>Je baas geeft je kritiek of je collega's maken het je moeilijk. Hoe blijf je sterk?</p>
-        
-        <div class="scenario-box">
-            <h4>Scenario: Je baas is niet tevreden</h4>
-            <p><strong>Wat je normaal zou doen:</strong> Boos worden, jezelf verdedigen, of opgeven</p>
-            <p><strong>Wat je met weerbaarheid doet:</strong></p>
-            <ul>
-                <li>Luister eerst naar wat je baas zegt</li>
-                <li>Vraag om specifieke voorbeelden</li>
-                <li>Bedenk hoe je het kunt verbeteren</li>
-                <li>Maak een plan en voer het uit</li>
-                <li>Vraag om feedback na een tijdje</li>
-            </ul>
+        <h3>1. Accepteer Wat Je Niet Kunt Controleren</h3>
+        <p>Veel stress komt omdat we proberen dingen te controleren die we niet kunnen controleren. Leer het verschil tussen wat je wel en niet kunt beïnvloeden.</p>
+
+        <div class="example">
+            <h4>Voorbeeld:</h4>
+            <p><strong>Je kunt niet controleren:</strong> Het weer, wat anderen denken, de economie</p>
+            <p><strong>Je kunt wel controleren:</strong> Je reactie, je voorbereiding, je houding</p>
         </div>
 
-        <h3><span class="step-number">2</span>Ruzies Thuis</h3>
-        <p>Je partner is boos of je kinderen luisteren niet. Hoe blijf je kalm?</p>
-        
-        <div class="scenario-box">
-            <h4>Scenario: Je partner is boos</h4>
-            <p><strong>Wat je normaal zou doen:</strong> Ook boos worden, ruzie maken, of weglopen</p>
-            <p><strong>Wat je met weerbaarheid doet:</strong></p>
-            <ul>
-                <li>Adem diep in en blijf kalm</li>
-                <li>Luister naar wat je partner zegt</li>
-                <li>Vraag om tijd om na te denken</li>
-                <li>Praat over oplossingen, niet over problemen</li>
-                <li>Zoek naar compromissen</li>
-            </ul>
-        </div>
+        <h3>2. Focus op Oplossingen, Niet op Problemen</h3>
+        <p>In plaats van te klagen over wat er mis gaat, vraag je jezelf: "Hoe kan ik dit oplossen?" Dit verandert je van slachtoffer naar probleemoplosser.</p>
 
-        <h3><span class="step-number">3</span>Financiële Problemen</h3>
-        <p>Je hebt geldproblemen of verliest je baan. Hoe blijf je optimistisch?</p>
-        
-        <div class="scenario-box">
-            <h4>Scenario: Je verliest je baan</h4>
-            <p><strong>Wat je normaal zou doen:</strong> In paniek raken, jezelf de schuld geven, of opgeven</p>
-            <p><strong>Wat je met weerbaarheid doet:</strong></p>
-            <ul>
-                <li>Accepteer dat het is gebeurd</li>
-                <li>Kijk naar je opties</li>
-                <li>Maak een plan om een nieuwe baan te vinden</li>
-                <li>Vraag om hulp van anderen</li>
-                <li>Gebruik de tijd om nieuwe vaardigheden te leren</li>
-            </ul>
-        </div>
+        <h3>3. Bouw een Ondersteunend Netwerk</h3>
+        <p>Mentale weerbaarheid is niet iets wat je alleen hoeft te doen. Omring je met mensen die je steunen en die je kunnen helpen als het moeilijk wordt.</p>
 
-        <h3><span class="step-number">4</span>Gezondheidsproblemen</h3>
-        <p>Je wordt ziek of iemand in je familie wordt ziek. Hoe blijf je sterk?</p>
-        
-        <div class="scenario-box">
-            <h4>Scenario: Je wordt ziek</h4>
-            <p><strong>Wat je normaal zou doen:</strong> Je zorgen maken, opgeven, of anderen de schuld geven</p>
-            <p><strong>Wat je met weerbaarheid doet:</strong></p>
-            <ul>
-                <li>Focus op wat je kunt controleren</li>
-                <li>Volg het advies van je dokter</li>
-                <li>Zoek steun bij familie en vrienden</li>
-                <li>Blijf positief en hoopvol</li>
-                <li>Gebruik de tijd om te rusten en te herstellen</li>
-            </ul>
-        </div>
-
-        <h3><span class="step-number">5</span>Sociale Situaties</h3>
-        <p>Je voelt je alleen of hebt ruzie met vrienden. Hoe blijf je verbonden?</p>
-        
-        <div class="scenario-box">
-            <h4>Scenario: Je voelt je alleen</h4>
-            <p><strong>Wat je normaal zou doen:</strong> Thuis blijven, jezelf isoleren, of denken dat niemand je begrijpt</p>
-            <p><strong>Wat je met weerbaarheid doet:</strong></p>
-            <ul>
-                <li>Erken dat je je alleen voelt</li>
-                <li>Zoek contact met anderen</li>
-                <li>Doe iets wat je leuk vindt</li>
-                <li>Word lid van een club of groep</li>
-                <li>Help anderen, dat helpt ook jezelf</li>
-            </ul>
-        </div>
-
-        <h2>Hoe Oefen Je Mentale Weerbaarheid?</h2>
-        <p>Mentale weerbaarheid kun je oefenen, net als een spier. Hier zijn praktische manieren:</p>
-
-        <h3>Dagelijkse Oefeningen</h3>
-        <ul>
-            <li><strong>Begin klein:</strong> Oefen met kleine problemen voordat je grote aanpakt</li>
-            <li><strong>Adem diep in:</strong> Tel tot 10 voordat je reageert op problemen</li>
-            <li><strong>Stel jezelf vragen:</strong> "Wat is het ergste dat kan gebeuren?"</li>
-            <li><strong>Zoek naar oplossingen:</strong> In plaats van te klagen, bedenk oplossingen</li>
-            <li><strong>Praat met anderen:</strong> Deel je problemen met mensen die je vertrouwt</li>
-        </ul>
-
-        <h3>Weekelijkse Oefeningen</h3>
-        <ul>
-            <li><strong>Probeer iets nieuws:</strong> Elke week iets doen wat je normaal zou vermijden</li>
-            <li><strong>Oefen moeilijke gesprekken:</strong> Praat over dingen die je normaal zou vermijden</li>
-            <li><strong>Help anderen:</strong> Het helpt je om je eigen problemen in perspectief te zien</li>
-            <li><strong>Leer van je fouten:</strong> Kijk naar wat je kunt leren van moeilijke situaties</li>
-            <li><strong>Vier je successen:</strong> Wat heb je deze week goed gedaan?</li>
-        </ul>
-
-        <h3>Maandelijkse Oefeningen</h3>
-        <ul>
-            <li><strong>Stel een groot doel:</strong> Iets wat je deze maand wilt bereiken</li>
-            <li><strong>Kijk terug op je vooruitgang:</strong> Wat heb je geleerd deze maand?</li>
-            <li><strong>Plan je volgende uitdaging:</strong> Wat wil je volgende maand proberen?</li>
-            <li><strong>Vier je successen:</strong> Wat heb je deze maand bereikt?</li>
-        </ul>
-
-        <h2>Veelgemaakte Fouten</h2>
-        <p>Hier zijn dingen die mensen vaak verkeerd doen als ze mentale weerbaarheid proberen op te bouwen:</p>
-
-        <ul>
-            <li><strong>Te snel willen:</strong> Weerbaarheid bouw je niet op in één dag</li>
-            <li><strong>Alles tegelijk willen:</strong> Begin met één situatie en bouw langzaam op</li>
-            <li><strong>Perfect willen zijn:</strong> Fouten maken is normaal en leerzaam</li>
-            <li><strong>Alleen focussen op problemen:</strong> Kijk ook naar wat goed gaat</li>
-            <li><strong>Niet om hulp vragen:</strong> Sterke mensen weten wanneer ze hulp nodig hebben</li>
-            <li><strong>Vergelijken met anderen:</strong> Focus op je eigen vooruitgang</li>
-        </ul>
-
-        <h2>Hoe Blijf Je Sterk in Moeilijke Tijden?</h2>
-        <p>Iedereen heeft wel eens moeilijke tijden. Hier zijn manieren om sterk te blijven:</p>
-
-        <h3>Als je je verdrietig voelt</h3>
-        <ul>
-            <li>Praat met iemand die je vertrouwt</li>
-            <li>Doe iets wat je normaal leuk vindt</li>
-            <li>Beweeg, ook al heb je geen zin</li>
-            <li>Eet gezond en slaap genoeg</li>
-            <li>Onthoud dat gevoelens tijdelijk zijn</li>
-        </ul>
-
-        <h3>Als je je angstig voelt</h3>
-        <ul>
-            <li>Adem diep in en uit</li>
-            <li>Stel jezelf de vraag: "Wat is het ergste dat kan gebeuren?"</li>
-            <li>Focus op wat je kunt controleren</li>
-            <li>Praat over je angsten met iemand</li>
-            <li>Doe iets wat je afleidt</li>
-        </ul>
-
-        <h3>Als je je boos voelt</h3>
-        <ul>
-            <li>Tel tot 10 voordat je reageert</li>
-            <li>Ga even weg uit de situatie</li>
-            <li>Beweeg om je energie kwijt te raken</li>
-            <li>Praat over wat je boos maakt</li>
-            <li>Zoek naar oplossingen in plaats van problemen</li>
-        </ul>
-
-        <h2>Hoe Help Je Anderen met Hun Weerbaarheid?</h2>
-        <p>Als je zelf weerbaar bent, kun je anderen helpen om ook weerbaar te worden:</p>
-
-        <ul>
-            <li><strong>Luister zonder oordeel:</strong> Laat anderen hun verhaal vertellen</li>
-            <li><strong>Stel vragen:</strong> Help anderen om zelf oplossingen te vinden</li>
-            <li><strong>Geef hoop:</strong> Herinner anderen aan hun sterke punten</li>
-            <li><strong>Wees een voorbeeld:</strong> Laat zien hoe je omgaat met moeilijke situaties</li>
-            <li><strong>Moedig aan:</strong> Vier de successen van anderen</li>
-        </ul>
-
-        <h2>Wanneer Vraag Je Professionele Hulp?</h2>
-        <p>Soms is het beter om professionele hulp te vragen. Vraag hulp als:</p>
-
-        <ul>
-            <li>Je je constant verdrietig of angstig voelt</li>
-            <li>Je niet meer kunt slapen of eten</li>
-            <li>Je gedachten hebt over jezelf pijn doen</li>
-            <li>Je problemen hebt met alcohol of drugs</li>
-            <li>Je relaties lijden onder je problemen</li>
-            <li>Je gevoelens je dagelijks leven beïnvloeden</li>
-        </ul>
+        <h3>4. Oefen Zelfzorg</h3>
+        <p>Je kunt niet mentaal sterk zijn als je fysiek en emotioneel uitgeput bent. Zorg voor voldoende slaap, beweging, en tijd voor jezelf.</p>
 
         <div class="practical-tip">
-            <h4>💡 Hulp vragen is sterk</h4>
-            <p>Het is geen zwakte om hulp te vragen. Sterke mensen weten wanneer ze hulp nodig hebben en durven erom te vragen. Professionele hulp kan je helpen om sneller en beter te herstellen.</p>
+            <h4>💡 Dagelijkse oefening</h4>
+            <p>Elke avond, vraag jezelf: "Wat ging er vandaag goed?" en "Wat kan ik morgen beter doen?" Dit helpt je om positief te blijven en te blijven groeien.</p>
         </div>
 
-        <h2>Praktische Tips voor Elke Dag</h2>
+        <h2>Praktische Technieken voor Vandaag</h2>
         
-        <h3>In de Ochtend</h3>
-        <ul>
-            <li>Sta op met een positieve gedachte</li>
-            <li>Doe 5 minuten ademhalingsoefeningen</li>
-            <li>Stel je voor hoe je dag goed gaat verlopen</li>
-            <li>Eet iets gezonds voor ontbijt</li>
-            <li>Zeg tegen jezelf: "Ik kan dit"</li>
-        </ul>
+        <div class="step-number">1</div>
+        <p><strong>Ademhalingsoefening</strong> - Bij stress: 4 tellen inademen, 4 tellen vasthouden, 4 tellen uitademen</p>
+        
+        <div class="step-number">2</div>
+        <p><strong>Herframe je gedachten</strong> - Vervang "Dit is een ramp" door "Dit is een uitdaging"</p>
+        
+        <div class="step-number">3</div>
+        <p><strong>Zoek hulp</strong> - Praat met iemand die je vertrouwt over wat je dwarszit</p>
+        
+        <div class="step-number">4</div>
+        <p><strong>Neem actie</strong> - Doe één ding dat je dichter bij een oplossing brengt</p>
 
-        <h3>Op het Werk</h3>
+        <h2>Wanneer Weerbaarheid het Meest Belangrijk is</h2>
+        <p>Mentale weerbaarheid is vooral belangrijk tijdens:</p>
         <ul>
-            <li>Begin met de moeilijkste taak</li>
-            <li>Neem regelmatig pauze</li>
-            <li>Praat met collega's over je werk</li>
-            <li>Vier kleine successen</li>
-            <li>Vraag om feedback</li>
-        </ul>
-
-        <h3>In de Avond</h3>
-        <ul>
-            <li>Schrijf op wat goed ging</li>
-            <li>Plan morgen, maar niet te gedetailleerd</li>
-            <li>Doe iets ontspannends</li>
-            <li>Ga op tijd naar bed</li>
-            <li>Denk aan één ding waar je dankbaar voor bent</li>
+            <li><strong>Veranderingen</strong> - Nieuwe baan, verhuizing, relatieproblemen</li>
+            <li><strong>Tegenslag</strong> - Falen, afwijzing, verlies</li>
+            <li><strong>Stress</strong> - Werkdruk, financiële problemen, gezondheidsproblemen</li>
+            <li><strong>Kritiek</strong> - Feedback, afwijzing, conflicten</li>
         </ul>
 
         <div class="conclusion">
-            <h2>🎯 Samenvatting</h2>
-            <p>Mentale weerbaarheid in de praktijk betekent dat je sterk blijft in echte situaties. Het helpt je om problemen op je werk, thuis, en in je relaties op te lossen zonder in paniek te raken. Je kunt het leren door dagelijks te oefenen, klein te beginnen, en hulp te vragen als je het nodig hebt. Onthoud: iedereen kan weerbaarheid opbouwen, het is geen talent maar een vaardigheid die je kunt leren. En als je zelf weerbaar bent, kun je anderen helpen om ook weerbaar te worden.</p>
+            <h2>Je Bent Sterker Dan Je Denkt</h2>
+            <p>Mentale weerbaarheid is niet iets wat je hebt of niet hebt. Het is een vaardigheid die je kunt ontwikkelen. Begin vandaag met één kleine stap. Elke dag word je weerbaarder, elke dag word je sterker.</p>
+            <p><strong>Jij kunt dit aan. Jij bent weerbaar.</strong></p>
+        </div>
+
+        <div class="footer">
+            <p><strong>Top Tier Men</strong> - Waar echte mannen groeien</p>
+            <p>© 2024 Top Tier Men. Alle rechten voorbehouden.</p>
+            <p><a href="https://platform.toptiermen.eu">Bezoek ons platform</a> voor meer content en community.</p>
         </div>
     </div>
 </body>
