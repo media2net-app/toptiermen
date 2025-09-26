@@ -67,3 +67,17 @@
 📚 STARTING: cut-the-weak.html - Thu Sep 25 23:52:06 EEST 2025
 ✅ COMPLETED: cut-the-weak.html - Thu Sep 25 23:55:30 EEST 2025
 📚 STARTING: hoe-je-je-broeders-versterkt-en-samen-groeit.html - Thu Sep 25 23:55:35 EEST 2025
+🔍 CONTROLE: Verificatie van alle modules 1-6 - Fri Sep 26 06:14:46 EEST 2025
+✅ CONTROLE VOLTOOID: Alle modules 1-6 zijn correct aangepast - Fri Sep 26 06:18:54 EEST 2025
+🔍 CONTROLE: Verificatie van terug knoppen in alle ebooks - Fri Sep 26 06:20:14 EEST 2025
+📋 VERIFICATIE RESULTATEN:
+✅ MODULE 1: Testosteron (UUID: c671fea4-bfb1-4ccc-b23e-220e80783d06)
+✅ MODULE 2: Discipline & Identiteit (UUID: ba58a203-b2d0-442b-83a3-62cfb0a79478)
+✅ MODULE 3: Fysieke Dominantie (UUID: 0d02e65a-c109-440d-9286-690b21fbdecb)
+✅ MODULE 4: Mentale Kracht & Weerbaarheid (UUID: c66b25e3-869f-4c2c-8037-a552726c6b62)
+✅ MODULE 5: Business & Finance (UUID: 309b7450-3c77-4aa5-bc14-f5514cafd886)
+✅ MODULE 6: Brotherhood (UUID: 6102f6c8-7f38-4501-ab94-e9a68622e46f)
+✅ MODULE 7: Voeding & Gezondheid (UUID: f5dfaee3-87a7-4d32-9548-751391642e2b)
+🎯 TOTAAL: 34 ebooks gecontroleerd - ALLE TERUG KNOPPEN CORRECT!
+🔧 FIXING: Support ticket API 400 error - Fri Sep 26 06:22:00 EEST 2025
+🔍 Checking if tickets table exists...

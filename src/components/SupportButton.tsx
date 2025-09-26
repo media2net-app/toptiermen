@@ -238,15 +238,29 @@ export default function SupportButton({ className = '' }: SupportButtonProps) {
     e.preventDefault();
     const formData = new FormData(e.currentTarget as HTMLFormElement);
     
-    // Get user ID from auth context instead of localStorage
-    const currentUser = user || { id: 'demo-user-id' };
+    // Get user ID from auth context with proper validation
+    if (!user || !user.id) {
+      alert('Je moet ingelogd zijn om een support ticket aan te maken. Log eerst in en probeer het opnieuw.');
+      return;
+    }
     
     const ticketData = {
-      userId: currentUser.id,
+      userId: user.id,
       subject: formData.get('subject') as string,
       message: formData.get('message') as string,
       category: formData.get('category') as string
     };
+
+    // Validate required fields
+    if (!ticketData.subject || !ticketData.message || !ticketData.category) {
+      alert('Alle velden zijn verplicht. Vul alle velden in en probeer het opnieuw.');
+      return;
+    }
+
+    if (ticketData.message.length < 10) {
+      alert('Je bericht moet minimaal 10 karakters lang zijn.');
+      return;
+    }
 
     try {
       console.log('🎫 Submitting ticket:', ticketData);
@@ -267,7 +281,7 @@ export default function SupportButton({ className = '' }: SupportButtonProps) {
         handleBackToCategories();
       } else {
         console.error('❌ Failed to create ticket:', responseData);
-        throw new Error(responseData.error || 'Failed to create ticket');
+        alert(`Fout bij het aanmaken van je ticket: ${responseData.error || 'Onbekende fout'}`);
       }
     } catch (error) {
       console.error('❌ Error creating ticket:', error);

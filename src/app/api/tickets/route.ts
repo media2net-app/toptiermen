@@ -62,15 +62,32 @@ export async function POST(request: NextRequest) {
 
     console.log('🎫 Ticket data:', { userId, subject, category, messageLength: message?.length });
 
+    // Validate required fields
     if (!userId || !subject || !message || !category) {
       console.error('❌ Missing required fields:', { userId: !!userId, subject: !!subject, message: !!message, category: !!category });
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+      return NextResponse.json({ 
+        error: 'Alle verplichte velden moeten worden ingevuld',
+        details: { userId: !!userId, subject: !!subject, message: !!message, category: !!category }
+      }, { status: 400 });
+    }
+
+    // Validate userId format (should be UUID)
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(userId)) {
+      console.error('❌ Invalid userId format:', userId);
+      return NextResponse.json({ error: 'Ongeldige gebruiker ID' }, { status: 400 });
     }
 
     // Validate message length
     if (message.length < 10) {
       console.error('❌ Message too short:', message.length);
-      return NextResponse.json({ error: 'Message must be at least 10 characters long' }, { status: 400 });
+      return NextResponse.json({ error: 'Bericht moet minimaal 10 karakters lang zijn' }, { status: 400 });
+    }
+
+    // Validate subject length
+    if (subject.length < 3) {
+      console.error('❌ Subject too short:', subject.length);
+      return NextResponse.json({ error: 'Onderwerp moet minimaal 3 karakters lang zijn' }, { status: 400 });
     }
 
     console.log('🎫 Inserting ticket into database...');
@@ -90,7 +107,10 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error('❌ Error creating ticket:', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ 
+        error: 'Database fout bij het aanmaken van ticket',
+        details: error.message 
+      }, { status: 500 });
     }
 
     console.log('✅ Ticket created successfully:', data.id);
@@ -98,6 +118,9 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('❌ Unexpected error creating ticket:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ 
+      error: 'Interne server fout',
+      details: error instanceof Error ? error.message : 'Onbekende fout'
+    }, { status: 500 });
   }
 }
