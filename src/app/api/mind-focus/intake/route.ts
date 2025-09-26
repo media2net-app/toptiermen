@@ -1,10 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+import { supabaseAdmin } from '@/lib/supabase-admin';
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,8 +10,15 @@ export async function POST(request: NextRequest) {
       personalGoals 
     } = await request.json();
 
+    console.log('🧘 Saving mind focus intake data for user:', userId);
+    console.log('📊 Intake data:', {
+      stressAssessment,
+      lifestyleInfo,
+      personalGoals
+    });
+
     // Save intake data to database
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('user_mind_profiles')
       .upsert({
         user_id: userId,
@@ -54,7 +56,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'User ID required' }, { status: 400 });
     }
 
-    const { data, error } = await supabase
+    console.log('🧘 Fetching mind focus profile for user:', userId);
+
+    const { data, error } = await supabaseAdmin
       .from('user_mind_profiles')
       .select('*')
       .eq('user_id', userId)

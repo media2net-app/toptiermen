@@ -455,10 +455,17 @@ export default function MindFocusPage() {
       }));
       
       if (data.success) {
-        console.log('Intake data saved successfully');
+        console.log('✅ Intake data saved successfully');
         setHasExistingProfile(true);
+        setCurrentView('dashboard');
+        
+        // Force sidebar refresh by triggering a page reload
+        // This ensures the sidebar shows the new subpages
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
       } else {
-        console.error('Failed to save intake data:', data.error);
+        console.error('❌ Failed to save intake data:', data.error);
       }
     } catch (error) {
       console.error('Error saving intake data:', error);

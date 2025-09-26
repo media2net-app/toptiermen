@@ -10,6 +10,7 @@ import { useOnboardingV2 } from '@/contexts/OnboardingV2Context';
 import { useDebug } from '@/contexts/DebugContext';
 import { useTestUser } from '@/hooks/useTestUser';
 import { useSubscription } from '@/hooks/useSubscription';
+import { useMindFocusIntake } from '@/hooks/useMindFocusIntake';
 import OnboardingV2Modal from '@/components/OnboardingV2Modal';
 import { WorkoutSessionProvider, useWorkoutSession } from '@/contexts/WorkoutSessionContext';
 import FloatingWorkoutWidget from '@/components/FloatingWorkoutWidget';
@@ -159,6 +160,7 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
   const [openDashboard, setOpenDashboard] = useState(true); // Default expanded
   const [openMindFocus, setOpenMindFocus] = useState(true); // Default expanded
   const { isCompleted, currentStep, hasTrainingAccess, hasNutritionAccess, isLoading } = useOnboardingV2();
+  const { isIntakeCompleted: mindFocusIntakeCompleted } = useMindFocusIntake();
   
   // Use onboardingStatus from props if available, otherwise fallback to context
   const actualOnboardingStatus = onboardingStatus || { current_step: currentStep, onboarding_completed: isCompleted };
@@ -383,7 +385,12 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
                              item.label === 'Brotherhood' ? setOpenBrotherhood : 
                              item.label === 'Mind & Focus' ? setOpenMindFocus : 
                              () => {};
-            const subItems = mobileMenu.filter(sub => 'parent' in sub && sub.parent === item.label);
+            let subItems = mobileMenu.filter(sub => 'parent' in sub && sub.parent === item.label);
+            
+            // For Mind & Focus, only show subpages if intake is completed
+            if (item.label === 'Mind & Focus' && !mindFocusIntakeCompleted) {
+              subItems = subItems.filter(sub => sub.label === 'Mijn Mind & Focus');
+            }
             const hasActiveSubItem = subItems.some(sub => 
               !isCompleted 
                 ? (sub.href === safePathname && sub.onboardingStep === actualCurrentStep) ||
@@ -545,6 +552,7 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
   const [openDashboard, setOpenDashboard] = useState(false);
   const [openMindFocus, setOpenMindFocus] = useState(false);
   const { isCompleted, currentStep, hasTrainingAccess, hasNutritionAccess, isLoading } = useOnboardingV2();
+  const { isIntakeCompleted: mindFocusIntakeCompleted } = useMindFocusIntake();
   
   // Use onboardingStatus from props if available, otherwise fallback to context
   const actualOnboardingStatus = onboardingStatus || { current_step: currentStep, onboarding_completed: isCompleted };
@@ -787,7 +795,12 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
                              item.label === 'Brotherhood' ? setOpenBrotherhood : 
                              item.label === 'Mind & Focus' ? setOpenMindFocus : 
                              () => {};
-            const subItems = sidebarMenu.filter(sub => 'parent' in sub && sub.parent === item.label);
+            let subItems = sidebarMenu.filter(sub => 'parent' in sub && sub.parent === item.label);
+            
+            // For Mind & Focus, only show subpages if intake is completed
+            if (item.label === 'Mind & Focus' && !mindFocusIntakeCompleted) {
+              subItems = subItems.filter(sub => sub.label === 'Mijn Mind & Focus');
+            }
             const hasActiveSubItem = subItems.some(sub => 
               !isCompleted 
                 ? (sub.href === safePathname && sub.onboardingStep === actualCurrentStep) ||
