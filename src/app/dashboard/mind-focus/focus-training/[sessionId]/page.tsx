@@ -551,14 +551,14 @@ export default function FocusSessionPage({ params }: { params: { sessionId: stri
               className="max-w-4xl mx-auto"
             >
               {/* Session Info */}
-              <div className="bg-[#1A2A1A] rounded-xl shadow-2xl border border-[#2A3A1A] p-8 mb-8">
-                <h2 className="text-2xl font-bold text-white mb-4">📋 Wat ga je doen?</h2>
-                <p className="text-[#8BAE5A] text-lg mb-6">{session.description}</p>
+              <div className="bg-[#1A2A1A] rounded-xl shadow-2xl border border-[#2A3A1A] p-4 sm:p-6 lg:p-8 mb-6 sm:mb-8">
+                <h2 className="text-xl sm:text-2xl font-bold text-white mb-3 sm:mb-4">📋 Wat ga je doen?</h2>
+                <p className="text-[#8BAE5A] text-base sm:text-lg mb-4 sm:mb-6">{session.description}</p>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
                   {/* Steps */}
                   <div>
-                    <h3 className="text-xl font-semibold text-white mb-4">📝 Stappen</h3>
+                    <h3 className="text-lg sm:text-xl font-semibold text-white mb-3 sm:mb-4">📝 Stappen</h3>
                     <div className="space-y-3">
                       {session.steps.map((step, index) => (
                         <div key={index} className="flex items-start gap-3">
@@ -573,7 +573,7 @@ export default function FocusSessionPage({ params }: { params: { sessionId: stri
                   
                   {/* Tips */}
                   <div>
-                    <h3 className="text-xl font-semibold text-white mb-4">💡 Tips</h3>
+                    <h3 className="text-lg sm:text-xl font-semibold text-white mb-3 sm:mb-4">💡 Tips</h3>
                     <div className="space-y-3">
                       {session.tips.map((tip, index) => (
                         <div key={index} className="flex items-start gap-3">
@@ -613,21 +613,21 @@ export default function FocusSessionPage({ params }: { params: { sessionId: stri
               className="max-w-2xl mx-auto text-center"
             >
               {/* Timer */}
-              <div className="bg-[#1A2A1A] rounded-xl shadow-2xl border border-[#2A3A1A] p-8 mb-8">
-                <div className="text-6xl font-bold text-[#B6C948] mb-4">
+              <div className="bg-[#1A2A1A] rounded-xl shadow-2xl border border-[#2A3A1A] p-4 sm:p-6 lg:p-8 mb-6 sm:mb-8">
+                <div className="text-4xl sm:text-6xl font-bold text-[#B6C948] mb-3 sm:mb-4">
                   {formatTime(timeRemaining)}
                 </div>
-                <div className="text-[#8BAE5A] text-lg mb-6">
+                <div className="text-[#8BAE5A] text-base sm:text-lg mb-4 sm:mb-6">
                   {isPlaying ? 'Meditatie actief...' : 'Gepauzeerd'}
                 </div>
                 
                 {/* Current Step and Step Timer */}
-                <div className="bg-[#2A3A1A] rounded-lg p-6 mb-6">
-                  <div className="text-center mb-4">
-                    <h3 className="text-xl font-semibold text-white mb-2">
+                <div className="bg-[#2A3A1A] rounded-lg p-4 sm:p-6 mb-4 sm:mb-6">
+                  <div className="text-center mb-3 sm:mb-4">
+                    <h3 className="text-lg sm:text-xl font-semibold text-white mb-2">
                       Stap {currentStep + 1} van {session?.steps?.length || 0}
                     </h3>
-                    <div className="text-3xl font-bold text-[#B6C948] mb-2">
+                    <div className="text-2xl sm:text-3xl font-bold text-[#B6C948] mb-2">
                       {formatTime(Math.floor(stepTimer))}
                     </div>
                     <div className="text-[#8BAE5A] text-sm">

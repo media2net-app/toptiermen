@@ -98,22 +98,44 @@ export function OnboardingV2Provider({ children }: { children: React.ReactNode }
     setLoadingProgress(0);
   };
 
-  // Load onboarding status
+  // Load onboarding status with enhanced loading state management
   const loadOnboardingStatus = async () => {
     if (!user?.email) {
+      console.log('🔍 No user email, setting loading to false');
       setIsLoading(false);
       return;
     }
 
     try {
+      console.log('🔄 Starting onboarding status load for:', user.email);
       setIsLoading(true);
+      
+      // Add timeout to prevent infinite loading
+      const timeoutId = setTimeout(() => {
+        console.warn('⚠️ Onboarding status load timeout, forcing completion');
+        setIsLoading(false);
+      }, 10000); // 10 second timeout
       
       const response = await fetch(`/api/onboarding-v2?email=${encodeURIComponent(user.email)}`);
       const data = await response.json();
 
+      // Clear timeout since we got a response
+      clearTimeout(timeoutId);
+
       if (data.success) {
-        setIsCompleted(data.onboarding.isCompleted);
-        setCurrentStep(data.onboarding.currentStep);
+        const isCompletedValue = data.onboarding.isCompleted;
+        const currentStepValue = data.onboarding.currentStep;
+        
+        console.log('✅ Onboarding V2 status loaded:', {
+          currentStep: currentStepValue,
+          isCompleted: isCompletedValue,
+          hasTrainingAccess: data.access.hasTrainingAccess,
+          hasNutritionAccess: data.access.hasNutritionAccess
+        });
+        
+        // Set all states atomically to prevent race conditions
+        setIsCompleted(isCompletedValue);
+        setCurrentStep(currentStepValue);
         setAvailableSteps(data.onboarding.availableSteps || []);
         setStepMapping(data.onboarding.stepMapping || {});
         
@@ -122,18 +144,23 @@ export function OnboardingV2Provider({ children }: { children: React.ReactNode }
         setIsAdmin(data.access.isAdmin);
         setIsBasic(data.access.isBasic);
         
-        console.log('✅ Onboarding V2 status loaded:', {
-          currentStep: data.onboarding.currentStep,
-          isCompleted: data.onboarding.isCompleted,
-          hasTrainingAccess: data.access.hasTrainingAccess,
-          hasNutritionAccess: data.access.hasNutritionAccess
-        });
+        // Ensure loading is set to false after all state updates
+        setTimeout(() => {
+          console.log('🏁 Onboarding status load completed, setting loading to false');
+          setIsLoading(false);
+        }, 100); // Small delay to ensure state updates are processed
       } else {
         console.error('❌ Failed to load onboarding status:', data.error);
+        // Set default values on error
+        setIsCompleted(false);
+        setCurrentStep(1);
+        setIsLoading(false);
       }
     } catch (error) {
       console.error('❌ Error loading onboarding status:', error);
-    } finally {
+      // Set default values on error
+      setIsCompleted(false);
+      setCurrentStep(1);
       setIsLoading(false);
     }
   };
@@ -247,9 +274,28 @@ export function OnboardingV2Provider({ children }: { children: React.ReactNode }
     return availableSteps.some(s => s.id === stepId);
   };
 
-  // Load status when user changes
+  // Load status when user changes - ENHANCED with reset on user change
   useEffect(() => {
-    loadOnboardingStatus();
+    if (user?.email) {
+      console.log('🔄 User changed, loading onboarding status for:', user.email);
+      // Reset states first to prevent flash
+      setIsLoading(true);
+      setIsCompleted(false);
+      setCurrentStep(null);
+      loadOnboardingStatus();
+    } else {
+      console.log('🔍 No user, resetting onboarding states');
+      // Reset all states when user logs out
+      setIsLoading(false);
+      setIsCompleted(false);
+      setCurrentStep(null);
+      setAvailableSteps([]);
+      setStepMapping({});
+      setHasTrainingAccess(false);
+      setHasNutritionAccess(false);
+      setIsAdmin(false);
+      setIsBasic(false);
+    }
   }, [user?.email]);
 
   const contextValue: OnboardingV2ContextType = {

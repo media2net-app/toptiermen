@@ -106,7 +106,16 @@ export default function MindFocusPage() {
   // Load existing profile data on component mount
   useEffect(() => {
     const loadExistingProfile = async () => {
-      if (!user) return;
+      if (!user) {
+        setIsLoadingProfile(false);
+        return;
+      }
+      
+      // Add timeout to prevent infinite loading
+      const timeoutId = setTimeout(() => {
+        console.warn('Profile loading timeout reached, forcing completion...');
+        setIsLoadingProfile(false);
+      }, 10000); // 10 second timeout
       
       try {
         const response = await fetch(`/api/mind-focus/intake?userId=${user.id}`);
@@ -148,6 +157,7 @@ export default function MindFocusPage() {
           timestamp: new Date().toISOString()
         });
       } finally {
+        clearTimeout(timeoutId);
         setIsLoadingProfile(false);
       }
     };
@@ -732,12 +742,12 @@ export default function MindFocusPage() {
           </div>
 
           {/* Content */}
-          <div className="p-12">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
+          <div className="p-4 sm:p-6 lg:p-12">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12 mb-8 sm:mb-12">
               {/* Wat is Mind & Focus */}
               <div>
-                <h2 className="text-2xl font-bold text-white mb-6 flex items-center">
-                  <FireIcon className="w-8 h-8 text-[#B6C948] mr-3" />
+                <h2 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6 flex items-center">
+                  <FireIcon className="w-6 h-6 sm:w-8 sm:h-8 text-[#B6C948] mr-2 sm:mr-3" />
                   Wat is Mind & Focus?
                 </h2>
                 <div className="space-y-4 text-[#8BAE5A]">
@@ -754,8 +764,8 @@ export default function MindFocusPage() {
 
               {/* Wat krijg je */}
               <div>
-                <h2 className="text-2xl font-bold text-white mb-6 flex items-center">
-                  <TagIcon className="w-8 h-8 text-[#B6C948] mr-3" />
+                <h2 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6 flex items-center">
+                  <TagIcon className="w-6 h-6 sm:w-8 sm:h-8 text-[#B6C948] mr-2 sm:mr-3" />
                   Wat krijg je?
                 </h2>
                 <div className="space-y-4">
@@ -794,10 +804,10 @@ export default function MindFocusPage() {
 
             {/* Hoe werkt het */}
             <div className="mb-12">
-              <h2 className="text-2xl font-bold text-white mb-8 text-center">
+              <h2 className="text-xl sm:text-2xl font-bold text-white mb-6 sm:mb-8 text-center">
                 Hoe werkt het?
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
                 <div className="text-center">
                   <div className="w-16 h-16 bg-[#B6C948]/20 rounded-full flex items-center justify-center mx-auto mb-4">
                     <span className="text-2xl font-bold text-[#B6C948]">1</span>
@@ -902,11 +912,11 @@ export default function MindFocusPage() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ duration: 0.3 }}
-                  className="space-y-8"
+                  className="space-y-6 sm:space-y-8"
                 >
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
                     <div>
-                      <label className="block text-lg font-medium text-white mb-2">
+                      <label className="block text-base sm:text-lg font-medium text-white mb-2">
                         Werk Stress Level (1-10)
                       </label>
                       <p className="text-sm text-[#8BAE5A] mb-4">
@@ -1018,8 +1028,8 @@ export default function MindFocusPage() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <label className="flex items-start p-6 border-2 border-[#2A3A1A] rounded-xl hover:border-[#B6C948] hover:bg-[#B6C948]/10 cursor-pointer transition-all bg-[#1A2A1A]">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                    <label className="flex items-start p-4 sm:p-6 border-2 border-[#2A3A1A] rounded-xl hover:border-[#B6C948] hover:bg-[#B6C948]/10 cursor-pointer transition-all bg-[#1A2A1A]">
                       <input
                         type="checkbox"
                         checked={stressAssessment.focusProblems}
@@ -1062,9 +1072,9 @@ export default function MindFocusPage() {
                   transition={{ duration: 0.3 }}
                   className="space-y-8"
                 >
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
                     <div>
-                      <label className="block text-lg font-medium text-white mb-2">
+                      <label className="block text-base sm:text-lg font-medium text-white mb-2">
                         Werkrooster
                       </label>
                       <p className="text-sm text-[#8BAE5A] mb-4">
@@ -1140,7 +1150,7 @@ export default function MindFocusPage() {
                   transition={{ duration: 0.3 }}
                   className="space-y-8"
                 >
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                     {Object.entries(personalGoals).map(([key, value]) => {
                       const goalLabels = {
                         stressVerminderen: { title: 'Stress verminderen', description: 'Minder stress en meer rust in je leven' },
@@ -1295,120 +1305,121 @@ export default function MindFocusPage() {
   const renderDashboard = () => {
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#0A0F0A] to-[#1A2A1A] p-4">
+      <div className="min-h-screen bg-gradient-to-br from-[#0A0F0A] to-[#1A2A1A] p-2 sm:p-4">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="bg-gradient-to-r from-[#2A3A1A] to-[#3A4A2A] rounded-xl p-8 text-[#B6C948] mb-8">
-          <div className="flex items-center justify-between">
+        <div className="bg-gradient-to-r from-[#2A3A1A] to-[#3A4A2A] rounded-xl p-4 sm:p-6 lg:p-8 text-[#B6C948] mb-4 sm:mb-6 lg:mb-8">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold mb-2">🧠 Mind & Focus Dashboard</h1>
-              <p className="text-[#8BAE5A]">Jouw persoonlijke stress management hub</p>
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-1 sm:mb-2">🧠 Mind & Focus Dashboard</h1>
+              <p className="text-[#8BAE5A] text-sm sm:text-base">Jouw persoonlijke stress management hub</p>
             </div>
-            <div className="text-right">
-              <div className="text-2xl font-bold">
+            <div className="text-left sm:text-right">
+              <div className="text-xl sm:text-2xl font-bold">
                 {isLoadingDashboardData ? (
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#B6C948]"></div>
+                  <div className="animate-spin rounded-full h-5 w-5 sm:h-6 sm:w-6 border-b-2 border-[#B6C948]"></div>
                 ) : (
                   dashboardData?.streak || 0
                 )}
               </div>
-              <div className="text-sm text-[#8BAE5A]">Dagen streak</div>
+              <div className="text-xs sm:text-sm text-[#8BAE5A]">Dagen streak</div>
             </div>
           </div>
         </div>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-[#1A2A1A] rounded-xl shadow-2xl border border-[#2A3A1A] p-6">
-            <div className="text-3xl font-bold text-white mb-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-4 sm:mb-6 lg:mb-8">
+          <div className="bg-[#1A2A1A] rounded-xl shadow-2xl border border-[#2A3A1A] p-3 sm:p-4 lg:p-6">
+            <div className="text-2xl sm:text-3xl font-bold text-white mb-1 sm:mb-2">
               {isLoadingDashboardData ? (
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#B6C948]"></div>
+                <div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-[#B6C948]"></div>
               ) : (
                 dashboardData?.sessionsThisWeek || 0
               )}
             </div>
-            <div className="text-[#8BAE5A]">Sessies deze week</div>
+            <div className="text-[#8BAE5A] text-sm sm:text-base">Sessies deze week</div>
           </div>
-          <div className="bg-[#1A2A1A] rounded-xl shadow-2xl border border-[#2A3A1A] p-6">
-            <div className="text-3xl font-bold text-white mb-2">
+          <div className="bg-[#1A2A1A] rounded-xl shadow-2xl border border-[#2A3A1A] p-3 sm:p-4 lg:p-6">
+            <div className="text-2xl sm:text-3xl font-bold text-white mb-1 sm:mb-2">
               {isLoadingDashboardData ? (
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#B6C948]"></div>
+                <div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-[#B6C948]"></div>
               ) : (
                 dashboardData?.currentStressLevel || currentStressLevel
               )}
             </div>
-            <div className="text-[#8BAE5A]">Huidige stress level</div>
+            <div className="text-[#8BAE5A] text-sm sm:text-base">Huidige stress level</div>
           </div>
-          <div className="bg-[#1A2A1A] rounded-xl shadow-2xl border border-[#2A3A1A] p-6">
-            <div className="text-3xl font-bold text-white mb-2">
+          <div className="bg-[#1A2A1A] rounded-xl shadow-2xl border border-[#2A3A1A] p-3 sm:p-4 lg:p-6">
+            <div className="text-2xl sm:text-3xl font-bold text-white mb-1 sm:mb-2">
               {isLoadingDashboardData ? (
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#B6C948]"></div>
+                <div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-[#B6C948]"></div>
               ) : (
                 dashboardData?.totalSessions || 0
               )}
             </div>
-            <div className="text-[#8BAE5A]">Totaal sessies</div>
+            <div className="text-[#8BAE5A] text-sm sm:text-base">Totaal sessies</div>
           </div>
-          <div className="bg-[#1A2A1A] rounded-xl shadow-2xl border border-[#2A3A1A] p-6">
-            <div className="text-3xl font-bold text-white mb-2">
+          <div className="bg-[#1A2A1A] rounded-xl shadow-2xl border border-[#2A3A1A] p-3 sm:p-4 lg:p-6">
+            <div className="text-2xl sm:text-3xl font-bold text-white mb-1 sm:mb-2">
               {isLoadingDashboardData ? (
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#B6C948]"></div>
+                <div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-[#B6C948]"></div>
               ) : (
                 `${dashboardData?.focusImprovement || 0}%`
               )}
             </div>
-            <div className="text-[#8BAE5A]">Focus verbetering</div>
+            <div className="text-[#8BAE5A] text-sm sm:text-base">Focus verbetering</div>
           </div>
         </div>
 
         {/* Tabs */}
         <div className="bg-[#1A2A1A] rounded-xl shadow-2xl border border-[#2A3A1A]">
           <div className="border-b border-[#2A3A1A]">
-            <nav className="flex space-x-8 px-6">
+            <nav className="flex flex-wrap space-x-2 sm:space-x-4 lg:space-x-8 px-3 sm:px-4 lg:px-6 overflow-x-auto">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`py-4 px-2 border-b-2 font-medium text-sm transition-colors ${
+                  className={`py-3 sm:py-4 px-2 sm:px-3 lg:px-4 border-b-2 font-medium text-xs sm:text-sm transition-colors whitespace-nowrap ${
                     activeTab === tab.id
                       ? 'border-[#B6C948] text-[#B6C948]'
                       : 'border-transparent text-[#8BAE5A] hover:text-white hover:border-[#3A4A2A]'
                   }`}
                 >
-                  <div className="flex items-center space-x-2">
-                    {tab.icon}
-                    <span>{tab.label}</span>
+                  <div className="flex items-center space-x-1 sm:space-x-2">
+                    <div className="w-4 h-4 sm:w-5 sm:h-5">{tab.icon}</div>
+                    <span className="hidden sm:inline">{tab.label}</span>
+                    <span className="sm:hidden">{tab.label.split(' ')[0]}</span>
                   </div>
                 </button>
               ))}
             </nav>
           </div>
 
-          <div className="p-6">
+          <div className="p-3 sm:p-4 lg:p-6">
             {activeTab === 'overview' && (
               <div className="space-y-6">
                 {/* Recent Journaling */}
                 {recentJournaling && (
-                  <div className="bg-gradient-to-r from-[#2A3A1A] to-[#3A4A2A] rounded-xl p-6">
-                    <h3 className="text-xl font-semibold text-[#B6C948] mb-4 flex items-center">
-                      <BookOpenIcon className="w-6 h-6 mr-2" />
+                  <div className="bg-gradient-to-r from-[#2A3A1A] to-[#3A4A2A] rounded-xl p-4 sm:p-6">
+                    <h3 className="text-lg sm:text-xl font-semibold text-[#B6C948] mb-3 sm:mb-4 flex items-center">
+                      <BookOpenIcon className="w-5 h-5 sm:w-6 sm:h-6 mr-2" />
                       Recente Journaling
                     </h3>
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[#8BAE5A]">Datum:</span>
-                        <span className="text-white font-medium">
+                    <div className="space-y-2 sm:space-y-3">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-0">
+                        <span className="text-[#8BAE5A] text-sm sm:text-base">Datum:</span>
+                        <span className="text-white font-medium text-sm sm:text-base">
                           {new Date(recentJournaling.date).toLocaleDateString('nl-NL')}
                         </span>
                       </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-[#8BAE5A]">Stress Level:</span>
-                        <span className="text-white font-medium">{recentJournaling.stress_level}/10</span>
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-0">
+                        <span className="text-[#8BAE5A] text-sm sm:text-base">Stress Level:</span>
+                        <span className="text-white font-medium text-sm sm:text-base">{recentJournaling.stress_level}/10</span>
                       </div>
                       {recentJournaling.daily_review && (
                         <div>
-                          <span className="text-[#8BAE5A] text-sm">Dagelijkse reflectie:</span>
-                          <p className="text-white text-sm mt-1 bg-[#1A2A1A] p-3 rounded-lg">
+                          <span className="text-[#8BAE5A] text-xs sm:text-sm">Dagelijkse reflectie:</span>
+                          <p className="text-white text-xs sm:text-sm mt-1 bg-[#1A2A1A] p-2 sm:p-3 rounded-lg">
                             {recentJournaling.daily_review}
                           </p>
                         </div>
@@ -1418,22 +1429,22 @@ export default function MindFocusPage() {
                 )}
 
                 {/* Todo List */}
-                <div className="bg-[#1A2A1A] rounded-xl p-6 border border-[#2A3A1A]">
-                  <h3 className="text-xl font-semibold text-white mb-4 flex items-center">
-                    <CheckCircleIcon className="w-6 h-6 mr-2 text-[#B6C948]" />
+                <div className="bg-[#1A2A1A] rounded-xl p-4 sm:p-6 border border-[#2A3A1A]">
+                  <h3 className="text-lg sm:text-xl font-semibold text-white mb-3 sm:mb-4 flex items-center">
+                    <CheckCircleIcon className="w-5 h-5 sm:w-6 sm:h-6 mr-2 text-[#B6C948]" />
                     Vandaag's Taken
                   </h3>
                   
                   {/* Add new todo */}
-                  <div className="mb-6">
-                    <div className="flex gap-2">
+                  <div className="mb-4 sm:mb-6">
+                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-2">
                       <input
                         type="text"
                         value={newTodo}
                         onChange={(e) => setNewTodo(e.target.value)}
                         onKeyPress={(e) => e.key === 'Enter' && addTodo()}
                         placeholder="Voeg een nieuwe taak toe..."
-                        className="flex-1 p-3 bg-[#2A3A1A] text-white border border-[#3A4A2A] rounded-lg focus:ring-2 focus:ring-[#B6C948] focus:border-transparent"
+                        className="flex-1 p-2 sm:p-3 bg-[#2A3A1A] text-white border border-[#3A4A2A] rounded-lg focus:ring-2 focus:ring-[#B6C948] focus:border-transparent text-sm sm:text-base"
                         disabled={isAddingTodo}
                       />
                       <motion.button
@@ -1441,7 +1452,7 @@ export default function MindFocusPage() {
                         disabled={!newTodo.trim() || isAddingTodo}
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
-                        className="bg-[#B6C948] text-[#1A2A1A] px-4 py-3 rounded-lg font-semibold hover:bg-[#8BAE5A] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="bg-[#B6C948] text-[#1A2A1A] px-3 sm:px-4 py-2 sm:py-3 rounded-lg font-semibold hover:bg-[#8BAE5A] transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
                       >
                         {isAddingTodo ? '...' : 'Toevoegen'}
                       </motion.button>
@@ -1449,11 +1460,11 @@ export default function MindFocusPage() {
                   </div>
 
                   {/* Todo list */}
-                  <div className="space-y-3">
+                  <div className="space-y-2 sm:space-y-3">
                     {todos.length === 0 ? (
-                      <div className="text-center py-8 text-[#8BAE5A]">
-                        <CheckCircleIcon className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                        <p>Geen taken voor vandaag. Voeg er een toe om te beginnen!</p>
+                      <div className="text-center py-6 sm:py-8 text-[#8BAE5A]">
+                        <CheckCircleIcon className="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-2 sm:mb-3 opacity-50" />
+                        <p className="text-sm sm:text-base">Geen taken voor vandaag. Voeg er een toe om te beginnen!</p>
                       </div>
                     ) : (
                       todos.map((todo) => (
@@ -1461,7 +1472,7 @@ export default function MindFocusPage() {
                           key={todo.id}
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
-                          className={`flex items-center p-4 rounded-lg border transition-all ${
+                          className={`flex items-center p-3 sm:p-4 rounded-lg border transition-all ${
                             todo.completed 
                               ? 'bg-[#B6C948]/10 border-[#B6C948] text-[#8BAE5A]' 
                               : 'bg-[#2A3A1A] border-[#3A4A2A] hover:border-[#B6C948]'
@@ -1471,18 +1482,18 @@ export default function MindFocusPage() {
                             onClick={() => toggleTodo(todo.id)}
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.9 }}
-                            className={`w-6 h-6 rounded-full border-2 flex items-center justify-center mr-3 transition-all ${
+                            className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 flex items-center justify-center mr-2 sm:mr-3 transition-all ${
                               todo.completed 
                                 ? 'bg-[#B6C948] border-[#B6C948]' 
                                 : 'border-[#8BAE5A] hover:border-[#B6C948]'
                             }`}
                           >
                             {todo.completed && (
-                              <CheckCircleIcon className="w-4 h-4 text-[#1A2A1A]" />
+                              <CheckCircleIcon className="w-3 h-3 sm:w-4 sm:h-4 text-[#1A2A1A]" />
                             )}
                           </motion.button>
                           
-                          <span className={`flex-1 ${todo.completed ? 'line-through' : ''}`}>
+                          <span className={`flex-1 text-sm sm:text-base ${todo.completed ? 'line-through' : ''}`}>
                             {todo.text}
                           </span>
                           
@@ -1492,7 +1503,7 @@ export default function MindFocusPage() {
                             whileTap={{ scale: 0.9 }}
                             className="text-[#8BAE5A] hover:text-red-400 transition-colors p-1"
                           >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                             </svg>
                           </motion.button>
@@ -1503,16 +1514,16 @@ export default function MindFocusPage() {
 
                   {/* Progress indicator */}
                   {todos.length > 0 && (
-                    <div className="mt-6 pt-4 border-t border-[#3A4A2A]">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-[#8BAE5A] text-sm">Progress vandaag</span>
-                        <span className="text-white font-semibold">
+                    <div className="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-[#3A4A2A]">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2 gap-1 sm:gap-0">
+                        <span className="text-[#8BAE5A] text-xs sm:text-sm">Progress vandaag</span>
+                        <span className="text-white font-semibold text-sm sm:text-base">
                           {todos.filter(t => t.completed).length} van {todos.length} voltooid
                         </span>
                       </div>
-                      <div className="w-full bg-[#2A3A1A] rounded-full h-2">
+                      <div className="w-full bg-[#2A3A1A] rounded-full h-1.5 sm:h-2">
                         <div 
-                          className="bg-[#B6C948] h-2 rounded-full transition-all duration-300"
+                          className="bg-[#B6C948] h-1.5 sm:h-2 rounded-full transition-all duration-300"
                           style={{ 
                             width: `${todos.length > 0 ? (todos.filter(t => t.completed).length / todos.length) * 100 : 0}%` 
                           }}
@@ -1524,20 +1535,20 @@ export default function MindFocusPage() {
 
                 {/* Daily Routine */}
                 {personalPlan?.dailyRoutine && personalPlan.dailyRoutine.length > 0 && (
-                  <div className="bg-[#1A2A1A] rounded-xl p-6 border border-[#2A3A1A]">
-                    <h3 className="text-xl font-semibold text-white mb-4 flex items-center">
-                      <ClockIcon className="w-6 h-6 mr-2 text-[#B6C948]" />
+                  <div className="bg-[#1A2A1A] rounded-xl p-4 sm:p-6 border border-[#2A3A1A]">
+                    <h3 className="text-lg sm:text-xl font-semibold text-white mb-3 sm:mb-4 flex items-center">
+                      <ClockIcon className="w-5 h-5 sm:w-6 sm:h-6 mr-2 text-[#B6C948]" />
                       Dagelijkse Routine
                     </h3>
-                    <div className="space-y-3">
+                    <div className="space-y-2 sm:space-y-3">
                       {personalPlan.dailyRoutine.map((session, index) => (
-                        <div key={session.id} className="bg-[#2A3A1A] border border-[#3A4A2A] rounded-lg p-4">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <h4 className="text-white font-semibold">{session.title}</h4>
-                              <p className="text-[#8BAE5A] text-sm">{session.description}</p>
+                        <div key={session.id} className="bg-[#2A3A1A] border border-[#3A4A2A] rounded-lg p-3 sm:p-4">
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
+                            <div className="flex-1">
+                              <h4 className="text-white font-semibold text-sm sm:text-base">{session.title}</h4>
+                              <p className="text-[#8BAE5A] text-xs sm:text-sm">{session.description}</p>
                             </div>
-                            <span className="text-[#B6C948] text-sm font-medium">
+                            <span className="text-[#B6C948] text-xs sm:text-sm font-medium">
                               {session.scheduledTime} • {session.duration} min
                             </span>
                           </div>
@@ -1575,7 +1586,7 @@ export default function MindFocusPage() {
                     <FireIcon className="w-5 h-5 text-[#B6C948] mr-2" />
                     Stress Assessment
                   </h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                     <div className="space-y-3">
                       <div className="flex justify-between items-center">
                         <span className="text-[#8BAE5A]">Werk Stress</span>
@@ -1651,7 +1662,7 @@ export default function MindFocusPage() {
                     <ClockIcon className="w-5 h-5 text-[#B6C948] mr-2" />
                     Lifestyle Informatie
                   </h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                     <div>
                       <span className="text-[#8BAE5A] text-sm">Werkrooster</span>
                       <p className="text-white font-medium">{lifestyleInfo.workSchedule}</p>
@@ -1699,7 +1710,7 @@ export default function MindFocusPage() {
                     <TagIcon className="w-5 h-5 text-[#B6C948] mr-2" />
                     Persoonlijke Doelen
                   </h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                     <div className="flex items-center">
                       <span className={`w-4 h-4 rounded-full mr-3 ${personalGoals.stressVerminderen ? 'bg-[#B6C948]' : 'bg-[#2A3A1A] border border-[#2A3A1A]'}`}></span>
                       <span className="text-white">Stress verminderen</span>
@@ -1732,7 +1743,7 @@ export default function MindFocusPage() {
             {activeTab === 'meditations' && (
               <div>
                 <h3 className="text-xl font-semibold text-white mb-4">Meditatie Bibliotheek</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                   {meditationTypes.map((type) => (
                     <div key={type.id} className="bg-[#1A2A1A] border border-[#2A3A1A] rounded-lg p-4">
                       <div className="flex items-center mb-3">

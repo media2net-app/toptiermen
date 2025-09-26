@@ -84,6 +84,60 @@ export default function AcademyPage() {
     setNavigating(false);
   }, []);
 
+  // Handle page visibility changes to reset loading states when returning from PDF ebooks
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        console.log('👁️ Page became visible, checking loading state...');
+        
+        // If we're stuck loading, reset the state
+        if (loading && !error) {
+          console.log('🔄 Resetting stuck loading state...');
+          setLoading(false);
+          setError(null);
+          
+          // Retry data fetch
+          setTimeout(() => {
+            console.log('🔄 Retrying data fetch after visibility change...');
+            window.location.reload();
+          }, 1000);
+        }
+      }
+    };
+
+    const handlePageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) {
+        console.log('📖 User returned from PDF ebook, resetting states...');
+        setNavigating(false);
+        
+        // Reset loading if stuck
+        if (loading && !error) {
+          console.log('🔄 Resetting stuck loading after page show...');
+          setLoading(false);
+          setError(null);
+          
+          // Retry data fetch
+          setTimeout(() => {
+            console.log('🔄 Retrying data fetch after page show...');
+            window.location.reload();
+          }, 1000);
+        }
+      }
+    };
+
+    if (typeof window !== 'undefined') {
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+      window.addEventListener('pageshow', handlePageShow);
+    }
+
+    return () => {
+      if (typeof window !== 'undefined') {
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
+        window.removeEventListener('pageshow', handlePageShow);
+      }
+    };
+  }, [loading, error]);
+
   // Fetch academy data with performance optimizations
   useEffect(() => {
     const fetchAcademyData = async () => {
@@ -104,19 +158,30 @@ export default function AcademyPage() {
         console.warn('⚠️ Academy data fetch timeout, showing error...');
         setError('Data laden duurde te lang. Probeer de pagina te verversen.');
         setLoading(false);
-      }, 10000); // 10 second timeout
+      }, 15000); // Increased to 15 second timeout
 
       try {
         // Fetch academy data via API endpoint (bypasses RLS)
-        const response = await fetch(`/api/academy/progress?userId=${user.id}`);
+        console.log('🔄 Fetching academy data from API...');
+        const response = await fetch(`/api/academy/progress?userId=${user.id}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          // Add cache control to prevent stale data
+          cache: 'no-cache'
+        });
         
         if (!response.ok) {
-          throw new Error('Failed to fetch academy data');
+          console.error('❌ API response not OK:', response.status, response.statusText);
+          throw new Error(`API request failed: ${response.status} ${response.statusText}`);
         }
 
         const result = await response.json();
+        console.log('📦 API response received:', { success: result.success, hasData: !!result.data });
         
         if (!result.success) {
+          console.error('❌ API returned error:', result.error);
           throw new Error(result.error || 'Failed to fetch academy data');
         }
 
@@ -206,9 +271,29 @@ export default function AcademyPage() {
 
       } catch (error) {
         console.error('❌ Academy data fetch error:', error);
-        setError(error instanceof Error ? error.message : 'Er is een onbekende fout opgetreden');
+        
+        // Enhanced error handling with retry mechanism
+        const errorMessage = error instanceof Error ? error.message : 'Er is een onbekende fout opgetreden';
+        
+        // Check if it's a network error or API error
+        if (error instanceof TypeError && error.message.includes('fetch')) {
+          console.warn('🔄 Network error detected, will retry automatically...');
+          setError('Netwerkfout. Probeer opnieuw...');
+        } else {
+          setError(errorMessage);
+        }
+        
         setLoading(false);
         clearTimeout(timeoutId);
+        
+        // Auto-retry after 3 seconds for network errors
+        if (error instanceof TypeError && error.message.includes('fetch')) {
+          console.log('🔄 Scheduling auto-retry in 3 seconds...');
+          setTimeout(() => {
+            console.log('🔄 Auto-retry triggered...');
+            fetchAcademyData();
+          }, 3000);
+        }
       }
     };
 

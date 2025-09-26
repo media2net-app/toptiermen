@@ -405,14 +405,14 @@ function TrainingschemasContent() {
     }
   };
 
-  // OPTIMIZED: Parallel data loading function with enhanced debugging
-  const loadAllData = async () => {
+  // OPTIMIZED: Parallel data loading function with enhanced debugging, timeout, and retry
+  const loadAllData = async (retryCount = 0) => {
     if (!user?.id) {
       console.log('❌ loadAllData: No user ID available');
       return;
     }
     
-    console.log('⚡ [PERFORMANCE] Starting parallel data loading for user:', user.email);
+    console.log(`⚡ [PERFORMANCE] Starting parallel data loading for user: ${user.email} (attempt ${retryCount + 1})`);
     const totalStartTime = Date.now();
     console.log('🔍 Current state before loading:', {
       profileLoading,
@@ -421,38 +421,62 @@ function TrainingschemasContent() {
       trainingSchemasCount: trainingSchemas.length
     });
     
+    // Add overall timeout to prevent infinite loading
+    const overallTimeout = setTimeout(() => {
+      console.warn('⚠️ Overall loading timeout reached (30s), forcing completion...');
+      setTrainingLoading(false);
+      setProfileLoading(false);
+      setTrainingError('Loading duurde te lang. Probeer de pagina te verversen.');
+    }, 30000); // 30 second overall timeout
+    
     try {
       setTrainingLoading(true);
       setProfileLoading(true);
       
-      // Start all API calls in parallel
-      console.log('📡 Starting parallel API calls...');
+      // Start all API calls in parallel with timeouts
+      console.log('📡 Starting parallel API calls with timeouts...');
+      
+      // Helper function to add timeout to fetch requests
+      const fetchWithTimeout = (url: string, timeout = 10000) => {
+        return Promise.race([
+          fetch(url),
+          new Promise((_, reject) => 
+            setTimeout(() => reject(new Error(`Request timeout: ${url}`)), timeout)
+          )
+        ]);
+      };
+      
       const [schemasResult, profileResult, periodResult, progressResult, completionResult] = await Promise.allSettled([
-        // Load training schemas
-        supabase
-          .from('training_schemas')
-          .select(`
-            *,
-            training_schema_days (
-              id,
-              day_number,
-              name
-            )
-          `)
-          .eq('status', 'published')
-          .order('created_at', { ascending: false }),
+        // Load training schemas with timeout
+        Promise.race([
+          supabase
+            .from('training_schemas')
+            .select(`
+              *,
+              training_schema_days (
+                id,
+                day_number,
+                name
+              )
+            `)
+            .eq('status', 'published')
+            .order('created_at', { ascending: false }),
+          new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Training schemas query timeout')), 15000)
+          )
+        ]),
         
-        // Load training profile
-        fetch(`/api/training-profile?userId=${user.email}`),
+        // Load training profile with timeout
+        fetchWithTimeout(`/api/training-profile?userId=${user.email}`, 10000),
         
-        // Load current schema period
-        fetch(`/api/training-schema-period?userId=${user.id}`),
+        // Load current schema period with timeout
+        fetchWithTimeout(`/api/training-schema-period?userId=${user.id}`, 10000),
         
-        // Load schema progress
-        fetch(`/api/user/schema-progress?userId=${user.id}`),
+        // Load schema progress with timeout
+        fetchWithTimeout(`/api/user/schema-progress?userId=${user.id}`, 10000),
         
-        // Load schema completion status
-        fetch(`/api/schema-completion?userId=${user.id}`)
+        // Load schema completion status with timeout
+        fetchWithTimeout(`/api/schema-completion?userId=${user.id}`, 10000)
       ]);
       
       console.log('📡 API calls completed:', {
@@ -462,66 +486,115 @@ function TrainingschemasContent() {
         progressStatus: progressResult.status
       });
       
-      // Process training schemas
+      // Process training schemas with enhanced error handling
       let allSchemas: TrainingSchema[] = [];
       if (schemasResult.status === 'fulfilled') {
-        const { data, error } = schemasResult.value;
+        const { data, error } = schemasResult.value as { data: any; error: any };
         if (error) {
           console.error('❌ Error fetching training schemas:', error);
           setTrainingError(`Failed to load training schemas: ${error.message}`);
+          // Try fallback: load schemas without joins
+          try {
+            console.log('🔄 Attempting fallback schema loading...');
+            const { data: fallbackData, error: fallbackError } = await supabase
+              .from('training_schemas')
+              .select('*')
+              .eq('status', 'published')
+              .order('created_at', { ascending: false })
+              .limit(50);
+            
+            if (!fallbackError && fallbackData) {
+              allSchemas = fallbackData;
+              console.log('✅ Fallback schemas loaded:', allSchemas.length);
+              setTrainingError(null);
+            }
+          } catch (fallbackErr) {
+            console.error('❌ Fallback schema loading failed:', fallbackErr);
+          }
         } else {
           console.log('✅ Training schemas loaded:', data?.length || 0, 'schemas');
           allSchemas = data || [];
         }
       } else {
         console.error('❌ Training schemas promise rejected:', schemasResult.reason);
-        setTrainingError('Failed to load training schemas');
+        setTrainingError(`Training schemas failed: ${schemasResult.reason?.message || 'Unknown error'}`);
+        
+        // Try fallback loading
+        try {
+          console.log('🔄 Attempting fallback schema loading after promise rejection...');
+          const { data: fallbackData, error: fallbackError } = await supabase
+            .from('training_schemas')
+            .select('*')
+            .eq('status', 'published')
+            .order('created_at', { ascending: false })
+            .limit(50);
+          
+          if (!fallbackError && fallbackData) {
+            allSchemas = fallbackData;
+            console.log('✅ Fallback schemas loaded after rejection:', allSchemas.length);
+            setTrainingError(null);
+          }
+        } catch (fallbackErr) {
+          console.error('❌ Fallback schema loading failed:', fallbackErr);
+        }
       }
       
-      // Process training profile
+      // Process training profile with enhanced error handling
       let userProfile: TrainingProfile | null = null;
       if (profileResult.status === 'fulfilled') {
-        const response = profileResult.value;
+        const response = profileResult.value as Response;
         console.log('📡 Profile API response status:', response.status);
         
         if (response.ok) {
-          const data = await response.json();
-          console.log('📡 Profile API response data:', data);
-          
-          if (data.success && data.profile) {
-            userProfile = data.profile;
-            setUserTrainingProfile(data.profile);
-            console.log('✅ Training profile loaded:', data.profile);
+          try {
+            const data = await response.json();
+            console.log('📡 Profile API response data:', data);
             
-            // Update calculator data
-            setCalculatorData({
-              training_goal: data.profile.training_goal,
-              training_frequency: data.profile.training_frequency.toString(),
-              equipment_type: data.profile.equipment_type
-            });
-          } else {
-            console.log('ℹ️ No training profile found');
+            if (data.success && data.profile) {
+              userProfile = data.profile;
+              setUserTrainingProfile(data.profile);
+              console.log('✅ Training profile loaded:', data.profile);
+              
+              // Update calculator data
+              setCalculatorData({
+                training_goal: data.profile.training_goal,
+                training_frequency: data.profile.training_frequency.toString(),
+                equipment_type: data.profile.equipment_type
+              });
+            } else {
+              console.log('ℹ️ No training profile found');
+              if (!showOnboardingStep3) {
+                console.log('🔧 Creating basic profile for non-onboarding user');
+                await createBasicProfile();
+              }
+            }
+          } catch (jsonError) {
+            console.error('❌ Error parsing profile JSON:', jsonError);
             if (!showOnboardingStep3) {
-              console.log('🔧 Creating basic profile for non-onboarding user');
-            await createBasicProfile();
+              await createBasicProfile();
             }
           }
         } else {
           console.error('❌ Profile API error:', response.status, response.statusText);
           if (!showOnboardingStep3) {
-          await createBasicProfile();
+            await createBasicProfile();
           }
         }
       } else {
         console.error('❌ Training profile promise rejected:', profileResult.reason);
+        console.log('🔄 Profile API failed, attempting to create basic profile...');
         if (!showOnboardingStep3) {
-        await createBasicProfile();
+          try {
+            await createBasicProfile();
+          } catch (createError) {
+            console.error('❌ Failed to create basic profile:', createError);
+          }
         }
       }
       
       // Process schema period
       if (periodResult.status === 'fulfilled') {
-        const response = periodResult.value;
+        const response = periodResult.value as Response;
         if (response.ok) {
           const result = await response.json();
           setCurrentSchemaPeriod(result.data);
@@ -537,7 +610,7 @@ function TrainingschemasContent() {
       
       // Process schema progress
       if (progressResult.status === 'fulfilled') {
-        const response = progressResult.value;
+        const response = progressResult.value as Response;
         if (response.ok) {
           const data = await response.json();
           if (data.unlockedSchemas) {
@@ -555,7 +628,7 @@ function TrainingschemasContent() {
       
       // Process schema completion status
       if (completionResult.status === 'fulfilled') {
-        const response = completionResult.value;
+        const response = completionResult.value as Response;
         if (response.ok) {
           const data = await response.json();
           if (data.success && data.schemas) {
@@ -621,8 +694,21 @@ function TrainingschemasContent() {
       
     } catch (error) {
       console.error('❌ Parallel loading error:', error);
-      setTrainingError('Failed to load data');
+      
+      // Auto-retry for network errors (max 2 retries)
+      if (retryCount < 2 && (error instanceof TypeError || error instanceof Error)) {
+        console.log(`🔄 Auto-retry ${retryCount + 1}/2 in 3 seconds...`);
+        setTimeout(() => {
+          loadAllData(retryCount + 1);
+        }, 3000);
+        return;
+      }
+      
+      setTrainingError(`Failed to load data: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
+      // Clear the overall timeout
+      clearTimeout(overallTimeout);
+      
       const totalTime = Date.now() - totalStartTime;
       console.log(`⚡ [PERFORMANCE] Total loading time: ${totalTime}ms`);
       console.log('🏁 Loading completed, setting loading states to false');
@@ -671,30 +757,36 @@ function TrainingschemasContent() {
     
     console.log(`🎯 Mapping frontend goal "${profile.training_goal}" to database goal "${dbGoal}"`);
     
+    // OPTIMIZED: Use more efficient filtering with early returns
+    const startTime = Date.now();
+    
     // NEW APPROACH: Always show ALL schemas that match goal + frequency, regardless of equipment type
     // This ensures users see all 3 schemas (1, 2, 3) for their chosen goal and frequency
     const primaryMatches = schemas.filter(schema => {
-      const goalMatch = schema.training_goal === dbGoal;
-      const frequencyMatch = (schema.training_schema_days?.length || 0) === profile.training_frequency;
+      // Early return for performance
+      if (schema.training_goal !== dbGoal) return false;
+      if ((schema.training_schema_days?.length || 0) !== profile.training_frequency) return false;
       
-      console.log(`🔍 Schema "${schema.name}": goal=${goalMatch}, frequency=${frequencyMatch} (${schema.training_goal} vs ${dbGoal}, ${schema.training_schema_days?.length || 0} days vs ${profile.training_frequency})`);
-      
-      return goalMatch && frequencyMatch;
+      return true;
     });
+    
+    const filterTime = Date.now() - startTime;
+    console.log(`⚡ [PERFORMANCE] Filtering completed in ${filterTime}ms`);
     
     console.log(`🎯 Primary matches (goal + frequency): ${primaryMatches.length}`);
     primaryMatches.forEach(schema => {
       console.log(`  ✅ "${schema.name}" - Schema ${schema.schema_nummer} (${schema.training_goal}, ${schema.equipment_type}, ${schema.training_schema_days?.length || 0} days)`);
     });
     
-    // DEDUPLICATION: Remove duplicates based on schema_nummer
-    const uniqueMatches = primaryMatches.reduce((acc, schema) => {
-      const existing = acc.find(s => s.schema_nummer === schema.schema_nummer);
-      if (!existing) {
-        acc.push(schema);
+    // OPTIMIZED: Use Map for faster deduplication
+    const uniqueMatchesMap = new Map<number, TrainingSchema>();
+    primaryMatches.forEach(schema => {
+      if (schema.schema_nummer && !uniqueMatchesMap.has(schema.schema_nummer)) {
+        uniqueMatchesMap.set(schema.schema_nummer, schema);
       }
-      return acc;
-    }, [] as TrainingSchema[]);
+    });
+    
+    const uniqueMatches = Array.from(uniqueMatchesMap.values());
     
     console.log(`🎯 Unique matches after deduplication: ${uniqueMatches.length}`);
     
@@ -2413,11 +2505,11 @@ function TrainingschemasContent() {
                     <AcademicCapIcon className="h-5 w-5 sm:h-6 sm:w-6 text-[#8BAE5A]" />
                   </div>
                   <div>
-                    <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-white">Beschikbare Trainingsschemas</h2>
-                    <p className="text-xs sm:text-sm text-gray-400">Beschikbaar op basis van jouw profiel</p>
-                    <div className="mt-2 p-3 bg-[#8BAE5A]/10 border border-[#8BAE5A]/30 rounded-lg">
-                      <p className="text-xs sm:text-sm text-[#8BAE5A] leading-relaxed">
-                        <span className="font-semibold">📅 8-weken systeem:</span> De trainingsschemas gaan per 8 weken. Zodra je schema 1 hebt afgerond, wordt schema 2 beschikbaar. <span className="font-semibold">Consistentie zorgt voor resultaat</span> - daarom is het belangrijk een schema voor minimaal 8 weken te volgen.
+                    <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-semibold text-white break-words">Beschikbare Trainingsschemas</h2>
+                    <p className="text-xs sm:text-sm text-gray-400 break-words">Beschikbaar op basis van jouw profiel</p>
+                    <div className="mt-2 p-2 sm:p-3 bg-[#8BAE5A]/10 border border-[#8BAE5A]/30 rounded-lg">
+                      <p className="text-xs sm:text-sm text-[#8BAE5A] leading-relaxed break-words">
+                        <span className="font-semibold">📅 8-weken systeem:</span> Trainingsschemas gaan per 8 weken. Schema 2 wordt beschikbaar na voltooiing van schema 1. <span className="font-semibold">Consistentie zorgt voor resultaat</span> - volg een schema minimaal 8 weken.
                       </p>
                     </div>
                   </div>

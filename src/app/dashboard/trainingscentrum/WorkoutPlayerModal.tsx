@@ -226,7 +226,7 @@ export default function WorkoutPlayerModal({ isOpen, onClose, onComplete, traini
           <div className="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity" />
         </Transition.Child>
         <div className="fixed inset-0 z-10 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-4 text-center">
+          <div className="flex min-h-full items-start sm:items-center justify-center p-0 sm:p-4 text-center">
             <Transition.Child
               as={Fragment}
               enter="ease-out duration-300"
@@ -236,14 +236,14 @@ export default function WorkoutPlayerModal({ isOpen, onClose, onComplete, traini
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="relative w-full max-w-4xl transform overflow-hidden rounded-2xl bg-[#232D1A] p-0 text-left shadow-xl transition-all border border-[#8BAE5A]/40 flex flex-col md:flex-row">
+              <Dialog.Panel className="relative w-full h-full sm:max-w-4xl sm:h-auto transform overflow-hidden rounded-none sm:rounded-2xl bg-[#232D1A] p-0 text-left shadow-xl transition-all border-0 sm:border border-[#8BAE5A]/40 flex flex-col md:flex-row min-h-screen sm:min-h-[80vh]">
                 {/* Oefeningenlijst */}
-                <div className="w-full md:w-1/4 bg-[#1B2214] p-4 flex flex-col gap-2 border-r border-[#3A4D23]/40">
+                <div className="w-full md:w-1/4 bg-[#1B2214] p-2 sm:p-4 flex flex-col gap-1 sm:gap-2 border-r border-[#3A4D23]/40 max-h-[30vh] sm:max-h-none overflow-y-auto">
                   {exercises.map((ex, i) => (
                     <button
                       key={ex.name}
                       onClick={() => setActiveIdx(i)}
-                      className={`text-left px-3 py-2 rounded-xl font-semibold transition-all ${
+                      className={`text-left px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg font-semibold transition-all text-xs sm:text-sm ${
                         i === activeIdx
                           ? 'bg-gradient-to-r from-[#8BAE5A]/30 to-[#FFD700]/10 text-[#FFD700]' 
                           : 'bg-[#232D1A] text-[#8BAE5A] hover:bg-[#8BAE5A]/10'
@@ -254,37 +254,38 @@ export default function WorkoutPlayerModal({ isOpen, onClose, onComplete, traini
                   ))}
                 </div>
                 {/* Actieve oefening */}
-                <div className="flex-1 p-6 flex flex-col gap-4">
+                <div className="flex-1 p-2 sm:p-6 flex flex-col gap-2 sm:gap-4 overflow-y-auto">
                   <div className="flex items-center justify-between">
-                    <h2 className="text-2xl font-bold text-[#FFD700] mb-2">{activeExercise.name}</h2>
+                    <h2 className="text-base sm:text-2xl font-bold text-[#FFD700] mb-1 sm:mb-2">{activeExercise.name}</h2>
                     <button
                       onClick={() => setShowAlternatives(true)}
-                      className="p-2 rounded-lg bg-[#3A4D23] text-[#8BAE5A] hover:bg-[#8BAE5A] hover:text-[#181F17] transition-all"
+                      className="p-1.5 sm:p-2 rounded-lg bg-[#3A4D23] text-[#8BAE5A] hover:bg-[#8BAE5A] hover:text-[#181F17] transition-all"
                       title="Alternatieve oefeningen"
                     >
-                      <ArrowPathIcon className="h-5 w-5" />
+                      <ArrowPathIcon className="h-4 w-4 sm:h-5 sm:w-5" />
                     </button>
                   </div>
-                  <div className="flex flex-col md:flex-row gap-6">
+                  <div className="flex flex-col md:flex-row gap-3 sm:gap-6">
                     {/* Instructies */}
-                    <ul className="flex-1 list-disc pl-5 text-[#8BAE5A] text-sm">
+                    <ul className="flex-1 list-disc pl-4 sm:pl-5 text-[#8BAE5A] text-xs sm:text-sm">
                       {activeExercise.instructions.map((inst, i) => (
                         <li key={i}>{inst}</li>
                       ))}
                     </ul>
                   </div>
                   {/* Sets loggen */}
-                  <div className="mt-4">
-                    <h3 className="text-lg font-semibold text-[#8BAE5A] mb-2">Sets loggen</h3>
-                    <div className="flex flex-col gap-2">
+                  <div className="mt-2 sm:mt-4">
+                    <h3 className="text-sm sm:text-lg font-semibold text-[#8BAE5A] mb-1 sm:mb-2">Sets loggen</h3>
+                    <div className="flex flex-col gap-1.5 sm:gap-2">
                       {activeExercise.sets.map((set, setIdx) => (
-                        <div key={setIdx} className="flex items-center gap-3">
-                          <span className="text-[#FFD700] text-sm">Set {setIdx + 1}:</span>
+                        <div key={setIdx} className="flex flex-col sm:flex-row items-start sm:items-center gap-1.5 sm:gap-3">
+                          <span className="text-[#FFD700] text-xs sm:text-sm">Set {setIdx + 1}:</span>
                           <span className="text-[#8BAE5A]/70 text-xs">Vorige: {set.prevReps}x @ {set.prevWeight}kg</span>
-                          <input
-                            type="number"
-                            placeholder="Gewicht (kg)"
-                            className="w-20 px-2 py-1 rounded bg-[#181F17] border border-[#3A4D23]/40 text-white text-sm focus:outline-none"
+                          <div className="flex gap-1.5 sm:gap-2">
+                            <input
+                              type="number"
+                              placeholder="Gewicht (kg)"
+                              className="w-14 sm:w-20 px-2 py-1 rounded bg-[#181F17] border border-[#3A4D23]/40 text-white text-xs sm:text-sm focus:outline-none"
                             value={set.weight}
                             onChange={e => {
                               const val = e.target.value;
@@ -296,10 +297,10 @@ export default function WorkoutPlayerModal({ isOpen, onClose, onComplete, traini
                             }}
                             disabled={set.done}
                           />
-                          <input
-                            type="number"
-                            placeholder="Reps"
-                            className="w-16 px-2 py-1 rounded bg-[#181F17] border border-[#3A4D23]/40 text-white text-sm focus:outline-none"
+                            <input
+                              type="number"
+                              placeholder="Reps"
+                              className="w-10 sm:w-16 px-2 py-1 rounded bg-[#181F17] border border-[#3A4D23]/40 text-white text-xs sm:text-sm focus:outline-none"
                             value={set.reps}
                             onChange={e => {
                               const val = e.target.value;
@@ -311,32 +312,41 @@ export default function WorkoutPlayerModal({ isOpen, onClose, onComplete, traini
                             }}
                             disabled={set.done}
                           />
-                          <button
-                            className={`ml-2 px-3 py-1 rounded-xl text-xs font-bold ${set.done ? 'bg-[#8BAE5A]/30 text-[#8BAE5A]' : 'bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] hover:from-[#FFD700] hover:to-[#8BAE5A]'}`}
+                            <button
+                              className={`px-2 sm:px-3 py-1 rounded-lg text-xs font-bold ${set.done ? 'bg-[#8BAE5A]/30 text-[#8BAE5A]' : 'bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] hover:from-[#FFD700] hover:to-[#8BAE5A]'}`}
                             onClick={() => handleSetDone(activeIdx, setIdx)}
                             disabled={set.done || resting}
                           >
                             {set.done ? '✓' : 'Afvinken'}
-                          </button>
+                            </button>
+                          </div>
                         </div>
                       ))}
                     </div>
                   </div>
                   {/* Rust-timer */}
                   {resting && (
-                    <div className="mt-4 flex items-center gap-2">
-                      <span className="text-[#FFD700] font-bold">Rust:</span>
-                      <span className="text-[#8BAE5A] text-lg font-mono">{restTime}s</span>
+                    <div className="mt-2 sm:mt-4 flex items-center gap-2">
+                      <span className="text-[#FFD700] font-bold text-xs sm:text-base">Rust:</span>
+                      <span className="text-[#8BAE5A] text-sm sm:text-lg font-mono">{restTime}s</span>
                     </div>
                   )}
-                  {/* Voltooi training knop */}
-                  <div className="mt-8 flex justify-end">
-                    <button
-                      className="px-6 py-3 rounded-2xl bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] text-lg font-bold shadow-lg hover:from-[#FFD700] hover:to-[#8BAE5A] transition-all"
-                      onClick={handleCompleteWorkout}
-                    >
-                      VOLTOOI TRAINING
-                    </button>
+                  {/* Voltooi training knop - Sticky Footer */}
+                  <div className="sticky bottom-0 bg-[#232D1A] border-t border-[#3A4D23]/40 p-2 sm:p-4 -mx-2 sm:-mx-6 mt-4 sm:mt-8">
+                    <div className="flex gap-2 sm:gap-4">
+                      <button
+                        onClick={onClose}
+                        className="flex-1 px-3 sm:px-4 py-2 sm:py-3 bg-[#3A4D23] text-[#8BAE5A] font-semibold rounded-lg sm:rounded-xl hover:bg-[#8BAE5A] hover:text-[#181F17] transition-all text-xs sm:text-base"
+                      >
+                        Sluiten
+                      </button>
+                      <button
+                        onClick={handleCompleteWorkout}
+                        className="flex-1 px-3 sm:px-4 py-2 sm:py-3 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-bold rounded-lg sm:rounded-xl hover:from-[#FFD700] hover:to-[#8BAE5A] transition-all text-xs sm:text-base"
+                      >
+                        Voltooi Training
+                      </button>
+                    </div>
                   </div>
                 </div>
               </Dialog.Panel>

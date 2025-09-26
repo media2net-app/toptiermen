@@ -7,42 +7,131 @@ import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import PageLayout from '@/components/PageLayout';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-// Simple video player for fast loading like onboarding
+// Enhanced video player with better buffering and performance
 const SimpleVideoPlayer = ({ src, onEnded, onPlay, onPause, className }: any) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isBuffering, setIsBuffering] = useState(false);
+  const [bufferingTimeout, setBufferingTimeout] = useState<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
-    const handleWaiting = () => setIsBuffering(true);
-    const handleCanPlay = () => setIsBuffering(false);
+    // Enhanced buffering detection with timeout
+    const handleWaiting = () => {
+      setIsBuffering(true);
+      // Clear any existing timeout
+      if (bufferingTimeout) {
+        clearTimeout(bufferingTimeout);
+      }
+      // Set timeout to show buffering indicator after 500ms
+      const timeout = setTimeout(() => {
+        setIsBuffering(true);
+      }, 500);
+      setBufferingTimeout(timeout);
+    };
+
+    const handleCanPlay = () => {
+      setIsBuffering(false);
+      if (bufferingTimeout) {
+        clearTimeout(bufferingTimeout);
+        setBufferingTimeout(null);
+      }
+    };
+
+    const handleCanPlayThrough = () => {
+      setIsBuffering(false);
+      if (bufferingTimeout) {
+        clearTimeout(bufferingTimeout);
+        setBufferingTimeout(null);
+      }
+    };
+
     const handlePlay = () => {
       setIsBuffering(false);
+      if (bufferingTimeout) {
+        clearTimeout(bufferingTimeout);
+        setBufferingTimeout(null);
+      }
       onPlay?.();
     };
+
     const handlePause = () => {
       onPause?.();
     };
+
     const handleEnded = () => {
       onEnded?.();
     };
 
+    // Handle network state changes
+    const handleStalled = () => {
+      setIsBuffering(true);
+    };
+
+    const handleSuspend = () => {
+      setIsBuffering(false);
+    };
+
+    // Add event listeners
     video.addEventListener('waiting', handleWaiting);
     video.addEventListener('canplay', handleCanPlay);
+    video.addEventListener('canplaythrough', handleCanPlayThrough);
     video.addEventListener('play', handlePlay);
     video.addEventListener('pause', handlePause);
     video.addEventListener('ended', handleEnded);
+    video.addEventListener('stalled', handleStalled);
+    video.addEventListener('suspend', handleSuspend);
 
+    // Cleanup function
     return () => {
       video.removeEventListener('waiting', handleWaiting);
       video.removeEventListener('canplay', handleCanPlay);
+      video.removeEventListener('canplaythrough', handleCanPlayThrough);
       video.removeEventListener('play', handlePlay);
       video.removeEventListener('pause', handlePause);
       video.removeEventListener('ended', handleEnded);
+      video.removeEventListener('stalled', handleStalled);
+      video.removeEventListener('suspend', handleSuspend);
+      
+      if (bufferingTimeout) {
+        clearTimeout(bufferingTimeout);
+      }
     };
-  }, [onPlay, onPause, onEnded]);
+  }, [onPlay, onPause, onEnded, bufferingTimeout]);
+
+  // Optimize video buffering when component mounts
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    // Set video properties for better buffering
+    video.load(); // Force reload to apply new attributes
+    
+    // Add event listener for when video is ready
+    const handleLoadedData = () => {
+      console.log('Video data loaded successfully');
+    };
+
+    const handleProgress = () => {
+      if (video.buffered.length > 0) {
+        const bufferedEnd = video.buffered.end(video.buffered.length - 1);
+        const duration = video.duration;
+        if (duration > 0) {
+          const bufferedPercent = (bufferedEnd / duration) * 100;
+          console.log(`Video buffered: ${bufferedPercent.toFixed(1)}%`);
+        }
+      }
+    };
+
+    video.addEventListener('loadeddata', handleLoadedData);
+    video.addEventListener('progress', handleProgress);
+
+    return () => {
+      video.removeEventListener('loadeddata', handleLoadedData);
+      video.removeEventListener('progress', handleProgress);
+    };
+  }, [src]);
 
   return (
     <div className="relative aspect-video bg-black rounded-lg overflow-hidden">
@@ -50,19 +139,25 @@ const SimpleVideoPlayer = ({ src, onEnded, onPlay, onPause, className }: any) =>
         ref={videoRef}
         className={className}
         controls
-        preload="metadata"
+        preload="auto"
         playsInline
         crossOrigin="anonymous"
+        webkit-playsinline="true"
+        data-setup="{}"
+        poster=""
       >
         <source src={src} type="video/mp4" />
         Je browser ondersteunt geen video afspelen.
       </video>
       
       {isBuffering && (
-        <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-          <div className="bg-black/60 rounded-lg p-3 flex items-center gap-2">
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-            <span className="text-white text-sm">Bufferen...</span>
+        <div className="absolute inset-0 bg-black/30 flex items-center justify-center z-10">
+          <div className="bg-black/80 rounded-lg p-4 flex flex-col items-center gap-3">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#8BAE5A]"></div>
+            <div className="text-center">
+              <span className="text-white text-sm font-medium">Bufferen...</span>
+              <p className="text-gray-300 text-xs mt-1">Video wordt geladen</p>
+            </div>
           </div>
         </div>
       )}
@@ -524,6 +619,59 @@ export default function LessonDetailPage() {
       return () => clearTimeout(timeoutId);
     }
   }, [loading, lesson, lessonId]);
+
+  // Enhanced page visibility handler for PDF ebook returns
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        console.log('👁️ Lesson page became visible, checking loading state...');
+        
+        // If we're stuck loading, reset the state
+        if (loading && !error) {
+          console.log('🔄 Resetting stuck loading state in lesson...');
+          setLoading(false);
+          setError(null);
+          
+          // Retry data fetch
+          setTimeout(() => {
+            console.log('🔄 Retrying lesson data fetch after visibility change...');
+            fetchData();
+          }, 1000);
+        }
+      }
+    };
+
+    const handlePageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) {
+        console.log('📖 User returned from PDF ebook to lesson, resetting states...');
+        
+        // Reset loading if stuck
+        if (loading && !error) {
+          console.log('🔄 Resetting stuck loading after page show in lesson...');
+          setLoading(false);
+          setError(null);
+          
+          // Retry data fetch
+          setTimeout(() => {
+            console.log('🔄 Retrying lesson data fetch after page show...');
+            fetchData();
+          }, 1000);
+        }
+      }
+    };
+
+    if (typeof window !== 'undefined') {
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+      window.addEventListener('pageshow', handlePageShow);
+    }
+
+    return () => {
+      if (typeof window !== 'undefined') {
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
+        window.removeEventListener('pageshow', handlePageShow);
+      }
+    };
+  }, [loading, error, lessonId]);
 
   // CRITICAL: Emergency reset when user returns from external tab
   useEffect(() => {

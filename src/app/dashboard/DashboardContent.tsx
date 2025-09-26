@@ -113,33 +113,39 @@ const baseMenu = [
   { label: 'Mentorship & Coaching', icon: ChatBubbleLeftRightIcon, href: '/dashboard/mentorship-en-coaching', onboardingStep: 7 },
 ];
 
-// Function to get menu with conditional onboarding button
+// Function to get menu with conditional onboarding button - ENHANCED LOGIC
 const getMenu = (isOnboardingCompleted: boolean, isLoading: boolean = false) => {
-  // Don't show onboarding button while loading to prevent flash
-  if (isLoading) {
+  console.log('🔍 getMenu called with:', { isOnboardingCompleted, isLoading });
+  
+  // CRITICAL: Don't show onboarding button while loading to prevent flash
+  if (isLoading === true) {
+    console.log('⏳ Loading state active, returning base menu');
     return baseMenu;
   }
   
-  // Only show onboarding button if onboarding is explicitly not completed
-  // Use strict equality to ensure we only show when definitely not completed
-  if (isOnboardingCompleted === true) {
-    return baseMenu;
-  }
-  
-  // If onboarding status is undefined or null, don't show onboarding button
+  // CRITICAL: If onboarding status is undefined or null, don't show onboarding button
   if (isOnboardingCompleted === undefined || isOnboardingCompleted === null) {
+    console.log('❓ Onboarding status undefined/null, returning base menu');
     return baseMenu;
   }
   
-  // Only show onboarding button if onboarding is explicitly false
+  // CRITICAL: Only show onboarding button if onboarding is explicitly false
   if (isOnboardingCompleted === false) {
+    console.log('✅ Onboarding not completed, showing onboarding button');
     return [
       { label: 'Onboarding', icon: CheckCircleIcon, href: null, onboardingStep: 1, isOnboardingItem: true, isDynamic: true },
       ...baseMenu
     ];
   }
   
-  // Default to base menu for any other case
+  // CRITICAL: If onboarding is completed (true), don't show onboarding button
+  if (isOnboardingCompleted === true) {
+    console.log('✅ Onboarding completed, returning base menu');
+    return baseMenu;
+  }
+  
+  // Default to base menu for any other case (safety fallback)
+  console.log('🔄 Default case, returning base menu');
   return baseMenu;
 };
 
@@ -166,12 +172,18 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
   // Use currentStep from actualOnboardingStatus if available, otherwise fallback to useOnboarding hook
   const actualCurrentStep = actualOnboardingStatus?.current_step ?? currentStep;
   
-  // Get menu with conditional onboarding button - pass loading state to prevent flash
-  // Use loading state to prevent flash during initial load
-  const mobileMenu = getMenu(
-    isLoading ? undefined : (actualOnboardingStatus?.onboarding_completed || isCompleted), 
-    isLoading
-  );
+  // Get menu with conditional onboarding button - ENHANCED LOGIC
+  // CRITICAL: Always pass loading state to prevent flash
+  const onboardingCompleted = actualOnboardingStatus?.onboarding_completed ?? isCompleted;
+  const mobileMenu = getMenu(onboardingCompleted, isLoading);
+  
+  console.log('🔍 MobileSidebarContent menu calculation:', {
+    actualOnboardingStatus: actualOnboardingStatus?.onboarding_completed,
+    isCompleted,
+    onboardingCompleted,
+    isLoading,
+    menuLength: mobileMenu.length
+  });
 
 
   // Function to check if a menu item should be visible based on subscription tier and admin status
@@ -198,7 +210,7 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
     if (actualOnboardingStatus?.onboarding_completed) {
       // Special case: If user completed onboarding but is still on forum intro step
       // Only allow Brotherhood > Forum access
-      if (actualCurrentStep === 5 || safePathname.includes('/brotherhood/forum')) {
+      if (actualCurrentStep === 5) {
         // Allow Brotherhood parent item (so it can be expanded)
         if (item.label === 'Brotherhood') {
           return false; // Not disabled - allow expansion
@@ -358,7 +370,7 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
           // Special case for step 6: Brotherhood should be active when on forum pages
           const isActive = !isCompleted 
             ? (safePathname === item.href && item.onboardingStep === actualCurrentStep) ||
-              (actualCurrentStep === 6 && item.label === 'Brotherhood' && safePathname.includes('/brotherhood/forum'))
+              (actualCurrentStep === 6 && item.label === 'Brotherhood')
             : safePathname === item.href;
           const hasSubmenu = mobileMenu.some(sub => 'parent' in sub && sub.parent === item.label);
 
@@ -374,7 +386,7 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
             const hasActiveSubItem = subItems.some(sub => 
               !isCompleted 
                 ? (sub.href === safePathname && sub.onboardingStep === actualCurrentStep) ||
-                  (actualCurrentStep === 5 && sub.label === 'Forum' && safePathname.includes('/brotherhood/forum'))
+                  (actualCurrentStep === 5 && sub.label === 'Forum')
                 : sub.href === safePathname
             );
             const allSubItemsDisabled = subItems.every(sub => isMenuItemDisabled(sub));
@@ -417,7 +429,7 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
                       {subItems.map(sub => {
                         const isSubActive = !isCompleted 
                           ? (safePathname === sub.href && sub.onboardingStep === actualCurrentStep) ||
-                            (actualCurrentStep === 5 && sub.label === 'Forum' && safePathname.includes('/brotherhood/forum'))
+                            (actualCurrentStep === 5 && sub.label === 'Forum')
                           : safePathname === sub.href;
                         const isHighlighted = false; // highlightedMenu not available in V2
                         const isDisabled = isMenuItemDisabled(sub);
@@ -559,8 +571,18 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
   // Use currentStep from actualOnboardingStatus if available, otherwise fallback to useOnboarding hook
   const actualCurrentStep = actualOnboardingStatus?.current_step ?? currentStep;
   
-  // Get menu with conditional onboarding button - pass loading state to prevent flash
-  const menu = getMenu(actualOnboardingStatus?.onboarding_completed || isCompleted, isLoading);
+  // Get menu with conditional onboarding button - ENHANCED LOGIC
+  // CRITICAL: Always pass loading state to prevent flash
+  const onboardingCompleted = actualOnboardingStatus?.onboarding_completed ?? isCompleted;
+  const menu = getMenu(onboardingCompleted, isLoading);
+  
+  console.log('🔍 SidebarContent menu calculation:', {
+    actualOnboardingStatus: actualOnboardingStatus?.onboarding_completed,
+    isCompleted,
+    onboardingCompleted,
+    isLoading,
+    menuLength: menu.length
+  });
 
   // Function to check if a menu item should be visible based on subscription tier and admin status
   const isMenuItemVisible = (item: any) => {
@@ -586,7 +608,7 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
     if (actualOnboardingStatus?.onboarding_completed) {
       // Special case: If user completed onboarding but is still on forum intro step
       // Only allow Brotherhood > Forum access
-      if (actualCurrentStep === 5 || safePathname.includes('/brotherhood/forum')) {
+      if (actualCurrentStep === 5) {
         // Allow Brotherhood parent item (so it can be expanded)
         if (item.label === 'Brotherhood') {
           return false; // Not disabled - allow expansion
@@ -747,7 +769,7 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
           // Special case for step 6: Brotherhood should be active when on forum pages
           const isActive = !isCompleted 
             ? (safePathname === item.href && item.onboardingStep === actualCurrentStep) ||
-              (actualCurrentStep === 6 && item.label === 'Brotherhood' && safePathname.includes('/brotherhood/forum'))
+              (actualCurrentStep === 6 && item.label === 'Brotherhood')
             : safePathname === item.href;
           const hasSubmenu = sidebarMenu.some(sub => 'parent' in sub && sub.parent === item.label);
 
@@ -763,7 +785,7 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
             const hasActiveSubItem = subItems.some(sub => 
               !isCompleted 
                 ? (sub.href === safePathname && sub.onboardingStep === actualCurrentStep) ||
-                  (actualCurrentStep === 5 && sub.label === 'Forum' && safePathname.includes('/brotherhood/forum'))
+                  (actualCurrentStep === 5 && sub.label === 'Forum')
                 : sub.href === safePathname
             );
             const allSubItemsDisabled = subItems.every(sub => isMenuItemDisabled(sub));
@@ -811,7 +833,7 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
                       {subItems.map(sub => {
                         const isSubActive = !isCompleted 
                           ? (safePathname === sub.href && sub.onboardingStep === actualCurrentStep) ||
-                            (actualCurrentStep === 5 && sub.label === 'Forum' && safePathname.includes('/brotherhood/forum'))
+                            (actualCurrentStep === 5 && sub.label === 'Forum')
                           : safePathname === sub.href;
                         const isHighlighted = false; // highlightedMenu not available in V2
                         const isDisabled = isMenuItemDisabled(sub);
@@ -968,22 +990,28 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
     }
   }, [refreshStatus]); // Add refreshStatus to dependency array
 
-  // Sync onboardingStatus with context changes
+  // Sync onboardingStatus with context changes - ENHANCED
   useEffect(() => {
     // Only run on client side to prevent hydration issues
     if (typeof window === 'undefined') return;
     
     if (contextIsCompleted !== undefined && contextCurrentStep !== undefined) {
+      console.log('🔄 Syncing onboarding status:', { contextIsCompleted, contextCurrentStep });
       setOnboardingStatus({
         onboarding_completed: contextIsCompleted,
         current_step: contextCurrentStep
       });
-      // console.log('🔄 [DASHBOARD] Syncing onboarding status:', {
-      //   contextIsCompleted,
-      //   contextCurrentStep
-      // });
     }
   }, [contextIsCompleted, contextCurrentStep]);
+  
+  // CRITICAL: Reset onboarding status when user logs out
+  useEffect(() => {
+    if (!user) {
+      console.log('🔍 User logged out, resetting onboarding status');
+      setOnboardingStatus(null);
+      setShowForcedOnboarding(false);
+    }
+  }, [user]);
 
   // 2.0.1: Cache busting for existing users
   useEffect(() => {
@@ -1507,10 +1535,7 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
         {/* Floating Workout Widget */}
         {typeof window !== 'undefined' && <WorkoutWidget />}
         
-        {/* Mobile Navigation - Hidden during onboarding */}
-        {!(!onboardingLoading && !isCompleted && contextCurrentStep !== null) && (
-          <MobileNav onMenuClick={() => setIsMobileMenuOpen(true)} />
-        )}
+        {/* Mobile Navigation - Completely removed */}
       </div>
     </>
   );

@@ -169,6 +169,59 @@ export default function ModuleDetailPage() {
     }
   }, [moduleId]);
 
+  // Handle page visibility changes to reset loading states when returning from PDF ebooks
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        console.log('👁️ Module page became visible, checking loading state...');
+        
+        // If we're stuck loading, reset the state
+        if (loading && !error) {
+          console.log('🔄 Resetting stuck loading state in module...');
+          setLoading(false);
+          setError(null);
+          
+          // Retry data fetch
+          setTimeout(() => {
+            console.log('🔄 Retrying module data fetch after visibility change...');
+            fetchModuleData();
+          }, 1000);
+        }
+      }
+    };
+
+    const handlePageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) {
+        console.log('📖 User returned from PDF ebook to module, resetting states...');
+        
+        // Reset loading if stuck
+        if (loading && !error) {
+          console.log('🔄 Resetting stuck loading after page show in module...');
+          setLoading(false);
+          setError(null);
+          
+          // Retry data fetch
+          setTimeout(() => {
+            console.log('🔄 Retrying module data fetch after page show...');
+            fetchModuleData();
+          }, 1000);
+        }
+      }
+    };
+
+    if (typeof window !== 'undefined') {
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+      window.addEventListener('pageshow', handlePageShow);
+    }
+
+    return () => {
+      if (typeof window !== 'undefined') {
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
+        window.removeEventListener('pageshow', handlePageShow);
+      }
+    };
+  }, [loading, error, moduleId]);
+
   // Retry function for failed data fetches
   const handleRetry = () => {
     console.log('🔄 Retrying module data fetch...');

@@ -137,7 +137,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
       setLoading(false);
       setIsInitialized(true); // Mark as initialized even on timeout
       // Don't clear user state on timeout - this might cause unwanted redirects
-    }, 2000); // 2 second timeout for auth initialization
+    }, 1000); // 1 second timeout for auth initialization
 
     getInitialSession().then(() => {
       clearTimeout(initTimeout);

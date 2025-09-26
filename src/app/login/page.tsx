@@ -98,7 +98,7 @@ function LoginPageContent() {
     const fallbackTimeout = setTimeout(() => {
       console.log('⚠️ Login page timeout - forcing completion');
       setLoginState(prev => ({ ...prev, isLoading: false }));
-    }, 500); // Reduced to 0.5s for faster loading
+    }, 200); // Reduced to 0.2s for faster loading
     
     return () => clearTimeout(fallbackTimeout);
   }, []);
@@ -110,7 +110,7 @@ function LoginPageContent() {
         console.log('⚠️ Auth context loading timeout - forcing auth completion');
         // Force auth to complete if it's taking too long
       }
-    }, 3000); // 3 second timeout for auth loading
+    }, 1000); // 1 second timeout for auth loading
     
     return () => clearTimeout(authTimeout);
   }, [loading, loginState.isClient]);
@@ -191,7 +191,7 @@ function LoginPageContent() {
       setTimeout(() => {
         console.log('🚀 Executing redirect to:', targetPath);
         router.replace(targetPath);
-      }, 800); // Reduced time for faster redirect
+      }, 300); // Reduced time for faster redirect
       
       // Fallback redirect if the first one doesn't work
       setTimeout(() => {
@@ -199,7 +199,7 @@ function LoginPageContent() {
           console.log('🔄 Fallback redirect - forcing navigation to:', targetPath);
           window.location.href = targetPath;
         }
-      }, 2000); // Fallback after 2 seconds
+      }, 1000); // Fallback after 1 second
     } else if (!user && !loading) {
       console.log('ℹ️ No authenticated user found, staying on login page');
     } else {

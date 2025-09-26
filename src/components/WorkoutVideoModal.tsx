@@ -107,27 +107,27 @@ export default function WorkoutVideoModal({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80"
+          className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 bg-black/80"
           onClick={onClose}
         >
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
-            className="relative w-full max-w-4xl bg-[#181F17] rounded-2xl overflow-hidden shadow-2xl"
+            className="relative w-full h-full sm:max-w-4xl sm:h-auto bg-[#181F17] rounded-none sm:rounded-2xl overflow-hidden shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-6 bg-[#232D1A] border-b border-[#3A4D23]">
+            <div className="flex items-center justify-between p-3 sm:p-6 bg-[#232D1A] border-b border-[#3A4D23]">
               <div>
-                <h2 className="text-2xl font-bold text-white">{exerciseName}</h2>
-                <p className="text-[#8BAE5A]">Workout Video Tutorial</p>
+                <h2 className="text-lg sm:text-2xl font-bold text-white">{exerciseName}</h2>
+                <p className="text-[#8BAE5A] text-sm sm:text-base">Workout Video Tutorial</p>
               </div>
               <button
                 onClick={onClose}
-                className="p-2 text-gray-400 hover:text-white transition-colors"
+                className="p-1.5 sm:p-2 text-gray-400 hover:text-white transition-colors"
               >
-                <XMarkIcon className="w-6 h-6" />
+                <XMarkIcon className="w-5 h-5 sm:w-6 sm:h-6" />
               </button>
             </div>
 
@@ -151,21 +151,21 @@ export default function WorkoutVideoModal({
                   
                   {/* Video Controls Overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 hover:opacity-100 transition-opacity">
-                    <div className="absolute bottom-0 left-0 right-0 p-4">
+                    <div className="absolute bottom-0 left-0 right-0 p-2 sm:p-4">
                       {/* Progress Bar */}
-                      <div className="mb-4">
+                      <div className="mb-2 sm:mb-4">
                         <input
                           type="range"
                           min="0"
                           max={duration || 0}
                           value={currentTime}
                           onChange={handleSeek}
-                          className="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer slider"
+                          className="w-full h-1.5 sm:h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer slider"
                           style={{
                             background: `linear-gradient(to right, #8BAE5A 0%, #8BAE5A ${(currentTime / (duration || 1)) * 100}%, #4A5568 ${(currentTime / (duration || 1)) * 100}%, #4A5568 100%)`
                           }}
                         />
-                        <div className="flex justify-between text-sm text-white mt-1">
+                        <div className="flex justify-between text-xs sm:text-sm text-white mt-1">
                           <span>{formatTime(currentTime)}</span>
                           <span>{formatTime(duration)}</span>
                         </div>
@@ -173,26 +173,26 @@ export default function WorkoutVideoModal({
 
                       {/* Control Buttons */}
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2 sm:gap-4">
                           <button
                             onClick={togglePlay}
-                            className="p-2 bg-[#8BAE5A] rounded-full hover:bg-[#7A9D4A] transition-colors"
+                            className="p-1.5 sm:p-2 bg-[#8BAE5A] rounded-full hover:bg-[#7A9D4A] transition-colors"
                           >
                             {isPlaying ? (
-                              <PauseIcon className="w-6 h-6 text-white" />
+                              <PauseIcon className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
                             ) : (
-                              <PlayIcon className="w-6 h-6 text-white" />
+                              <PlayIcon className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
                             )}
                           </button>
                           
                           <button
                             onClick={toggleMute}
-                            className="p-2 bg-gray-600 rounded-full hover:bg-gray-500 transition-colors"
+                            className="p-1.5 sm:p-2 bg-gray-600 rounded-full hover:bg-gray-500 transition-colors"
                           >
                             {isMuted ? (
-                              <SpeakerXMarkIcon className="w-5 h-5 text-white" />
+                              <SpeakerXMarkIcon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                             ) : (
-                              <SpeakerWaveIcon className="w-5 h-5 text-white" />
+                              <SpeakerWaveIcon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                             )}
                           </button>
                         </div>
@@ -218,41 +218,41 @@ export default function WorkoutVideoModal({
 
             {/* Exercise Details */}
             {exerciseDetails && (
-              <div className="p-6 bg-[#232D1A]">
-                <h3 className="text-lg font-semibold text-white mb-4">Oefening Details</h3>
-                <div className="grid grid-cols-3 gap-4 mb-4">
-                  <div className="text-center p-3 bg-[#181F17] rounded-lg">
-                    <div className="text-2xl font-bold text-[#8BAE5A]">{exerciseDetails.sets}</div>
-                    <div className="text-sm text-gray-400">Sets</div>
+              <div className="p-3 sm:p-6 bg-[#232D1A]">
+                <h3 className="text-base sm:text-lg font-semibold text-white mb-2 sm:mb-4">Oefening Details</h3>
+                <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-2 sm:mb-4">
+                  <div className="text-center p-2 sm:p-3 bg-[#181F17] rounded-lg">
+                    <div className="text-lg sm:text-2xl font-bold text-[#8BAE5A]">{exerciseDetails.sets}</div>
+                    <div className="text-xs sm:text-sm text-gray-400">Sets</div>
                   </div>
-                  <div className="text-center p-3 bg-[#181F17] rounded-lg">
-                    <div className="text-2xl font-bold text-[#FFD700]">{exerciseDetails.reps}</div>
-                    <div className="text-sm text-gray-400">Reps</div>
+                  <div className="text-center p-2 sm:p-3 bg-[#181F17] rounded-lg">
+                    <div className="text-lg sm:text-2xl font-bold text-[#FFD700]">{exerciseDetails.reps}</div>
+                    <div className="text-xs sm:text-sm text-gray-400">Reps</div>
                   </div>
-                  <div className="text-center p-3 bg-[#181F17] rounded-lg">
-                    <div className="text-2xl font-bold text-[#f0a14f]">{exerciseDetails.rest}</div>
-                    <div className="text-sm text-gray-400">Rust</div>
+                  <div className="text-center p-2 sm:p-3 bg-[#181F17] rounded-lg">
+                    <div className="text-lg sm:text-2xl font-bold text-[#f0a14f]">{exerciseDetails.rest}</div>
+                    <div className="text-xs sm:text-sm text-gray-400">Rust</div>
                   </div>
                 </div>
                 
                 {exerciseDetails.notes && (
-                  <div className="p-4 bg-[#181F17] rounded-lg">
-                    <h4 className="font-semibold text-[#8BAE5A] mb-2">Notities</h4>
-                    <p className="text-gray-300 text-sm">{exerciseDetails.notes}</p>
+                  <div className="p-3 sm:p-4 bg-[#181F17] rounded-lg">
+                    <h4 className="font-semibold text-[#8BAE5A] mb-1 sm:mb-2 text-sm sm:text-base">Notities</h4>
+                    <p className="text-gray-300 text-xs sm:text-sm">{exerciseDetails.notes}</p>
                   </div>
                 )}
               </div>
             )}
 
             {/* Footer */}
-            <div className="p-6 bg-[#181F17] border-t border-[#3A4D23]">
-              <div className="flex justify-between items-center">
-                <p className="text-gray-400 text-sm">
+            <div className="p-3 sm:p-6 bg-[#181F17] border-t border-[#3A4D23]">
+              <div className="flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-0">
+                <p className="text-gray-400 text-xs sm:text-sm text-center sm:text-left">
                   Bekijk de video aandachtig voor de juiste uitvoering
                 </p>
                 <button
                   onClick={onClose}
-                  className="px-6 py-2 bg-[#8BAE5A] text-white font-semibold rounded-lg hover:bg-[#7A9D4A] transition-colors"
+                  className="px-4 sm:px-6 py-2 bg-[#8BAE5A] text-white font-semibold rounded-lg hover:bg-[#7A9D4A] transition-colors text-sm sm:text-base"
                 >
                   Sluiten
                 </button>

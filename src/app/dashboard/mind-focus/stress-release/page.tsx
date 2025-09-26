@@ -297,7 +297,7 @@ export default function StressReleasePage() {
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
         <div className="bg-[#1A2A1A] rounded-xl shadow-2xl border border-[#2A3A1A] p-6">
           <div className="text-3xl font-bold text-white mb-2">
             {completedSessions.length}
@@ -320,11 +320,11 @@ export default function StressReleasePage() {
 
       {/* Getting Started */}
       <div className="bg-[#1A2A1A] rounded-xl shadow-2xl border border-[#2A3A1A] p-8">
-        <h2 className="text-2xl font-bold text-white mb-6 flex items-center">
-          <PlayIcon className="w-8 h-8 text-[#B6C948] mr-3" />
+        <h2 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6 flex items-center">
+          <PlayIcon className="w-6 h-6 sm:w-8 sm:h-8 text-[#B6C948] mr-2 sm:mr-3" />
           Hoe begin je met Stress Release?
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
           <div className="text-center">
             <div className="w-16 h-16 bg-[#B6C948]/20 rounded-full flex items-center justify-center mx-auto mb-4">
               <span className="text-2xl font-bold text-[#B6C948]">1</span>
@@ -405,7 +405,7 @@ export default function StressReleasePage() {
       )}
 
       {/* Sessions Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {stressSessions.map((session) => (
           <motion.div
             key={session.id}
@@ -463,7 +463,7 @@ export default function StressReleasePage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
         {dailyTasks.map((task) => (
           <motion.div
             key={task.id}
@@ -523,7 +523,7 @@ export default function StressReleasePage() {
       <h2 className="text-2xl font-bold text-white">Jouw Stress Release Progress</h2>
       
       {/* Progress Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
         <div className="bg-[#1A2A1A] rounded-xl shadow-2xl border border-[#2A3A1A] p-6">
           <h3 className="text-lg font-semibold text-white mb-4">Sessie Progress</h3>
           <div className="space-y-3">
@@ -585,7 +585,7 @@ export default function StressReleasePage() {
       {/* Achievements */}
       <div className="bg-[#1A2A1A] rounded-xl shadow-2xl border border-[#2A3A1A] p-6">
         <h3 className="text-lg font-semibold text-white mb-4">🏆 Stress Release Achievements</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
           <div className={`p-4 rounded-lg border-2 ${
             completedSessions.length >= 1 
               ? 'border-[#B6C948] bg-[#B6C948]/10' 
