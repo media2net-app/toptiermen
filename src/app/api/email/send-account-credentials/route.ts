@@ -13,9 +13,13 @@ export async function POST(request: NextRequest) {
       'Je Top Tier Men Accountgegevens - Platform',
       'account-credentials',
       {
+        name: 'lemicky_91',
+        email: 'lemicky_91@icloud.com',
         username: 'lemicky_91',
-        password: 'TempPassword123!',
+        tempPassword: 'TempPassword123!',
+        platformUrl: 'https://platform.toptiermen.eu',
         loginUrl: 'https://platform.toptiermen.eu/login',
+        packageType: 'Premium Tier',
         supportEmail: 'support@toptiermen.eu'
       },
       {

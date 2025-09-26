@@ -20,9 +20,13 @@ export async function POST(request: NextRequest) {
       'Je Top Tier Men Accountgegevens - Platform',
       'account-credentials',
       {
+        name: username,
+        email: email,
         username: username,
-        password: password,
+        tempPassword: password,
+        platformUrl: 'https://platform.toptiermen.eu',
         loginUrl: 'https://platform.toptiermen.eu/login',
+        packageType: 'Premium Tier',
         supportEmail: 'support@toptiermen.eu'
       },
       {
