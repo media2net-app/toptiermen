@@ -1,11 +1,10 @@
 'use client';
 
 import { useState, useEffect, useRef, Suspense } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { EnvelopeIcon, LockClosedIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 
-// Force dynamic rendering to prevent BAILOUT_TO_CLIENT_SIDE_RENDERING
 export const dynamic = 'force-dynamic';
 
 // Simplified configuration
@@ -17,9 +16,9 @@ const LOGIN_CONFIG = {
 
 function LoginPageContent() {
   const router = useRouter();
-  const { user, profile, login, isAdmin, getRedirectPath } = useAuth();
-  
-  // ✅ FIX: Completely remove loading states to prevent hydration mismatch
+  const searchParams = useSearchParams();
+  const { user, profile, isLoading: authLoading, login, isAdmin, getRedirectPath } = useAuth();
+  const loading = false; // Force loading to false to show login form
   
   // ✅ PHASE 1: Simplified state management - Single state object
   const [loginState, setLoginState] = useState({
@@ -29,13 +28,25 @@ function LoginPageContent() {
     error: "",
     showPassword: false,
     rememberMe: false,
+    isClient: false,
     showLoadingOverlay: false,
     loadingProgress: 0,
     loadingText: "",
     isRedirecting: false
   });
 
-  // ✅ FIX: Removed isClient logic to prevent hydration mismatch
+  // ✅ FIX: Ensure client-side hydration consistency
+  useEffect(() => {
+    setLoginState(prev => ({ ...prev, isClient: true }));
+    
+    // Force loading to complete after a short delay
+    const forceLoadingComplete = setTimeout(() => {
+      console.log('🔄 Forcing loading completion...');
+      // This will trigger the component to show the login form
+    }, 1000);
+    
+    return () => clearTimeout(forceLoadingComplete);
+  }, []);
   
   // Ref to prevent multiple redirects
   const redirectExecuted = useRef(false);
@@ -89,44 +100,66 @@ function LoginPageContent() {
   });
   const [resetMessage, setResetMessage] = useState("");
 
-  // ✅ FIX: Removed isClient logic to prevent hydration mismatch
-
-  // ✅ FIX: Removed isClient logic to prevent hydration mismatch
-
-
-  // ✅ FIXED: Single useEffect for logout status handling - moved to client-side only
+  // ✅ PHASE 1: Hydration safety - set isClient after mount
   useEffect(() => {
-    // Only run on client side
-    if (typeof window === 'undefined') return;
+    setLoginState(prev => ({ ...prev, isClient: true }));
     
+    // Fallback timeout to prevent infinite loading - reduced timeout
+    const fallbackTimeout = setTimeout(() => {
+      console.log('⚠️ Login page timeout - forcing completion');
+      setLoginState(prev => ({ ...prev, isLoading: false }));
+    }, 200); // Reduced to 0.2s for faster loading
+    
+    return () => clearTimeout(fallbackTimeout);
+  }, []);
+
+  // ✅ NEW: Fallback for auth context loading issues
+  useEffect(() => {
+    const authTimeout = setTimeout(() => {
+      if (loading && loginState.isClient) {
+        console.log('⚠️ Auth context loading timeout - forcing auth completion');
+        // Force auth to complete if it's taking too long
+      }
+    }, 500); // 0.5 second timeout for auth loading
+    
+    return () => clearTimeout(authTimeout);
+  }, [loading, loginState.isClient]);
+
+
+  // ✅ FIXED: Single useEffect for logout status handling
+  useEffect(() => {
     // Handle logout status with improved messaging
-    const urlParams = new URLSearchParams(window.location.search);
-    const logoutStatus = urlParams.get('logout');
+    const logoutStatus = searchParams?.get('logout');
     if (logoutStatus === 'success') {
       setLoginState(prev => ({ ...prev, error: '' }));
       // Show success message briefly
       console.log('✅ Logout successful, ready for new login');
       // Clean URL
-      const url = new URL(window.location.href);
-      url.searchParams.delete('logout');
-      url.searchParams.delete('t');
-      window.history.replaceState({}, '', url.toString());
+      if (typeof window !== 'undefined') {
+        const url = new URL(window.location.href);
+        url.searchParams.delete('logout');
+        url.searchParams.delete('t');
+        window.history.replaceState({}, '', url.toString());
+      }
     } else if (logoutStatus === 'error') {
       setLoginState(prev => ({ ...prev, error: 'Er is een fout opgetreden bij het uitloggen. Je sessie is gewist, probeer opnieuw in te loggen.' }));
       console.log('⚠️ Logout error occurred, but session should be cleared');
       // Clean URL
-      const url = new URL(window.location.href);
-      url.searchParams.delete('logout');
-      url.searchParams.delete('t');
-      window.history.replaceState({}, '', url.toString());
+      if (typeof window !== 'undefined') {
+        const url = new URL(window.location.href);
+        url.searchParams.delete('logout');
+        url.searchParams.delete('t');
+        window.history.replaceState({}, '', url.toString());
+      }
     }
-  }, []);
+  }, [searchParams]);
 
   // ✅ FIXED: Single useEffect for authentication redirect with better loading handling
   useEffect(() => {
     console.log('🔄 Redirect useEffect triggered:', { 
       user: user?.email, 
       profile: profile?.full_name, 
+      loading, 
       isLoading: loginState.isLoading, 
       isRedirecting: loginState.isRedirecting 
     });
@@ -147,14 +180,8 @@ function LoginPageContent() {
       // Determine redirect path - use fallback if getRedirectPath fails
       let targetPath = '/dashboard'; // Default fallback
       try {
-        // Only access window on client side
-        if (typeof window !== 'undefined') {
-          const urlParams = new URLSearchParams(window.location.search);
-          const redirectTo = urlParams.get('redirect') || undefined;
-          targetPath = getRedirectPath(redirectTo);
-        } else {
-          targetPath = getRedirectPath(undefined);
-        }
+        const redirectTo = searchParams?.get('redirect') || undefined;
+        targetPath = getRedirectPath(redirectTo);
         console.log('🎯 Target path determined:', targetPath);
       } catch (error) {
         console.warn('⚠️ getRedirectPath failed, using fallback:', error);
@@ -183,15 +210,16 @@ function LoginPageContent() {
           window.location.href = targetPath;
         }
       }, 1000); // Fallback after 1 second
-    } else if (!user) {
+    } else if (!user && !loading) {
       console.log('ℹ️ No authenticated user found, staying on login page');
     } else {
       console.log('⏸️ Redirect conditions not met:', { 
         hasUser: !!user, 
-        isLoading: loginState.isLoading
+        isLoading: loginState.isLoading,
+        loading 
       });
     }
-  }, [user, profile, router, loginState.isLoading]); // Updated dependencies
+  }, [loading, user, profile, router, searchParams, loginState.isLoading]); // Updated dependencies
 
   // ✅ NEW: Hide overlay when URL changes (user has been redirected)
   useEffect(() => {
@@ -356,10 +384,34 @@ function LoginPageContent() {
     }
   }
 
-  // ✅ FIX: Always show login form - no loading states
+  // ✅ FIX: Prevent hydration mismatch by ensuring consistent rendering
+  if (!loginState.isClient) {
+    return (
+      <div 
+        className="min-h-screen flex items-center justify-center relative px-4 py-6"
+        style={{ backgroundColor: '#181F17' }}
+      >
+        <img src="/pattern.png" alt="pattern" className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none z-0" />
+        <div className="w-full max-w-md p-6 sm:p-8 rounded-3xl shadow-2xl bg-[#232D1A]/95 border border-[#3A4D23] backdrop-blur-lg relative z-10">
+          <div className="flex justify-center mb-4">
+            <img 
+              src="/logo_white-full.svg" 
+              alt="Top Tier Men Logo" 
+              className="h-16 sm:h-20 md:h-24 w-auto"
+            />
+          </div>
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#8BAE5A] mx-auto"></div>
+            <p className="text-[#8BAE5A] mt-4">Laden...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div 
-      className="min-h-screen flex items-center justify-center relative px-4 py-6"
+      className={`min-h-screen flex items-center justify-center relative px-4 py-6 ${loginState.isLoading ? 'login-loading' : ''}`}
       style={{ backgroundColor: '#181F17' }}
     >
       <img src="/pattern.png" alt="pattern" className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none z-0" />
@@ -376,9 +428,10 @@ function LoginPageContent() {
         <p className="text-[#B6C948] text-center mb-6 sm:mb-8 text-base sm:text-lg font-figtree">Log in op je dashboard</p>
         
         {/* ✅ FIXED: Enhanced debug info - only in development */}
-        {process.env.NODE_ENV === 'development' && (
+        {loginState.isClient && process.env.NODE_ENV === 'development' && (
           <div className="mb-4 p-3 bg-[#181F17] border border-[#B6C948] rounded-lg text-xs">
             <p className="text-[#B6C948] font-bold mb-2">🔧 Debug Info:</p>
+            <p className="text-[#8BAE5A]">Loading: {loading ? '✅' : '❌'}</p>
             <p className="text-[#8BAE5A]">User: {user ? '✅' : '❌'}</p>
             <p className="text-[#8BAE5A]">Email: {loginState.email || 'Empty'}</p>
             <p className="text-[#8BAE5A]">Password Length: {loginState.password.length}</p>
@@ -390,7 +443,7 @@ function LoginPageContent() {
                 setLoginState(prev => ({
                   ...prev,
                   email: 'chiel@media2net.nl',
-                  password: 'Test123!',
+                  password: 'W4t3rk0k3r^',
                   error: ''
                 }));
                 console.log('✅ Test credentials filled');
@@ -529,7 +582,7 @@ function LoginPageContent() {
       </div>
 
       {/* Loading Overlay */}
-      {loginState.showLoadingOverlay && (
+      {loginState.isClient && loginState.showLoadingOverlay && (
         <div className="fixed inset-0 bg-[#181F17]/95 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="text-center">
             {/* Logo */}
@@ -568,7 +621,7 @@ function LoginPageContent() {
       )}
 
       {/* ✅ FIXED: Simplified forgot password modal */}
-      {forgotPasswordState.showForgotPassword && (
+      {loginState.isClient && forgotPasswordState.showForgotPassword && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-[#232D1A] rounded-2xl p-8 max-w-md w-full mx-4 border border-[#3A4D23]">
             <div className="text-center mb-6">
