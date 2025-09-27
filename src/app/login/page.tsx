@@ -3,9 +3,8 @@
 import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/lib/supabase';
 import { EnvelopeIcon, LockClosedIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
-
-export const dynamic = 'force-dynamic';
 
 // Simplified configuration
 const LOGIN_CONFIG = {
@@ -18,7 +17,7 @@ function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, profile, isLoading: authLoading, login, isAdmin, getRedirectPath } = useAuth();
-  const loading = false; // Force loading to false to show login form
+  const loading = authLoading; // Use actual auth loading state
   
   // ✅ PHASE 1: Simplified state management - Single state object
   const [loginState, setLoginState] = useState({
@@ -38,14 +37,6 @@ function LoginPageContent() {
   // ✅ FIX: Ensure client-side hydration consistency
   useEffect(() => {
     setLoginState(prev => ({ ...prev, isClient: true }));
-    
-    // Force loading to complete after a short delay
-    const forceLoadingComplete = setTimeout(() => {
-      console.log('🔄 Forcing loading completion...');
-      // This will trigger the component to show the login form
-    }, 1000);
-    
-    return () => clearTimeout(forceLoadingComplete);
   }, []);
   
   // Ref to prevent multiple redirects
@@ -120,7 +111,7 @@ function LoginPageContent() {
         console.log('⚠️ Auth context loading timeout - forcing auth completion');
         // Force auth to complete if it's taking too long
       }
-    }, 500); // 0.5 second timeout for auth loading
+    }, 1000); // 1 second timeout for auth loading
     
     return () => clearTimeout(authTimeout);
   }, [loading, loginState.isClient]);
@@ -154,72 +145,32 @@ function LoginPageContent() {
     }
   }, [searchParams]);
 
-  // ✅ FIXED: Single useEffect for authentication redirect with better loading handling
+  // ✅ SIMPLIFIED: Direct redirect when user is authenticated
   useEffect(() => {
-    console.log('🔄 Redirect useEffect triggered:', { 
+    console.log('🔄 Auth check:', { 
       user: user?.email, 
-      profile: profile?.full_name, 
       loading, 
-      isLoading: loginState.isLoading, 
-      isRedirecting: loginState.isRedirecting 
+      isLoading: loginState.isLoading,
+      redirectExecuted: redirectExecuted.current
     });
 
-    // Don't redirect while form is submitting
-    if (loginState.isLoading) {
-      console.log('⏳ Form still loading, waiting...', { isLoading: loginState.isLoading });
-      return;
-    }
-
-    // Only redirect if we have a confirmed authenticated user and not already executed
-    if (user && !loginState.isLoading && !redirectExecuted.current) {
-      console.log('✅ User authenticated, starting redirect process...', { email: user.email, profile: profile?.full_name });
+    // Redirect authenticated user
+    if (user && !loading && !loginState.isLoading && !redirectExecuted.current) {
+      console.log('✅ Redirecting authenticated user:', user.email);
       
-      // Mark redirect as executed to prevent multiple redirects
+      // Determine target path
+      const redirectTo = searchParams?.get('redirect');
+      const targetPath = redirectTo || (isAdmin ? '/dashboard-admin' : '/dashboard');
+      
+      console.log('🎯 Redirecting to:', targetPath);
+      
+      // Set flag and redirect
       redirectExecuted.current = true;
       
-      // Determine redirect path - use fallback if getRedirectPath fails
-      let targetPath = '/dashboard'; // Default fallback
-      try {
-        const redirectTo = searchParams?.get('redirect') || undefined;
-        targetPath = getRedirectPath(redirectTo);
-        console.log('🎯 Target path determined:', targetPath);
-      } catch (error) {
-        console.warn('⚠️ getRedirectPath failed, using fallback:', error);
-        // Use admin dashboard for admin users, regular dashboard for others
-        targetPath = isAdmin ? '/dashboard-admin' : '/dashboard';
-      }
-      
-      // Don't start loading sequence again if already showing (from login)
-      if (!loginState.showLoadingOverlay) {
-        console.log('🎬 Starting redirect loading sequence...');
-        startLoadingSequence();
-      } else {
-        console.log('🎬 Loading overlay already showing from login');
-      }
-      
-      // Execute redirect after loading sequence has time to show
-      setTimeout(() => {
-        console.log('🚀 Executing redirect to:', targetPath);
-        router.replace(targetPath);
-      }, 300); // Reduced time for faster redirect
-      
-      // Fallback redirect if the first one doesn't work
-      setTimeout(() => {
-        if (redirectExecuted.current && loginState.showLoadingOverlay) {
-          console.log('🔄 Fallback redirect - forcing navigation to:', targetPath);
-          window.location.href = targetPath;
-        }
-      }, 1000); // Fallback after 1 second
-    } else if (!user && !loading) {
-      console.log('ℹ️ No authenticated user found, staying on login page');
-    } else {
-      console.log('⏸️ Redirect conditions not met:', { 
-        hasUser: !!user, 
-        isLoading: loginState.isLoading,
-        loading 
-      });
+      // Use router.replace for SPA navigation
+      router.replace(targetPath);
     }
-  }, [loading, user, profile, router, searchParams, loginState.isLoading]); // Updated dependencies
+  }, [user, loading, loginState.isLoading, isAdmin, searchParams]);
 
   // ✅ NEW: Hide overlay when URL changes (user has been redirected)
   useEffect(() => {
@@ -427,31 +378,73 @@ function LoginPageContent() {
 
         <p className="text-[#B6C948] text-center mb-6 sm:mb-8 text-base sm:text-lg font-figtree">Log in op je dashboard</p>
         
-        {/* ✅ FIXED: Enhanced debug info - only in development */}
+        {/* ✅ ENHANCED: Comprehensive debug info - only in development */}
         {loginState.isClient && process.env.NODE_ENV === 'development' && (
           <div className="mb-4 p-3 bg-[#181F17] border border-[#B6C948] rounded-lg text-xs">
             <p className="text-[#B6C948] font-bold mb-2">🔧 Debug Info:</p>
-            <p className="text-[#8BAE5A]">Loading: {loading ? '✅' : '❌'}</p>
-            <p className="text-[#8BAE5A]">User: {user ? '✅' : '❌'}</p>
+            <p className="text-[#8BAE5A]">Auth Loading: {loading ? '✅' : '❌'}</p>
+            <p className="text-[#8BAE5A]">Form Loading: {loginState.isLoading ? '✅' : '❌'}</p>
+            <p className="text-[#8BAE5A]">User: {user ? `✅ ${user.email}` : '❌'}</p>
+            <p className="text-[#8BAE5A]">Profile: {profile ? `✅ ${profile.full_name}` : '❌'}</p>
+            <p className="text-[#8BAE5A]">Is Admin: {isAdmin ? '✅' : '❌'}</p>
+            <p className="text-[#8BAE5A]">Redirect Executed: {redirectExecuted.current ? '✅' : '❌'}</p>
+            <p className="text-[#8BAE5A]">Is Redirecting: {loginState.isRedirecting ? '✅' : '❌'}</p>
+            <p className="text-[#8BAE5A]">Show Overlay: {loginState.showLoadingOverlay ? '✅' : '❌'}</p>
             <p className="text-[#8BAE5A]">Email: {loginState.email || 'Empty'}</p>
             <p className="text-[#8BAE5A]">Password Length: {loginState.password.length}</p>
             <p className="text-[#8BAE5A]">Error: {loginState.error || 'None'}</p>
-            <button
-              type="button"
-              onClick={() => {
-                console.log('🔧 Filling test credentials...');
-                setLoginState(prev => ({
-                  ...prev,
-                  email: 'chiel@media2net.nl',
-                  password: 'W4t3rk0k3r^',
-                  error: ''
-                }));
-                console.log('✅ Test credentials filled');
-              }}
-              className="mt-2 px-2 py-1 bg-[#8BAE5A] text-[#181F17] rounded text-xs cursor-pointer hover:bg-[#7A9E4A] transition-colors"
-            >
-              Fill Test Credentials
-            </button>
+            
+            <div className="mt-2 space-y-1">
+              <button
+                type="button"
+                onClick={() => {
+                  console.log('🔧 Filling test credentials...');
+                  setLoginState(prev => ({
+                    ...prev,
+                    email: 'chiel@media2net.nl',
+                    password: 'W4t3rk0k3r^',
+                    error: ''
+                  }));
+                  console.log('✅ Test credentials filled');
+                }}
+                className="w-full px-2 py-1 bg-[#8BAE5A] text-[#181F17] rounded text-xs cursor-pointer hover:bg-[#7A9E4A] transition-colors"
+              >
+                Fill Test Credentials
+              </button>
+              
+              <button
+                type="button"
+                onClick={async () => {
+                  console.log('🔧 Testing Supabase connection...');
+                  try {
+                    const { data, error } = await supabase.auth.getSession();
+                    if (error) {
+                      console.error('❌ Supabase session error:', error);
+                    } else {
+                      console.log('✅ Supabase session:', data.session ? 'Active' : 'None');
+                    }
+                  } catch (err) {
+                    console.error('❌ Supabase test error:', err);
+                  }
+                }}
+                className="w-full px-2 py-1 bg-[#3A4D23] text-[#8BAE5A] rounded text-xs cursor-pointer hover:bg-[#4A5D33] transition-colors"
+              >
+                Test Supabase Connection
+              </button>
+              
+              <button
+                type="button"
+                onClick={() => {
+                  console.log('🚀 Manual redirect test...');
+                  const targetPath = isAdmin ? '/dashboard-admin' : '/dashboard';
+                  console.log('🎯 Manually redirecting to:', targetPath);
+                  window.location.href = targetPath;
+                }}
+                className="w-full px-2 py-1 bg-[#B6C948] text-[#181F17] rounded text-xs cursor-pointer hover:bg-[#A6B938] transition-colors font-bold"
+              >
+                Manual Redirect Test
+              </button>
+            </div>
           </div>
         )}
         

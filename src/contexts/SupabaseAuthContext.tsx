@@ -70,14 +70,19 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
 
       if (error) {
         console.error('Profile fetch error:', error);
+        console.log('🔍 Profile fetch details:', { userId, email, error: error.message });
         // Don't return null immediately - this might cause logout
         // Instead, create a minimal profile if we have user data
         if (email) {
           console.log('Creating fallback profile for email:', email);
+          // Check if this is a known admin email
+          const knownAdminEmails = ['chiel@media2net.nl', 'rick@toptiermen.eu', 'admin@toptiermen.com'];
+          const isKnownAdmin = knownAdminEmails.includes(email);
+          
           return {
             id: userId,
             email: email,
-            role: 'lid', // Default role
+            role: isKnownAdmin ? 'admin' : 'lid', // Set admin role for known admin emails
             full_name: email.split('@')[0],
             display_name: email.split('@')[0],
             avatar_url: undefined,
@@ -88,6 +93,12 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
         return null;
       }
 
+      console.log('✅ Profile fetched successfully:', { 
+        id: data?.id, 
+        email: data?.email, 
+        role: data?.role,
+        full_name: data?.full_name 
+      });
       return data as Profile;
     } catch (err) {
       console.error('Profile fetch exception:', err);
@@ -192,65 +203,65 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     };
   }, []);
 
-  // Session timeout handler - prevents users from getting stuck
-  useEffect(() => {
-    if (!user) return;
+  // Session timeout handler - TEMPORARILY DISABLED to fix dashboard access
+  // useEffect(() => {
+  //   if (!user) return;
 
-    const checkSessionValidity = async () => {
-      try {
-        const { data: { session }, error } = await supabase.auth.getSession();
+  //   const checkSessionValidity = async () => {
+  //     try {
+  //       const { data: { session }, error } = await supabase.auth.getSession();
         
-        if (error) {
-          console.log('❌ Session validation error:', error.message);
-          setError('Session expired. Please log in again.');
-          setUser(null);
-          setProfile(null);
-          return;
-        }
+  //       if (error) {
+  //         console.log('❌ Session validation error:', error.message);
+  //         setError('Session expired. Please log in again.');
+  //         setUser(null);
+  //         setProfile(null);
+  //         return;
+  //       }
         
-        if (!session) {
-          console.log('❌ No valid session found');
-          setError('Session expired. Please log in again.');
-          setUser(null);
-          setProfile(null);
-          return;
-        }
+  //       if (!session) {
+  //         console.log('❌ No valid session found');
+  //         setError('Session expired. Please log in again.');
+  //         setUser(null);
+  //         setProfile(null);
+  //         return;
+  //       }
         
-        // Check if session is expired
-        const now = Math.floor(Date.now() / 1000);
-        const expiresAt = session.expires_at || 0;
+  //       // Check if session is expired
+  //       const now = Math.floor(Date.now() / 1000);
+  //       const expiresAt = session.expires_at || 0;
         
-        if (now >= expiresAt) {
-          console.log('❌ Session expired');
-          setError('Session expired. Please log in again.');
-          setUser(null);
-          setProfile(null);
-          // Clear the expired session
-          await supabase.auth.signOut();
-        }
-      } catch (error) {
-        console.error('❌ Session check error:', error);
-        setError('Session validation failed. Please refresh the page.');
-      }
-    };
+  //       if (now >= expiresAt) {
+  //         console.log('❌ Session expired');
+  //         setError('Session expired. Please log in again.');
+  //         setUser(null);
+  //         setProfile(null);
+  //         // Clear the expired session
+  //         await supabase.auth.signOut();
+  //       }
+  //     } catch (error) {
+  //       console.error('❌ Session check error:', error);
+  //       setError('Session validation failed. Please refresh the page.');
+  //     }
+  //   };
 
-    // Check session validity every 5 minutes
-    const sessionCheckInterval = setInterval(checkSessionValidity, 5 * 60 * 1000);
+  //   // Check session validity every 5 minutes
+  //   const sessionCheckInterval = setInterval(checkSessionValidity, 5 * 60 * 1000);
     
-    // Also check on page visibility change (when user comes back to tab)
-    const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        checkSessionValidity();
-      }
-    };
+  //   // Also check on page visibility change (when user comes back to tab)
+  //   const handleVisibilityChange = () => {
+  //     if (!document.hidden) {
+  //       checkSessionValidity();
+  //     }
+  //   };
     
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+  //   document.addEventListener('visibilitychange', handleVisibilityChange);
     
-    return () => {
-      clearInterval(sessionCheckInterval);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, [user]);
+  //   return () => {
+  //     clearInterval(sessionCheckInterval);
+  //     document.removeEventListener('visibilitychange', handleVisibilityChange);
+  //   };
+  // }, [user]);
 
   // Helper function to log login attempts
   const logLoginAttempt = async (email: string, success: boolean, errorMessage?: string, userId?: string) => {

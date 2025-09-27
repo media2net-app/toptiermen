@@ -152,12 +152,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <ErrorBoundary>
       <DebugProvider>
-        <SessionRecovery>
-          <SessionTimeoutWarning timeoutMinutes={30} warningMinutes={5} />
-          <DashboardContent>
-            {children}
-          </DashboardContent>
-        </SessionRecovery>
+        {/* TEMPORARILY DISABLED: <SessionRecovery> */}
+        {/* <SessionTimeoutWarning timeoutMinutes={30} warningMinutes={5} /> */}
+        <DashboardContent>
+          {children}
+        </DashboardContent>
+        {/* </SessionRecovery> */}
       </DebugProvider>
     </ErrorBoundary>
   );

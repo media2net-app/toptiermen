@@ -11,11 +11,11 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: true,
-    flowType: 'pkce', // Use PKCE flow for better security and session management
-    storage: typeof window !== 'undefined' ? window.localStorage : undefined, // Explicitly use localStorage
-    storageKey: 'sb-toptiermen-auth-token', // Custom storage key
-    // Enhanced session management
-    debug: process.env.NODE_ENV === 'development'
+    detectSessionInUrl: false, // Disable to prevent redirect loops
+    flowType: 'implicit', // Use implicit flow for simpler session management
+    storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+    storageKey: 'sb-toptiermen-auth-token',
+    // Reduced session management for stability
+    debug: false // Disable debug logs to reduce noise
   }
 });

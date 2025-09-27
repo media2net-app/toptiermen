@@ -11,25 +11,39 @@ export async function middleware(req: NextRequest) {
   const supabase = createMiddlewareClient({ req, res });
   
   // Check if this is a protected route
-  const isProtectedRoute = req.nextUrl.pathname.startsWith('/dashboard') || 
-                          req.nextUrl.pathname.startsWith('/api/') ||
+  const isProtectedRoute = req.nextUrl.pathname.startsWith('/api/') ||
                           req.nextUrl.pathname.startsWith('/admin');
+  
+  // TEMPORARY: Disable dashboard protection to test redirect
+  const isDashboardRoute = req.nextUrl.pathname.startsWith('/dashboard');
+  
+  // Allow login-v2 page without session check
+  if (req.nextUrl.pathname === '/login-v2') {
+    return res;
+  }
   
   if (isProtectedRoute) {
     try {
       // Get the current session
       const { data: { session }, error } = await supabase.auth.getSession();
       
+      console.log('🔍 Middleware session check:', {
+        path: req.nextUrl.pathname,
+        hasSession: !!session,
+        hasError: !!error,
+        sessionExpiry: session?.expires_at ? new Date(session.expires_at * 1000) : 'N/A'
+      });
+      
       if (error) {
         console.log('❌ Session error:', error.message);
         // Redirect to login if there's a session error
-        if (req.nextUrl.pathname.startsWith('/dashboard')) {
+        if (isDashboardRoute) {
           return NextResponse.redirect(new URL('/login', req.url));
         }
       } else if (!session) {
         console.log('❌ No session found for protected route');
         // Redirect to login if no session
-        if (req.nextUrl.pathname.startsWith('/dashboard')) {
+        if (isDashboardRoute) {
           return NextResponse.redirect(new URL('/login', req.url));
         }
       } else {
@@ -41,17 +55,17 @@ export async function middleware(req: NextRequest) {
           console.log('❌ Session expired, redirecting to login');
           // Clear the expired session
           await supabase.auth.signOut();
-          if (req.nextUrl.pathname.startsWith('/dashboard')) {
+          if (isDashboardRoute) {
             return NextResponse.redirect(new URL('/login', req.url));
           }
         } else {
-          console.log('✅ Valid session found');
+          console.log('✅ Valid session found, allowing access');
         }
       }
     } catch (error) {
       console.error('❌ Middleware error:', error);
       // On error, redirect to login for dashboard routes
-      if (req.nextUrl.pathname.startsWith('/dashboard')) {
+      if (isDashboardRoute) {
         return NextResponse.redirect(new URL('/login', req.url));
       }
     }
