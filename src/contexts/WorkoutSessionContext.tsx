@@ -117,6 +117,13 @@ export function WorkoutSessionProvider({ children }: { children: ReactNode }) {
           return;
         }
         
+        // Additional check: if session is not active and has no workout time, don't restore it
+        if (!parsedSession.isActive && parsedSession.workoutTime === 0) {
+          console.log('🧹 Session is inactive with no workout time, clearing...');
+          localStorage.removeItem('activeWorkoutSession');
+          return;
+        }
+        
         setSession(parsedSession);
         setWorkoutTime(parsedSession.workoutTime || 0);
         setIsWorkoutTimerRunning(parsedSession.isActive || false);
@@ -217,8 +224,18 @@ export function WorkoutSessionProvider({ children }: { children: ReactNode }) {
         console.log('🧹 Manual workout session clear triggered');
         stopWorkout();
       };
+      
+      // Add function to check current session state
+      (window as any).checkWorkoutSession = () => {
+        console.log('🔍 Current workout session state:');
+        console.log('📊 session:', session);
+        console.log('📊 workoutTime:', workoutTime);
+        console.log('📊 isWorkoutTimerRunning:', isWorkoutTimerRunning);
+        console.log('📊 restTime:', restTime);
+        console.log('📊 isRestTimerRunning:', isRestTimerRunning);
+      };
     }
-  }, []);
+  }, [session, workoutTime, isWorkoutTimerRunning, restTime, isRestTimerRunning]);
 
   const value: WorkoutSessionContextType = {
     session,

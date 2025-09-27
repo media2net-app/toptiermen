@@ -106,13 +106,22 @@ export default function FloatingWorkoutWidget({
   };
 
   // Only show widget if there's an active session and it's not completed
-  if (!session || !session.isActive) return null;
+  if (!session || !session.isActive) {
+    console.log('🧹 No session or session not active, hiding widget');
+    return null;
+  }
   
   // Additional check: if session is too old (more than 6 hours), don't show
   const sessionAge = Date.now() - new Date((session as any).started_at || session.id).getTime();
   const maxAge = 6 * 60 * 60 * 1000; // 6 hours
   if (sessionAge > maxAge) {
     console.log('🕐 Session too old, hiding widget');
+    return null;
+  }
+  
+  // Additional check: if workout time is 0, don't show (likely a stale session)
+  if (session.workoutTime === 0) {
+    console.log('🧹 Session has no workout time, hiding widget');
     return null;
   }
 

@@ -91,6 +91,20 @@ export default function MijnTrainingen() {
   const [showWeekCompletionModal, setShowWeekCompletionModal] = useState(false);
   const [weekCompletionData, setWeekCompletionData] = useState<any>(null);
 
+  // Debug function to log current state
+  const debugWeekState = () => {
+    console.log('🔍 DEBUG WEEK STATE:');
+    console.log('📊 completedWeeks:', completedWeeks);
+    console.log('📊 completedWeeks.length:', completedWeeks.length);
+    console.log('📊 weekCompletionData:', weekCompletionData);
+    console.log('📊 showWeekCompletionModal:', showWeekCompletionModal);
+    if (completedWeeks.length > 0) {
+      const maxWeek = Math.max(...completedWeeks.map((week: any) => week.week || week.weekNumber || 0));
+      console.log('📊 maxWeekNumber:', maxWeek);
+      console.log('📊 nextWeekNumber would be:', maxWeek + 1);
+    }
+  };
+
   useEffect(() => {
     if (user) {
       loadTrainingData();
@@ -149,6 +163,7 @@ export default function MijnTrainingen() {
           
           if (weekData.success && weekData.completions) {
             console.log('✅ Week completions loaded from database:', weekData.completions.length);
+            console.log('📊 Raw week completions from database:', weekData.completions);
             
             // Convert database completions to local format
             const loadedCompletedWeeks = weekData.completions.map((completion: any) => ({
@@ -157,6 +172,7 @@ export default function MijnTrainingen() {
               days: completion.completed_days || []
             }));
             
+            console.log('📊 Converted completedWeeks:', loadedCompletedWeeks);
             setCompletedWeeks(loadedCompletedWeeks);
           } else {
             console.log('⚠️ No week completions found in database, using local storage');
@@ -165,6 +181,7 @@ export default function MijnTrainingen() {
             if (localCompletedWeeks) {
               try {
                 const parsedWeeks = JSON.parse(localCompletedWeeks);
+                console.log('📊 Raw localStorage completedWeeks:', parsedWeeks);
                 setCompletedWeeks(parsedWeeks);
                 console.log('✅ Week completions loaded from localStorage:', parsedWeeks.length);
               } catch (parseError) {
@@ -179,6 +196,7 @@ export default function MijnTrainingen() {
           if (localCompletedWeeks) {
             try {
               const parsedWeeks = JSON.parse(localCompletedWeeks);
+              console.log('📊 Raw localStorage completedWeeks (fallback):', parsedWeeks);
               setCompletedWeeks(parsedWeeks);
               console.log('✅ Week completions loaded from localStorage:', parsedWeeks.length);
             } catch (parseError) {
@@ -212,9 +230,18 @@ export default function MijnTrainingen() {
     
     if (allDaysCompleted) {
       console.log('🎉 All days completed! Checking if week completion exists...');
+      console.log('📊 Current completedWeeks:', completedWeeks);
+      console.log('📊 completedWeeks.length:', completedWeeks.length);
       
       // Calculate the correct week number based on completed weeks
-      const nextWeekNumber = completedWeeks.length + 1;
+      // Use a more robust calculation that considers the actual week numbers
+      let nextWeekNumber = 1;
+      if (completedWeeks.length > 0) {
+        // Find the highest week number and add 1
+        const maxWeekNumber = Math.max(...completedWeeks.map((week: any) => week.week || week.weekNumber || 0));
+        nextWeekNumber = maxWeekNumber + 1;
+      }
+      console.log('📊 Calculated nextWeekNumber:', nextWeekNumber);
       
       // Check if modal should be shown (not already closed) - with fallback for missing tables
       if (user && trainingData?.schema?.id) {
@@ -263,6 +290,10 @@ export default function MijnTrainingen() {
       // Show the completion modal instead of automatically progressing
       setWeekCompletionData(weekData);
       setShowWeekCompletionModal(true);
+      
+      // Debug log the state
+      console.log('🎉 Week completion modal shown with data:', weekData);
+      debugWeekState();
     }
   };
 
@@ -274,7 +305,12 @@ export default function MijnTrainingen() {
       console.log('🔄 Starting new week...');
       
       // Create week completion data from current days
-      const currentWeekNumber = completedWeeks.length + 1;
+      // Use the same robust calculation as in checkWeekCompletion
+      let currentWeekNumber = 1;
+      if (completedWeeks.length > 0) {
+        const maxWeekNumber = Math.max(...completedWeeks.map((week: any) => week.week || week.weekNumber || 0));
+        currentWeekNumber = maxWeekNumber + 1;
+      }
       const weekCompletionData = {
         week: currentWeekNumber,
         completedAt: new Date().toISOString(),
@@ -651,6 +687,26 @@ export default function MijnTrainingen() {
                   <EyeIcon className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                   <span className="hidden sm:inline">Bekijk Schema Details</span>
                   <span className="sm:hidden">Details</span>
+                </button>
+                <button
+                  onClick={debugWeekState}
+                  className="flex items-center px-3 py-2 sm:px-4 sm:py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-xs sm:text-sm"
+                >
+                  🔍 Debug
+                </button>
+                <button
+                  onClick={() => {
+                    console.log('🧹 Clearing workout session...');
+                    if (typeof window !== 'undefined' && (window as any).clearWorkoutSession) {
+                      (window as any).clearWorkoutSession();
+                    }
+                    if (typeof window !== 'undefined' && (window as any).checkWorkoutSession) {
+                      (window as any).checkWorkoutSession();
+                    }
+                  }}
+                  className="flex items-center px-3 py-2 sm:px-4 sm:py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-xs sm:text-sm"
+                >
+                  🧹 Clear Timer
                 </button>
               </div>
               

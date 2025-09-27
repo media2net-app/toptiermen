@@ -54,6 +54,21 @@ const WorkoutWidget = () => {
     return null;
   }
   
+  // Only show widget if session is actually active and not just stored
+  // This prevents showing the widget when the user is not actively working out
+  if (!session.isActive) {
+    console.log('🧹 Session exists but is not active, cleaning up');
+    stopWorkout();
+    return null;
+  }
+  
+  // Additional check: if workout time is 0 and session is not really active, clean up
+  if (session.workoutTime === 0 && !session.isActive) {
+    console.log('🧹 Session has no workout time and is not active, cleaning up');
+    stopWorkout();
+    return null;
+  }
+  
   return (
     <FloatingWorkoutWidget
       session={session}
