@@ -473,21 +473,20 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
         </div>
       )}
       {/* Top Navigation Bar */}
-      <div className="bg-[#232D1A] border-b border-[#3A4D23] px-4 sm:px-6 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
+      <div className="bg-[#232D1A] border-b border-[#3A4D23] p-3 sm:p-4">
+        <div className="flex items-center justify-between w-full">
+          <div className="flex items-center">
             <button
               onClick={() => setIsMobileMenuOpen(true)}
-              className="lg:hidden grid grid-cols-[auto_1fr] items-center gap-2 px-3 py-2 bg-[#181F17] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors"
+              className="lg:hidden flex items-center gap-2 px-3 py-2 bg-[#181F17] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors"
             >
               <Bars3Icon className="w-5 h-5" />
               <span className="text-sm font-medium">Menu</span>
             </button>
-            <h1 className="text-xl md:text-2xl font-bold text-[#8BAE5A]">Admin Panel</h1>
             {loading && !user && (
-              <div className="flex items-center gap-2 text-[#8BAE5A] text-sm">
+              <div className="flex items-center gap-2 text-[#8BAE5A] text-xs sm:text-sm ml-3">
                 <div className="animate-spin rounded-full h-3 w-3 border-b border-[#8BAE5A]"></div>
-                Gegevens laden...
+                <span>Gegevens laden...</span>
               </div>
             )}
           </div>

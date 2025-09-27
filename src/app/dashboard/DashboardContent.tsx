@@ -110,9 +110,10 @@ const SubscriptionTier = () => {
 
 // 2.0.1: Dashboard menu configuration
 const baseMenu = [
-  { label: 'Mijn Profiel', icon: UserCircleIcon, href: '/dashboard/mijn-profiel', onboardingStep: 1 },
-  { label: 'Notificaties', icon: BellIcon, href: '/dashboard/notificaties', onboardingStep: 1 },
-  { label: 'Mijn Trainingen', icon: AcademicCapIcon, href: '/dashboard/mijn-trainingen', onboardingStep: 1 },
+  { label: 'Dashboard', icon: HomeIcon, href: '/dashboard', onboardingStep: 1 },
+  { label: 'Persoonlijke dashboard', icon: HomeIcon, parent: 'Dashboard', href: '/dashboard', isSub: true, onboardingStep: 1 },
+  { label: 'Mijn Profiel', icon: UserCircleIcon, parent: 'Dashboard', href: '/dashboard/mijn-profiel', isSub: true, onboardingStep: 1 },
+  { label: 'Mijn Trainingen', icon: AcademicCapIcon, parent: 'Dashboard', href: '/dashboard/mijn-trainingen', isSub: true, onboardingStep: 1 },
   { label: 'Finance & Business', icon: CurrencyDollarIcon, href: '/dashboard/finance-en-business', onboardingStep: 7 },
   { label: 'Academy', icon: FireIcon, href: '/dashboard/academy', onboardingStep: 7 },
   { label: 'Challenges', icon: FireIcon, href: '/dashboard/mijn-challenges', onboardingStep: 3 },
@@ -145,9 +146,10 @@ const getMenu = (isOnboardingCompleted: boolean, isLoading: boolean = false) => 
 
 // 2.0.1: Sidebar component with enhanced monitoring
 // Mobile-specific sidebar content with working submenu functionality
-const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: { 
+const MobileSidebarContent = ({ onLinkClick, onboardingStatus, setIsMobileMenuOpen }: { 
   onLinkClick?: () => void, 
-  onboardingStatus?: any 
+  onboardingStatus?: any,
+  setIsMobileMenuOpen?: (open: boolean) => void
 }) => {
   const pathname = usePathname();
   const router = useRouter();
@@ -340,15 +342,24 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
 
   return (
     <nav className="flex flex-col gap-2">
-      {/* Mijn Dashboard Button */}
-      <Link
-        href="/dashboard"
-        onClick={(e) => handleMobileLinkClick('/dashboard', 'Dashboard', e)}
-        className="flex items-center gap-3 px-4 py-3 bg-[#8BAE5A] text-black font-bold rounded-xl hover:bg-[#7A9D4A] transition-colors mb-4"
-      >
-        <HomeIcon className="w-5 h-5" />
-        <span>Mijn Dashboard</span>
-      </Link>
+      {/* TTM Logo */}
+      <div className="mb-4 pb-3 border-b border-[#3A4D23]/40">
+        <Link 
+          href="/dashboard" 
+          onClick={() => setIsMobileMenuOpen && setIsMobileMenuOpen(false)}
+          className="flex items-center justify-center hover:opacity-80 transition-opacity"
+        >
+          <Image
+            src="/logo_white-full.svg"
+            alt="Top Tier Men Logo"
+            width={35}
+            height={9}
+            style={{ height: 'auto' }}
+            className="h-2 w-auto object-contain"
+            priority
+          />
+        </Link>
+      </div>
       
       {mobileMenu.map((item) => {
         // Onboarding button is now handled by getMenu function
@@ -361,10 +372,14 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
         if (!('parent' in item)) {
           // During onboarding, only the current step should be active
           // Special case for step 6: Brotherhood should be active when on forum pages
+          // Special case for Dashboard: should be active when on dashboard or its subpages
           const isActive = !isCompleted 
             ? (safePathname === item.href && item.onboardingStep === actualCurrentStep) ||
-              (actualCurrentStep === 6 && item.label === 'Brotherhood')
-            : safePathname === item.href;
+              (actualCurrentStep === 6 && item.label === 'Brotherhood') ||
+              (item.label === 'Dashboard' && (safePathname === '/dashboard' || safePathname.startsWith('/dashboard/mijn-profiel') || safePathname.startsWith('/dashboard/mijn-trainingen')))
+            : item.label === 'Dashboard' 
+              ? (safePathname === '/dashboard' || safePathname.startsWith('/dashboard/mijn-profiel') || safePathname.startsWith('/dashboard/mijn-trainingen'))
+              : safePathname === item.href;
           const hasSubmenu = mobileMenu.some(sub => 'parent' in sub && sub.parent === item.label);
 
           if (hasSubmenu) {
@@ -392,7 +407,7 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
             return (
               <div key={item.label} className="group">
                 <button
-                  className={`grid grid-cols-[auto_1fr_auto] items-center gap-4 px-4 py-3 rounded-xl font-bold uppercase text-sm tracking-wide transition-all duration-150 font-figtree w-full text-left ${
+                  className={`grid grid-cols-[auto_1fr_auto] items-center gap-4 px-4 py-3 rounded-xl font-bold uppercase text-xs tracking-wide transition-all duration-150 font-figtree w-full text-left ${
                     allSubItemsDisabled
                       ? 'text-gray-500 cursor-not-allowed opacity-50'
                       : isActive || hasActiveSubItem 
@@ -436,7 +451,7 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
                           return (
                             <div
                               key={sub.label}
-                              className="block px-4 py-2 rounded-lg text-sm text-gray-500 cursor-not-allowed opacity-50"
+                              className="block px-4 py-2 rounded-lg text-xs text-gray-500 cursor-not-allowed opacity-50"
                               title={(sub as any).disabled ? "Binnenkort online" : "Nog niet beschikbaar tijdens onboarding"}
                             >
                               {sub.label}
@@ -450,7 +465,7 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
                             href={sub.href || '#'}
                             onClick={(sub as any).disabled ? (e) => e.preventDefault() : onLinkClick}
                             title={(sub as any).disabled ? "Binnenkort online" : undefined}
-                            className={`block px-4 py-2 rounded-lg text-sm transition-all duration-150 ${
+                            className={`block px-4 py-2 rounded-lg text-xs transition-all duration-150 ${
                               (sub as any).disabled
                                 ? 'text-gray-500 cursor-not-allowed opacity-50'
                                 : isSubActive 
@@ -846,7 +861,7 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
                           return (
                             <div
                               key={sub.label}
-                              className="block px-4 py-2 rounded-lg text-sm text-gray-500 cursor-not-allowed opacity-50"
+                              className="block px-4 py-2 rounded-lg text-xs text-gray-500 cursor-not-allowed opacity-50"
                               title={(sub as any).disabled ? "Binnenkort online" : "Nog niet beschikbaar tijdens onboarding"}
                             >
                               {sub.label}
@@ -860,7 +875,7 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
                             href={sub.href || '#'}
                             onClick={(sub as any).disabled ? (e) => e.preventDefault() : onLinkClick}
                             title={(sub as any).disabled ? "Binnenkort online" : undefined}
-                            className={`block px-4 py-2 rounded-lg text-sm transition-all duration-150 ${
+                            className={`block px-4 py-2 rounded-lg text-xs transition-all duration-150 ${
                               (sub as any).disabled
                                 ? 'text-gray-500 cursor-not-allowed opacity-50'
                                 : isSubActive 
@@ -893,15 +908,11 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
             return (
               <div
                 key={item.label}
-                className={`grid grid-cols-[auto_1fr] items-center gap-4 px-4 py-3 rounded-xl font-bold uppercase text-sm tracking-wide font-figtree text-gray-500 cursor-not-allowed opacity-50 ${collapsed ? 'justify-center px-2' : ''}`}
+                className={`grid grid-cols-[auto_1fr] items-center gap-4 px-4 py-3 rounded-xl font-bold uppercase text-xs tracking-wide font-figtree text-gray-500 cursor-not-allowed opacity-50 ${collapsed ? 'justify-center px-2' : ''}`}
                 title={(item as any).disabled ? "Binnenkort online" : "Nog niet beschikbaar tijdens onboarding"}
               >
                 <item.icon className="w-6 h-6 text-gray-500" />
-                {!collapsed && (
-                  <div className="flex items-center justify-between w-full">
-                    <span className="truncate">{item.label}</span>
-                  </div>
-                )}
+                <span className="truncate">{item.label}</span>
               </div>
             );
           }
@@ -931,7 +942,7 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
                    '/dashboard/welcome-video') : (item.href || '#'))}
                 onClick={(item as any).disabled ? (e) => e.preventDefault() : onLinkClick}
                 title={(item as any).disabled ? "Binnenkort online" : undefined}
-                className={`grid grid-cols-[auto_1fr] items-center gap-4 px-4 py-3 rounded-xl font-bold uppercase text-sm tracking-wide transition-all duration-500 font-figtree ${
+                className={`grid grid-cols-[auto_1fr] items-center gap-4 px-4 py-3 rounded-xl font-bold uppercase text-xs tracking-wide transition-all duration-500 font-figtree ${
                   (item as any).disabled
                     ? 'text-gray-500 cursor-not-allowed opacity-50'
                     : isActive 
@@ -944,11 +955,7 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
                 } ${collapsed ? 'justify-center px-2' : ''}`}
               >
               <item.icon className={`w-6 h-6 ${(item as any).disabled ? 'text-gray-500' : isActive ? 'text-white' : shouldBeYellow ? 'text-[#FFD700]' : 'text-[#8BAE5A]'}`} />
-              {!collapsed && (
-                <div className="flex items-center justify-between w-full">
-                  <span className="truncate">{item.label}</span>
-                </div>
-              )}
+              <span className="truncate">{item.label}</span>
             </Link>
             </motion.div>
           );
@@ -1350,56 +1357,53 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
           sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64 lg:ml-72'
         }`}>
           {/* Top Bar */}
-          <div className="bg-[#232D1A] border-b border-[#3A4D23] p-4 flex items-center justify-between">
-            <div className="flex items-center gap-2 sm:gap-4">
-              {/* Mobile Menu Button */}
-              <button
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="lg:hidden grid grid-cols-[auto_1fr] items-center gap-2 px-3 py-2 bg-[#181F17] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors"
-              >
-                <Bars3Icon className="w-5 h-5 sm:w-6 sm:h-6" />
-                <span className="text-sm font-medium">Menu</span>
-              </button>
-
-              {/* Page Title */}
-              <h1 className="text-base sm:text-lg md:text-xl font-bold text-white">
-                {getMenu(onboardingStatus?.onboarding_completed || isCompleted).find(item => item.href === pathname)?.label || 'Dashboard'}
-              </h1>
-            </div>
-
-            <div className="flex items-center gap-2 sm:gap-4">
-              {/* Admin Dashboard Button */}
-              {isAdmin && (
-                <Link
-                  href="/dashboard-admin"
-                  className="px-2 sm:px-3 md:px-4 py-2 bg-[#8BAE5A] text-[#0A0F0A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold flex items-center gap-1 md:gap-2 text-xs sm:text-sm md:text-base"
+          <div className="bg-[#232D1A] border-b border-[#3A4D23] p-3 sm:p-4">
+            <div className="flex items-center justify-between w-full">
+              {/* Left Side - Mobile Menu Only */}
+              <div className="flex items-center">
+                {/* Mobile Menu Button */}
+                <button
+                  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                  className="lg:hidden flex items-center gap-2 px-3 py-2 bg-[#181F17] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors"
                 >
-                  <UserGroupIcon className="w-3 h-3 sm:w-4 sm:h-4" />
-                  <span className="hidden sm:inline">Admin Dashboard</span>
-                  <span className="sm:hidden">Admin</span>
-                </Link>
-              )}
+                  <Bars3Icon className="w-5 h-5" />
+                  <span className="text-sm font-medium">Menu</span>
+                </button>
+              </div>
 
-
-              {/* Logout */}
-              <button
-                onClick={handleLogout}
-                disabled={isLoggingOut}
-                data-logout-button
-                className="px-2 sm:px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center gap-1 sm:gap-2 text-xs sm:text-sm whitespace-nowrap"
-              >
-                {isLoggingOut ? (
-                  <>
-                    <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    <span>Uitloggen...</span>
-                  </>
-                ) : (
-                  <>
-                    <XMarkIcon className="w-3 h-3 sm:w-4 sm:h-4" />
-                    <span>Uitloggen</span>
-                  </>
+              {/* Right Side - Admin + Logout */}
+              <div className="flex items-center gap-2">
+                {/* Admin Dashboard Button */}
+                {isAdmin && (
+                  <Link
+                    href="/dashboard-admin"
+                    className="px-2 sm:px-3 py-1.5 sm:py-2 bg-[#8BAE5A] text-[#0A0F0A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold flex items-center gap-1 text-xs sm:text-sm"
+                  >
+                    <UserGroupIcon className="w-3 h-3 sm:w-4 sm:h-4" />
+                    <span>Admin</span>
+                  </Link>
                 )}
-              </button>
+
+                {/* Logout */}
+                <button
+                  onClick={handleLogout}
+                  disabled={isLoggingOut}
+                  data-logout-button
+                  className="px-2 sm:px-3 py-1.5 sm:py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center gap-1 text-xs sm:text-sm whitespace-nowrap"
+                >
+                  {isLoggingOut ? (
+                    <>
+                      <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <span>Uitloggen</span>
+                    </>
+                  ) : (
+                    <>
+                      <XMarkIcon className="w-3 h-3 sm:w-4 sm:h-4" />
+                      <span>Uitloggen</span>
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           </div>
 
@@ -1438,12 +1442,12 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
                   onClick={(e) => e.stopPropagation()}
                 >
                   {/* Header */}
-                  <div className="p-4 border-b border-[#3A4D23] flex-shrink-0 bg-[#232D1A] z-10">
+                  <div className="p-4 border-b border-[#3A4D23] flex-shrink-0 bg-[#232D1A] z-10 relative">
                     <div className="flex items-center justify-between">
                       <Link 
                         href="/dashboard" 
                         onClick={() => setIsMobileMenuOpen(false)}
-                        className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+                        className="flex items-center justify-center hover:opacity-80 transition-opacity"
                       >
                         <Image
                           src="/logo_white-full.svg"
@@ -1451,7 +1455,8 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
                           width={60}
                           height={15}
                           style={{ height: 'auto' }}
-                          className="h-4 w-auto object-contain"
+                          className="h-3 w-auto object-contain"
+                          priority
                         />
                       </Link>
                       <motion.button
@@ -1471,6 +1476,7 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
                       <MobileSidebarContent 
                         onLinkClick={() => setIsMobileMenuOpen(false)}
                         onboardingStatus={onboardingStatus}
+                        setIsMobileMenuOpen={setIsMobileMenuOpen}
                       />
                     </div>
                   </div>

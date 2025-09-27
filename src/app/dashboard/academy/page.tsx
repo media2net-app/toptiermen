@@ -411,7 +411,7 @@ export default function AcademyPage() {
       )}
 
       {/* Modules Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {modules.map((module) => {
           const moduleLessons = lessons.filter(lesson => lesson.module_id === module.id);
           const completedLessons = moduleLessons.filter(lesson => 
@@ -446,7 +446,7 @@ export default function AcademyPage() {
                 }
               }}
               disabled={!isUnlocked || navigating}
-              className={`w-full p-6 rounded-xl border transition-all duration-200 hover:scale-105 relative overflow-hidden text-left ${
+              className={`w-full max-w-sm sm:max-w-none mx-auto sm:mx-0 p-6 rounded-xl border transition-all duration-200 hover:scale-105 relative overflow-hidden text-left ${
                 isCompleted
                   ? 'border-[#3A4D23] hover:bg-[#232D1A]/95'
                   : isUnlocked
@@ -471,35 +471,34 @@ export default function AcademyPage() {
               
               {/* Content */}
               <div className="relative z-10">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-[#8BAE5A] rounded-lg flex items-center justify-center">
-                      <span className="text-[#181F17] font-bold text-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 bg-[#8BAE5A] rounded-lg flex items-center justify-center">
+                      <span className="text-[#181F17] font-bold text-xs sm:text-sm">
                         {getModuleNumber(module.order_index)}
                       </span>
                     </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-white mb-1">{module.title}</h3>
-                      <p className="text-gray-400 text-sm line-clamp-2">{module.short_description || module.description}</p>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-sm sm:text-base font-semibold text-white mb-0 sm:mb-1 truncate">{module.title}</h3>
                     </div>
                   </div>
                   
                   {isCompleted ? (
-                    <CheckCircleIcon className="w-6 h-6 text-[#8BAE5A] flex-shrink-0" />
+                    <CheckCircleIcon className="w-4 h-4 sm:w-5 sm:h-5 text-[#8BAE5A] flex-shrink-0" />
                   ) : !isUnlocked ? (
-                    <LockClosedIcon className="w-6 h-6 text-gray-500 flex-shrink-0" />
+                    <LockClosedIcon className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500 flex-shrink-0" />
                   ) : (
-                    <PlayIcon className="w-6 h-6 text-[#8BAE5A] flex-shrink-0" />
+                    <PlayIcon className="w-4 h-4 sm:w-5 sm:h-5 text-[#8BAE5A] flex-shrink-0" />
                   )}
                 </div>
 
-                <p className="text-gray-300 mb-4 line-clamp-2">{module.description}</p>
+                <p className="text-gray-300 mb-2 text-xs sm:text-sm line-clamp-2">{module.description}</p>
 
                 {/* Progress Bar */}
-                <div className="mb-4">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm text-gray-400">Voortgang</span>
-                    <span className="text-sm text-[#8BAE5A] font-semibold">{progress}%</span>
+                <div className="mb-2">
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-xs sm:text-sm text-gray-400">Voortgang</span>
+                    <span className="text-xs sm:text-sm text-[#8BAE5A] font-semibold">{progress}%</span>
                   </div>
                   <div className="w-full bg-[#232D1A] rounded-full h-2">
                     <div
@@ -511,18 +510,19 @@ export default function AcademyPage() {
 
                 {/* Action Info (formerly button) */}
                 <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-2 text-sm text-gray-400">
-                    <ClockIcon className="w-4 h-4" />
+                  <div className="flex items-center gap-2 text-xs text-gray-400">
+                    <ClockIcon className="w-3 h-3" />
                     <span>{moduleLessons.length} lessen</span>
                   </div>
                   
                   {isUnlocked ? (
-                    <div className="flex items-center gap-2 text-sm text-[#8BAE5A] font-semibold">
-                      {isCompleted ? 'Bekijk Module' : 'Start Module'}
+                    <div className="flex items-center gap-1 text-xs sm:text-sm text-[#8BAE5A] font-semibold">
+                      <span className="hidden sm:inline">{isCompleted ? 'Bekijk Module' : 'Start Module'}</span>
+                      <span className="sm:hidden">{isCompleted ? 'Bekijk' : 'Start'}</span>
                       {navigating ? (
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#8BAE5A]"></div>
+                        <div className="animate-spin rounded-full h-3 w-3 sm:h-4 sm:w-4 border-b-2 border-[#8BAE5A]"></div>
                       ) : (
-                        <ArrowRightIcon className="w-4 h-4" />
+                        <ArrowRightIcon className="w-3 h-3 sm:w-4 sm:h-4" />
                       )}
                     </div>
                   ) : (

@@ -38,7 +38,7 @@ export default function PageLayout({
   padding = 'md'
 }: PageLayoutProps) {
   return (
-    <div className={`${maxWidthClasses[maxWidth]} mx-auto ${paddingClasses[padding]}`}>
+    <div className={`dashboard-content ${maxWidthClasses[maxWidth]} mx-auto ${paddingClasses[padding]}`}>
       {/* Page Header */}
       <div className="mb-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">

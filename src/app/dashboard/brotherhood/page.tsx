@@ -180,18 +180,18 @@ export default function Brotherhood() {
                   Bekijk alle
                 </Link>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-2 sm:gap-3">
                 {myConnections.map((connection) => (
-                  <div key={connection.id} className="flex items-center gap-2 p-2 bg-[#181F17] rounded-lg">
+                  <div key={connection.id} className="flex flex-col items-center gap-1 p-2 bg-[#181F17] rounded-lg text-center">
                     <Image
                       src={connection.avatar}
                       alt={connection.name}
                       width={32}
                       height={32}
-                      className="w-6 h-6 sm:w-8 sm:h-8 rounded-full"
+                      className="w-8 h-8 rounded-full"
                     />
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-white text-xs sm:text-sm truncate">{connection.name}</h3>
+                    <div className="w-full">
+                      <h3 className="font-semibold text-white text-xs truncate">{connection.name}</h3>
                       <p className="text-[#8BAE5A] text-xs">{connection.rank}</p>
                     </div>
                   </div>

@@ -442,7 +442,7 @@ export default function LedenOverzicht() {
           value={search}
           onChange={e => setSearch(e.target.value)}
         />
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-3">
           <select
             className="w-full bg-[#232D1A]/80 rounded-xl p-3 text-white border border-[#3A4D23]/40 text-sm sm:text-base"
             value={selectedRank}
@@ -486,7 +486,7 @@ export default function LedenOverzicht() {
         </div>
       </div>
       {/* Leden Gallerij */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+      <div className="grid grid-cols-2 gap-2 sm:gap-3 md:gap-4 lg:gap-6">
         {filtered.map((m) => {
           const memberInterests = getMemberInterests(m.interests);
           const memberRank = m.current_rank?.name || m.fallback_rank || 'Recruit';

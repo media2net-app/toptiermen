@@ -138,6 +138,8 @@ const booksData = [
     description: "Ontwikkel de mindset van een miljonair en verander je financiële toekomst.",
     rating: 4,
     featured: false,
+    affiliate_link: "https://amzn.to/4gOLV4v",
+    cover_image_url: "/boekenkamer/millinoairemindset.jpg",
     publication_year: 2005,
     pages: 256,
     language: "en",
