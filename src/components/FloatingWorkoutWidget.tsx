@@ -105,8 +105,16 @@ export default function FloatingWorkoutWidget({
     }
   };
 
-  // Only show widget if there's an active session
+  // Only show widget if there's an active session and it's not completed
   if (!session || !session.isActive) return null;
+  
+  // Additional check: if session is too old (more than 6 hours), don't show
+  const sessionAge = Date.now() - new Date((session as any).started_at || session.id).getTime();
+  const maxAge = 6 * 60 * 60 * 1000; // 6 hours
+  if (sessionAge > maxAge) {
+    console.log('🕐 Session too old, hiding widget');
+    return null;
+  }
 
   return (
     <AnimatePresence>

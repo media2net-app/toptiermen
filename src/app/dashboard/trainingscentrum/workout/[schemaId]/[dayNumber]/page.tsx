@@ -708,7 +708,7 @@ export default function WorkoutPage() {
         // Set completion flag to prevent re-loading
         setIsWorkoutCompleted(true);
         
-        // Stop the global workout session completely
+        // Stop the global workout session completely FIRST
         stopWorkout();
         
         // Close completion modal
@@ -716,11 +716,11 @@ export default function WorkoutPage() {
         
         toast.success('Workout voltooid! 🎉');
         
-        // Navigate to training overview with a small delay to ensure state is cleared
+        // Navigate to training overview with a longer delay to ensure state is completely cleared
         setTimeout(() => {
           // Use window.location.href to force navigation and prevent re-triggering
           window.location.href = '/dashboard/mijn-trainingen';
-        }, 200);
+        }, 500);
       } else {
         console.error('❌ Workout completion failed:', responseData);
         toast.error('Fout bij voltooien workout: ' + (responseData.error || 'Onbekende fout'));

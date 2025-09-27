@@ -45,6 +45,15 @@ const WorkoutWidget = () => {
     return null;
   }
   
+  // Check if session is too old and clean it up
+  const sessionAge = Date.now() - new Date(session.started_at).getTime();
+  const maxAge = 6 * 60 * 60 * 1000; // 6 hours
+  if (sessionAge > maxAge) {
+    console.log('🧹 Cleaning up old workout session');
+    stopWorkout();
+    return null;
+  }
+  
   return (
     <FloatingWorkoutWidget
       session={session}

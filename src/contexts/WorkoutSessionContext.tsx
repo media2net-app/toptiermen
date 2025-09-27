@@ -16,13 +16,14 @@ interface WorkoutSession {
   isActive: boolean;
   currentExerciseIndex: number;
   totalExercises: number;
+  started_at: string;
 }
 
 interface WorkoutSessionContextType {
   session: WorkoutSession | null;
   setSession: (session: WorkoutSession | null) => void;
   updateSession: (updates: Partial<WorkoutSession>) => void;
-  startWorkout: (sessionData: Omit<WorkoutSession, 'workoutTime' | 'isActive'>) => void;
+  startWorkout: (sessionData: Omit<WorkoutSession, 'workoutTime' | 'isActive' | 'started_at'>) => void;
   pauseWorkout: () => void;
   resumeWorkout: () => void;
   stopWorkout: () => void;
@@ -137,11 +138,12 @@ export function WorkoutSessionProvider({ children }: { children: ReactNode }) {
     }
   }, [session]);
 
-  const startWorkout = (sessionData: Omit<WorkoutSession, 'workoutTime' | 'isActive'>) => {
+  const startWorkout = (sessionData: Omit<WorkoutSession, 'workoutTime' | 'isActive' | 'started_at'>) => {
     const newSession: WorkoutSession = {
       ...sessionData,
       workoutTime: 0,
-      isActive: true
+      isActive: true,
+      started_at: new Date().toISOString()
     };
     setSession(newSession);
     setWorkoutTime(0);
@@ -170,13 +172,19 @@ export function WorkoutSessionProvider({ children }: { children: ReactNode }) {
 
   const stopWorkout = () => {
     console.log('🛑 Stopping workout session completely...');
+    
+    // Stop all timers first
+    setIsWorkoutTimerRunning(false);
+    setIsRestTimerRunning(false);
+    
+    // Clear all state
     setSession(null);
     setWorkoutTime(0);
-    setIsWorkoutTimerRunning(false);
     setRestTime(0);
-    setIsRestTimerRunning(false);
+    
     // Clear localStorage
     localStorage.removeItem('activeWorkoutSession');
+    
     console.log('✅ Workout session completely cleared');
   };
 
