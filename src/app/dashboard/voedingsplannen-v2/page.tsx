@@ -1093,6 +1093,20 @@ export default function VoedingsplannenV2Page() {
     // Set the selected plan ID for visual selection
     setSelectedPlanId(plan.plan_id || plan.id);
     
+    // Auto-scroll to next step button when plan is selected during onboarding
+    if (!isCompleted && currentStep === 5) {
+      setTimeout(() => {
+        const nextStepButton = document.querySelector('[data-next-step-button]');
+        if (nextStepButton) {
+          console.log('🎯 Auto-scrolling to next step button in voedingsplannen...');
+          nextStepButton.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center' 
+          });
+        }
+      }, 500);
+    }
+    
     // Complete onboarding step 5 if in onboarding
     if (!isCompleted && currentStep === 5) {
       console.log('🔧 DEBUG: Completing onboarding step 5...');
@@ -2059,6 +2073,7 @@ export default function VoedingsplannenV2Page() {
                         handlePlanSelect(selectedPlan);
                       }
                     }}
+                    data-next-step-button
                     className="px-6 py-3 bg-gradient-to-r from-[#B6C948] to-[#8BAE5A] text-[#181F17] rounded-lg font-semibold hover:from-[#8BAE5A] hover:to-[#B6C948] transition-all duration-200 flex items-center gap-2"
                   >
                     <span>Volgende Stap</span>
@@ -2198,6 +2213,7 @@ export default function VoedingsplannenV2Page() {
                           e.stopPropagation();
                           handlePlanSelect(plan);
                         }}
+                        data-next-step-button
                         className="w-full px-4 py-2 bg-gradient-to-r from-[#B6C948] to-[#8BAE5A] text-[#181F17] rounded-lg font-semibold hover:from-[#8BAE5A] hover:to-[#B6C948] transition-all duration-200 flex items-center justify-center gap-2"
                       >
                         <span>Volgende Stap</span>

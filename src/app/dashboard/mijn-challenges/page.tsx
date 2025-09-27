@@ -385,8 +385,16 @@ export default function MijnChallengesPage() {
         
         // Check if user is in onboarding step 2 or 3 and has enough challenges
         if ((currentStep === 2 || currentStep === 3) && !isCompleted && challenges.length >= 2) { // 2 because we just added one, so total will be 3
-          setShowContinueButton(true);
-          toast.success('Perfect! Je hebt 3 challenges toegevoegd. Klik op "Ga verder" om door te gaan.');
+          toast.success('Perfect! Je hebt 3 challenges toegevoegd. Je gaat automatisch door naar de volgende stap.');
+          
+          // Auto-complete onboarding step and redirect
+          setTimeout(async () => {
+            try {
+              await completeOnboardingStep();
+            } catch (error) {
+              console.error('Error auto-completing onboarding step:', error);
+            }
+          }, 1000); // 1 second delay to show the success message
         }
       }
     } catch (error) {
@@ -437,12 +445,9 @@ export default function MijnChallengesPage() {
       shouldShow: (currentStep === 2 || currentStep === 3) && !isCompleted && challenges.length >= 3
     });
     
-    // Show continue button if user is on step 2 or 3 and has 3+ challenges
-    if ((currentStep === 2 || currentStep === 3) && !isCompleted && challenges.length >= 3) {
-      setShowContinueButton(true);
-    } else {
-      setShowContinueButton(false);
-    }
+    // Don't show continue button during onboarding - auto-complete instead
+    // Only show continue button for non-onboarding scenarios
+    setShowContinueButton(false);
   }, [currentStep, isCompleted, challenges.length]);
 
   // Load challenges
@@ -683,8 +688,16 @@ export default function MijnChallengesPage() {
 
         // Check if user is in onboarding step 2 or 3 and has enough challenges
         if ((currentStep === 2 || currentStep === 3) && !isCompleted && challenges.length >= 2) { // 2 because we just added one, so total will be 3
-          setShowContinueButton(true);
-          toast.success('Perfect! Je hebt 3 challenges toegevoegd. Klik op "Ga verder" om door te gaan.');
+          toast.success('Perfect! Je hebt 3 challenges toegevoegd. Je gaat automatisch door naar de volgende stap.');
+          
+          // Auto-complete onboarding step and redirect
+          setTimeout(async () => {
+            try {
+              await completeOnboardingStep();
+            } catch (error) {
+              console.error('Error auto-completing onboarding step:', error);
+            }
+          }, 1000); // 1 second delay to show the success message
         }
       }
     } catch (err) {
@@ -895,22 +908,7 @@ export default function MijnChallengesPage() {
 
         {/* DEBUG: Show current state */}
 
-        {/* Onboarding Continue Button - Shows when user has 3+ challenges */}
-        {showContinueButton && (currentStep === 2 || currentStep === 3) && !isCompleted && (
-          <div className="bg-gradient-to-r from-[#8BAE5A]/20 to-[#FFD700]/20 border border-[#8BAE5A]/30 rounded-2xl p-6 mb-8 text-center">
-            <div className="text-4xl mb-4">🎯</div>
-            <h3 className="text-2xl font-bold text-white mb-2">Perfect! Je hebt 3 challenges toegevoegd</h3>
-            <p className="text-[#8BAE5A] mb-6">
-              Je bent klaar voor de volgende stap. Klik op "Ga verder" om door te gaan met je onboarding.
-            </p>
-            <button
-              onClick={completeOnboardingStep}
-              className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] hover:from-[#7A9E4A] hover:to-[#E6C200] text-[#181F17] font-bold px-8 py-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg"
-            >
-              🚀 Ga verder
-            </button>
-          </div>
-        )}
+        {/* Onboarding Continue Button - Removed for auto-completion */}
 
 
         {/* Onboarding Popup - Positioned at top for challenges page */}

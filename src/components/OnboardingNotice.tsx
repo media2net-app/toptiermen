@@ -9,10 +9,10 @@ interface OnboardingNoticeProps {
 }
 
 export default function OnboardingNotice({ className = "" }: OnboardingNoticeProps) {
-  const { currentStep, isCompleted, hasTrainingAccess, hasNutritionAccess } = useOnboardingV2();
+  const { currentStep, isCompleted, hasTrainingAccess, hasNutritionAccess, isLoading } = useOnboardingV2();
 
-  // Don't show notice if onboarding is completed
-  if (isCompleted) {
+  // Don't show notice if onboarding is completed, still loading, or currentStep is null (not initialized)
+  if (isCompleted || isLoading || currentStep === null) {
     return null;
   }
 
@@ -46,7 +46,7 @@ export default function OnboardingNotice({ className = "" }: OnboardingNoticePro
         if (hasTrainingAccess) {
           return {
             title: "Trainingsschema kiezen",
-            message: "Selecteer een trainingsschema dat bij je past. Klik op 'Selecteer Dit Schema' om door te gaan naar de volgende stap.",
+            message: "Vul je profiel in en selecteer daarna een trainingsschema. Klik op 'Selecteer Dit Schema' om door te gaan naar de volgende stap.",
             icon: "💪",
             color: "from-purple-500 to-purple-600"
           };

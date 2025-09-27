@@ -1,59 +1,26 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  FireIcon, 
-  ClockIcon, 
-  TagIcon,
-  CalendarDaysIcon,
-  CpuChipIcon,
-  BookOpenIcon,
-  ChartBarIcon,
-  PlayIcon,
-  PauseIcon,
-  StopIcon,
-  CheckCircleIcon
-} from '@heroicons/react/24/solid';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { useOnboardingV2 } from '@/contexts/OnboardingV2Context';
-import { toast } from 'react-hot-toast';
-
-interface StressAssessment {
-  workStress: number;
-  personalStress: number;
-  sleepQuality: number;
-  energyLevel: number;
-  focusProblems: boolean;
-  irritability: boolean;
-}
-
-interface LifestyleInfo {
-  workSchedule: string;
-  freeTime: string[];
-  familyObligations: string[];
-  sportSchedule: string;
-  commuteTime: number;
-  lunchBreak: string;
-}
-
-interface PersonalGoals {
-  stressVerminderen: boolean;
-  focusVerbeteren: boolean;
-  betereSlaap: boolean;
-  betereRelaties: boolean;
-  hogerePrestaties: boolean;
-  emotioneleControle: boolean;
-}
+import { 
+  TagIcon, 
+  FireIcon, 
+  ClockIcon, 
+  CpuChipIcon,
+  PlayIcon,
+  ChartBarIcon,
+  BookOpenIcon,
+  StarIcon
+} from '@heroicons/react/24/solid';
 
 interface MeditationSession {
   id: string;
-  title: string;
-  type: string;
+  name: string;
   duration: number;
+  type: string;
   description: string;
-  scheduledTime?: string;
   audioUrl?: string;
 }
 
@@ -99,9 +66,35 @@ export default function MindFocusPage() {
   const [isAnimating, setIsAnimating] = useState(false);
   const [hasExistingProfile, setHasExistingProfile] = useState(false);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
-  const [debugInfo, setDebugInfo] = useState<any>(null);
-  const [showDebug, setShowDebug] = useState(false);
   const [dashboardData, setDashboardData] = useState<any>(null);
+  
+  // Intake form state
+  const [stressAssessment, setStressAssessment] = useState({
+    workStress: 5,
+    personalStress: 5,
+    sleepQuality: 5,
+    energyLevel: 5,
+    focusProblems: false,
+    irritability: false
+  });
+  
+  const [lifestyleInfo, setLifestyleInfo] = useState({
+    workSchedule: '9-17',
+    freeTime: [] as string[],
+    familyObligations: [] as string[],
+    sportSchedule: '3x per week',
+    stressTriggers: [] as string[]
+  });
+  
+  const [personalGoals, setPersonalGoals] = useState({
+    improveFocus: false,
+    reduceStress: false,
+    betterSleep: false,
+    moreEnergy: false,
+    workLifeBalance: false
+  });
+  
+  const [isSaving, setIsSaving] = useState(false);
 
   // Load existing profile data on component mount
   useEffect(() => {
@@ -110,28 +103,10 @@ export default function MindFocusPage() {
         setIsLoadingProfile(false);
         return;
       }
-      
-      // Add timeout to prevent infinite loading
-      const timeoutId = setTimeout(() => {
-        console.warn('Profile loading timeout reached, forcing completion...');
-        setIsLoadingProfile(false);
-      }, 10000); // 10 second timeout
-      
+
       try {
         const response = await fetch(`/api/mind-focus/intake?userId=${user.id}`);
         const data = await response.json();
-        
-        // Debug information
-        const debugData = {
-          userId: user.id,
-          userEmail: user.email,
-          apiResponse: data,
-          hasProfile: data.success && data.profile,
-          profileData: data.profile,
-          currentView: data.success && data.profile ? 'dashboard' : 'intro',
-          timestamp: new Date().toISOString()
-        };
-        setDebugInfo(debugData);
         
         if (data.success && data.profile) {
           setHasExistingProfile(true);
@@ -150,277 +125,24 @@ export default function MindFocusPage() {
         }
       } catch (error) {
         console.error('Error loading profile:', error);
-        setDebugInfo({
-          userId: user.id,
-          userEmail: user.email,
-          error: error.message,
-          timestamp: new Date().toISOString()
-        });
       } finally {
         clearTimeout(timeoutId);
         setIsLoadingProfile(false);
       }
     };
 
+    const timeoutId = setTimeout(() => {
+      setIsLoadingProfile(false);
+    }, 3000);
+
     loadExistingProfile();
   }, [user]);
 
-
-  const intakeSteps = [
-    {
-      id: 'stress',
-      title: 'Stress Assessment',
-      subtitle: 'Hoe voel je je momenteel?',
-      icon: <FireIcon className="w-8 h-8" />
-    },
-    {
-      id: 'lifestyle',
-      title: 'Lifestyle Informatie',
-      subtitle: 'Vertel ons over je dagelijkse routine',
-      icon: <ClockIcon className="w-8 h-8" />
-    },
-    {
-      id: 'goals',
-      title: 'Persoonlijke Doelen',
-      subtitle: 'Wat wil je bereiken?',
-      icon: <TagIcon className="w-8 h-8" />
-    }
-  ];
-
-  const [stressAssessment, setStressAssessment] = useState<StressAssessment>({
-    workStress: 5,
-    personalStress: 5,
-    sleepQuality: 5,
-    energyLevel: 5,
-    focusProblems: false,
-    irritability: false
-  });
-
-  const [lifestyleInfo, setLifestyleInfo] = useState<LifestyleInfo>({
-    workSchedule: '08:00-17:00',
-    freeTime: [],
-    familyObligations: [],
-    sportSchedule: '',
-    commuteTime: 30,
-    lunchBreak: '12:00-13:00'
-  });
-
-  const [personalGoals, setPersonalGoals] = useState<PersonalGoals>({
-    stressVerminderen: false,
-    focusVerbeteren: false,
-    betereSlaap: false,
-    betereRelaties: false,
-    hogerePrestaties: false,
-    emotioneleControle: false
-  });
-
-  const [personalPlan, setPersonalPlan] = useState<{
-    dailyRoutine: MeditationSession[];
-    weeklyGoals: string[];
-    progressTargets: any;
-  } | null>(null);
-
-  const [todaySessions, setTodaySessions] = useState<MeditationSession[]>([]);
-  const [streakCount, setStreakCount] = useState(0);
-  const [currentStressLevel, setCurrentStressLevel] = useState(5);
-  
-  // Journaling state
-  const [journalText, setJournalText] = useState('');
-  const [isSavingJournal, setIsSavingJournal] = useState(false);
-  
-  // Todo list state
-  const [todos, setTodos] = useState<{
-    id: string;
-    text: string;
-    completed: boolean;
-    category: 'mind-focus' | 'stress-release' | 'sleep-prep' | 'recovery' | 'general';
-  }[]>([]);
-  const [newTodo, setNewTodo] = useState('');
-  const [isAddingTodo, setIsAddingTodo] = useState(false);
-  
-  // Recent journaling state
-  const [recentJournaling, setRecentJournaling] = useState<any>(null);
-  const [journalHistory, setJournalHistory] = useState<any[]>([]);
-  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
-  
-  // Dashboard loading state
-  const [isLoadingDashboardData, setIsLoadingDashboardData] = useState(false);
-
-  // Fetch journal history
-  const fetchJournalHistory = async () => {
-    if (!user) return;
-    
-    setIsLoadingHistory(true);
-    try {
-      const response = await fetch('/api/mind-focus/journal');
-      if (response.ok) {
-        const data = await response.json();
-        setJournalHistory(data.entries || []);
-      }
-    } catch (error) {
-      console.error('Error fetching journal history:', error);
-    } finally {
-      setIsLoadingHistory(false);
-    }
-  };
-
-  // Fetch real dashboard data from database
-  const fetchDashboardData = async () => {
-    if (!user?.id) return;
-
-    try {
-      setIsLoadingDashboardData(true);
-      console.log('📊 Fetching dashboard data for user:', user.id);
-
-      // Fetch meditation sessions
-      const sessionsResponse = await fetch(`/api/mind-focus/sessions?userId=${user.id}`);
-      const sessionsData = await sessionsResponse.json();
-      
-      // Fetch journal entries
-      const journalResponse = await fetch(`/api/mind-focus/journal?userId=${user.id}`);
-      const journalData = await journalResponse.json();
-      
-      // Set recent journaling data
-      if (journalData.success && journalData.entries && journalData.entries.length > 0) {
-        setRecentJournaling(journalData.entries[0]); // Most recent entry
-      }
-
-      // Calculate current week sessions
-      const now = new Date();
-      const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
-      startOfWeek.setHours(0, 0, 0, 0);
-      
-      const sessionsThisWeek = sessionsData.success && sessionsData.sessions 
-        ? sessionsData.sessions.filter((session: any) => 
-            new Date(session.created_at) >= startOfWeek
-          ).length 
-        : 0;
-
-      // Calculate total sessions
-      const totalSessions = sessionsData.success && sessionsData.sessions 
-        ? sessionsData.sessions.length 
-        : 0;
-
-      // Get latest stress level from journal entries
-      const latestStressLevel = journalData.success && journalData.entries && journalData.entries.length > 0
-        ? journalData.entries[0].stress_level || currentStressLevel
-        : currentStressLevel;
-
-      // Calculate streak from journal entries
-      const calculateStreak = (entries: any[]) => {
-        if (!entries || entries.length === 0) return 0;
-        
-        let streak = 0;
-        const today = new Date();
-        let currentDate = new Date(today);
-        
-        // Sort entries by date descending
-        const sortedEntries = entries.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-        
-        for (let i = 0; i < sortedEntries.length; i++) {
-          const entryDate = new Date(sortedEntries[i].date);
-          const expectedDate = new Date(currentDate);
-          
-          // Check if entry is for expected date (allowing for same day)
-          if (entryDate.toDateString() === expectedDate.toDateString()) {
-            streak++;
-            currentDate.setDate(currentDate.getDate() - 1);
-          } else {
-            break;
-          }
-        }
-        
-        return streak;
-      };
-
-      const streak = journalData.success && journalData.entries 
-        ? calculateStreak(journalData.entries)
-        : 0;
-
-      // Calculate focus improvement (placeholder logic - could be enhanced)
-      const focusImprovement = Math.min(95, Math.max(0, streak * 10 + sessionsThisWeek * 5));
-
-      const realDashboardData = {
-        sessionsThisWeek,
-        currentStressLevel: latestStressLevel,
-        totalSessions,
-        focusImprovement,
-        streak,
-        timestamp: new Date().toISOString()
-      };
-
-      console.log('✅ Dashboard data fetched:', realDashboardData);
-      setDashboardData(realDashboardData);
-
-    } catch (error) {
-      console.error('❌ Error fetching dashboard data:', error);
-      // Fallback to dummy data if API fails
-      const fallbackData = {
-        sessionsThisWeek: 0,
-        currentStressLevel: currentStressLevel,
-        totalSessions: 0,
-        focusImprovement: 0,
-        streak: 0,
-        timestamp: new Date().toISOString()
-      };
-      setDashboardData(fallbackData);
-    } finally {
-      setIsLoadingDashboardData(false);
-    }
-  };
-
-  // Update dashboard data when component mounts or when currentView changes to dashboard
-  useEffect(() => {
-    if (currentView === 'dashboard' && user?.id) {
-      fetchDashboardData();
-    }
-  }, [currentView, user?.id]);
-
-  // Refresh dashboard data when switching to overview tab
-  useEffect(() => {
-    if (activeTab === 'overview' && currentView === 'dashboard' && user?.id) {
-      fetchDashboardData();
-    }
-  }, [activeTab, currentView, user?.id]);
-
-  // Load journal history when journaling tab is active
-  useEffect(() => {
-    if (activeTab === 'journal' && user) {
-      fetchJournalHistory();
-    }
-  }, [activeTab, user]);
-
-  const tabs = [
-    { id: 'overview', label: 'Overzicht', icon: <CpuChipIcon className="w-5 h-5" /> },
-    { id: 'profile', label: 'Mijn Profiel', icon: <CpuChipIcon className="w-5 h-5" /> },
-    { id: 'meditations', label: 'Meditaties', icon: <BookOpenIcon className="w-5 h-5" /> },
-    { id: 'journal', label: 'Journaling', icon: <ChartBarIcon className="w-5 h-5" /> }
-  ];
-
-  const nextStep = () => {
-    if (currentStep < intakeSteps.length - 1) {
-      setIsAnimating(true);
-      setTimeout(() => {
-        setCurrentStep(prev => prev + 1);
-        setIsAnimating(false);
-      }, 300);
-    } else {
-      generatePersonalPlan();
-    }
-  };
-
-  const prevStep = () => {
-    if (currentStep > 0) {
-      setIsAnimating(true);
-      setTimeout(() => {
-        setCurrentStep(prev => prev - 1);
-        setIsAnimating(false);
-      }, 300);
-    }
-  };
-
+  // Save intake data function
   const saveIntakeData = async () => {
     if (!user) return;
+    
+    setIsSaving(true);
     
     try {
       const response = await fetch('/api/mind-focus/intake', {
@@ -438,29 +160,12 @@ export default function MindFocusPage() {
       
       const data = await response.json();
       
-      // Update debug info
-      setDebugInfo(prev => ({
-        ...prev,
-        saveAttempt: {
-          success: data.success,
-          response: data,
-          timestamp: new Date().toISOString(),
-          dataSent: {
-            userId: user.id,
-            stressAssessment,
-            lifestyleInfo,
-            personalGoals
-          }
-        }
-      }));
-      
       if (data.success) {
         console.log('✅ Intake data saved successfully');
         setHasExistingProfile(true);
         setCurrentView('dashboard');
         
-        // Force sidebar refresh by triggering a page reload
-        // This ensures the sidebar shows the new subpages
+        // Force reload to ensure clean state
         setTimeout(() => {
           window.location.reload();
         }, 1000);
@@ -469,1621 +174,320 @@ export default function MindFocusPage() {
       }
     } catch (error) {
       console.error('Error saving intake data:', error);
-      setDebugInfo(prev => ({
-        ...prev,
-        saveAttempt: {
-          success: false,
-          error: error.message,
-          timestamp: new Date().toISOString()
-        }
-      }));
-    }
-  };
-
-  // Todo list functions
-  const addTodo = async () => {
-    if (!newTodo.trim() || !user?.id) return;
-    
-    try {
-      setIsAddingTodo(true);
-      const todo = {
-        id: Date.now().toString(),
-        text: newTodo.trim(),
-        completed: false,
-        category: 'general' as const
-      };
-      
-      setTodos(prev => [...prev, todo]);
-      setNewTodo('');
-      
-      // Save to database
-      const response = await fetch('/api/mind-focus/todos', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: user.id,
-          text: todo.text,
-          category: todo.category
-        })
-      });
-      
-      if (!response.ok) {
-        console.error('Failed to save todo');
-      }
-    } catch (error) {
-      console.error('Error adding todo:', error);
     } finally {
-      setIsAddingTodo(false);
+      setIsSaving(false);
     }
-  };
-
-  const toggleTodo = async (todoId: string) => {
-    if (!user?.id) return;
-    
-    try {
-      setTodos(prev => prev.map(todo => 
-        todo.id === todoId ? { ...todo, completed: !todo.completed } : todo
-      ));
-      
-      // Update in database
-      const response = await fetch('/api/mind-focus/todos', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: user.id,
-          todoId,
-          completed: !todos.find(t => t.id === todoId)?.completed
-        })
-      });
-      
-      if (!response.ok) {
-        console.error('Failed to update todo');
-      }
-    } catch (error) {
-      console.error('Error updating todo:', error);
-    }
-  };
-
-  const deleteTodo = async (todoId: string) => {
-    if (!user?.id) return;
-    
-    try {
-      setTodos(prev => prev.filter(todo => todo.id !== todoId));
-      
-      // Delete from database
-      const response = await fetch('/api/mind-focus/todos', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: user.id,
-          todoId
-        })
-      });
-      
-      if (!response.ok) {
-        console.error('Failed to delete todo');
-      }
-    } catch (error) {
-      console.error('Error deleting todo:', error);
-    }
-  };
-
-  // Load todos on component mount
-  useEffect(() => {
-    const loadTodos = async () => {
-      if (!user?.id) return;
-      
-      try {
-        const response = await fetch(`/api/mind-focus/todos?userId=${user.id}`);
-        const data = await response.json();
-        
-        if (data.success && data.todos) {
-          setTodos(data.todos);
-        }
-      } catch (error) {
-        console.error('Error loading todos:', error);
-      }
-    };
-
-    loadTodos();
-  }, [user?.id]);
-
-  // Save journal entry
-  const saveJournalEntry = async () => {
-    if (!user?.id) {
-      toast.error('Je moet ingelogd zijn om journal entries op te slaan');
-      return;
-    }
-
-    if (!journalText.trim()) {
-      toast.error('Voeg wat tekst toe aan je journal entry');
-      return;
-    }
-
-    try {
-      setIsSavingJournal(true);
-      const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
-      
-      const response = await fetch('/api/mind-focus/journal', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: user.id,
-          date: today,
-          dailyReview: journalText,
-          mood: currentStressLevel,
-          stressLevel: currentStressLevel,
-          energyLevel: currentStressLevel,
-          sleepQuality: currentStressLevel,
-          notes: '',
-          gratitude: [],
-          tomorrowPriorities: []
-        })
-      });
-
-      const data = await response.json();
-      
-      if (data.success) {
-        toast.success('Journal entry opgeslagen! 🎉');
-        setJournalText(''); // Clear the textarea after saving
-        // Refresh dashboard data to show updated stats
-        fetchDashboardData();
-        // Refresh journal history to show the new entry
-        fetchJournalHistory();
-      } else {
-        toast.error('Kon journal entry niet opslaan');
-      }
-    } catch (error) {
-      console.error('Error saving journal entry:', error);
-      toast.error('Kon journal entry niet opslaan');
-    } finally {
-      setIsSavingJournal(false);
-    }
-  };
-
-  const generatePersonalPlan = () => {
-    // Calculate stress level
-    const totalStress = stressAssessment.workStress + stressAssessment.personalStress;
-    const avgStress = totalStress / 2;
-    
-    // Generate daily routine based on work schedule and stress level
-    const dailyRoutine: MeditationSession[] = [];
-    
-    // Morning session
-    if (lifestyleInfo.workSchedule.includes('08:00')) {
-      dailyRoutine.push({
-        id: 'morning-focus',
-        title: 'Ochtend Focus Training',
-        type: 'focus',
-        duration: avgStress > 6 ? 15 : 10,
-        description: 'Start je dag met mentale helderheid',
-        scheduledTime: '07:30'
-      });
-    }
-    
-    // Lunch break session
-    if (avgStress > 6) {
-      dailyRoutine.push({
-        id: 'lunch-stress-release',
-        title: 'Lunch Stress Release',
-        type: 'stress',
-        duration: 10,
-        description: 'Herstel je balans tijdens lunch',
-        scheduledTime: lifestyleInfo.lunchBreak.split('-')[0]
-      });
-    }
-    
-    // Evening session
-    dailyRoutine.push({
-      id: 'evening-recovery',
-      title: 'Avond Recovery',
-      type: 'recovery',
-      duration: avgStress > 7 ? 20 : 15,
-      description: 'Ontspan en verwerk de dag',
-      scheduledTime: '19:00'
-    });
-    
-    // Sleep preparation if sleep quality is low
-    if (stressAssessment.sleepQuality < 6) {
-      dailyRoutine.push({
-        id: 'sleep-prep',
-        title: 'Sleep Preparation',
-        type: 'sleep',
-        duration: 15,
-        description: 'Bereid je voor op een goede nachtrust',
-        scheduledTime: '21:30'
-      });
-    }
-
-    // Generate weekly goals based on personal goals
-    const weeklyGoals: string[] = [];
-    if (personalGoals.stressVerminderen) weeklyGoals.push('Stress level met 30% verminderen');
-    if (personalGoals.focusVerbeteren) weeklyGoals.push('Focus sessies 5x per week');
-    if (personalGoals.betereSlaap) weeklyGoals.push('Slaapkwaliteit verbeteren');
-    if (personalGoals.hogerePrestaties) weeklyGoals.push('Performance sessies toevoegen');
-
-    setPersonalPlan({
-      dailyRoutine,
-      weeklyGoals,
-      progressTargets: {
-        stressReduction: avgStress * 0.7,
-        focusSessions: 5,
-        sleepImprovement: stressAssessment.sleepQuality + 2
-      }
-    });
-    
-    // Save intake data to database
-    saveIntakeData();
-    
-    setCurrentView('plan');
-  };
-
-
-  const completeSession = (sessionId: string) => {
-    console.log('Completing session:', sessionId);
-    toast.success('Sessie voltooid!');
   };
 
   const renderIntro = () => (
-    <div className="min-h-screen bg-gradient-to-br from-[#0A0F0A] to-[#1A2A1A] flex items-center justify-center p-4">
-      <div className="w-full max-w-4xl">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="bg-[#1A2A1A] rounded-xl shadow-2xl border border-[#2A3A1A] overflow-hidden"
-        >
-          {/* Header */}
-          <div className="bg-gradient-to-r from-[#2A3A1A] to-[#3A4A2A] px-4 sm:px-8 lg:px-12 py-6 sm:py-8 lg:py-12 text-center">
-            <div className="flex justify-center mb-3 sm:mb-4 lg:mb-6">
-              <div className="p-3 sm:p-4 lg:p-6 bg-[#B6C948]/20 rounded-xl sm:rounded-2xl">
-                <CpuChipIcon className="w-8 h-8 sm:w-12 sm:h-12 lg:w-16 lg:h-16 text-[#B6C948]" />
+    <div className="min-h-screen bg-gradient-to-br from-[#0A0F0A] to-[#1A2A1A]">
+      <div className="container mx-auto px-4 py-12">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
+            Mind & Focus
+          </h1>
+          <p className="text-xl text-[#8BAE5A] max-w-3xl mx-auto">
+            Ontwikkel mentale kracht, verbeter je focus en bereik innerlijke balans met onze gecureerde meditatie en mindfulness programma's.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+          {meditationTypes.map((type) => (
+            <div
+              key={type.id}
+              className="bg-[#1A2A1A]/80 rounded-xl p-6 text-center hover:bg-[#1A2A1A] transition-all duration-300 cursor-pointer border border-[#2A3A1A] hover:border-[#3A4A2A]"
+              onClick={() => setCurrentView('intake')}
+            >
+              <div className={`w-16 h-16 ${type.color} rounded-full flex items-center justify-center text-white mx-auto mb-4`}>
+                {type.iconComponent}
               </div>
+              <h3 className="text-xl font-bold text-white mb-2">{type.name}</h3>
+              <p className="text-[#8BAE5A] text-sm">{type.description}</p>
             </div>
-            <h1 className="text-2xl sm:text-3xl lg:text-5xl font-bold text-[#B6C948] mb-2 sm:mb-3 lg:mb-4">
-              🧠 Mind & Focus
-            </h1>
-            <p className="text-[#8BAE5A] text-sm sm:text-base lg:text-xl max-w-2xl mx-auto">
-              Jouw persoonlijke stress management en focus training hub
-            </p>
+          ))}
+        </div>
+
+        <div className="text-center">
+          <button
+            onClick={() => setCurrentView('intake')}
+            className="bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] text-[#1A2A1A] px-8 py-4 rounded-xl font-bold text-lg hover:from-[#7A9D4A] hover:to-[#e0903f] transition-all duration-200 shadow-lg hover:shadow-xl"
+          >
+            Start Mind & Focus Assessment
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderDashboard = () => (
+    <div className="min-h-screen bg-gradient-to-br from-[#0A0F0A] to-[#1A2A1A]">
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-white">Mind & Focus Dashboard</h1>
+            <p className="text-[#8BAE5A] mt-2">Welkom terug! Laten we je mentale welzijn verbeteren.</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Quick Actions */}
+          <div className="lg:col-span-2">
+            <h2 className="text-2xl font-bold text-white mb-6">Quick Actions</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {meditationTypes.map((type) => (
+                <div
+                  key={type.id}
+                  className="bg-[#1A2A1A]/80 rounded-xl p-6 border border-[#2A3A1A] hover:border-[#3A4A2A] transition-all duration-300 cursor-pointer"
+                  onClick={() => router.push(`/dashboard/mind-focus/${type.id}-training`)}
+                >
+                  <div className="flex items-center gap-4 mb-3">
+                    <div className={`w-12 h-12 ${type.color} rounded-full flex items-center justify-center text-white`}>
+                      {type.iconComponent}
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-white">{type.name}</h3>
+                      <p className="text-[#8BAE5A] text-sm">{type.description}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center text-[#8BAE5A] text-sm">
+                    <PlayIcon className="w-4 h-4 mr-2" />
+                    Start Sessie
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
 
-          {/* Content */}
-          <div className="p-4 sm:p-6 lg:p-12">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12 mb-8 sm:mb-12">
-              {/* Wat is Mind & Focus */}
-              <div>
-                <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-white mb-3 sm:mb-4 lg:mb-6 flex items-center">
-                  <FireIcon className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-[#B6C948] mr-2 sm:mr-3" />
-                  Wat is Mind & Focus?
-                </h2>
-                <div className="space-y-4 text-[#8BAE5A]">
-                  <p>
-                    Mind & Focus is jouw persoonlijke stress management en focus training platform. 
-                    We helpen je om mentaal sterker te worden, stress te verminderen en je focus te verbeteren.
-                  </p>
-                  <p>
-                    Geen zweverige chakra's of vrouwelijke wellness trends - wij focussen op praktische, 
-                    mannelijke stress management technieken die écht werken.
-                  </p>
+          {/* Stats */}
+          <div>
+            <h2 className="text-2xl font-bold text-white mb-6">Jouw Progress</h2>
+            <div className="space-y-4">
+              <div className="bg-[#1A2A1A]/80 rounded-xl p-6 border border-[#2A3A1A]">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[#8BAE5A]">Deze Week</span>
+                  <span className="text-white font-bold">3 sessies</span>
+                </div>
+                <div className="w-full bg-[#2A3A1A] rounded-full h-2">
+                  <div className="bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] h-2 rounded-full" style={{ width: '60%' }}></div>
                 </div>
               </div>
 
-              {/* Wat krijg je */}
-              <div>
-                <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-white mb-3 sm:mb-4 lg:mb-6 flex items-center">
-                  <TagIcon className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-[#B6C948] mr-2 sm:mr-3" />
-                  Wat krijg je?
-                </h2>
-                <div className="space-y-4">
-                  <div className="flex items-start p-4 bg-[#1A2A1A] border border-[#2A3A1A] rounded-lg">
-                    <div className="w-6 h-6 bg-[#B6C948] rounded-full flex items-center justify-center mr-4 mt-1">
-                      <span className="text-[#1A2A1A] text-sm font-bold">1</span>
-                    </div>
-                    <div>
-                      <h3 className="text-white font-semibold mb-1">Persoonlijk Plan</h3>
-                      <p className="text-[#8BAE5A] text-sm">Op maat gemaakt meditatie en focus plan gebaseerd op jouw levensstijl</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start p-4 bg-[#1A2A1A] border border-[#2A3A1A] rounded-lg">
-                    <div className="w-6 h-6 bg-[#B6C948] rounded-full flex items-center justify-center mr-4 mt-1">
-                      <span className="text-[#1A2A1A] text-sm font-bold">2</span>
-                    </div>
-                    <div>
-                      <h3 className="text-white font-semibold mb-1">Dagelijkse Routine</h3>
-                      <p className="text-[#8BAE5A] text-sm">Meditatie sessies die perfect passen in jouw werkrooster</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start p-4 bg-[#1A2A1A] border border-[#2A3A1A] rounded-lg">
-                    <div className="w-6 h-6 bg-[#B6C948] rounded-full flex items-center justify-center mr-4 mt-1">
-                      <span className="text-[#1A2A1A] text-sm font-bold">3</span>
-                    </div>
-                    <div>
-                      <h3 className="text-white font-semibold mb-1">Progress Tracking</h3>
-                      <p className="text-[#8BAE5A] text-sm">Monitor je stress levels en focus verbetering over tijd</p>
-                    </div>
-                  </div>
+              <div className="bg-[#1A2A1A]/80 rounded-xl p-6 border border-[#2A3A1A]">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[#8BAE5A]">Streak</span>
+                  <span className="text-white font-bold">5 dagen</span>
+                </div>
+                <div className="flex">
+                  {[...Array(7)].map((_, i) => (
+                    <div
+                      key={i}
+                      className={`w-3 h-3 rounded-full mr-1 ${i < 5 ? 'bg-[#8BAE5A]' : 'bg-[#2A3A1A]'}`}
+                    />
+                  ))}
                 </div>
               </div>
-            </div>
 
-            {/* Hoe werkt het */}
-            <div className="mb-12">
-              <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-white mb-4 sm:mb-6 lg:mb-8 text-center">
-                Hoe werkt het?
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-                <div className="text-center">
-                  <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-[#B6C948]/20 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
-                    <span className="text-lg sm:text-xl lg:text-2xl font-bold text-[#B6C948]">1</span>
-                  </div>
-                  <h3 className="text-base sm:text-lg font-semibold text-white mb-2">Intake</h3>
-                  <p className="text-[#8BAE5A] text-xs sm:text-sm">Vul een korte intake in over je stress levels en levensstijl</p>
+              <div className="bg-[#1A2A1A]/80 rounded-xl p-6 border border-[#2A3A1A]">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[#8BAE5A]">Focus Score</span>
+                  <span className="text-white font-bold">8.2/10</span>
                 </div>
-                
-                <div className="text-center">
-                  <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-[#B6C948]/20 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
-                    <span className="text-lg sm:text-xl lg:text-2xl font-bold text-[#B6C948]">2</span>
-                  </div>
-                  <h3 className="text-base sm:text-lg font-semibold text-white mb-2">Plan</h3>
-                  <p className="text-[#8BAE5A] text-xs sm:text-sm">Krijg een op maat gemaakt plan met meditatie sessies</p>
-                </div>
-                
-                <div className="text-center">
-                  <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-[#B6C948]/20 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
-                    <span className="text-lg sm:text-xl lg:text-2xl font-bold text-[#B6C948]">3</span>
-                  </div>
-                  <h3 className="text-base sm:text-lg font-semibold text-white mb-2">Train</h3>
-                  <p className="text-[#8BAE5A] text-xs sm:text-sm">Start met je dagelijkse routine en track je progress</p>
+                <div className="w-full bg-[#2A3A1A] rounded-full h-2">
+                  <div className="bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] h-2 rounded-full" style={{ width: '82%' }}></div>
                 </div>
               </div>
-            </div>
-
-            {/* Start Button */}
-            <div className="text-center">
-              <motion.button
-                onClick={() => setCurrentView('intake')}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="bg-gradient-to-r from-[#B6C948] to-[#8BAE5A] text-[#1A2A1A] px-12 py-4 rounded-xl text-xl font-bold hover:from-[#8BAE5A] hover:to-[#B6C948] transition-all duration-300 shadow-2xl hover:shadow-3xl"
-              >
-                🚀 Start Intake
-              </motion.button>
-              <p className="text-[#8BAE5A] text-sm mt-4">
-                Neem 3 minuten de tijd voor een betere mentale gezondheid
-              </p>
             </div>
           </div>
-        </motion.div>
+        </div>
       </div>
     </div>
   );
 
   const renderIntakeForm = () => (
-    <div className="min-h-screen bg-gradient-to-br from-[#0A0F0A] to-[#1A2A1A] flex items-center justify-center p-4">
-      <div className="w-full max-w-4xl">
-        {/* Progress Bar */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-[#8BAE5A] text-sm">
-              Stap {currentStep + 1} van {intakeSteps.length}
-            </span>
-            <span className="text-[#8BAE5A] text-sm">
-              {Math.round(((currentStep + 1) / intakeSteps.length) * 100)}%
-            </span>
-          </div>
-          <div className="w-full bg-[#2A3A1A] rounded-full h-2">
-            <motion.div
-              className="bg-[#B6C948] h-2 rounded-full"
-              initial={{ width: 0 }}
-              animate={{ width: `${((currentStep + 1) / intakeSteps.length) * 100}%` }}
-              transition={{ duration: 0.3 }}
-            />
-          </div>
-        </div>
-
-        <motion.div
-          key={currentStep}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          transition={{ duration: 0.3 }}
-          className="bg-[#1A2A1A] rounded-xl shadow-2xl border border-[#2A3A1A] overflow-hidden"
-        >
-          {/* Header */}
-          <div className="bg-gradient-to-r from-[#2A3A1A] to-[#3A4A2A] px-12 py-8">
-            <div className="flex items-center space-x-6">
-              <div className="p-4 bg-[#B6C948]/20 rounded-xl">
-                {intakeSteps[currentStep]?.icon}
-              </div>
-              <div>
-                <h1 className="text-4xl font-bold text-[#B6C948] mb-2">
-                  {intakeSteps[currentStep]?.title}
-                </h1>
-                <p className="text-[#8BAE5A] text-xl">
-                  {intakeSteps[currentStep]?.subtitle}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Content */}
-          <div className="p-12">
-            <AnimatePresence mode="wait">
-              {currentStep === 0 && (
-                <motion.div
-                  key="stress"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.3 }}
-                  className="space-y-6 sm:space-y-8"
-                >
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
-                    <div>
-                      <label className="block text-base sm:text-lg font-medium text-white mb-2">
-                        Werk Stress Level (1-10)
-                      </label>
-                      <p className="text-sm text-[#8BAE5A] mb-4">
-                        Hoe gestrest voel je je op je werk? 1 = heel ontspannen, 10 = extreem gestrest
-                      </p>
-                      <input
-                        type="range"
-                        min="1"
-                        max="10"
-                        value={stressAssessment.workStress}
-                        onChange={(e) => setStressAssessment(prev => ({
-                          ...prev,
-                          workStress: parseInt(e.target.value)
-                        }))}
-                        className="w-full h-3 bg-[#2A3A1A] rounded-lg appearance-none cursor-pointer slider-green"
-                        style={{
-                          background: `linear-gradient(to right, #B6C948 0%, #B6C948 ${(stressAssessment.workStress - 1) * 11.11}%, #2A3A1A ${(stressAssessment.workStress - 1) * 11.11}%, #2A3A1A 100%)`
-                        }}
-                      />
-                      <div className="flex justify-between text-sm text-[#8BAE5A] mt-2">
-                        <span>Laag</span>
-                        <span className="font-bold text-[#B6C948] text-lg">{stressAssessment.workStress}</span>
-                        <span>Hoog</span>
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-lg font-medium text-white mb-2">
-                        Privé Stress Level (1-10)
-                      </label>
-                      <p className="text-sm text-[#8BAE5A] mb-4">
-                        Hoe gestrest voel je je in je privéleven? 1 = heel ontspannen, 10 = extreem gestrest
-                      </p>
-                      <input
-                        type="range"
-                        min="1"
-                        max="10"
-                        value={stressAssessment.personalStress}
-                        onChange={(e) => setStressAssessment(prev => ({
-                          ...prev,
-                          personalStress: parseInt(e.target.value)
-                        }))}
-                        className="w-full h-3 bg-[#2A3A1A] rounded-lg appearance-none cursor-pointer slider-green"
-                        style={{
-                          background: `linear-gradient(to right, #B6C948 0%, #B6C948 ${(stressAssessment.personalStress - 1) * 11.11}%, #2A3A1A ${(stressAssessment.personalStress - 1) * 11.11}%, #2A3A1A 100%)`
-                        }}
-                      />
-                      <div className="flex justify-between text-sm text-[#8BAE5A] mt-2">
-                        <span>Laag</span>
-                        <span className="font-bold text-[#B6C948] text-lg">{stressAssessment.personalStress}</span>
-                        <span>Hoog</span>
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-lg font-medium text-white mb-2">
-                        Slaapkwaliteit (1-10)
-                      </label>
-                      <p className="text-sm text-[#8BAE5A] mb-4">
-                        Hoe goed slaap je? 1 = heel slecht slapen, 10 = perfect slapen
-                      </p>
-                      <input
-                        type="range"
-                        min="1"
-                        max="10"
-                        value={stressAssessment.sleepQuality}
-                        onChange={(e) => setStressAssessment(prev => ({
-                          ...prev,
-                          sleepQuality: parseInt(e.target.value)
-                        }))}
-                        className="w-full h-3 bg-[#2A3A1A] rounded-lg appearance-none cursor-pointer slider-green"
-                        style={{
-                          background: `linear-gradient(to right, #B6C948 0%, #B6C948 ${(stressAssessment.sleepQuality - 1) * 11.11}%, #2A3A1A ${(stressAssessment.sleepQuality - 1) * 11.11}%, #2A3A1A 100%)`
-                        }}
-                      />
-                      <div className="flex justify-between text-sm text-[#8BAE5A] mt-2">
-                        <span>Slecht</span>
-                        <span className="font-bold text-[#B6C948] text-lg">{stressAssessment.sleepQuality}</span>
-                        <span>Uitstekend</span>
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-lg font-medium text-white mb-2">
-                        Energie Level (1-10)
-                      </label>
-                      <p className="text-sm text-[#8BAE5A] mb-4">
-                        Hoe energiek voel je je? 1 = heel moe/uitgeput, 10 = vol energie
-                      </p>
-                      <input
-                        type="range"
-                        min="1"
-                        max="10"
-                        value={stressAssessment.energyLevel}
-                        onChange={(e) => setStressAssessment(prev => ({
-                          ...prev,
-                          energyLevel: parseInt(e.target.value)
-                        }))}
-                        className="w-full h-3 bg-[#2A3A1A] rounded-lg appearance-none cursor-pointer slider-green"
-                        style={{
-                          background: `linear-gradient(to right, #B6C948 0%, #B6C948 ${(stressAssessment.energyLevel - 1) * 11.11}%, #2A3A1A ${(stressAssessment.energyLevel - 1) * 11.11}%, #2A3A1A 100%)`
-                        }}
-                      />
-                      <div className="flex justify-between text-sm text-[#8BAE5A] mt-2">
-                        <span>Laag</span>
-                        <span className="font-bold text-[#B6C948] text-lg">{stressAssessment.energyLevel}</span>
-                        <span>Hoog</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                    <label className="flex items-start p-4 sm:p-6 border-2 border-[#2A3A1A] rounded-xl hover:border-[#B6C948] hover:bg-[#B6C948]/10 cursor-pointer transition-all bg-[#1A2A1A]">
-                      <input
-                        type="checkbox"
-                        checked={stressAssessment.focusProblems}
-                        onChange={(e) => setStressAssessment(prev => ({
-                          ...prev,
-                          focusProblems: e.target.checked
-                        }))}
-                        className="mr-4 w-5 h-5 text-[#B6C948] mt-1"
-                      />
-                      <div>
-                        <span className="text-lg text-white block">Focus problemen</span>
-                        <span className="text-sm text-[#8BAE5A]">Moeite met concentreren of taken afmaken</span>
-                      </div>
-                    </label>
-                    <label className="flex items-start p-6 border-2 border-[#2A3A1A] rounded-xl hover:border-[#B6C948] hover:bg-[#B6C948]/10 cursor-pointer transition-all bg-[#1A2A1A]">
-                      <input
-                        type="checkbox"
-                        checked={stressAssessment.irritability}
-                        onChange={(e) => setStressAssessment(prev => ({
-                          ...prev,
-                          irritability: e.target.checked
-                        }))}
-                        className="mr-4 w-5 h-5 text-[#B6C948] mt-1"
-                      />
-                      <div>
-                        <span className="text-lg text-white block">Irritatie/agressie</span>
-                        <span className="text-sm text-[#8BAE5A]">Snel geïrriteerd of agressief reageren</span>
-                      </div>
-                    </label>
-                  </div>
-                </motion.div>
-              )}
-
-              {currentStep === 1 && (
-                <motion.div
-                  key="lifestyle"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.3 }}
-                  className="space-y-8"
-                >
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
-                    <div>
-                      <label className="block text-base sm:text-lg font-medium text-white mb-2">
-                        Werkrooster
-                      </label>
-                      <p className="text-sm text-[#8BAE5A] mb-4">
-                        Wanneer werk je meestal? Dit helpt ons om de beste momenten voor meditatie te vinden
-                      </p>
-                      <select
-                        value={lifestyleInfo.workSchedule}
-                        onChange={(e) => setLifestyleInfo(prev => ({
-                          ...prev,
-                          workSchedule: e.target.value
-                        }))}
-                        className="w-full p-4 text-lg border-2 border-[#2A3A1A] rounded-xl focus:ring-2 focus:ring-[#B6C948] focus:border-transparent bg-[#1A2A1A] text-white"
-                      >
-                        <option value="08:00-17:00">08:00 - 17:00</option>
-                        <option value="09:00-18:00">09:00 - 18:00</option>
-                        <option value="07:00-16:00">07:00 - 16:00</option>
-                        <option value="10:00-19:00">10:00 - 19:00</option>
-                        <option value="nacht">Nachtdienst</option>
-                        <option value="flexibel">Flexibel</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-lg font-medium text-white mb-2">
-                        Reistijd naar werk (minuten)
-                      </label>
-                      <p className="text-sm text-[#8BAE5A] mb-4">
-                        Hoe lang doe je erover om naar je werk te gaan? Ideaal voor korte meditatie sessies
-                      </p>
-                      <input
-                        type="number"
-                        value={lifestyleInfo.commuteTime}
-                        onChange={(e) => setLifestyleInfo(prev => ({
-                          ...prev,
-                          commuteTime: parseInt(e.target.value)
-                        }))}
-                        className="w-full p-4 text-lg border-2 border-[#2A3A1A] rounded-xl focus:ring-2 focus:ring-[#B6C948] focus:border-transparent bg-[#1A2A1A] text-white"
-                        placeholder="30"
-                      />
-                    </div>
-
-                    <div className="md:col-span-2">
-                      <label className="block text-lg font-medium text-white mb-2">
-                        Lunch pauze
-                      </label>
-                      <p className="text-sm text-[#8BAE5A] mb-4">
-                        Wanneer heb je lunch? Perfect moment voor een korte stress-release sessie
-                      </p>
-                      <select
-                        value={lifestyleInfo.lunchBreak}
-                        onChange={(e) => setLifestyleInfo(prev => ({
-                          ...prev,
-                          lunchBreak: e.target.value
-                        }))}
-                        className="w-full p-4 text-lg border-2 border-[#2A3A1A] rounded-xl focus:ring-2 focus:ring-[#B6C948] focus:border-transparent bg-[#1A2A1A] text-white"
-                      >
-                        <option value="12:00-13:00">12:00 - 13:00</option>
-                        <option value="12:30-13:30">12:30 - 13:30</option>
-                        <option value="13:00-14:00">13:00 - 14:00</option>
-                        <option value="flexibel">Flexibel</option>
-                      </select>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-
-              {currentStep === 2 && (
-                <motion.div
-                  key="goals"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.3 }}
-                  className="space-y-8"
-                >
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                    {Object.entries(personalGoals).map(([key, value]) => {
-                      const goalLabels = {
-                        stressVerminderen: { title: 'Stress verminderen', description: 'Minder stress en meer rust in je leven' },
-                        focusVerbeteren: { title: 'Focus verbeteren', description: 'Beter concentreren en taken afmaken' },
-                        betereSlaap: { title: 'Betere slaap', description: 'Dieper slapen en uitgerust wakker worden' },
-                        betereRelaties: { title: 'Betere relaties', description: 'Meer verbinding en harmonie in relaties' },
-                        hogerePrestaties: { title: 'Hogere prestaties', description: 'Beter presteren op werk en in sport' },
-                        emotioneleControle: { title: 'Emotionele controle', description: 'Beter omgaan met emoties en reacties' }
-                      };
-                      
-                      const goal = goalLabels[key as keyof typeof goalLabels];
-                      
-                      return (
-                        <label key={key} className="flex items-start p-6 border-2 border-[#2A3A1A] rounded-xl hover:border-[#B6C948] hover:bg-[#B6C948]/10 cursor-pointer transition-all bg-[#1A2A1A]">
-                          <input
-                            type="checkbox"
-                            checked={value}
-                            onChange={(e) => setPersonalGoals(prev => ({
-                              ...prev,
-                              [key]: e.target.checked
-                            }))}
-                            className="mr-4 w-5 h-5 text-[#B6C948] mt-1"
-                          />
-                          <div>
-                            <span className="text-lg text-white block">{goal.title}</span>
-                            <span className="text-sm text-[#8BAE5A]">{goal.description}</span>
-                          </div>
-                        </label>
-                      );
-                    })}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-
-          {/* Navigation */}
-          <div className="px-12 py-6 bg-[#1A2A1A] flex justify-between items-center border-t border-[#2A3A1A]">
-            {currentStep > 0 && (
-              <motion.button
-                onClick={prevStep}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="bg-[#2A3A1A] text-white hover:bg-[#3A4A2A] px-6 py-3 rounded-lg font-semibold transition-all"
-              >
-                ← Vorige
-              </motion.button>
-            )}
-
-            <motion.button
-              onClick={nextStep}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className={`bg-gradient-to-r from-[#2A3A1A] to-[#3A4A2A] text-[#B6C948] px-8 py-3 rounded-lg text-lg font-semibold hover:from-[#3A4A2A] hover:to-[#4A5A3A] transition-all duration-200 shadow-lg hover:shadow-xl ${
-                currentStep === 0 ? 'ml-auto' : ''
-              }`}
-            >
-              {currentStep === intakeSteps.length - 1 ? '🚀 Genereer Plan' : 'Volgende →'}
-            </motion.button>
-          </div>
-        </motion.div>
-      </div>
-    </div>
-  );
-
-  const renderPersonalPlan = () => (
-    <div className="min-h-screen bg-gradient-to-br from-[#0A0F0A] to-[#1A2A1A] p-4">
-      <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-[#B6C948] mb-4">
-            🎯 Jouw Persoonlijke Mind & Focus Plan
-          </h1>
-          <p className="text-[#8BAE5A] text-xl">
-            Op basis van jouw intake hebben we een op maat gemaakt plan ontwikkeld
-          </p>
-        </div>
-
-        {personalPlan && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Daily Routine */}
-            <div className="bg-[#1A2A1A] rounded-xl shadow-2xl border border-[#2A3A1A] p-6">
-              <h2 className="text-2xl font-semibold text-white mb-6 flex items-center">
-                <CalendarDaysIcon className="mr-3 text-[#B6C948] w-6 h-6" />
-                Dagelijkse Routine
-              </h2>
-              
-              <div className="space-y-4">
-                {personalPlan.dailyRoutine.map((session, index) => (
-                  <motion.div 
-                    key={session.id} 
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    className="border border-[#2A3A1A] rounded-lg p-4 hover:shadow-md transition-shadow bg-[#1A2A1A]"
-                  >
-                    <div className="flex items-center">
-                      <div className="p-2 bg-[#2A3A1A] rounded-lg mr-4">
-                        {meditationTypes.find(t => t.id === session.type)?.iconComponent}
-                      </div>
-                      <div>
-                        <h3 className="text-white font-semibold">{session.title}</h3>
-                        <p className="text-[#8BAE5A] text-sm">{session.description}</p>
-                        <p className="text-[#8BAE5A] text-xs">{session.scheduledTime} • {session.duration} min</p>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-
-            {/* Weekly Goals */}
-            <div className="bg-[#1A2A1A] rounded-xl shadow-2xl border border-[#2A3A1A] p-6">
-              <h2 className="text-2xl font-semibold text-white mb-6 flex items-center">
-                <TagIcon className="mr-3 text-[#B6C948] w-6 h-6" />
-                Weekdoelen
-              </h2>
-              
-              <div className="space-y-3">
-                {personalPlan.weeklyGoals.map((goal, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    className="flex items-center p-3 bg-[#1A2A1A] border border-[#2A3A1A] rounded-lg"
-                  >
-                    <div className="w-6 h-6 bg-[#B6C948] rounded-full flex items-center justify-center mr-3">
-                      <span className="text-[#1A2A1A] text-sm">✓</span>
-                    </div>
-                    <span className="text-white">{goal}</span>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div className="text-center mt-8">
-          <motion.button
-            onClick={() => setCurrentView('dashboard')}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="bg-gradient-to-r from-[#2A3A1A] to-[#3A4A2A] text-[#B6C948] px-8 py-4 rounded-lg text-lg font-semibold hover:from-[#3A4A2A] hover:to-[#4A5A3A] transition-all duration-200 shadow-lg hover:shadow-xl"
-          >
-            🎯 Start Mijn Mind & Focus Journey
-          </motion.button>
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderDashboard = () => {
-
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-[#0A0F0A] to-[#1A2A1A] p-2 sm:p-4">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-[#2A3A1A] to-[#3A4A2A] rounded-xl p-4 sm:p-6 lg:p-8 text-[#B6C948] mb-4 sm:mb-6 lg:mb-8">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div>
-              <h1 className="text-lg sm:text-xl lg:text-2xl font-bold mb-1 sm:mb-2">🧠 Mind & Focus Dashboard</h1>
-              <p className="text-[#8BAE5A] text-xs sm:text-sm">Jouw persoonlijke stress management hub</p>
-            </div>
-            <div className="text-left sm:text-right">
-              <div className="text-xl sm:text-2xl font-bold">
-                {isLoadingDashboardData ? (
-                  <div className="animate-spin rounded-full h-5 w-5 sm:h-6 sm:w-6 border-b-2 border-[#B6C948]"></div>
-                ) : (
-                  dashboardData?.streak || 0
-                )}
-              </div>
-              <div className="text-xs sm:text-sm text-[#8BAE5A]">Dagen streak</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Quick Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-4 sm:mb-6 lg:mb-8">
-          <div className="bg-[#1A2A1A] rounded-xl shadow-2xl border border-[#2A3A1A] p-3 sm:p-4 lg:p-6">
-            <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-1 sm:mb-2">
-              {isLoadingDashboardData ? (
-                <div className="animate-spin rounded-full h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 border-b-2 border-[#B6C948]"></div>
-              ) : (
-                dashboardData?.sessionsThisWeek || 0
-              )}
-            </div>
-            <div className="text-[#8BAE5A] text-xs sm:text-sm">Sessies deze week</div>
-          </div>
-          <div className="bg-[#1A2A1A] rounded-xl shadow-2xl border border-[#2A3A1A] p-3 sm:p-4 lg:p-6">
-            <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-1 sm:mb-2">
-              {isLoadingDashboardData ? (
-                <div className="animate-spin rounded-full h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 border-b-2 border-[#B6C948]"></div>
-              ) : (
-                dashboardData?.currentStressLevel || currentStressLevel
-              )}
-            </div>
-            <div className="text-[#8BAE5A] text-xs sm:text-sm">Huidige stress level</div>
-          </div>
-          <div className="bg-[#1A2A1A] rounded-xl shadow-2xl border border-[#2A3A1A] p-3 sm:p-4 lg:p-6">
-            <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-1 sm:mb-2">
-              {isLoadingDashboardData ? (
-                <div className="animate-spin rounded-full h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 border-b-2 border-[#B6C948]"></div>
-              ) : (
-                dashboardData?.totalSessions || 0
-              )}
-            </div>
-            <div className="text-[#8BAE5A] text-xs sm:text-sm">Totaal sessies</div>
-          </div>
-          <div className="bg-[#1A2A1A] rounded-xl shadow-2xl border border-[#2A3A1A] p-3 sm:p-4 lg:p-6">
-            <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-1 sm:mb-2">
-              {isLoadingDashboardData ? (
-                <div className="animate-spin rounded-full h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 border-b-2 border-[#B6C948]"></div>
-              ) : (
-                `${dashboardData?.focusImprovement || 0}%`
-              )}
-            </div>
-            <div className="text-[#8BAE5A] text-xs sm:text-sm">Focus verbetering</div>
-          </div>
-        </div>
-
-        {/* Tabs */}
-        <div className="bg-[#1A2A1A] rounded-xl shadow-2xl border border-[#2A3A1A]">
-          <div className="border-b border-[#2A3A1A]">
-            <nav className="flex flex-wrap space-x-2 sm:space-x-4 lg:space-x-8 px-3 sm:px-4 lg:px-6 overflow-x-auto">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`py-3 sm:py-4 px-2 sm:px-3 lg:px-4 border-b-2 font-medium text-xs sm:text-sm transition-colors whitespace-nowrap ${
-                    activeTab === tab.id
-                      ? 'border-[#B6C948] text-[#B6C948]'
-                      : 'border-transparent text-[#8BAE5A] hover:text-white hover:border-[#3A4A2A]'
-                  }`}
-                >
-                  <div className="flex items-center space-x-1 sm:space-x-2">
-                    <div className="w-4 h-4 sm:w-5 sm:h-5">{tab.icon}</div>
-                    <span className="hidden sm:inline">{tab.label}</span>
-                    <span className="sm:hidden">{tab.label.split(' ')[0]}</span>
-                  </div>
-                </button>
-              ))}
-            </nav>
-          </div>
-
-          <div className="p-3 sm:p-4 lg:p-6">
-            {activeTab === 'overview' && (
-              <div className="space-y-6">
-                {/* Recent Journaling */}
-                {recentJournaling && (
-                  <div className="bg-gradient-to-r from-[#2A3A1A] to-[#3A4A2A] rounded-xl p-4 sm:p-6">
-                    <h3 className="text-lg sm:text-xl font-semibold text-[#B6C948] mb-3 sm:mb-4 flex items-center">
-                      <BookOpenIcon className="w-5 h-5 sm:w-6 sm:h-6 mr-2" />
-                      Recente Journaling
-                    </h3>
-                    <div className="space-y-2 sm:space-y-3">
-                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-0">
-                        <span className="text-[#8BAE5A] text-sm sm:text-base">Datum:</span>
-                        <span className="text-white font-medium text-sm sm:text-base">
-                          {new Date(recentJournaling.date).toLocaleDateString('nl-NL')}
-                        </span>
-                      </div>
-                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-0">
-                        <span className="text-[#8BAE5A] text-sm sm:text-base">Stress Level:</span>
-                        <span className="text-white font-medium text-sm sm:text-base">{recentJournaling.stress_level}/10</span>
-                      </div>
-                      {recentJournaling.daily_review && (
-                        <div>
-                          <span className="text-[#8BAE5A] text-xs sm:text-sm">Dagelijkse reflectie:</span>
-                          <p className="text-white text-xs sm:text-sm mt-1 bg-[#1A2A1A] p-2 sm:p-3 rounded-lg">
-                            {recentJournaling.daily_review}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* Todo List */}
-                <div className="bg-[#1A2A1A] rounded-xl p-4 sm:p-6 border border-[#2A3A1A]">
-                  <h3 className="text-lg sm:text-xl font-semibold text-white mb-3 sm:mb-4 flex items-center">
-                    <CheckCircleIcon className="w-5 h-5 sm:w-6 sm:h-6 mr-2 text-[#B6C948]" />
-                    Vandaag's Taken
-                  </h3>
-                  
-                  {/* Add new todo */}
-                  <div className="mb-4 sm:mb-6">
-                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-2">
-                      <input
-                        type="text"
-                        value={newTodo}
-                        onChange={(e) => setNewTodo(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && addTodo()}
-                        placeholder="Voeg een nieuwe taak toe..."
-                        className="flex-1 p-2 sm:p-3 bg-[#2A3A1A] text-white border border-[#3A4A2A] rounded-lg focus:ring-2 focus:ring-[#B6C948] focus:border-transparent text-sm sm:text-base"
-                        disabled={isAddingTodo}
-                      />
-                      <motion.button
-                        onClick={addTodo}
-                        disabled={!newTodo.trim() || isAddingTodo}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        className="bg-[#B6C948] text-[#1A2A1A] px-3 sm:px-4 py-2 sm:py-3 rounded-lg font-semibold hover:bg-[#8BAE5A] transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
-                      >
-                        {isAddingTodo ? '...' : 'Toevoegen'}
-                      </motion.button>
-                    </div>
-                  </div>
-
-                  {/* Todo list */}
-                  <div className="space-y-2 sm:space-y-3">
-                    {todos.length === 0 ? (
-                      <div className="text-center py-6 sm:py-8 text-[#8BAE5A]">
-                        <CheckCircleIcon className="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-2 sm:mb-3 opacity-50" />
-                        <p className="text-sm sm:text-base">Geen taken voor vandaag. Voeg er een toe om te beginnen!</p>
-                      </div>
-                    ) : (
-                      todos.map((todo) => (
-                        <motion.div
-                          key={todo.id}
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          className={`flex items-center p-3 sm:p-4 rounded-lg border transition-all ${
-                            todo.completed 
-                              ? 'bg-[#B6C948]/10 border-[#B6C948] text-[#8BAE5A]' 
-                              : 'bg-[#2A3A1A] border-[#3A4A2A] hover:border-[#B6C948]'
-                          }`}
-                        >
-                          <motion.button
-                            onClick={() => toggleTodo(todo.id)}
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
-                            className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 flex items-center justify-center mr-2 sm:mr-3 transition-all ${
-                              todo.completed 
-                                ? 'bg-[#B6C948] border-[#B6C948]' 
-                                : 'border-[#8BAE5A] hover:border-[#B6C948]'
-                            }`}
-                          >
-                            {todo.completed && (
-                              <CheckCircleIcon className="w-3 h-3 sm:w-4 sm:h-4 text-[#1A2A1A]" />
-                            )}
-                          </motion.button>
-                          
-                          <span className={`flex-1 text-sm sm:text-base ${todo.completed ? 'line-through' : ''}`}>
-                            {todo.text}
-                          </span>
-                          
-                          <motion.button
-                            onClick={() => deleteTodo(todo.id)}
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
-                            className="text-[#8BAE5A] hover:text-red-400 transition-colors p-1"
-                          >
-                            <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                          </motion.button>
-                        </motion.div>
-                      ))
-                    )}
-                  </div>
-
-                  {/* Progress indicator */}
-                  {todos.length > 0 && (
-                    <div className="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-[#3A4A2A]">
-                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2 gap-1 sm:gap-0">
-                        <span className="text-[#8BAE5A] text-xs sm:text-sm">Progress vandaag</span>
-                        <span className="text-white font-semibold text-sm sm:text-base">
-                          {todos.filter(t => t.completed).length} van {todos.length} voltooid
-                        </span>
-                      </div>
-                      <div className="w-full bg-[#2A3A1A] rounded-full h-1.5 sm:h-2">
-                        <div 
-                          className="bg-[#B6C948] h-1.5 sm:h-2 rounded-full transition-all duration-300"
-                          style={{ 
-                            width: `${todos.length > 0 ? (todos.filter(t => t.completed).length / todos.length) * 100 : 0}%` 
-                          }}
-                        ></div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Daily Routine */}
-                {personalPlan?.dailyRoutine && personalPlan.dailyRoutine.length > 0 && (
-                  <div className="bg-[#1A2A1A] rounded-xl p-4 sm:p-6 border border-[#2A3A1A]">
-                    <h3 className="text-lg sm:text-xl font-semibold text-white mb-3 sm:mb-4 flex items-center">
-                      <ClockIcon className="w-5 h-5 sm:w-6 sm:h-6 mr-2 text-[#B6C948]" />
-                      Dagelijkse Routine
-                    </h3>
-                    <div className="space-y-2 sm:space-y-3">
-                      {personalPlan.dailyRoutine.map((session, index) => (
-                        <div key={session.id} className="bg-[#2A3A1A] border border-[#3A4A2A] rounded-lg p-3 sm:p-4">
-                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
-                            <div className="flex-1">
-                              <h4 className="text-white font-semibold text-sm sm:text-base">{session.title}</h4>
-                              <p className="text-[#8BAE5A] text-xs sm:text-sm">{session.description}</p>
-                            </div>
-                            <span className="text-[#B6C948] text-xs sm:text-sm font-medium">
-                              {session.scheduledTime} • {session.duration} min
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {activeTab === 'profile' && (
-              <div className="space-y-6">
-                {/* Profile Header */}
-                <div className="bg-[#1A2A1A] rounded-xl p-6 border border-[#2A3A1A]">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-xl font-semibold text-white">Mijn Mind & Focus Profiel</h3>
-                    <motion.button
-                      onClick={() => setCurrentView('intake')}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="bg-[#B6C948] text-[#1A2A1A] px-4 py-2 rounded-lg font-semibold hover:bg-[#8BAE5A] transition-colors"
-                    >
-                      Intake Opnieuw Doen
-                    </motion.button>
-                  </div>
-                  <p className="text-[#8BAE5A] text-sm">
-                    Hier zie je je ingevulde profiel en kun je de intake opnieuw doen om je plan aan te passen.
-                  </p>
-                </div>
-
-                {/* Stress Assessment */}
-                <div className="bg-[#1A2A1A] rounded-xl p-6 border border-[#2A3A1A]">
-                  <h4 className="text-lg font-semibold text-white mb-4 flex items-center">
-                    <FireIcon className="w-5 h-5 text-[#B6C948] mr-2" />
-                    Stress Assessment
-                  </h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-                    <div className="space-y-3">
-                      <div className="flex justify-between items-center">
-                        <span className="text-[#8BAE5A]">Werk Stress</span>
-                        <span className="text-white font-semibold">{stressAssessment.workStress}/10</span>
-                      </div>
-                      <div className="w-full bg-[#2A3A1A] rounded-full h-2">
-                        <div 
-                          className="bg-[#B6C948] h-2 rounded-full transition-all duration-300"
-                          style={{ width: `${(stressAssessment.workStress / 10) * 100}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-3">
-                      <div className="flex justify-between items-center">
-                        <span className="text-[#8BAE5A]">Privé Stress</span>
-                        <span className="text-white font-semibold">{stressAssessment.personalStress}/10</span>
-                      </div>
-                      <div className="w-full bg-[#2A3A1A] rounded-full h-2">
-                        <div 
-                          className="bg-[#B6C948] h-2 rounded-full transition-all duration-300"
-                          style={{ width: `${(stressAssessment.personalStress / 10) * 100}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-3">
-                      <div className="flex justify-between items-center">
-                        <span className="text-[#8BAE5A]">Slaapkwaliteit</span>
-                        <span className="text-white font-semibold">{stressAssessment.sleepQuality}/10</span>
-                      </div>
-                      <div className="w-full bg-[#2A3A1A] rounded-full h-2">
-                        <div 
-                          className="bg-[#B6C948] h-2 rounded-full transition-all duration-300"
-                          style={{ width: `${(stressAssessment.sleepQuality / 10) * 100}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-3">
-                      <div className="flex justify-between items-center">
-                        <span className="text-[#8BAE5A]">Energie Level</span>
-                        <span className="text-white font-semibold">{stressAssessment.energyLevel}/10</span>
-                      </div>
-                      <div className="w-full bg-[#2A3A1A] rounded-full h-2">
-                        <div 
-                          className="bg-[#B6C948] h-2 rounded-full transition-all duration-300"
-                          style={{ width: `${(stressAssessment.energyLevel / 10) * 100}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="flex items-center">
-                      <span className="text-[#8BAE5A] mr-2">Focus problemen:</span>
-                      <span className={`font-semibold ${stressAssessment.focusProblems ? 'text-red-400' : 'text-green-400'}`}>
-                        {stressAssessment.focusProblems ? 'Ja' : 'Nee'}
-                      </span>
-                    </div>
-                    <div className="flex items-center">
-                      <span className="text-[#8BAE5A] mr-2">Irritatie/agressie:</span>
-                      <span className={`font-semibold ${stressAssessment.irritability ? 'text-red-400' : 'text-green-400'}`}>
-                        {stressAssessment.irritability ? 'Ja' : 'Nee'}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Lifestyle Info */}
-                <div className="bg-[#1A2A1A] rounded-xl p-6 border border-[#2A3A1A]">
-                  <h4 className="text-lg font-semibold text-white mb-4 flex items-center">
-                    <ClockIcon className="w-5 h-5 text-[#B6C948] mr-2" />
-                    Lifestyle Informatie
-                  </h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-                    <div>
-                      <span className="text-[#8BAE5A] text-sm">Werkrooster</span>
-                      <p className="text-white font-medium">{lifestyleInfo.workSchedule}</p>
-                    </div>
-                    <div>
-                      <span className="text-[#8BAE5A] text-sm">Sport Schema</span>
-                      <p className="text-white font-medium">{lifestyleInfo.sportSchedule}</p>
-                    </div>
-                    <div>
-                      <span className="text-[#8BAE5A] text-sm">Reistijd Werk</span>
-                      <p className="text-white font-medium">{lifestyleInfo.commuteTime} minuten</p>
-                    </div>
-                    <div>
-                      <span className="text-[#8BAE5A] text-sm">Lunch Pauze</span>
-                      <p className="text-white font-medium">{lifestyleInfo.lunchBreak}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="mt-4">
-                    <span className="text-[#8BAE5A] text-sm">Vrije Tijd</span>
-                    <div className="flex flex-wrap gap-2 mt-1">
-                      {lifestyleInfo.freeTime.map((time, index) => (
-                        <span key={index} className="bg-[#2A3A1A] text-[#B6C948] px-3 py-1 rounded-full text-sm">
-                          {time}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                  
-                  <div className="mt-4">
-                    <span className="text-[#8BAE5A] text-sm">Familie Verplichtingen</span>
-                    <div className="flex flex-wrap gap-2 mt-1">
-                      {lifestyleInfo.familyObligations.map((obligation, index) => (
-                        <span key={index} className="bg-[#2A3A1A] text-[#B6C948] px-3 py-1 rounded-full text-sm">
-                          {obligation}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Personal Goals */}
-                <div className="bg-[#1A2A1A] rounded-xl p-6 border border-[#2A3A1A]">
-                  <h4 className="text-lg font-semibold text-white mb-4 flex items-center">
-                    <TagIcon className="w-5 h-5 text-[#B6C948] mr-2" />
-                    Persoonlijke Doelen
-                  </h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-                    <div className="flex items-center">
-                      <span className={`w-4 h-4 rounded-full mr-3 ${personalGoals.stressVerminderen ? 'bg-[#B6C948]' : 'bg-[#2A3A1A] border border-[#2A3A1A]'}`}></span>
-                      <span className="text-white">Stress verminderen</span>
-                    </div>
-                    <div className="flex items-center">
-                      <span className={`w-4 h-4 rounded-full mr-3 ${personalGoals.focusVerbeteren ? 'bg-[#B6C948]' : 'bg-[#2A3A1A] border border-[#2A3A1A]'}`}></span>
-                      <span className="text-white">Focus verbeteren</span>
-                    </div>
-                    <div className="flex items-center">
-                      <span className={`w-4 h-4 rounded-full mr-3 ${personalGoals.betereSlaap ? 'bg-[#B6C948]' : 'bg-[#2A3A1A] border border-[#2A3A1A]'}`}></span>
-                      <span className="text-white">Betere slaap</span>
-                    </div>
-                    <div className="flex items-center">
-                      <span className={`w-4 h-4 rounded-full mr-3 ${personalGoals.betereRelaties ? 'bg-[#B6C948]' : 'bg-[#2A3A1A] border border-[#2A3A1A]'}`}></span>
-                      <span className="text-white">Betere relaties</span>
-                    </div>
-                    <div className="flex items-center">
-                      <span className={`w-4 h-4 rounded-full mr-3 ${personalGoals.hogerePrestaties ? 'bg-[#B6C948]' : 'bg-[#2A3A1A] border border-[#2A3A1A]'}`}></span>
-                      <span className="text-white">Hogere prestaties</span>
-                    </div>
-                    <div className="flex items-center">
-                      <span className={`w-4 h-4 rounded-full mr-3 ${personalGoals.emotioneleControle ? 'bg-[#B6C948]' : 'bg-[#2A3A1A] border border-[#2A3A1A]'}`}></span>
-                      <span className="text-white">Emotionele controle</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'meditations' && (
-              <div>
-                <h3 className="text-xl font-semibold text-white mb-4">Meditatie Bibliotheek</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-                  {meditationTypes.map((type) => (
-                    <div key={type.id} className="bg-[#1A2A1A] border border-[#2A3A1A] rounded-lg p-4">
-                      <div className="flex items-center mb-3">
-                        <div className={`p-2 ${type.color} rounded-lg mr-3`}>
-                          {type.iconComponent}
-                        </div>
-                        <div>
-                          <h4 className="text-white font-semibold">{type.name}</h4>
-                          <p className="text-[#8BAE5A] text-sm">{type.description}</p>
-                        </div>
-                      </div>
-                      <button 
-                        onClick={() => {
-                          if (type.id === 'focus') {
-                            router.push('/dashboard/mind-focus/focus-training');
-                          } else if (type.id === 'stress') {
-                            router.push('/dashboard/mind-focus/stress-release');
-                          } else if (type.id === 'sleep') {
-                            router.push('/dashboard/mind-focus/sleep-preparation');
-                          } else if (type.id === 'recovery') {
-                            router.push('/dashboard/mind-focus/recovery');
-                          } else {
-                            router.push(`/dashboard/mind-en-focus/meditaties?type=${type.id}`);
-                          }
-                        }}
-                        className="w-full bg-[#2A3A1A] text-[#B6C948] py-2 rounded-lg hover:bg-[#3A4A2A] transition-colors"
-                      >
-                        Bekijk Sessies
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'journal' && (
-              <div className="space-y-6">
-                {/* New Journal Entry */}
-                <div>
-                  <h3 className="text-xl font-semibold text-white mb-4">Nieuwe Journal Entry</h3>
-                  <div className="bg-[#2A3A1A] rounded-lg p-6">
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-white font-medium mb-2">Hoe voel je je vandaag?</label>
-                        <input
-                          type="range"
-                          min="1"
-                          max="10"
-                          value={currentStressLevel}
-                          onChange={(e) => setCurrentStressLevel(parseInt(e.target.value))}
-                          className="w-full h-3 bg-[#1A2A1A] rounded-lg appearance-none cursor-pointer"
-                        />
-                        <div className="flex justify-between text-sm text-[#8BAE5A] mt-1">
-                          <span>Zeer slecht</span>
-                          <span className="font-bold text-[#B6C948]">{currentStressLevel}</span>
-                          <span>Uitstekend</span>
-                        </div>
-                      </div>
-                      <div>
-                        <label className="block text-white font-medium mb-2">Waar ben je dankbaar voor?</label>
-                        <textarea
-                          value={journalText}
-                          onChange={(e) => setJournalText(e.target.value)}
-                          className="w-full h-24 p-3 bg-[#1A2A1A] text-white border border-[#2A3A1A] rounded-lg focus:ring-2 focus:ring-[#B6C948] focus:border-transparent resize-none"
-                          placeholder="Schrijf hier je gedachten..."
-                          disabled={isSavingJournal}
-                        />
-                      </div>
-                      <button 
-                        onClick={saveJournalEntry}
-                        disabled={isSavingJournal || !journalText.trim()}
-                        className="bg-[#B6C948] text-[#1A2A1A] px-6 py-2 rounded-lg font-semibold hover:bg-[#8BAE5A] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                      >
-                        {isSavingJournal ? (
-                          <>
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#1A2A1A]"></div>
-                            Opslaan...
-                          </>
-                        ) : (
-                          'Opslaan'
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Journal History */}
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-xl font-semibold text-white">Journal Geschiedenis</h3>
-                    <button
-                      onClick={fetchJournalHistory}
-                      disabled={isLoadingHistory}
-                      className="bg-[#3A4A2A] text-[#B6C948] px-4 py-2 rounded-lg font-medium hover:bg-[#2A3A1A] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                    >
-                      {isLoadingHistory ? (
-                        <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#B6C948]"></div>
-                          Laden...
-                        </>
-                      ) : (
-                        <>
-                          <BookOpenIcon className="w-4 h-4" />
-                          Ververs
-                        </>
-                      )}
-                    </button>
-                  </div>
-                  
-                  {isLoadingHistory ? (
-                    <div className="bg-[#2A3A1A] rounded-lg p-6 text-center">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#B6C948] mx-auto mb-4"></div>
-                      <p className="text-[#8BAE5A]">Geschiedenis laden...</p>
-                    </div>
-                  ) : journalHistory.length > 0 ? (
-                    <div className="space-y-4">
-                      {journalHistory.map((entry, index) => (
-                        <div key={entry.id || index} className="bg-gradient-to-r from-[#2A3A1A] to-[#3A4A2A] rounded-lg p-6">
-                          <div className="flex items-center justify-between mb-3">
-                            <span className="text-[#B6C948] font-semibold">
-                              {new Date(entry.date).toLocaleDateString('nl-NL', {
-                                weekday: 'long',
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric'
-                              })}
-                            </span>
-                            <span className="text-[#8BAE5A] text-sm">
-                              Stress Level: {entry.stress_level}/10
-                            </span>
-                          </div>
-                          {entry.daily_review && (
-                            <div className="bg-[#1A2A1A] p-4 rounded-lg">
-                              <p className="text-white text-sm leading-relaxed">
-                                {entry.daily_review}
-                              </p>
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="bg-[#2A3A1A] rounded-lg p-6 text-center">
-                      <BookOpenIcon className="w-12 h-12 text-[#8BAE5A] mx-auto mb-4" />
-                      <p className="text-[#8BAE5A] mb-2">Nog geen journal entries</p>
-                      <p className="text-[#6A7A4A] text-sm">Begin met het schrijven van je eerste journal entry hierboven</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-    );
-  };
-
-  // Debug Panel Component
-  const DebugPanel = () => (
-    debugInfo && (
-      <div className="fixed top-4 right-4 z-50">
-        <button
-          onClick={() => setShowDebug(!showDebug)}
-          className="bg-[#B6C948] text-[#1A2A1A] px-3 py-2 rounded-lg text-sm font-bold mb-2"
-        >
-          🐛 Debug {showDebug ? 'Hide' : 'Show'}
-        </button>
-        {showDebug && (
-          <div className="bg-[#1A2A1A] border border-[#2A3A1A] rounded-lg p-4 max-w-md max-h-96 overflow-auto text-xs">
-            <h3 className="text-[#B6C948] font-bold mb-2">Debug Info</h3>
-            <div className="space-y-2 text-white">
-              <div><strong>User ID:</strong> {debugInfo.userId}</div>
-              <div><strong>Email:</strong> {debugInfo.userEmail}</div>
-              <div><strong>Has Profile:</strong> {debugInfo.hasProfile ? '✅ YES' : '❌ NO'}</div>
-              <div><strong>Current View:</strong> {debugInfo.currentView}</div>
-              <div><strong>Timestamp:</strong> {debugInfo.timestamp}</div>
-              
-              {debugInfo.apiResponse && (
-                <div>
-                  <strong>API Response:</strong>
-                  <pre className="bg-[#0A0F0A] p-2 rounded text-xs overflow-auto">
-                    {JSON.stringify(debugInfo.apiResponse, null, 2)}
-                  </pre>
-                </div>
-              )}
-              
-              {debugInfo.saveAttempt && (
-                <div>
-                  <strong>Save Attempt:</strong>
-                  <div>Success: {debugInfo.saveAttempt.success ? '✅' : '❌'}</div>
-                  <div>Time: {debugInfo.saveAttempt.timestamp}</div>
-                  {debugInfo.saveAttempt.error && (
-                    <div className="text-red-400">Error: {debugInfo.saveAttempt.error}</div>
-                  )}
-                </div>
-              )}
-              
-              {debugInfo.profileData && (
-                <div>
-                  <strong>Profile Data:</strong>
-                  <pre className="bg-[#0A0F0A] p-2 rounded text-xs overflow-auto">
-                    {JSON.stringify(debugInfo.profileData, null, 2)}
-                  </pre>
-                </div>
-              )}
-              
-              {dashboardData && (
-                <div>
-                  <strong>Dashboard Data:</strong>
-                  <div className="bg-[#0A0F0A] p-2 rounded text-xs">
-                    <div>Sessions deze week: {dashboardData.sessionsThisWeek}</div>
-                    <div>Huidige stress level: {dashboardData.currentStressLevel}</div>
-                    <div>Totaal sessies: {dashboardData.totalSessions}</div>
-                    <div>Focus verbetering: {dashboardData.focusImprovement}%</div>
-                    <div>Streak: {dashboardData.streak} dagen</div>
-                    <div>Timestamp: {dashboardData.timestamp}</div>
-                  </div>
-                </div>
-              )}
-              
-              {/* User Input Values */}
-              <div>
-                <strong>Gebruiker Ingevulde Waardes:</strong>
-                <div className="bg-[#0A0F0A] p-2 rounded text-xs">
-                  <div><strong>Stress Assessment:</strong></div>
-                  <div>• Werk stress: {stressAssessment.workStress}/10</div>
-                  <div>• Privé stress: {stressAssessment.personalStress}/10</div>
-                  <div>• Slaapkwaliteit: {stressAssessment.sleepQuality}/10</div>
-                  <div>• Energie level: {stressAssessment.energyLevel}/10</div>
-                  <div>• Focus problemen: {stressAssessment.focusProblems ? 'Ja' : 'Nee'}</div>
-                  <div>• Irritatie/agressie: {stressAssessment.irritability ? 'Ja' : 'Nee'}</div>
-                  
-                  <div className="mt-2"><strong>Lifestyle Info:</strong></div>
-                  <div>• Werkrooster: {lifestyleInfo.workSchedule}</div>
-                  <div>• Vrije tijd: {lifestyleInfo.freeTime.join(', ')}</div>
-                  <div>• Familie verplichtingen: {lifestyleInfo.familyObligations.join(', ')}</div>
-                  <div>• Sport schema: {lifestyleInfo.sportSchedule}</div>
-                  <div>• Reistijd werk: {lifestyleInfo.commuteTime} min</div>
-                  <div>• Lunch pauze: {lifestyleInfo.lunchBreak}</div>
-                  
-                  <div className="mt-2"><strong>Persoonlijke Doelen:</strong></div>
-                  <div>• Stress verminderen: {personalGoals.stressVerminderen ? '✅' : '❌'}</div>
-                  <div>• Focus verbeteren: {personalGoals.focusVerbeteren ? '✅' : '❌'}</div>
-                  <div>• Betere slaap: {personalGoals.betereSlaap ? '✅' : '❌'}</div>
-                  <div>• Betere relaties: {personalGoals.betereRelaties ? '✅' : '❌'}</div>
-                  <div>• Hogere prestaties: {personalGoals.hogerePrestaties ? '✅' : '❌'}</div>
-                  <div>• Emotionele controle: {personalGoals.emotioneleControle ? '✅' : '❌'}</div>
-                </div>
-              </div>
-              
-              {/* Improvement Goals Summary */}
-              <div>
-                <strong>Verbetering Doelen:</strong>
-                <div className="bg-[#0A0F0A] p-2 rounded text-xs">
-                  {(() => {
-                    const goals: string[] = [];
-                    if (personalGoals.stressVerminderen) goals.push('Stress verminderen');
-                    if (personalGoals.focusVerbeteren) goals.push('Focus verbeteren');
-                    if (personalGoals.betereSlaap) goals.push('Betere slaap');
-                    if (personalGoals.betereRelaties) goals.push('Betere relaties');
-                    if (personalGoals.hogerePrestaties) goals.push('Hogere prestaties');
-                    if (personalGoals.emotioneleControle) goals.push('Emotionele controle');
-                    
-                    return goals.length > 0 ? goals.map(goal => <div key={goal}>• {goal}</div>) : <div>Geen doelen geselecteerd</div>;
-                  })()}
-                </div>
-              </div>
-              
-              {/* Calculated Improvement Summary */}
-              <div>
-                <strong>Berekende Verbetering:</strong>
-                <div className="bg-[#0A0F0A] p-2 rounded text-xs">
-                  <div><strong>Stress Level Analyse:</strong></div>
-                  <div>• Totaal stress: {(stressAssessment.workStress + stressAssessment.personalStress) / 2}/10</div>
-                  <div>• Slaapkwaliteit: {stressAssessment.sleepQuality}/10</div>
-                  <div>• Energie level: {stressAssessment.energyLevel}/10</div>
-                  
-                  <div className="mt-2"><strong>Gegenereerde Weekdoelen:</strong></div>
-                  {(() => {
-                    const weeklyGoals: string[] = [];
-                    if (personalGoals.stressVerminderen) weeklyGoals.push('Stress level met 30% verminderen');
-                    if (personalGoals.focusVerbeteren) weeklyGoals.push('Focus sessies toevoegen');
-                    if (personalGoals.betereSlaap) weeklyGoals.push('Slaap routine verbeteren');
-                    if (personalGoals.hogerePrestaties) weeklyGoals.push('Performance sessies toevoegen');
-                    
-                    return weeklyGoals.length > 0 ? weeklyGoals.map(goal => <div key={goal}>• {goal}</div>) : <div>Geen weekdoelen gegenereerd</div>;
-                  })()}
-                  
-                  <div className="mt-2"><strong>Dagelijkse Routine:</strong></div>
-                  <div>• Avond Recovery: 19:00 • 15 min</div>
-                  <div>• Focus sessie: 09:00 • 10 min</div>
-                  <div>• Gratitude journal: 20:00 • 5 min</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    )
-  );
-
-  // Wrapper function to add debug panel to all views
-  const renderWithDebug = (content: React.ReactNode) => (
     <div className="min-h-screen bg-gradient-to-br from-[#0A0F0A] to-[#1A2A1A]">
-      <DebugPanel />
-      {content}
+      <div className="container mx-auto px-4 py-12">
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-3xl font-bold text-white mb-8 text-center">
+            Mind & Focus Assessment
+          </h1>
+          <p className="text-[#8BAE5A] text-center mb-8">
+            Help ons je persoonlijke programma samen te stellen door een paar vragen te beantwoorden.
+          </p>
+          
+          <div className="bg-[#1A2A1A]/80 rounded-xl p-8 border border-[#2A3A1A]">
+            {/* Stress Assessment */}
+            <div className="mb-8">
+              <h2 className="text-xl font-bold text-white mb-4">Stress Assessment</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-[#8BAE5A] mb-2">Werk stress (1-10)</label>
+                  <input
+                    type="range"
+                    min="1"
+                    max="10"
+                    value={stressAssessment.workStress}
+                    onChange={(e) => setStressAssessment(prev => ({ ...prev, workStress: parseInt(e.target.value) }))}
+                    className="w-full h-2 bg-[#2A3A1A] rounded-lg appearance-none cursor-pointer"
+                  />
+                  <div className="text-white text-center mt-1">{stressAssessment.workStress}/10</div>
+                </div>
+                
+                <div>
+                  <label className="block text-[#8BAE5A] mb-2">Persoonlijke stress (1-10)</label>
+                  <input
+                    type="range"
+                    min="1"
+                    max="10"
+                    value={stressAssessment.personalStress}
+                    onChange={(e) => setStressAssessment(prev => ({ ...prev, personalStress: parseInt(e.target.value) }))}
+                    className="w-full h-2 bg-[#2A3A1A] rounded-lg appearance-none cursor-pointer"
+                  />
+                  <div className="text-white text-center mt-1">{stressAssessment.personalStress}/10</div>
+                </div>
+                
+                <div>
+                  <label className="block text-[#8BAE5A] mb-2">Slaapkwaliteit (1-10)</label>
+                  <input
+                    type="range"
+                    min="1"
+                    max="10"
+                    value={stressAssessment.sleepQuality}
+                    onChange={(e) => setStressAssessment(prev => ({ ...prev, sleepQuality: parseInt(e.target.value) }))}
+                    className="w-full h-2 bg-[#2A3A1A] rounded-lg appearance-none cursor-pointer"
+                  />
+                  <div className="text-white text-center mt-1">{stressAssessment.sleepQuality}/10</div>
+                </div>
+                
+                <div>
+                  <label className="block text-[#8BAE5A] mb-2">Energie level (1-10)</label>
+                  <input
+                    type="range"
+                    min="1"
+                    max="10"
+                    value={stressAssessment.energyLevel}
+                    onChange={(e) => setStressAssessment(prev => ({ ...prev, energyLevel: parseInt(e.target.value) }))}
+                    className="w-full h-2 bg-[#2A3A1A] rounded-lg appearance-none cursor-pointer"
+                  />
+                  <div className="text-white text-center mt-1">{stressAssessment.energyLevel}/10</div>
+                </div>
+              </div>
+              
+              <div className="mt-6 space-y-3">
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={stressAssessment.focusProblems}
+                    onChange={(e) => setStressAssessment(prev => ({ ...prev, focusProblems: e.target.checked }))}
+                    className="mr-3"
+                  />
+                  <span className="text-white">Ik heb problemen met concentratie</span>
+                </label>
+                
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={stressAssessment.irritability}
+                    onChange={(e) => setStressAssessment(prev => ({ ...prev, irritability: e.target.checked }))}
+                    className="mr-3"
+                  />
+                  <span className="text-white">Ik voel me snel geïrriteerd of agressief</span>
+                </label>
+              </div>
+            </div>
+
+            {/* Personal Goals */}
+            <div className="mb-8">
+              <h2 className="text-xl font-bold text-white mb-4">Persoonlijke Doelen</h2>
+              <div className="space-y-3">
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={personalGoals.improveFocus}
+                    onChange={(e) => setPersonalGoals(prev => ({ ...prev, improveFocus: e.target.checked }))}
+                    className="mr-3"
+                  />
+                  <span className="text-white">Verbeter focus en concentratie</span>
+                </label>
+                
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={personalGoals.reduceStress}
+                    onChange={(e) => setPersonalGoals(prev => ({ ...prev, reduceStress: e.target.checked }))}
+                    className="mr-3"
+                  />
+                  <span className="text-white">Verminder stress</span>
+                </label>
+                
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={personalGoals.betterSleep}
+                    onChange={(e) => setPersonalGoals(prev => ({ ...prev, betterSleep: e.target.checked }))}
+                    className="mr-3"
+                  />
+                  <span className="text-white">Beter slapen</span>
+                </label>
+                
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={personalGoals.moreEnergy}
+                    onChange={(e) => setPersonalGoals(prev => ({ ...prev, moreEnergy: e.target.checked }))}
+                    className="mr-3"
+                  />
+                  <span className="text-white">Meer energie</span>
+                </label>
+                
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={personalGoals.workLifeBalance}
+                    onChange={(e) => setPersonalGoals(prev => ({ ...prev, workLifeBalance: e.target.checked }))}
+                    className="mr-3"
+                  />
+                  <span className="text-white">Betere werk/privé balans</span>
+                </label>
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <div className="text-center">
+              <button
+                onClick={saveIntakeData}
+                disabled={isSaving}
+                className="bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] text-[#1A2A1A] px-8 py-4 rounded-xl font-bold text-lg hover:from-[#7A9D4A] hover:to-[#e0903f] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isSaving ? 'Opslaan...' : 'Assessment Voltooien'}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 
   // Show loading state while checking for existing profile
   if (isLoadingProfile) {
-    return renderWithDebug(
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#B6C948] mx-auto mb-4"></div>
-          <p className="text-[#8BAE5A] text-lg">Laden...</p>
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#0A0F0A] to-[#1A2A1A]">
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#B6C948] mx-auto mb-4"></div>
+            <p className="text-[#8BAE5A] text-lg">Laden...</p>
+          </div>
         </div>
       </div>
     );
   }
 
   if (currentView === 'intro') {
-    return renderWithDebug(renderIntro());
+    return renderIntro();
   }
 
   if (currentView === 'intake') {
-    return renderWithDebug(renderIntakeForm());
+    return renderIntakeForm();
   }
 
-  if (currentView === 'plan') {
-    return renderWithDebug(renderPersonalPlan());
-  }
-
-  return renderWithDebug(renderDashboard());
+  return renderDashboard();
 }

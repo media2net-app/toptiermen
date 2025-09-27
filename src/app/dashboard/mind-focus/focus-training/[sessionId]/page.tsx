@@ -206,34 +206,35 @@ export default function FocusSessionPage({ params }: { params: { sessionId: stri
   const [speechEnabled, setSpeechEnabled] = useState(true);
   const audioRef = useRef<HTMLAudioElement>(null);
 
-  // Rechtenvrije meditatie audio tracks met fallback
+
+  // Meditatie audio tracks - gebruik bestaande audio bestanden
   const meditationTracks = [
     {
       id: 'nature-sounds',
       name: 'Natuurgeluiden',
-      url: '/audio/nature-sounds.mp3',
-      fallbackUrl: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav', // Fallback URL
+      url: '/whoosh-cinematic-sound-effect-376889.mp3', // Gebruik bestaand bestand
+      fallbackUrl: null,
       description: 'Rustige natuurgeluiden voor diepe ontspanning'
     },
     {
       id: 'ambient-pad',
       name: 'Ambient Pad',
-      url: '/audio/ambient-pad.mp3',
-      fallbackUrl: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav', // Fallback URL
+      url: '/whoosh-cinematic-sound-effect-376889.mp3', // Gebruik bestaand bestand
+      fallbackUrl: null,
       description: 'Zachte ambient muziek voor focus'
     },
     {
       id: 'binaural-beats',
       name: 'Binaural Beats',
-      url: '/audio/binaural-beats.mp3',
-      fallbackUrl: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav', // Fallback URL
+      url: '/whoosh-cinematic-sound-effect-376889.mp3', // Gebruik bestaand bestand
+      fallbackUrl: null,
       description: 'Binaural beats voor diepe meditatie'
     },
     {
       id: 'singing-bowls',
       name: 'Zingende Schalen',
-      url: '/audio/singing-bowls.mp3',
-      fallbackUrl: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav', // Fallback URL
+      url: '/whoosh-cinematic-sound-effect-376889.mp3', // Gebruik bestaand bestand
+      fallbackUrl: null,
       description: 'Tibetaanse zingende schalen voor spirituele meditatie'
     }
   ];
@@ -394,42 +395,15 @@ export default function FocusSessionPage({ params }: { params: { sessionId: stri
     }
   };
 
-  // Fallback tone generator for when audio files fail
+  // Fallback tone generator for when audio files fail - gebruik eenvoudige stilte
   const playFallbackTone = () => {
     try {
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-      
-      // Create a gentle meditation tone
-      const createTone = (frequency: number, startTime: number, duration: number) => {
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-        
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-        
-        oscillator.frequency.setValueAtTime(frequency, startTime);
-        oscillator.type = 'sine';
-        
-        // Gentle fade in/out
-        gainNode.gain.setValueAtTime(0, startTime);
-        gainNode.gain.linearRampToValueAtTime(volume * 0.05, startTime + 0.5);
-        gainNode.gain.linearRampToValueAtTime(volume * 0.05, startTime + duration - 0.5);
-        gainNode.gain.linearRampToValueAtTime(0, startTime + duration);
-        
-        oscillator.start(startTime);
-        oscillator.stop(startTime + duration);
-      };
-      
-      // Play a gentle meditation tone sequence
-      const now = audioContext.currentTime;
-      createTone(220, now, 2); // A3
-      createTone(246.94, now + 2, 2); // B3
-      createTone(261.63, now + 4, 2); // C4
-      createTone(293.66, now + 6, 2); // D4
-      
-      console.log('Fallback meditation tone played');
+      console.log('Audio bestanden niet beschikbaar - meditatie zonder audio');
+      // Voor nu gewoon stil - de meditatie kan zonder audio
+      setIsAudioPlaying(false);
     } catch (error) {
-      console.log('Fallback tone failed:', error);
+      console.log('Fallback audio failed:', error);
+      setIsAudioPlaying(false);
     }
   };
 

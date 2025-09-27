@@ -226,10 +226,10 @@ export default function PreWorkoutModal({
             >
               <div className="flex items-center mb-2">
                 <CheckIcon className="w-6 h-6 text-[#8BAE5A] mr-2" />
-                <span className="font-semibold text-white">Quick Complete</span>
+                <span className="font-semibold text-white">Training Al Gedaan</span>
               </div>
               <p className="text-sm text-gray-400">
-                Direct voltooien zonder tracking - voor ervaren trainers
+                Heb je vandaag al getraind? Registreer deze training als voltooid
               </p>
             </button>
           </div>
@@ -300,7 +300,7 @@ export default function PreWorkoutModal({
             ) : (
               <div className="flex items-center justify-center">
                 <StarIcon className="w-5 h-5 mr-2" />
-                {selectedMode === 'interactive' ? 'Start Interactive Training' : 'Quick Complete'}
+                {selectedMode === 'interactive' ? 'Start Interactive Training' : 'Training Registreren'}
               </div>
             )}
           </button>

@@ -478,9 +478,10 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
           <div className="flex items-center gap-4">
             <button
               onClick={() => setIsMobileMenuOpen(true)}
-              className="lg:hidden p-2 text-[#8BAE5A]"
+              className="lg:hidden grid grid-cols-[auto_1fr] items-center gap-2 px-3 py-2 bg-[#181F17] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors"
             >
-              <Bars3Icon className="w-6 h-6" />
+              <Bars3Icon className="w-5 h-5" />
+              <span className="text-sm font-medium">Menu</span>
             </button>
             <h1 className="text-xl md:text-2xl font-bold text-[#8BAE5A]">Admin Panel</h1>
             {loading && !user && (
@@ -575,7 +576,7 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
               onClick={handleLogout}
               disabled={isLoggingOut}
               data-admin-logout-button
-              className="px-3 sm:px-4 py-2 rounded-xl bg-[#181F17] text-[#8BAE5A] text-sm font-semibold border border-[#3A4D23] hover:bg-[#232D1A] transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-3 sm:px-4 py-2 rounded-xl bg-[#181F17] text-[#8BAE5A] text-xs sm:text-sm font-semibold border border-[#3A4D23] hover:bg-[#232D1A] transition disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
             >
               {isLoggingOut ? 'Uitloggen...' : 'Uitloggen'}
             </button>
@@ -684,7 +685,7 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 p-4 sm:p-6 md:p-12 overflow-x-auto bg-[#181F17]">
+        <main className="admin-layout flex-1 p-4 sm:p-6 md:p-12 overflow-x-auto bg-[#181F17]">
           {children}
         </main>
       </div>

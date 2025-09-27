@@ -151,9 +151,8 @@ export default function BoekenkamerPage() {
                             href={book.affiliate_link}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-[#8BAE5A] hover:text-[#7A9E4A] text-xs transition-colors font-medium"
+                            className="inline-flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-[#8BAE5A] to-[#7A9E4A] text-white text-xs font-semibold rounded-lg hover:from-[#7A9E4A] hover:to-[#6B8D3A] transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105"
                           >
-                            <span className="text-xs">🔗</span>
                             Bestellen
                           </a>
                         )}
@@ -207,9 +206,8 @@ export default function BoekenkamerPage() {
                             href={book.affiliate_link}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-[#8BAE5A] hover:text-[#7A9E4A] text-xs transition-colors font-medium"
+                            className="inline-flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-[#8BAE5A] to-[#7A9E4A] text-white text-xs font-semibold rounded-lg hover:from-[#7A9E4A] hover:to-[#6B8D3A] transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105"
                           >
-                            <span className="text-xs">🔗</span>
                             Bestellen
                           </a>
                         )}

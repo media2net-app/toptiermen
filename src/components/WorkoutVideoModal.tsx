@@ -1,15 +1,12 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  XMarkIcon, 
-  PlayIcon, 
-  PauseIcon,
-  SpeakerWaveIcon,
-  SpeakerXMarkIcon
+  XMarkIcon
 } from '@heroicons/react/24/outline';
 import { getCDNVideoUrl } from '@/lib/cdn-config';
+import OptimizedVideoPlayer from './OptimizedVideoPlayer';
 
 interface WorkoutVideoModalProps {
   isOpen: boolean;
@@ -34,70 +31,15 @@ export default function WorkoutVideoModal({
   console.log('🎬 WorkoutVideoModal render:', { isOpen, exerciseName, videoUrl });
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     if (isOpen) {
       setIsPlaying(false);
-      setCurrentTime(0);
-      if (videoRef.current) {
-        videoRef.current.currentTime = 0;
-      }
     }
   }, [isOpen]);
 
-  const togglePlay = () => {
-    if (videoRef.current) {
-      if (isPlaying) {
-        videoRef.current.pause();
-      } else {
-        videoRef.current.play();
-      }
-      setIsPlaying(!isPlaying);
-    }
-  };
-
-  const toggleMute = () => {
-    if (videoRef.current) {
-      videoRef.current.muted = !isMuted;
-      setIsMuted(!isMuted);
-    }
-  };
-
-  const handleTimeUpdate = () => {
-    if (videoRef.current) {
-      setCurrentTime(videoRef.current.currentTime);
-    }
-  };
-
-  const handleLoadedMetadata = () => {
-    if (videoRef.current) {
-      setDuration(videoRef.current.duration);
-    }
-  };
-
-  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const time = parseFloat(e.target.value);
-    if (videoRef.current) {
-      videoRef.current.currentTime = time;
-      setCurrentTime(time);
-    }
-  };
-
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
-
   const handleVideoEnd = () => {
     setIsPlaying(false);
-    setCurrentTime(0);
-    if (videoRef.current) {
-      videoRef.current.currentTime = 0;
-    }
   };
 
   return (
@@ -134,72 +76,17 @@ export default function WorkoutVideoModal({
             {/* Video Container */}
             <div className="relative aspect-video bg-black">
               {videoUrl && videoUrl !== 'undefined' ? (
-                <>
-                  <video
-                    ref={videoRef}
-                    src={videoUrl.startsWith('/video-oefeningen/') ? videoUrl : getCDNVideoUrl(videoUrl)}
-                    className="w-full h-full object-cover"
-                    preload="auto"
-                    onTimeUpdate={handleTimeUpdate}
-                    onLoadedMetadata={handleLoadedMetadata}
-                    onEnded={handleVideoEnd}
-                    onCanPlay={() => {
-                      console.log('🎥 Workout video can start playing:', videoUrl);
-                    }}
-                    muted={isMuted}
-                  />
-                  
-                  {/* Video Controls Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 hover:opacity-100 transition-opacity">
-                    <div className="absolute bottom-0 left-0 right-0 p-2 sm:p-4">
-                      {/* Progress Bar */}
-                      <div className="mb-2 sm:mb-4">
-                        <input
-                          type="range"
-                          min="0"
-                          max={duration || 0}
-                          value={currentTime}
-                          onChange={handleSeek}
-                          className="w-full h-1.5 sm:h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer slider"
-                          style={{
-                            background: `linear-gradient(to right, #8BAE5A 0%, #8BAE5A ${(currentTime / (duration || 1)) * 100}%, #4A5568 ${(currentTime / (duration || 1)) * 100}%, #4A5568 100%)`
-                          }}
-                        />
-                        <div className="flex justify-between text-xs sm:text-sm text-white mt-1">
-                          <span>{formatTime(currentTime)}</span>
-                          <span>{formatTime(duration)}</span>
-                        </div>
-                      </div>
-
-                      {/* Control Buttons */}
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 sm:gap-4">
-                          <button
-                            onClick={togglePlay}
-                            className="p-1.5 sm:p-2 bg-[#8BAE5A] rounded-full hover:bg-[#7A9D4A] transition-colors"
-                          >
-                            {isPlaying ? (
-                              <PauseIcon className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
-                            ) : (
-                              <PlayIcon className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
-                            )}
-                          </button>
-                          
-                          <button
-                            onClick={toggleMute}
-                            className="p-1.5 sm:p-2 bg-gray-600 rounded-full hover:bg-gray-500 transition-colors"
-                          >
-                            {isMuted ? (
-                              <SpeakerXMarkIcon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-                            ) : (
-                              <SpeakerWaveIcon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-                            )}
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </>
+                <OptimizedVideoPlayer
+                  src={videoUrl.startsWith('/video-oefeningen/') ? videoUrl : getCDNVideoUrl(videoUrl)}
+                  className="w-full h-full object-cover"
+                  controls={true}
+                  onEnded={handleVideoEnd}
+                  onPlay={() => {
+                    console.log('🎥 Workout video started playing:', videoUrl);
+                    setIsPlaying(true);
+                  }}
+                  muted={isMuted}
+                />
               ) : (
                 <div className="flex items-center justify-center h-full">
                   <div className="text-center">

@@ -607,6 +607,19 @@ export default function MijnProfiel() {
     setEditValue('');
   };
 
+  const handleFieldChange = async (field: string, value: string) => {
+    if (!profile) return;
+    
+    const updates: Partial<UserProfile> = {};
+    (updates as any)[field] = value;
+    
+    // Update local state immediately for better UX
+    setProfile(prev => prev ? { ...prev, ...updates } : null);
+    
+    // Save to database
+    await updateProfile(updates);
+  };
+
   const addInterest = async (interest: string) => {
     if (!profile) return;
     
@@ -1009,330 +1022,292 @@ export default function MijnProfiel() {
 
   return (
     <ClientLayout>
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-2 drop-shadow-lg">Mijn Profiel</h1>
-        <p className="text-[#8BAE5A] text-base sm:text-lg mb-6 sm:mb-8">Beheer je profiel, voortgang en instellingen</p>
-      
-      {/* Tabs - Mobile Optimized */}
-      <div className="mb-6 sm:mb-8">
-        <div className="flex gap-1 sm:gap-2 overflow-x-auto pb-2" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-          {tabs.map((tab) => {
-            const Icon = tab.icon;
-            return (
-              <button
-                key={tab.key}
-                onClick={() => setActiveTab(tab.key)}
-                className={`px-3 sm:px-4 py-2 rounded-xl font-semibold transition-all text-xs sm:text-sm whitespace-nowrap flex items-center gap-1 sm:gap-2 flex-shrink-0 ${activeTab === tab.key ? 'bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] shadow' : 'bg-[#232D1A] text-[#8BAE5A] hover:bg-[#2A341F]'}`}
-              >
-                <Icon className="w-4 h-4" />
-                <span className="hidden sm:inline">{tab.label}</span>
-                <span className="sm:hidden">{tab.label.split(' ')[0]}</span>
-              </button>
-            );
-          })}
+      <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 xl:px-10">
+        {/* Header Section - Fully Responsive */}
+        <div className="mb-4 sm:mb-6 md:mb-8">
+          <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold text-white mb-1 sm:mb-2 drop-shadow-lg leading-tight">Mijn Profiel</h1>
+          <p className="text-[#8BAE5A] text-sm sm:text-base md:text-lg leading-relaxed">Beheer je profiel, voortgang en instellingen</p>
         </div>
-      </div>
       
-      {/* Tab Content */}
-      <div className="bg-[#232D1A]/80 rounded-2xl shadow-xl border border-[#3A4D23]/40 p-4 sm:p-6 md:p-10">
-        {activeTab === 'publiek' && profile && (
-          <div className="space-y-8">
-            {/* Coverfoto - Facebook Style */}
-            <div className="relative w-full h-48 sm:h-56 md:h-64 lg:h-72 rounded-2xl overflow-hidden bg-gradient-to-r from-[#8BAE5A]/30 to-[#FFD700]/20 group">
-              {profile.cover_url ? (
-                <img 
-                  src={profile.cover_url} 
-                  alt="Coverfoto" 
-                  className="w-full h-full object-cover" 
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <span className="text-[#8BAE5A]/60 text-xl sm:text-2xl md:text-3xl font-bold">Geen coverfoto</span>
-                </div>
-              )}
-              
-              {/* Coverfoto Edit Overlay */}
-              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <label className="flex items-center gap-2 px-3 py-2 bg-[#8BAE5A] text-[#181F17] rounded-xl font-semibold cursor-pointer hover:bg-[#A6C97B] transition-colors text-sm">
-                  <CameraIcon className="w-4 h-4" />
-                  {profile.cover_url ? 'Coverfoto wijzigen' : 'Coverfoto toevoegen'}
-                  <input
-                    type="file"
-                    accept="image/*,.heic,.heif"
-                    onChange={(e) => handleFileSelect(e, 'cover')}
-                    className="hidden"
-                  />
-                </label>
-              </div>
-            </div>
-            
-            {/* Profielfoto - Overlapping Coverfoto */}
-            <div className="relative -mt-16 sm:-mt-20 md:-mt-24 lg:-mt-28 px-4 sm:px-6 md:px-8">
-              <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 lg:w-36 lg:h-36 rounded-full border-4 border-[#FFD700] bg-[#232D1A] flex items-center justify-center overflow-hidden shadow-xl relative group">
-                {profile.avatar_url ? (
+        {/* Tabs - Enhanced Responsive Design */}
+        <div className="mb-4 sm:mb-6 md:mb-8">
+          <div className="flex gap-1 sm:gap-1.5 md:gap-2 overflow-x-auto pb-2 scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+            {tabs.map((tab) => {
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key)}
+                  className={`px-2.5 sm:px-3 md:px-4 lg:px-5 py-2 md:py-2.5 rounded-lg md:rounded-xl font-semibold transition-all text-xs sm:text-sm md:text-base whitespace-nowrap flex items-center gap-1 sm:gap-1.5 md:gap-2 flex-shrink-0 min-w-0 ${activeTab === tab.key ? 'bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] shadow-lg' : 'bg-[#232D1A] text-[#8BAE5A] hover:bg-[#2A341F]'}`}
+                >
+                  <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 flex-shrink-0" />
+                  <span className="hidden xs:inline sm:hidden md:inline truncate">{tab.label}</span>
+                  <span className="xs:hidden sm:inline md:hidden lg:inline truncate">{tab.label.split(' ')[0]}</span>
+                  <span className="hidden lg:hidden xl:inline truncate">{tab.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      
+        {/* Tab Content - Enhanced Responsive */}
+        <div className="bg-[#232D1A]/80 rounded-xl sm:rounded-2xl shadow-xl border border-[#3A4D23]/40 p-3 sm:p-4 md:p-6 lg:p-8 xl:p-10">
+          {activeTab === 'publiek' && profile && (
+            <div className="space-y-4 sm:space-y-6 md:space-y-8">
+              {/* Coverfoto - Enhanced Responsive */}
+              <div className="relative w-full h-40 sm:h-48 md:h-56 lg:h-64 xl:h-72 rounded-xl sm:rounded-2xl overflow-hidden bg-gradient-to-r from-[#8BAE5A]/30 to-[#FFD700]/20 group">
+                {profile.cover_url ? (
                   <img 
-                    src={profile.avatar_url} 
-                    alt="Profielfoto" 
+                    src={profile.cover_url} 
+                    alt="Coverfoto" 
                     className="w-full h-full object-cover" 
                   />
                 ) : (
-                  <span className="text-[#8BAE5A]/60 text-2xl sm:text-3xl">Geen foto</span>
+                  <div className="w-full h-full flex items-center justify-center">
+                    <span className="text-[#8BAE5A]/60 text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-center px-4">Geen coverfoto</span>
+                  </div>
                 )}
                 
-                {/* Profielfoto Edit Overlay */}
-                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-full">
-                  <label className="flex items-center gap-1 px-2 py-1 bg-[#8BAE5A] text-[#181F17] rounded-lg font-semibold cursor-pointer hover:bg-[#A6C97B] transition-colors text-xs">
-                    <CameraIcon className="w-3 h-3" />
-                    {profile.avatar_url ? 'Wijzigen' : 'Toevoegen'}
+                {/* Coverfoto Edit Overlay */}
+                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <label className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 md:px-4 py-1.5 sm:py-2 bg-[#8BAE5A] text-[#181F17] rounded-lg sm:rounded-xl font-semibold cursor-pointer hover:bg-[#A6C97B] transition-colors text-xs sm:text-sm">
+                    <CameraIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                    <span className="hidden sm:inline">{profile.cover_url ? 'Coverfoto wijzigen' : 'Coverfoto toevoegen'}</span>
+                    <span className="sm:hidden">{profile.cover_url ? 'Wijzigen' : 'Toevoegen'}</span>
                     <input
                       type="file"
                       accept="image/*,.heic,.heif"
-                      onChange={(e) => handleFileSelect(e, 'avatar')}
+                      onChange={(e) => handleFileSelect(e, 'cover')}
                       className="hidden"
                     />
                   </label>
                 </div>
               </div>
-            </div>
-            
-            {/* Basis info - Below Profile Picture */}
-            <div className="px-4 sm:px-6 md:px-8 space-y-4">
-              <div>
-                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-2">
-                  {editingField === 'display_name' ? (
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="text"
-                        value={editValue}
-                        onChange={(e) => setEditValue(e.target.value)}
-                        className="bg-[#181F17] text-white px-3 py-1 rounded-lg border border-[#8BAE5A] focus:outline-none focus:border-[#FFD700] text-lg sm:text-xl md:text-2xl"
-                        placeholder="Display naam"
-                      />
-                      <button onClick={saveEdit} disabled={saving} className="text-[#8BAE5A] hover:text-[#FFD700]">
-                        <CheckIcon className="w-5 h-5" />
-                      </button>
-                      <button onClick={cancelEdit} className="text-red-400 hover:text-red-300">
-                        <XMarkIcon className="w-5 h-5" />
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      {profile.display_name || profile.full_name}
-                      <button 
-                        onClick={() => startEditing('display_name', profile.display_name || profile.full_name)}
-                        className="text-[#8BAE5A] hover:text-[#FFD700] opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <PencilIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                      </button>
-                    </div>
-                  )}
-                </h2>
-                <p className="text-[#8BAE5A] text-sm sm:text-base">{profile.email}</p>
-              </div>
               
-              {/* Stats Badges */}
-              <div className="flex flex-wrap gap-2">
-                <span className="inline-block bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-white px-3 py-1 rounded-full text-xs sm:text-sm font-semibold shadow">
-                  {currentRank ? `Level ${currentRank.rank_order} - ${currentRank.name}` : 'Beginner'}
-                </span>
-                <span className="inline-block bg-[#3A4D23] text-[#8BAE5A] px-3 py-1 rounded-full text-xs sm:text-sm font-semibold">
-                  {currentXP} XP
-                </span>
-                <span className="inline-block bg-[#3A4D23] text-[#8BAE5A] px-3 py-1 rounded-full text-xs sm:text-sm font-semibold">
-                  {userBadges.length} badges
-                </span>
-              </div>
-            </div>
-            
-            {/* Bio */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-white">Over mij</h3>
-                <button 
-                  onClick={() => startEditing('bio', profile.bio || '')}
-                  className="text-[#8BAE5A] hover:text-[#FFD700]"
-                >
-                  <PencilIcon className="w-4 h-4" />
-                </button>
-              </div>
-              {editingField === 'bio' ? (
-                <div className="space-y-2">
-                  <textarea
-                    value={editValue}
-                    onChange={(e) => setEditValue(e.target.value)}
-                    className="w-full bg-[#181F17] text-white px-3 py-2 rounded-lg border border-[#8BAE5A] focus:outline-none focus:border-[#FFD700] resize-none"
-                    rows={3}
-                    placeholder="Vertel iets over jezelf..."
-                  />
-                  <div className="flex gap-2">
-                    <button onClick={saveEdit} disabled={saving} className="px-3 py-1 bg-[#8BAE5A] text-[#181F17] rounded-lg text-sm font-semibold hover:bg-[#A6C97B] transition-colors">
-                      Opslaan
-                    </button>
-                    <button onClick={cancelEdit} className="px-3 py-1 bg-red-500 text-white rounded-lg text-sm font-semibold hover:bg-red-600 transition-colors">
-                      Annuleren
-                    </button>
+              {/* Profielfoto - Enhanced Responsive */}
+              <div className="relative -mt-12 sm:-mt-16 md:-mt-20 lg:-mt-24 xl:-mt-28 px-3 sm:px-4 md:px-6 lg:px-8">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 lg:w-32 lg:h-32 xl:w-36 xl:h-36 rounded-full border-3 sm:border-4 border-[#FFD700] bg-[#232D1A] flex items-center justify-center overflow-hidden shadow-xl relative group">
+                  {profile.avatar_url ? (
+                    <img 
+                      src={profile.avatar_url} 
+                      alt="Profielfoto" 
+                      className="w-full h-full object-cover" 
+                    />
+                  ) : (
+                    <span className="text-[#8BAE5A]/60 text-lg sm:text-xl md:text-2xl lg:text-3xl">Geen foto</span>
+                  )}
+                  
+                  {/* Profielfoto Edit Overlay */}
+                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-full">
+                    <label className="flex items-center gap-1 px-1.5 sm:px-2 py-1 sm:py-1.5 bg-[#8BAE5A] text-[#181F17] rounded-md sm:rounded-lg font-semibold cursor-pointer hover:bg-[#A6C97B] transition-colors text-xs">
+                      <CameraIcon className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                      <span className="hidden sm:inline">{profile.avatar_url ? 'Wijzigen' : 'Toevoegen'}</span>
+                      <span className="sm:hidden">{profile.avatar_url ? 'Wijzig' : 'Toevoeg'}</span>
+                      <input
+                        type="file"
+                        accept="image/*,.heic,.heif"
+                        onChange={(e) => handleFileSelect(e, 'avatar')}
+                        className="hidden"
+                      />
+                    </label>
                   </div>
                 </div>
-              ) : (
-                <p className="text-[#8BAE5A] italic">
-                  {profile.bio || 'Nog geen bio toegevoegd. Klik op het potlood om er een toe te voegen!'}
-                </p>
-              )}
-            </div>
-            
-            {/* Location */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-white">Locatie</h3>
-                <button 
-                  onClick={() => startEditing('location', profile.location || '')}
-                  className="text-[#8BAE5A] hover:text-[#FFD700]"
-                >
-                  <PencilIcon className="w-4 h-4" />
-                </button>
               </div>
-              {editingField === 'location' ? (
-                <div className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    value={editValue}
-                    onChange={(e) => setEditValue(e.target.value)}
-                    className="flex-1 bg-[#181F17] text-white px-3 py-2 rounded-lg border border-[#8BAE5A] focus:outline-none focus:border-[#FFD700]"
-                    placeholder="Je locatie"
-                  />
-                  <button onClick={saveEdit} disabled={saving} className="px-3 py-2 bg-[#8BAE5A] text-[#181F17] rounded-lg font-semibold hover:bg-[#A6C97B] transition-colors">
-                    <CheckIcon className="w-4 h-4" />
-                  </button>
-                  <button onClick={cancelEdit} className="px-3 py-2 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600 transition-colors">
-                    <XMarkIcon className="w-4 h-4" />
-                  </button>
-                </div>
-              ) : (
-                <p className="text-[#8BAE5A]">
-                  {profile.location || 'Locatie niet ingesteld'}
-                </p>
-              )}
-            </div>
             
-            {/* Interests */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-white">Interesses</h3>
-              <div className="flex flex-wrap gap-2">
-                {profile.interests?.map((interest, idx) => (
-                  <span key={idx} className="px-3 py-1 rounded-full bg-[#8BAE5A]/20 text-[#8BAE5A] text-sm font-medium flex items-center gap-2">
-                    {interest}
-                    <button 
-                      onClick={() => removeInterest(interest)}
-                      className="text-red-400 hover:text-red-300"
-                    >
-                      <XMarkIcon className="w-3 h-3" />
-                    </button>
+              {/* Basis info - Enhanced Responsive */}
+              <div className="px-3 sm:px-4 md:px-6 lg:px-8 space-y-3 sm:space-y-4">
+                <div>
+                  <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-white mb-1 sm:mb-2 leading-tight">
+                    {editingField === 'display_name' ? (
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                        <input
+                          type="text"
+                          value={editValue}
+                          onChange={(e) => setEditValue(e.target.value)}
+                          className="flex-1 bg-[#181F17] text-white px-3 py-2 rounded-lg border border-[#8BAE5A] focus:outline-none focus:border-[#FFD700] text-base sm:text-lg md:text-xl lg:text-2xl w-full sm:w-auto"
+                          placeholder="Display naam"
+                        />
+                        <div className="flex gap-2">
+                          <button onClick={saveEdit} disabled={saving} className="text-[#8BAE5A] hover:text-[#FFD700] p-1">
+                            <CheckIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                          </button>
+                          <button onClick={cancelEdit} className="text-red-400 hover:text-red-300 p-1">
+                            <XMarkIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                        <span className="break-words">{profile.display_name || profile.full_name}</span>
+                        <button 
+                          onClick={() => startEditing('display_name', profile.display_name || profile.full_name)}
+                          className="text-[#8BAE5A] hover:text-[#FFD700] opacity-0 group-hover:opacity-100 transition-opacity p-1 self-start sm:self-center"
+                        >
+                          <PencilIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                        </button>
+                      </div>
+                    )}
+                  </h2>
+                  <p className="text-[#8BAE5A] text-sm sm:text-base break-all sm:break-normal">{profile.email}</p>
+                </div>
+                
+                {/* Stats Badges - Enhanced Responsive */}
+                <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                  <span className="inline-block bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-white px-2.5 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-semibold shadow">
+                    {currentRank ? `Level ${currentRank.rank_order} - ${currentRank.name}` : 'Beginner'}
                   </span>
-                ))}
+                  <span className="inline-block bg-[#3A4D23] text-[#8BAE5A] px-2.5 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-semibold">
+                    {currentXP} XP
+                  </span>
+                  <span className="inline-block bg-[#3A4D23] text-[#8BAE5A] px-2.5 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-semibold">
+                    {userBadges.length} badges
+                  </span>
+                </div>
+              </div>
+            
+              {/* Bio - Enhanced Responsive */}
+              <div className="space-y-2 sm:space-y-3">
+                <h3 className="text-base sm:text-lg font-semibold text-white">Over mij</h3>
+                <textarea
+                  value={profile.bio || ''}
+                  onChange={(e) => handleFieldChange('bio', e.target.value)}
+                  className="w-full bg-[#181F17] text-white px-3 sm:px-4 py-2 sm:py-3 rounded-lg border border-[#3A4D23] focus:outline-none focus:border-[#8BAE5A] focus:ring-1 focus:ring-[#8BAE5A] resize-none text-sm sm:text-base"
+                  rows={3}
+                  placeholder="Vertel iets over jezelf..."
+                />
               </div>
               
-              <div className="space-y-2">
-                <p className="text-[#8BAE5A] text-sm">Voeg interesses toe:</p>
-                <div className="flex flex-wrap gap-2">
-                  {interestOptions.filter(option => !profile.interests?.includes(option)).map((interest) => (
-                    <button
-                      key={interest}
-                      onClick={() => addInterest(interest)}
-                      className="px-3 py-1 rounded-full bg-[#3A4D23] text-[#8BAE5A] text-sm font-medium hover:bg-[#8BAE5A] hover:text-[#181F17] transition-colors"
-                    >
-                      + {interest}
-                    </button>
+              {/* Location - Enhanced Responsive */}
+              <div className="space-y-2 sm:space-y-3">
+                <h3 className="text-base sm:text-lg font-semibold text-white">Locatie</h3>
+                <input
+                  type="text"
+                  value={profile.location || ''}
+                  onChange={(e) => handleFieldChange('location', e.target.value)}
+                  className="w-full bg-[#181F17] text-white px-3 sm:px-4 py-2 sm:py-3 rounded-lg border border-[#3A4D23] focus:outline-none focus:border-[#8BAE5A] focus:ring-1 focus:ring-[#8BAE5A] text-sm sm:text-base"
+                  placeholder="Stad, Land"
+                />
+              </div>
+              
+              {/* Interests - Enhanced Responsive */}
+              <div className="space-y-3 sm:space-y-4">
+                <h3 className="text-base sm:text-lg font-semibold text-white">Interesses</h3>
+                <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                  {profile.interests?.map((interest, idx) => (
+                    <span key={idx} className="px-2.5 sm:px-3 py-1 rounded-full bg-[#8BAE5A]/20 text-[#8BAE5A] text-xs sm:text-sm font-medium flex items-center gap-1.5 sm:gap-2">
+                      <span className="break-words">{interest}</span>
+                      <button 
+                        onClick={() => removeInterest(interest)}
+                        className="text-red-400 hover:text-red-300 flex-shrink-0"
+                      >
+                        <XMarkIcon className="w-3 h-3" />
+                      </button>
+                    </span>
                   ))}
                 </div>
+                
+                <div className="space-y-2 sm:space-y-3">
+                  <p className="text-[#8BAE5A] text-xs sm:text-sm">Voeg interesses toe:</p>
+                  <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                    {interestOptions.filter(option => !profile.interests?.includes(option)).map((interest) => (
+                      <button
+                        key={interest}
+                        onClick={() => addInterest(interest)}
+                        className="px-2.5 sm:px-3 py-1 rounded-full bg-[#3A4D23] text-[#8BAE5A] text-xs sm:text-sm font-medium hover:bg-[#8BAE5A] hover:text-[#181F17] transition-colors"
+                      >
+                        + {interest}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
-            </div>
           </div>
         )}
         
-        {activeTab === 'voortgang' && (
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-white mb-6">Mijn Voortgang</h2>
-            
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-[#181F17] rounded-xl p-6 text-center">
-                <TrophyIcon className="w-12 h-12 text-[#FFD700] mx-auto mb-4" />
-                <h3 className="text-xl font-bold text-white mb-2">{currentXP}</h3>
-                <p className="text-[#8BAE5A]">Totaal XP</p>
+          {activeTab === 'voortgang' && (
+            <div className="space-y-4 sm:space-y-6">
+              <h2 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6">Mijn Voortgang</h2>
+              
+              {/* Stats Grid - Enhanced Responsive */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
+                <div className="bg-[#181F17] rounded-lg sm:rounded-xl p-4 sm:p-6 text-center">
+                  <TrophyIcon className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-[#FFD700] mx-auto mb-3 sm:mb-4" />
+                  <h3 className="text-lg sm:text-xl font-bold text-white mb-1 sm:mb-2">{currentXP}</h3>
+                  <p className="text-[#8BAE5A] text-sm sm:text-base">Totaal XP</p>
+                </div>
+                
+                <div className="bg-[#181F17] rounded-lg sm:rounded-xl p-4 sm:p-6 text-center">
+                  <FireIcon className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-[#FFD700] mx-auto mb-3 sm:mb-4" />
+                  <h3 className="text-lg sm:text-xl font-bold text-white mb-1 sm:mb-2">{userBadges.length}</h3>
+                  <p className="text-[#8BAE5A] text-sm sm:text-base">Badges Verdiend</p>
+                </div>
+                
+                <div className="bg-[#181F17] rounded-lg sm:rounded-xl p-4 sm:p-6 text-center sm:col-span-2 lg:col-span-1">
+                  <BookOpenIcon className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-[#FFD700] mx-auto mb-3 sm:mb-4" />
+                  <h3 className="text-lg sm:text-xl font-bold text-white mb-1 sm:mb-2">{currentRank ? `Level ${currentRank.rank_order}` : 'Level 1'}</h3>
+                  <p className="text-[#8BAE5A] text-sm sm:text-base">{currentRank?.name || 'Recruit'}</p>
+                </div>
               </div>
               
-              <div className="bg-[#181F17] rounded-xl p-6 text-center">
-                <FireIcon className="w-12 h-12 text-[#FFD700] mx-auto mb-4" />
-                <h3 className="text-xl font-bold text-white mb-2">{userBadges.length}</h3>
-                <p className="text-[#8BAE5A]">Badges Verdiend</p>
+              {/* Badges Section - Enhanced Responsive */}
+              <div className="bg-[#181F17] rounded-lg sm:rounded-xl p-4 sm:p-6">
+                <BadgeDisplay 
+                  badges={userBadges} 
+                  maxDisplay={12} 
+                  showTitle={true} 
+                  size="md" 
+                />
               </div>
               
-              <div className="bg-[#181F17] rounded-xl p-6 text-center">
-                <BookOpenIcon className="w-12 h-12 text-[#FFD700] mx-auto mb-4" />
-                <h3 className="text-xl font-bold text-white mb-2">{currentRank ? `Level ${currentRank.rank_order}` : 'Level 1'}</h3>
-                <p className="text-[#8BAE5A]">{currentRank?.name || 'Recruit'}</p>
+              <div className="text-center text-[#8BAE5A]">
+                <p className="text-sm sm:text-base">Meer voortgangsdata volgt binnenkort...</p>
               </div>
             </div>
-            
-            {/* Badges Section */}
-            <div className="bg-[#181F17] rounded-xl p-6">
-              <BadgeDisplay 
-                badges={userBadges} 
-                maxDisplay={12} 
-                showTitle={true} 
-                size="md" 
-              />
-            </div>
-            
-            <div className="text-center text-[#8BAE5A]">
-              <p>Meer voortgangsdata volgt binnenkort...</p>
-            </div>
-          </div>
-        )}
+          )}
         
-        {activeTab === 'instellingen' && (
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-white mb-6">Account & Instellingen</h2>
-            
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 bg-[#181F17] rounded-lg">
-                <div>
-                  <h3 className="font-semibold text-white">E-mail</h3>
-                  <p className="text-[#8BAE5A] text-sm">{profile?.email}</p>
-                </div>
-                <button className="px-4 py-2 bg-[#8BAE5A] text-[#181F17] rounded-lg font-semibold hover:bg-[#A6C97B] transition-colors">
-                  Wijzigen
-                </button>
-              </div>
+          {activeTab === 'instellingen' && (
+            <div className="space-y-4 sm:space-y-6">
+              <h2 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6">Account & Instellingen</h2>
               
-              <div className="flex items-center justify-between p-4 bg-[#181F17] rounded-lg">
-                <div>
-                  <h3 className="font-semibold text-white">Wachtwoord</h3>
-                  <p className="text-[#8BAE5A] text-sm">Laatst gewijzigd: onbekend</p>
+              <div className="space-y-3 sm:space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 bg-[#181F17] rounded-lg gap-3 sm:gap-4">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-white text-sm sm:text-base">E-mail</h3>
+                    <p className="text-[#8BAE5A] text-xs sm:text-sm break-all sm:break-normal">{profile?.email}</p>
+                  </div>
+                  <button className="px-3 sm:px-4 py-2 bg-[#8BAE5A] text-[#181F17] rounded-lg font-semibold hover:bg-[#A6C97B] transition-colors text-sm sm:text-base whitespace-nowrap">
+                    Wijzigen
+                  </button>
                 </div>
-                <button 
-                  onClick={() => setShowPasswordModal(true)}
-                  className="px-4 py-2 bg-[#8BAE5A] text-[#181F17] rounded-lg font-semibold hover:bg-[#A6C97B] transition-colors"
-                >
-                  Wijzigen
-                </button>
-              </div>
-              
-              <div className="flex items-center justify-between p-4 bg-[#181F17] rounded-lg">
-                <div>
-                  <h3 className="font-semibold text-white">Account verwijderen</h3>
-                  <p className="text-[#8BAE5A] text-sm">Permanent verwijderen van je account</p>
+                
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 bg-[#181F17] rounded-lg gap-3 sm:gap-4">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-white text-sm sm:text-base">Wachtwoord</h3>
+                    <p className="text-[#8BAE5A] text-xs sm:text-sm">Laatst gewijzigd: onbekend</p>
+                  </div>
+                  <button 
+                    onClick={() => setShowPasswordModal(true)}
+                    className="px-3 sm:px-4 py-2 bg-[#8BAE5A] text-[#181F17] rounded-lg font-semibold hover:bg-[#A6C97B] transition-colors text-sm sm:text-base whitespace-nowrap"
+                  >
+                    Wijzigen
+                  </button>
                 </div>
-                <button 
-                  onClick={handleDeleteAccount}
-                  className="px-4 py-2 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600 transition-colors"
-                >
-                  Verwijderen
-                </button>
+                
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 bg-[#181F17] rounded-lg gap-3 sm:gap-4">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-white text-sm sm:text-base">Account verwijderen</h3>
+                    <p className="text-[#8BAE5A] text-xs sm:text-sm">Permanent verwijderen van je account</p>
+                  </div>
+                  <button 
+                    onClick={handleDeleteAccount}
+                    className="px-3 sm:px-4 py-2 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600 transition-colors text-sm sm:text-base whitespace-nowrap"
+                  >
+                    Verwijderen
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
         
         {activeTab === 'privacy' && (
           <div className="space-y-6">
@@ -1490,51 +1465,51 @@ export default function MijnProfiel() {
           </div>
         )}
 
-        {activeTab === 'affiliate' && (
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-white mb-6">Affiliate Marketing</h2>
-            
-            {/* Affiliate Overview */}
-            <div className="bg-gradient-to-r from-[#3A4D23] to-[#4A5D33] rounded-lg p-4 sm:p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-lg sm:text-xl font-bold text-white">Verdien Geld met Brotherhood</h3>
-                  <p className="text-[#8BAE5A] text-xs sm:text-sm">Deel je unieke affiliate link en verdien commissie op elke nieuwe lid</p>
-                </div>
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#8BAE5A] rounded-lg flex items-center justify-center flex-shrink-0 ml-2">
-                  <FireIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                </div>
-              </div>
+          {activeTab === 'affiliate' && (
+            <div className="space-y-4 sm:space-y-6">
+              <h2 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6">Affiliate Marketing</h2>
               
-              <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-4">
-                <div className="bg-[#232D1A] rounded-lg p-3 sm:p-4 text-center">
-                  <div className="text-lg sm:text-2xl font-bold text-[#8BAE5A] mb-1">€25</div>
-                  <div className="text-white text-xs sm:text-sm">Per Nieuwe Lid</div>
+              {/* Affiliate Overview - Enhanced Responsive */}
+              <div className="bg-gradient-to-r from-[#3A4D23] to-[#4A5D33] rounded-lg p-3 sm:p-4 md:p-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 sm:mb-4 gap-3">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-base sm:text-lg md:text-xl font-bold text-white mb-1">Verdien Geld met Brotherhood</h3>
+                    <p className="text-[#8BAE5A] text-xs sm:text-sm leading-relaxed">Deel je unieke affiliate link en verdien commissie op elke nieuwe lid</p>
+                  </div>
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#8BAE5A] rounded-lg flex items-center justify-center flex-shrink-0 self-start sm:self-center">
+                    <FireIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                  </div>
                 </div>
-                <div className="bg-[#232D1A] rounded-lg p-3 sm:p-4 text-center">
-                  <div className="text-lg sm:text-2xl font-bold text-[#8BAE5A] mb-1">€5</div>
-                  <div className="text-white text-xs sm:text-sm">Maandelijkse Commissie</div>
-                </div>
-                <div className="bg-[#232D1A] rounded-lg p-3 sm:p-4 text-center">
-                  <div className="text-lg sm:text-2xl font-bold text-[#8BAE5A] mb-1">10%</div>
-                  <div className="text-white text-xs sm:text-sm">Extra Korting</div>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3 md:gap-4">
+                  <div className="bg-[#232D1A] rounded-lg p-3 sm:p-4 text-center">
+                    <div className="text-base sm:text-lg md:text-2xl font-bold text-[#8BAE5A] mb-1">€25</div>
+                    <div className="text-white text-xs sm:text-sm">Per Nieuwe Lid</div>
+                  </div>
+                  <div className="bg-[#232D1A] rounded-lg p-3 sm:p-4 text-center">
+                    <div className="text-base sm:text-lg md:text-2xl font-bold text-[#8BAE5A] mb-1">€5</div>
+                    <div className="text-white text-xs sm:text-sm">Maandelijkse Commissie</div>
+                  </div>
+                  <div className="bg-[#232D1A] rounded-lg p-3 sm:p-4 text-center">
+                    <div className="text-base sm:text-lg md:text-2xl font-bold text-[#8BAE5A] mb-1">10%</div>
+                    <div className="text-white text-xs sm:text-sm">Extra Korting</div>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Affiliate Link Section */}
-            <div className="bg-[#181F17] rounded-lg p-4 sm:p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-base sm:text-lg font-semibold text-white">Jouw Affiliate Link</h3>
-                <button
-                  onClick={startEditingAffiliateCode}
-                  disabled={editingAffiliateCode}
-                  className="text-[#8BAE5A] hover:text-[#FFD700] transition-colors"
-                  title="Bewerk affiliate code"
-                >
-                  <PencilIcon className="w-4 h-4" />
-                </button>
-              </div>
+              {/* Affiliate Link Section - Enhanced Responsive */}
+              <div className="bg-[#181F17] rounded-lg p-3 sm:p-4 md:p-6">
+                <div className="flex items-center justify-between mb-3 sm:mb-4">
+                  <h3 className="text-sm sm:text-base md:text-lg font-semibold text-white">Jouw Affiliate Link</h3>
+                  <button
+                    onClick={startEditingAffiliateCode}
+                    disabled={editingAffiliateCode}
+                    className="text-[#8BAE5A] hover:text-[#FFD700] transition-colors p-1"
+                    title="Bewerk affiliate code"
+                  >
+                    <PencilIcon className="w-4 h-4" />
+                  </button>
+                </div>
               
               <div className="space-y-4">
                 {editingAffiliateCode ? (
@@ -1617,163 +1592,163 @@ export default function MijnProfiel() {
               </div>
             </div>
 
-            {/* Affiliate Stats */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-              <div className="bg-[#181F17] rounded-lg p-3 sm:p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[#8BAE5A] text-xs sm:text-sm">Totaal Verdiend</span>
-                  <span className="text-white font-semibold text-sm sm:text-base">€{affiliateData.total_earned}</span>
+              {/* Affiliate Stats - Enhanced Responsive */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                <div className="bg-[#181F17] rounded-lg p-3 sm:p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[#8BAE5A] text-xs sm:text-sm">Totaal Verdiend</span>
+                    <span className="text-white font-semibold text-sm sm:text-base">€{affiliateData.total_earned}</span>
+                  </div>
+                  <div className="w-full bg-[#232D1A] rounded-full h-2">
+                    <div 
+                      className="bg-[#8BAE5A] h-2 rounded-full transition-all duration-300" 
+                      style={{ width: `${Math.min((affiliateData.total_earned / 100) * 100, 100)}%` }}
+                    ></div>
+                  </div>
                 </div>
-                <div className="w-full bg-[#232D1A] rounded-full h-2">
-                  <div 
-                    className="bg-[#8BAE5A] h-2 rounded-full transition-all duration-300" 
-                    style={{ width: `${Math.min((affiliateData.total_earned / 100) * 100, 100)}%` }}
-                  ></div>
+                
+                <div className="bg-[#181F17] rounded-lg p-3 sm:p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[#8BAE5A] text-xs sm:text-sm">Aantal Referrals</span>
+                    <span className="text-white font-semibold text-sm sm:text-base">{affiliateData.total_referrals}</span>
+                  </div>
+                  <div className="w-full bg-[#232D1A] rounded-full h-2">
+                    <div 
+                      className="bg-[#8BAE5A] h-2 rounded-full transition-all duration-300" 
+                      style={{ width: `${Math.min((affiliateData.total_referrals / 10) * 100, 100)}%` }}
+                    ></div>
+                  </div>
+                </div>
+                
+                <div className="bg-[#181F17] rounded-lg p-3 sm:p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[#8BAE5A] text-xs sm:text-sm">Actieve Referrals</span>
+                    <span className="text-white font-semibold text-sm sm:text-base">{affiliateData.active_referrals}</span>
+                  </div>
+                  <div className="w-full bg-[#232D1A] rounded-full h-2">
+                    <div 
+                      className="bg-[#8BAE5A] h-2 rounded-full transition-all duration-300" 
+                      style={{ width: `${affiliateData.total_referrals > 0 ? (affiliateData.active_referrals / affiliateData.total_referrals) * 100 : 0}%` }}
+                    ></div>
+                  </div>
+                </div>
+                
+                <div className="bg-[#181F17] rounded-lg p-3 sm:p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[#8BAE5A] text-xs sm:text-sm">Maandelijkse Inkomsten</span>
+                    <span className="text-white font-semibold text-sm sm:text-base">€{affiliateData.monthly_earnings}</span>
+                  </div>
+                  <div className="w-full bg-[#232D1A] rounded-full h-2">
+                    <div 
+                      className="bg-[#8BAE5A] h-2 rounded-full transition-all duration-300" 
+                      style={{ width: `${Math.min((affiliateData.monthly_earnings / 50) * 100, 100)}%` }}
+                    ></div>
+                  </div>
                 </div>
               </div>
-              
-              <div className="bg-[#181F17] rounded-lg p-3 sm:p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[#8BAE5A] text-xs sm:text-sm">Aantal Referrals</span>
-                  <span className="text-white font-semibold text-sm sm:text-base">{affiliateData.total_referrals}</span>
-                </div>
-                <div className="w-full bg-[#232D1A] rounded-full h-2">
-                  <div 
-                    className="bg-[#8BAE5A] h-2 rounded-full transition-all duration-300" 
-                    style={{ width: `${Math.min((affiliateData.total_referrals / 10) * 100, 100)}%` }}
-                  ></div>
-                </div>
-              </div>
-              
-              <div className="bg-[#181F17] rounded-lg p-3 sm:p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[#8BAE5A] text-xs sm:text-sm">Actieve Referrals</span>
-                  <span className="text-white font-semibold text-sm sm:text-base">{affiliateData.active_referrals}</span>
-                </div>
-                <div className="w-full bg-[#232D1A] rounded-full h-2">
-                  <div 
-                    className="bg-[#8BAE5A] h-2 rounded-full transition-all duration-300" 
-                    style={{ width: `${affiliateData.total_referrals > 0 ? (affiliateData.active_referrals / affiliateData.total_referrals) * 100 : 0}%` }}
-                  ></div>
-                </div>
-              </div>
-              
-              <div className="bg-[#181F17] rounded-lg p-3 sm:p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[#8BAE5A] text-xs sm:text-sm">Maandelijkse Inkomsten</span>
-                  <span className="text-white font-semibold text-sm sm:text-base">€{affiliateData.monthly_earnings}</span>
-                </div>
-                <div className="w-full bg-[#232D1A] rounded-full h-2">
-                  <div 
-                    className="bg-[#8BAE5A] h-2 rounded-full transition-all duration-300" 
-                    style={{ width: `${Math.min((affiliateData.monthly_earnings / 50) * 100, 100)}%` }}
-                  ></div>
-                </div>
-              </div>
-            </div>
 
-            {/* Marketing Materials */}
-            <div className="bg-[#181F17] rounded-lg p-4 sm:p-6">
-              <h3 className="text-base sm:text-lg font-semibold text-white mb-4">Marketing Materialen</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                <div className="bg-[#232D1A] rounded-lg p-3 sm:p-4">
-                  <h4 className="font-semibold text-white mb-2 text-sm sm:text-base">Social Media Posts</h4>
-                  <p className="text-[#8BAE5A] text-xs sm:text-sm mb-3">Kant-en-klare posts voor Instagram, Facebook en LinkedIn</p>
-                  <button disabled className="w-full px-3 py-2 sm:px-4 sm:py-2 bg-gray-600 text-gray-400 rounded-lg font-semibold cursor-not-allowed text-sm">
-                    Binnenkort beschikbaar
-                  </button>
-                </div>
-                
-                <div className="bg-[#232D1A] rounded-lg p-3 sm:p-4">
-                  <h4 className="font-semibold text-white mb-2 text-sm sm:text-base">E-mail Templates</h4>
-                  <p className="text-[#8BAE5A] text-xs sm:text-sm mb-3">Professionele e-mail templates voor je netwerk</p>
-                  <button disabled className="w-full px-3 py-2 sm:px-4 sm:py-2 bg-gray-600 text-gray-400 rounded-lg font-semibold cursor-not-allowed text-sm">
-                    Binnenkort beschikbaar
-                  </button>
-                </div>
-                
-                <div className="bg-[#232D1A] rounded-lg p-3 sm:p-4">
-                  <h4 className="font-semibold text-white mb-2 text-sm sm:text-base">Banners & Graphics</h4>
-                  <p className="text-[#8BAE5A] text-xs sm:text-sm mb-3">Visuele materialen voor websites en social media</p>
-                  <button disabled className="w-full px-3 py-2 sm:px-4 sm:py-2 bg-gray-600 text-gray-400 rounded-lg font-semibold cursor-not-allowed text-sm">
-                    Binnenkort beschikbaar
-                  </button>
-                </div>
-                
-                <div className="bg-[#232D1A] rounded-lg p-3 sm:p-4">
-                  <h4 className="font-semibold text-white mb-2 text-sm sm:text-base">Video Content</h4>
-                  <p className="text-[#8BAE5A] text-xs sm:text-sm mb-3">Korte video's om Brotherhood te promoten</p>
-                  <button disabled className="w-full px-3 py-2 sm:px-4 sm:py-2 bg-gray-600 text-gray-400 rounded-lg font-semibold cursor-not-allowed text-sm">
-                    Binnenkort beschikbaar
-                  </button>
+              {/* Marketing Materials - Enhanced Responsive */}
+              <div className="bg-[#181F17] rounded-lg p-3 sm:p-4 md:p-6">
+                <h3 className="text-sm sm:text-base md:text-lg font-semibold text-white mb-3 sm:mb-4">Marketing Materialen</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                  <div className="bg-[#232D1A] rounded-lg p-3 sm:p-4">
+                    <h4 className="font-semibold text-white mb-2 text-xs sm:text-sm md:text-base">Social Media Posts</h4>
+                    <p className="text-[#8BAE5A] text-xs sm:text-sm mb-3 leading-relaxed">Kant-en-klare posts voor Instagram, Facebook en LinkedIn</p>
+                    <button disabled className="w-full px-3 py-2 bg-gray-600 text-gray-400 rounded-lg font-semibold cursor-not-allowed text-xs sm:text-sm">
+                      Binnenkort beschikbaar
+                    </button>
+                  </div>
+                  
+                  <div className="bg-[#232D1A] rounded-lg p-3 sm:p-4">
+                    <h4 className="font-semibold text-white mb-2 text-xs sm:text-sm md:text-base">E-mail Templates</h4>
+                    <p className="text-[#8BAE5A] text-xs sm:text-sm mb-3 leading-relaxed">Professionele e-mail templates voor je netwerk</p>
+                    <button disabled className="w-full px-3 py-2 bg-gray-600 text-gray-400 rounded-lg font-semibold cursor-not-allowed text-xs sm:text-sm">
+                      Binnenkort beschikbaar
+                    </button>
+                  </div>
+                  
+                  <div className="bg-[#232D1A] rounded-lg p-3 sm:p-4">
+                    <h4 className="font-semibold text-white mb-2 text-xs sm:text-sm md:text-base">Banners & Graphics</h4>
+                    <p className="text-[#8BAE5A] text-xs sm:text-sm mb-3 leading-relaxed">Visuele materialen voor websites en social media</p>
+                    <button disabled className="w-full px-3 py-2 bg-gray-600 text-gray-400 rounded-lg font-semibold cursor-not-allowed text-xs sm:text-sm">
+                      Binnenkort beschikbaar
+                    </button>
+                  </div>
+                  
+                  <div className="bg-[#232D1A] rounded-lg p-3 sm:p-4">
+                    <h4 className="font-semibold text-white mb-2 text-xs sm:text-sm md:text-base">Video Content</h4>
+                    <p className="text-[#8BAE5A] text-xs sm:text-sm mb-3 leading-relaxed">Korte video's om Brotherhood te promoten</p>
+                    <button disabled className="w-full px-3 py-2 bg-gray-600 text-gray-400 rounded-lg font-semibold cursor-not-allowed text-xs sm:text-sm">
+                      Binnenkort beschikbaar
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Referral History */}
-            <div className="bg-[#181F17] rounded-lg p-4 sm:p-6">
-              <h3 className="text-base sm:text-lg font-semibold text-white mb-4">Referral Geschiedenis</h3>
-              <div className="text-center py-6 sm:py-8">
-                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-[#232D1A] rounded-full flex items-center justify-center mx-auto mb-4">
-                  <UserGroupIcon className="w-6 h-6 sm:w-8 sm:h-8 text-[#8BAE5A]" />
+              {/* Referral History - Enhanced Responsive */}
+              <div className="bg-[#181F17] rounded-lg p-3 sm:p-4 md:p-6">
+                <h3 className="text-sm sm:text-base md:text-lg font-semibold text-white mb-3 sm:mb-4">Referral Geschiedenis</h3>
+                <div className="text-center py-4 sm:py-6 md:py-8">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 bg-[#232D1A] rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                    <UserGroupIcon className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-[#8BAE5A]" />
+                  </div>
+                  <p className="text-[#8BAE5A] text-xs sm:text-sm">Nog geen referrals. Deel je affiliate link om te beginnen!</p>
                 </div>
-                <p className="text-[#8BAE5A] text-xs sm:text-sm">Nog geen referrals. Deel je affiliate link om te beginnen!</p>
               </div>
-            </div>
 
-            {/* How It Works */}
-            <div className="bg-[#181F17] rounded-lg p-4 sm:p-6">
-              <h3 className="text-base sm:text-lg font-semibold text-white mb-4">Hoe Werkt Het?</h3>
-              <div className="space-y-3 sm:space-y-4">
-                <div className="flex items-start space-x-3 sm:space-x-4">
-                  <div className="w-6 h-6 sm:w-8 sm:h-8 bg-[#8BAE5A] rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                    <span className="text-white font-bold text-xs sm:text-sm">1</span>
+              {/* How It Works - Enhanced Responsive */}
+              <div className="bg-[#181F17] rounded-lg p-3 sm:p-4 md:p-6">
+                <h3 className="text-sm sm:text-base md:text-lg font-semibold text-white mb-3 sm:mb-4">Hoe Werkt Het?</h3>
+                <div className="space-y-3 sm:space-y-4">
+                  <div className="flex items-start space-x-3 sm:space-x-4">
+                    <div className="w-6 h-6 sm:w-8 sm:h-8 bg-[#8BAE5A] rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 sm:mt-1">
+                      <span className="text-white font-bold text-xs sm:text-sm">1</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-semibold text-white text-xs sm:text-sm md:text-base mb-1">Deel je Affiliate Link</h4>
+                      <p className="text-[#8BAE5A] text-xs sm:text-sm leading-relaxed">Kopieer en deel je unieke affiliate link met je netwerk</p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-semibold text-white text-sm sm:text-base">Deel je Affiliate Link</h4>
-                    <p className="text-[#8BAE5A] text-xs sm:text-sm">Kopieer en deel je unieke affiliate link met je netwerk</p>
+                  
+                  <div className="flex items-start space-x-3 sm:space-x-4">
+                    <div className="w-6 h-6 sm:w-8 sm:h-8 bg-[#8BAE5A] rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 sm:mt-1">
+                      <span className="text-white font-bold text-xs sm:text-sm">2</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-semibold text-white text-xs sm:text-sm md:text-base mb-1">Nieuwe Leden Registreren</h4>
+                      <p className="text-[#8BAE5A] text-xs sm:text-sm leading-relaxed">Mensen registreren zich via jouw link en worden actieve leden</p>
+                    </div>
                   </div>
-                </div>
-                
-                <div className="flex items-start space-x-3 sm:space-x-4">
-                  <div className="w-6 h-6 sm:w-8 sm:h-8 bg-[#8BAE5A] rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                    <span className="text-white font-bold text-xs sm:text-sm">2</span>
+                  
+                  <div className="flex items-start space-x-3 sm:space-x-4">
+                    <div className="w-6 h-6 sm:w-8 sm:h-8 bg-[#8BAE5A] rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 sm:mt-1">
+                      <span className="text-white font-bold text-xs sm:text-sm">3</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-semibold text-white text-xs sm:text-sm md:text-base mb-1">Verdien Commissie</h4>
+                      <p className="text-[#8BAE5A] text-xs sm:text-sm leading-relaxed">Je ontvangt €25 direct en €5 per maand voor elke actieve referral</p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-semibold text-white text-sm sm:text-base">Nieuwe Leden Registreren</h4>
-                    <p className="text-[#8BAE5A] text-xs sm:text-sm">Mensen registreren zich via jouw link en worden actieve leden</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start space-x-3 sm:space-x-4">
-                  <div className="w-6 h-6 sm:w-8 sm:h-8 bg-[#8BAE5A] rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                    <span className="text-white font-bold text-xs sm:text-sm">3</span>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-white text-sm sm:text-base">Verdien Commissie</h4>
-                    <p className="text-[#8BAE5A] text-xs sm:text-sm">Je ontvangt €25 direct en €5 per maand voor elke actieve referral</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start space-x-3 sm:space-x-4">
-                  <div className="w-6 h-6 sm:w-8 sm:h-8 bg-[#8BAE5A] rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                    <span className="text-white font-bold text-xs sm:text-sm">4</span>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-white text-sm sm:text-base">Uitbetaling</h4>
-                    <p className="text-[#8BAE5A] text-xs sm:text-sm">Maandelijkse uitbetaling van je verdiende commissies</p>
+                  
+                  <div className="flex items-start space-x-3 sm:space-x-4">
+                    <div className="w-6 h-6 sm:w-8 sm:h-8 bg-[#8BAE5A] rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 sm:mt-1">
+                      <span className="text-white font-bold text-xs sm:text-sm">4</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-semibold text-white text-xs sm:text-sm md:text-base mb-1">Uitbetaling</h4>
+                      <p className="text-[#8BAE5A] text-xs sm:text-sm leading-relaxed">Maandelijkse uitbetaling van je verdiende commissies</p>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
       </div>
       
-      {/* Password Change Modal */}
-      {showPasswordModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-[#232D1A] rounded-2xl p-8 max-w-md w-full mx-4 border border-[#3A4D23]">
+        {/* Password Change Modal - Enhanced Responsive */}
+        {showPasswordModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3 sm:p-4">
+            <div className="bg-[#232D1A] rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 max-w-md w-full border border-[#3A4D23]">
             <div className="text-center mb-6">
               <div className="w-16 h-16 bg-[#8BAE5A]/20 rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg className="w-8 h-8 text-[#8BAE5A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1920,10 +1895,10 @@ export default function MijnProfiel() {
         </div>
       )}
 
-      {/* Delete Account Confirmation Modal */}
-      {showDeleteModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-[#232D1A] rounded-2xl p-8 max-w-md w-full mx-4 border border-red-500/20">
+        {/* Delete Account Confirmation Modal - Enhanced Responsive */}
+        {showDeleteModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3 sm:p-4">
+            <div className="bg-[#232D1A] rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 max-w-md w-full border border-red-500/20">
             <div className="text-center mb-6">
               <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
                 <ExclamationTriangleIcon className="w-8 h-8 text-red-500" />
@@ -1997,17 +1972,17 @@ export default function MijnProfiel() {
         />
       )}
       
-      {/* Upload progress indicator */}
-      {isUploading && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-[#232D1A] rounded-2xl p-6 flex flex-col items-center gap-4">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8BAE5A]"></div>
-            <p className="text-white font-semibold">
-              {uploadingType === 'avatar' ? 'Profielfoto' : 'Coverfoto'} wordt geüpload...
-            </p>
+        {/* Upload progress indicator - Enhanced Responsive */}
+        {isUploading && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3 sm:p-4">
+            <div className="bg-[#232D1A] rounded-xl sm:rounded-2xl p-4 sm:p-6 flex flex-col items-center gap-3 sm:gap-4">
+              <div className="animate-spin rounded-full h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 border-b-2 border-[#8BAE5A]"></div>
+              <p className="text-white font-semibold text-sm sm:text-base text-center">
+                {uploadingType === 'avatar' ? 'Profielfoto' : 'Coverfoto'} wordt geüpload...
+              </p>
+            </div>
           </div>
-        </div>
-      )}
+        )}
       
       {/* Hidden file input for ref */}
       <input

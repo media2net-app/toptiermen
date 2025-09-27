@@ -34,7 +34,6 @@ interface Exercise {
   currentSet: number;
   notes?: string;
   videoUrl?: string;
-  weights?: number[]; // Array to store weight for each set
 }
 
 interface WorkoutSession {
@@ -87,8 +86,7 @@ export default function WorkoutPage() {
       rest: '120s',
       completed: false,
       currentSet: 0,
-      videoUrl: undefined, // Will be fetched from exercises table
-      weights: []
+      videoUrl: undefined // Will be fetched from exercises table
     },
     {
       id: '2',
@@ -98,8 +96,7 @@ export default function WorkoutPage() {
       rest: '90s',
       completed: false,
       currentSet: 0,
-      videoUrl: undefined, // Will be fetched from exercises table
-      weights: []
+      videoUrl: undefined // Will be fetched from exercises table
     },
     {
       id: '3',
@@ -109,8 +106,7 @@ export default function WorkoutPage() {
       rest: '90s',
       completed: false,
       currentSet: 0,
-      videoUrl: undefined, // Will be fetched from exercises table
-      weights: []
+      videoUrl: undefined // Will be fetched from exercises table
     },
     {
       id: '4',
@@ -120,8 +116,7 @@ export default function WorkoutPage() {
       rest: '60s',
       completed: false,
       currentSet: 0,
-      videoUrl: undefined, // Will be fetched from exercises table
-      weights: []
+      videoUrl: undefined // Will be fetched from exercises table
     }
   ];
 
@@ -1006,72 +1001,33 @@ export default function WorkoutPage() {
                     </div>
                   </div>
 
-                  {/* Weight Registration for Each Set */}
-                  {exercise.currentSet > 0 && (
+                  {/* Workout Timer Display */}
+                  {index === currentExerciseIndex && isWorkoutActive && globalSession && (
                     <div className="mt-3 p-3 bg-[#1A1A1A] rounded-lg">
-                      <div className="text-sm font-medium text-white mb-2">Gewicht per set:</div>
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                        {Array.from({ length: exercise.sets }, (_, setIndex) => (
-                          <div key={setIndex} className="flex flex-col">
-                            <label className="text-xs text-gray-400 mb-1">Set {setIndex + 1}</label>
-                            <input
-                              type="number"
-                              placeholder="kg"
-                              value={exercise.weights?.[setIndex] || ''}
-                              onChange={async (e) => {
-                                const weight = parseFloat(e.target.value) || 0;
-                                const newWeights = [...(exercise.weights || [])];
-                                newWeights[setIndex] = weight;
-                                
-                                // Update local state
-                                const updatedExercises = exercises.map(ex => 
-                                  ex.id === exercise.id 
-                                    ? { ...ex, weights: newWeights }
-                                    : ex
-                                );
-                                setExercises(updatedExercises);
-
-                                // Save to database if weight > 0
-                                if (weight > 0 && session?.id) {
-                                  try {
-                                    const response = await fetch('/api/training/save-weight', {
-                                      method: 'POST',
-                                      headers: { 'Content-Type': 'application/json' },
-                                      body: JSON.stringify({
-                                        userId: user?.id,
-                                        sessionId: session.id,
-                                        exerciseId: exercise.id,
-                                        setNumber: setIndex + 1,
-                                        weight: weight
-                                      })
-                                    });
-
-                                    if (response.ok) {
-                                      console.log('✅ Weight saved for set', setIndex + 1, ':', weight, 'kg');
-                                    } else {
-                                      console.error('❌ Failed to save weight data');
-                                    }
-                                  } catch (error) {
-                                    console.error('❌ Error saving weight:', error);
-                                  }
-                                }
-                              }}
-                              className="w-full px-2 py-1 text-sm bg-[#232D1A] border border-[#3A4D23] rounded text-white placeholder-gray-500 focus:border-[#8BAE5A] focus:outline-none"
-                              disabled={setIndex >= exercise.currentSet}
-                            />
+                      <div className="text-sm font-medium text-white mb-2">Workout Timer</div>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 bg-[#8BAE5A] rounded-full flex items-center justify-center">
+                            <ClockIcon className="w-4 h-4 text-white" />
                           </div>
-                        ))}
-                      </div>
-                      
-                      {/* Progress Summary */}
-                      {exercise.weights && exercise.weights.some(w => w > 0) && (
-                        <div className="mt-2 text-xs text-gray-400">
-                          Gemiddeld gewicht: {Math.round(
-                            exercise.weights.filter(w => w > 0).reduce((a, b) => a + b, 0) / 
-                            exercise.weights.filter(w => w > 0).length
-                          )}kg
+                          <div>
+                            <div className="text-lg font-bold text-[#FFD700]">
+                              {formatTime(globalSession.workoutTime || 0)}
+                            </div>
+                            <div className="text-xs text-gray-400">Workout tijd</div>
+                          </div>
                         </div>
-                      )}
+                        
+                        {/* Rest Timer */}
+                        {globalSession.isRestActive && globalSession.restTime > 0 && (
+                          <div className="text-right">
+                            <div className="text-lg font-bold text-[#f0a14f]">
+                              {formatTime(globalSession.restTime)}
+                            </div>
+                            <div className="text-xs text-gray-400">Rust tijd</div>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -1080,43 +1036,6 @@ export default function WorkoutPage() {
           </div>
         </div>
 
-        {/* Workout Timer - Fixed at bottom of content */}
-        {isWorkoutActive && globalSession && (
-          <div className="mt-8 p-4 bg-gradient-to-r from-[#3A4D23] to-[#4A5D33] border border-[#8BAE5A]/30 rounded-lg">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 bg-[#8BAE5A] rounded-full flex items-center justify-center">
-                  <FireIcon className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-white">Workout Actief</h3>
-                  <p className="text-sm text-gray-300">{currentExercise?.name || 'Oefening'}</p>
-                </div>
-              </div>
-              
-              <div className="text-right">
-                <div className="text-2xl font-bold text-[#FFD700]">
-                  {formatTime(globalSession.workoutTime || 0)}
-                </div>
-                <div className="text-sm text-gray-400">Workout tijd</div>
-              </div>
-            </div>
-            
-            {/* Progress Bar */}
-            <div className="mt-4">
-              <div className="flex justify-between text-sm text-gray-400 mb-2">
-                <span>Voortgang: {completedExercises}/{totalExercises} oefeningen</span>
-                <span>{Math.round((completedExercises / totalExercises) * 100)}%</span>
-              </div>
-              <div className="w-full bg-[#232D1A] rounded-full h-2">
-                <div 
-                  className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] h-2 rounded-full transition-all duration-500"
-                  style={{ width: `${Math.round((completedExercises / totalExercises) * 100)}%` }}
-                ></div>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Workout Video Modal */}

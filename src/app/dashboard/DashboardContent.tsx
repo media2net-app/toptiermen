@@ -110,11 +110,9 @@ const SubscriptionTier = () => {
 
 // 2.0.1: Dashboard menu configuration
 const baseMenu = [
-  { label: 'Dashboard', icon: HomeIcon, href: '/dashboard', onboardingStep: 1 },
-  { label: 'Mijn Dashboard', icon: HomeIcon, parent: 'Dashboard', href: '/dashboard', isSub: true, onboardingStep: 1 },
-  { label: 'Mijn Profiel', icon: UserCircleIcon, parent: 'Dashboard', href: '/dashboard/mijn-profiel', isSub: true, onboardingStep: 1 },
-  { label: 'Notificaties', icon: BellIcon, parent: 'Dashboard', href: '/dashboard/notificaties', isSub: true, onboardingStep: 1 },
-  { label: 'Mijn Trainingen', icon: AcademicCapIcon, parent: 'Dashboard', href: '/dashboard/mijn-trainingen', isSub: true, onboardingStep: 1 },
+  { label: 'Mijn Profiel', icon: UserCircleIcon, href: '/dashboard/mijn-profiel', onboardingStep: 1 },
+  { label: 'Notificaties', icon: BellIcon, href: '/dashboard/notificaties', onboardingStep: 1 },
+  { label: 'Mijn Trainingen', icon: AcademicCapIcon, href: '/dashboard/mijn-trainingen', onboardingStep: 1 },
   { label: 'Finance & Business', icon: CurrencyDollarIcon, href: '/dashboard/finance-en-business', onboardingStep: 7 },
   { label: 'Academy', icon: FireIcon, href: '/dashboard/academy', onboardingStep: 7 },
   { label: 'Challenges', icon: FireIcon, href: '/dashboard/mijn-challenges', onboardingStep: 3 },
@@ -136,39 +134,12 @@ const baseMenu = [
   { label: 'Mentorship & Coaching', icon: ChatBubbleLeftRightIcon, href: '/dashboard/mentorship-en-coaching', onboardingStep: 7 },
 ];
 
-// Function to get menu with conditional onboarding button - ENHANCED LOGIC
+// Function to get menu - no longer shows onboarding button on mobile
 const getMenu = (isOnboardingCompleted: boolean, isLoading: boolean = false) => {
   console.log('🔍 getMenu called with:', { isOnboardingCompleted, isLoading });
   
-  // CRITICAL: Don't show onboarding button while loading to prevent flash
-  if (isLoading === true) {
-    console.log('⏳ Loading state active, returning base menu');
-    return baseMenu;
-  }
-  
-  // CRITICAL: If onboarding status is undefined or null, don't show onboarding button
-  if (isOnboardingCompleted === undefined || isOnboardingCompleted === null) {
-    console.log('❓ Onboarding status undefined/null, returning base menu');
-    return baseMenu;
-  }
-  
-  // CRITICAL: Only show onboarding button if onboarding is explicitly false
-  if (isOnboardingCompleted === false) {
-    console.log('✅ Onboarding not completed, showing onboarding button');
-    return [
-      { label: 'Onboarding', icon: CheckCircleIcon, href: null, onboardingStep: 1, isOnboardingItem: true, isDynamic: true },
-      ...baseMenu
-    ];
-  }
-  
-  // CRITICAL: If onboarding is completed (true), don't show onboarding button
-  if (isOnboardingCompleted === true) {
-    console.log('✅ Onboarding completed, returning base menu');
-    return baseMenu;
-  }
-  
-  // Default to base menu for any other case (safety fallback)
-  console.log('🔄 Default case, returning base menu');
+  // Always return base menu - no onboarding button on mobile
+  console.log('📱 Returning base menu (no onboarding button on mobile)');
   return baseMenu;
 };
 
@@ -237,7 +208,7 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
     if (actualOnboardingStatus?.onboarding_completed) {
       // Special case: If user completed onboarding but is still on forum intro step
       // Only allow Brotherhood > Forum access
-      if (actualCurrentStep === 5) {
+      if (actualCurrentStep === 6) {
         // Allow Brotherhood parent item (so it can be expanded)
         if (item.label === 'Brotherhood') {
           return false; // Not disabled - allow expansion
@@ -261,9 +232,9 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
       const isBasicTier = !hasTrainingAccess && !hasNutritionAccess;
       const isLastStep = actualCurrentStep === 6; // Forum intro is always the last step
       
-      // Enhanced debug logging for step 5
-      if (typeof window !== 'undefined' && actualCurrentStep === 5) {
-        console.log(`🔍 [MOBILE STEP 5 DEBUG] ${item.label}: parent=${item.parent}, isBasicTier=${isBasicTier}, isLastStep=${isLastStep}, onboarding_completed=${actualOnboardingStatus?.onboarding_completed}`);
+      // Enhanced debug logging for step 6
+      if (typeof window !== 'undefined' && actualCurrentStep === 6) {
+        console.log(`🔍 [MOBILE STEP 6 DEBUG] ${item.label}: parent=${item.parent}, isBasicTier=${isBasicTier}, isLastStep=${isLastStep}, onboarding_completed=${actualOnboardingStatus?.onboarding_completed}`);
       }
       
       // Special case for last step (Forum intro): Only allow Brotherhood > Forum
@@ -305,13 +276,8 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
             isCurrentStep = item.label === 'Trainingsschemas';
           }
         } else if (actualCurrentStep === 5) {
-          if (isBasicTier) {
-            // Basic tier: step 5 = Forum (Brotherhood > Forum) - this shouldn't happen as Basic only has 4 steps
-            isCurrentStep = false;
-          } else {
-            // Premium/Lifetime tier: step 5 = Voedingsplannen
-            isCurrentStep = item.label === 'Voedingsplannen';
-          }
+          // Premium/Lifetime tier: step 5 = Voedingsplannen
+          isCurrentStep = item.label === 'Voedingsplannen';
         } else {
           // For all other steps, use normal matching
           isCurrentStep = true;
@@ -418,7 +384,7 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
             const hasActiveSubItem = subItems.some(sub => 
               !isCompleted 
                 ? (sub.href === safePathname && sub.onboardingStep === actualCurrentStep) ||
-                  (actualCurrentStep === 5 && sub.label === 'Forum')
+                  (actualCurrentStep === 6 && sub.label === 'Forum')
                 : sub.href === safePathname
             );
             const allSubItemsDisabled = subItems.every(sub => isMenuItemDisabled(sub));
@@ -461,7 +427,7 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
                       {subItems.map(sub => {
                         const isSubActive = !isCompleted 
                           ? (safePathname === sub.href && sub.onboardingStep === actualCurrentStep) ||
-                            (actualCurrentStep === 5 && sub.label === 'Forum')
+                            (actualCurrentStep === 6 && sub.label === 'Forum')
                           : safePathname === sub.href;
                         const isHighlighted = false; // highlightedMenu not available in V2
                         const isDisabled = isMenuItemDisabled(sub);
@@ -535,7 +501,7 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus }: {
                  actualCurrentStep === 2 ? '/dashboard/mijn-challenges' :
                  actualCurrentStep === 3 ? '/dashboard/trainingsschemas' :
                  actualCurrentStep === 4 ? '/dashboard/voedingsplannen-v2' :
-                 actualCurrentStep === 5 ? '/dashboard/challenges' :
+                 actualCurrentStep === 5 ? '/dashboard/voedingsplannen-v2' :
                  actualCurrentStep === 6 ? '/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden' :
                  '/dashboard/welcome-video') : (item.href || '#'))}
               onClick={(item as any).disabled ? (e) => e.preventDefault() : (e) => handleMobileLinkClick(item.href || '#', item.label, e)}
@@ -644,7 +610,7 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
     if (actualOnboardingStatus?.onboarding_completed) {
       // Special case: If user completed onboarding but is still on forum intro step
       // Only allow Brotherhood > Forum access
-      if (actualCurrentStep === 5) {
+      if (actualCurrentStep === 6) {
         // Allow Brotherhood parent item (so it can be expanded)
         if (item.label === 'Brotherhood') {
           return false; // Not disabled - allow expansion
@@ -712,13 +678,8 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
             isCurrentStep = item.label === 'Trainingsschemas';
           }
         } else if (actualCurrentStep === 5) {
-          if (isBasicTier) {
-            // Basic tier: step 5 = Forum (Brotherhood > Forum) - this shouldn't happen as Basic only has 4 steps
-            isCurrentStep = false;
-          } else {
-            // Premium/Lifetime tier: step 5 = Voedingsplannen
-            isCurrentStep = item.label === 'Voedingsplannen';
-          }
+          // Premium/Lifetime tier: step 5 = Voedingsplannen
+          isCurrentStep = item.label === 'Voedingsplannen';
         } else {
           // For all other steps, use normal matching
           isCurrentStep = true;
@@ -828,7 +789,7 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
             const hasActiveSubItem = subItems.some(sub => 
               !isCompleted 
                 ? (sub.href === safePathname && sub.onboardingStep === actualCurrentStep) ||
-                  (actualCurrentStep === 5 && sub.label === 'Forum')
+                  (actualCurrentStep === 6 && sub.label === 'Forum')
                 : sub.href === safePathname
             );
             const allSubItemsDisabled = subItems.every(sub => isMenuItemDisabled(sub));
@@ -876,7 +837,7 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
                       {subItems.map(sub => {
                         const isSubActive = !isCompleted 
                           ? (safePathname === sub.href && sub.onboardingStep === actualCurrentStep) ||
-                            (actualCurrentStep === 5 && sub.label === 'Forum')
+                            (actualCurrentStep === 6 && sub.label === 'Forum')
                           : safePathname === sub.href;
                         const isHighlighted = false; // highlightedMenu not available in V2
                         const isDisabled = isMenuItemDisabled(sub);
@@ -965,7 +926,7 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
                    actualCurrentStep === 2 ? '/dashboard/mijn-challenges' :
                    actualCurrentStep === 3 ? '/dashboard/trainingsschemas' :
                    actualCurrentStep === 4 ? '/dashboard/voedingsplannen-v2' :
-                   actualCurrentStep === 5 ? '/dashboard/challenges' :
+                   actualCurrentStep === 5 ? '/dashboard/voedingsplannen-v2' :
                    actualCurrentStep === 6 ? '/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden' :
                    '/dashboard/welcome-video') : (item.href || '#'))}
                 onClick={(item as any).disabled ? (e) => e.preventDefault() : onLinkClick}
@@ -1394,9 +1355,10 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
               {/* Mobile Menu Button */}
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="lg:hidden p-2 bg-[#181F17] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors"
+                className="lg:hidden grid grid-cols-[auto_1fr] items-center gap-2 px-3 py-2 bg-[#181F17] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors"
               >
                 <Bars3Icon className="w-5 h-5 sm:w-6 sm:h-6" />
+                <span className="text-sm font-medium">Menu</span>
               </button>
 
               {/* Page Title */}
@@ -1424,19 +1386,17 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
                 onClick={handleLogout}
                 disabled={isLoggingOut}
                 data-logout-button
-                className="px-2 sm:px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
+                className="px-2 sm:px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center gap-1 sm:gap-2 text-xs sm:text-sm whitespace-nowrap"
               >
                 {isLoggingOut ? (
                   <>
                     <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    <span className="hidden sm:inline">Uitloggen...</span>
-                    <span className="sm:hidden">...</span>
+                    <span>Uitloggen...</span>
                   </>
                 ) : (
                   <>
                     <XMarkIcon className="w-3 h-3 sm:w-4 sm:h-4" />
-                    <span className="hidden sm:inline">Uitloggen</span>
-                    <span className="sm:hidden">x Uit</span>
+                    <span>Uitloggen</span>
                   </>
                 )}
               </button>
@@ -1506,7 +1466,7 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
                   </div>
                   
                   {/* Scrollable Content */}
-                  <div className="flex-1 overflow-y-auto overflow-x-hidden sidebar-scrollbar" style={{ height: 'calc(100vh - 80px)', maxHeight: 'calc(100vh - 80px)' }}>
+                  <div className="mobile-sidebar flex-1 overflow-y-auto overflow-x-hidden sidebar-scrollbar" style={{ height: 'calc(100vh - 80px)', maxHeight: 'calc(100vh - 80px)' }}>
                     <div className="p-4 pb-8">
                       <MobileSidebarContent 
                         onLinkClick={() => setIsMobileMenuOpen(false)}
@@ -1520,7 +1480,7 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
           </AnimatePresence>
 
           {/* Page Content */}
-          <div className="p-3 sm:p-4 md:p-6 lg:p-8">
+          <div className="dashboard-content p-3 sm:p-4 md:p-6 lg:p-8">
             <div className={`transition-all duration-300 ${onboardingLoading && contextCurrentStep !== 5 ? 'opacity-50 scale-95' : 'opacity-100 scale-100'}`}>
               {children}
             </div>
@@ -1531,7 +1491,7 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
 
         {/* Modals and Components */}
         {/* OnboardingV2Modal - Global modal for onboarding steps */}
-        {typeof window !== 'undefined' && (
+        {typeof window !== 'undefined' && !onboardingLoading && (
           <OnboardingV2Modal isOpen={!isCompleted && (contextCurrentStep === 1 || contextCurrentStep === 2)} />
         )}
 
