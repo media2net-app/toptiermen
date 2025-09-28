@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   BookOpenIcon,
@@ -92,6 +92,8 @@ export default function VoedingsplannenPage() {
   const { isCompleted, currentStep: onboardingStep, completeStep } = useOnboardingV2();
   const { hasAccess, loading: subscriptionLoading } = useSubscription();
   const router = useRouter();
+  // Ref to the continue button section for auto-scroll during onboarding
+  const continueRef = useRef<HTMLDivElement | null>(null);
 
   // Nutrition plans state
   const [nutritionPlans, setNutritionPlans] = useState<NutritionPlan[]>([]);
@@ -804,7 +806,7 @@ export default function VoedingsplannenPage() {
                   </p>
                 </div>
               ) : (
-                <div className="bg-[#8BAE5A]/20 rounded-xl p-4 border border-[#8BAE5A]">
+                <div className="bg-[#8BAE5A]/20 rounded-xl p-4 border border-[#8BAE5A]" ref={continueRef}>
                   <p className="text-[#8BAE5A] text-sm font-semibold mb-2">
                     ✅ Perfect! Je hebt een voedingsplan geselecteerd
                   </p>

@@ -260,7 +260,7 @@ export default function ProductPage() {
         <div className="absolute inset-0 bg-gradient-to-r from-[#8BAE5A]/20 to-[#B6C948]/20"></div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
           <div className="text-center">
-            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">
+            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 break-words">
               {abTestVariant === 'A' ? (
                 <>
                   Word de <span className="text-[#8BAE5A]">Beste Versie</span><br />
@@ -327,7 +327,7 @@ export default function ProductPage() {
       <section id="features" className="py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 break-words">
               Alles wat je nodig hebt om te excelleren
             </h2>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
@@ -345,7 +345,7 @@ export default function ProductPage() {
                 <div className="w-12 h-12 bg-[#8BAE5A] rounded-lg flex items-center justify-center mb-4 group-hover:bg-[#B6C948] transition-colors">
                   <feature.icon className="w-6 h-6 text-white" />
                 </div>
-                <h3 className="text-xl font-semibold text-white mb-3">{feature.title}</h3>
+                <h3 className="text-xl font-semibold text-white mb-3 break-words">{feature.title}</h3>
                 <p className="text-gray-400">{feature.description}</p>
               </div>
             ))}
@@ -357,7 +357,7 @@ export default function ProductPage() {
       <section className="py-24 bg-[#181F17]/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 break-words">
               Wat onze leden zeggen
             </h2>
             <p className="text-xl text-gray-300">
@@ -397,7 +397,7 @@ export default function ProductPage() {
       <section className="py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 break-words">
               Kies je plan
             </h2>
             <p className="text-xl text-gray-300 mb-8">
@@ -405,7 +405,7 @@ export default function ProductPage() {
             </p>
             
             {/* Pricing Toggle */}
-            <div className="flex items-center justify-center gap-4 mb-8">
+            <div className="flex items-center justify-center gap-4 mb-8 flex-wrap">
               <span className={`text-lg ${selectedPricing === 'monthly' ? 'text-white' : 'text-gray-400'}`}>
                 Maandelijks
               </span>
@@ -455,7 +455,7 @@ export default function ProductPage() {
                 )}
 
                 <div className="text-center mb-8">
-                  <h3 className="text-2xl font-bold text-white mb-2">{tier.name}</h3>
+                  <h3 className="text-2xl font-bold text-white mb-2 break-words">{tier.name}</h3>
                   <div className="flex items-center justify-center gap-2 mb-2">
                     <span className="text-4xl font-bold text-white">€{tier.price}</span>
                     {tier.originalPrice && (

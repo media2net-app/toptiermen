@@ -60,6 +60,19 @@ export default function BoekenkamerPage() {
     ));
   };
 
+  // Strict allowlist: only these titles should show a Bestellen button, with the exact URL below
+  const allowedAffiliate: Record<string, string> = {
+    'rich dad poor dad': 'https://amzn.to/4pELNsm',
+    'cashflow quadrant': 'https://amzn.to/48tbGoQ',
+    'master your mindset': 'https://amzn.to/42H99Uh',
+    'think and grow rich': 'https://amzn.to/4gOLV4v',
+    'psychology of money': 'https://amzn.to/46Dbl0m',
+    'diary of a ceo': 'https://amzn.to/4nQDl7N',
+    'i will teach you to be rich': 'https://amzn.to/3VyG7lR'
+  };
+  const normalizeTitle = (s: string) => s?.toLowerCase().trim().replace(/\s+/g, ' ') || '';
+  const getAllowedLinkFor = (title: string) => allowedAffiliate[normalizeTitle(title)] || null;
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#181F17] flex items-center justify-center">
@@ -146,9 +159,9 @@ export default function BoekenkamerPage() {
                         </span>
                         <p className="text-gray-300 text-xs mb-3 line-clamp-2">{book.description}</p>
                         
-                        {book.affiliate_link && (
+                        {getAllowedLinkFor(book.title) && (
                           <a
-                            href={book.affiliate_link}
+                            href={getAllowedLinkFor(book.title) as string}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-[#8BAE5A] to-[#7A9E4A] text-white text-xs font-semibold rounded-lg hover:from-[#7A9E4A] hover:to-[#6B8D3A] transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105"
@@ -201,9 +214,9 @@ export default function BoekenkamerPage() {
                         </span>
                         <p className="text-gray-300 text-xs mb-2 line-clamp-2">{book.description}</p>
                         
-                        {book.affiliate_link && (
+                        {getAllowedLinkFor(book.title) && (
                           <a
-                            href={book.affiliate_link}
+                            href={getAllowedLinkFor(book.title) as string}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-[#8BAE5A] to-[#7A9E4A] text-white text-xs font-semibold rounded-lg hover:from-[#7A9E4A] hover:to-[#6B8D3A] transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105"

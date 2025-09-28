@@ -148,27 +148,27 @@ export default function DebtSnowball() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <button
               onClick={() => setStrategy('snowball')}
-              className={`p-4 rounded-lg border-2 transition-all ${
+              className={`p-4 rounded-lg border-2 transition-all w-full text-left break-words whitespace-normal min-w-0 ${
                 strategy === 'snowball'
                   ? 'border-[#8BAE5A] bg-[#8BAE5A]/10'
                   : 'border-[#3A4D23] bg-[#232D1A] hover:border-[#8BAE5A]/50'
               }`}
             >
-              <div className="text-lg font-bold text-white mb-1">Sneeuwbal Methode</div>
-              <div className="text-sm text-[#A3AED6]">
+              <div className="text-base sm:text-lg font-bold text-white mb-1">Sneeuwbal Methode</div>
+              <div className="text-xs sm:text-sm text-[#A3AED6]">
                 Los eerst de kleinste schuld af voor psychologische winst
               </div>
             </button>
             <button
               onClick={() => setStrategy('avalanche')}
-              className={`p-4 rounded-lg border-2 transition-all ${
+              className={`p-4 rounded-lg border-2 transition-all w-full text-left break-words whitespace-normal min-w-0 ${
                 strategy === 'avalanche'
                   ? 'border-[#8BAE5A] bg-[#8BAE5A]/10'
                   : 'border-[#3A4D23] bg-[#232D1A] hover:border-[#8BAE5A]/50'
               }`}
             >
-              <div className="text-lg font-bold text-white mb-1">Lawaai Methode</div>
-              <div className="text-sm text-[#A3AED6]">
+              <div className="text-base sm:text-lg font-bold text-white mb-1">Lawaai Methode</div>
+              <div className="text-xs sm:text-sm text-[#A3AED6]">
                 Los eerst de schuld met hoogste rente af voor financiële winst
               </div>
             </button>
@@ -219,7 +219,7 @@ export default function DebtSnowball() {
           <div className="space-y-3">
             {debts.map((debt) => (
               <div key={debt.id} className="bg-[#181F17] rounded-lg p-4">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
                   <div>
                     <label className="block text-[#8BAE5A] text-sm mb-1">Naam</label>
                     <input
@@ -249,7 +249,7 @@ export default function DebtSnowball() {
                     />
                   </div>
                   <div className="flex items-end gap-2">
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       <label className="block text-[#8BAE5A] text-sm mb-1">Min. Betaling</label>
                       <input
                         type="number"
@@ -261,7 +261,7 @@ export default function DebtSnowball() {
                     {debts.length > 1 && (
                       <button
                         onClick={() => removeDebt(debt.id)}
-                        className="text-red-400 hover:text-red-300 transition-colors p-2"
+                        className="text-red-400 hover:text-red-300 transition-colors p-2 shrink-0"
                       >
                         <TrashIcon className="h-4 w-4" />
                       </button>

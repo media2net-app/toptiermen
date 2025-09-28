@@ -725,7 +725,7 @@ export default function LesPage() {
       </div>
       
       <div className="mb-6">
-        <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">{lesson.title}</h1>
+        <h1 className="text-2xl md:text-3xl font-bold text-white mb-2 break-words">{lesson.title}</h1>
         <span className="text-[#8BAE5A] text-sm font-semibold">{lesson.duration}</span>
       </div>
       
@@ -750,7 +750,7 @@ export default function LesPage() {
       
       <div className="bg-[#232D1A] rounded-2xl shadow-xl p-6 mb-8 border border-[#3A4D23]">
         <h2 className="text-xl font-bold text-[#8BAE5A] mb-2">Over deze les</h2>
-        <p className="text-[#B6C948] text-lg mb-4">{lesson.description}</p>
+        <p className="text-[#B6C948] text-lg mb-4 break-words">{lesson.description}</p>
         {lesson.content}
       </div>
       
@@ -768,7 +768,7 @@ export default function LesPage() {
         />
       )}
       
-      <div className="flex justify-between">
+      <div className="flex justify-between flex-wrap gap-3">
         {prev ? (
           <Link href={`/dashboard/academy/discipline-identiteit/${prev.slug}`} className="px-6 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] font-semibold border border-[#3A4D23] hover:bg-[#232D1A] transition">
             ← {prev.title}

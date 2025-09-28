@@ -446,7 +446,7 @@ export default function AcademyPage() {
                 }
               }}
               disabled={!isUnlocked || navigating}
-              className={`w-full max-w-sm sm:max-w-none mx-auto sm:mx-0 p-6 rounded-xl border transition-all duration-200 hover:scale-105 relative overflow-hidden text-left ${
+              className={`w-full max-w-full sm:max-w-none mx-auto sm:mx-0 p-6 rounded-xl border transition-all duration-200 sm:hover:scale-105 relative overflow-hidden text-left ${
                 isCompleted
                   ? 'border-[#3A4D23] hover:bg-[#232D1A]/95'
                   : isUnlocked

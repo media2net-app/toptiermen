@@ -302,6 +302,28 @@ body {
   background: #181F17;
 }
 
+/* Responsive defaults for markdown (ReactMarkdown) content */
+.prose img {
+  max-width: 100%;
+  height: auto;
+}
+
+.prose table {
+  display: block;
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.prose pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.prose code {
+  word-break: break-word;
+}
+
 /* Custom scrollbar for specific elements */
 .custom-scrollbar {
   scrollbar-width: thin;

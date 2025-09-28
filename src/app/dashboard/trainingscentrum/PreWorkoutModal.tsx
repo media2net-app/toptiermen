@@ -180,8 +180,8 @@ export default function PreWorkoutModal({
             <div className="w-16 h-16 bg-gradient-to-br from-[#8BAE5A] to-[#FFD700] rounded-full flex items-center justify-center mr-4">
               <FireIcon className="w-8 h-8 text-[#181F17]" />
             </div>
-            <div>
-              <h2 className="text-3xl font-bold text-white">Start Training</h2>
+            <div className="text-left">
+              <h2 className="text-3xl font-bold text-white text-balance leading-tight">Start Training</h2>
               <p className="text-[#8BAE5A]">Dag {dayNumber}</p>
             </div>
           </div>
@@ -190,8 +190,8 @@ export default function PreWorkoutModal({
         {/* Training Info */}
         <div className="bg-[#0F1419]/50 rounded-xl p-6 mb-6">
           <div>
-            <h3 className="text-lg font-semibold text-white mb-2">{schemaName}</h3>
-            <p className="text-[#8BAE5A] text-sm">{focusArea}</p>
+            <h3 className="text-lg font-semibold text-white mb-2 break-words text-pretty leading-snug">{schemaName}</h3>
+            <p className="text-[#8BAE5A] text-sm break-words leading-snug">{focusArea}</p>
           </div>
         </div>
 
@@ -207,11 +207,11 @@ export default function PreWorkoutModal({
                   : 'border-[#3A4D23] bg-[#181F17] hover:border-[#5A6D43]'
               }`}
             >
-              <div className="flex items-center mb-2">
+              <div className="flex items-start mb-2">
                 <PlayIcon className="w-6 h-6 text-[#8BAE5A] mr-2" />
-                <span className="font-semibold text-white">Interactive Training</span>
+                <span className="font-semibold text-white text-left leading-snug break-words">Interactive Training</span>
               </div>
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-gray-400 break-words text-pretty leading-snug">
                 Timer-based training met oefening tracking en real-time feedback
               </p>
             </button>
@@ -224,11 +224,11 @@ export default function PreWorkoutModal({
                   : 'border-[#3A4D23] bg-[#181F17] hover:border-[#5A6D43]'
               }`}
             >
-              <div className="flex items-center mb-2">
+              <div className="flex items-start mb-2">
                 <CheckIcon className="w-6 h-6 text-[#8BAE5A] mr-2" />
-                <span className="font-semibold text-white">Training Al Gedaan</span>
+                <span className="font-semibold text-white text-left leading-snug break-words">Training Al Gedaan</span>
               </div>
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-gray-400 break-words text-pretty leading-snug">
                 Heb je vandaag al getraind? Registreer deze training als voltooid
               </p>
             </button>
@@ -255,7 +255,7 @@ export default function PreWorkoutModal({
                   }`}>
                     {item.checked && <CheckIcon className="w-3 h-3 text-[#181F17]" />}
                   </div>
-                  <span className={`text-sm ${item.checked ? 'text-[#8BAE5A]' : 'text-gray-300'}`}>
+                  <span className={`text-sm ${item.checked ? 'text-[#8BAE5A]' : 'text-gray-300'} break-words`}>
                     {item.label}
                   </span>
                 </button>

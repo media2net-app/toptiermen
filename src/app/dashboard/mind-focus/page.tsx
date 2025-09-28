@@ -181,28 +181,38 @@ export default function MindFocusPage() {
 
   const renderIntro = () => (
     <div className="min-h-screen bg-gradient-to-br from-[#0A0F0A] to-[#1A2A1A]">
-      <div className="container mx-auto px-4 py-12">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
+      <div className="container mx-auto px-4 py-8 md:py-12">
+        <div className="text-center mb-8 md:mb-10">
+          <h1 className="text-3xl md:text-5xl font-bold text-white mb-3 md:mb-4 leading-tight">
             Mind & Focus
           </h1>
-          <p className="text-xl text-[#8BAE5A] max-w-3xl mx-auto">
-            Ontwikkel mentale kracht, verbeter je focus en bereik innerlijke balans met onze gecureerde meditatie en mindfulness programma's.
+          <p className="text-[#8BAE5A] max-w-3xl mx-auto text-sm sm:text-base md:text-lg">
+            Bouw mentale kracht. Houd je hoofd scherp onder druk. Minder stress, meer rust. Hier pak je controle over je focus, slaap en energie.
           </p>
+          <div className="max-w-3xl mx-auto mt-4 text-left text-[#8BAE5A] text-xs sm:text-sm md:text-base">
+            <ul className="list-disc pl-5 space-y-1">
+              <li><span className="text-white font-semibold">Stress management</span> – ontladen en herstellen na drukke dagen</li>
+              <li><span className="text-white font-semibold">Dankbaarheid & helderheid</span> – kalmte en richting in je hoofd</li>
+              <li><span className="text-white font-semibold">Slaap & herstel</span> – dieper slapen, sterker terugkomen</li>
+            </ul>
+          </div>
+          <div className="max-w-3xl mx-auto mt-4 text-[#B6C948] text-xs sm:text-sm">
+            Eerst doe je een korte intake. Daarna gaan alle tools voor je open.
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8 md:mb-10">
           {meditationTypes.map((type) => (
             <div
               key={type.id}
-              className="bg-[#1A2A1A]/80 rounded-xl p-6 text-center hover:bg-[#1A2A1A] transition-all duration-300 cursor-pointer border border-[#2A3A1A] hover:border-[#3A4A2A]"
+              className="bg-[#1A2A1A]/80 rounded-lg md:rounded-xl p-4 md:p-6 text-center hover:bg-[#1A2A1A] transition-all duration-300 cursor-pointer border border-[#2A3A1A] hover:border-[#3A4A2A]"
               onClick={() => setCurrentView('intake')}
             >
-              <div className={`w-16 h-16 ${type.color} rounded-full flex items-center justify-center text-white mx-auto mb-4`}>
+              <div className={`w-12 h-12 md:w-14 md:h-14 ${type.color} rounded-full flex items-center justify-center text-white mx-auto mb-3 md:mb-4`}>
                 {type.iconComponent}
               </div>
-              <h3 className="text-xl font-bold text-white mb-2">{type.name}</h3>
-              <p className="text-[#8BAE5A] text-sm">{type.description}</p>
+              <h3 className="text-lg md:text-xl font-bold text-white mb-1 md:mb-2">{type.name}</h3>
+              <p className="text-[#8BAE5A] text-xs sm:text-sm">{type.description}</p>
             </div>
           ))}
         </div>
@@ -210,9 +220,9 @@ export default function MindFocusPage() {
         <div className="text-center">
           <button
             onClick={() => setCurrentView('intake')}
-            className="bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] text-[#1A2A1A] px-8 py-4 rounded-xl font-bold text-lg hover:from-[#7A9D4A] hover:to-[#e0903f] transition-all duration-200 shadow-lg hover:shadow-xl"
+            className="bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] text-[#1A2A1A] px-6 py-3 md:px-8 md:py-4 rounded-lg md:rounded-xl font-bold text-base md:text-lg hover:from-[#7A9D4A] hover:to-[#e0903f] transition-all duration-200 shadow-lg hover:shadow-xl"
           >
-            Start Mind & Focus Assessment
+            Start eerst je Mind & Focus Intake
           </button>
         </div>
       </div>

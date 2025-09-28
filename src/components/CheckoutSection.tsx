@@ -236,7 +236,7 @@ export default function CheckoutSection({
           </div>
 
           {/* Checkout Form */}
-          <div className="bg-[#1A2313] rounded-2xl p-4 sm:p-8 border border-[#3A4D23]/30 sticky top-4 sm:top-8">
+          <div className="bg-[#1A2313] rounded-2xl p-4 sm:p-8 border border-[#3A4D23]/30 lg:sticky lg:top-8">
             
             <h3 className="text-2xl font-bold text-white mb-8 text-center">Vul je gegevens in</h3>
 
@@ -280,7 +280,7 @@ export default function CheckoutSection({
                 <label htmlFor="discountCode" className="block text-sm font-medium text-white mb-2">
                   Kortingscode (optioneel)
                 </label>
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-col sm:flex-row">
                   <input
                     type="text"
                     id="discountCode"
@@ -296,7 +296,7 @@ export default function CheckoutSection({
                   <button
                     type="button"
                     onClick={applyDiscountCode}
-                    className="px-4 py-3 bg-[#8BAE5A] text-[#181F17] rounded-lg font-medium hover:bg-[#B6C948] transition-colors"
+                    className="px-4 py-3 bg-[#8BAE5A] text-[#181F17] rounded-lg font-medium hover:bg-[#B6C948] transition-colors w-full sm:w-auto"
                   >
                     Toepassen
                   </button>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -74,6 +74,8 @@ export default function WorkoutPage() {
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
   const [workoutEndTime, setWorkoutEndTime] = useState(0); // Store the final workout time when completed
   const [isWorkoutCompleted, setIsWorkoutCompleted] = useState(false); // Flag to prevent re-starting workout
+  // Guard to prevent auto-starting a new session after completion/navigation
+  const hasInitializedSession = useRef(false);
   // const [showWorkoutPlayerModal, setShowWorkoutPlayerModal] = useState(false); // Removed - component doesn't exist
 
   // Sample exercises - in real app, fetch from API
@@ -320,8 +322,32 @@ export default function WorkoutPage() {
     return () => clearInterval(interval);
   }, [isTimerRunning]);
 
+  // Handle coming back from other pages with ?showCompleted=1 (from FloatingWorkoutWidget stop)
+  useEffect(() => {
+    const showCompleted = searchParams?.get('showCompleted');
+    if (showCompleted === '1') {
+      // Stop timers and show completion modal using current time
+      const currentTime = globalSession?.workoutTime || timer;
+      setWorkoutEndTime(currentTime);
+      stopWorkout();
+      setIsTimerRunning(false);
+      setIsWorkoutActive(false);
+      setShowCompletionModal(true);
+
+      // Optionally remove the query param to avoid repeat on refresh
+      try {
+        const url = new URL(window.location.href);
+        url.searchParams.delete('showCompleted');
+        window.history.replaceState({}, '', url.toString());
+      } catch {}
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, globalSession?.workoutTime]);
+
   // Initialize WorkoutSessionContext when exercises are loaded
   useEffect(() => {
+    // Do not auto-start if we've already initialized once or workout is completed
+    if (hasInitializedSession.current || isWorkoutCompleted) return;
     if (exercises.length > 0 && !globalSession) {
       const currentExercise = exercises[currentExerciseIndex];
       const sessionIdToUse = sessionId || `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -340,6 +366,7 @@ export default function WorkoutPage() {
       });
       setIsWorkoutActive(true);
       setIsTimerRunning(true);
+      hasInitializedSession.current = true;
     }
   }, [exercises.length, currentExerciseIndex, globalSession?.id, sessionId, schemaId, dayNumber]);
 
@@ -616,6 +643,7 @@ export default function WorkoutPage() {
         stopWorkout(); // Stop the global workout timer
         setIsTimerRunning(false); // Stop local timer
         setIsWorkoutActive(false); // Mark workout as inactive
+        hasInitializedSession.current = true; // Prevent any auto-restart
         setTimeout(() => {
           setShowCompletionModal(true);
         }, 1000); // Small delay to let the last set completion animation finish
@@ -659,6 +687,7 @@ export default function WorkoutPage() {
     stopWorkout();
     setIsTimerRunning(false);
     setIsWorkoutActive(false);
+    hasInitializedSession.current = true; // Prevent auto-restart
     
     // Show completion modal
     setShowCompletionModal(true);
@@ -702,6 +731,7 @@ export default function WorkoutPage() {
         
         // Set completion flag to prevent re-loading
         setIsWorkoutCompleted(true);
+        hasInitializedSession.current = true; // Prevent auto-restart on this mount
         
         // Stop the global workout session completely FIRST
         stopWorkout();
@@ -773,7 +803,7 @@ export default function WorkoutPage() {
       <div className="min-h-screen bg-gradient-to-br from-[#0F1419] to-[#1A1F2E] p-6">
         <div className="max-w-4xl mx-auto">
           {/* Header */}
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center justify-between mb-6">
             <button
               onClick={() => router.back()}
               className="flex items-center text-[#8BAE5A] hover:text-white transition-colors"
@@ -783,8 +813,8 @@ export default function WorkoutPage() {
             </button>
             
             <div className="text-center">
-              <h1 className="text-3xl font-bold text-white">Dag {dayNumber} Training</h1>
-              <p className="text-[#8BAE5A]">Interactive Workout</p>
+              <h1 className="text-2xl sm:text-3xl font-bold text-white leading-tight whitespace-nowrap">Dag {dayNumber} Training</h1>
+              <p className="text-[#8BAE5A] text-xs sm:text-sm">Interactive Workout</p>
             </div>
 
             <div className="w-32"></div> {/* Spacer to maintain layout */}
@@ -795,7 +825,7 @@ export default function WorkoutPage() {
             <div className="text-center mb-8 space-y-4">
               <button
                 onClick={startWorkoutLocal}
-                className="px-8 py-4 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-bold text-lg rounded-xl hover:from-[#7A9D4A] hover:to-[#e0903f] transition-all duration-200"
+                className="px-5 py-3 sm:px-8 sm:py-4 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-bold text-base sm:text-lg rounded-lg sm:rounded-xl hover:from-[#7A9D4A] hover:to-[#e0903f] transition-all duration-200"
               >
                 <PlayIcon className="w-6 h-6 inline mr-2" />
                 Start Workout
@@ -817,11 +847,11 @@ export default function WorkoutPage() {
               </div>
             </div>
           ) : (
-            <div className="flex justify-center gap-4 mb-8">
+            <div className="flex justify-center gap-3 sm:gap-4 mb-6">
               {globalSession?.isActive ? (
                 <button
                   onClick={pauseWorkoutLocal}
-                  className="px-6 py-3 bg-[#f0a14f] text-white font-semibold rounded-lg hover:bg-[#e0903f] transition-colors"
+                  className="px-4 py-2 sm:px-6 sm:py-3 bg-[#f0a14f] text-white font-semibold rounded-lg hover:bg-[#e0903f] transition-colors text-sm sm:text-base"
                 >
                   <PauseIcon className="w-5 h-5 inline mr-2" />
                   Pauzeer
@@ -829,7 +859,7 @@ export default function WorkoutPage() {
               ) : (
                 <button
                   onClick={resumeWorkoutLocal}
-                  className="px-6 py-3 bg-[#8BAE5A] text-white font-semibold rounded-lg hover:bg-[#7A9D4A] transition-colors"
+                  className="px-4 py-2 sm:px-6 sm:py-3 bg-[#8BAE5A] text-white font-semibold rounded-lg hover:bg-[#7A9D4A] transition-colors text-sm sm:text-base"
                 >
                   <PlayIcon className="w-5 h-5 inline mr-2" />
                   Hervat
@@ -838,7 +868,7 @@ export default function WorkoutPage() {
               
               <button
                 onClick={showWorkoutCompletion}
-                className="px-6 py-3 bg-gradient-to-r from-[#FFD700] to-[#f0a14f] text-[#181F17] font-semibold rounded-lg hover:from-[#e0903f] hover:to-[#d0802f] transition-all duration-200"
+                className="px-4 py-2 sm:px-6 sm:py-3 bg-gradient-to-r from-[#FFD700] to-[#f0a14f] text-[#181F17] font-semibold rounded-lg hover:from-[#e0903f] hover:to-[#d0802f] transition-all duration-200 text-sm sm:text-base"
               >
                 <TrophyIcon className="w-5 h-5 inline mr-2" />
                 Voltooi Workout
@@ -846,99 +876,9 @@ export default function WorkoutPage() {
             </div>
           )}
 
-          {/* Progress Bar */}
-          <div className="mb-8">
-            <div className="flex justify-between text-sm text-gray-400 mb-2">
-              <span>Voortgang: {completedExercises}/{totalExercises} oefeningen</span>
-              <span>{Math.round((completedExercises / totalExercises) * 100)}%</span>
-            </div>
-            <div className="w-full h-3 bg-[#3A4D23] rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] transition-all duration-500"
-                style={{ width: `${(completedExercises / totalExercises) * 100}%` }}
-              ></div>
-            </div>
-          </div>
+          
 
-          {/* Rest Timer */}
-          {globalSession?.isRestActive && globalSession?.restTime > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mb-6 p-4 bg-[#f0a14f]/10 border border-[#f0a14f]/30 rounded-lg text-center"
-            >
-              <div className="text-2xl font-bold text-[#f0a14f] mb-2">
-                {formatTime(globalSession.restTime)}
-              </div>
-              <p className="text-[#f0a14f] mb-4">Rust voor volgende oefening</p>
-              <button
-                onClick={skipRest}
-                className="px-4 py-2 bg-[#f0a14f] text-white font-semibold rounded-lg hover:bg-[#e0903f] transition-colors"
-              >
-                Rust Overslaan
-              </button>
-            </motion.div>
-          )}
-
-          {/* Current Exercise */}
-          {currentExercise && (
-            <div className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-6 mb-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-2xl font-bold text-white">
-                  {currentExercise.name}
-                </h2>
-                <div className="flex items-center gap-4">
-                  <button
-                    onClick={() => setShowVideoModal(true)}
-                    className="p-2 bg-[#3A4D23] text-[#8BAE5A] rounded-lg hover:bg-[#4A5D33] transition-colors"
-                    title="Bekijk oefening video"
-                  >
-                    <VideoCameraIcon className="w-5 h-5" />
-                  </button>
-                  <div className="text-right">
-                    <div className="text-sm text-gray-400">Oefening {currentExerciseIndex + 1}/{totalExercises}</div>
-                    <div className="text-lg font-semibold text-[#8BAE5A]">
-                      Set {currentExercise.currentSet + 1}/{currentExercise.sets}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div className="text-center p-4 bg-[#0F1419]/50 rounded-lg">
-                  <div className="text-2xl font-bold text-[#8BAE5A]">{currentExercise.sets}</div>
-                  <div className="text-sm text-gray-400">Sets</div>
-                </div>
-                <div className="text-center p-4 bg-[#0F1419]/50 rounded-lg">
-                  <div className="text-2xl font-bold text-[#FFD700]">{currentExercise.reps}</div>
-                  <div className="text-sm text-gray-400">Reps</div>
-                </div>
-                <div className="text-center p-4 bg-[#0F1419]/50 rounded-lg">
-                  <div className="text-2xl font-bold text-[#f0a14f]">{currentExercise.rest}</div>
-                  <div className="text-sm text-gray-400">Rust</div>
-                </div>
-              </div>
-
-              {currentExercise.currentSet < currentExercise.sets && (
-                <button
-                  onClick={() => completeSet(currentExercise.id)}
-                  className="w-full px-6 py-4 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-bold text-lg rounded-lg hover:from-[#7A9D4A] hover:to-[#e0903f] transition-all duration-200"
-                >
-                  <CheckIcon className="w-6 h-6 inline mr-2" />
-                  Voltooi Set {currentExercise.currentSet + 1}
-                </button>
-              )}
-
-              {currentExercise.completed && currentExerciseIndex < exercises.length - 1 && (
-                <button
-                  onClick={nextExercise}
-                  className="w-full mt-4 px-6 py-4 bg-[#3A4D23] text-[#8BAE5A] font-bold text-lg rounded-lg hover:bg-[#4A5D33] transition-colors"
-                >
-                  Volgende Oefening
-                </button>
-              )}
-            </div>
-          )}
+          
 
           {/* Exercise List */}
           <div className="bg-[#181F17] border border-[#3A4D23]/30 rounded-xl p-6">
@@ -1001,6 +941,22 @@ export default function WorkoutPage() {
                     </div>
                   </div>
 
+                  {/* Overall Progress (compact, inside active exercise) */}
+                  {index === currentExerciseIndex && (
+                    <div className="mt-2">
+                      <div className="flex justify-between text-xs text-gray-400 mb-1">
+                        <span>Voortgang: {completedExercises}/{totalExercises} oefeningen</span>
+                        <span>{Math.round((completedExercises / totalExercises) * 100)}%</span>
+                      </div>
+                      <div className="w-full h-2 bg-[#3A4D23] rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] transition-all duration-500"
+                          style={{ width: `${(completedExercises / totalExercises) * 100}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Workout Timer Display */}
                   {index === currentExerciseIndex && isWorkoutActive && globalSession && (
                     <div className="mt-3 p-3 bg-[#1A1A1A] rounded-lg">
@@ -1029,6 +985,39 @@ export default function WorkoutPage() {
                         )}
                       </div>
                     </div>
+                  )}
+
+                  {/* Rest skip (compact) above complete button when resting) */}
+                  {index === currentExerciseIndex && globalSession?.isRestActive && globalSession?.restTime > 0 && (
+                    <div className="mt-3 flex justify-end">
+                      <button
+                        onClick={skipRest}
+                        className="px-3 py-2 bg-[#f0a14f] text-white text-xs sm:text-sm font-semibold rounded-md hover:bg-[#e0903f] transition-colors shadow-sm"
+                      >
+                        Rust overslaan
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Voltooi Set - integrated into active exercise item */}
+                  {index === currentExerciseIndex && exercise.currentSet < exercise.sets && (
+                    <button
+                      onClick={() => completeSet(exercise.id)}
+                      className="w-full mt-2 sm:mt-3 px-4 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-bold text-base sm:text-lg rounded-lg sm:rounded-xl hover:from-[#7A9D4A] hover:to-[#e0903f] transition-all duration-200"
+                    >
+                      <CheckIcon className="w-5 h-5 sm:w-6 sm:h-6 inline mr-2" />
+                      Voltooi Set {exercise.currentSet + 1}
+                    </button>
+                  )}
+
+                  {/* Volgende Oefening - when current exercise completed */}
+                  {index === currentExerciseIndex && exercise.completed && index < exercises.length - 1 && (
+                    <button
+                      onClick={nextExercise}
+                      className="w-full mt-3 px-6 py-4 bg-[#3A4D23] text-[#8BAE5A] font-bold text-lg rounded-lg hover:bg-[#4A5D33] transition-colors"
+                    >
+                      Volgende Oefening
+                    </button>
                   )}
                 </div>
               ))}

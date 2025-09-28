@@ -141,7 +141,7 @@ export default function BadgeDisplay({
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.8, y: 10 }}
                   transition={{ duration: 0.2 }}
-                  className="absolute z-50 bottom-full left-1/2 transform -translate-x-1/2 mb-2"
+                  className="hidden md:block absolute z-50 bottom-full left-1/2 transform -translate-x-1/2 mb-2"
                 >
                   <div className="bg-[#181F17] border border-[#3A4D23] rounded-lg p-4 shadow-xl min-w-[280px] max-w-[320px]">
                     {/* Badge Header */}

@@ -56,7 +56,7 @@ export default function WorkoutVideoModal({
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
-            className="relative w-full h-full sm:max-w-4xl sm:h-auto bg-[#181F17] rounded-none sm:rounded-2xl overflow-hidden shadow-2xl"
+            className="relative w-full sm:max-w-4xl max-h-[90vh] h-auto bg-[#181F17] rounded-none sm:rounded-2xl overflow-hidden sm:overflow-hidden shadow-2xl mx-2 sm:mx-0 flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
@@ -73,63 +73,65 @@ export default function WorkoutVideoModal({
               </button>
             </div>
 
-            {/* Video Container */}
-            <div className="relative aspect-video bg-black">
-              {videoUrl && videoUrl !== 'undefined' ? (
-                <OptimizedVideoPlayer
-                  src={videoUrl.startsWith('/video-oefeningen/') ? videoUrl : getCDNVideoUrl(videoUrl)}
-                  className="w-full h-full object-cover"
-                  controls={true}
-                  onEnded={handleVideoEnd}
-                  onPlay={() => {
-                    console.log('🎥 Workout video started playing:', videoUrl);
-                    setIsPlaying(true);
-                  }}
-                  muted={isMuted}
-                />
-              ) : (
-                <div className="flex items-center justify-center h-full">
-                  <div className="text-center">
-                    <div className="w-20 h-20 bg-[#3A4D23] rounded-full flex items-center justify-center mx-auto mb-4">
-                      <svg className="w-10 h-10 text-[#8BAE5A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                      </svg>
+            {/* Scrollable Body (video + details) */}
+            <div className="flex-1 overflow-y-auto">
+              {/* Video Container */}
+              <div className="relative w-full aspect-video bg-black flex items-center justify-center">
+                {videoUrl && videoUrl !== 'undefined' ? (
+                  <OptimizedVideoPlayer
+                    src={videoUrl.startsWith('/video-oefeningen/') ? videoUrl : getCDNVideoUrl(videoUrl)}
+                    className="w-full h-full object-contain"
+                    controls={true}
+                    onEnded={handleVideoEnd}
+                    onPlay={() => {
+                      console.log('🎥 Workout video started playing:', videoUrl);
+                      setIsPlaying(true);
+                    }}
+                    muted={isMuted}
+                  />
+                ) : (
+                  <div className="flex items-center justify-center h-full">
+                    <div className="text-center">
+                      <div className="w-20 h-20 bg-[#3A4D23] rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg className="w-10 h-10 text-[#8BAE5A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                      <h3 className="text-xl font-semibold text-white mb-2">Geen video beschikbaar</h3>
+                      <p className="text-gray-400">Er is nog geen video tutorial voor deze oefening</p>
+                      <p className="text-gray-500 text-sm mt-2">Bekijk de oefening details hieronder voor instructies</p>
                     </div>
-                    <h3 className="text-xl font-semibold text-white mb-2">Geen video beschikbaar</h3>
-                    <p className="text-gray-400">Er is nog geen video tutorial voor deze oefening</p>
-                    <p className="text-gray-500 text-sm mt-2">Bekijk de oefening details hieronder voor instructies</p>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Exercise Details */}
-            {exerciseDetails && (
-              <div className="p-3 sm:p-6 bg-[#232D1A]">
-                <h3 className="text-base sm:text-lg font-semibold text-white mb-2 sm:mb-4">Oefening Details</h3>
-                <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-2 sm:mb-4">
-                  <div className="text-center p-2 sm:p-3 bg-[#181F17] rounded-lg">
-                    <div className="text-lg sm:text-2xl font-bold text-[#8BAE5A]">{exerciseDetails.sets}</div>
-                    <div className="text-xs sm:text-sm text-gray-400">Sets</div>
-                  </div>
-                  <div className="text-center p-2 sm:p-3 bg-[#181F17] rounded-lg">
-                    <div className="text-lg sm:text-2xl font-bold text-[#FFD700]">{exerciseDetails.reps}</div>
-                    <div className="text-xs sm:text-sm text-gray-400">Reps</div>
-                  </div>
-                  <div className="text-center p-2 sm:p-3 bg-[#181F17] rounded-lg">
-                    <div className="text-lg sm:text-2xl font-bold text-[#f0a14f]">{exerciseDetails.rest}</div>
-                    <div className="text-xs sm:text-sm text-gray-400">Rust</div>
-                  </div>
-                </div>
-                
-                {exerciseDetails.notes && (
-                  <div className="p-3 sm:p-4 bg-[#181F17] rounded-lg">
-                    <h4 className="font-semibold text-[#8BAE5A] mb-1 sm:mb-2 text-sm sm:text-base">Notities</h4>
-                    <p className="text-gray-300 text-xs sm:text-sm">{exerciseDetails.notes}</p>
                   </div>
                 )}
               </div>
-            )}
+              {/* Exercise Details */}
+              {exerciseDetails && (
+                <div className="p-3 sm:p-6 bg-[#232D1A]">
+                  <h3 className="text-base sm:text-lg font-semibold text-white mb-2 sm:mb-4">Oefening Details</h3>
+                  <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-2 sm:mb-4">
+                    <div className="text-center p-2 sm:p-3 bg-[#181F17] rounded-lg">
+                      <div className="text-lg sm:text-2xl font-bold text-[#8BAE5A]">{exerciseDetails.sets}</div>
+                      <div className="text-xs sm:text-sm text-gray-400">Sets</div>
+                    </div>
+                    <div className="text-center p-2 sm:p-3 bg-[#181F17] rounded-lg">
+                      <div className="text-lg sm:text-2xl font-bold text-[#FFD700]">{exerciseDetails.reps}</div>
+                      <div className="text-xs sm:text-sm text-gray-400">Reps</div>
+                    </div>
+                    <div className="text-center p-2 sm:p-3 bg-[#181F17] rounded-lg">
+                      <div className="text-lg sm:text-2xl font-bold text-[#f0a14f]">{exerciseDetails.rest}</div>
+                      <div className="text-xs sm:text-sm text-gray-400">Rust</div>
+                    </div>
+                  </div>
+                  
+                  {exerciseDetails.notes && (
+                    <div className="p-3 sm:p-4 bg-[#181F17] rounded-lg">
+                      <h4 className="font-semibold text-[#8BAE5A] mb-1 sm:mb-2 text-sm sm:text-base">Notities</h4>
+                      <p className="text-gray-300 text-xs sm:text-sm">{exerciseDetails.notes}</p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
 
             {/* Footer */}
             <div className="p-3 sm:p-6 bg-[#181F17] border-t border-[#3A4D23]">

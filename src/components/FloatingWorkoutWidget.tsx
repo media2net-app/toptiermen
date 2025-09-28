@@ -70,6 +70,16 @@ export default function FloatingWorkoutWidget({
     };
   }, [isRestTimerRunning, restTime]);
 
+  // Safety: if workout is effectively completed (all sets done and no rest), auto-stop
+  useEffect(() => {
+    if (!session) return;
+    const isCompleted = session.currentSet >= session.totalSets;
+    if (session.isActive && isCompleted && !isRestTimerRunning) {
+      console.log('🛑 Auto-stopping floating widget: all sets completed and no active rest');
+      stopWorkout();
+    }
+  }, [session, isRestTimerRunning, stopWorkout]);
+
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -100,14 +110,25 @@ export default function FloatingWorkoutWidget({
     if (onShowCompletion) {
       onShowCompletion();
     } else {
-      // Otherwise, just stop the workout (we're on a different page)
-      stopWorkout();
+      // Otherwise, navigate back to the workout page and trigger completion modal
+      if (session) {
+        const url = `/dashboard/trainingscentrum/workout/${session.schemaId}/${session.dayNumber}?sessionId=${session.id}&showCompleted=1`;
+        router.push(url);
+      } else {
+        // Fallback: stop if no session data available
+        stopWorkout();
+      }
     }
   };
 
   // Only show widget if there's an active session and it's not completed
   if (!session || !session.isActive) {
     console.log('🧹 No session or session not active, hiding widget');
+    return null;
+  }
+  // Hide if completed (even if isActive still true due to stale state)
+  if (session.currentSet >= session.totalSets && !isRestTimerRunning) {
+    console.log('🧹 Session completed (all sets). Hiding floating widget.');
     return null;
   }
   

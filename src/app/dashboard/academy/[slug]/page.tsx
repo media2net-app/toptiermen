@@ -85,23 +85,14 @@ export default function ModuleDetailPage() {
   }, [loading, error, moduleId]);
 
   const fetchModuleData = async () => {
-    if (!moduleId || !user?.id) {
-      console.log('Module page: Missing moduleId or user');
-      setError('Module ID of gebruiker ontbreekt');
-      setLoading(false);
-      return;
-    }
-
-    // Check cache first
     const cacheKey = `academy_module_${moduleId}`;
-    const cachedData = sessionStorage.getItem(cacheKey);
-    const cacheTimestamp = sessionStorage.getItem(`${cacheKey}_timestamp`);
+    const cachedData = typeof window !== 'undefined' ? sessionStorage.getItem(cacheKey) : null;
+    const cacheTimestamp = typeof window !== 'undefined' ? sessionStorage.getItem(`${cacheKey}_timestamp`) : null;
     const now = Date.now();
     const cacheAge = cacheTimestamp ? now - parseInt(cacheTimestamp) : Infinity;
-    
-    // Use cache if less than 2 minutes old
+
+    // 1) Serve fresh-enough cache immediately (works even if user isn't ready yet)
     if (cachedData && cacheAge < 2 * 60 * 1000) {
-      console.log('🎓 Module: Using cached data for module:', moduleId);
       try {
         const parsedData = JSON.parse(cachedData);
         setModule(parsedData.module);
@@ -112,31 +103,32 @@ export default function ModuleDetailPage() {
         setAllModules(parsedData.allModules);
         setLoading(false);
         setError(null);
-        return;
-      } catch (err) {
-        console.warn('⚠️ Failed to parse cached data, fetching fresh...');
+        console.log('🎓 Module: Used cached data');
+      } catch {
+        console.warn('⚠️ Failed to parse cached data');
       }
     }
 
-    console.log('Module page: Starting data fetch for:', { moduleId, user: user.email });
+    // 2) If user not ready, defer server fetch without showing error
+    if (!moduleId || !user?.id) {
+      console.log('Module page: Waiting for user/moduleId before live fetch...');
+      return;
+    }
+
+    // 3) Live fetch with timeout to avoid hanging after returning from PDF
     setLoading(true);
     setError(null);
-
+    const abort = new AbortController();
+    const t = setTimeout(() => abort.abort(), 12000); // 12s timeout
     try {
-      const response = await fetch(`/api/academy/module-data?userId=${user.id}&moduleId=${moduleId}`);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
+      const response = await fetch(`/api/academy/module-data?userId=${user.id}&moduleId=${moduleId}`, { signal: abort.signal, cache: 'no-cache' });
+      clearTimeout(t);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
-      
-      if (data.error) {
-        throw new Error(data.error);
-      }
+      if (data.error) throw new Error(data.error);
 
       // Cache the data
-      const cacheData = {
+      const cachePayload = {
         module: data.module,
         lessons: data.lessons,
         completedLessonIds: data.completedLessonIds,
@@ -144,26 +136,22 @@ export default function ModuleDetailPage() {
         nextModule: data.nextModule,
         allModules: data.allModules
       };
-      sessionStorage.setItem(cacheKey, JSON.stringify(cacheData));
+      sessionStorage.setItem(cacheKey, JSON.stringify(cachePayload));
       sessionStorage.setItem(`${cacheKey}_timestamp`, now.toString());
 
-      // Update state with fetched data
+      // Update state
       setModule(data.module);
       setLessons(data.lessons);
       setCompletedLessonIds(data.completedLessonIds);
       setPreviousModule(data.previousModule);
       setNextModule(data.nextModule);
       setAllModules(data.allModules);
-
-      console.log('✅ Module data loaded and cached successfully:', {
-        module: data.module.title,
-        lessonsCount: data.lessons.length,
-        completedLessons: data.completedLessonIds.length
-      });
-
-    } catch (err) {
+    } catch (err: any) {
       console.error('❌ Error fetching module data:', err);
-      setError(err instanceof Error ? err.message : 'Fout bij het laden van module data');
+      // Only show an error if there is no cache to show
+      if (!cachedData) {
+        setError(err?.message || 'Fout bij het laden van module data');
+      }
     } finally {
       setLoading(false);
     }
@@ -411,10 +399,10 @@ export default function ModuleDetailPage() {
             )}
           </div>
           
-          <h1 className="text-3xl font-bold text-[#8BAE5A] mb-2">
+          <h1 className="text-3xl font-bold text-[#8BAE5A] mb-2 break-words">
             Module {getModuleNumber(module.order_index)}: {module.title}
           </h1>
-          <p className="text-gray-300 text-lg">{module.description}</p>
+          <p className="text-gray-300 text-lg break-words">{module.description}</p>
         </div>
 
         {/* Lessons Grid */}
@@ -428,18 +416,18 @@ export default function ModuleDetailPage() {
                 router.push(`/dashboard/academy/${module.id}/${lesson.id}`);
               }}
               disabled={navigating}
-              className="block w-full text-left p-6 rounded-xl border transition-all duration-200 hover:scale-105 disabled:opacity-50 ${
+              className={`block w-full text-left p-6 rounded-xl border transition-all duration-200 hover:scale-105 disabled:opacity-50 ${
                 completedLessonIds.includes(lesson.id)
                   ? 'bg-[#232D1A] text-[#8BAE5A] border-[#3A4D23] hover:bg-[#3A4D23]'
                   : 'bg-[#181F17] text-gray-300 border-[#3A4D23] hover:bg-[#232D1A]'
-              }"
+              }`}
             >
               <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 min-w-0">
                   <span className="w-8 h-8 rounded-full border-2 border-[#8BAE5A] flex items-center justify-center text-sm font-bold text-[#8BAE5A]">
                     {index + 1}
                   </span>
-                  <h3 className="text-xl font-semibold">{lesson.title}</h3>
+                  <h3 className="text-xl font-semibold truncate">{lesson.title}</h3>
                 </div>
                 {completedLessonIds.includes(lesson.id) && (
                   <span className="text-green-400 text-2xl">✓</span>

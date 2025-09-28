@@ -21,6 +21,7 @@ import {
 import { toast } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { useWorkoutSession } from '@/contexts/WorkoutSessionContext';
 import PageLayout from '@/components/PageLayout';
 import PreWorkoutModal from '../trainingscentrum/PreWorkoutModal';
 
@@ -79,6 +80,7 @@ interface TrainingData {
 
 export default function MijnTrainingen() {
   const { user } = useSupabaseAuth();
+  const { stopWorkout } = useWorkoutSession();
   const router = useRouter();
   const [trainingData, setTrainingData] = useState<TrainingData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -229,6 +231,12 @@ export default function MijnTrainingen() {
     const allDaysCompleted = days.every(day => day.isCompleted);
     
     if (allDaysCompleted) {
+      // Ensure any running workout session is stopped to avoid dangling timers
+      try {
+        stopWorkout();
+      } catch (e) {
+        console.log('ℹ️ Could not stop workout (possibly no session):', e);
+      }
       console.log('🎉 All days completed! Checking if week completion exists...');
       console.log('📊 Current completedWeeks:', completedWeeks);
       console.log('📊 completedWeeks.length:', completedWeeks.length);
@@ -303,6 +311,8 @@ export default function MijnTrainingen() {
     
     try {
       console.log('🔄 Starting new week...');
+      // Also make sure any lingering workout session is stopped when starting a new week
+      try { stopWorkout(); } catch {}
       
       // Create week completion data from current days
       // Use the same robust calculation as in checkWeekCompletion
@@ -725,12 +735,10 @@ export default function MijnTrainingen() {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.1 * index }}
                       className={`relative p-3 sm:p-4 md:p-6 rounded-lg sm:rounded-xl border-2 cursor-pointer transition-all duration-200 ${
-                      isCurrentDay
-                          ? 'border-[#8BAE5A] bg-[#232D1A] shadow-lg'
-                        : isCompleted
+                        isCompleted
                           ? 'border-green-500 bg-green-900/20 shadow-green-500/20 shadow-lg'
                           : 'border-[#3A4D23] bg-[#1A1A1A] hover:border-[#5A6D43] hover:shadow-md'
-                    }`}
+                      }`}
                     onClick={() => setSelectedDay(day.day_number)}
                   >
                     {isCompleted && (
@@ -778,15 +786,24 @@ export default function MijnTrainingen() {
                         </div>
                       </div>
                     
+                    {/* Only allow starting this day if previous day is completed (fallback to progress) */}
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
+                        // Guard: don't allow starting future days until previous completed
+                        const prevDay = days?.find(d => d.day_number === day.day_number - 1);
+                        const prevCompleted = day.day_number === 1 ? true : (prevDay?.isCompleted ?? false);
+                        const progressAllows = progress ? progress.completed_days >= (day.day_number - 1) : day.day_number === 1;
+                        const canStart = prevCompleted || progressAllows;
+                        if (!canStart) return;
                         startWorkout(day.day_number);
                       }}
                         className={`w-full px-3 py-2 sm:px-4 sm:py-3 font-semibold rounded-lg transition-all duration-200 flex items-center justify-center text-xs sm:text-sm md:text-base ${
                           isCompleted
                             ? 'bg-green-600 text-white hover:bg-green-700'
-                            : 'bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] hover:from-[#7A9D4A] hover:to-[#e0903f]'
+                            : (() => { const prevDay = days?.find(d => d.day_number === day.day_number - 1); const prevCompleted = day.day_number === 1 ? true : (prevDay?.isCompleted ?? false); return prevCompleted || (progress && progress.completed_days >= (day.day_number - 1)) || day.day_number === 1; })()
+                              ? 'bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] hover:from-[#7A9D4A] hover:to-[#e0903f]'
+                              : 'bg-[#2a2f28] text-gray-400 cursor-not-allowed'
                         }`}
                       >
                         {isCompleted ? (

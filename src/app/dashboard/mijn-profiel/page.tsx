@@ -117,6 +117,10 @@ export default function MijnProfiel() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [passwordError, setPasswordError] = useState<string | null>(null);
+  // Debounce timers for field autosave
+  const saveTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+  // Per-field timestamp of last successful save
+  const [fieldSavedAt, setFieldSavedAt] = useState<Record<string, number>>({});
   
   // Password strength indicator
   const getPasswordStrength = (password: string) => {
@@ -154,29 +158,33 @@ export default function MijnProfiel() {
     try {
       setLoading(true);
       setError(null);
-      
-      console.log('Fetching all profile data...');
-      
-      // Add timeout to prevent infinite loading
-      const timeoutId = setTimeout(() => {
-        console.warn('Profile loading timeout reached, forcing completion...');
-        setLoading(false);
-      }, 15000); // 15 second timeout
-      
-      // Fetch all data in parallel
-      await Promise.all([
-        fetchUserProfile(),
+      console.time('⏱️ fetchAllData_total');
+      console.log('Fetching profile (primary) first, then secondary data in background...');
+
+      // 1) Fetch critical data FIRST (profile) to render the page ASAP
+      await fetchUserProfile();
+      setLoading(false); // allow UI to render with profile
+
+      // 2) Fetch secondary data in background (don't block render)
+      const bgTasks = [
         fetchBadgesAndRanks(),
         fetchAffiliateData(),
+        // Note: push subscription check should never block initial render
         fetchPushSubscription()
-      ]);
-      
-      clearTimeout(timeoutId);
-      console.log('All profile data fetched successfully');
+      ];
+      // Use Promise.allSettled so failures don't block the rest
+      Promise.allSettled(bgTasks).then((results) => {
+        results.forEach((r, i) => {
+          if (r.status === 'rejected') {
+            console.warn('Background task failed:', i, r.reason);
+          }
+        });
+      });
+
+      console.timeEnd('⏱️ fetchAllData_total');
     } catch (error) {
       console.error('Error fetching data:', error);
       setError('Er is een fout opgetreden bij het laden van je profiel');
-    } finally {
       setLoading(false);
     }
   };
@@ -185,7 +193,7 @@ export default function MijnProfiel() {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('*')
+        .select('id,email,full_name,display_name,avatar_url,cover_url,interests,bio,location,is_public,show_email,created_at')
         .eq('id', user?.id)
         .single();
 
@@ -333,12 +341,12 @@ export default function MijnProfiel() {
         return;
       }
 
-      // Check current permission
-      const permission = await Notification.requestPermission();
-      setPushPermission(permission);
-
+      // IMPORTANT: Do NOT request permission on page load.
+      // Only read current permission to avoid blocking UX.
+      const permission = typeof Notification !== 'undefined' ? Notification.permission : 'default';
+      setPushPermission(permission as NotificationPermission);
       if (permission !== 'granted') {
-        console.log('Push notification permission not granted');
+        // Skip silently; user can enable later from settings
         return;
       }
 
@@ -560,10 +568,10 @@ export default function MijnProfiel() {
     }
   };
 
-  const updateProfile = async (updates: Partial<UserProfile>) => {
+  const updateProfile = async (updates: Partial<UserProfile>, opts: { silent?: boolean } = {}) => {
     if (!profile) return;
 
-    setSaving(true);
+    if (!opts.silent) setSaving(true);
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -574,17 +582,19 @@ export default function MijnProfiel() {
 
       if (error) {
         console.error('Error updating profile:', error);
-        toast.error('Er is een fout opgetreden bij het opslaan');
+        if (!opts.silent) toast.error('Er is een fout opgetreden bij het opslaan');
       } else {
         setProfile(data);
-        toast.success('Profiel succesvol bijgewerkt!');
-        setEditingField(null);
+        if (!opts.silent) {
+          toast.success('Profiel succesvol bijgewerkt!');
+          setEditingField(null);
+        }
       }
     } catch (error) {
       console.error('Error:', error);
-      toast.error('Er is een fout opgetreden');
+      if (!opts.silent) toast.error('Er is een fout opgetreden');
     } finally {
-      setSaving(false);
+      if (!opts.silent) setSaving(false);
     }
   };
 
@@ -615,9 +625,15 @@ export default function MijnProfiel() {
     
     // Update local state immediately for better UX
     setProfile(prev => prev ? { ...prev, ...updates } : null);
-    
-    // Save to database
-    await updateProfile(updates);
+
+    // Debounce save to database to avoid saving on every keystroke
+    if (saveTimers.current[field]) {
+      clearTimeout(saveTimers.current[field]);
+    }
+    saveTimers.current[field] = setTimeout(async () => {
+      await updateProfile(updates, { silent: true });
+      setFieldSavedAt(prev => ({ ...prev, [field]: Date.now() }));
+    }, 700);
   };
 
   const addInterest = async (interest: string) => {
@@ -1031,19 +1047,19 @@ export default function MijnProfiel() {
       
         {/* Tabs - Enhanced Responsive Design */}
         <div className="mb-4 sm:mb-6 md:mb-8">
-          <div className="flex gap-1 sm:gap-1.5 md:gap-2 overflow-x-auto pb-2 scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+          <div className="flex gap-1.5 sm:gap-2 md:gap-2.5 overflow-x-auto pb-2 scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
             {tabs.map((tab) => {
               const Icon = tab.icon;
               return (
                 <button
                   key={tab.key}
                   onClick={() => setActiveTab(tab.key)}
-                  className={`px-2.5 sm:px-3 md:px-4 lg:px-5 py-2 md:py-2.5 rounded-lg md:rounded-xl font-semibold transition-all text-xs sm:text-sm md:text-base whitespace-nowrap flex items-center gap-1 sm:gap-1.5 md:gap-2 flex-shrink-0 min-w-0 ${activeTab === tab.key ? 'bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] shadow-lg' : 'bg-[#232D1A] text-[#8BAE5A] hover:bg-[#2A341F]'}`}
+                  className={`px-2.5 sm:px-3.5 md:px-4 lg:px-5 py-1.5 sm:py-2 md:py-2.5 rounded-lg md:rounded-xl font-semibold transition-all text-[11px] sm:text-sm md:text-base whitespace-nowrap flex items-center gap-1.5 sm:gap-2 md:gap-2 flex-shrink-0 min-w-0 ${activeTab === tab.key ? 'bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] shadow-lg' : 'bg-[#232D1A] text-[#8BAE5A] hover:bg-[#2A341F]'}`}
                 >
-                  <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 flex-shrink-0" />
-                  <span className="hidden xs:inline sm:hidden md:inline truncate">{tab.label}</span>
-                  <span className="xs:hidden sm:inline md:hidden lg:inline truncate">{tab.label.split(' ')[0]}</span>
-                  <span className="hidden lg:hidden xl:inline truncate">{tab.label}</span>
+                  <Icon className="w-4 h-4 sm:w-4.5 sm:h-4.5 md:w-5 md:h-5 flex-shrink-0" />
+                  {/* Short label on mobile, full label on md+ */}
+                  <span className="inline md:hidden truncate">{tab.label.split(' ')[0]}</span>
+                  <span className="hidden md:inline truncate">{tab.label}</span>
                 </button>
               );
             })}
@@ -1061,6 +1077,7 @@ export default function MijnProfiel() {
                     src={profile.cover_url} 
                     alt="Coverfoto" 
                     className="w-full h-full object-cover" 
+                    loading="lazy"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
@@ -1092,6 +1109,7 @@ export default function MijnProfiel() {
                       src={profile.avatar_url} 
                       alt="Profielfoto" 
                       className="w-full h-full object-cover" 
+                      loading="lazy"
                     />
                   ) : (
                     <span className="text-[#8BAE5A]/60 text-lg sm:text-xl md:text-2xl lg:text-3xl">Geen foto</span>

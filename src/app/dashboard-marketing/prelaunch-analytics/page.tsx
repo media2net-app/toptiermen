@@ -216,7 +216,7 @@ export default function PrelaunchAnalyticsPage() {
             <h1 className="text-3xl font-bold text-white">Prelaunch Analytics</h1>
           </div>
           
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 flex-wrap">
             <select
               value={timeRange}
               onChange={(e) => setTimeRange(e.target.value)}

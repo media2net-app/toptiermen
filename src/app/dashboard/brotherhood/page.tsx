@@ -130,7 +130,7 @@ export default function Brotherhood() {
 
       {/* Tab Navigation */}
       <div className="mb-8">
-        <div className="flex flex-wrap gap-2 border-b border-[#3A4D23]/40">
+        <div className="flex flex-nowrap overflow-x-auto scrollbar-hide gap-2 border-b border-[#3A4D23]/40">
           {[
             { id: 'dashboard', label: 'Dashboard Overzicht', icon: '🏠' },
             { id: 'social', label: 'Social Feed Connecties', icon: '👥' },
@@ -140,7 +140,7 @@ export default function Brotherhood() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-all duration-200 ${
+              className={`shrink-0 flex items-center gap-2 px-4 py-3 text-sm font-medium transition-all duration-200 ${
                 activeTab === tab.id
                   ? 'bg-[#8BAE5A] text-[#181F17] rounded-t-lg'
                   : 'text-[#8BAE5A] hover:text-white hover:bg-[#3A4D23]/40'

@@ -251,12 +251,12 @@ export default function ProfielDetail() {
         </div>
         <div className="flex-1 flex flex-col gap-2 text-center sm:text-left">
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-2 sm:gap-3">
-            <h2 className="text-xl sm:text-2xl font-bold text-white">{member.full_name || 'Onbekende gebruiker'}</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-white break-words max-w-full">{member.full_name || 'Onbekende gebruiker'}</h2>
             <span className="flex items-center gap-1 text-[#FFD700] font-semibold text-sm sm:text-lg">
               {rankIcon} {currentMemberRank ? `Level ${currentMemberRank.rank_order} - ${currentMemberRank.name}` : displayRank}
             </span>
           </div>
-          <div className="text-[#8BAE5A] text-sm">{member.location || 'Locatie onbekend'}</div>
+          <div className="text-[#8BAE5A] text-sm break-words max-w-full">{member.location || 'Locatie onbekend'}</div>
           {memberInterests.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-1 justify-center sm:justify-start">
               {memberInterests.map(tag => (

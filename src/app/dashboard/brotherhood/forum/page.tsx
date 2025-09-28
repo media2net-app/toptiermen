@@ -65,6 +65,9 @@ const ForumOverview = () => {
   };
 
   const fetchCategories = async () => {
+    // Add a timeout so onboarding never gets stuck on this step
+    const abort = new AbortController();
+    const timeout = setTimeout(() => abort.abort(), 12000);
     try {
       // Fetch categories with topic and post counts
       const { data: categoriesData, error: categoriesError } = await supabase
@@ -87,6 +90,7 @@ const ForumOverview = () => {
 
       if (categoriesError) {
         console.error('Error fetching categories:', categoriesError);
+        setCategories([]);
         return;
       }
 
@@ -145,7 +149,10 @@ const ForumOverview = () => {
       setCategories(processedCategories);
     } catch (error) {
       console.error('Error fetching forum data:', error);
+      // Ensure we render the page even if fetch fails
+      setCategories([]);
     } finally {
+      clearTimeout(timeout);
       setLoading(false);
     }
   };
@@ -174,6 +181,24 @@ const ForumOverview = () => {
                 <div className="h-4 bg-gray-700 rounded w-2/3"></div>
               </div>
             ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Graceful fallback: if categories couldn't be loaded, show a helpful message with direct link
+  if (categories.length === 0) {
+    return (
+      <div className="w-full min-h-screen bg-[#0A0F0A]">
+        <div className="max-w-7xl mx-auto w-full px-2 sm:px-4 md:px-6 lg:px-8 py-10">
+          <div className="bg-[#232D1A]/90 rounded-2xl shadow-xl border border-[#3A4D23]/40 p-6 text-center">
+            <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">Forum laden mislukt</h2>
+            <p className="text-[#8BAE5A] mb-4">Probeer het opnieuw of ga direct naar het introductietopic om onboarding af te ronden.</p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <button onClick={fetchCategories} className="px-5 py-2 rounded-lg bg-[#3A4D23] text-white hover:bg-[#4A5D33]">Opnieuw laden</button>
+              <a href="/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden" className="px-5 py-2 rounded-lg bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-bold">Ga naar Introductietopic</a>
+            </div>
           </div>
         </div>
       </div>

@@ -665,10 +665,10 @@ Na deze les kun je verder met de volgende les in de module.`;
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div className="min-w-0">
           <h1 className="text-3xl font-bold text-[#8BAE5A]">Academy Beheer</h1>
-          <p className="text-[#B6C948] mt-2">Beheer alle Academy modules en lessen</p>
+          <p className="text-[#B6C948] mt-2 break-words">Beheer alle Academy modules en lessen</p>
         </div>
         <AdminButton
           onClick={() => openModuleModal()}
@@ -749,8 +749,8 @@ Na deze les kun je verder met de volgende les in de module.`;
                 </div>
               </div>
               
-              <h3 className="text-xl font-bold text-[#8BAE5A] mb-2">{module.title}</h3>
-              <p className="text-[#B6C948] text-sm mb-4 line-clamp-2">{module.shortDescription}</p>
+              <h3 className="text-xl font-bold text-[#8BAE5A] mb-2 break-words">{module.title}</h3>
+              <p className="text-[#B6C948] text-sm mb-4 line-clamp-2 break-words">{module.shortDescription}</p>
               
               <div className="space-y-3 mb-4">
                 <div className="flex items-center justify-between">
@@ -771,7 +771,7 @@ Na deze les kun je verder met de volgende les in de module.`;
                 </div>
               </div>
 
-              <div className="admin-card-actions">
+              <div className="admin-card-actions flex-wrap">
                 <AdminButton 
                   onClick={(e: React.MouseEvent) => {
                     e.stopPropagation();
@@ -805,8 +805,8 @@ Na deze les kun je verder met de volgende les in de module.`;
       {/* Selected Module Details */}
       {selectedModule && selectedModuleData && (
         <AdminCard>
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-4">
+          <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
+            <div className="flex items-center gap-4 flex-wrap">
               <AdminButton
                 onClick={() => setSelectedModule(null)}
                 variant="secondary"
@@ -815,9 +815,9 @@ Na deze les kun je verder met de volgende les in de module.`;
                 <ArrowLeftIcon className="w-5 h-5 mr-2" />
                 Terug
               </AdminButton>
-              <div>
-                <h2 className="text-2xl font-bold text-[#8BAE5A]">Lessen voor Module: {selectedModuleData.title}</h2>
-                <p className="text-[#B6C948] mt-1">{selectedModuleData.description}</p>
+              <div className="min-w-0">
+                <h2 className="text-2xl font-bold text-[#8BAE5A] break-words">Lessen voor Module: {selectedModuleData.title}</h2>
+                <p className="text-[#B6C948] mt-1 break-words">{selectedModuleData.description}</p>
                 <div className="flex items-center gap-4 mt-2 text-sm">
                   <span className="text-[#B6C948]">
                     📚 {moduleLessons.length} lessen
@@ -831,7 +831,7 @@ Na deze les kun je verder met de volgende les in de module.`;
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-wrap">
               {moduleLessons.filter(l => !l.content).length > 0 && (
                 <div className="flex items-center gap-2">
                   <AdminButton

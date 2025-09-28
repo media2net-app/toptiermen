@@ -265,6 +265,30 @@ export default function WorkoutPlayerModal({ isOpen, onClose, onComplete, traini
                       <ArrowPathIcon className="h-4 w-4 sm:h-5 sm:w-5" />
                     </button>
                   </div>
+                  {/* Compact stats block: Sets / Reps / Rest */}
+                  <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-2 sm:mb-4">
+                    <div className="text-center p-2 sm:p-3 bg-[#181F17] rounded-lg">
+                      <div className="text-lg sm:text-2xl font-bold text-[#8BAE5A]">
+                        {activeExercise?.sets?.length ?? '-'}
+                      </div>
+                      <div className="text-xs sm:text-sm text-gray-400">Sets</div>
+                    </div>
+                    <div className="text-center p-2 sm:p-3 bg-[#181F17] rounded-lg">
+                      <div className="text-lg sm:text-2xl font-bold text-[#FFD700]">
+                        {(() => {
+                          const s0 = activeExercise?.sets?.[0] || {} as any;
+                          return (activeExercise as any)?.reps || (activeExercise as any)?.targetReps || s0.targetReps || s0.reps || '—';
+                        })()}
+                      </div>
+                      <div className="text-xs sm:text-sm text-gray-400">Reps</div>
+                    </div>
+                    <div className="text-center p-2 sm:p-3 bg-[#181F17] rounded-lg">
+                      <div className="text-lg sm:text-2xl font-bold text-[#f0a14f]">
+                        {restTime}s
+                      </div>
+                      <div className="text-xs sm:text-sm text-gray-400">Rust</div>
+                    </div>
+                  </div>
                   <div className="flex flex-col md:flex-row gap-3 sm:gap-6">
                     {/* Instructies */}
                     <ul className="flex-1 list-disc pl-4 sm:pl-5 text-[#8BAE5A] text-xs sm:text-sm">

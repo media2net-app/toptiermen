@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, Suspense } from 'react';
+import { useState, useEffect, useCallback, Suspense, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   BookOpenIcon,
@@ -140,6 +140,8 @@ function TrainingschemasContent() {
   const { hasAccess, loading: subscriptionLoading } = useSubscription();
   const router = useRouter();
   const searchParams = useSearchParams();
+  // Ref to the continue button section for auto-scroll during onboarding
+  const continueRef = useRef<HTMLDivElement | null>(null);
 
   // DEBUG: Enhanced logging (moved after state declarations)
 
@@ -1287,33 +1289,24 @@ function TrainingschemasContent() {
         const startDate = new Date(data.data.schema_start_date).toLocaleDateString('nl-NL');
         const endDate = new Date(data.data.schema_end_date).toLocaleDateString('nl-NL');
         toast.success(`Trainingsschema geselecteerd! 8-weken periode gestart: ${startDate} - ${endDate}`);
-          
-          // Only redirect to Mijn trainingen if NOT in onboarding
-          if (isCompleted && !showOnboardingStep3) {
+
+        // Only redirect to Mijn trainingen if NOT in onboarding
+        if (isCompleted && !showOnboardingStep3) {
           console.log('🔄 Redirecting to Mijn trainingen...');
           // Direct redirect without delay
           router.push('/dashboard/mijn-trainingen');
-          } else {
-            console.log('🎯 Onboarding active - NOT redirecting to Mijn trainingen');
-        }
-        
-        // Complete onboarding step if needed
-        if (!isCompleted && showOnboardingStep3) {
-          console.log('🎯 Schema selected during onboarding step 3 - NOT auto-completing');
-          // Don't auto-complete, let user click "Volgende Stap" button
-          // The "Volgende Stap" button will be shown in the UI
-          
-          // Auto-scroll to the "Volgende Stap" button after a short delay
+        } else {
+          // Small delay to ensure the continue button is rendered before scrolling
           setTimeout(() => {
-            const nextStepButton = document.querySelector('[data-next-step-button]');
+            const nextStepButton = document.querySelector('[data-next-step-button]') as HTMLElement | null;
             if (nextStepButton) {
               console.log('🎯 Auto-scrolling to next step button...');
-              nextStepButton.scrollIntoView({ 
-                behavior: 'smooth', 
-                block: 'center' 
-              });
+              nextStepButton.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            } else {
+              // Fallback to container ref
+              continueRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
-          }, 500); // Small delay to ensure the button is rendered
+          }, 300);
         }
       } else {
         toast.error(data.error || 'Failed to select training schema');
@@ -2061,6 +2054,7 @@ function TrainingschemasContent() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="mx-3 sm:mx-4 md:mx-6 mb-4 sm:mb-6"
+          ref={continueRef}
         >
           <div className="bg-gradient-to-r from-[#8BAE5A]/10 to-[#8BAE5A]/5 border border-[#8BAE5A]/30 rounded-2xl p-4 sm:p-6">
             <div className="flex items-center justify-center gap-2 sm:gap-3 mb-4">

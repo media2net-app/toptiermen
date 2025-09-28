@@ -33,6 +33,7 @@ function LoginPageContent() {
     loadingText: "",
     isRedirecting: false
   });
+  const [showDebugPanel, setShowDebugPanel] = useState(false);
 
   // ✅ FIX: Ensure client-side hydration consistency
   useEffect(() => {
@@ -186,7 +187,7 @@ function LoginPageContent() {
         redirectExecuted.current = false;
       }
     };
-    
+
     // Emergency fallback: hide overlay after 5 seconds
     const emergencyTimeout = setTimeout(() => {
       if (loginState.showLoadingOverlay && loginState.isRedirecting) {
@@ -197,32 +198,26 @@ function LoginPageContent() {
           isRedirecting: false 
         }));
         redirectExecuted.current = false;
+        // As last resort, force navigation to dashboard
+        try {
+          const targetPath = getRedirectPath(searchParams?.get('redirect') || undefined);
+          console.log('⛑️ Emergency hard redirect to:', targetPath);
+          window.location.href = targetPath;
+        } catch {}
       }
-    }, 5000);
-    
-    return () => clearTimeout(emergencyTimeout);
+    }, 8000);
 
-    // Listen for route changes
-    const originalPush = router.push;
-    const originalReplace = router.replace;
-    
-    router.push = (...args) => {
-      handleRouteChange();
-      return originalPush.apply(router, args);
-    };
-    
-    router.replace = (...args) => {
-      handleRouteChange();
-      return originalReplace.apply(router, args);
-    };
-
-    // Also listen for popstate events (back/forward navigation)
+    // Listen for popstate events (back/forward navigation)
     window.addEventListener('popstate', handleRouteChange);
+    // Also hide overlay when the page visibility changes (navigation underway)
+    const visHandler = () => handleRouteChange();
+    document.addEventListener('visibilitychange', visHandler);
 
+    // Cleanup at end (ensure we actually register listeners before returning)
     return () => {
-      router.push = originalPush;
-      router.replace = originalReplace;
+      clearTimeout(emergencyTimeout);
       window.removeEventListener('popstate', handleRouteChange);
+      document.removeEventListener('visibilitychange', visHandler);
     };
   }, [loginState.isRedirecting, loginState.showLoadingOverlay, router]);
 
@@ -281,6 +276,15 @@ function LoginPageContent() {
         isLoading: false,
         isRedirecting: true 
       }));
+      
+      // Fallback redirect for mobile Safari if SPA navigation stalls
+      setTimeout(() => {
+        if (typeof window !== 'undefined' && (loginState.showLoadingOverlay || loginState.isRedirecting)) {
+          const targetPath = getRedirectPath(searchParams?.get('redirect') || undefined);
+          console.log('⛑️ Fallback hard redirect to:', targetPath);
+          window.location.href = targetPath;
+        }
+      }, 2000);
       
     } catch (error: any) {
       console.error('❌ Login exception:', error);
@@ -610,6 +614,31 @@ function LoginPageContent() {
             </div>
             
           </div>
+        </div>
+      )}
+
+      {/* Lightweight production debug panel for mobile issue investigation */}
+      {loginState.isClient && (
+        <div className="fixed left-3 bottom-3 z-50">
+          <button
+            type="button"
+            onClick={() => setShowDebugPanel(v => !v)}
+            className="px-2 py-1 text-xs rounded bg-[#3A4D23] text-[#8BAE5A] border border-[#8BAE5A]/30 shadow"
+          >
+            {showDebugPanel ? 'Hide Debug' : 'Show Debug'}
+          </button>
+          {showDebugPanel && (
+            <div className="mt-2 p-2 rounded bg-[#232D1A]/95 text-[10px] text-[#8BAE5A] border border-[#3A4D23] w-64 break-words">
+              <div>overlay: {String(loginState.showLoadingOverlay)}</div>
+              <div>redirecting: {String(loginState.isRedirecting)}</div>
+              <div>formLoading: {String(loginState.isLoading)}</div>
+              <div>progress: {loginState.loadingProgress}%</div>
+              <div>text: {loginState.loadingText || '-'}</div>
+              <div>user: {user?.email || '-'}</div>
+              <div>error: {loginState.error || '-'}</div>
+              <div>ts: {new Date().toLocaleTimeString()}</div>
+            </div>
+          )}
         </div>
       )}
 

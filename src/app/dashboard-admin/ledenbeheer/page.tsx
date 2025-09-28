@@ -615,7 +615,9 @@ export default function Ledenbeheer() {
     setAddingUser(true);
     
     try {
-      // Call the API route to create user
+      // Call the API route to create user (with timeout and better errors)
+      const abort = new AbortController();
+      const t = setTimeout(() => abort.abort(), 12000);
       const response = await fetch('/api/admin/create-user', {
         method: 'POST',
         headers: {
@@ -630,9 +632,12 @@ export default function Ledenbeheer() {
           package_type: newUserData.package_type,
           password: newUserData.password || undefined // Only send password if provided
         }),
+        signal: abort.signal
       });
 
-      const data = await response.json();
+      clearTimeout(t);
+      let data: any = {};
+      try { data = await response.json(); } catch {}
 
       if (response.ok) {
         toast.success(data.message || `Gebruiker ${newUserData.full_name} succesvol aangemaakt!`, {
@@ -656,11 +661,11 @@ export default function Ledenbeheer() {
         // Refresh members list
         fetchMembers();
       } else {
-        throw new Error(data.error || 'Er is een fout opgetreden bij het aanmaken van de gebruiker');
+        throw new Error(data?.error || 'Er is een fout opgetreden bij het aanmaken van de gebruiker');
       }
     } catch (error: any) {
       console.error('Error creating user:', error);
-      toast.error(error.message || 'Er is een fout opgetreden bij het aanmaken van de gebruiker', {
+      toast.error(error?.message || 'Er is een fout opgetreden bij het aanmaken van de gebruiker', {
         position: "top-right",
         duration: 3000,
       });
@@ -787,50 +792,93 @@ export default function Ledenbeheer() {
     }
 
     try {
+      console.log('🗑️ [DELETE FLOW] Starting permanent delete for user:', {
+        id: userToDelete.id,
+        email: userToDelete.email,
+        full_name: userToDelete.full_name
+      });
       setDeletingUser(true);
-      
-      const response = await fetch('/api/admin/delete-user', {
-        method: 'DELETE',
+
+      // Some proxies strip DELETE bodies; use POST and also include userId as query param
+      const endpoint = `/api/admin/delete-user?userId=${encodeURIComponent(userToDelete.id)}`;
+      const payload = { userId: userToDelete.id };
+      console.log('🗑️ [DELETE FLOW] Request details:', {
+        method: 'POST',
+        endpoint,
+        headers: { 'Content-Type': 'application/json' },
+        body: payload
+      });
+
+      const abort = new AbortController();
+      const t = setTimeout(() => {
+        console.warn('⏳ [DELETE FLOW] Request timeout (12s) aborting...');
+        abort.abort();
+      }, 12000);
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          userId: userToDelete.id
-        }),
+        body: JSON.stringify(payload),
+        signal: abort.signal
       });
 
-      const data = await response.json();
+      clearTimeout(t);
 
-      if (response.ok) {
+      const rawText = await response.text();
+      let data: any = {};
+      try {
+        data = rawText ? JSON.parse(rawText) : {};
+      } catch (e) {
+        console.warn('⚠️ [DELETE FLOW] Failed to parse JSON response, raw text:', rawText);
+      }
+
+      console.log('🗑️ [DELETE FLOW] Response received:', {
+        status: response.status,
+        ok: response.ok,
+        data
+      });
+
+      if (response.ok && data?.success) {
         toast.success(`✅ Gebruiker ${userToDelete.full_name || userToDelete.email} is permanent verwijderd uit het systeem`, {
           position: "top-right",
           duration: 5000,
         });
+        console.log('🗑️ [DELETE FLOW] Success toast shown, refreshing members...');
         
         // Refresh members list
-        fetchMembers();
+        await fetchMembers();
         setShowDeleteModal(false);
         setUserToDelete(null);
         setDeleteConfirmation('');
+        console.log('🗑️ [DELETE FLOW] Local state reset and modal closed');
       } else {
-        toast.error(data.error || 'Er is een fout opgetreden bij het verwijderen', {
+        console.error('❌ [DELETE FLOW] Server reported error:', data);
+        toast.error(data?.error || 'Er is een fout opgetreden bij het verwijderen', {
           position: "top-right",
-          duration: 3000,
+          duration: 4000,
         });
       }
     } catch (error) {
-      console.error('Error deleting user:', error);
+      console.error('❌ [DELETE FLOW] Exception deleting user:', error);
       toast.error('Er is een fout opgetreden bij het verwijderen', {
         position: "top-right",
-        duration: 3000,
+        duration: 4000,
       });
     } finally {
       setDeletingUser(false);
+      console.log('🗑️ [DELETE FLOW] Deleting state set to false');
     }
   };
 
   // Open delete modal
   const openDeleteModal = (member: any) => {
+    console.log('🗑️ [DELETE FLOW] Open delete modal for member:', {
+      id: member?.id,
+      email: member?.email,
+      full_name: member?.full_name
+    });
     setUserToDelete(member);
     setDeleteConfirmation('');
     setShowDeleteModal(true);

@@ -56,11 +56,19 @@ const VoorstellenTopicPage = () => {
   const [hasPosted, setHasPosted] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
+  // Safeguard: start loading topic immediately (not gated by auth),
+  // so onboarding doesn't get stuck if authLoading lingers after returning from another page.
   useEffect(() => {
-    if (user && !authLoading) {
-      fetchTopicAndPosts();
-    }
-  }, [user, authLoading]);
+    fetchTopicAndPosts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Safety timeout: if authLoading never resolves on some devices, don't keep the skeleton forever
+  const [authWaitTimedOut, setAuthWaitTimedOut] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setAuthWaitTimedOut(true), 8000);
+    return () => clearTimeout(t);
+  }, []);
 
   useEffect(() => {
     if (topic && user && !hasPosted) {
@@ -71,6 +79,9 @@ const VoorstellenTopicPage = () => {
   const fetchTopicAndPosts = async () => {
     if (topic) return; // Don't fetch if topic is already loaded
 
+    // Add a timeout to avoid hanging
+    const abortController = new AbortController();
+    const timeout = setTimeout(() => abortController.abort(), 12000);
     try {
       setLoading(true);
       console.log('🔍 Fetching topic and posts...');
@@ -90,7 +101,7 @@ const VoorstellenTopicPage = () => {
 
       if (topicsError && topicsError.code !== 'PGRST116') {
         console.error('Error fetching topic:', topicsError);
-        return;
+        setTopic(null);
       }
 
       if (topics) {
@@ -98,7 +109,7 @@ const VoorstellenTopicPage = () => {
         console.log('✅ Topic set:', topics);
 
         // Fetch posts for this topic using API endpoint
-        const postsResponse = await fetch(`/api/forum-posts?topic_id=${topics.id}`);
+        const postsResponse = await fetch(`/api/forum-posts?topic_id=${topics.id}`, { signal: abortController.signal, cache: 'no-cache' });
         const postsResult = await postsResponse.json();
 
         console.log('💬 Posts API result:', postsResult);
@@ -107,13 +118,17 @@ const VoorstellenTopicPage = () => {
           setPosts(postsResult.posts || []);
         } else {
           console.error('Error fetching posts:', postsResult.error);
+          setPosts([]);
         }
       } else {
         console.log('❌ No topic found');
       }
     } catch (error) {
       console.error('Error in fetchTopicAndPosts:', error);
+      // Ensure UI renders even on error
+      setPosts([]);
     } finally {
+      clearTimeout(timeout);
       setLoading(false);
     }
   };
@@ -249,7 +264,8 @@ const VoorstellenTopicPage = () => {
   };
 
   // Show loading state while authenticating or fetching data
-  if (authLoading || loading) {
+  const effectiveAuthLoading = authLoading && !authWaitTimedOut;
+  if (effectiveAuthLoading || loading) {
     return (
       <div className="flex flex-col md:flex-row gap-8 md:gap-12 max-w-7xl mx-auto w-full px-2 sm:px-4 md:px-0">
         <div className="flex-1">

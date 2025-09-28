@@ -207,37 +207,76 @@ export default function FocusSessionPage({ params }: { params: { sessionId: stri
   const audioRef = useRef<HTMLAudioElement>(null);
 
 
-  // Meditatie audio tracks - gebruik bestaande audio bestanden
-  const meditationTracks = [
-    {
-      id: 'nature-sounds',
-      name: 'Natuurgeluiden',
-      url: '/whoosh-cinematic-sound-effect-376889.mp3', // Gebruik bestaand bestand
-      fallbackUrl: null,
-      description: 'Rustige natuurgeluiden voor diepe ontspanning'
-    },
-    {
-      id: 'ambient-pad',
-      name: 'Ambient Pad',
-      url: '/whoosh-cinematic-sound-effect-376889.mp3', // Gebruik bestaand bestand
-      fallbackUrl: null,
-      description: 'Zachte ambient muziek voor focus'
-    },
-    {
-      id: 'binaural-beats',
-      name: 'Binaural Beats',
-      url: '/whoosh-cinematic-sound-effect-376889.mp3', // Gebruik bestaand bestand
-      fallbackUrl: null,
-      description: 'Binaural beats voor diepe meditatie'
-    },
-    {
-      id: 'singing-bowls',
-      name: 'Zingende Schalen',
-      url: '/whoosh-cinematic-sound-effect-376889.mp3', // Gebruik bestaand bestand
-      fallbackUrl: null,
-      description: 'Tibetaanse zingende schalen voor spirituele meditatie'
-    }
-  ];
+  // Meditatie audio tracks
+  const [meditationTracks, setMeditationTracks] = useState<Array<{ id: string; name: string; url: string | undefined; description?: string }>>([
+    { id: 'nature-sounds', name: 'Natuurgeluiden', url: undefined, description: 'Rustige natuurgeluiden voor diepe ontspanning' },
+    { id: 'ambient-pad', name: 'Ambient Pad', url: undefined, description: 'Zachte ambient muziek voor focus' },
+    { id: 'binaural-beats', name: 'Binaural Beats', url: undefined, description: 'Binaural beats voor diepe meditatie' },
+    { id: 'singing-bowls', name: 'Zingende Schalen', url: undefined, description: 'Tibetaanse zingende schalen voor meditatie' }
+  ]);
+
+  // Laad beschikbare meditatie audio uit de database (supabase) via API
+  useEffect(() => {
+    const loadMeditationLibrary = async () => {
+      try {
+        const res = await fetch('/api/mind-focus/meditation-library?type=all');
+        const json = await res.json();
+        if (res.ok && json.success && Array.isArray(json.meditations)) {
+          // Map naar track shape; gebruik title en audio_url
+          const tracksFromDb: Array<{ id: string; name: string; url: string | undefined; description?: string }> = json.meditations
+            .filter((m: any) => !!m.audio_url)
+            .map((m: any, idx: number) => ({
+              id: m.id?.toString() || `db-${idx}`,
+              name: m.title || 'Meditatie Audio',
+              url: (m.audio_url as string) || undefined,
+              description: m.description || undefined
+            }));
+          if (tracksFromDb.length > 0) {
+            // Prefer 'Meditation & Gentle Nature' if present
+            const preferredName = 'Meditation & Gentle Nature';
+            const preferredIdx = tracksFromDb.findIndex((t) => t.name === preferredName);
+            let ordered = tracksFromDb.slice();
+            if (preferredIdx > 0) {
+              const [pref] = ordered.splice(preferredIdx, 1);
+              ordered = [pref, ...ordered];
+            }
+            setMeditationTracks(ordered);
+            // Select preferred if available, else first
+            setCurrentTrack(preferredIdx >= 0 ? 0 : 0);
+          } else {
+            // Fallback naar lokale bestanden in public/sounds/
+            const localTracks: Array<{ id: string; name: string; url: string | undefined; description?: string }> = [
+              { id: 'meditation-and-gentle-nature-184572', name: 'Meditation & Gentle Nature', url: '/sounds/meditation-and-gentle-nature-184572.mp3' },
+              { id: 'ambient-background-339939', name: 'Ambient Background', url: '/sounds/ambient-background-339939.mp3' },
+              { id: 'meditation-music-without-nature-sound-256142', name: 'Meditation Music (No Nature)', url: '/sounds/meditation-music-without-nature-sound-256142.mp3' },
+              { id: 'meditation-yoga-relaxing-music-378307', name: 'Meditation Yoga Relaxing', url: '/sounds/meditation-yoga-relaxing-music-378307.mp3' },
+              { id: 'meditation-yoga-relaxing-music-380330', name: 'Meditation Yoga Relaxing 2', url: '/sounds/meditation-yoga-relaxing-music-380330.mp3' },
+              { id: 'nature-dreamscape-350256', name: 'Nature Dreamscape', url: '/sounds/nature-dreamscape-350256.mp3' },
+              { id: 'nature-investigation-255161', name: 'Nature Investigation', url: '/sounds/nature-investigation-255161.mp3' }
+            ];
+            setMeditationTracks(localTracks);
+            // Preferred is first in fallback list
+            setCurrentTrack(0);
+          }
+        }
+      } catch (e) {
+        console.log('Kon meditatie bibliotheek niet laden, gebruik standaard tracks (stilte).', e);
+        // Fallback als API niet bereikbaar is
+        const localTracks: Array<{ id: string; name: string; url: string | undefined; description?: string }> = [
+          { id: 'meditation-and-gentle-nature-184572', name: 'Meditation & Gentle Nature', url: '/sounds/meditation-and-gentle-nature-184572.mp3' },
+          { id: 'ambient-background-339939', name: 'Ambient Background', url: '/sounds/ambient-background-339939.mp3' },
+          { id: 'meditation-music-without-nature-sound-256142', name: 'Meditation Music (No Nature)', url: '/sounds/meditation-music-without-nature-sound-256142.mp3' },
+          { id: 'meditation-yoga-relaxing-music-378307', name: 'Meditation Yoga Relaxing', url: '/sounds/meditation-yoga-relaxing-music-378307.mp3' },
+          { id: 'meditation-yoga-relaxing-music-380330', name: 'Meditation Yoga Relaxing 2', url: '/sounds/meditation-yoga-relaxing-music-380330.mp3' },
+          { id: 'nature-dreamscape-350256', name: 'Nature Dreamscape', url: '/sounds/nature-dreamscape-350256.mp3' },
+          { id: 'nature-investigation-255161', name: 'Nature Investigation', url: '/sounds/nature-investigation-255161.mp3' }
+        ];
+        setMeditationTracks(localTracks);
+        setCurrentTrack(0);
+      }
+    };
+    loadMeditationLibrary();
+  }, []);
 
   useEffect(() => {
     const foundSession = focusSessions.find(s => s.id === params.sessionId);
@@ -250,15 +289,24 @@ export default function FocusSessionPage({ params }: { params: { sessionId: stri
       console.log('Step timer initialized:', stepDuration, 'seconds');
       // Start audio automatically when session is loaded
       if (audioEnabled && audioRef.current) {
-        audioRef.current.loop = true; // Set loop to true
-        audioRef.current.play().catch(error => {
-          console.log('Audio play failed, trying fallback:', error);
+        audioRef.current.loop = true; // loop
+        // Stel bron in op huidige track (indien aanwezig)
+        const src = meditationTracks[currentTrack]?.url || '';
+        if (src) {
+          audioRef.current.src = src;
+          // set volume immediately before play
+          audioRef.current.volume = volume;
+          audioRef.current.play().then(() => setIsAudioPlaying(true)).catch(error => {
+            console.log('Audio play failed, trying fallback:', error);
+            playFallbackTone();
+          });
+        } else {
+          // Geen audio beschikbaar -> stilte
           playFallbackTone();
-        });
-        setIsAudioPlaying(true);
+        }
       }
     }
-  }, [params.sessionId, audioEnabled]);
+  }, [params.sessionId, audioEnabled, currentTrack, meditationTracks]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -282,7 +330,6 @@ export default function FocusSessionPage({ params }: { params: { sessionId: stri
     let stepInterval: NodeJS.Timeout;
     if (isPlaying && session && session.steps && session.steps.length > 0) {
       const stepDuration = (session.duration * 60) / session.steps.length; // Duration per step in seconds
-      setStepTimer(stepDuration); // Initialize step timer
       
       stepInterval = setInterval(() => {
         setStepTimer(prev => {
@@ -328,6 +375,15 @@ export default function FocusSessionPage({ params }: { params: { sessionId: stri
     if (audioRef.current) {
       if (isPlaying && audioEnabled) {
         audioRef.current.loop = true; // Ensure loop is enabled
+        // Update bron bij trackwijziging
+        const src = meditationTracks[currentTrack]?.url || '';
+        if (src) {
+          if (audioRef.current.src !== window.location.origin + src && audioRef.current.src !== src) {
+            audioRef.current.src = src;
+          }
+        }
+        // ensure current volume
+        audioRef.current.volume = volume;
         audioRef.current.play().catch(error => {
           console.log('Audio play failed, trying fallback:', error);
           playFallbackTone();
@@ -338,7 +394,7 @@ export default function FocusSessionPage({ params }: { params: { sessionId: stri
         setIsAudioPlaying(false);
       }
     }
-  }, [isPlaying, audioEnabled]);
+  }, [isPlaying, audioEnabled, currentTrack, meditationTracks, volume]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -428,6 +484,20 @@ export default function FocusSessionPage({ params }: { params: { sessionId: stri
 
   const changeTrack = (trackIndex: number) => {
     setCurrentTrack(trackIndex);
+    // Update audio bron onmiddellijk
+    if (audioRef.current) {
+      const src = meditationTracks[trackIndex]?.url || '';
+      if (src) {
+        audioRef.current.src = src;
+        if (isPlaying && audioEnabled) {
+          audioRef.current.volume = volume;
+          audioRef.current.play().catch(() => {});
+        }
+      } else {
+        audioRef.current.pause();
+        setIsAudioPlaying(false);
+      }
+    }
   };
 
   const getDifficultyColor = (difficulty: string) => {
@@ -586,6 +656,8 @@ export default function FocusSessionPage({ params }: { params: { sessionId: stri
               transition={{ duration: 0.3 }}
               className="max-w-2xl mx-auto text-center"
             >
+              {/* Hidden audio element for meditation playback */}
+              <audio ref={audioRef} preload="auto" loop className="hidden" />
               {/* Timer */}
               <div className="bg-[#1A2A1A] rounded-xl shadow-2xl border border-[#2A3A1A] p-4 sm:p-6 lg:p-8 mb-6 sm:mb-8">
                 <div className="text-4xl sm:text-6xl font-bold text-[#B6C948] mb-3 sm:mb-4">
@@ -722,7 +794,7 @@ export default function FocusSessionPage({ params }: { params: { sessionId: stri
                           type="range"
                           min="0"
                           max="1"
-                          step="0.1"
+                          step="0.01"
                           value={volume}
                           onChange={(e) => setVolume(parseFloat(e.target.value))}
                           className="w-full h-2 bg-[#3A4A2A] rounded-lg appearance-none cursor-pointer slider"

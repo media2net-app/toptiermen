@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { SupabaseAuthProvider } from '@/contexts/SupabaseAuthContext';
@@ -75,6 +75,14 @@ export const metadata: Metadata = {
     'Pragma': 'no-cache',
     'Expires': '0',
   },
+};
+
+// Prevent zooming on mobile (iOS & Android)
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({

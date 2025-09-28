@@ -166,8 +166,8 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus, setIsMobileMenuOp
   
   const safePathname = pathname || '';
   
-  // Use currentStep from actualOnboardingStatus if available, otherwise fallback to useOnboarding hook
-  const actualCurrentStep = actualOnboardingStatus?.current_step ?? currentStep;
+  // Use currentStep from context with priority, then fallback to onboardingStatus
+  const actualCurrentStep = currentStep ?? actualOnboardingStatus?.current_step;
   
   // Get menu with conditional onboarding button - ENHANCED LOGIC
   // CRITICAL: Always pass loading state to prevent flash
@@ -342,25 +342,6 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus, setIsMobileMenuOp
 
   return (
     <nav className="flex flex-col gap-2">
-      {/* TTM Logo */}
-      <div className="mb-4 pb-3 border-b border-[#3A4D23]/40">
-        <Link 
-          href="/dashboard" 
-          onClick={() => setIsMobileMenuOpen && setIsMobileMenuOpen(false)}
-          className="flex items-center justify-center hover:opacity-80 transition-opacity"
-        >
-          <Image
-            src="/logo_white-full.svg"
-            alt="Top Tier Men Logo"
-            width={35}
-            height={9}
-            style={{ height: 'auto' }}
-            className="h-2 w-auto object-contain"
-            priority
-          />
-        </Link>
-      </div>
-      
       {mobileMenu.map((item) => {
         // Onboarding button is now handled by getMenu function
         
@@ -1442,12 +1423,12 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
                   onClick={(e) => e.stopPropagation()}
                 >
                   {/* Header */}
-                  <div className="p-4 border-b border-[#3A4D23] flex-shrink-0 bg-[#232D1A] z-10 relative">
+                  <div className="p-4 flex-shrink-0 bg-[#232D1A] z-10 relative">
                     <div className="flex items-center justify-between">
                       <Link 
                         href="/dashboard" 
                         onClick={() => setIsMobileMenuOpen(false)}
-                        className="flex items-center justify-center hover:opacity-80 transition-opacity"
+                        className="flex items-center justify-start hover:opacity-80 transition-opacity"
                       >
                         <Image
                           src="/logo_white-full.svg"

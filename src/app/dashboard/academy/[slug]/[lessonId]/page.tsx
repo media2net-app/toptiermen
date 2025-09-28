@@ -137,7 +137,7 @@ const SimpleVideoPlayer = ({ src, onEnded, onPlay, onPause, className }: any) =>
     <div className="relative aspect-video bg-black rounded-lg overflow-hidden">
       <video
         ref={videoRef}
-        className={className}
+        className={className || 'w-full h-full object-contain'}
         controls
         preload="auto"
         playsInline
