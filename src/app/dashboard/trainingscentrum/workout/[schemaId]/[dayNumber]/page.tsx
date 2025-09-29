@@ -672,10 +672,33 @@ export default function WorkoutPage() {
   };
 
   const skipRest = () => {
-    // Update global session
+    // End rest immediately
     updateRestTimer(0, false);
-    
-    toast.success('Rust overgeslagen! 💪');
+
+    setExercises(prev => {
+      const current = prev[currentExerciseIndex];
+      if (!current) return prev;
+
+      // If current exercise is already completed (all sets done), jump to next exercise
+      const isCompleted = current.currentSet >= current.sets;
+      if (isCompleted) {
+        if (currentExerciseIndex < prev.length - 1) {
+          const newIndex = currentExerciseIndex + 1;
+          setCurrentExerciseIndex(newIndex);
+          const next = prev[newIndex];
+          if (next) {
+            updateProgress(0, next.name, newIndex);
+          }
+        }
+        return prev;
+      }
+
+      // Otherwise, we're between sets: by skipping rest, we simply make sure the UI is ready for the next set.
+      // No counter change is needed here because currentSet already reflects completed sets.
+      return prev;
+    });
+
+    toast.success('Rust overgeslagen! Ga door met de volgende set.');
   };
 
   const showWorkoutCompletion = () => {
@@ -1014,7 +1037,7 @@ export default function WorkoutPage() {
                   {index === currentExerciseIndex && exercise.completed && index < exercises.length - 1 && (
                     <button
                       onClick={nextExercise}
-                      className="w-full mt-3 px-6 py-4 bg-[#3A4D23] text-[#8BAE5A] font-bold text-lg rounded-lg hover:bg-[#4A5D33] transition-colors"
+                      className="w-full mt-3 px-6 py-4 bg-[#8BAE5A] text-[#181F17] font-extrabold text-lg rounded-lg hover:bg-[#A6C97B] transition-colors focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] focus:ring-offset-2 focus:ring-offset-[#0F1419]"
                     >
                       Volgende Oefening
                     </button>

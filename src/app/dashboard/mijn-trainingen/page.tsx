@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   LockClosedIcon, 
@@ -92,6 +92,7 @@ export default function MijnTrainingen() {
   const [completedWeeks, setCompletedWeeks] = useState<any[]>([]);
   const [showWeekCompletionModal, setShowWeekCompletionModal] = useState(false);
   const [weekCompletionData, setWeekCompletionData] = useState<any>(null);
+  const weekCompletionRef = useRef<HTMLDivElement | null>(null);
 
   // Debug function to log current state
   const debugWeekState = () => {
@@ -106,6 +107,21 @@ export default function MijnTrainingen() {
       console.log('📊 nextWeekNumber would be:', maxWeek + 1);
     }
   };
+
+  // When the week completion modal opens, scroll to the top so the centered modal is fully visible
+  useEffect(() => {
+    if (showWeekCompletionModal) {
+      // Give the modal a tick to mount before scrolling
+      setTimeout(() => {
+        try {
+          if (typeof window !== 'undefined') {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+          weekCompletionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } catch {}
+      }, 50);
+    }
+  }, [showWeekCompletionModal]);
 
   useEffect(() => {
     if (user) {
@@ -241,14 +257,8 @@ export default function MijnTrainingen() {
       console.log('📊 Current completedWeeks:', completedWeeks);
       console.log('📊 completedWeeks.length:', completedWeeks.length);
       
-      // Calculate the correct week number based on completed weeks
-      // Use a more robust calculation that considers the actual week numbers
-      let nextWeekNumber = 1;
-      if (completedWeeks.length > 0) {
-        // Find the highest week number and add 1
-        const maxWeekNumber = Math.max(...completedWeeks.map((week: any) => week.week || week.weekNumber || 0));
-        nextWeekNumber = maxWeekNumber + 1;
-      }
+      // Calculate the current week number based on completed weeks (live state)
+      const nextWeekNumber = (completedWeeks?.length || 0) + 1;
       console.log('📊 Calculated nextWeekNumber:', nextWeekNumber);
       
       // Check if modal should be shown (not already closed) - with fallback for missing tables
@@ -683,6 +693,29 @@ export default function MijnTrainingen() {
               transition={{ delay: 0.2 }}
               className="mb-4 sm:mb-6 md:mb-8"
             >
+              {/* Compact 'Week voltooid' banner (mobile-first) */}
+              {trainingData?.hasActiveSchema && days && days.every(day => day.isCompleted) && (
+                <div className="mb-3 sm:mb-4 p-3 sm:p-4 bg-gradient-to-r from-[#8BAE5A]/15 to-[#FFD700]/15 rounded-lg border border-[#8BAE5A]/30">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] rounded-full flex items-center justify-center">
+                        <span className="text-[#181F17] font-bold text-sm sm:text-base">🏆</span>
+                      </div>
+                      <div>
+                        <div className="text-white font-bold text-sm sm:text-base">Week {completedWeeks.length + 1} voltooid!</div>
+                        <div className="text-gray-300 text-xs sm:text-sm">Klaar voor de volgende week?</div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={startNewWeek}
+                      className="px-3 py-2 sm:px-4 sm:py-2 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-semibold text-xs sm:text-sm rounded-lg hover:from-[#7A9D4A] hover:to-[#e0903f] transition-all duration-200 shadow"
+                    >
+                      Start
+                    </button>
+                  </div>
+                </div>
+              )}
+
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
                 <div>
                 <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-white">Trainingsdagen</h2>
@@ -690,34 +723,6 @@ export default function MijnTrainingen() {
                     Huidige Week: {completedWeeks.length + 1}/8
                   </p>
                 </div>
-                <button
-                  onClick={viewSchemaDetails}
-                  className="flex items-center px-3 py-2 sm:px-4 sm:py-2 bg-[#3A4D23] text-[#8BAE5A] rounded-lg hover:bg-[#4A5D33] transition-colors text-xs sm:text-sm"
-                >
-                  <EyeIcon className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                  <span className="hidden sm:inline">Bekijk Schema Details</span>
-                  <span className="sm:hidden">Details</span>
-                </button>
-                <button
-                  onClick={debugWeekState}
-                  className="flex items-center px-3 py-2 sm:px-4 sm:py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-xs sm:text-sm"
-                >
-                  🔍 Debug
-                </button>
-                <button
-                  onClick={() => {
-                    console.log('🧹 Clearing workout session...');
-                    if (typeof window !== 'undefined' && (window as any).clearWorkoutSession) {
-                      (window as any).clearWorkoutSession();
-                    }
-                    if (typeof window !== 'undefined' && (window as any).checkWorkoutSession) {
-                      (window as any).checkWorkoutSession();
-                    }
-                  }}
-                  className="flex items-center px-3 py-2 sm:px-4 sm:py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-xs sm:text-sm"
-                >
-                  🧹 Clear Timer
-                </button>
               </div>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
@@ -827,32 +832,7 @@ export default function MijnTrainingen() {
             </motion.div>
         )}
 
-        {/* Start New Week Button - Show when all days are completed */}
-        {trainingData?.hasActiveSchema && days && days.every(day => day.isCompleted) && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="mt-6 text-center"
-          >
-            <div className="bg-gradient-to-r from-[#8BAE5A]/20 to-[#FFD700]/20 border border-[#8BAE5A]/30 rounded-xl p-6">
-              <div className="mb-4">
-                <div className="w-16 h-16 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] rounded-full flex items-center justify-center mx-auto mb-4">
-                  <TrophyIcon className="w-8 h-8 text-[#181F17]" />
-                </div>
-                <h3 className="text-xl font-bold text-white mb-2">Week {completedWeeks.length + 1} Voltooid! 🎉</h3>
-                <p className="text-gray-300">Alle trainingsdagen zijn succesvol afgerond. Klaar voor de volgende week?</p>
-              </div>
-              
-              <button
-                onClick={startNewWeek}
-                className="px-8 py-3 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-bold text-lg rounded-lg hover:from-[#7A9D4A] hover:to-[#e0903f] transition-all duration-200 shadow-lg hover:shadow-xl"
-              >
-                Start Nieuwe Week
-              </button>
-            </div>
-          </motion.div>
-        )}
+        {/* (Removed large bottom 'Week voltooid' card in favor of compact top banner) */}
 
         </div>
       </div>
@@ -1073,6 +1053,7 @@ export default function MijnTrainingen() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            ref={weekCompletionRef}
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}

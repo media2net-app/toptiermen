@@ -24,6 +24,7 @@ interface Lesson {
   id: string;
   title: string;
   description: string;
+  short_description?: string;
   duration: string;
   module_id: string;
   order_index: number;
@@ -323,13 +324,13 @@ export default function ModuleDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0F1411] text-white">
+    <div className="min-h-screen bg-[#0F1411] text-white overflow-x-hidden">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-3 sm:gap-4">
             {/* Left: Back to Academy + Previous Module */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 min-w-0">
               <button
                 onClick={() => {
                   console.log('🔄 Navigating to academy...');
@@ -337,7 +338,7 @@ export default function ModuleDetailPage() {
                   router.push('/dashboard/academy');
                 }}
                 disabled={navigating}
-                className="text-[#8BAE5A] hover:text-[#B6C948] transition-colors disabled:opacity-50 flex items-center gap-2"
+                className="text-[#8BAE5A] hover:text-[#B6C948] transition-colors disabled:opacity-50 flex items-center gap-2 w-full sm:w-auto"
               >
                 {navigating ? (
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#8BAE5A]"></div>
@@ -356,11 +357,11 @@ export default function ModuleDetailPage() {
                     router.push(`/dashboard/academy/${previousModule.id}`);
                   }}
                   disabled={navigating}
-                  className="text-[#8BAE5A] hover:text-[#B6C948] transition-colors disabled:opacity-50 flex items-center gap-3 group bg-[#181F17] hover:bg-[#232D1A] px-4 py-2 rounded-xl border border-[#3A4D23] hover:border-[#8BAE5A] self-start sm:self-auto"
+                  className="text-[#8BAE5A] hover:text-[#B6C948] transition-colors disabled:opacity-50 flex items-center gap-3 group bg-[#181F17] hover:bg-[#232D1A] px-4 py-2 rounded-xl border border-[#3A4D23] hover:border-[#8BAE5A] self-start sm:self-auto w-full sm:w-auto"
                 >
-                  <div className="text-left">
+                  <div className="text-left min-w-0">
                     <div className="text-xs text-gray-400 uppercase tracking-wide">Vorige Module</div>
-                    <div className="font-semibold text-sm md:text-base">
+                    <div className="font-semibold text-sm md:text-base truncate">
                       Module {getModuleNumber(previousModule.order_index)}: {previousModule.title}
                     </div>
                   </div>
@@ -382,11 +383,11 @@ export default function ModuleDetailPage() {
                   router.push(`/dashboard/academy/${nextModule.id}`);
                 }}
                 disabled={navigating}
-                className="text-[#8BAE5A] hover:text-[#B6C948] transition-colors disabled:opacity-50 flex items-center gap-3 group bg-[#181F17] hover:bg-[#232D1A] px-4 py-2 rounded-xl border border-[#3A4D23] hover:border-[#8BAE5A] self-start sm:self-auto"
+                className="text-[#8BAE5A] hover:text-[#B6C948] transition-colors disabled:opacity-50 flex items-center gap-3 group bg-[#181F17] hover:bg-[#232D1A] px-4 py-2 rounded-xl border border-[#3A4D23] hover:border-[#8BAE5A] self-start sm:self-auto w-full sm:w-auto"
               >
-                <div className="text-right">
+                <div className="text-right min-w-0">
                   <div className="text-xs text-gray-400 uppercase tracking-wide">Volgende Module</div>
-                  <div className="font-semibold text-sm md:text-base">
+                  <div className="font-semibold text-sm md:text-base truncate">
                     Module {getModuleNumber(nextModule.order_index)}: {nextModule.title}
                   </div>
                 </div>
@@ -399,67 +400,118 @@ export default function ModuleDetailPage() {
             )}
           </div>
           
-          <h1 className="text-3xl font-bold text-[#8BAE5A] mb-2 break-words">
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#8BAE5A] mb-2 break-words">
             Module {getModuleNumber(module.order_index)}: {module.title}
           </h1>
-          <p className="text-gray-300 text-lg break-words">{module.description}</p>
+          <p className="text-gray-300 text-base sm:text-lg break-words">{module.description}</p>
         </div>
 
-        {/* Lessons Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {lessons.map((lesson, index) => (
-            <button
-              key={lesson.id}
-              onClick={() => {
-                console.log('🔄 Navigating to lesson...');
-                setNavigating(true);
-                router.push(`/dashboard/academy/${module.id}/${lesson.id}`);
-              }}
-              disabled={navigating}
-              className={`block w-full text-left p-6 rounded-xl border transition-all duration-200 hover:scale-105 disabled:opacity-50 ${
-                completedLessonIds.includes(lesson.id)
-                  ? 'bg-[#232D1A] text-[#8BAE5A] border-[#3A4D23] hover:bg-[#3A4D23]'
-                  : 'bg-[#181F17] text-gray-300 border-[#3A4D23] hover:bg-[#232D1A]'
-              }`}
-            >
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-3 min-w-0">
-                  <span className="w-8 h-8 rounded-full border-2 border-[#8BAE5A] flex items-center justify-center text-sm font-bold text-[#8BAE5A]">
-                    {index + 1}
-                  </span>
-                  <h3 className="text-xl font-semibold truncate">{lesson.title}</h3>
-                </div>
-                {completedLessonIds.includes(lesson.id) && (
-                  <span className="text-green-400 text-2xl">✓</span>
-                )}
-              </div>
-              
-              <p className="text-gray-400 mb-4 line-clamp-3">{lesson.description}</p>
-              
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-[#8BAE5A]">Duur: {lesson.duration}</span>
-                {navigating && (
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#8BAE5A]"></div>
-                )}
-              </div>
-            </button>
-          ))}
+        {/* Lessons - Compact table-like layout */}
+        <div className="bg-[#181F17] border border-[#3A4D23] rounded-xl overflow-hidden">
+          {/* Header (desktop) */}
+          <div className="hidden md:grid grid-cols-12 gap-3 px-4 py-3 bg-[#0F1411] border-b border-[#3A4D23] text-xs text-gray-400">
+            <div className="col-span-1">#</div>
+            <div className="col-span-4">Les</div>
+            <div className="col-span-5">Intro</div>
+            <div className="col-span-1 text-right">Duur</div>
+            <div className="col-span-1 text-center">Status</div>
+          </div>
+
+          {/* Rows */}
+          <div className="divide-y divide-[#3A4D23]">
+            {lessons.map((lesson, index) => {
+              const completed = completedLessonIds.includes(lesson.id);
+              const intro = (lesson.short_description?.trim() || (lesson.description || '').split(/\n|\.|\!|\?/)[0] || '').trim();
+              return (
+                <button
+                  key={lesson.id}
+                  onClick={() => {
+                    console.log('🔄 Navigating to lesson...');
+                    setNavigating(true);
+                    router.push(`/dashboard/academy/${module.id}/${lesson.id}`);
+                  }}
+                  disabled={navigating}
+                  className={`w-full text-left group hover:bg-[#1C2417] transition-colors disabled:opacity-50`}
+                >
+                  {/* Desktop row */}
+                  <div className="hidden md:grid grid-cols-12 gap-3 px-4 py-3 items-center">
+                    <div className="col-span-1">
+                      <span className="inline-flex items-center justify-center w-7 h-7 rounded-full border-2 border-[#8BAE5A] text-[11px] font-bold text-[#8BAE5A]">
+                        {index + 1}
+                      </span>
+                    </div>
+                    <div className="col-span-4 pr-2 truncate text-white font-semibold">
+                      {lesson.title}
+                    </div>
+                    <div className="col-span-5 text-gray-300">
+                      <span className="line-clamp-1">{intro}</span>
+                    </div>
+                    <div className="col-span-1 text-right text-[#8BAE5A] font-semibold">
+                      {lesson.duration}
+                    </div>
+                    <div className="col-span-1 text-center">
+                      {/* Tiny per-lesson progress bar */}
+                      <div className="w-full bg-[#232D1A] rounded-full h-1">
+                        <div
+                          className={`h-1 rounded-full transition-all duration-300 ${completed ? 'bg-gradient-to-r from-[#8BAE5A] to-[#B6C948] w-full' : 'bg-[#3A4D23] w-0'}`}
+                        ></div>
+                      </div>
+                      <div className="mt-1">
+                        {completed ? (
+                          <span className="inline-flex items-center px-1.5 py-0.5 rounded-full bg-green-600/20 text-green-400 border border-green-600/30 text-[10px] font-semibold">
+                            ✓
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center px-1.5 py-0.5 rounded-full bg-[#232D1A] text-gray-300 border border-[#3A4D23] text-[10px]">
+                            0%
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Mobile card */}
+                  <div className={`md:hidden px-4 py-3 ${completed ? 'bg-[#1C2417]' : ''}`}>
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="inline-flex items-center justify-center w-7 h-7 rounded-full border-2 border-[#8BAE5A] text-[11px] font-bold text-[#8BAE5A] flex-shrink-0">
+                          {index + 1}
+                        </span>
+                        <div className="min-w-0">
+                          <div className="text-white font-semibold text-sm truncate">{lesson.title}</div>
+                          <div className="text-[11px] text-gray-300 line-clamp-2">{intro}</div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-[11px] text-[#8BAE5A] font-semibold">{lesson.duration}</div>
+                        {completed && <div className="text-green-400 text-lg leading-none">✓</div>}
+                      </div>
+                    </div>
+                    {/* Tiny per-lesson progress bar (mobile) */}
+                    <div className="mt-2 w-full bg-[#232D1A] rounded-full h-1">
+                      <div className={`h-1 rounded-full transition-all duration-300 ${completed ? 'bg-gradient-to-r from-[#8BAE5A] to-[#B6C948] w-full' : 'bg-[#3A4D23] w-0'}`}></div>
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
-        {/* Progress Summary */}
-        <div className="mt-8 p-6 bg-[#181F17]/90 rounded-xl border border-[#3A4D23]">
-          <h3 className="text-lg font-semibold text-[#8BAE5A] mb-4">Voortgang</h3>
-          <div className="flex items-center gap-4">
+        {/* Progress Summary - compact */}
+        <div className="mt-6 p-4 bg-[#181F17]/90 rounded-xl border border-[#3A4D23]">
+          <h3 className="text-base font-semibold text-[#8BAE5A] mb-3">Voortgang</h3>
+          <div className="flex items-center gap-3">
             <div className="flex-1">
-              <div className="w-full bg-[#232D1A] rounded-full h-3">
+              <div className="w-full bg-[#232D1A] rounded-full h-1 md:h-2">
                 <div
-                  className="bg-gradient-to-r from-[#8BAE5A] to-[#B6C948] h-3 rounded-full transition-all duration-300"
+                  className="bg-gradient-to-r from-[#8BAE5A] to-[#B6C948] h-1 md:h-2 rounded-full transition-all duration-300"
                   style={{ width: `${(completedLessonIds.length / lessons.length) * 100}%` }}
                 ></div>
               </div>
             </div>
-            <span className="text-[#8BAE5A] font-semibold">
-              {completedLessonIds.length} van {lessons.length} lessen voltooid
+            <span className="text-[#8BAE5A] text-xs md:text-sm font-semibold whitespace-nowrap">
+              {completedLessonIds.length} / {lessons.length}
             </span>
           </div>
         </div>

@@ -38,16 +38,16 @@ export default function PageLayout({
   padding = 'md'
 }: PageLayoutProps) {
   return (
-    <div className={`dashboard-content ${maxWidthClasses[maxWidth]} mx-auto ${paddingClasses[padding]}`}>
+    <div className={`dashboard-content ${maxWidthClasses[maxWidth]} mx-auto ${paddingClasses[padding]} overflow-x-hidden`}>
       {/* Page Header */}
       <div className="mb-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-1 sm:mb-2 drop-shadow-lg">
+            <h1 className="text-xl sm:text-3xl md:text-4xl font-bold text-white mb-1 sm:mb-2 drop-shadow-lg break-words">
               {title}
             </h1>
             {subtitle && (
-              <p className="text-[#A3AED6] text-base sm:text-lg">
+              <p className="text-[#A3AED6] text-sm sm:text-lg leading-snug">
                 {subtitle}
               </p>
             )}

@@ -142,6 +142,13 @@ function TrainingschemasContent() {
   const searchParams = useSearchParams();
   // Ref to the continue button section for auto-scroll during onboarding
   const continueRef = useRef<HTMLDivElement | null>(null);
+  // Ref to the calculator section to scroll into view when opened
+  const calculatorRef = useRef<HTMLDivElement | null>(null);
+  // Ref to the available training schemas section
+  const availableSchemasRef = useRef<HTMLDivElement | null>(null);
+  const [highlightAvailable, setHighlightAvailable] = useState(false);
+  // Scroll intent after saving profile to ensure we scroll after mount
+  const [scrollToAvailablePending, setScrollToAvailablePending] = useState(false);
 
   // DEBUG: Enhanced logging (moved after state declarations)
 
@@ -186,6 +193,31 @@ function TrainingschemasContent() {
     training_frequency: '',
     equipment_type: 'gym'
   });
+
+  // Auto-scroll to calculator whenever it opens (required profile prompt or manual open)
+  useEffect(() => {
+    if (showRequiredProfile || showCalculator) {
+      setTimeout(() => {
+        try {
+          calculatorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } catch {}
+      }, 100);
+    }
+  }, [showRequiredProfile, showCalculator]);
+
+  // When profile and filtered schemas are ready and a scroll is pending, perform the scroll
+  useEffect(() => {
+    if (scrollToAvailablePending && userTrainingProfile && trainingSchemas.length > 0) {
+      setTimeout(() => {
+        try {
+          availableSchemasRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          setHighlightAvailable(true);
+          setTimeout(() => setHighlightAvailable(false), 1200);
+        } catch {}
+        setScrollToAvailablePending(false);
+      }, 150);
+    }
+  }, [scrollToAvailablePending, userTrainingProfile, trainingSchemas.length]);
 
   // DEBUG: Enhanced logging (after all state declarations)
   console.log('🔍 TrainingschemasContent render:', {
@@ -1044,6 +1076,9 @@ function TrainingschemasContent() {
           setTrainingSchemas(filtered);
           console.log('🎯 Re-applied filtering after profile save:', filtered.length, 'schemas');
         }
+
+        // Defer scroll until the available section is mounted
+        setScrollToAvailablePending(true);
       } else {
         console.error('❌ Failed to save training profile:', data);
         toast.error(data.error || 'Failed to save training profile');
@@ -2149,6 +2184,12 @@ function TrainingschemasContent() {
                         training_frequency: userTrainingProfile.training_frequency.toString(),
                         equipment_type: userTrainingProfile.equipment_type
                       });
+                      // Give the UI a tick to render and then scroll to the calculator
+                      setTimeout(() => {
+                        try {
+                          calculatorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        } catch {}
+                      }, 100);
                     }
                   }}
                   className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors text-xs sm:text-sm font-medium"
@@ -2314,6 +2355,7 @@ function TrainingschemasContent() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               className="mb-8"
+              ref={calculatorRef}
             >
               <div className="bg-gradient-to-r from-[#8BAE5A]/10 to-[#8BAE5A]/5 border border-[#8BAE5A]/30 rounded-2xl p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-4 sm:mb-6">
@@ -2510,6 +2552,7 @@ function TrainingschemasContent() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="mb-8"
+            ref={availableSchemasRef}
           >
             <div className="bg-gradient-to-r from-[#8BAE5A]/10 to-[#8BAE5A]/5 border border-[#8BAE5A]/30 rounded-2xl p-4 sm:p-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 gap-3">
@@ -2517,7 +2560,7 @@ function TrainingschemasContent() {
                   <div className="p-2 bg-[#8BAE5A]/20 rounded-lg">
                     <AcademicCapIcon className="h-5 w-5 sm:h-6 sm:w-6 text-[#8BAE5A]" />
                   </div>
-                  <div>
+                  <div className={`${highlightAvailable ? 'ring-2 ring-[#8BAE5A] ring-offset-2 ring-offset-[#0F1419] rounded-lg transition' : ''}`}>
                     <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-semibold text-white break-words">Beschikbare Trainingsschemas</h2>
                     <p className="text-xs sm:text-sm text-gray-400 break-words">Beschikbaar op basis van jouw profiel</p>
                     <div className="mt-2 p-2 sm:p-3 bg-[#8BAE5A]/10 border border-[#8BAE5A]/30 rounded-lg">

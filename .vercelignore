@@ -1,0 +1,35 @@
+# Exclude heavy, non-build-critical files from deployment
+# Vercel will still install dependencies and build Next.js
+
+# VCS and editor
+.git/
+.github/
+.vscode/
+.DS_Store
+
+# Local/build/runtime
+node_modules/
+.next/
+.vercel/
+
+# Large archives, scripts and reports not required at runtime
+ARCHIVE/
+Developer/
+docs/
+scripts/
+ONBOARDING/
+OUDE_PAGINAS/
+
+# Root artifacts and datasets not needed for build/runtime
+*.md
+*.log
+*.sql
+*.csv
+*emails*.json
+*emails*.csv
+migration-backup.json
+
+test-output.css
+
+# Keep src, public, package.json, next.config.js, tailwind and postcss configs
+# Keep env files managed by Vercel via dashboard

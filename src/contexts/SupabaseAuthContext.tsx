@@ -1,8 +1,58 @@
-'use client';
+ 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { User, Session } from '@supabase/supabase-js';
-import { supabase } from '@/lib/supabase';
+ import React, { createContext, useContext, useEffect, useState } from 'react';
+ import { User, Session } from '@supabase/supabase-js';
+ import { supabase } from '@/lib/supabase';
+
+ // Helper: Clear all client-side auth/cache data (storage + cookies)
+ const clearClientAuth = () => {
+   try {
+     if (typeof window === 'undefined') return;
+     console.log('🧹 Clearing client auth/storage...');
+     // Clear storages
+     try { localStorage.clear(); } catch {}
+     try { sessionStorage.clear(); } catch {}
+
+     // Remove known keys explicitly (defensive)
+     try {
+       localStorage.removeItem('toptiermen-v2-auth');
+       localStorage.removeItem('sb-wkjvstuttbeyqzyjayxj-auth-token');
+       sessionStorage.removeItem('sb-wkjvstuttbeyqzyjayxj-auth-token');
+     } catch {}
+
+     // Clear cookies (including subdomain/root variants)
+     try {
+       const expire = 'expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;';
+       const host = window.location.hostname; // e.g. platform.toptiermen.eu
+       const parts = host.split('.');
+       const domains: string[] = [];
+       // Generate domain permutations: current host and root domain
+       domains.push(host); // exact
+       if (parts.length >= 2) {
+         const root = `.${parts.slice(-2).join('.')}`; // .toptiermen.eu
+         domains.push(root);
+       }
+       const cookies = document.cookie.split(';');
+       for (const raw of cookies) {
+         const name = raw.split('=')[0]?.trim();
+         if (!name) continue;
+         for (const d of domains) {
+           try {
+             document.cookie = `${name}=; ${expire} domain=${d}`;
+           } catch {}
+         }
+         // Also try without domain attr
+         try {
+           document.cookie = `${name}=; ${expire}`;
+         } catch {}
+       }
+     } catch {}
+
+     console.log('✅ Client auth/storage cleared');
+   } catch (e) {
+     console.warn('⚠️ Failed clearing client auth/storage (continuing):', e);
+   }
+ };
 
 interface Profile {
   id: string;
@@ -450,19 +500,8 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
       setProfile(null);
       setError(null);
       
-      // 2. Clear all browser storage
-      if (typeof window !== 'undefined') {
-        console.log('🧹 Clearing browser storage...');
-        localStorage.clear();
-        sessionStorage.clear();
-        
-        // Remove specific auth-related items
-        localStorage.removeItem('toptiermen-v2-auth');
-        localStorage.removeItem('sb-wkjvstuttbeyqzyjayxj-auth-token');
-        sessionStorage.removeItem('sb-wkjvstuttbeyqzyjayxj-auth-token');
-        
-        console.log('✅ Browser storage cleared');
-      }
+      // 2. Clear all client caches and cookies
+      clearClientAuth();
       
       // 3. Sign out from Supabase with timeout
       console.log('🔐 Signing out from Supabase...');
@@ -518,6 +557,9 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
       } else {
         console.error('❌ Logout failed, forcing redirect anyway...');
       }
+      
+      // Extra safety: ensure client caches are cleared before redirect
+      clearClientAuth();
       
       // Always redirect regardless of logout success/failure to prevent stuck state
       if (typeof window !== 'undefined') {

@@ -19,6 +19,38 @@ function LoginPageContent() {
   const { user, profile, isLoading: authLoading, login, isAdmin, getRedirectPath } = useAuth();
   const loading = authLoading; // Use actual auth loading state
   
+  // Helper: Aggressive client cleanup (storage + cookies) to fix Safari re-login issues
+  const clearClientAuth = () => {
+    try {
+      if (typeof window === 'undefined') return;
+      // Storage
+      try { localStorage.clear(); } catch {}
+      try { sessionStorage.clear(); } catch {}
+      try {
+        localStorage.removeItem('toptiermen-v2-auth');
+        localStorage.removeItem('sb-wkjvstuttbeyqzyjayxj-auth-token');
+        sessionStorage.removeItem('sb-wkjvstuttbeyqzyjayxj-auth-token');
+      } catch {}
+      // Cookies (domain + root)
+      try {
+        const expire = 'expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;';
+        const host = window.location.hostname;
+        const parts = host.split('.');
+        const domains: string[] = [host];
+        if (parts.length >= 2) domains.push(`.${parts.slice(-2).join('.')}`);
+        const cookies = document.cookie.split(';');
+        for (const raw of cookies) {
+          const name = raw.split('=')[0]?.trim();
+          if (!name) continue;
+          for (const d of domains) {
+            try { document.cookie = `${name}=; ${expire} domain=${d}`; } catch {}
+          }
+          try { document.cookie = `${name}=; ${expire}`; } catch {}
+        }
+      } catch {}
+    } catch {}
+  };
+  
   // ✅ PHASE 1: Simplified state management - Single state object
   const [loginState, setLoginState] = useState({
     email: "",
@@ -123,6 +155,9 @@ function LoginPageContent() {
     // Handle logout status with improved messaging
     const logoutStatus = searchParams?.get('logout');
     if (logoutStatus === 'success') {
+      // Aggressive cleanup to avoid stuck sessions on Safari
+      clearClientAuth();
+      try { supabase.auth.signOut(); } catch {}
       setLoginState(prev => ({ ...prev, error: '' }));
       // Show success message briefly
       console.log('✅ Logout successful, ready for new login');
@@ -134,6 +169,8 @@ function LoginPageContent() {
         window.history.replaceState({}, '', url.toString());
       }
     } else if (logoutStatus === 'error') {
+      clearClientAuth();
+      try { supabase.auth.signOut(); } catch {}
       setLoginState(prev => ({ ...prev, error: 'Er is een fout opgetreden bij het uitloggen. Je sessie is gewist, probeer opnieuw in te loggen.' }));
       console.log('⚠️ Logout error occurred, but session should be cleared');
       // Clean URL
@@ -228,6 +265,9 @@ function LoginPageContent() {
     // Reset redirecting state for new login attempt
     setLoginState(prev => ({ ...prev, isRedirecting: false }));
     redirectExecuted.current = false;
+    // Ensure a clean slate just before login (Safari fix)
+    clearClientAuth();
+    try { await supabase.auth.signOut(); } catch {}
     
     console.log('🚀 Login form submitted');
     console.log('📧 Email:', loginState.email);
@@ -563,6 +603,18 @@ function LoginPageContent() {
                 disabled={loginState.isLoading}
               >
                 🔄 Pagina Verversen
+              </button>
+              <button
+                onClick={() => {
+                  console.log('🧹 Forceer schoonmaken + herladen');
+                  clearClientAuth();
+                  try { supabase.auth.signOut(); } catch {}
+                  setTimeout(() => window.location.reload(), 150);
+                }}
+                className={`mt-2 w-full px-3 py-2 bg-[#8BAE5A]/20 text-[#B6C948] rounded text-sm font-medium hover:bg-[#8BAE5A]/30 transition-colors border border-[#8BAE5A]/30 ${loginState.isLoading ? 'cursor-wait opacity-75' : 'cursor-pointer'}`}
+                disabled={loginState.isLoading}
+              >
+                🧹 Forceer Schoonmaken
               </button>
             </div>
             

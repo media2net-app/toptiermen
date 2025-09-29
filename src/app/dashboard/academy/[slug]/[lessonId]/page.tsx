@@ -1280,7 +1280,7 @@ export default function LessonDetailPage() {
         </div>
 
         {/* Custom Navigation with Hard Refresh */}
-        <div className="mb-6 flex items-center gap-2 text-sm">
+        <div className="mb-6 flex flex-wrap items-center gap-2 text-xs sm:text-sm min-w-0">
           <button
             onClick={() => {
               console.log('🔄 Navigating to academy...');
@@ -1300,20 +1300,20 @@ export default function LessonDetailPage() {
               router.push(`/dashboard/academy/${module.id}`);
             }}
             disabled={navigating}
-            className="text-[#8BAE5A] hover:text-[#B6C948] transition-colors disabled:opacity-50"
+            className="text-[#8BAE5A] hover:text-[#B6C948] transition-colors disabled:opacity-50 truncate max-w-[60vw] sm:max-w-none"
           >
             Module {getModuleNumber(module.order_index)}: {module.title}
           </button>
           <span className="text-gray-400">/</span>
-          <span className="text-gray-300">{lesson.title}</span>
+          <span className="text-gray-300 truncate max-w-[70vw] sm:max-w-none">{lesson.title}</span>
         </div>
 
         {/* Lesson content */}
         <div className="bg-[#181F17]/90 rounded-xl p-6 border border-[#3A4D23]">
           <div className="mb-6">
-            <h1 className="text-2xl font-bold text-[#8BAE5A] mb-2">{lesson.title}</h1>
-            <p className="text-gray-300">{lesson.description}</p>
-            <div className="flex items-center gap-4 mt-4 text-sm text-gray-400">
+            <h1 className="text-xl sm:text-2xl font-bold text-[#8BAE5A] mb-2 break-words">{lesson.title}</h1>
+            <p className="text-gray-300 break-words">{lesson.description}</p>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-4 text-xs sm:text-sm text-gray-400">
               <span>Duur: {lesson.duration}</span>
               <span>Type: {lesson.type}</span>
               {completed && <span className="text-green-400">✓ Voltooid</span>}
@@ -1499,7 +1499,7 @@ export default function LessonDetailPage() {
 
         {/* Navigation buttons - Only show for non-exam lessons */}
         {lesson.type !== 'exam' && (
-          <div className="flex justify-between items-center mt-8">
+          <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 mt-8">
             {prevLesson ? (
               <button
                 onClick={() => {
@@ -1515,14 +1515,14 @@ export default function LessonDetailPage() {
                   }, 50);
                 }}
                 disabled={navigating}
-                className="px-6 py-3 bg-[#232D1A] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors font-semibold disabled:opacity-50 flex items-center gap-2"
+                className="px-6 py-3 bg-[#232D1A] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors font-semibold disabled:opacity-50 flex items-center gap-2 w-full sm:w-auto"
               >
                 {navigating ? (
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#8BAE5A]"></div>
                 ) : (
                   "←"
                 )}
-                Vorige les: {prevLesson.title}
+                <span className="truncate">Vorige les: {prevLesson.title}</span>
               </button>
             ) : (
               <div></div>
@@ -1543,9 +1543,9 @@ export default function LessonDetailPage() {
                   }, 50);
                 }}
                 disabled={navigating}
-                className="px-6 py-3 bg-[#8BAE5A] text-[#181F17] rounded-lg hover:bg-[#B6C948] transition-colors font-semibold disabled:opacity-50 flex items-center gap-2"
+                className="px-6 py-3 bg-[#8BAE5A] text-[#181F17] rounded-lg hover:bg-[#B6C948] transition-colors font-semibold disabled:opacity-50 flex items-center gap-2 w-full sm:w-auto"
               >
-                Volgende les: {nextLesson.title}
+                <span className="truncate">Volgende les: {nextLesson.title}</span>
                 {navigating ? (
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#181F17]"></div>
                 ) : (

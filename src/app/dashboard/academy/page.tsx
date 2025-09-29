@@ -353,7 +353,7 @@ export default function AcademyPage() {
     <PageLayout title="Academy" subtitle="Leer en groei met onze uitgebreide cursussen">
       {/* Overall Progress */}
       <div className="mb-8 p-6 bg-[#181F17]/90 rounded-xl border border-[#3A4D23]">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-4 gap-3">
           <h2 className="text-xl font-semibold text-[#8BAE5A]">Algemene Voortgang</h2>
           <div className="flex items-center gap-3">
           <span className="text-[#8BAE5A] font-bold">{overallProgress}%</span>
@@ -410,8 +410,76 @@ export default function AcademyPage() {
         </div>
       )}
 
-      {/* Modules Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+      {/* Modules - Mobile compact list */}
+      <div className="sm:hidden space-y-3">
+        {modules.map((module) => {
+          const moduleLessons = lessons.filter(lesson => lesson.module_id === module.id);
+          const completedLessons = moduleLessons.filter(lesson => 
+            lessonProgress[lesson.id]?.completed
+          ).length;
+          const progress = moduleLessons.length > 0 ? 
+            Math.round((completedLessons / moduleLessons.length) * 100) : 0;
+          const isUnlocked = unlocks[module.id]?.unlocked_at || module.order_index === 1;
+          const isCompleted = progress === 100;
+          const intro = (module.short_description || module.description || '').split(/\n|\.|\!|\?/)[0] || '';
+
+          // Debug logging for Chiel
+          if (user?.email === 'chiel@media2net.nl') {
+            console.log(`🔍 Module ${module.title}:`, {
+              moduleId: module.id,
+              orderIndex: module.order_index,
+              isUnlocked,
+              unlockData: unlocks[module.id],
+              progress,
+              completedLessons,
+              totalLessons: moduleLessons.length
+            });
+          }
+
+          return (
+            <button
+              key={module.id}
+              onClick={() => {
+                if (isUnlocked) {
+                  console.log('🔄 Navigating to module...');
+                  setNavigating(true);
+                  router.push(`/dashboard/academy/${module.id}`);
+                }
+              }}
+              disabled={!isUnlocked || navigating}
+              className={`w-full p-4 rounded-xl border border-[#3A4D23] bg-[#181F17] text-left overflow-hidden ${!isUnlocked ? 'opacity-60 cursor-not-allowed' : 'active:scale-[0.99]'} ${navigating ? 'opacity-50' : ''}`}
+            >
+              <div className="flex items-start justify-between gap-3 min-w-0">
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="w-8 h-8 bg-[#8BAE5A] rounded-lg flex items-center justify-center flex-shrink-0">
+                    <span className="text-[#181F17] font-bold text-xs">{getModuleNumber(module.order_index)}</span>
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-white font-semibold text-sm truncate break-words">{module.title}</div>
+                    <div className="text-[11px] text-gray-300 line-clamp-2 break-words">{intro}</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <div className="text-[11px] text-gray-400 flex items-center gap-1"><ClockIcon className="w-3 h-3" />{moduleLessons.length}</div>
+                  {isCompleted ? (
+                    <CheckCircleIcon className="w-4 h-4 text-[#8BAE5A]" />
+                  ) : !isUnlocked ? (
+                    <LockClosedIcon className="w-4 h-4 text-gray-500" />
+                  ) : (
+                    <PlayIcon className="w-4 h-4 text-[#8BAE5A]" />
+                  )}
+                </div>
+              </div>
+              <div className="mt-2 w-full bg-[#232D1A] rounded-full h-1">
+                <div className="h-1 rounded-full bg-gradient-to-r from-[#8BAE5A] to-[#B6C948] transition-all duration-300" style={{ width: `${progress}%` }}></div>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Modules - Desktop grid */}
+      <div className="hidden sm:grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {modules.map((module) => {
           const moduleLessons = lessons.filter(lesson => lesson.module_id === module.id);
           const completedLessons = moduleLessons.filter(lesson => 

@@ -165,7 +165,7 @@ export default function PreWorkoutModal({
       />
 
       {/* Modal */}
-      <div className="relative w-full max-w-2xl bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-2xl p-8 shadow-2xl">
+      <div className="relative w-full max-w-[92vw] sm:max-w-xl md:max-w-2xl bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-2xl p-4 sm:p-6 md:p-8 shadow-2xl overflow-hidden">
         {/* Close Button */}
         <button
           onClick={onClose}
@@ -175,60 +175,60 @@ export default function PreWorkoutModal({
         </button>
 
         {/* Header */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-6 sm:mb-8">
           <div className="flex items-center justify-center mb-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-[#8BAE5A] to-[#FFD700] rounded-full flex items-center justify-center mr-4">
-              <FireIcon className="w-8 h-8 text-[#181F17]" />
+            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-[#8BAE5A] to-[#FFD700] rounded-full flex items-center justify-center mr-3 sm:mr-4">
+              <FireIcon className="w-6 h-6 sm:w-8 sm:h-8 text-[#181F17]" />
             </div>
             <div className="text-left">
-              <h2 className="text-3xl font-bold text-white text-balance leading-tight">Start Training</h2>
-              <p className="text-[#8BAE5A]">Dag {dayNumber}</p>
+              <h2 className="text-2xl sm:text-3xl font-bold text-white text-balance leading-tight">Start Training</h2>
+              <p className="text-[#8BAE5A] text-sm sm:text-base">Dag {dayNumber}</p>
             </div>
           </div>
         </div>
 
         {/* Training Info */}
-        <div className="bg-[#0F1419]/50 rounded-xl p-6 mb-6">
+        <div className="bg-[#0F1419]/50 rounded-xl p-4 sm:p-6 mb-6 overflow-hidden">
           <div>
-            <h3 className="text-lg font-semibold text-white mb-2 break-words text-pretty leading-snug">{schemaName}</h3>
+            <h3 className="text-base sm:text-lg font-semibold text-white mb-2 break-words text-pretty leading-snug">{schemaName}</h3>
             <p className="text-[#8BAE5A] text-sm break-words leading-snug">{focusArea}</p>
           </div>
         </div>
 
         {/* Training Mode Selection */}
         <div className="mb-6">
-          <h3 className="text-lg font-semibold text-white mb-4">Kies je training mode:</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <h3 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4">Kies je training mode:</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
             <button
               onClick={() => setSelectedMode('interactive')}
-              className={`p-4 rounded-xl border-2 transition-all ${
+              className={`w-full p-3 sm:p-4 rounded-xl border-2 transition-all overflow-hidden ${
                 selectedMode === 'interactive'
                   ? 'border-[#8BAE5A] bg-[#232D1A]'
                   : 'border-[#3A4D23] bg-[#181F17] hover:border-[#5A6D43]'
               }`}
             >
-              <div className="flex items-start mb-2">
-                <PlayIcon className="w-6 h-6 text-[#8BAE5A] mr-2" />
-                <span className="font-semibold text-white text-left leading-snug break-words">Interactive Training</span>
+              <div className="flex items-start mb-1 sm:mb-2">
+                <PlayIcon className="w-5 h-5 sm:w-6 sm:h-6 text-[#8BAE5A] mr-2 flex-shrink-0" />
+                <span className="font-semibold text-white text-left leading-snug break-words text-sm sm:text-base">Interactive Training</span>
               </div>
-              <p className="text-sm text-gray-400 break-words text-pretty leading-snug">
+              <p className="text-xs sm:text-sm text-gray-400 break-words text-pretty leading-snug">
                 Timer-based training met oefening tracking en real-time feedback
               </p>
             </button>
 
             <button
               onClick={() => setSelectedMode('quick')}
-              className={`p-4 rounded-xl border-2 transition-all ${
+              className={`w-full p-3 sm:p-4 rounded-xl border-2 transition-all overflow-hidden ${
                 selectedMode === 'quick'
                   ? 'border-[#8BAE5A] bg-[#232D1A]'
                   : 'border-[#3A4D23] bg-[#181F17] hover:border-[#5A6D43]'
               }`}
             >
-              <div className="flex items-start mb-2">
-                <CheckIcon className="w-6 h-6 text-[#8BAE5A] mr-2" />
-                <span className="font-semibold text-white text-left leading-snug break-words">Training Al Gedaan</span>
+              <div className="flex items-start mb-1 sm:mb-2">
+                <CheckIcon className="w-5 h-5 sm:w-6 sm:h-6 text-[#8BAE5A] mr-2 flex-shrink-0" />
+                <span className="font-semibold text-white text-left leading-snug break-words text-sm sm:text-base">Training Al Gedaan</span>
               </div>
-              <p className="text-sm text-gray-400 break-words text-pretty leading-snug">
+              <p className="text-xs sm:text-sm text-gray-400 break-words text-pretty leading-snug">
                 Heb je vandaag al getraind? Registreer deze training als voltooid
               </p>
             </button>
@@ -280,17 +280,17 @@ export default function PreWorkoutModal({
         )}
 
         {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-4">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
           <button
             onClick={onClose}
-            className="flex-1 px-6 py-3 bg-[#3A4D23] text-[#8BAE5A] font-semibold rounded-lg hover:bg-[#4A5D33] transition-colors"
+            className="flex-1 px-5 py-3 sm:px-6 bg-[#3A4D23] text-[#8BAE5A] font-semibold rounded-lg hover:bg-[#4A5D33] transition-colors"
           >
             Annuleren
           </button>
           <button
             onClick={startWorkout}
             disabled={isStarting}
-            className="flex-1 px-6 py-3 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-semibold rounded-lg hover:from-[#7A9D4A] hover:to-[#e0903f] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 px-5 py-3 sm:px-6 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-semibold rounded-lg hover:from-[#7A9D4A] hover:to-[#e0903f] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isStarting ? (
               <div className="flex items-center justify-center">

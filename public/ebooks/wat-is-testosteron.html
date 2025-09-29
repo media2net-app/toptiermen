@@ -825,5 +825,42 @@
             });
         });
     </script>
+  <!-- Back Button: right-middle pill, returns to previous lesson -->
+  <button id="ttm-back-btn" style="position:fixed;right:20px;top:50%;transform:translateY(-50%);z-index:9999;background:linear-gradient(90deg,#8BAE5A,#B6C948);color:#0F1411;border:0;border-radius:9999px;padding:10px 16px;font-weight:700;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;box-shadow:0 6px 20px rgba(139,174,90,0.35);display:flex;align-items:center;gap:8px;cursor:pointer;">
+    <span style="font-size:14px;">←</span>
+    <span style="font-size:14px;">Terug</span>
+  </button>
+  <script>
+    (function(){
+      const btn = document.getElementById('ttm-back-btn');
+      if (!btn) return;
+
+      // Hide any legacy back buttons on the page (old implementation)
+      try {
+        var legacy = Array.from(document.querySelectorAll('a,button')).filter(function(el){
+          if (el.id === 'ttm-back-btn') return false;
+          var txt = (el.textContent||'').trim().toLowerCase();
+          return txt === 'terug' || txt.includes('terug naar');
+        });
+        legacy.forEach(function(el){ el.setAttribute('data-ttm-hidden-legacy-back','1'); el.style.display='none'; });
+      } catch(e){}
+
+      btn.addEventListener('click', function(){
+        try {
+          if (window.history.length > 1) {
+            window.history.back();
+            return;
+          }
+        } catch(e) {}
+        // Fallback: try to go back to the Academy module list
+        var ref = document.referrer || '';
+        if (ref && ref.indexOf('/dashboard/academy/') !== -1) {
+          window.location.href = ref;
+        } else {
+          window.location.href = '/dashboard/academy';
+        }
+      });
+    })();
+  </script>
 </body>
 </html>

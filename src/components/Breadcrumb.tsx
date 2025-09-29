@@ -18,7 +18,7 @@ export default function Breadcrumb({ items, className = '' }: BreadcrumbProps) {
   if (!items || items.length === 0) return null;
 
   return (
-    <nav className={`flex items-center space-x-1 text-sm ${className}`} aria-label="Breadcrumb">
+    <nav className={`flex flex-wrap items-center gap-x-1 text-xs sm:text-sm min-w-0 ${className}`} aria-label="Breadcrumb">
       {/* Home icon */}
       <Link
         href="/dashboard"
@@ -30,18 +30,18 @@ export default function Breadcrumb({ items, className = '' }: BreadcrumbProps) {
 
       {/* Breadcrumb items */}
       {items.map((item, index) => (
-        <div key={index} className="flex items-center">
+        <div key={index} className="flex items-center min-w-0">
           <ChevronRightIcon className="w-4 h-4 text-[#3A4D23] mx-1" />
           
           {item.href && !item.isCurrent ? (
             <Link
               href={item.href}
-              className="text-[#8BAE5A] hover:text-[#B6C948] transition-colors hover:underline"
+              className="text-[#8BAE5A] hover:text-[#B6C948] transition-colors hover:underline truncate max-w-[45vw] sm:max-w-none leading-tight"
             >
               {item.label}
             </Link>
           ) : (
-            <span className={`${item.isCurrent ? 'text-white font-semibold' : 'text-[#8BAE5A]'}`}>
+            <span className={`${item.isCurrent ? 'text-white font-semibold' : 'text-[#8BAE5A]'} truncate max-w-[45vw] sm:max-w-none leading-tight`}>
               {item.label}
             </span>
           )}

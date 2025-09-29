@@ -284,6 +284,9 @@ export default function MijnChallengesPage() {
   const [hasDismissedAlmost, setHasDismissedAlmost] = useState(false);
   const [preferencesLoaded, setPreferencesLoaded] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  // Library button states
+  const [addingLibraryIds, setAddingLibraryIds] = useState<Set<string>>(new Set());
+  const [addedLibraryIds, setAddedLibraryIds] = useState<Set<string>>(new Set());
   const [challengeToDelete, setChallengeToDelete] = useState<Challenge | null>(null);
   
   // Challenge Library state
@@ -330,6 +333,9 @@ export default function MijnChallengesPage() {
     if (!user?.id) return;
 
     try {
+      // Prevent double submit
+      if (addingLibraryIds.has(suggestedChallenge.id) || addedLibraryIds.has(suggestedChallenge.id)) return;
+      setAddingLibraryIds(prev => new Set(prev).add(suggestedChallenge.id));
       // First, create a new challenge in the challenges table
       const createChallengeResponse = await fetch('/api/challenges', {
         method: 'POST',
@@ -382,6 +388,8 @@ export default function MijnChallengesPage() {
         }
         
         toast.success(`Challenge "${suggestedChallenge.title}" toegevoegd!`);
+        // Mark as added in UI
+        setAddedLibraryIds(prev => new Set(prev).add(suggestedChallenge.id));
         // Keep challenge library open so users can add more challenges
         
         // Check if user is in onboarding step 2 or 3 and has enough challenges
@@ -396,6 +404,12 @@ export default function MijnChallengesPage() {
     } catch (error) {
       console.error('Error adding suggested challenge:', error);
       toast.error('Er is een fout opgetreden bij het toevoegen van de challenge.');
+    } finally {
+      setAddingLibraryIds(prev => {
+        const next = new Set(prev);
+        next.delete(suggestedChallenge.id);
+        return next;
+      });
     }
   };
 
@@ -1228,14 +1242,14 @@ export default function MijnChallengesPage() {
 
         {/* Top Tier Men Challenge Library */}
         {showChallengeLibrary && (
-          <div className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-2xl p-6 mb-8 shadow-2xl">
-            <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold text-white mb-2">🏆 Top Tier Men Challenge Library</h2>
-              <p className="text-[#8BAE5A] text-lg">Kies challenges die jou tot een echte leider maken</p>
+          <div className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-2xl p-4 sm:p-5 mb-6 shadow-xl">
+            <div className="text-center mb-5">
+              <h2 className="text-2xl sm:text-3xl font-bold text-white mb-1">🏆 Top Tier Men Challenge Library</h2>
+              <p className="text-[#8BAE5A] text-sm sm:text-base">Kies challenges die jou tot een echte leider maken</p>
             </div>
             
             {/* Category Tabs */}
-            <div className="flex flex-wrap justify-center gap-3 mb-8">
+            <div className="flex flex-wrap justify-center gap-2 sm:gap-3 mb-5">
               {[
                 { key: 'all', label: 'Alle Challenges', icon: '🔥', color: 'from-[#8BAE5A] to-[#B6C948]' },
                 { key: 'Fysiek', label: 'Fysiek', icon: '💪', color: 'from-[#FF6B6B] to-[#FF8E8E]' },
@@ -1245,7 +1259,7 @@ export default function MijnChallengesPage() {
                 <button
                   key={tab.key}
                   onClick={() => setSelectedCategory(tab.key)}
-                  className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm transition-all duration-200 ${
                     selectedCategory === tab.key
                       ? `bg-gradient-to-r ${tab.color} text-[#181F17] shadow-lg scale-105`
                       : 'bg-[#0F1419] text-[#8BAE5A] hover:bg-[#3A4D23] hover:text-white'
@@ -1258,21 +1272,21 @@ export default function MijnChallengesPage() {
             </div>
 
             {/* Search and Difficulty Filter */}
-            <div className="flex flex-col md:flex-row gap-4 mb-8">
+            <div className="flex flex-col md:flex-row gap-3 mb-5">
               <div className="flex-1">
                 <input
                   type="text"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   placeholder="🔍 Zoek naar specifieke challenges..."
-                  className="w-full bg-[#0F1419] border border-[#3A4D23]/30 rounded-xl px-6 py-4 text-white placeholder-gray-400 focus:outline-none focus:border-[#8BAE5A] focus:ring-2 focus:ring-[#8BAE5A]/20 text-lg"
+                  className="w-full bg-[#0F1419] border border-[#3A4D23]/30 rounded-xl px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-[#8BAE5A] focus:ring-2 focus:ring-[#8BAE5A]/20 text-sm sm:text-base"
                 />
               </div>
               <div className="md:w-48">
                 <select
                   value={selectedDifficulty}
                   onChange={(e) => setSelectedDifficulty(e.target.value)}
-                  className="w-full bg-[#0F1419] border border-[#3A4D23]/30 rounded-xl px-6 py-4 text-white focus:outline-none focus:border-[#8BAE5A] focus:ring-2 focus:ring-[#8BAE5A]/20 text-lg"
+                  className="w-full bg-[#0F1419] border border-[#3A4D23]/30 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#8BAE5A] focus:ring-2 focus:ring-[#8BAE5A]/20 text-sm sm:text-base"
                 >
                   <option value="all">Alle Niveaus</option>
                   <option value="easy">🟢 Makkelijk</option>
@@ -1283,19 +1297,19 @@ export default function MijnChallengesPage() {
             </div>
 
             {/* Challenge Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5">
               {getFilteredSuggestedChallenges().map((mission) => (
                 <div
                   key={mission.id}
-                  className="group bg-gradient-to-br from-[#0F1419] to-[#181F17] border border-[#3A4D23]/30 rounded-2xl p-6 hover:border-[#8BAE5A]/50 hover:shadow-2xl hover:shadow-[#8BAE5A]/10 transition-all duration-300 transform hover:scale-105"
+                  className="group bg-gradient-to-br from-[#0F1419] to-[#181F17] border border-[#3A4D23]/30 rounded-2xl p-4 sm:p-5 hover:border-[#8BAE5A]/50 hover:shadow-xl hover:shadow-[#8BAE5A]/10 transition-colors duration-200"
                 >
                   {/* Header */}
-                  <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-3">
                       <span className="text-4xl group-hover:scale-110 transition-transform duration-300">{mission.icon}</span>
                       <div>
-                        <h3 className="text-xl font-bold text-white mb-1">{mission.title}</h3>
-                        <span className={`text-sm px-3 py-1 rounded-full font-medium ${
+                        <h3 className="text-lg font-bold text-white mb-1">{mission.title}</h3>
+                        <span className={`text-xs px-2.5 py-0.5 rounded-full font-medium ${
                           mission.category === 'Fysiek' ? 'bg-red-600/20 text-red-400 border border-red-600/30' :
                           mission.category === 'Mentaal' ? 'bg-blue-600/20 text-blue-400 border border-blue-600/30' :
                           mission.category === 'Financieel' ? 'bg-yellow-600/20 text-yellow-400 border border-yellow-600/30' :
@@ -1306,8 +1320,8 @@ export default function MijnChallengesPage() {
                       </div>
                     </div>
                     <div className="flex flex-col items-end gap-2">
-                      <span className="text-lg text-[#FFD700] font-bold">+{mission.xp_reward} XP</span>
-                      <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                      <span className="text-sm text-[#FFD700] font-bold">+{mission.xp_reward} XP</span>
+                      <span className={`text-[11px] px-2 py-0.5 rounded-full font-medium ${
                         mission.difficulty === 'easy' ? 'bg-green-600/20 text-green-400' :
                         mission.difficulty === 'medium' ? 'bg-yellow-600/20 text-yellow-400' :
                         'bg-red-600/20 text-red-400'
@@ -1319,16 +1333,42 @@ export default function MijnChallengesPage() {
                   </div>
 
                   {/* Description */}
-                  <p className="text-gray-300 text-sm leading-relaxed mb-6">{mission.description}</p>
+                  <p className="text-gray-300 text-sm leading-relaxed mb-4 line-clamp-2">{mission.description}</p>
 
                   {/* Action Button */}
-                  <button
-                    onClick={() => addSuggestedChallenge(mission)}
-                    className="w-full bg-gradient-to-r from-[#8BAE5A] to-[#B6C948] hover:from-[#B6C948] hover:to-[#8BAE5A] text-[#181F17] font-bold px-6 py-3 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg flex items-center justify-center gap-2"
-                  >
-                    <span>⚔️</span>
-                    <span>Challenge Aanvaarden</span>
-                  </button>
+                  {(() => {
+                    const alreadyInList = challenges.some(c => c.title === mission.title);
+                    const isAdded = alreadyInList || addedLibraryIds.has(mission.id);
+                    const isLoading = addingLibraryIds.has(mission.id);
+                    return (
+                      <button
+                        onClick={() => !isAdded && !isLoading && addSuggestedChallenge(mission)}
+                        disabled={isAdded || isLoading}
+                        className={`w-full font-bold px-4 py-2.5 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 text-sm ${
+                          isAdded
+                            ? 'bg-[#2a2f28] text-gray-300 cursor-not-allowed border border-[#3A4D23]'
+                            : 'bg-gradient-to-r from-[#8BAE5A] to-[#B6C948] hover:from-[#B6C948] hover:to-[#8BAE5A] text-[#181F17]'
+                        }`}
+                      >
+                        {isAdded ? (
+                          <>
+                            <span>✅</span>
+                            <span>Toegevoegd</span>
+                          </>
+                        ) : isLoading ? (
+                          <>
+                            <span className="animate-spin inline-block w-4 h-4 border-2 border-[#181F17] border-t-transparent rounded-full" />
+                            <span>Toevoegen...</span>
+                          </>
+                        ) : (
+                          <>
+                            <span>⚔️</span>
+                            <span>Challenge Aanvaarden</span>
+                          </>
+                        )}
+                      </button>
+                    );
+                  })()}
                 </div>
               ))}
             </div>
