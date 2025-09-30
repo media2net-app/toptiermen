@@ -33,7 +33,7 @@ export const currentSmtpConfig: EmailConfig = {
 export const sendgridConfig: EmailConfig = {
   provider: 'api',
   sendgridApiKey: process.env.SENDGRID_API_KEY || 'SG.test_key_for_development',
-  fromEmail: 'platform@toptiermen.eu',
+  fromEmail: process.env.SENDGRID_FROM_EMAIL || 'info@toptiermen.nl',
   fromName: 'TopTierMen Platform'
 };
 
@@ -49,7 +49,7 @@ export const mailgunConfig: EmailConfig = {
 // Function to get current email configuration
 export function getEmailConfig(): EmailConfig {
   // You can switch providers here by changing the return value
-  return mailgunConfig; // BACK TO MAILGUN - SMTP HAS HELO ISSUES
+  return sendgridConfig; // Default: SendGrid Web API
   
   // To use SMTP (HELO issues):
   // return currentSmtpConfig;

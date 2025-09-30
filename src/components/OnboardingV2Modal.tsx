@@ -112,13 +112,26 @@ const WelcomeVideoStep = ({ onComplete }: { onComplete: () => void }) => {
         </div>
       </div>
 
-      {videoWatched && (
+      {/* Primary next button when video finished */}
+      {videoWatched ? (
         <button
           onClick={onComplete}
           className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] hover:from-[#7A9E4A] hover:to-[#E6C200] text-white px-6 py-3 sm:px-8 sm:py-4 rounded-lg font-bold text-sm sm:text-lg transition-all duration-300 transform hover:scale-105 shadow-lg"
         >
           Volgende Stap →
         </button>
+      ) : (
+        <div className="flex flex-col items-center gap-3">
+          <button
+            onClick={onComplete}
+            className="bg-[#3A4D23] hover:bg-[#445a29] text-white px-6 py-3 sm:px-8 sm:py-4 rounded-lg font-bold text-sm sm:text-lg transition-colors shadow-md"
+          >
+            Problemen met video? Ga verder →
+          </button>
+          <p className="text-gray-400 text-xs sm:text-sm max-w-md">
+            Als de video niet goed afspeelt op jouw apparaat (bijv. iOS/Android), kun je hier toch doorgaan. Je kunt de video later terugkijken via het dashboard.
+          </p>
+        </div>
       )}
     </div>
   );
@@ -471,16 +484,26 @@ export default function OnboardingV2Modal({ isOpen }: OnboardingV2ModalProps) {
   }
 
   const handleStepComplete = async (step: number, data?: any) => {
-    const success = await completeStep(step, data);
-    if (success) {
-      // Handle redirects after step completion with optimized timing
-      if (step === 0) { // Welcome video (database step 0) -> redirect to goal step
-        setTimeout(() => router.push('/dashboard'), 100);
-      } else if (step === 1) { // Goal step (database step 1) -> redirect to challenges
-        setTimeout(() => router.push('/dashboard/mijn-challenges'), 100);
-      } else if (step === 5) { // Forum intro step (database step 5) -> complete onboarding
-        setTimeout(() => router.push('/dashboard'), 100);
-      }
+    let success = false;
+    try {
+      success = await completeStep(step, data);
+    } catch (e) {
+      console.error('Onboarding step complete error:', e);
+    }
+
+    // Always navigate to the intended next UI location, even if API failed.
+    // The dashboard will re-sync onboarding state and show the correct next step.
+    const go = (path: string) => setTimeout(() => router.push(path), 80);
+    if (step === 0) {
+      go('/dashboard');
+    } else if (step === 1) {
+      go('/dashboard/mijn-challenges');
+    } else if (step === 5) {
+      go('/dashboard');
+    }
+
+    if (!success) {
+      toast.error('Stap geactiveerd, synchroniseren met server...');
     }
   };
 

@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discipline Levensstijl - Ebook | Top Tier Men</title>
+    <meta name="description" content="Uitgebreide gids over discipline als levensstijl: praktische oefeningen, checklists en reflectie vragen voor duurzame transformatie.">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #ffffff;
+            background: linear-gradient(135deg, #0A0F0A 0%, #181F17 50%, #232D1A 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem;
+            background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+            border-radius: 20px;
+            border: 1px solid #3A4D23;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .logo {
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff 0%, #8BAE5A 50%, #B6C948 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: #8BAE5A;
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .module-info {
+            background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+            padding: 1rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+            border-left: 4px solid #8BAE5A;
+        }
+
+        .section {
+            background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+            margin-bottom: 2rem;
+            padding: 2rem;
+            border-radius: 15px;
+            border: 1px solid #3A4D23;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .section h2 {
+            color: #B6C948;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section h3 {
+            color: #8BAE5A;
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin: 1.5rem 0 1rem;
+        }
+
+        .section p {
+            margin-bottom: 1rem;
+            color: #e0e0e0;
+        }
+
+        .section ul, .section ol {
+            margin: 1rem 0;
+            padding-left: 2rem;
+        }
+
+        .section li {
+            margin-bottom: 0.5rem;
+            color: #e0e0e0;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+            padding: 1.5rem;
+            border-radius: 10px;
+            border-left: 4px solid #B6C948;
+            margin: 1.5rem 0;
+        }
+
+        .exercise-box {
+            background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%);
+            padding: 1.5rem;
+            border-radius: 10px;
+            border: 1px solid #8BAE5A;
+            margin: 1rem 0;
+        }
+
+        .exercise-box h4 {
+            color: #B6C948;
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+        }
+
+        .checklist {
+            background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+            padding: 1.5rem;
+            border-radius: 10px;
+            border: 1px solid #3A4D23;
+            margin: 1rem 0;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.8rem;
+            padding: 0.5rem;
+            background: rgba(58, 77, 35, 0.3);
+            border-radius: 8px;
+        }
+
+        .checklist-item input[type="checkbox"] {
+            margin-right: 1rem;
+            width: 18px;
+            height: 18px;
+            accent-color: #8BAE5A;
+        }
+
+        .reflection-question {
+            background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+            padding: 1.5rem;
+            border-radius: 10px;
+            border-left: 4px solid #B6C948;
+            margin: 1rem 0;
+        }
+
+        .reflection-question h4 {
+            color: #B6C948;
+            margin-bottom: 1rem;
+        }
+
+        .action-plan {
+            background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%);
+            padding: 2rem;
+            border-radius: 15px;
+            border: 2px solid #8BAE5A;
+            margin: 2rem 0;
+        }
+
+        .action-plan h3 {
+            color: #B6C948;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .action-step {
+            background: rgba(139, 174, 90, 0.1);
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            border-left: 3px solid #8BAE5A;
+        }
+
+        .action-step h4 {
+            color: #8BAE5A;
+            margin-bottom: 0.5rem;
+        }
+
+        .icon {
+            width: 24px;
+            height: 24px;
+            display: inline-block;
+            margin-right: 0.5rem;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding: 2rem;
+            background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+            border-radius: 15px;
+            border: 1px solid #3A4D23;
+        }
+
+        .footer p {
+            color: #8BAE5A;
+            margin-bottom: 1rem;
+        }
+
+        .ttm-brand {
+            color: #B6C948;
+            font-weight: 700;
+        }
+
+        /* Sticky Back Button */
+        .sticky-back-btn {
+            position: fixed;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+            z-index: 1000;
+            background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 15px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(139, 174, 90, 0.3);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            min-width: 120px;
+            justify-content: center;
+        }
+
+        .sticky-back-btn:hover {
+            background: linear-gradient(135deg, #B6C948 0%, #8BAE5A 100%);
+            transform: translateY(-50%) scale(1.05);
+            box-shadow: 0 12px 35px rgba(139, 174, 90, 0.4);
+        }
+
+        .sticky-back-btn:active {
+            transform: translateY(-50%) scale(0.95);
+        }
+
+        .sticky-back-btn svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .section {
+                padding: 1.5rem;
+            }
+
+            .sticky-back-btn {
+                right: 10px;
+                padding: 12px 16px;
+                font-size: 12px;
+                min-width: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sticky Back Button -->
+    <a href="https://platform.toptiermen.eu/dashboard/academy/ba58a203-b2d0-442b-83a3-62cfb0a79478/1dcb34e9-9540-4072-871e-dcc206dbd6de" class="sticky-back-btn" title="Terug naar les">
+        <svg viewBox="0 0 24 24">
+            <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+        </svg>
+        Terug
+    </a>
+
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">
+                <img src="/logo_white-full.svg" alt="Top Tier Men Logo" style="height:40px;width:auto" />
+            </div>
+            <h1>Discipline Levensstijl</h1>
+            <p class="subtitle">Van Korte Termijn naar Duurzame Transformatie</p>
+            <div class="module-info">
+                <strong>Module 02: Discipline & Identiteit</strong> | <strong>Les 03: Discipline Levensstijl</strong>
+            </div>
+        </div>
+
+        <!-- Uitgebreide Samenvatting -->
+        <div class="section">
+            <h2>📚 Uitgebreide Samenvatting van de Les</h2>
+            
+            <div class="highlight-box">
+                <h4>🎯 Les Overzicht</h4>
+                <p>In deze les hebben we de transformatie van discipline behandeld - van een korte termijn inspanning naar een duurzame levensstijl. Deze evolutie is cruciaal voor blijvend succes en persoonlijke groei als Top Tier Man.</p>
+            </div>
+
+            <h3>Wat is Discipline als Levensstijl Precies?</h3>
+            <p>Discipline als levensstijl is niet alleen het volgen van regels of het bereiken van doelen - het is een fundamentele manier van leven die je identiteit vormt. Het gaat om het ontwikkelen van een mentaliteit waarbij discipline natuurlijk en automatisch wordt, in plaats van een constante strijd.</p>
+            
+            <p>Denk aan discipline als levensstijl als een "upgrade" van je hele bestaan. Waar gewone discipline je helpt om doelen te bereiken, helpt discipline als levensstijl je om de persoon te worden die je wilt zijn.</p>
+
+            <div class="highlight-box">
+                <h4>💡 Eenvoudige Definitie</h4>
+                <p><em>Discipline als levensstijl is je vermogen om consequent te handelen naar je waarden en doelen, niet als een tijdelijke inspanning, maar als een natuurlijke manier van leven. Het is de integratie van discipline in je identiteit en dagelijkse routine.</em></p>
+            </div>
+
+            <h3>De Drie Fasen van Discipline Ontwikkeling</h3>
+            <p>Discipline als levensstijl ontwikkelt zich in drie duidelijke fasen, elk met zijn eigen uitdagingen en voordelen. Deze fasen bouwen op elkaar voort en creëren samen een onwrikbare fundering voor blijvend succes.</p>
+            
+            <h4>1. Bewuste Discipline (Fase 1)</h4>
+            <p>Dit is de beginfase waar je bewust moet nadenken over elke disciplineuze keuze. Het vereist veel mentale energie en wilskracht, maar het is de fundering voor alles wat volgt.</p>
+            
+            <h4>2. Geautomatiseerde Discipline (Fase 2)</h4>
+            <p>In deze fase worden veel disciplineuze acties automatisch. Je hoeft er niet meer over na te denken - het wordt een gewoonte. Dit bespaart mentale energie en maakt discipline makkelijker.</p>
+            
+            <h4>3. Identiteits Discipline (Fase 3)</h4>
+            <p>Dit is het hoogste niveau - discipline wordt deel van wie je bent. Je bent niet iemand die discipline heeft, je bent iemand die discipline is. Dit is de meest krachtige en duurzame vorm.</p>
+
+            <h3>De 4 Fundamentele Pijlers van Discipline Levensstijl</h3>
+            <p>Discipline als levensstijl is gebaseerd op vier fundamentele pijlers die samen een onwrikbare mentaliteit creëren. Deze pijlers zijn de basis van alle duurzame discipline en kunnen worden toegepast in je dagelijks leven.</p>
+            
+            <h4>Pijler 1: Consistentie (De Basis)</h4>
+            <p>Consistentie is de basis van alle discipline. Het gaat om het dagelijks uitvoeren van kleine acties, ongeacht hoe je je voelt of wat er om je heen gebeurt.</p>
+            
+            <p><strong>Praktische Toepassing:</strong></p>
+            <ul>
+                <li><strong>Dagelijkse Routines:</strong> Ontwikkel vaste routines voor belangrijke activiteiten</li>
+                <li><strong>Kleine Acties:</strong> Focus op kleine, dagelijkse acties in plaats van grote, sporadische inspanningen</li>
+                <li><strong>Tracking:</strong> Houd bij wat je doet om consistentie te monitoren</li>
+                <li><strong>Flexibiliteit:</strong> Wees flexibel in de uitvoering, maar consistent in de intentie</li>
+            </ul>
+            
+            <h4>Pijler 2: Identiteit (Wie Je Bent)</h4>
+            <p>Identiteit is de meest krachtige pijler. Wanneer discipline deel wordt van je identiteit, wordt het natuurlijk en duurzaam. Je bent niet iemand die discipline heeft, je bent iemand die discipline is.</p>
+            
+            <p><strong>Praktische Toepassing:</strong></p>
+            <ul>
+                <li><strong>Identiteits Verandering:</strong> Verander van "ik probeer" naar "ik ben"</li>
+                <li><strong>Waarden:</strong> Definieer je waarden en leef ernaar</li>
+                <li><strong>Doelen:</strong> Stel doelen die aansluiten bij je identiteit</li>
+                <li><strong>Verhalen:</strong> Vertel jezelf verhalen die je identiteit ondersteunen</li>
+            </ul>
+            
+            <h4>Pijler 3: Systemen (Hoe Het Werkt)</h4>
+            <p>Systemen maken discipline automatisch. Door goede systemen te bouwen, hoef je niet meer te vertrouwen op wilskracht of motivatie. Systemen werken 24/7, ongeacht hoe je je voelt.</p>
+            
+            <p><strong>Praktische Toepassing:</strong></p>
+            <ul>
+                <li><strong>Omgevingsontwerp:</strong> Richt je omgeving in om goede keuzes makkelijker te maken</li>
+                <li><strong>Gewoonte Stapelen:</strong> Koppel nieuwe gewoonten aan bestaande gewoonten</li>
+                <li><strong>Automatisering:</strong> Automatiseer zoveel mogelijk processen</li>
+                <li><strong>Verantwoording:</strong> Bouw systemen voor verantwoording en feedback</li>
+            </ul>
+            
+            <h4>Pijler 4: Groei (Waar Je Naartoe Gaat)</h4>
+            <p>Groei is de drijvende kracht achter discipline als levensstijl. Het gaat om het voortdurend verbeteren van jezelf en je prestaties, niet om perfectie, maar om vooruitgang.</p>
+            
+            <p><strong>Praktische Toepassing:</strong></p>
+            <ul>
+                <li><strong>Continue Verbetering:</strong> Zoek altijd naar manieren om beter te worden</li>
+                <li><strong>Feedback:</strong> Vraag om feedback en gebruik het om te verbeteren</li>
+                <li><strong>Leren:</strong> Investeer in jezelf door te leren en te ontwikkelen</li>
+                <li><strong>Uitdagingen:</strong> Zoek uitdagingen die je helpen groeien</li>
+            </ul>
+
+            <h3>Hoe Discipline als Levensstijl Werkt in je Hersenen</h3>
+            <p>Discipline als levensstijl werkt omdat het je hersenen traint om anders te reageren op verleidingen en uitdagingen. Het ontwikkelt nieuwe verbindingen die je helpen om automatisch de juiste keuzes te maken.</p>
+            
+            <h4>Gewoonte Vorming</h4>
+            <p>Discipline als levensstijl is gebaseerd op gewoonte vorming. Wanneer je consequent dezelfde acties uitvoert, worden deze automatisch. Je hoeft er niet meer over na te denken - het gaat vanzelf.</p>
+            
+            <h4>Identiteit Integratie</h4>
+            <p>Wanneer discipline deel wordt van je identiteit, wordt het natuurlijk en duurzaam. Je hersenen behandelen disciplineuze acties als onderdeel van wie je bent, niet als iets wat je moet doen.</p>
+            
+            <h4>Automatische Reacties</h4>
+            <p>Door herhaalde training worden goede reacties automatisch. Je hoeft niet meer na te denken over wat je moet doen - je lichaam en geest reageren instinctief correct.</p>
+
+            <h3>Discipline Levensstijl in de Praktijk</h3>
+            <p>Discipline als levensstijl wordt pas echt krachtig wanneer het wordt toegepast in de praktijk. Hier zijn concrete voorbeelden van hoe discipline als levensstijl werkt in verschillende situaties.</p>
+            
+            <h4>Case Study 1: De Ochtendroutine</h4>
+            <p><strong>Situatie:</strong> Je wilt een productieve ochtendroutine ontwikkelen die je dag goed begint.</p>
+            
+            <p><strong>Zonder Discipline Levensstijl:</strong></p>
+            <ul>
+                <li>Wordt wakker wanneer je zin hebt</li>
+                <li>Checkt direct je telefoon</li>
+                <li>Haast zich om klaar te maken</li>
+                <li>Voelt zich gestrest en overweldigd</li>
+                <li>Begint de dag al achter</li>
+            </ul>
+            
+            <p><strong>Met Discipline Levensstijl:</strong></p>
+            <ul>
+                <li>Staat op op een vaste tijd (06:00)</li>
+                <li>Maakt direct je bed op</li>
+                <li>Doet 20 minuten lichaamsbeweging</li>
+                <li>Mediteert 10 minuten</li>
+                <li>Eet een gezond ontbijt</li>
+                <li>Plant de dag vooruit</li>
+                <li>Begint de dag met energie en focus</li>
+            </ul>
+
+            <h4>Case Study 2: Werk Productiviteit</h4>
+            <p><strong>Situatie:</strong> Je wilt je productiviteit op het werk verhogen en betere resultaten behalen.</p>
+            
+            <p><strong>Zonder Discipline Levensstijl:</strong></p>
+            <ul>
+                <li>Werkt reactief op wat er op je afkomt</li>
+                <li>Laat zich afleiden door social media</li>
+                <li>Stelt taken uit tot het laatste moment</li>
+                <li>Voelt zich overweldigd door de hoeveelheid werk</li>
+                <li>Levert middelmatige resultaten</li>
+            </ul>
+            
+            <p><strong>Met Discipline Levensstijl:</strong></p>
+            <ul>
+                <li>Plant je dag de avond ervoor</li>
+                <li>Werkt in gefocuste blokken van 25 minuten</li>
+                <li>Elimineert alle afleidingen</li>
+                <li>Voltooit taken volledig voordat je naar de volgende gaat</li>
+                <li>Levert consistente, hoge kwaliteit resultaten</li>
+            </ul>
+        </div>
+
+        <!-- Huiswerk Opdrachten -->
+        <div class="section">
+            <h2>📝 Huiswerk Opdrachten</h2>
+            <p><strong>Belangrijk:</strong> Deze opdrachten zijn specifiek gebaseerd op de les inhoud over discipline als levensstijl en zijn ontworpen om je begrip te verdiepen en praktische toepassing te stimuleren.</p>
+
+            <div class="exercise-box">
+                <h4>Opdracht 1: Discipline Levensstijl Assessment</h4>
+                <p><strong>Doel:</strong> Evalueer je huidige discipline levensstijl niveau en identificeer verbeterpunten.</p>
+                <p><strong>Actie:</strong> Beantwoord de volgende vragen eerlijk en noteer je antwoorden (1-10 schaal):</p>
+                <ul>
+                    <li>Hoe natuurlijk voelt discipline voor je?</li>
+                    <li>Hoe goed kun je discipline handhaven zonder wilskracht?</li>
+                    <li>Hoe geïntegreerd is discipline in je identiteit?</li>
+                    <li>Hoe goed werken je discipline systemen automatisch?</li>
+                    <li>Hoe consistent ben je in je discipline gewoonten?</li>
+                    <li>Hoe goed kun je discipline handhaven onder stress?</li>
+                    <li>Hoe goed kun je anderen inspireren door je discipline?</li>
+                    <li>Hoe duurzaam zijn je discipline gewoonten?</li>
+                </ul>
+                <p><strong>Reflectie:</strong> Welke scores zijn het laagst? Dit zijn je prioriteiten voor discipline levensstijl ontwikkeling.</p>
+            </div>
+
+            <div class="exercise-box">
+                <h4>Opdracht 2: Discipline Levensstijl Dagboek (14 dagen)</h4>
+                <p><strong>Doel:</strong> Houd bij hoe je discipline levensstijl toepast en identificeer patronen.</p>
+                <p><strong>Actie:</strong> Houd elke dag bij:</p>
+                <ul>
+                    <li><strong>Natuurlijkheid:</strong> Hoe natuurlijk voelde discipline vandaag? (1-10)</li>
+                    <li><strong>Automatisering:</strong> Hoe automatisch waren je discipline acties? (1-10)</li>
+                    <li><strong>Identiteit:</strong> Hoe goed paste discipline bij wie je bent? (1-10)</li>
+                    <li><strong>Systemen:</strong> Hoe goed werkten je discipline systemen? (1-10)</li>
+                    <li><strong>Consistentie:</strong> Hoe consistent was je met je discipline gewoonten? (1-10)</li>
+                    <li><strong>Stress:</strong> Hoe goed handhaafde je discipline onder stress? (1-10)</li>
+                    <li><strong>Inspiratie:</strong> Hoe goed inspireerde je anderen door je discipline? (1-10)</li>
+                    <li><strong>Notities:</strong> Wat viel je op vandaag? Welke uitdagingen had je?</li>
+                </ul>
+                <p><strong>Analyse:</strong> Aan het einde van de 14 dagen, identificeer patronen en correlaties. Welke dagen had je de beste discipline levensstijl?</p>
+            </div>
+
+            <div class="exercise-box">
+                <h4>Opdracht 3: Discipline Levensstijl Systemen Audit</h4>
+                <p><strong>Doel:</strong> Evalueer en optimaliseer je discipline systemen voor automatische werking.</p>
+                <p><strong>Actie:</strong> Evalueer de volgende systemen:</p>
+                <ul>
+                    <li><strong>Omgevingssystemen:</strong> Hoe goed ondersteunt je omgeving discipline?</li>
+                    <li><strong>Gewoonte systemen:</strong> Hoe goed werken je gewoonte loops?</li>
+                    <li><strong>Identiteit systemen:</strong> Hoe goed ondersteunt je identiteit discipline?</li>
+                    <li><strong>Verantwoording systemen:</strong> Hoe goed houd je jezelf verantwoordelijk?</li>
+                    <li><strong>Feedback systemen:</strong> Hoe goed krijg je feedback op je discipline?</li>
+                </ul>
+                <p><strong>Actieplan:</strong> Kies 3 systemen die je kunt verbeteren en maak een plan om ze te optimaliseren.</p>
+            </div>
+
+            <div class="exercise-box">
+                <h4>Opdracht 4: Discipline Levensstijl Identiteit Development</h4>
+                <p><strong>Doel:</strong> Ontwikkel je identiteit als iemand met discipline levensstijl.</p>
+                <p><strong>Actie:</strong> Implementeer de volgende identiteit development activiteiten:</p>
+                <ul>
+                    <li>Schrijf dagelijks 3 affirmaties over je discipline identiteit</li>
+                    <li>Visualiseer jezelf als iemand met discipline levensstijl</li>
+                    <li>Spreek over jezelf als iemand met discipline levensstijl</li>
+                    <li>Handel elke dag naar je discipline identiteit</li>
+                    <li>Deel je discipline identiteit met anderen</li>
+                </ul>
+                <p><strong>Reflectie:</strong> Houd bij hoe je identiteit verandert en hoe dit je discipline beïnvloedt.</p>
+            </div>
+
+            <div class="exercise-box">
+                <h4>Opdracht 5: Discipline Levensstijl Leiderschap</h4>
+                <p><strong>Doel:</strong> Ontwikkel je vermogen om anderen te leiden door discipline levensstijl.</p>
+                <p><strong>Actie:</strong> Implementeer de volgende leiderschap activiteiten:</p>
+                <ul>
+                    <li>Word een discipline levensstijl mentor voor anderen</li>
+                    <li>Deel je discipline levensstijl kennis met anderen</li>
+                    <li>Organiseer discipline levensstijl activiteiten</li>
+                    <li>Creëer een discipline levensstijl community</li>
+                    <li>Help anderen hun discipline levensstijl te ontwikkelen</li>
+                </ul>
+                <p><strong>Reflectie:</strong> Houd bij hoe je leiderschap vaardigheden verbeteren en hoe anderen reageren op je discipline levensstijl.</p>
+            </div>
+        </div>
+
+        <!-- Discipline Levensstijl Checklists -->
+        <div class="section">
+            <h2>✅ Discipline Levensstijl Checklists</h2>
+            <p><strong>Doel:</strong> Deze checklists zijn specifiek ontworpen om je discipline levensstijl te ontwikkelen en te versterken.</p>
+
+            <h3>Discipline Levensstijl Ochtendroutine</h3>
+            <div class="checklist">
+                <div class="checklist-item">
+                    <input type="checkbox" id="lifestyle1">
+                    <label for="lifestyle1">Sta op op een vaste tijd zonder wilskracht</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="lifestyle2">
+                    <label for="lifestyle2">Discipline voelt natuurlijk en automatisch</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="lifestyle3">
+                    <label for="lifestyle3">Identiteit ondersteunt discipline acties</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="lifestyle4">
+                    <label for="lifestyle4">Systemen werken automatisch</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="lifestyle5">
+                    <label for="lifestyle5">Discipline is deel van wie je bent</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="lifestyle6">
+                    <label for="lifestyle6">Geen wilskracht nodig voor discipline</label>
+                </div>
+            </div>
+
+            <h3>Discipline Levensstijl Focus</h3>
+            <div class="checklist">
+                <div class="checklist-item">
+                    <input type="checkbox" id="focus1">
+                    <label for="focus1">Focus voelt natuurlijk en automatisch</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="focus2">
+                    <label for="focus2">Afleidingen worden automatisch geëlimineerd</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="focus3">
+                    <label for="focus3">Discipline systemen ondersteunen focus</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="focus4">
+                    <label for="focus4">Identiteit ondersteunt focus gedrag</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="focus5">
+                    <label for="focus5">Focus is deel van je natuurlijke gedrag</label>
+                </div>
+            </div>
+
+            <h3>Discipline Levensstijl Systemen</h3>
+            <div class="checklist">
+                <div class="checklist-item">
+                    <input type="checkbox" id="systems1">
+                    <label for="systems1">Omgevingssystemen werken automatisch</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="systems2">
+                    <label for="systems2">Gewoonte systemen zijn geïntegreerd</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="systems3">
+                    <label for="systems3">Identiteit systemen ondersteunen discipline</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="systems4">
+                    <label for="systems4">Verantwoording systemen werken automatisch</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="systems5">
+                    <label for="systems5">Feedback systemen zijn geïntegreerd</label>
+                </div>
+            </div>
+
+            <h3>Discipline Levensstijl Leiderschap</h3>
+            <div class="checklist">
+                <div class="checklist-item">
+                    <input type="checkbox" id="leadership1">
+                    <label for="leadership1">Leiderschap door discipline levensstijl</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="leadership2">
+                    <label for="leadership2">Inspireer anderen door discipline levensstijl</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="leadership3">
+                    <label for="leadership3">Mentor anderen in discipline levensstijl</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="leadership4">
+                    <label for="leadership4">Creëer discipline levensstijl community</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="leadership5">
+                    <label for="leadership5">Help anderen discipline levensstijl ontwikkelen</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reflectie Vragen -->
+        <div class="section">
+            <h2>🤔 Reflectie Vragen voor Discipline Levensstijl</h2>
+            
+            <div class="reflection-question">
+                <h4>Vraag 1: Huidige Discipline Levensstijl Status</h4>
+                <p>Hoe zou je je huidige discipline levensstijl niveau beoordelen op een schaal van 1-10? Welke specifieke gebieden van je leven hebben de meeste discipline levensstijl nodig? Wat zijn je grootste uitdagingen bij het ontwikkelen van discipline levensstijl?</p>
+            </div>
+            
+            <div class="reflection-question">
+                <h4>Vraag 2: Discipline Levensstijl Obstakels</h4>
+                <p>Welke factoren in je leven maken discipline levensstijl het moeilijkst? Denk aan je omgeving, routines, sociale invloeden, en persoonlijke gewoonten. Welke van deze factoren kun je het gemakkelijkst aanpakken?</p>
+            </div>
+            
+            <div class="reflection-question">
+                <h4>Vraag 3: Discipline Levensstijl Impact</h4>
+                <p>Hoe heeft gebrek aan discipline levensstijl je leven beïnvloed? Welke kansen heb je gemist door inconsistentie? Hoe zou je leven eruitzien als je discipline levensstijl had in alle belangrijke gebieden?</p>
+            </div>
+            
+            <div class="reflection-question">
+                <h4>Vraag 4: Discipline Levensstijl Doelen</h4>
+                <p>Wat zijn je specifieke doelen voor discipline levensstijl ontwikkeling over de komende 3 maanden? Welke meetbare verbeteringen wil je zien in je consistentie, focus, en doelgerichtheid?</p>
+            </div>
+            
+            <div class="reflection-question">
+                <h4>Vraag 5: Discipline Levensstijl Strategie</h4>
+                <p>Welke strategieën ben je bereid te gebruiken om je discipline levensstijl te ontwikkelen? Wat zijn je grootste uitdagingen bij het implementeren van discipline levensstijl gewoonten? Hoe kun je jezelf verantwoordelijk houden?</p>
+            </div>
+            
+            <div class="reflection-question">
+                <h4>Vraag 6: Discipline Levensstijl Visie</h4>
+                <p>Hoe ziet je ideale discipline levensstijl eruit over 1 jaar? Welke rol speelt discipline levensstijl in je algemene doelen en ambities? Hoe kun je anderen inspireren door je discipline levensstijl?</p>
+            </div>
+        </div>
+
+        <!-- Volgende Stappen en Actieplan -->
+        <div class="section">
+            <h2>🚀 Volgende Stappen en Actieplan</h2>
+
+            <div class="action-plan">
+                <h3>90-Dagen Discipline Levensstijl Transformatie</h3>
+
+                <div class="action-step">
+                    <h4>Dagen 1-30: Foundation Bouwen</h4>
+                    <ul>
+                        <li>Implementeer discipline levensstijl assessment</li>
+                        <li>Start met discipline levensstijl dagboek</li>
+                        <li>Implementeer discipline levensstijl ochtendroutine</li>
+                        <li>Begin met discipline levensstijl systemen audit</li>
+                        <li>Start met discipline levensstijl identiteit development</li>
+                    </ul>
+                </div>
+
+                <div class="action-step">
+                    <h4>Dagen 31-60: Systemen Optimaliseren</h4>
+                    <ul>
+                        <li>Optimaliseer discipline levensstijl systemen</li>
+                        <li>Implementeer discipline levensstijl focus technieken</li>
+                        <li>Versterk discipline levensstijl identiteit</li>
+                        <li>Implementeer discipline levensstijl verantwoording</li>
+                        <li>Start met discipline levensstijl leiderschap</li>
+                    </ul>
+                </div>
+
+                <div class="action-step">
+                    <h4>Dagen 61-90: Levensstijl Integratie</h4>
+                    <ul>
+                        <li>Integreer discipline levensstijl in alle gebieden</li>
+                        <li>Versterk discipline levensstijl identiteit</li>
+                        <li>Implementeer discipline levensstijl leiderschap</li>
+                        <li>Plan voor langetermijn discipline levensstijl development</li>
+                        <li>Word een discipline levensstijl mentor</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>Langetermijn Discipline Levensstijl Strategieën</h3>
+            <ul>
+                <li><strong>Maand 4-6:</strong> Verdieping en geavanceerde discipline levensstijl technieken</li>
+                <li><strong>Maand 7-12:</strong> Integratie van discipline levensstijl in alle levensgebieden</li>
+                <li><strong>Jaar 2+:</strong> Discipline levensstijl leiderschap en mentoring</li>
+            </ul>
+
+            <div class="highlight-box">
+                <h4>🎯 Belangrijke Herinnering</h4>
+                <p>Discipline levensstijl is niet een bestemming, maar een manier van leven. Focus op progressie, niet op perfectie. Elke dag is een nieuwe kans om je discipline levensstijl te ontwikkelen en jezelf te verbeteren.</p>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>Dit ebook is onderdeel van de <span class="ttm-brand">Top Tier Men</span> Academy</p>
+            <p>Module 02: Discipline & Identiteit | Les 03: Discipline Levensstijl</p>
+            <p>© 2025 Top Tier Men. Alle rechten voorbehouden.</p>
+        </div>
+    </div>
+
+    <script>
+        // Simple functionality for checkboxes
+        document.addEventListener('DOMContentLoaded', function() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            
+            checkboxes.forEach(checkbox => {
+                // Load saved state from localStorage
+                const savedState = localStorage.getItem(checkbox.id);
+                if (savedState === 'true') {
+                    checkbox.checked = true;
+                }
+                
+                // Save state when changed
+                checkbox.addEventListener('change', function() {
+                    localStorage.setItem(this.id, this.checked);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

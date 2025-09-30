@@ -3,14 +3,14 @@ import { createClient } from '@supabase/supabase-js';
 
 export async function POST(request: NextRequest) {
   try {
-    const { currentPassword, newPassword } = await request.json();
+    const { newPassword } = await request.json();
     
     console.log('🔧 Changing password for user');
     
-    if (!currentPassword || !newPassword) {
+    if (!newPassword) {
       return NextResponse.json({
         success: false,
-        error: 'Alle velden zijn verplicht'
+        error: 'Nieuw wachtwoord is vereist'
       }, { status: 400 });
     }
 
@@ -60,21 +60,7 @@ export async function POST(request: NextRequest) {
       }, { status: 401 });
     }
 
-    // Verify current password by attempting to sign in with current credentials
-    const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-      email: user.email!,
-      password: currentPassword
-    });
-
-    if (signInError) {
-      console.error('❌ Current password verification failed:', signInError);
-      return NextResponse.json({
-        success: false,
-        error: 'Huidig wachtwoord is incorrect'
-      }, { status: 400 });
-    }
-
-    // Now update the password using admin API
+    // Update the password using admin API (no current password required, user must be authenticated via token)
     const { data: updateData, error: updateError } = await supabase.auth.admin.updateUserById(
       user.id,
       { password: newPassword }

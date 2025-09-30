@@ -31,31 +31,32 @@ import SchemaChangeWarningModal from '@/components/SchemaChangeWarningModal';
 interface TrainingSchema {
   id: string;
   name: string;
-  description: string;
-  category: string;
-  cover_image: string | null;
-  status: string;
-  difficulty: string;
-  estimated_duration: string;
-  target_audience: string | null;
+  // The following fields are optional in list view to allow minimal selects
+  description?: string;
+  category?: string;
+  cover_image?: string | null;
+  status?: string;
+  difficulty?: string;
+  estimated_duration?: string;
+  target_audience?: string | null;
   training_goal: string;
-  rep_range: string;
-  rest_time_seconds: number;
+  rep_range?: string;
+  rest_time_seconds?: number;
   equipment_type: string;
   schema_nummer: number | null;
   duration?: string;
   training_schema_days?: {
-    id: string;
+    id?: string;
     day_number: number;
-    name: string;
+    name?: string;
     training_schema_exercises?: {
-      id: string;
-      exercise_name: string;
+      id?: string;
+      exercise_name?: string;
       notes?: string;
-      sets: number;
-      reps: string;
+      sets?: number;
+      reps?: string;
       rest_time_seconds?: number;
-      order_index: number;
+      order_index?: number;
       exercise_id?: number;
       video_url?: string;
     }[];
@@ -366,11 +367,13 @@ function TrainingschemasContent() {
       const { data, error } = await supabase
         .from('training_schemas')
         .select(`
-          *,
+          id,
+          name,
+          training_goal,
+          equipment_type,
+          schema_nummer,
           training_schema_days (
-            id,
-            day_number,
-            name
+            day_number
           )
         `)
         .eq('status', 'published')
@@ -387,11 +390,12 @@ function TrainingschemasContent() {
       
       console.log('✅ Training schemas fetched from database:', data?.length || 0);
       
-      // Store all schemas for re-filtering
-      setAllTrainingSchemas(data || []);
+      // Store all schemas for re-filtering (cast to our app type)
+      const minimalList = (data || []) as unknown as TrainingSchema[];
+      setAllTrainingSchemas(minimalList);
       
       // Filter schemas based on user's profile if they have one
-      let filteredSchemas = data || [];
+      let filteredSchemas: TrainingSchema[] = minimalList;
       
       if (userTrainingProfile && !showOnboardingStep3) {
         // Only filter during normal use, not during onboarding
@@ -486,11 +490,13 @@ function TrainingschemasContent() {
           supabase
             .from('training_schemas')
             .select(`
-              *,
+              id,
+              name,
+              training_goal,
+              equipment_type,
+              schema_nummer,
               training_schema_days (
-                id,
-                day_number,
-                name
+                day_number
               )
             `)
             .eq('status', 'published')
@@ -631,8 +637,25 @@ function TrainingschemasContent() {
         const response = periodResult.value as Response;
         if (response.ok) {
           const result = await response.json();
-          setCurrentSchemaPeriod(result.data);
-          console.log('✅ Current schema period loaded:', result.data);
+          // Transform to match SchemaPeriod interface (align with fetchCurrentSchemaPeriod)
+          if (result?.data) {
+            const transformedData = {
+              id: result.data.selected_schema_id,
+              user_id: user.id,
+              training_schema_id: result.data.selected_schema_id,
+              start_date: result.data.schema_start_date,
+              end_date: result.data.schema_end_date,
+              status: 'active' as const,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+              training_schemas: result.data.training_schema
+            };
+            setCurrentSchemaPeriod(transformedData);
+            console.log('✅ Current schema period loaded:', transformedData);
+          } else {
+            console.log('⚠️ No active schema period found');
+            setCurrentSchemaPeriod(null);
+          }
         } else {
           console.log('⚠️ No active schema period found');
           setCurrentSchemaPeriod(null);
@@ -2080,8 +2103,9 @@ function TrainingschemasContent() {
 
   return (
     <PageLayout title="Trainingsschemas">
-      <OnboardingV2Progress />
-      <OnboardingNotice />
+      {/* Show onboarding UI only if onboarding is not completed */}
+      {!isCompleted && <OnboardingV2Progress />}
+      {!isCompleted && <OnboardingNotice />}
       
       {/* Continue to Voedingsplannen Button - Only show during onboarding and when schema is selected */}
       {userTrainingProfile && trainingSchemas.length > 0 && !isCompleted && selectedTrainingSchema && (
@@ -2949,7 +2973,7 @@ function TrainingschemasContent() {
       <PostOnboardingSchemaModal
         isOpen={showPostOnboardingModal}
         onClose={() => setShowPostOnboardingModal(false)}
-        selectedSchema={selectedSchemaForModal}
+        selectedSchema={selectedSchemaForModal as any}
       />
 
       {/* Schema Change Warning Modal */}

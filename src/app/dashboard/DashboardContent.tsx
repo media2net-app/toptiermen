@@ -14,6 +14,7 @@ import { useMindFocusIntake } from '@/hooks/useMindFocusIntake';
 import OnboardingV2Modal from '@/components/OnboardingV2Modal';
 import { WorkoutSessionProvider, useWorkoutSession } from '@/contexts/WorkoutSessionContext';
 import FloatingWorkoutWidget from '@/components/FloatingWorkoutWidget';
+import MobileWorkoutBar from '@/components/MobileWorkoutBar';
 import MobileNav from '../components/MobileNav';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
@@ -31,6 +32,7 @@ import TestUserVideoModal from '@/components/TestUserVideoModal';
 import PWAInstallPrompt from '@/components/PWAInstallPrompt';
 import V2MonitoringDashboard from '@/components/V2MonitoringDashboard';
 import V2PerformanceAlerts from '@/components/V2PerformanceAlerts';
+import ModalBase from '@/components/ui/ModalBase';
 import CacheIssueHelper from '@/components/CacheIssueHelper';
 
 // Workout Widget Component
@@ -70,10 +72,12 @@ const WorkoutWidget = () => {
   }
   
   return (
-    <FloatingWorkoutWidget
-      session={session}
-      onResume={() => {}}
-    />
+    <>
+      {/* Desktop widget */}
+      <FloatingWorkoutWidget session={session} onResume={() => {}} />
+      {/* Mobile widget */}
+      <MobileWorkoutBar session={session as any} />
+    </>
   );
 };
 
@@ -205,8 +209,15 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus, setIsMobileMenuOp
     // Check if item is explicitly disabled (e.g., "binnenkort online")
     if ((item as any).disabled) return true;
     
+    // Special guard: if onboarding is NOT completed and we're on last step (6), only allow Brotherhood > Forum
+    if (!actualOnboardingStatus?.onboarding_completed && actualCurrentStep === 6) {
+      if (item.label === 'Brotherhood') return false; // allow expand
+      if (item.label === 'Forum' && item.parent === 'Brotherhood') return false;
+      return true;
+    }
+
     // If onboarding is completed, no items should be disabled (except explicitly disabled ones)
-    // BUT: If user is still on step 5 (Forum intro), only allow Brotherhood > Forum
+    // BUT: If user is still marked on step 6 (Forum intro), only allow Brotherhood > Forum
     if (actualOnboardingStatus?.onboarding_completed) {
       // Special case: If user completed onboarding but is still on forum intro step
       // Only allow Brotherhood > Forum access
@@ -952,6 +963,7 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, profile, isAdmin, logoutAndRedirect } = useSupabaseAuth();
+  const { session, stopWorkout } = useWorkoutSession();
   const { showDebug, toggleDebug } = useDebug();
   const { isCompleted, isLoading: onboardingLoading } = useOnboardingV2();
   const isTestUser = useTestUser();
@@ -1151,33 +1163,96 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
     }
   }, [onboardingStatus, profile?.role]);
 
-  // Enhanced logout using the new logoutAndRedirect function
+  // Workout-aware logout confirm modal
+  const [showWorkoutLogoutConfirm, setShowWorkoutLogoutConfirm] = useState(false);
+
+  // Enhanced logout using the new logoutAndRedirect function with workout guard
   const handleLogout = async () => {
     if (isLoggingOut) return; // Prevent double click
     
+    // If there is an active workout, ask for confirmation and finalize first
+    if (session && (session.isActive || (session.workoutTime ?? 0) > 0)) {
+      console.log('🚪 Logout intercepted due to active workout session:', {
+        isActive: session.isActive,
+        workoutTime: session.workoutTime,
+        currentSet: session.currentSet,
+      });
+      setShowWorkoutLogoutConfirm(true);
+      // Native confirm fallback if modal isn't mounted (edge cases)
+      setTimeout(() => {
+        try {
+          const modalVisible = document.querySelector('[data-workout-logout-modal]');
+          if (!modalVisible) {
+            const proceed = window.confirm('Weet je zeker dat je wilt uitloggen? Je hebt nog een workout sessie lopen. De workout wordt gestopt en geregistreerd.');
+            if (proceed) {
+              void confirmStopWorkoutAndLogout();
+            }
+          }
+        } catch (e) {
+          console.warn('Workout logout confirm fallback error', e);
+        }
+      }, 50);
+      return;
+    }
+
     try {
       console.log('🚪 Dashboard: Logout initiated...');
       setIsLoggingOut(true);
-      
-      // Show loading state
       const logoutButton = document.querySelector('[data-logout-button]');
-      if (logoutButton) {
-        logoutButton.setAttribute('disabled', 'true');
-      }
-      
-      // Use the enhanced logoutAndRedirect function
+      if (logoutButton) logoutButton.setAttribute('disabled', 'true');
       await logoutAndRedirect('/login');
-      
     } catch (error) {
       console.error('❌ Dashboard: Logout error:', error);
-      
-      // Emergency fallback - force redirect
       if (typeof window !== 'undefined') {
         window.location.href = `/login?logout=error&t=${Date.now()}`;
       }
-    } finally {
-      // Note: setIsLoggingOut(false) is not needed here since we're redirecting
-      // The component will be unmounted during redirect
+    }
+  };
+
+  const confirmStopWorkoutAndLogout = async () => {
+    try {
+      setIsLoggingOut(true);
+      // finalize workout in DB if we have id
+      if (session?.id) {
+        try {
+          const duration_minutes = Math.max(1, Math.round((session.workoutTime || 0) / 60));
+          await fetch('/api/workouts/sessions', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              session_id: session.id,
+              status: 'completed',
+              duration_minutes
+            })
+          });
+          } catch (e) {
+          console.warn('⚠️ Failed to finalize workout before logout', e);
+        }
+        try {
+          await fetch('/api/workout-sessions/complete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              sessionId: session.id,
+              userId: user?.id,
+              schemaId: (session as any).schemaId,
+              dayNumber: (session as any).dayNumber,
+              rating: 5,
+              notes: 'Auto-complete on logout'
+            })
+
+          });
+        } catch (e) {
+          console.warn('⚠️ Failed to mark day completion before logout', e);
+        }
+      }
+      stopWorkout();
+      await logoutAndRedirect('/login');
+    } catch (e) {
+      console.error('❌ Error during finalize+logout', e);
+      if (typeof window !== 'undefined') {
+        window.location.href = `/login?logout=error&t=${Date.now()}`;
+      }
     }
   };
 
@@ -1512,6 +1587,31 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
         
         {/* Support Button - Removed */}
         
+        {/* Workout logout confirm - Standard ModalBase */}
+        <ModalBase isOpen={showWorkoutLogoutConfirm} onClose={() => setShowWorkoutLogoutConfirm(false)} zIndexClassName="z-[9999]">
+          <div className="bg-[#232D1A] border border-[#3A4D23] rounded-xl p-6 w-full" data-workout-logout-modal>
+            <h3 className="text-lg font-bold text-white mb-2">Weet je zeker dat je wilt uitloggen?</h3>
+            <p className="text-[#8BAE5A] text-sm mb-4">
+              Je hebt nog een workout sessie lopen. Als je doorgaat, wordt de workout eerst gestopt en geregistreerd.
+            </p>
+            <div className="bg-[#181F17] rounded-lg p-3 text-sm text-gray-300 mb-4">
+              <div className="flex justify-between"><span>Huidige oefening</span><span className="text-white font-medium">{session?.exerciseName || '-'}</span></div>
+              <div className="flex justify-between"><span>Set</span><span className="text-white font-medium">{session?.currentSet}/{session?.totalSets}</span></div>
+              <div className="flex justify-between"><span>Workout tijd</span><span className="text-white font-medium">{Math.floor((session?.workoutTime||0)/60)}m {((session?.workoutTime||0)%60).toString().padStart(2,'0')}s</span></div>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowWorkoutLogoutConfirm(false)}
+                className="flex-1 px-4 py-2 bg-[#3A4D23] text-[#8BAE5A] rounded-lg font-semibold hover:bg-[#4A5D33] transition-colors"
+              >Nee, ga terug</button>
+              <button
+                onClick={confirmStopWorkoutAndLogout}
+                className="flex-1 px-4 py-2 bg-[#8BAE5A] text-[#181F17] rounded-lg font-semibold hover:bg-[#A6C97B] transition-colors"
+              >Ja, stop en uitloggen</button>
+            </div>
+          </div>
+        </ModalBase>
+
         {/* Floating Workout Widget */}
         {typeof window !== 'undefined' && <WorkoutWidget />}
         

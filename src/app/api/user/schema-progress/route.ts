@@ -68,8 +68,10 @@ export async function GET(request: NextRequest) {
       const schema1Progress = progressData.find((p: any) => p.training_schemas.schema_nummer === 1);
       
       if (schema1Progress) {
-        // Check if user has completed 8 weeks (56 days) of Schema 1
-        const weeksCompleted = Math.floor((schema1Progress.completed_days || 0) / 7);
+        // Compute weeks from completed_days (DB column) or from completed_at fallback
+        const totalDays1 = (schema1Progress.completed_days ?? 0) as number;
+        // If completed_at is set, treat as 8 weeks completed
+        const weeksCompleted = schema1Progress.completed_at ? 8 : Math.floor(totalDays1 / 7);
         
         if (weeksCompleted >= 8) {
           unlockedSchemas[2] = true;
@@ -77,7 +79,8 @@ export async function GET(request: NextRequest) {
           // Check if user has completed 8 weeks of Schema 2
           const schema2Progress = progressData.find((p: any) => p.training_schemas.schema_nummer === 2);
           if (schema2Progress) {
-            const schema2WeeksCompleted = Math.floor((schema2Progress.completed_days || 0) / 7);
+            const totalDays2 = (schema2Progress.completed_days ?? 0) as number;
+            const schema2WeeksCompleted = schema2Progress.completed_at ? 8 : Math.floor(totalDays2 / 7);
             if (schema2WeeksCompleted >= 8) {
               unlockedSchemas[3] = true;
             }

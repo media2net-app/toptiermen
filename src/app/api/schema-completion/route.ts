@@ -131,6 +131,16 @@ export async function POST(request: NextRequest) {
 
       console.log('🎉 Schema 2 unlocked successfully:', newProgressData);
 
+      // Set user's selected schema to Schema 2 so frontend loads it by default
+      const { error: profileUpdateError } = await supabaseAdmin
+        .from('profiles')
+        .update({ selected_schema_id: schema2Data.id, updated_at: new Date().toISOString() })
+        .eq('id', userId);
+
+      if (profileUpdateError) {
+        console.warn('⚠️ Failed to update profiles.selected_schema_id to schema 2:', profileUpdateError);
+      }
+
       return NextResponse.json({ 
         success: true, 
         message: 'Schema 1 completed and Schema 2 unlocked',

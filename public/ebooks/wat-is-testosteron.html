@@ -283,9 +283,37 @@
         }
     </style>
 </head>
+<!-- Injected: TTM header polish -->
+<style id="ttm-green-theme-header-fix">
+  /* Hide inline SVG logo block */
+  .header .logo { display: none !important; }
+  .header {
+    position: relative;
+    padding-top: 56px !important;
+    margin-bottom: 28px !important;
+  }
+  .header::before {
+    content: "";
+    display: block;
+    width: 220px;
+    height: 32px;
+    margin: 0 auto 16px auto;
+    background: url('/logo_white-full.svg') center/contain no-repeat;
+    opacity: 0.95;
+  }
+  /* Layered inner outline for consistency */
+  .header::after {
+    content: "";
+    position: absolute;
+    inset: 20px;
+    border: 1px solid #4A5D33;
+    border-radius: 16px;
+    pointer-events: none;
+  }
+</style>
 <body>
     <!-- Sticky Back Button -->
-    <a href="/dashboard/academy/c671fea4-bfb1-4ccc-b23e-220e80783d06" class="sticky-back-btn" title="Terug naar Testosteron Module">
+    <a href="/dashboard/academy/test/a352b3db-4c71-48b4-a83d-8983d0bbc7ba" class="sticky-back-btn" title="Terug naar les">
         <svg viewBox="0 0 24 24">
             <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
         </svg>

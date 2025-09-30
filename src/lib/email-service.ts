@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 import { getEmailConfig } from '@/lib/email-config';
+import sgMail from '@sendgrid/mail';
 
 interface EmailConfig {
   provider: 'api' | 'smtp' | 'mailgun';
@@ -449,6 +450,21 @@ Rick Cuijpers & Het Top Tier Men Team
 Website: https://platform.toptiermen.eu
 Contact: platform@toptiermen.eu
         `
+      },
+      'password-reset-minimal': {
+        subject: 'Top Tier Men – Wachtwoord reset',
+        html: `
+          <div style="font-family:system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color:#111;">
+            <p>Hoi \${name},</p>
+            <p>Je wachtwoord is opnieuw ingesteld. Je tijdelijke wachtwoord is:</p>
+            <p><strong style="font-size:18px;">\${tempPassword}</strong></p>
+            <p>Inloggen: <a href="https://platform.toptiermen.eu/login">https://platform.toptiermen.eu/login</a></p>
+            <p>Wij raden aan om na het inloggen direct je wachtwoord te wijzigen.</p>
+            <hr style="border:none;border-top:1px solid #ddd;" />
+            <p style="font-size:12px;color:#666;">Afzender: \${supportEmail || 'info@toptiermen.nl'}. Antwoorden kan op dit adres.</p>
+          </div>
+        `,
+        text: `Hoi \${name},\n\nJe wachtwoord is opnieuw ingesteld. Tijdelijk wachtwoord: \${tempPassword}\nInloggen: https://platform.toptiermen.eu/login\n\nWij raden aan om na het inloggen direct je wachtwoord te wijzigen.\n\n— Top Tier Men`
       },
       sneak_preview: {
         subject: '🎬 EXCLUSIEVE VIDEO - Eerste kijk in het Top Tier Men Platform',
@@ -1425,20 +1441,31 @@ Contact: platform@toptiermen.eu
 
   private async sendViaApi(to: string, subject: string, html: string, text: string): Promise<boolean> {
     try {
-      console.log('📧 Sending email via API...');
-      
-      // This would use Resend or another email API
-      // For now, we'll simulate it
-      console.log('✅ Email would be sent via API');
-      console.log('📧 Email content:', {
+      console.log('📧 Sending email via API (SendGrid)...');
+      const config = await this.getConfig();
+
+      const apiKey = (config as any).sendgridApiKey || process.env.SENDGRID_API_KEY;
+      if (!apiKey) {
+        throw new Error('SENDGRID_API_KEY not configured');
+      }
+      sgMail.setApiKey(apiKey);
+      if (process.env.SENDGRID_EU_RESIDENCY === 'true' && (sgMail as any).setDataResidency) {
+        (sgMail as any).setDataResidency('eu');
+      }
+
+      const msg = {
         to,
+        from: `${config.fromName} <${config.fromEmail}>`,
         subject,
-        htmlLength: html.length,
-        textLength: text.length
-      });
+        html,
+        text,
+      } as sgMail.MailDataRequired;
+
+      const [resp] = await sgMail.send(msg);
+      console.log('✅ SendGrid accepted:', resp.statusCode);
 
       // Log email to database
-      await this.logEmail(to, 'api', subject);
+      await this.logEmail(to, 'sendgrid', subject);
       return true;
     } catch (error) {
       console.error('❌ Error sending email via API:', error);

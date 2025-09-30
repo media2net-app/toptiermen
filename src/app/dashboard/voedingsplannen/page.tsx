@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   BookOpenIcon,
@@ -15,7 +15,11 @@ import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { useOnboardingV2 } from "@/contexts/OnboardingV2Context";
 import { useRouter } from 'next/navigation';
 import { useSubscription } from '@/hooks/useSubscription';
-import DynamicPlanViewNew from './components/DynamicPlanViewNew';
+import dynamic from 'next/dynamic';
+const DynamicPlanViewNew = dynamic(() => import('./components/DynamicPlanViewNew'), {
+  ssr: false,
+  loading: () => null,
+});
 
 // Function to map activity level to Dutch display text
 function getActivityLevelDisplay(activityLevel: string): string {
@@ -97,12 +101,61 @@ export default function VoedingsplannenPage() {
 
   // Nutrition plans state
   const [nutritionPlans, setNutritionPlans] = useState<NutritionPlan[]>([]);
+  const [allNutritionPlans, setAllNutritionPlans] = useState<NutritionPlan[]>([]);
   const [nutritionLoading, setNutritionLoading] = useState(true);
   const [nutritionError, setNutritionError] = useState<string | null>(null);
   const [userNutritionProfile, setUserNutritionProfile] = useState<any>(null);
   const [selectedNutritionPlan, setSelectedNutritionPlan] = useState<string | null>(null);
   const [showRequiredIntake, setShowRequiredIntake] = useState(false);
   const [viewingDynamicPlan, setViewingDynamicPlan] = useState<{planId: string, planName: string} | null>(null);
+  const [showResetModal, setShowResetModal] = useState(false);
+
+  // Unified Reset Plan click handler with native confirm fallback
+  const handleResetClick = () => {
+    try {
+      console.log('🧼 Reset plan clicked');
+      toast.remove();
+      toast('Resetten van plan geopend…', { icon: '🧼' });
+      setShowResetModal(true);
+      // After a short delay, verify that the modal is actually in the DOM; if not, use native confirm()
+      setTimeout(() => {
+        const modalEl = document.getElementById('reset-confirm-modal');
+        if (!modalEl) {
+          console.warn('⚠️ Reset modal not found in DOM, falling back to native confirm');
+          const proceed = window.confirm('Plan resetten? We adviseren je om je plan minimaal 8 weken te volgen. Weet je zeker dat je je huidige plan wilt wijzigen?');
+          if (proceed) {
+            handleDeselectPlan();
+          }
+        }
+      }, 100);
+    } catch (e) {
+      // As a final fallback, use native confirm
+      const proceed = window.confirm('Plan resetten?');
+      if (proceed) handleDeselectPlan();
+    }
+  };
+
+  // Auto-scroll the reset modal into view when it opens
+  useEffect(() => {
+    if (!showResetModal) return;
+    const scrollToModal = () => {
+      const el = document.getElementById('reset-confirm-modal');
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const viewportH = window.innerHeight || document.documentElement.clientHeight;
+      // If modal is not roughly centered, adjust scroll
+      if (rect.top < viewportH * 0.2 || rect.bottom > viewportH * 0.8) {
+        const modalCenterY = rect.top + rect.height / 2;
+        const viewportCenterY = viewportH / 2;
+        const delta = modalCenterY - viewportCenterY;
+        window.scrollBy({ top: delta, behavior: 'smooth' });
+      }
+    };
+    // Run after mount and after potential animations
+    const t1 = setTimeout(scrollToModal, 50);
+    const t2 = setTimeout(scrollToModal, 250);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, [showResetModal]);
   
   // Onboarding state
   const [onboardingStatus, setOnboardingStatus] = useState<any>(null);
@@ -149,46 +202,8 @@ export default function VoedingsplannenPage() {
       const data = await response.json();
       
       if (data.success) {
-        // Filter plans based on user's goal if they have a nutrition profile
-        let filteredPlans = data.plans;
-        
-        // Check if user has a goal (either from profile or from calculator)
-        const userGoal = userNutritionProfile?.goal || calculatorData.goal;
-        
-        if (userGoal) {
-          const normalizedGoal = userGoal.toLowerCase();
-          console.log('🎯 Filtering plans for user goal:', normalizedGoal);
-          console.log('📊 User nutrition profile:', userNutritionProfile);
-          console.log('🧮 Calculator data:', calculatorData);
-          
-          // Map user goals to plan goals (case-insensitive)
-          const goalMapping = {
-            'cut': 'droogtrainen',
-            'bulk': 'spiermassa', 
-            'maintain': 'onderhoud',
-            'maintenance': 'onderhoud',
-            'droogtrainen': 'droogtrainen',
-            'spiermassa': 'spiermassa',
-            'behoud': 'onderhoud',
-            'onderhoud': 'onderhoud'
-          };
-          
-          const mappedGoal = goalMapping[normalizedGoal] || normalizedGoal;
-          console.log(`🗺️ Mapping user goal "${normalizedGoal}" to plan goal "${mappedGoal}"`);
-          
-          filteredPlans = data.plans.filter(plan => {
-            // Use goal field for filtering (not fitness_goal)
-            const planGoal = plan.goal?.toLowerCase();
-            const matches = planGoal === mappedGoal;
-            console.log(`Plan "${plan.name}" (goal: ${plan.goal}) matches mapped goal (${mappedGoal}):`, matches);
-            return matches;
-          });
-          
-          console.log(`✅ Filtered from ${data.plans.length} to ${filteredPlans.length} plans`);
-        }
-        
-        // Sort plans: Carnivoor always first, then by name
-        filteredPlans.sort((a, b) => {
+        // Sort once: Carnivoor always first, then by name
+        const sorted = [...data.plans].sort((a, b) => {
           const aIsCarnivore = a.name.toLowerCase().includes('carnivoor');
           const bIsCarnivore = b.name.toLowerCase().includes('carnivoor');
           
@@ -197,8 +212,8 @@ export default function VoedingsplannenPage() {
           
           return a.name.localeCompare(b.name);
         });
-        
-        setNutritionPlans(filteredPlans);
+        // Store all plans; filtering happens via memoized effect
+        setAllNutritionPlans(sorted);
       } else {
         throw new Error(data.error || 'Failed to fetch nutrition plans');
       }
@@ -343,10 +358,9 @@ export default function VoedingsplannenPage() {
 
       if (response.ok) {
         toast.success('Voedingsplan geselecteerd!');
-        // Refresh the active plan selection
-        checkUserNutritionProfile();
-        // Force re-render of daily needs section
-        setSelectedNutritionPlan(planId);
+        // Toon direct de vergrendelde planweergave zonder race met API-herlaad
+        setSelectedNutritionPlan(planId); // Houd lokaal vast
+        setViewingDynamicPlan(null); // Niet nodig; we renderen locked view via early return
       } else {
         toast.error('Er is een fout opgetreden bij het selecteren van het plan');
       }
@@ -377,6 +391,8 @@ export default function VoedingsplannenPage() {
         setSelectedNutritionPlan(null);
         // Refresh the active plan selection
         checkUserNutritionProfile();
+        setViewingDynamicPlan(null);
+        setShowResetModal(false);
       } else {
         toast.error('Er is een fout opgetreden bij het deselecteren van het plan');
       }
@@ -607,41 +623,55 @@ export default function VoedingsplannenPage() {
   }, [user?.id, userNutritionProfile]);
 
   // Fetch plans when user profile changes or initially
+  // Fetch plans once per user session; filtering is client-side
   useEffect(() => {
     if (user?.id) {
       fetchNutritionPlans();
     }
-  }, [user?.id, userNutritionProfile]);
+  }, [user?.id]);
+
+  // Memoized filtering by goal to avoid refetching
+  const filteredPlans = useMemo(() => {
+    const userGoal = (userNutritionProfile?.goal || calculatorData.goal || '').toLowerCase();
+    if (!userGoal) return allNutritionPlans;
+    const goalMapping: Record<string, string> = {
+      cut: 'droogtrainen',
+      bulk: 'spiermassa',
+      maintain: 'onderhoud',
+      maintenance: 'onderhoud',
+      droogtrainen: 'droogtrainen',
+      spiermassa: 'spiermassa',
+      behoud: 'onderhoud',
+      onderhoud: 'onderhoud',
+    };
+    const mapped = goalMapping[userGoal] || userGoal;
+    return allNutritionPlans.filter(p => (p.goal || '').toLowerCase() === mapped);
+  }, [allNutritionPlans, userNutritionProfile?.goal, calculatorData.goal]);
+
+  // Update UI plans whenever filter inputs change
+  useEffect(() => {
+    setNutritionPlans(filteredPlans);
+  }, [filteredPlans]);
 
   // Re-check selected plan when nutrition plans are loaded
+  // Only re-check active plan if not already known
   useEffect(() => {
-    if (user?.id && nutritionPlans.length > 0 && userNutritionProfile) {
-      // Re-check if we have an active plan and it exists in the loaded plans
+    if (user?.id && nutritionPlans.length > 0 && userNutritionProfile && !selectedNutritionPlan) {
       const checkActivePlan = async () => {
         try {
           const response = await fetch(`/api/nutrition-plan-active?userId=${user.id}`);
           const data = await response.json();
-          
           if (data.success && data.hasActivePlan) {
             const planExists = nutritionPlans.find(p => p.plan_id === data.activePlanId);
-            if (planExists) {
-              console.log('✅ Active plan confirmed after plans loaded:', data.activePlanId);
-              setSelectedNutritionPlan(data.activePlanId);
-            } else {
-              console.log('⚠️ Active plan not found in loaded plans:', data.activePlanId);
-              setSelectedNutritionPlan(null);
-            }
-          } else {
-            setSelectedNutritionPlan(null);
+            if (planExists) setSelectedNutritionPlan(data.activePlanId);
           }
         } catch (error) {
           console.error('❌ Error re-checking active plan:', error);
         }
       };
-      
       checkActivePlan();
     }
-  }, [user?.id, nutritionPlans, userNutritionProfile]);
+  }, [user?.id, nutritionPlans, userNutritionProfile, selectedNutritionPlan]);
 
   // Show fallback if no user is logged in
   if (!user && !authLoading) {
@@ -675,6 +705,88 @@ export default function VoedingsplannenPage() {
           </div>
         </div>
       </div>
+    );
+  }
+
+  // If user has an active selected plan, lock view to the plan page
+  if (user && selectedNutritionPlan) {
+    const activePlan = allNutritionPlans.find(p => p.plan_id === selectedNutritionPlan);
+    const planName = activePlan?.name || 'Geselecteerd voedingsplan';
+    return (
+      <PageLayout 
+        title="Voedingsplannen" 
+        subtitle="Je geselecteerde plan (vergrendeld)"
+      >
+        <div className="w-full p-3 sm:p-4 md:p-6">
+          {/* Reset bar */}
+          <div className="mb-4 sm:mb-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-[#181F17]/80 border border-[#3A4D23] rounded-xl p-4">
+              <div className="text-gray-300 text-sm">
+                <div className="text-white font-semibold mb-1">Je plan is vergrendeld</div>
+                <div>
+                  Voor optimale resultaten adviseren we om een plan minimaal 8 weken te volgen. Wil je toch wisselen? Reset dan je plan hieronder.
+                </div>
+              </div>
+              <button
+                onClick={handleResetClick}
+                className="px-4 py-2 bg-red-600/20 border border-red-500/30 text-red-400 rounded-lg hover:bg-red-600/30 transition-colors font-semibold"
+              >
+                Reset plan
+              </button>
+            </div>
+          </div>
+
+          {/* Locked plan view */}
+          <DynamicPlanViewNew 
+            planId={selectedNutritionPlan}
+            planName={planName}
+            userId={user.id}
+            // Intercept back to enforce lock: show reset modal instead
+            onBack={handleResetClick}
+          />
+
+          {/* Confirmation Modal */}
+          <AnimatePresence>
+            {showResetModal && (
+              <motion.div 
+                className="fixed inset-0 z-[1000] flex items-center justify-center"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                <div className="absolute inset-0 bg-black/60" onClick={() => setShowResetModal(false)} />
+                <motion.div 
+                  id="reset-confirm-modal"
+                  className="relative bg-[#181F17] border border-[#3A4D23] rounded-xl p-6 w-[90%] max-w-md text-white"
+                  initial={{ scale: 0.95, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.95, opacity: 0 }}
+                >
+                  <h3 className="text-xl font-bold mb-2">Plan resetten?</h3>
+                  <p className="text-gray-300 mb-4">
+                    We adviseren je om je plan <span className="text-[#8BAE5A] font-semibold">minimaal 8 weken</span> te volgen voor zichtbaar resultaat.
+                    Weet je zeker dat je je huidige plan wilt wijzigen?
+                  </p>
+                  <div className="flex justify-end gap-3">
+                    <button 
+                      onClick={() => setShowResetModal(false)}
+                      className="px-4 py-2 bg-[#3A4D23] hover:bg-[#4A5D33] rounded-lg"
+                    >
+                      Annuleren
+                    </button>
+                    <button 
+                      onClick={handleDeselectPlan}
+                      className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg"
+                    >
+                      Ja, reset plan
+                    </button>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </PageLayout>
     );
   }
 

@@ -498,6 +498,8 @@ export default function LessonDetailPage() {
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [navigating, setNavigating] = useState(false);
   const [showForceButton, setShowForceButton] = useState(false);
+  // Guard to prevent concurrent fetches
+  const isFetchingRef = useRef(false);
 
   // Disable video preloading - only load current lesson video
   const isPreloading = false;
@@ -791,6 +793,11 @@ export default function LessonDetailPage() {
 
   // ENHANCED: Debug data fetching with detailed logging
   const fetchData = async () => {
+    if (isFetchingRef.current) {
+      console.log('⏳ fetchData skipped: request already in-flight');
+      return;
+    }
+    isFetchingRef.current = true;
     console.log('🔍 fetchData called with:', { 
       user: !!user, 
       moduleId, 
@@ -826,43 +833,23 @@ export default function LessonDetailPage() {
     setError(null);
 
     try {
-      // Fetch module data
-      console.log('🔍 Fetching module data for:', moduleId);
-      const { data: moduleData, error: moduleError } = await supabase
-        .from('academy_modules')
-        .select('*')
-        .or(`id.eq.${moduleId},slug.eq.${moduleId}`)
-        .eq('status', 'published')
-        .single();
-
-      console.log('📦 Module query result:', { moduleData, moduleError });
-
-      if (moduleError || !moduleData) {
-        console.error('❌ Module error:', moduleError);
-        setError('Module niet gevonden');
-        setLoading(false);
-        return;
+      // Fetch via server API (bypasses RLS) with timeout protection
+      console.log('🔍 Fetching module+lessons via API for:', { moduleId, lessonId, userId: user.id });
+      const controller = new AbortController();
+      const t = setTimeout(() => controller.abort(), 15000);
+      const res = await fetch(`/api/academy/module-data?userId=${encodeURIComponent(user.id)}&moduleId=${encodeURIComponent(moduleId)}`, {
+        method: 'GET',
+        cache: 'no-cache',
+        signal: controller.signal
+      });
+      clearTimeout(t);
+      if (!res.ok) {
+        const txt = await res.text();
+        throw new Error(`API ${res.status}: ${txt}`);
       }
-
-      console.log('✅ Module data found:', moduleData.title);
-
-      // Fetch lessons data
-      console.log('🔍 Fetching lessons for module ID:', moduleData.id);
-      const { data: lessonsData, error: lessonsError } = await supabase
-        .from('academy_lessons')
-        .select('*')
-        .eq('module_id', moduleData.id)
-        .eq('status', 'published')
-        .order('order_index');
-
-      console.log('📚 Lessons query result:', { lessonsCount: lessonsData?.length, lessonsError });
-
-      if (lessonsError || !lessonsData) {
-        console.error('❌ Lessons error:', lessonsError);
-        setError('Lessen niet gevonden');
-        setLoading(false);
-        return;
-      }
+      const payload = await res.json();
+      const moduleData = payload.module;
+      const lessonsData = payload.lessons || [];
 
       console.log('✅ Lessons found:', lessonsData.length);
 
@@ -880,30 +867,9 @@ export default function LessonDetailPage() {
 
       console.log('✅ Current lesson found:', currentLesson.title);
 
-      // Fetch user progress from both tables
-      console.log('🔍 Fetching progress for user:', user.id);
-      
-      // Check academy_lesson_completions table first (primary)
-      const { data: academyProgress } = await supabase
-        .from('academy_lesson_completions')
-        .select('lesson_id')
-        .eq('user_id', user.id);
-
-      // Also check user_lesson_progress table for compatibility
-      const { data: progressData } = await supabase
-        .from('user_lesson_progress')
-        .select('lesson_id')
-        .eq('user_id', user.id)
-        .eq('completed', true);
-
-      // Combine both progress sources
-      const allCompletedLessons = [
-        ...(academyProgress?.map(p => p.lesson_id) || []),
-        ...(progressData?.map(p => p.lesson_id) || [])
-      ];
-      const uniqueCompletedLessons = [...new Set(allCompletedLessons)];
-
-      console.log('📈 Progress data:', uniqueCompletedLessons.length, 'completed lessons');
+      // Progress is already provided by the API for module view; avoid extra client-side queries here to reduce latency
+      const uniqueCompletedLessons: string[] = payload.completedLessonIds || [];
+      console.log('📈 Progress data (from API):', uniqueCompletedLessons.length);
 
       // Fetch ebook data
       console.log('🔍 Fetching ebook for lesson:', lessonId);
@@ -943,6 +909,7 @@ export default function LessonDetailPage() {
     } finally {
       console.log('🏁 Fetch finally block - setting loading to false');
       setLoading(false);
+      isFetchingRef.current = false;
     }
   };
 
@@ -1054,25 +1021,28 @@ export default function LessonDetailPage() {
               localStorage.setItem('academyBadgeUnlock', JSON.stringify(badgeData));
               
               // Show success message
-              alert('🎉 Gefeliciteerd! Je hebt de Academy Master badge ontgrendeld!');
+              alert('🎉 gefeliciteerd! Je hebt de Academy Master badge ontgrendeld!');
             }
-          } catch (error) {
-            console.error('Error checking academy completion:', error);
+          } catch (e) {
+            console.error('❌ Error checking academy completion badge:', e);
           }
-        }, 1000);
+        }, 300);
       }
-    } catch (error) {
-      console.error('Error completing lesson:', error);
+    } catch (e) {
       setError('Fout bij voltooien van les');
     } finally {
       setSaving(false);
     }
   };
 
-  // Calculate progress
+  // Calculate previous and next lessons based on current state
   const currentIndex = lessons.findIndex(l => l.id === lessonId);
   const prevLesson = currentIndex > 0 ? lessons[currentIndex - 1] : null;
-  const nextLesson = currentIndex < lessons.length - 1 ? lessons[currentIndex + 1] : null;
+  const nextLesson = currentIndex >= 0 && currentIndex < lessons.length - 1 ? lessons[currentIndex + 1] : null;
+  useEffect(() => {
+    if (!user?.id || !moduleId || !lessonId) return;
+    fetchData();
+  }, [user?.id, moduleId, lessonId]);
 
   // Get module number based on order_index
   const getModuleNumber = (orderIndex: number) => {
@@ -1462,34 +1432,78 @@ export default function LessonDetailPage() {
 
                 <div className="mb-4">
                   <button
-                    onClick={() => {
-                      // Simple ebook filename mapping
-                      const ebookFilename = lesson.title
+                    onClick={async () => {
+                      if (module.order_index !== 1) {
+                        // Temporarily disabled for modules 2–7
+                        return;
+                      }
+                      // 1) Use DB file_url if explicitly set
+                      if (ebook?.file_url) {
+                        const directUrl = ebook.file_url as string;
+                        console.log('📖 Opening ebook via DB file_url:', directUrl);
+                        window.location.href = directUrl;
+                        return;
+                      }
+
+                      // 2) Build slug from lesson title
+                      const slug = lesson.title
                         .toLowerCase()
                         .replace(/[^a-z0-9\s]/g, '')
                         .replace(/\s+/g, '-')
                         .replace(/^-+|-+$/g, '');
-                      
-                      const ebookUrl = `/ebooks/${ebookFilename}.html`;
-                      console.log('📖 Opening ebook in same tab:', ebookUrl);
-                      console.log('📖 Lesson title:', lesson.title);
-                      console.log('📖 Generated filename:', ebookFilename);
-                      
-                      // Open ebook in same tab only
-                      window.location.href = ebookUrl;
+
+                      // 3) Candidate v2 URLs to try (alias + slug)
+                      const v2Alias: { [slug: string]: string } = {
+                        'waarom-is-fysieke-dominantie-zo-belangrijk': 'fysieke-dominantie-belangrijk',
+                        'ontdek-je-kernwaarden-en-bouw-je-top-tier-identiteit': 'top-tier-identiteit',
+                        'wat-is-identiteit-en-waarom-zijn-kernwaarden-essentieel': 'identiteit-kernwaarden',
+                        'discipline-van-korte-termijn-naar-een-levensstijl': 'discipline-levensstijl',
+                      };
+
+                      const candidates = [
+                        `/ebooksv2/${v2Alias[slug] || slug}.html`,
+                        // Also try the alternate if alias was applied first
+                        v2Alias[slug] ? `/ebooksv2/${slug}.html` : ''
+                      ].filter(Boolean) as string[];
+
+                      // 4) HEAD check for first existing v2 URL
+                      let targetUrl: string | null = null;
+                      for (const url of candidates) {
+                        try {
+                          const res = await fetch(url, { method: 'HEAD' });
+                          if (res.ok) {
+                            targetUrl = url;
+                            break;
+                          }
+                        } catch (e) {
+                          // ignore and continue
+                        }
+                      }
+
+                      // 5) Navigate to v2 if found, else fallback to legacy
+                      targetUrl = targetUrl || `/ebooks/${slug}.html`;
+                      console.log('📖 Opening ebook:', targetUrl);
+                      window.location.href = targetUrl;
                     }}
-                    className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-[#8BAE5A] to-[#B6C948] text-white rounded-lg hover:from-[#B6C948] hover:to-[#8BAE5A] transition-all duration-200 font-semibold shadow-md hover:shadow-lg transform hover:scale-105"
+                    disabled={module.order_index !== 1}
+                    className={`inline-flex items-center px-4 py-2 rounded-lg transition-all duration-200 font-semibold shadow-md ${
+                      module.order_index === 1
+                        ? 'bg-gradient-to-r from-[#8BAE5A] to-[#B6C948] text-white hover:from-[#B6C948] hover:to-[#8BAE5A] hover:shadow-lg transform hover:scale-105'
+                        : 'bg-gray-300 text-gray-600 cursor-not-allowed'
+                    }`}
                   >
                     <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                     </svg>
-                    Bekijk E-book
+                    {module.order_index === 1 ? 'Bekijk E-book' : 'E-book binnenkort beschikbaar'}
                     <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                     </svg>
                   </button>
                   <p className="text-xs text-gray-500 mt-2">
-                    Het ebook opent in hetzelfde tabblad met alle praktische informatie en oefeningen.
+                    {module.order_index === 1
+                      ? 'Het ebook opent in hetzelfde tabblad met alle praktische informatie en oefeningen.'
+                      : 'Voor modules 2 t/m 7 worden de ebooks binnenkort toegevoegd.'}
                   </p>
                 </div>
               </div>

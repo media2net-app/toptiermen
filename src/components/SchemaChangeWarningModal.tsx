@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ExclamationTriangleIcon,
@@ -22,6 +22,28 @@ export default function SchemaChangeWarningModal({
   onConfirm,
   currentSchemaName 
 }: SchemaChangeWarningModalProps) {
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  // Ensure modal is fully visible (centered) and lock body scroll while open
+  useEffect(() => {
+    if (!isOpen) {
+      if (typeof document !== 'undefined') document.body.style.overflow = '';
+      return;
+    }
+    if (typeof document !== 'undefined') document.body.style.overflow = 'hidden';
+    if (typeof window !== 'undefined') {
+      try {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } catch {}
+    }
+    const id = window.setTimeout(() => {
+      try {
+        modalRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+        modalRef.current?.focus();
+      } catch {}
+    }, 100);
+    return () => window.clearTimeout(id);
+  }, [isOpen]);
 
   return (
     <AnimatePresence>
@@ -38,7 +60,11 @@ export default function SchemaChangeWarningModal({
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.8, opacity: 0 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
-            className="relative bg-[#181F17] border border-[#3A4D23] rounded-2xl p-8 max-w-lg w-full mx-4 shadow-2xl"
+            ref={modalRef}
+            tabIndex={-1}
+            role="dialog"
+            aria-modal="true"
+            className="relative bg-[#181F17] border border-[#3A4D23] rounded-2xl p-8 max-w-lg w-full mx-4 shadow-2xl focus:outline-none"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Close button */}

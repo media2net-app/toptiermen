@@ -171,8 +171,8 @@ export function useAuth(): AuthState & AuthActions & AuthUtils {
   const getRedirectPath = useCallback((redirectTo?: string) => {
     if (redirectTo && redirectTo !== '/login') return redirectTo;
     
-    // Admin users go to admin dashboard
-    if (authState.isAdmin) return '/dashboard-admin';
+    // Admin users should land on the regular dashboard by default
+    if (authState.isAdmin) return '/dashboard';
     
     // If onboarding data exists and is not completed, redirect to current step
     if (authState.onboarding && !authState.onboarding.isCompleted && authState.onboarding.currentStep !== null) {

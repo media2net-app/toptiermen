@@ -23,6 +23,7 @@ import Breadcrumb, { createBreadcrumbs } from '@/components/Breadcrumb';
 import CompoundInterest from './components/CompoundInterest';
 import FIRECalculator from './components/FIRECalculator';
 import PageLayout from '@/components/PageLayout';
+import ModalBase from '@/components/ui/ModalBase';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 
@@ -817,8 +818,11 @@ function FinanceDashboardContent() {
 
       {/* Settings Modal */}
       {showSettingsModal && editingProfile && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
-          <div className="bg-[#232D1A] border border-[#3A4D23] rounded-xl p-4 sm:p-6 max-w-2xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+        <ModalBase
+          isOpen={showSettingsModal}
+          onClose={() => { setShowSettingsModal(false); setEditingProfile(null); }}
+          className="bg-[#232D1A] border border-[#3A4D23] rounded-xl p-4 sm:p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+        >
             <div className="flex justify-between items-center mb-4 sm:mb-6">
               <h3 className="text-lg sm:text-xl font-bold text-white">
                 Financiële Profiel Bewerken
@@ -969,8 +973,7 @@ function FinanceDashboardContent() {
                 Opslaan
               </button>
             </div>
-          </div>
-        </div>
+        </ModalBase>
       )}
 
       {/* Add Goal Modal */}

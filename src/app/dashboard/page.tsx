@@ -8,7 +8,6 @@ import Link from 'next/link';
 import BadgeDisplay from '@/components/BadgeDisplay';
 import { useAuth } from '@/hooks/useAuth';
 import DashboardLoadingModal from '@/components/ui/DashboardLoadingModal';
-import DashboardDebugger from '@/components/DashboardDebugger';
 import { useRouter } from 'next/navigation';
 
 
@@ -126,8 +125,9 @@ export default function Dashboard() {
   const [activityLoading, setActivityLoading] = useState(false);
   const [hasMoreActivities, setHasMoreActivities] = useState(false);
   const [activityOffset, setActivityOffset] = useState(0);
+  const [activeNutritionPlan, setActiveNutritionPlan] = useState<{ id: string; title: string } | null>(null);
 
-  const [showDebugger, setShowDebugger] = useState(false);
+  
 
   const { 
     user, 
@@ -385,6 +385,39 @@ export default function Dashboard() {
     }
   }, [user?.id]);
 
+  // Fetch active nutrition plan (resolve ID to title)
+  useEffect(() => {
+    const fetchActivePlan = async () => {
+      if (!user?.id) return;
+      try {
+        const res = await fetch(`/api/nutrition-plan-active?userId=${user.id}`, { cache: 'no-cache' });
+        if (!res.ok) { setActiveNutritionPlan(null); return; }
+        const data = await res.json();
+        if (data?.success && data?.hasActivePlan && data?.activePlanId) {
+          const activeId = data.activePlanId as string;
+          // Resolve title via dedicated endpoint
+          try {
+            const planRes = await fetch(`/api/nutrition-plan-by-id?planId=${encodeURIComponent(activeId)}`, { cache: 'no-cache' });
+            if (planRes.ok) {
+              const planData = await planRes.json();
+              if (planData?.success && planData?.plan) {
+                setActiveNutritionPlan({ id: activeId, title: planData.plan.name || 'Voedingsplan' });
+                return;
+              }
+            }
+          } catch {}
+          // Fallback: show the ID if no plan found
+          setActiveNutritionPlan({ id: activeId, title: 'Voedingsplan' });
+        } else {
+          setActiveNutritionPlan(null);
+        }
+      } catch {
+        setActiveNutritionPlan(null);
+      }
+    };
+    fetchActivePlan();
+  }, [user?.id]);
+
   // Simple fade in effect - only on client side
   useEffect(() => {
     if (typeof window !== 'undefined' && !loading) {
@@ -466,10 +499,10 @@ export default function Dashboard() {
           {/* Dashboard Content */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8 animate-fade-in-up">
             {/* Mijn Challenges */}
-            <Link href="/dashboard/mijn-challenges" className={`bg-gradient-to-br from-[#181F17] to-[#232D1A] border rounded-xl p-4 sm:p-6 text-left transition-transform duration-300 cursor-pointer block ${
+            <Link href="/dashboard/mijn-challenges" className={`border rounded-xl p-4 sm:p-6 text-left transition-transform duration-300 cursor-pointer block ${
               stats?.challenges.completedToday === stats?.challenges.total && (stats?.challenges.total || 0) > 0
-                ? 'border-[#8BAE5A] shadow-2xl shadow-[#8BAE5A]/20 hover:scale-105 hover:shadow-[#8BAE5A]/40'
-                : 'border-[#3A4D23]/30 hover:scale-105 hover:shadow-2xl hover:border-[#8BAE5A]/50'
+                ? 'bg-[#3A4D23] border-[#8BAE5A] shadow-2xl shadow-[#8BAE5A]/20 hover:scale-105 hover:shadow-[#8BAE5A]/40'
+                : 'bg-gradient-to-br from-[#181F17] to-[#232D1A] border-[#3A4D23]/30 hover:scale-105 hover:shadow-2xl hover:border-[#8BAE5A]/50'
             }`}>
               <div className="flex items-center justify-between mb-3 sm:mb-4">
                 <h3 className="text-lg sm:text-xl font-bold text-white">Mijn Challenges</h3>
@@ -514,6 +547,28 @@ export default function Dashboard() {
                   ? '🎉 Perfecte dag behaald!' 
                   : `${stats?.challenges.completedToday || 0} vandaag`
                 }
+              </div>
+            </Link>
+
+            {/* Voedingsplan */}
+            <Link href={activeNutritionPlan ? `/dashboard/voedingsplannen-v2/${activeNutritionPlan.id}` : "/dashboard/voedingsplannen-v2"} className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-4 sm:p-6 text-left transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#8BAE5A]/50 cursor-pointer block">
+              <div className="flex items-center justify-between mb-3 sm:mb-4">
+                <h3 className="text-lg sm:text-xl font-bold text-white">Voedingsplan</h3>
+                <span className="text-[#8BAE5A] text-sm sm:text-base">{activeNutritionPlan ? 'Geselecteerd' : 'Geen selectie'}</span>
+              </div>
+              <div className="space-y-2 sm:space-y-3">
+                {activeNutritionPlan ? (
+                  <div className="text-white font-semibold text-sm sm:text-base truncate">
+                    {activeNutritionPlan.title}
+                  </div>
+                ) : (
+                  <div className="text-xs sm:text-sm text-gray-400">
+                    Je hebt nog geen voedingsplan geselecteerd. Klik om een plan te kiezen.
+                  </div>
+                )}
+                <div className="w-full h-2 bg-[#3A4D23]/40 rounded-full">
+                  <div className="h-2 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] rounded-full transition-all duration-700" style={{ width: activeNutritionPlan ? '60%' : '0%' }} />
+                </div>
               </div>
             </Link>
 
@@ -917,50 +972,8 @@ export default function Dashboard() {
             )}
           </div>
 
-          {/* Admin Debug Section */}
-          {profile?.role === 'admin' && (
-            <div className="bg-gradient-to-br from-red-900/20 to-red-800/20 border border-red-500/30 rounded-xl p-6 mb-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-bold text-red-400">🔧 Admin Debug Tools</h3>
-                <button
-                  onClick={() => setShowDebugger(!showDebugger)}
-                  className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
-                    showDebugger 
-                      ? 'bg-red-600 text-white hover:bg-red-700' 
-                      : 'bg-red-500 text-white hover:bg-red-600'
-                  }`}
-                >
-                  {showDebugger ? 'Verberg Debug' : 'Toon Debug'}
-                </button>
-              </div>
-              <p className="text-red-300 text-sm mb-4">
-                Debug tools voor het diagnosticeren van dashboard loading problemen en performance issues.
-              </p>
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div className="text-red-300">
-                  <div className="font-semibold">Status:</div>
-                  <div className={showDebugger ? 'text-green-400' : 'text-red-400'}>
-                    {showDebugger ? '✅ Actief' : '❌ Inactief'}
-                  </div>
-                </div>
-                <div className="text-red-300">
-                  <div className="font-semibold">Monitoring:</div>
-                  <div>Performance, Errors, Network</div>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </ClientLayout>
-
-      {/* Dashboard Debugger for Admin Users */}
-      {profile?.role === 'admin' && (
-        <DashboardDebugger 
-          isVisible={showDebugger}
-          onToggle={() => setShowDebugger(!showDebugger)}
-        />
-      )}
-
     </div>
   );
-} 
+}

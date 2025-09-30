@@ -237,25 +237,37 @@ export default function MijnProfiel() {
 
       setUserBadges(userBadges);
 
-      // Get user XP and current rank
-      const { data: xpData, error: xpError } = await supabase
-        .from('user_xp')
-        .select('total_xp, current_rank_id')
-        .eq('user_id', user.id)
-        .single();
-
-      if (!xpError && xpData) {
-        setCurrentXP(xpData.total_xp || 0);
-
-        // Get rank details
-        const { data: rankData, error: rankError } = await supabase
-          .from('ranks')
-          .select('*')
-          .eq('id', xpData.current_rank_id)
+      // Get XP/level using the same logic as dashboard for consistency
+      try {
+        const dsRes = await fetch('/api/dashboard-stats', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: user.id })
+        });
+        if (dsRes.ok) {
+          const ds = await dsRes.json();
+          const xpStats = ds?.stats?.xp;
+          if (xpStats) {
+            setCurrentXP(xpStats.total ?? 0);
+            setCurrentRank({ rank_order: xpStats.level ?? 1, name: xpStats.rank ?? 'Beginner' });
+          }
+        }
+      } catch (e) {
+        console.warn('Fallback to user_xp due to dashboard-stats error', e);
+        // Fallback to user_xp + ranks tables
+        const { data: xpData, error: xpError } = await supabase
+          .from('user_xp')
+          .select('total_xp, current_rank_id')
+          .eq('user_id', user.id)
           .single();
-
-        if (!rankError && rankData) {
-          setCurrentRank(rankData);
+        if (!xpError && xpData) {
+          setCurrentXP(xpData.total_xp || 0);
+          const { data: rankData } = await supabase
+            .from('ranks')
+            .select('*')
+            .eq('id', xpData.current_rank_id)
+            .single();
+          if (rankData) setCurrentRank(rankData);
         }
       }
     } catch (error) {
@@ -762,8 +774,8 @@ export default function MijnProfiel() {
     setPasswordError(null);
 
     // Validate inputs
-    if (!currentPassword || !newPassword || !confirmPassword) {
-      setPasswordError('Alle velden zijn verplicht');
+    if (!newPassword) {
+      setPasswordError('Nieuw wachtwoord is vereist');
       return;
     }
 
@@ -783,10 +795,7 @@ export default function MijnProfiel() {
       return;
     }
 
-    if (newPassword !== confirmPassword) {
-      setPasswordError('Nieuwe wachtwoorden komen niet overeen');
-      return;
-    }
+    // Bevestiging is niet meer verplicht
 
     setIsChangingPassword(true);
     try {
@@ -807,7 +816,6 @@ export default function MijnProfiel() {
           'Authorization': `Bearer ${session.access_token}`
         },
         body: JSON.stringify({
-          currentPassword,
           newPassword
         })
       });
@@ -1763,10 +1771,11 @@ export default function MijnProfiel() {
           )}
       </div>
       
-        {/* Password Change Modal - Enhanced Responsive */}
+        {/* Password Change Modal - Centered with auto-scroll */}
         {showPasswordModal && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3 sm:p-4">
-            <div className="bg-[#232D1A] rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 max-w-md w-full border border-[#3A4D23]">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
+            <div className="absolute inset-0 bg-black/50" onClick={() => setShowPasswordModal(false)} />
+            <div className="relative bg-[#232D1A] rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 max-w-md w-full border border-[#3A4D23] max-h-[85vh] overflow-y-auto">
             <div className="text-center mb-6">
               <div className="w-16 h-16 bg-[#8BAE5A]/20 rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg className="w-8 h-8 text-[#8BAE5A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1775,7 +1784,7 @@ export default function MijnProfiel() {
               </div>
               <h3 className="text-xl font-bold text-white mb-2">Wachtwoord Wijzigen</h3>
               <p className="text-[#8BAE5A] text-sm mb-4">
-                Voer je huidige wachtwoord in en kies een nieuw wachtwoord.
+                Voer een nieuw wachtwoord in. Je hoeft je huidige wachtwoord niet in te voeren.
               </p>
               <div className="bg-[#181F17] rounded-lg p-3 text-left">
                 <p className="text-[#B6C948] text-xs font-semibold mb-2">Wachtwoord vereisten:</p>
@@ -1795,19 +1804,6 @@ export default function MijnProfiel() {
                   <p className="text-red-400 text-sm">{passwordError}</p>
                 </div>
               )}
-              
-              <div>
-                <label className="block text-[#B6C948] font-medium mb-2">
-                  Huidig Wachtwoord
-                </label>
-                <input
-                  type="password"
-                  value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
-                  className="w-full bg-[#181F17] text-white px-3 py-2 rounded-lg border border-[#3A4D23] focus:outline-none focus:border-[#8BAE5A]"
-                  placeholder="Voer je huidige wachtwoord in"
-                />
-              </div>
               
               <div>
                 <label className="block text-[#B6C948] font-medium mb-2">
@@ -1842,32 +1838,6 @@ export default function MijnProfiel() {
                   </div>
                 )}
               </div>
-              
-              <div>
-                <label className="block text-[#B6C948] font-medium mb-2">
-                  Bevestig Nieuw Wachtwoord
-                </label>
-                <input
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className={`w-full bg-[#181F17] text-white px-3 py-2 rounded-lg border focus:outline-none ${
-                    confirmPassword && newPassword !== confirmPassword 
-                      ? 'border-red-500 focus:border-red-500' 
-                      : confirmPassword && newPassword === confirmPassword 
-                      ? 'border-green-500 focus:border-green-500'
-                      : 'border-[#3A4D23] focus:border-[#8BAE5A]'
-                  }`}
-                  placeholder="Herhaal je nieuwe wachtwoord"
-                />
-                {confirmPassword && (
-                  <p className={`text-xs mt-1 ${
-                    newPassword === confirmPassword ? 'text-green-400' : 'text-red-400'
-                  }`}>
-                    {newPassword === confirmPassword ? '✓ Wachtwoorden komen overeen' : '✗ Wachtwoorden komen niet overeen'}
-                  </p>
-                )}
-              </div>
             </div>
             
             <div className="flex gap-3">
@@ -1888,10 +1858,7 @@ export default function MijnProfiel() {
                 onClick={handleChangePassword}
                 disabled={
                   isChangingPassword || 
-                  !currentPassword || 
                   !newPassword || 
-                  !confirmPassword ||
-                  newPassword !== confirmPassword ||
                   newPassword.length < 8 ||
                   !/[A-Z]/.test(newPassword) ||
                   !/[a-z]/.test(newPassword) ||

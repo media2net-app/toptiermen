@@ -54,63 +54,68 @@ export async function POST(request: NextRequest) {
     console.log('🔍 Step 1: Checking profiles table...');
     const { data: profile, error: profileError } = await supabaseAdmin
       .from('profiles')
-      .select('id, email, full_name, display_name, package_type')
+      .select('id, email, full_name, display_name, username, package_type')
       .eq('email', email)
       .single();
         
+    let profileData = profile as any;
     if (profileError || !profile) {
-      console.log('❌ User not found in profiles:', profileError);
-      return NextResponse.json({
-        success: false,
-        error: 'Geen account gevonden met dit e-mailadres'
-      }, { status: 404 });
-    }
-    
-    console.log('✅ Step 1: User found in profiles:', profile.email);
-
-    // Step 2: Check if user exists in auth
-    console.log('🔍 Step 2: Checking auth users...');
-    const { data: authUsers, error: listError } = await supabaseAdmin.auth.admin.listUsers();
-    
-    if (listError) {
-      console.error('❌ Error listing auth users:', listError);
-      return NextResponse.json({
-        success: false,
-        error: 'Fout bij het ophalen van gebruikersgegevens'
-      }, { status: 500 });
+      console.log('ℹ️ User not found in profiles, proceeding with auth-only flow');
+      profileData = null;
+    } else {
+      console.log('✅ Step 1: User found in profiles:', profile.email);
     }
 
-    let user = authUsers.users.find(u => u.email === email);
-    console.log('🔍 Step 2: Found user in auth:', !!user);
-    
-    // If user doesn't exist in auth, create one
+    // Step 2: Check if user exists in auth (case-insensitive match)
+    console.log('🔍 Step 2: Checking auth users (with pagination)...');
+    const targetEmail = (email || '').toLowerCase();
+    let user = null as any;
+    let page = 1;
+    const perPage = 1000;
+    while (!user) {
+      const { data: pageData, error: pageErr } = await supabaseAdmin.auth.admin.listUsers({ page, perPage });
+      if (pageErr) {
+        console.error('❌ Error listing auth users:', pageErr);
+        return NextResponse.json({ success: false, error: 'Fout bij het ophalen van gebruikersgegevens' }, { status: 500 });
+      }
+      user = pageData.users.find((u: any) => (u.email || '').toLowerCase() === targetEmail) || null;
+      if (pageData.users.length < perPage) break; // last page
+      page += 1;
+    }
+    console.log('🔍 Step 2: Found user in auth after scan:', !!user);
     if (!user) {
-      console.log('🔍 Step 2: User not found in auth, creating new auth account...');
-      
-      const tempPassword = generateTempPassword();
-      const { data: newAuthUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
-        email: email,
-        password: tempPassword,
+      console.log('ℹ️ Not found in auth, attempting to create then re-scan...');
+      const tempPasswordInit = generateTempPassword();
+      const { data: created, error: createErr } = await supabaseAdmin.auth.admin.createUser({
+        email,
+        password: tempPasswordInit,
         email_confirm: true,
         user_metadata: {
-          full_name: profile.full_name || profile.display_name,
+          full_name: profileData?.full_name || profileData?.display_name,
           admin_created: true
         }
       });
-      
-      if (createError) {
-        console.error('❌ Error creating auth account:', createError);
-        return NextResponse.json({
-          success: false,
-          error: 'Account bestaat maar er is een technisch probleem. Neem contact op met de beheerder.',
-          errorDetails: createError.message
-        }, { status: 500 });
+      if (createErr) {
+        console.warn('⚠️ createUser error (may already exist):', createErr.message);
+        // Re-scan once more to be sure
+        page = 1; user = null;
+        while (!user) {
+          const { data: pageData, error: pageErr } = await supabaseAdmin.auth.admin.listUsers({ page, perPage });
+          if (pageErr) {
+            console.error('❌ Error listing auth users (retry):', pageErr);
+            break;
+          }
+          user = pageData.users.find((u: any) => (u.email || '').toLowerCase() === targetEmail) || null;
+          if (pageData.users.length < perPage) break;
+          page += 1;
+        }
+        if (!user) {
+          return NextResponse.json({ success: false, error: 'Geen account gevonden in authenticatie voor dit e-mailadres' }, { status: 404 });
+        }
       } else {
-        user = newAuthUser.user;
-        console.log('✅ Step 2: Auth account created for:', email);
+        user = created.user;
+        console.log('✅ Auth account created for:', email);
       }
-    } else {
-      console.log('✅ Step 2: User found in auth:', user.id);
     }
 
     // Step 3: Generate new temporary password
@@ -141,25 +146,25 @@ export async function POST(request: NextRequest) {
     console.log('🔍 Step 5: Sending password reset email...');
     try {
       const emailService = new EmailService();
-      
       const success = await emailService.sendEmail(
         email,
         '🔐 Je Nieuwe Top Tier Men Wachtwoord - Wachtwoord Reset',
         'password-reset',
         {
-          name: profile.full_name || profile.display_name || 'Gebruiker',
+          full_name: profileData?.full_name || profileData?.display_name || 'Gebruiker',
+          name: profileData?.full_name || profileData?.display_name || (email.split('@')[0] || 'Gebruiker'),
+          username: (profileData?.username || profileData?.display_name || (profileData?.full_name ? profileData.full_name.replace(/\s+/g, '').toLowerCase() : null)) || (email.split('@')[0] || 'gebruiker'),
           email: email,
           tempPassword: newTempPassword,
           platformUrl: 'https://platform.toptiermen.eu',
           loginUrl: 'https://platform.toptiermen.eu/login',
-          packageType: profile.package_type || 'Premium Tier',
+          packageType: profileData?.package_type || 'Premium Tier',
           supportEmail: 'support@toptiermen.eu'
         },
         {
           tracking: true
         }
       );
-
       if (success) {
         console.log('✅ Step 5: Password reset email sent successfully to:', email);
         return NextResponse.json({

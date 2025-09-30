@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import ModalBase from '@/components/ui/ModalBase';
 import { useRouter } from 'next/navigation';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { useOnboardingV2 } from '@/contexts/OnboardingV2Context';
@@ -832,16 +833,8 @@ export default function MijnChallengesPage() {
         setChallengeToDelete(null);
       }
     };
-
-    if (showDeleteConfirm) {
-      document.addEventListener('keydown', handleEscKey);
-      document.body.style.overflow = 'hidden'; // Prevent background scrolling
-    }
-
-    return () => {
-      document.removeEventListener('keydown', handleEscKey);
-      document.body.style.overflow = 'unset'; // Restore scrolling
-    };
+    if (showDeleteConfirm) document.addEventListener('keydown', handleEscKey);
+    return () => document.removeEventListener('keydown', handleEscKey);
   }, [showDeleteConfirm]);
 
   // Filter challenges
@@ -1395,81 +1388,32 @@ export default function MijnChallengesPage() {
 
         {/* Delete Confirmation Modal */}
         {showDeleteConfirm && challengeToDelete && (
-          <div 
-            className="fixed inset-0 bg-black bg-opacity-50 z-[9999] flex items-center justify-center p-4"
-            style={{ 
-              backdropFilter: 'blur(4px)',
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              width: '100vw',
-              height: '100vh',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-            onClick={() => {
-              setShowDeleteConfirm(false);
-              setChallengeToDelete(null);
-            }}
+          <ModalBase
+            isOpen={showDeleteConfirm}
+            onClose={() => { setShowDeleteConfirm(false); setChallengeToDelete(null); }}
+            className="bg-[#1d2a20] border border-[#3A4D23]/50 rounded-2xl p-6 w-full max-w-md shadow-2xl"
           >
-            <div 
-              className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border-2 border-red-600 rounded-2xl p-8 max-w-md w-full shadow-2xl relative z-[10000] max-h-[90vh] overflow-y-auto mx-auto"
-              style={{
-                transform: 'translateY(0)',
-                margin: 'auto'
-              }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="text-center">
-                <div className="text-4xl mb-4">⚔️</div>
-                <h2 className="text-2xl font-bold text-white mb-4">
-                  Challenge Verwijderen
-                </h2>
-                <div className="bg-[#0F1419]/80 rounded-xl p-4 mb-6 border border-[#3A4D23]">
-                  <p className="text-white text-sm leading-relaxed mb-3">
-                    <strong>Top Tier Man,</strong> ben je zeker dat je deze challenge wilt verwijderen?
-                  </p>
-                  <div className="bg-[#232D1A]/80 rounded-lg p-3 border border-red-600/30">
-                    <p className="text-red-400 text-sm font-semibold">
-                      "{challengeToDelete.title}"
-                    </p>
-                  </div>
-                </div>
-                <div className="bg-[#232D1A]/80 rounded-xl p-4 border border-[#3A4D23] mb-6">
-                  <p className="text-[#8BAE5A] text-sm font-semibold">
-                    💪 <strong>Herinnering:</strong> Echte leiders maken bewuste keuzes. 
-                    Zorg ervoor dat je deze challenge niet meer nodig hebt voor je groei.
-                  </p>
-                </div>
-                <div className="flex gap-4">
-                  <button
-                    onClick={() => {
-                      setShowDeleteConfirm(false);
-                      setChallengeToDelete(null);
-                    }}
-                    className="flex-1 bg-[#3A4D23] text-[#8BAE5A] px-6 py-3 rounded-lg hover:bg-[#8BAE5A] hover:text-white transition-colors duration-300 font-semibold"
-                  >
-                    Annuleren
-                  </button>
-                  <button
-                    onClick={() => deleteChallenge(challengeToDelete.id)}
-                    className="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-6 py-3 rounded-lg transition-all duration-300 font-semibold"
-                  >
-                    Verwijderen
-                  </button>
-                </div>
-              </div>
+            <h3 className="text-xl font-bold text-white mb-2">Challenge verwijderen?</h3>
+            <p className="text-gray-300 mb-4">Weet je zeker dat je "{challengeToDelete?.title}" wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.</p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => { setShowDeleteConfirm(false); setChallengeToDelete(null); }}
+                className="flex-1 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600"
+              >
+                Annuleren
+              </button>
+              <button
+                onClick={() => deleteChallenge(challengeToDelete!.id)}
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-500"
+              >
+                Verwijderen
+              </button>
             </div>
-          </div>
+          </ModalBase>
         )}
         
         {/* OnboardingV2Modal removed to prevent conflicts - handled by main dashboard */}
       </div>
-
-      {/* Onboarding Loading Overlay */}
       <OnboardingLoadingOverlay 
         show={showLoadingOverlay}
         text={loadingText}

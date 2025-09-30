@@ -32,14 +32,12 @@ export async function GET(request: NextRequest) {
         .from('academy_modules')
         .select('*')
         .eq('id', moduleId)
-        .eq('status', 'published')
         .single(),
       
       supabaseAdmin
         .from('academy_lessons')
         .select('*')
         .eq('module_id', moduleId)
-        .eq('status', 'published')
         .order('order_index', { ascending: true }),
       
       supabaseAdmin
@@ -51,7 +49,6 @@ export async function GET(request: NextRequest) {
       supabaseAdmin
         .from('academy_modules')
         .select('*')
-        .eq('status', 'published')
         .order('order_index', { ascending: true })
     ]), 20000);
 

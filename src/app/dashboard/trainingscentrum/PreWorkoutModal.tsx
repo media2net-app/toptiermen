@@ -1,6 +1,7 @@
+
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { 
   XMarkIcon, 
   PlayIcon, 
@@ -42,21 +43,31 @@ export default function PreWorkoutModal({
   const router = useRouter();
   const { user } = useSupabaseAuth();
   const [selectedMode, setSelectedMode] = useState<'interactive' | 'quick'>('interactive');
-  const [checklist, setChecklist] = useState<ChecklistItem[]>([
-    { id: 'warmup', label: 'Warm-up doen (5 min)', checked: false },
-    { id: 'water', label: 'Water klaar', checked: false },
-    { id: 'space', label: 'Ruimte vrij', checked: false },
-    { id: 'music', label: 'Motiverende muziek', checked: false }
-  ]);
+  // Checklist removed per UX request
   const [isStarting, setIsStarting] = useState(false);
+  const modalRef = useRef<HTMLDivElement>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
 
-  const toggleChecklistItem = (id: string) => {
-    setChecklist(prev => 
-      prev.map(item => 
-        item.id === id ? { ...item, checked: !item.checked } : item
-      )
-    );
-  };
+  // Lock page scroll on open and auto-center overlay on all devices
+  useEffect(() => {
+    if (!isOpen) {
+      if (typeof document !== 'undefined') document.body.style.overflow = '';
+      return;
+    }
+    if (typeof document !== 'undefined') document.body.style.overflow = 'hidden';
+
+    const center = () => {
+      try {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        setTimeout(() => {
+          try { overlayRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch {}
+        }, 60);
+        modalRef.current?.focus();
+      } catch {}
+    };
+    const id = window.setTimeout(center, 50);
+    return () => window.clearTimeout(id);
+  }, [isOpen]);
 
   const startWorkout = async () => {
     if (!user?.id) return;
@@ -149,23 +160,23 @@ export default function PreWorkoutModal({
     }
   };
 
-  const checkedItems = checklist.filter(item => item.checked).length;
-  const totalItems = checklist.length;
+  // Checklist removed
 
   console.log('🎭 Modal render state:', { isOpen, schemaId, dayNumber, schemaName });
   
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-black/80 backdrop-blur-sm"
-        onClick={onClose}
-      />
-
+    <div ref={overlayRef} className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
       {/* Modal */}
-      <div className="relative w-full max-w-[92vw] sm:max-w-xl md:max-w-2xl bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-2xl p-4 sm:p-6 md:p-8 shadow-2xl overflow-hidden">
+      <div
+        ref={modalRef}
+        tabIndex={-1}
+        className="w-full max-w-[92vw] sm:max-w-xl md:max-w-2xl max-h-[90vh] bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-2xl p-4 sm:p-6 md:p-8 shadow-2xl overflow-y-auto focus:outline-none"
+        aria-modal="true"
+        role="dialog"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Close Button */}
         <button
           onClick={onClose}
@@ -174,7 +185,6 @@ export default function PreWorkoutModal({
           <XMarkIcon className="w-6 h-6" />
         </button>
 
-        {/* Header */}
         <div className="text-center mb-6 sm:mb-8">
           <div className="flex items-center justify-center mb-4">
             <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-[#8BAE5A] to-[#FFD700] rounded-full flex items-center justify-center mr-3 sm:mr-4">
@@ -235,34 +245,7 @@ export default function PreWorkoutModal({
           </div>
         </div>
 
-        {/* Pre-Workout Checklist */}
-        {selectedMode === 'interactive' && (
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold text-white mb-4">
-              Pre-Workout Checklist ({checkedItems}/{totalItems})
-            </h3>
-            <div className="space-y-3">
-              {checklist.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => toggleChecklistItem(item.id)}
-                  className="flex items-center w-full p-3 rounded-lg bg-[#0F1419]/50 hover:bg-[#0F1419]/70 transition-colors"
-                >
-                  <div className={`w-5 h-5 rounded border-2 flex items-center justify-center mr-3 ${
-                    item.checked
-                      ? 'border-[#8BAE5A] bg-[#8BAE5A]'
-                      : 'border-[#3A4D23]'
-                  }`}>
-                    {item.checked && <CheckIcon className="w-3 h-3 text-[#181F17]" />}
-                  </div>
-                  <span className={`text-sm ${item.checked ? 'text-[#8BAE5A]' : 'text-gray-300'} break-words`}>
-                    {item.label}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
+        {/* Checklist removed */}
 
         {/* Warning for Quick Mode */}
         {selectedMode === 'quick' && (
@@ -308,4 +291,4 @@ export default function PreWorkoutModal({
       </div>
     </div>
   );
-} 
+}

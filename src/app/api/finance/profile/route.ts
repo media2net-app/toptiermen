@@ -178,27 +178,32 @@ export async function DELETE(request: NextRequest) {
 
     console.log('🗑️ Deleting financial goal:', goalId);
 
-    // Delete the goal by setting status to 'deleted'
-    const { data: deletedGoal, error: deleteError } = await supabaseAdmin
+    // Coerce ID to number when possible (some schemas use numeric IDs)
+    const numericId = Number(goalId);
+    const idFilter = Number.isFinite(numericId) ? numericId : goalId;
+
+    // Soft-delete the goal by setting status to 'deleted'
+    const { data: deletedRows, error: deleteError } = await supabaseAdmin
       .from('financial_goals')
       .update({
         status: 'deleted',
         updated_at: new Date().toISOString()
       })
-      .eq('id', goalId)
-      .select()
-      .single();
+      .eq('id', idFilter)
+      .select('*');
 
     if (deleteError) {
       console.error('Error deleting financial goal:', deleteError);
       return NextResponse.json({ error: 'Failed to delete financial goal' }, { status: 500 });
     }
 
-    console.log('✅ Financial goal deleted successfully:', deletedGoal);
+    // If no rows were returned, consider it idempotent success (already deleted or not found)
+    const affected = Array.isArray(deletedRows) ? deletedRows.length : (deletedRows ? 1 : 0);
+    console.log('✅ Financial goal delete attempted. Affected rows:', affected);
 
     return NextResponse.json({ 
       success: true, 
-      message: 'Financial goal deleted successfully' 
+      message: affected > 0 ? 'Financial goal deleted successfully' : 'No matching goal found; treated as deleted' 
     });
 
   } catch (error) {

@@ -241,7 +241,7 @@ function AdminDashboardContent() {
       
       // Add timeout to prevent infinite loading
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Request timeout')), 10000)
+        setTimeout(() => reject(new Error('Request timeout')), 20000)
       );
       
       const fetchPromise = fetch(`/api/admin/dashboard-stats?period=${selectedPeriod}`);
@@ -355,10 +355,10 @@ function AdminDashboardContent() {
             </p>
           )}
           {loading && !dataLoaded && (
-            <p className="text-[#8BAE5A] text-sm mt-1 flex items-center gap-2">
-              <div className="animate-spin rounded-full h-3 w-3 border-b border-[#8BAE5A]"></div>
-              Gegevens laden...
-            </p>
+            <div className="text-[#8BAE5A] text-sm mt-1 flex items-center gap-2">
+              <span className="animate-spin rounded-full h-3 w-3 border-b border-[#8BAE5A] inline-block"></span>
+              <span>Gegevens laden...</span>
+            </div>
           )}
         </div>
         <div className="flex items-center gap-2 sm:gap-4">

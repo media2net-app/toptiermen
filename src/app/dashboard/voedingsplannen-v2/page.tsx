@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import OnboardingV2Progress from '@/components/OnboardingV2Progress';
 import OnboardingNotice from '@/components/OnboardingNotice';
 import OnboardingLoadingOverlay from '@/components/OnboardingLoadingOverlay';
+import ModalBase from '@/components/ui/ModalBase';
 import { motion } from 'framer-motion';
 import { 
   BookOpenIcon, 
@@ -19,7 +20,8 @@ import {
   InformationCircleIcon,
   ArrowLeftIcon,
   FireIcon,
-  HeartIcon
+  HeartIcon,
+  CheckIcon
 } from '@heroicons/react/24/solid';
 import { PencilIcon } from '@heroicons/react/24/outline';
 import IngredientEditModal from '@/components/IngredientEditModal';
@@ -54,6 +56,7 @@ interface OriginalPlanData {
         lunch: any;
         lunch_snack: any;
         diner: any;
+        avond_snack?: any;
       };
     };
   };
@@ -119,6 +122,14 @@ export default function VoedingsplannenV2Page() {
   const [editingMealType, setEditingMealType] = useState<string>('');
   const [editingDay, setEditingDay] = useState<string>('');
   const [selectedPlanId, setSelectedPlanId] = useState<string | number | null>(null);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+  // Debug: Smart Scaling toggle
+  const [smartScalingOn, setSmartScalingOn] = useState<boolean>(true);
+  // Debug: Raw (unscaled) plan for testing
+  const [rawPlanData, setRawPlanData] = useState<any>(null);
+  // Debug: Scaling test modal/results
+  const [showScalingTestModal, setShowScalingTestModal] = useState(false);
+  const [scalingTestResults, setScalingTestResults] = useState<any[]>([]);
   
   // Post-onboarding modal state
   const [showPostOnboardingModal, setShowPostOnboardingModal] = useState(false);
@@ -184,6 +195,44 @@ export default function VoedingsplannenV2Page() {
     setEditingDay('');
   }, []);
 
+  // Auto-scroll the reset modal into view when it opens
+  useEffect(() => {
+    if (!showResetConfirm) return;
+    const scrollToModal = () => {
+      const el = document.getElementById('reset-confirm-modal-v2');
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const viewportH = window.innerHeight || document.documentElement.clientHeight;
+      if (rect.top < viewportH * 0.2 || rect.bottom > viewportH * 0.8) {
+        const modalCenterY = rect.top + rect.height / 2;
+        const viewportCenterY = viewportH / 2;
+        const delta = modalCenterY - viewportCenterY;
+        window.scrollBy({ top: delta, behavior: 'smooth' });
+      }
+    };
+    const t1 = setTimeout(scrollToModal, 50);
+    const t2 = setTimeout(scrollToModal, 250);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, [showResetConfirm]);
+
+  // Load active selection on mount so it persists after refresh
+  useEffect(() => {
+    const loadActiveSelection = async () => {
+      if (!user?.id) return;
+      try {
+        const res = await fetch(`/api/nutrition-plan-active?userId=${user.id}`, { cache: 'no-cache' });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data?.success && data?.hasActivePlan && data?.activePlanId) {
+          setSelectedPlanId(data.activePlanId);
+        }
+      } catch (e) {
+        console.warn('Failed to load active nutrition plan', e);
+      }
+    };
+    loadActiveSelection();
+  }, [user?.id]);
+
   // Reset modal state when no plan is selected
   useEffect(() => {
     if (!selectedPlan) {
@@ -192,6 +241,21 @@ export default function VoedingsplannenV2Page() {
       setEditingDay('');
     }
   }, [selectedPlan]);
+
+  // If we have an active selectedPlanId and plans are loaded, auto-select and load detail
+  useEffect(() => {
+    if (selectedPlan || !selectedPlanId || plans.length === 0) return;
+    const plan = plans.find(p => (p.plan_id || p.id) === selectedPlanId);
+    if (plan) {
+      setSelectedPlan(plan);
+      // Load original data to render detail view
+      const idToLoad = (plan.plan_id || plan.id).toString();
+      fetch(`/api/nutrition-plan-original?planId=${idToLoad}`)
+        .then(res => res.ok ? res.json() : Promise.reject(new Error('Failed to load plan')))
+        .then(data => setOriginalPlanData(data.plan ? data.plan : data))
+        .catch(err => console.error('Error preloading original plan data:', err));
+    }
+  }, [selectedPlanId, plans, selectedPlan]);
 
   // Debug: Log modal state changes
   useEffect(() => {
@@ -360,29 +424,30 @@ export default function VoedingsplannenV2Page() {
     }
   };
 
-  // Function to calculate personalized targets for a plan
-  const calculatePersonalizedTargets = (plan: NutritionPlan | any) => {
-    if (!userProfile) return null;
+  // Function to calculate personalized targets for a plan (supports override profile)
+  const calculatePersonalizedTargets = (plan: NutritionPlan | any, profileOverride?: UserProfile) => {
+    const profile = profileOverride || userProfile;
+    if (!profile) return null;
 
     // Use TTM Formula: weight x 22 x activity_level
     const activityMultipliers = {
       sedentary: 1.1,
       moderate: 1.3,
       very_active: 1.6
-    };
+    } as const;
     
-    const baseCalories = userProfile.weight * 22 * activityMultipliers[userProfile.activity_level];
+    const baseCalories = profile.weight * 22 * activityMultipliers[profile.activity_level];
 
     // Apply goal adjustment based on the PLAN's goal, not user's fitness goal
     const goalAdjustments = {
       droogtrainen: -500,
       onderhoud: 0,
       spiermassa: 400
-    };
+    } as const;
     
     // Use the plan's goal for calorie adjustment
     const planGoal = plan.goal?.toLowerCase() || 'onderhoud';
-    const goalAdjustment = goalAdjustments[planGoal] || 0;
+    const goalAdjustment = goalAdjustments[planGoal as keyof typeof goalAdjustments] || 0;
     const targetCalories = Math.round(baseCalories + goalAdjustment);
 
     // Use macro percentages from database if available, otherwise fallback to hardcoded
@@ -628,216 +693,185 @@ export default function VoedingsplannenV2Page() {
     return null;
   };
 
+  // === Unit-aware helpers for Smart Scaling ===
+  const gramsPerUnit = (ingredient: any) => {
+    if (ingredient.unit === 'per_piece' || ingredient.unit === 'per_plakje' || ingredient.unit === 'stuk' || ingredient.unit === 'handje') return 1; // piece-based unit
+    if (ingredient.unit === 'per_ml') return 1; // approx 1ml ~ 1g
+    // per_100g / g
+    return 0.01; // 1g is 0.01 of 100g base
+  };
+
+  const macroPerUnit = (ingredient: any) => {
+    const k = gramsPerUnit(ingredient);
+    const p100 = ingredient.protein_per_100g || 0;
+    const c100 = ingredient.carbs_per_100g || 0;
+    const f100 = ingredient.fat_per_100g || 0;
+    if (ingredient.unit === 'g') {
+      return { p: p100 / 100, c: c100 / 100, f: f100 / 100 };
+    }
+    return { p: p100 * k, c: c100 * k, f: f100 * k };
+  };
+
+  const roundUnitAmount = (ingredient: any, x: number) => {
+    if (ingredient.unit === 'per_piece' || ingredient.unit === 'per_plakje' || ingredient.unit === 'stuk' || ingredient.unit === 'handje') {
+      return Math.max(1, Math.round(x));
+    }
+    if (ingredient.unit === 'per_100g' || ingredient.unit === 'g' || ingredient.unit === 'per_ml') {
+      const step = 5; // 5g step
+      return Math.max(0.1, Math.round(x / step) * step);
+    }
+    // default
+    return Math.max(0.1, Math.round(x * 10) / 10);
+  };
+
 
   // Smart Scaling Algorithm - Focus on Macro Balance Optimization
   const applySmartScaling = (planData: any, userProfile: any) => {
-    if (!planData || !userProfile || userProfile.weight === 100) {
-      // No scaling needed for 100kg users
-      return planData;
-    }
+    if (!planData || !userProfile) return planData;
+    const scaledPlan = JSON.parse(JSON.stringify(planData));
 
-    console.log('🧠 Applying Smart Scaling for weight:', userProfile.weight, '- Focus: Macro Balance to 100%');
-    
-    const baseWeight = 100;
-    const weightRatio = userProfile.weight / baseWeight;
-    const scaledPlan = JSON.parse(JSON.stringify(planData)); // Deep clone
-    
-    // Get personalized targets
-    const personalizedTargets = calculatePersonalizedTargets(planData);
-    if (!personalizedTargets) return null;
-    
-    const targetCalories = personalizedTargets.targetCalories;
-    const targetProtein = personalizedTargets.targetProtein;
-    const targetCarbs = personalizedTargets.targetCarbs;
-    const targetFat = personalizedTargets.targetFat;
-    
-    console.log('🎯 Smart Scaling Targets:', {
-      targetCalories,
-      targetProtein,
-      targetCarbs,
-      targetFat,
-      weightRatio
-    });
-
-    // Scale ingredients for each day to optimize macro balance to 100%
-    const days = Object.keys(scaledPlan.meals.weekly_plan);
-    console.log(`🧠 Optimizing macro balance for ${days.length} days:`, days);
-    
+    const days = Object.keys(scaledPlan?.meals?.weekly_plan || {});
     days.forEach(day => {
-      const dayData = scaledPlan.meals.weekly_plan[day];
-      console.log(`🧠 Processing day: ${day}`);
-      
-      // First pass: Apply basic weight-based scaling
-      ['ontbijt', 'ochtend_snack', 'lunch', 'lunch_snack', 'diner', 'avond_snack'].forEach(mealType => {
-        const meal = dayData[mealType];
-        if (meal && meal.ingredients && Array.isArray(meal.ingredients)) {
-          console.log(`🧠 Basic scaling ${day} ${mealType} with ${meal.ingredients.length} ingredients`);
-          
-          meal.ingredients.forEach((ingredient: any) => {
-            if (ingredient.amount && ingredient.unit) {
-              const originalAmount = ingredient.amount;
-              let newAmount = originalAmount * weightRatio;
-              
-              // Apply realistic scaling rules
-              if (ingredient.unit === 'per_piece' || ingredient.unit === 'per_plakje' || ingredient.unit === 'stuk') {
-                newAmount = Math.max(1, Math.round(newAmount));
-              } else {
-                newAmount = Math.round(newAmount * 10) / 10;
-                if (newAmount < 0.1) newAmount = 0.1;
-              }
-              
-              ingredient.amount = newAmount;
-            }
-          });
-          
-          // Recalculate meal totals after basic scaling
-          const mealTotals = calculateMealTotals(meal);
-          meal.totals = mealTotals;
-        }
-      });
-      
-      // Second pass: Optimize macro balance to get as close to 100% as possible
-      let iterations = 0;
-      const maxIterations = 5;
-      
-      while (iterations < maxIterations) {
-      const dayTotals = calculateDayTotals(day, scaledPlan);
-      
-        // Calculate current macro percentages
-        const caloriesPercent = (dayTotals.calories / targetCalories) * 100;
-        const proteinPercent = (dayTotals.protein / targetProtein) * 100;
-        const carbsPercent = (dayTotals.carbs / targetCarbs) * 100;
-        const fatPercent = (dayTotals.fat / targetFat) * 100;
-        
-        console.log(`🧠 Day ${day} iteration ${iterations + 1}:`, {
-          calories: `${caloriesPercent.toFixed(1)}%`,
-          protein: `${proteinPercent.toFixed(1)}%`,
-          carbs: `${carbsPercent.toFixed(1)}%`,
-          fat: `${fatPercent.toFixed(1)}%`
-        });
-        
-        // Check if we're close enough to 100% (within 5%)
-        const allClose = Math.abs(caloriesPercent - 100) <= 5 && 
-                        Math.abs(proteinPercent - 100) <= 5 && 
-                        Math.abs(carbsPercent - 100) <= 5 && 
-                        Math.abs(fatPercent - 100) <= 5;
-        
-        if (allClose) {
-          console.log(`🧠 Day ${day} macro balance optimized! All within 5% of target.`);
-          break;
-        }
-        
-        // Optimize each macro by adjusting relevant ingredients
-        ['ontbijt', 'ochtend_snack', 'lunch', 'lunch_snack', 'diner', 'avond_snack'].forEach(mealType => {
-          const meal = dayData[mealType];
-          if (meal && meal.ingredients && Array.isArray(meal.ingredients)) {
-            
-            meal.ingredients.forEach((ingredient: any) => {
-              if (!ingredient.amount || !ingredient.unit) return;
-              
-                const currentAmount = ingredient.amount;
-              let adjustmentFactor = 1;
-              
-              // Determine which macro this ingredient primarily affects
-              const proteinPer100g = ingredient.protein_per_100g || 0;
-              const carbsPer100g = ingredient.carbs_per_100g || 0;
-              const fatPer100g = ingredient.fat_per_100g || 0;
-              const caloriesPer100g = ingredient.calories_per_100g || 0;
-              
-              // Calculate current contribution
-              let multiplier = 1;
-              if (ingredient.unit === 'per_piece' || ingredient.unit === 'per_plakje' || ingredient.unit === 'stuk') {
-                multiplier = currentAmount;
-              } else if (ingredient.unit === 'per_100g' || ingredient.unit === 'g') {
-                multiplier = currentAmount / 100;
-              }
-              
-              const currentProtein = proteinPer100g * multiplier;
-              const currentCarbs = carbsPer100g * multiplier;
-              const currentFat = fatPer100g * multiplier;
-              const currentCalories = caloriesPer100g * multiplier;
-              
-              // Determine if this ingredient should be adjusted based on macro needs
-              if (proteinPercent < 95 && proteinPer100g > 10) {
-                // Increase protein-rich ingredients
-                adjustmentFactor = 1.1;
-              } else if (proteinPercent > 105 && proteinPer100g > 10) {
-                // Decrease protein-rich ingredients
-                adjustmentFactor = 0.95;
-              } else if (carbsPercent < 95 && carbsPer100g > 10) {
-                // Increase carb-rich ingredients
-                adjustmentFactor = 1.1;
-              } else if (carbsPercent > 105 && carbsPer100g > 10) {
-                // Decrease carb-rich ingredients
-                adjustmentFactor = 0.95;
-              } else if (fatPercent < 95 && fatPer100g > 10) {
-                // Increase fat-rich ingredients
-                adjustmentFactor = 1.1;
-              } else if (fatPercent > 105 && fatPer100g > 10) {
-                // Decrease fat-rich ingredients
-                adjustmentFactor = 0.95;
-              }
-              
-              // Apply adjustment
-              if (adjustmentFactor !== 1) {
-                let newAmount = currentAmount * adjustmentFactor;
-                
-                // Apply realistic constraints
-                if (ingredient.unit === 'per_piece' || ingredient.unit === 'per_plakje' || ingredient.unit === 'stuk') {
-                  newAmount = Math.max(1, Math.round(newAmount));
-                } else {
-                  newAmount = Math.round(newAmount * 10) / 10;
-                  if (newAmount < 0.1) newAmount = 0.1;
-                }
-                
-                ingredient.amount = newAmount;
-                
-                if (Math.abs(newAmount - currentAmount) > 0.1) {
-                  console.log(`🧠 Adjusted ${ingredient.name}: ${currentAmount} → ${newAmount} (factor: ${adjustmentFactor.toFixed(2)})`);
-                }
-              }
+      const personalized = calculatePersonalizedTargets(scaledPlan, userProfile);
+      if (!personalized) return;
+
+      // 1) Calorie-first global scaling
+      const totalsBefore = calculateDayTotals(day, scaledPlan);
+      if (totalsBefore.calories > 0) {
+        const fCal = personalized.targetCalories / totalsBefore.calories;
+        ['ontbijt','ochtend_snack','lunch','lunch_snack','diner','avond_snack'].forEach(mealType => {
+          const meal = scaledPlan.meals.weekly_plan[day]?.[mealType];
+          if (meal?.ingredients) {
+            meal.ingredients.forEach((ing: any) => {
+              if (ing.amount) ing.amount = roundUnitAmount(ing, ing.amount * fCal);
             });
-            
-            // Recalculate meal totals after adjustments
-            const mealTotals = calculateMealTotals(meal);
-            meal.totals = mealTotals;
+            meal.totals = calculateMealTotals(meal, mealType, day);
           }
         });
-        
-        iterations++;
       }
-        
-      // Final day totals
-      const finalDayTotals = calculateDayTotals(day, scaledPlan);
-        if (scaledPlan.meals.weekly_plan[day]) {
-        scaledPlan.meals.weekly_plan[day].dailyTotals = finalDayTotals;
+
+      // 2) Macro balancing (3 smaller iterations)
+      for (let iter = 0; iter < 3; iter++) {
+        const t = calculateDayTotals(day, scaledPlan);
+        const dP = personalized.targetProtein - t.protein;
+        const dC = personalized.targetCarbs - t.carbs;
+        const dF = personalized.targetFat - t.fat;
+
+        const within5 = (actual:number, target:number) => Math.abs(actual - target) <= Math.max(5, target * 0.05);
+        if (within5(t.calories, personalized.targetCalories)
+          && within5(t.protein, personalized.targetProtein)
+          && within5(t.carbs, personalized.targetCarbs)
+          && within5(t.fat, personalized.targetFat)) break;
+
+        const proteinSources:any[] = [];
+        const carbSources:any[]   = [];
+        const fatSources:any[]    = [];
+
+        ['ontbijt','ochtend_snack','lunch','lunch_snack','diner','avond_snack'].forEach(mealType => {
+          const meal = scaledPlan.meals.weekly_plan[day]?.[mealType];
+          meal?.ingredients?.forEach((ing:any) => {
+            const m = macroPerUnit(ing);
+            if (m.p > 0.1) proteinSources.push({ ing, m });
+            if (m.c > 0.1) carbSources.push({ ing, m });
+            if (m.f > 0.1) fatSources.push({ ing, m });
+          });
+        });
+
+        const applyDelta = (sources:any[], delta:number, key:'p'|'c'|'f', stepVal:number) => {
+          if (sources.length === 0 || Math.abs(delta) < 0.5) return;
+          const weights = sources.map(s => Math.max(0.01, s.m[key]));
+          const sumW = weights.reduce((a:number,b:number)=>a+b,0);
+          sources.forEach((s, i) => {
+            const share = (weights[i] / sumW) * delta * stepVal; // grams macro
+            const unitsChange = share / s.m[key];
+            const newAmount = roundUnitAmount(s.ing, (s.ing.amount || 0) + unitsChange);
+            s.ing.amount = newAmount;
+          });
+        };
+
+        // Main balancing with slightly smaller step to reduce overshoot
+        const mainStep = 0.45;
+        if (dP !== 0) applyDelta(proteinSources, dP, 'p', mainStep);
+        if (dC !== 0) applyDelta(carbSources,    dC, 'c', mainStep);
+        if (dF !== 0) applyDelta(fatSources,     dF, 'f', mainStep);
+
+        // refresh meal totals
+        ['ontbijt','ochtend_snack','lunch','lunch_snack','diner','avond_snack'].forEach(mealType => {
+          const meal = scaledPlan.meals.weekly_plan[day]?.[mealType];
+          if (meal) meal.totals = calculateMealTotals(meal, mealType, day);
+        });
       }
-      
-      console.log(`🧠 Final day ${day} totals:`, {
-        calories: `${finalDayTotals.calories.toFixed(1)} (${((finalDayTotals.calories / targetCalories) * 100).toFixed(1)}%)`,
-        protein: `${finalDayTotals.protein.toFixed(1)}g (${((finalDayTotals.protein / targetProtein) * 100).toFixed(1)}%)`,
-        carbs: `${finalDayTotals.carbs.toFixed(1)}g (${((finalDayTotals.carbs / targetCarbs) * 100).toFixed(1)}%)`,
-        fat: `${finalDayTotals.fat.toFixed(1)}g (${((finalDayTotals.fat / targetFat) * 100).toFixed(1)}%)`
-      });
     });
 
-    console.log('✅ Smart Scaling applied - Macro balance optimized!');
-    
-    // Debug: Check final macro balance
-    console.log('🔍 Final macro balance verification:');
-    days.forEach(day => {
-      const dayTotals = scaledPlan.meals.weekly_plan[day]?.dailyTotals;
-      if (dayTotals) {
-        const caloriesPercent = ((dayTotals.calories / targetCalories) * 100).toFixed(1);
-        const proteinPercent = ((dayTotals.protein / targetProtein) * 100).toFixed(1);
-        const carbsPercent = ((dayTotals.carbs / targetCarbs) * 100).toFixed(1);
-        const fatPercent = ((dayTotals.fat / targetFat) * 100).toFixed(1);
-        
-        console.log(`🔍 ${day}: C:${caloriesPercent}% P:${proteinPercent}% K:${carbsPercent}% F:${fatPercent}%`);
-      }
-    });
-    
     return scaledPlan;
+  };
+
+  // Run 5-profile scaling tests and store results
+  const runSmartScalingTests = async () => {
+    try {
+      // Prefer a pristine raw plan; fallback to currently loaded originalPlanData
+      const basePlan = rawPlanData ? deepClone(rawPlanData) : (originalPlanData ? deepClone(originalPlanData) : null);
+      if (!basePlan) {
+        console.warn('No plan data available for tests');
+        toast.error('Geen plandata beschikbaar voor test');
+        return;
+      }
+      const plan = basePlan;
+      const profiles: UserProfile[] = [
+        { weight: 70, height: 180, age: 28, gender: 'male', activity_level: 'sedentary', fitness_goal: 'onderhoud' },
+        { weight: 80, height: 182, age: 32, gender: 'male', activity_level: 'moderate', fitness_goal: 'droogtrainen' },
+        { weight: 90, height: 185, age: 35, gender: 'male', activity_level: 'very_active', fitness_goal: 'spiermassa' },
+        { weight: 100, height: 188, age: 30, gender: 'male', activity_level: 'moderate', fitness_goal: 'onderhoud' },
+        { weight: 110, height: 190, age: 38, gender: 'male', activity_level: 'very_active', fitness_goal: 'spiermassa' },
+      ];
+
+      // Choose a valid day present in the plan
+      const availableDays = Object.keys(plan?.meals?.weekly_plan || {});
+      const day = availableDays.includes('maandag') ? 'maandag' : (availableDays[0] || 'maandag');
+      if (!plan?.meals?.weekly_plan?.[day]) {
+        console.warn('Selected test day not found in plan; test may yield zeros', { availableDays });
+      }
+      const results: any[] = [];
+
+      for (const profile of profiles) {
+        const targets = calculatePersonalizedTargets(plan, profile);
+        if (!targets) continue;
+        const scaled = applySmartScaling(plan, profile);
+        const totals = calculateDayTotals(day, scaled);
+        const pct = {
+          calories: (totals.calories / Math.max(1, targets.targetCalories)) * 100,
+          protein: (totals.protein / Math.max(1, targets.targetProtein)) * 100,
+          carbs: (totals.carbs / Math.max(1, targets.targetCarbs)) * 100,
+          fat: (totals.fat / Math.max(1, targets.targetFat)) * 100,
+        };
+        const dev = {
+          calories: pct.calories - 100,
+          protein: pct.protein - 100,
+          carbs: pct.carbs - 100,
+          fat: pct.fat - 100,
+        };
+        const within5 = (v:number) => Math.abs(v) <= 5;
+        const allWithin5 = within5(dev.calories) && within5(dev.protein) && within5(dev.carbs) && within5(dev.fat);
+        results.push({
+          profile,
+          planGoal: (plan.goal || 'onderhoud'),
+          target: { calories: targets.targetCalories, protein: targets.targetProtein, carbs: targets.targetCarbs, fat: targets.targetFat },
+          actual: { calories: Math.round(totals.calories), protein: Math.round(totals.protein), carbs: Math.round(totals.carbs), fat: Math.round(totals.fat) },
+          percent: pct,
+          deviation: dev,
+          allWithin5,
+        });
+      }
+
+      setScalingTestResults(results);
+      if (results.length === 0) {
+        console.warn('Smart scaling test produced no results');
+        toast.error('Test gaf geen resultaten. Controleer of plandata aanwezig is.');
+      }
+    } catch (e) {
+      console.error('Smart scaling tests failed', e);
+      toast.error('Fout tijdens Smart Scaling test');
+    }
   };
 
   // Function to calculate progress and color for progress bars
@@ -1026,15 +1060,17 @@ export default function VoedingsplannenV2Page() {
       const data = await response.json();
       console.log('🔧 DEBUG: loadOriginalPlanData data received:', { planName: data.plan?.name, hasMeals: !!data.plan?.meals });
       let planData = data.plan;
+      // Keep a pristine copy for tests
+      setRawPlanData(JSON.parse(JSON.stringify(data.plan)));
       
-      // Apply smart scaling automatically if user weight is not 100kg
-      if (userProfile && userProfile.weight !== 100) {
+      // Apply smart scaling only when toggle is ON and user weight is not 100kg
+      if (smartScalingOn && userProfile && userProfile.weight !== 100) {
         planData = applySmartScaling(data.plan, userProfile);
         console.log('🧠 Smart scaling applied automatically');
       }
       
       setOriginalPlanData(planData);
-      console.log('✅ Plan data loaded:', planData.name, userProfile?.weight === 100 ? '(original)' : '(smart scaled)');
+      console.log('✅ Plan data loaded:', planData.name, smartScalingOn && userProfile?.weight !== 100 ? '(smart scaled)' : '(original)');
       console.log('🔍 Plan data structure:', {
         hasMeals: !!data.plan.meals,
         hasWeeklyPlan: !!data.plan.meals?.weekly_plan,
@@ -1093,6 +1129,27 @@ export default function VoedingsplannenV2Page() {
     // Set the selected plan ID for visual selection
     setSelectedPlanId(plan.plan_id || plan.id);
     
+    // Persist selection for the user
+    if (user?.id) {
+      try {
+        const res = await fetch('/api/nutrition-plan-select', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: user.id, planId: plan.plan_id || plan.id })
+        });
+        if (!res.ok) {
+          const txt = await res.text();
+          console.error('❌ Failed to persist plan selection:', txt);
+          toast.error('Opslaan van voedingsplan mislukt');
+        } else {
+          toast.success('Voedingsplan geselecteerd');
+        }
+      } catch (e) {
+        console.error('❌ Error persisting plan selection:', e);
+        toast.error('Opslaan van voedingsplan mislukt');
+      }
+    }
+    
     // Auto-scroll to next step button when plan is selected during onboarding
     if (!isCompleted && currentStep === 5) {
       setTimeout(() => {
@@ -1133,6 +1190,16 @@ export default function VoedingsplannenV2Page() {
     setShowOriginalData(true);
   };
 
+  // Reload plan when Smart Scaling toggle changes
+  useEffect(() => {
+    if (!selectedPlan) return;
+    setLoadingOriginal(true);
+    setScalingInfo(null);
+    loadOriginalPlanData((selectedPlan.plan_id || selectedPlan.id).toString());
+    // Keep detail view open
+    setLoadingOriginal(false);
+  }, [smartScalingOn]);
+
   // Show subscription loading state
   if (subscriptionLoading) {
     return (
@@ -1141,6 +1208,38 @@ export default function VoedingsplannenV2Page() {
           <div className="w-16 h-16 bg-gradient-to-r from-[#B6C948] to-[#8BAE5A] rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse">
             <RocketLaunchIcon className="w-8 h-8 text-[#181F17]" />
           </div>
+
+        {/* Reset confirm modal */}
+        {showResetConfirm && (
+          <div className="fixed inset-0 z-[1000] flex items-center justify-center">
+            <div className="absolute inset-0 bg-black/60" onClick={() => setShowResetConfirm(false)} />
+            <div className="relative bg-[#181F17] border border-[#3A4D23] rounded-xl p-6 w-[90%] max-w-md text-white">
+              <h3 className="text-xl font-bold mb-2">Plan resetten?</h3>
+              <p className="text-gray-300 mb-4">We adviseren je om je plan minimaal 8 weken te volgen voor zichtbaar resultaat. Weet je zeker dat je je huidige plan wilt wijzigen?</p>
+              <div className="flex justify-end gap-3">
+                <button onClick={() => setShowResetConfirm(false)} className="px-4 py-2 bg-[#3A4D23] hover:bg-[#4A5D33] rounded-lg">Annuleren</button>
+                <button
+                  onClick={async () => {
+                    try {
+                      await fetch('/api/nutrition-plan-select', {
+                        method: 'DELETE',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ userId: user?.id })
+                      });
+                    } catch {}
+                    setSelectedPlan(null);
+                    setOriginalPlanData(null);
+                    setSelectedPlanId(null);
+                    setShowResetConfirm(false);
+                  }}
+                  className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg"
+                >
+                  Ja, reset plan
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
           <h3 className="text-xl font-bold text-white mb-2">Laden...</h3>
           <p className="text-[#B6C948]">Controleer toegang...</p>
         </div>
@@ -1268,16 +1367,54 @@ export default function VoedingsplannenV2Page() {
   if (selectedPlan && originalPlanData && userProfile) {
     return (
       <div className="min-h-screen bg-[#0A0F0A] p-6">
-        {/* Back Button */}
-        <div className="mb-6">
-          <button
-            onClick={handleBackToPlans}
-            className="flex items-center gap-2 px-4 py-2 bg-[#3A4D23] text-[#8BAE5A] rounded-lg hover:bg-[#4A5D33] transition-colors"
-          >
-            <ArrowLeftIcon className="w-4 h-4" />
-            <span>Terug naar Plannen</span>
-          </button>
+        {/* Locked reset bar */}
+        <div className="mb-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-[#181F17] border border-[#3A4D23] rounded-xl p-4">
+            <div className="text-gray-300 text-sm">
+              <div className="text-white font-semibold mb-1">Je plan is vergrendeld</div>
+              <div>Voor optimale resultaten adviseren we om een plan minimaal 8 weken te volgen. Wil je toch wisselen? Reset dan je plan hieronder.</div>
+            </div>
+            <button
+              onClick={() => setShowResetConfirm(true)}
+              className="px-4 py-2 bg-red-600/20 border border-red-500/30 text-red-400 rounded-lg hover:bg-red-600/30 transition-colors font-semibold"
+            >
+              Reset plan
+            </button>
+          </div>
         </div>
+
+        {/* Reset confirm modal - visible in detail view */}
+        {showResetConfirm && (
+          <div className="fixed inset-0 z-[1000] flex items-center justify-center">
+            <div className="absolute inset-0 bg-black/60" onClick={() => setShowResetConfirm(false)} />
+            <div id="reset-confirm-modal-v2" className="relative bg-[#181F17] border border-[#3A4D23] rounded-xl p-6 w-[90%] max-w-md text-white">
+              <h3 className="text-xl font-bold mb-2">Plan resetten?</h3>
+              <p className="text-gray-300 mb-4">We adviseren je om je plan minimaal 8 weken te volgen voor zichtbaar resultaat. Weet je zeker dat je je huidige plan wilt wijzigen?</p>
+              <div className="flex justify-end gap-3">
+                <button onClick={() => setShowResetConfirm(false)} className="px-4 py-2 bg-[#3A4D23] hover:bg-[#4A5D33] rounded-lg">Annuleren</button>
+                <button
+                  onClick={async () => {
+                    try {
+                      await fetch('/api/nutrition-plan-select', {
+                        method: 'DELETE',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ userId: user?.id })
+                      });
+                    } catch {}
+                    setSelectedPlan(null);
+                    setOriginalPlanData(null);
+                    setSelectedPlanId(null);
+                    setShowResetConfirm(false);
+                  }}
+                  className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg"
+                >
+                  Ja, reset plan
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        {/* Back Button hidden when a plan is active/locked */}
 
         {/* Plan Detail Header */}
         <motion.div 
@@ -1300,6 +1437,30 @@ export default function VoedingsplannenV2Page() {
                     }
                   </p>
                 </div>
+              </div>
+              {/* Smart Scaling Debug Toggle */}
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-gray-300 hidden sm:inline">Smart Scaling</span>
+                <button
+                  onClick={() => setSmartScalingOn(v => !v)}
+                  className={`relative inline-flex h-8 w-18 items-center rounded-full border transition-colors ${smartScalingOn ? 'bg-[#8BAE5A] border-[#A4C06F]' : 'bg-[#2A3A1A] border-[#3A4D23]'}`}
+                  title={`Smart Scaling ${smartScalingOn ? 'aan' : 'uit'}`}
+                >
+                  <span className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${smartScalingOn ? 'translate-x-10' : 'translate-x-1'}`}></span>
+                </button>
+                <span className={`text-sm font-semibold ${smartScalingOn ? 'text-[#8BAE5A]' : 'text-gray-400'}`}>
+                  {smartScalingOn ? 'Aan' : 'Uit'}
+                </span>
+                <button
+                  onClick={async () => {
+                    await runSmartScalingTests();
+                    setShowScalingTestModal(true);
+                  }}
+                  className="px-3 py-2 bg-[#3A4D23] hover:bg-[#4A5D33] text-white rounded-lg text-sm"
+                  title="Voer 5-profiel Smart Scaling test uit"
+                >
+                  Test Smart Scaling (5)
+                </button>
               </div>
             </div>
 
@@ -1420,6 +1581,51 @@ export default function VoedingsplannenV2Page() {
 
           </div>
         </motion.div>
+
+        {/* Smart Scaling Test Results Modal */}
+        {showScalingTestModal && (
+          <div className="fixed inset-0 z-[1000] flex items-center justify-center">
+            <div className="absolute inset-0 bg-black/60" onClick={() => setShowScalingTestModal(false)} />
+            <div className="relative bg-[#181F17] border border-[#3A4D23] rounded-xl p-6 w-[95%] max-w-2xl text-white">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-bold">Smart Scaling Testresultaten (5 profielen)</h3>
+                <button onClick={() => setShowScalingTestModal(false)} className="px-3 py-1 bg-[#3A4D23] hover:bg-[#4A5D33] rounded-lg">Sluiten</button>
+              </div>
+              {/* Overview */}
+              {(() => {
+                const passes = scalingTestResults.filter(r => r.allWithin5).length;
+                const avgDev = (arr:number[]) => (arr.reduce((a,b)=>a+b,0)/Math.max(1,arr.length)).toFixed(1);
+                const avgCal = avgDev(scalingTestResults.map(r => Math.abs(r.deviation.calories)));
+                const avgP = avgDev(scalingTestResults.map(r => Math.abs(r.deviation.protein)));
+                const avgC = avgDev(scalingTestResults.map(r => Math.abs(r.deviation.carbs)));
+                const avgF = avgDev(scalingTestResults.map(r => Math.abs(r.deviation.fat)));
+                return (
+                  <div className="mb-4 p-3 rounded-lg bg-[#0A0F0A] border border-[#3A4D23] text-sm">
+                    <div><span className="text-[#8BAE5A] font-semibold">Overall Score:</span> {passes}/5 profielen binnen ±5% op alle macros en kcal</div>
+                    <div className="mt-1 text-gray-300">Gem. afwijking — Kcal: {avgCal}%, Eiwit: {avgP}%, Koolhydraten: {avgC}%, Vet: {avgF}%</div>
+                  </div>
+                );
+              })()}
+              {/* List */}
+              <div className="space-y-3 max-h-[60vh] overflow-auto pr-1">
+                {scalingTestResults.map((r, i) => (
+                  <div key={i} className="p-3 rounded-lg bg-[#0A0F0A] border border-[#3A4D23]">
+                    <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                      <div className="font-semibold">Profiel {i+1}: {r.profile.weight}kg • {r.profile.activity_level} • doel: {r.planGoal}</div>
+                      <div className={r.allWithin5 ? 'text-[#8BAE5A]' : 'text-red-400'}>{r.allWithin5 ? 'Binnen ±5% (OK)' : 'Buiten ±5%'}</div>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+                      <div>Caloriën: {r.actual.calories} / {r.target.calories} ({r.percent.calories.toFixed(1)}%) • Δ {r.deviation.calories.toFixed(1)}%</div>
+                      <div>Eiwit: {r.actual.protein}g / {r.target.protein}g ({r.percent.protein.toFixed(1)}%) • Δ {r.deviation.protein.toFixed(1)}%</div>
+                      <div>Koolhydraten: {r.actual.carbs}g / {r.target.carbs}g ({r.percent.carbs.toFixed(1)}%) • Δ {r.deviation.carbs.toFixed(1)}%</div>
+                      <div>Vet: {r.actual.fat}g / {r.target.fat}g ({r.percent.fat.toFixed(1)}%) • Δ {r.deviation.fat.toFixed(1)}%</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Detailed Meal Structure */}
         <motion.div 
@@ -2054,16 +2260,16 @@ export default function VoedingsplannenV2Page() {
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-[#181F17] border border-[#3A4D23] rounded-xl p-6 mb-6"
+                className="mx-3 sm:mx-4 md:mx-6 bg-gradient-to-r from-[#8BAE5A]/10 to-[#8BAE5A]/5 border border-[#8BAE5A]/30 rounded-2xl p-4 sm:p-6 mb-4 sm:mb-6"
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-gradient-to-r from-[#B6C948] to-[#8BAE5A] rounded-full flex items-center justify-center">
-                      <span className="text-[#181F17] font-bold text-sm">✓</span>
+                <div className="flex items-center justify-between gap-3 sm:gap-4">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="p-2 bg-[#8BAE5A]/20 rounded-lg">
+                      <CheckIcon className="h-5 w-5 sm:h-6 sm:w-6 text-[#8BAE5A]" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-bold text-white">Voedingsplan Geselecteerd</h3>
-                      <p className="text-[#8BAE5A] text-sm">Je hebt een voedingsplan gekozen. Klik op "Volgende Stap" om door te gaan.</p>
+                      <h3 className="text-base sm:text-lg font-semibold text-white">Voedingsplan Geselecteerd!</h3>
+                      <p className="text-xs sm:text-sm text-gray-400">Je bent klaar voor de volgende stap</p>
                     </div>
                   </div>
                   <button
@@ -2074,10 +2280,13 @@ export default function VoedingsplannenV2Page() {
                       }
                     }}
                     data-next-step-button
-                    className="px-6 py-3 bg-gradient-to-r from-[#B6C948] to-[#8BAE5A] text-[#181F17] rounded-lg font-semibold hover:from-[#8BAE5A] hover:to-[#B6C948] transition-all duration-200 flex items-center gap-2"
+                    className="px-6 sm:px-8 py-2 sm:py-3 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold shadow-lg shadow-[#8BAE5A]/20 flex items-center gap-2"
                   >
-                    <span>Volgende Stap</span>
-                    <span>→</span>
+                    <span className="hidden sm:inline">Doorgaan naar Volgende Stap</span>
+                    <span className="sm:hidden">Volgende Stap</span>
+                    <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
                   </button>
                 </div>
               </motion.div>
@@ -2255,3 +2464,8 @@ export default function VoedingsplannenV2Page() {
     </div>
   );
 }
+
+// === Debug helpers ===
+function deepClone<T>(obj:T):T { return JSON.parse(JSON.stringify(obj)); }
+
+// (no-op placeholder removed)

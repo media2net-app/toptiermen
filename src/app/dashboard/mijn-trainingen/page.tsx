@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import ModalBase from '@/components/ui/ModalBase';
 import { 
   LockClosedIcon, 
   PlayIcon, 
@@ -108,6 +109,30 @@ export default function MijnTrainingen() {
     }
   };
 
+  // Helper to mark current schema completed (Schema 1) and navigate to Trainingsschemas (Schema 2 visible)
+  const completeSchemaAndGoToSchema2 = async () => {
+    if (!user || !trainingData?.schema?.id) {
+      router.push('/dashboard/trainingsschemas');
+      return;
+    }
+    try {
+      // Mark schema as completed (8 weeks)
+      await fetch('/api/schema-completion', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user.id,
+          schemaId: trainingData.schema.id,
+          completedWeeks: 8,
+          completionDate: new Date().toISOString()
+        })
+      });
+    } catch {}
+    // Flag UI to highlight Schema 2 on trainingsschemas page
+    try { localStorage.setItem('ttm_focus_schema_2', 'true'); } catch {}
+    router.push('/dashboard/trainingsschemas');
+  };
+
   // When the week completion modal opens, scroll to the top so the centered modal is fully visible
   useEffect(() => {
     if (showWeekCompletionModal) {
@@ -173,6 +198,7 @@ export default function MijnTrainingen() {
       }
 
       // Load week completions from database (with fallback for missing tables)
+      let effectiveCompletedWeeks: any[] | null = null;
       if (data.hasActiveSchema && data.schema?.id) {
         try {
           console.log('📅 Loading week completions...');
@@ -192,6 +218,7 @@ export default function MijnTrainingen() {
             
             console.log('📊 Converted completedWeeks:', loadedCompletedWeeks);
             setCompletedWeeks(loadedCompletedWeeks);
+            effectiveCompletedWeeks = loadedCompletedWeeks;
           } else {
             console.log('⚠️ No week completions found in database, using local storage');
             // Try to load from localStorage as fallback
@@ -202,6 +229,7 @@ export default function MijnTrainingen() {
                 console.log('📊 Raw localStorage completedWeeks:', parsedWeeks);
                 setCompletedWeeks(parsedWeeks);
                 console.log('✅ Week completions loaded from localStorage:', parsedWeeks.length);
+                effectiveCompletedWeeks = parsedWeeks;
               } catch (parseError) {
                 console.log('⚠️ Could not parse localStorage week completions');
               }
@@ -217,6 +245,7 @@ export default function MijnTrainingen() {
               console.log('📊 Raw localStorage completedWeeks (fallback):', parsedWeeks);
               setCompletedWeeks(parsedWeeks);
               console.log('✅ Week completions loaded from localStorage:', parsedWeeks.length);
+              effectiveCompletedWeeks = parsedWeeks;
             } catch (parseError) {
               console.log('⚠️ Could not parse localStorage week completions');
             }
@@ -226,7 +255,7 @@ export default function MijnTrainingen() {
 
       // Check if all days are completed and handle week progression (only if modal is not open)
       if (data.hasActiveSchema && data.days && !showWeekCompletionModal) {
-        checkWeekCompletion(data.days);
+        checkWeekCompletion(data.days, effectiveCompletedWeeks || completedWeeks);
       }
     } catch (error) {
       console.error('❌ Error loading training data:', error);
@@ -237,7 +266,7 @@ export default function MijnTrainingen() {
   };
 
   // Function to check if all days are completed and handle week progression
-  const checkWeekCompletion = async (days: any[]) => {
+  const checkWeekCompletion = async (days: any[], overrideCompletedWeeks?: any[]) => {
     // Don't check if modal is already open
     if (showWeekCompletionModal) {
       console.log('⏸️ Week completion modal already open, skipping check');
@@ -254,11 +283,10 @@ export default function MijnTrainingen() {
         console.log('ℹ️ Could not stop workout (possibly no session):', e);
       }
       console.log('🎉 All days completed! Checking if week completion exists...');
-      console.log('📊 Current completedWeeks:', completedWeeks);
-      console.log('📊 completedWeeks.length:', completedWeeks.length);
-      
-      // Calculate the current week number based on completed weeks (live state)
-      const nextWeekNumber = (completedWeeks?.length || 0) + 1;
+      const effectiveCompletedWeeks = Array.isArray(overrideCompletedWeeks) ? overrideCompletedWeeks : completedWeeks;
+      console.log('📊 Using completedWeeks length:', effectiveCompletedWeeks?.length || 0);
+      // Calculate the current week number based on the freshest list of completed weeks
+      const nextWeekNumber = (effectiveCompletedWeeks?.length || 0) + 1;
       console.log('📊 Calculated nextWeekNumber:', nextWeekNumber);
       
       // Check if modal should be shown (not already closed) - with fallback for missing tables
@@ -635,8 +663,15 @@ export default function MijnTrainingen() {
             <div className="flex-1">
                 <div className="flex items-start justify-between mb-3 sm:mb-4">
                   <div className="flex-1 min-w-0 pr-2">
-                    <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-white mb-1 sm:mb-2 leading-tight">{schema?.name}</h2>
-                    <p className="text-gray-400 text-xs sm:text-sm md:text-base lg:text-lg mb-3 sm:mb-4 leading-relaxed">{schema?.description}</p>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-white leading-tight">{schema?.name}</h2>
+                      {typeof schema?.schema_nummer !== 'undefined' && schema?.schema_nummer !== null && (
+                        <span className="inline-flex items-center px-2 py-1 text-[10px] sm:text-xs font-semibold rounded-md bg-[#8BAE5A]/15 text-[#8BAE5A] border border-[#8BAE5A]/30">
+                          Schema {schema?.schema_nummer}
+                        </span>
+                      )}
+                    </div>
+                    {/* Description hidden per request */}
               </div>
                   {schema?.cover_image && (
                     <div className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 bg-[#3A4D23] rounded-lg sm:rounded-xl overflow-hidden ml-2 sm:ml-3 md:ml-4 flex-shrink-0">
@@ -703,15 +738,28 @@ export default function MijnTrainingen() {
                       </div>
                       <div>
                         <div className="text-white font-bold text-sm sm:text-base">Week {completedWeeks.length + 1} voltooid!</div>
-                        <div className="text-gray-300 text-xs sm:text-sm">Klaar voor de volgende week?</div>
+                        {trainingData?.schema?.schema_nummer === 1 && (completedWeeks.length + 1) >= 8 ? (
+                          <div className="text-[#FFD700] text-xs sm:text-sm font-semibold">Schema 1 voltooid! Schema 2 is nu beschikbaar.</div>
+                        ) : (
+                          <div className="text-gray-300 text-xs sm:text-sm">Klaar voor de volgende week?</div>
+                        )}
                       </div>
                     </div>
-                    <button
-                      onClick={startNewWeek}
-                      className="px-3 py-2 sm:px-4 sm:py-2 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-semibold text-xs sm:text-sm rounded-lg hover:from-[#7A9D4A] hover:to-[#e0903f] transition-all duration-200 shadow"
-                    >
-                      Start
-                    </button>
+                    {trainingData?.schema?.schema_nummer === 1 && (completedWeeks.length + 1) >= 8 ? (
+                      <button
+                        onClick={completeSchemaAndGoToSchema2}
+                        className="px-3 py-2 sm:px-4 sm:py-2 bg-gradient-to-r from-[#FFD700] to-[#8BAE5A] text-[#181F17] font-semibold text-xs sm:text-sm rounded-lg hover:from-[#FFE55C] hover:to-[#A6C97B] transition-all duration-200 shadow"
+                      >
+                        Ga naar Schema 2
+                      </button>
+                    ) : (
+                      <button
+                        onClick={startNewWeek}
+                        className="px-3 py-2 sm:px-4 sm:py-2 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-semibold text-xs sm:text-sm rounded-lg hover:from-[#7A9D4A] hover:to-[#e0903f] transition-all duration-200 shadow"
+                      >
+                        Start
+                      </button>
+                    )}
                   </div>
                 </div>
               )}
@@ -719,8 +767,13 @@ export default function MijnTrainingen() {
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
                 <div>
                 <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-white">Trainingsdagen</h2>
-                  <p className="text-[#8BAE5A] text-xs sm:text-sm mt-1">
-                    Huidige Week: {completedWeeks.length + 1}/8
+                  <p className="text-[#8BAE5A] text-xs sm:text-sm mt-1 flex items-center gap-2">
+                    <span>Huidige Week: {completedWeeks.length + 1}/8</span>
+                    {typeof schema?.schema_nummer !== 'undefined' && schema?.schema_nummer !== null && (
+                      <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-semibold rounded bg-[#8BAE5A]/15 text-[#8BAE5A] border border-[#8BAE5A]/30">
+                        Schema {schema?.schema_nummer}
+                      </span>
+                    )}
                   </p>
                 </div>
               </div>
@@ -1048,19 +1101,11 @@ export default function MijnTrainingen() {
       {/* Week Completion Modal */}
       <AnimatePresence>
         {showWeekCompletionModal && weekCompletionData && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-            ref={weekCompletionRef}
+          <ModalBase
+            isOpen={showWeekCompletionModal}
+            onClose={() => setShowWeekCompletionModal(false)}
+            className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 max-w-2xl w-full shadow-2xl mx-2 sm:mx-4"
           >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 max-w-2xl w-full shadow-2xl mx-2 sm:mx-4"
-            >
               <div className="text-center">
                 {/* Success Icon */}
                 <div className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 md:mb-6">
@@ -1133,62 +1178,61 @@ export default function MijnTrainingen() {
                 
                 {/* Action Buttons */}
                 <div className="flex justify-center">
-                  <button
-                    onClick={async () => {
-                      // Record modal close and save week completion to database
-                      if (user && trainingData?.schema?.id && weekCompletionData) {
-                        try {
-                          console.log('💾 Recording modal close and saving week completion...');
-                          
-                          // Record that modal was closed
-                          await fetch('/api/week-completion-modal-views', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                              userId: user.id,
-                              schemaId: trainingData.schema.id,
-                              weekNumber: weekCompletionData.week,
-                              action: 'closed'
-                            })
-                          });
-                          
-                          // Save week completion to database
-                          const response = await fetch('/api/week-completion', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                              userId: user.id,
-                              schemaId: trainingData.schema.id,
-                              weekNumber: weekCompletionData.week,
-                              completedAt: weekCompletionData.completedAt,
-                              completedDays: weekCompletionData.days
-                            })
-                          });
-
-                          if (response.ok) {
-                            console.log('✅ Week completion and modal close recorded');
-                          } else {
-                            console.error('❌ Failed to save week completion:', response.status);
+                  {trainingData?.schema?.schema_nummer === 1 && weekCompletionData?.week >= 8 ? (
+                    <button
+                      onClick={completeSchemaAndGoToSchema2}
+                      className="px-8 py-3 sm:px-12 sm:py-4 bg-gradient-to-r from-[#FFD700] to-[#8BAE5A] text-[#181F17] font-bold text-sm sm:text-base md:text-lg rounded-lg sm:rounded-xl hover:from-[#FFE55C] hover:to-[#A6C97B] transition-all duration-200 shadow-lg"
+                    >
+                      Ga naar Schema 2
+                    </button>
+                  ) : (
+                    <button
+                      onClick={async () => {
+                        // Record modal close and save week completion to database
+                        if (user && trainingData?.schema?.id && weekCompletionData) {
+                          try {
+                            console.log('💾 Recording modal close and saving week completion...');
+                            await fetch('/api/week-completion-modal-views', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({
+                                userId: user.id,
+                                schemaId: trainingData.schema.id,
+                                weekNumber: weekCompletionData.week,
+                                action: 'closed'
+                              })
+                            });
+                            const response = await fetch('/api/week-completion', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({
+                                userId: user.id,
+                                schemaId: trainingData.schema.id,
+                                weekNumber: weekCompletionData.week,
+                                completedAt: weekCompletionData.completedAt,
+                                completedDays: weekCompletionData.days
+                              })
+                            });
+                            if (!response.ok) {
+                              console.error('❌ Failed to save week completion:', response.status);
+                            }
+                          } catch (error) {
+                            console.error('❌ Error saving week completion:', error);
                           }
-                        } catch (error) {
-                          console.error('❌ Error saving week completion:', error);
                         }
-                      }
-
-                      // Close modal
-                      setShowWeekCompletionModal(false);
-                      setWeekCompletionData(null);
-                    }}
-                    className="px-8 py-3 sm:px-12 sm:py-4 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-bold text-sm sm:text-base md:text-lg rounded-lg sm:rounded-xl hover:from-[#7A9D4A] hover:to-[#e0903f] transition-all duration-200 shadow-lg"
-                  >
-                    Sluiten
-                  </button>
+                        setShowWeekCompletionModal(false);
+                        setWeekCompletionData(null);
+                      }}
+                      className="px-8 py-3 sm:px-12 sm:py-4 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-bold text-sm sm:text-base md:text-lg rounded-lg sm:rounded-xl hover:from-[#7A9D4A] hover:to-[#e0903f] transition-all duration-200 shadow-lg"
+                    >
+                      Sluiten
+                    </button>
+                  )}
                 </div>
               </div>
-            </motion.div>
-          </motion.div>
-      )}
+          </ModalBase>
+        )}
       </AnimatePresence>
     </PageLayout>
   );
-} 
+}

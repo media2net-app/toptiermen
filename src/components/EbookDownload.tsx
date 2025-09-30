@@ -76,7 +76,38 @@ export default function EbookDownload({
   };
 
   const ebookFilename = getEbookFilename();
-  const ebookUrl = `/ebooks/${ebookFilename}.html`;
+  // Known v2 filenames present in public/ebooksv2/
+  const v2Filenames = new Set([
+    'de-basis-van-discipline',
+    'de-kracht-van-hoog-testosteron',
+    'de-waarheid-over-testosteron-doping',
+    'discipline-levensstijl',
+    'fysieke-dominantie-belangrijk',
+    'identiteit-kernwaarden',
+    'militaire-discipline',
+    'testosteron-killers-wat-moet-je-elimineren',
+    'top-tier-identiteit',
+    'trt-en-mijn-visie',
+    'wat-is-testosteron',
+  ]);
+
+  // Map potential generated slugs to the actual v2 filenames when they differ
+  const v2Alias: { [slug: string]: string } = {
+    // long-to-short or alternative slugs mapping
+    'waarom-is-fysieke-dominantie-zo-belangrijk': 'fysieke-dominantie-belangrijk',
+    'ontdek-je-kernwaarden-en-bouw-je-top-tier-identiteit': 'top-tier-identiteit',
+    'wat-is-identiteit-en-waarom-zijn-kernwaarden-essentieel': 'identiteit-kernwaarden',
+    'discipline-van-korte-termijn-naar-een-levensstijl': 'discipline-levensstijl',
+  };
+
+  // Prefer DB-provided URL if present, else v2 by exact or alias match, else legacy
+  const ebookUrl = ebookData?.file_url
+    ? ebookData.file_url
+    : v2Filenames.has(ebookFilename)
+      ? `/ebooksv2/${ebookFilename}.html`
+      : v2Alias[ebookFilename]
+        ? `/ebooksv2/${v2Alias[ebookFilename]}.html`
+        : `/ebooks/${ebookFilename}.html`;
 
   // Check if this lesson has an ebook available
   const hasEbook = true; // All lessons now have ebooks

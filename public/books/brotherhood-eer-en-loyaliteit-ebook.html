@@ -193,8 +193,62 @@
             }
         }
     </style>
+
+
+<!-- Injected by update-ebooks-ttm-theme.js -->
+<style id="ttm-green-theme">
+  :root { color-scheme: dark; }
+  body {
+    background: linear-gradient(135deg, #0A0F0A 0%, #181F17 50%, #232D1A 100%) !important;
+    color: #ffffff !important;
+  }
+  a { color: #8BAE5A; }
+  /* Sticky Back Button */
+  .sticky-back-btn {
+    position: fixed;
+    top: 50%;
+    right: 20px;
+    transform: translateY(-50%);
+    z-index: 1000;
+    background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 14px 18px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 8px 25px rgba(139, 174, 90, 0.3);
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    min-width: 110px;
+    justify-content: center;
+  }
+  .sticky-back-btn:hover {
+    background: linear-gradient(135deg, #B6C948 0%, #8BAE5A 100%);
+    transform: translateY(-50%) scale(1.05);
+    box-shadow: 0 12px 35px rgba(139, 174, 90, 0.4);
+  }
+  .sticky-back-btn:active { transform: translateY(-50%) scale(0.95); }
+  .sticky-back-btn svg { width: 16px; height: 16px; fill: currentColor; }
+  @media (max-width: 768px) {
+    .sticky-back-btn { right: 10px; padding: 12px 16px; font-size: 12px; min-width: 96px; }
+  }
+</style>
 </head>
 <body>
+
+<!-- Injected by update-ebooks-ttm-theme.js -->
+<a href="/dashboard/academy/6102f6c8-7f38-4501-ab94-e9a68622e46f/376405c4-33da-4c25-a83c-2cfd54e99b42" class="sticky-back-btn" title="Terug naar les">
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+  </svg>
+  Terug
+</a>
+
     <div class="ebook-container">
         <div class="header">
             <h1>Eer en Loyaliteit</h1>
