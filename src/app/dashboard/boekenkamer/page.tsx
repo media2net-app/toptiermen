@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { BookOpenIcon, StarIcon } from '@heroicons/react/24/solid';
 
 interface Book {
@@ -21,13 +22,32 @@ interface Book {
 }
 
 export default function BoekenkamerPage() {
+  const { user } = useSupabaseAuth();
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [readBooks, setReadBooks] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     fetchBooks();
   }, []);
+
+  // Load read status for logged-in user
+  useEffect(() => {
+    const loadRead = async () => {
+      if (!user?.id) return;
+      try {
+        const res = await fetch(`/api/books/read?userId=${user.id}`, { cache: 'no-store' });
+        if (res.ok) {
+          const { bookIds } = await res.json();
+          setReadBooks(new Set((bookIds || []).filter((n: any) => typeof n === 'number')));
+        }
+      } catch (e) {
+        console.warn('Failed to load read books', e);
+      }
+    };
+    loadRead();
+  }, [user?.id]);
 
   const fetchBooks = async () => {
     try {
@@ -46,6 +66,33 @@ export default function BoekenkamerPage() {
       setError('Er is een fout opgetreden bij het laden van de boeken.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const toggleRead = async (bookId: number) => {
+    if (!user?.id) return;
+    const isRead = readBooks.has(bookId);
+    // Optimistic update
+    setReadBooks(prev => {
+      const next = new Set(prev);
+      if (isRead) next.delete(bookId); else next.add(bookId);
+      return next;
+    });
+
+    try {
+      const res = await fetch('/api/books/read', {
+        method: isRead ? 'DELETE' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id, bookId })
+      });
+      if (!res.ok) throw new Error('request failed');
+    } catch (e) {
+      // Rollback on failure
+      setReadBooks(prev => {
+        const next = new Set(prev);
+        if (isRead) next.add(bookId); else next.delete(bookId);
+        return next;
+      });
     }
   };
 
@@ -88,7 +135,6 @@ export default function BoekenkamerPage() {
     return (
       <div className="min-h-screen bg-[#181F17] flex items-center justify-center">
         <div className="text-center">
-          <div className="text-red-400 text-lg mb-4">{error}</div>
           <button 
             onClick={fetchBooks}
             className="bg-[#8BAE5A] text-white px-4 py-2 rounded-lg hover:bg-[#7A9E4A] transition-colors"
@@ -100,8 +146,9 @@ export default function BoekenkamerPage() {
     );
   }
 
-  const featuredBooks = books.filter(book => book.featured);
-  const regularBooks = books.filter(book => !book.featured);
+  // Split books into featured and regular
+  const featuredBooks = books.filter((b) => b.featured);
+  const regularBooks = books.filter((b) => !b.featured);
 
   return (
     <div className="min-h-screen bg-[#181F17]">
@@ -110,12 +157,8 @@ export default function BoekenkamerPage() {
           {/* Header */}
           <div className="bg-[#232D1A]/80 rounded-xl shadow-xl border border-[#3A4D23]/40 p-8 mb-8">
             <div className="text-center">
-              <h1 className="text-4xl font-bold text-white mb-4">
-                Boekenkamer 📚
-              </h1>
-              <p className="text-[#8BAE5A]/70 text-lg">
-                Ontdek onze collectie van waardevolle boeken en resources voor persoonlijke groei.
-              </p>
+              <h1 className="text-4xl font-bold text-white mb-4">Boekenkamer 📚</h1>
+              <p className="text-[#8BAE5A]/70 text-lg">Ontdek onze collectie van waardevolle boeken en resources voor persoonlijke groei.</p>
             </div>
           </div>
 
@@ -127,52 +170,58 @@ export default function BoekenkamerPage() {
                 Aanbevolen Boeken
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {featuredBooks.map((book) => (
-                  <div key={book.id} className="bg-[#232D1A]/80 rounded-xl shadow-lg border border-[#3A4D23]/40 p-4 hover:border-[#8BAE5A]/50 transition-all duration-300">
-                    <div className="flex gap-4">
-                      {/* Book Cover */}
-                      {book.cover_image_url && (
-                        <div className="flex-shrink-0">
-                          <img 
-                            src={book.cover_image_url} 
-                            alt={book.title}
-                            className="w-20 h-32 object-contain rounded-lg bg-gray-100"
-                          />
-                        </div>
-                      )}
-                      
-                      {/* Book Info */}
-                      <div className="flex-1">
-                        <div className="flex items-start justify-between mb-2">
-                          <div className="flex items-center gap-1">
-                            <BookOpenIcon className="w-4 h-4 text-[#8BAE5A]" />
-                            <h3 className="text-sm font-bold text-white">{book.title}</h3>
+                {featuredBooks.map((book) => {
+                  const isRead = readBooks.has(book.id);
+                  const btnClass = isRead
+                    ? 'bg-green-700 text-white hover:bg-green-600'
+                    : 'bg-[#3A4D23] text-[#8BAE5A] hover:bg-[#4A5D33]';
+                  return (
+                    <div key={book.id} className={`${isRead ? 'bg-green-900/20 border-green-600/50' : 'bg-[#232D1A]/80 border-[#3A4D23]/40'} rounded-xl shadow-lg border p-4 hover:border-[#8BAE5A]/50 transition-all duration-300 overflow-hidden`}>
+                      <div className="flex gap-4">
+                        {/* Book Cover */}
+                        {book.cover_image_url && (
+                          <div className="flex-shrink-0">
+                            <img 
+                              src={book.cover_image_url} 
+                              alt={book.title} 
+                              className="w-20 h-32 object-contain rounded-lg bg-gray-100" 
+                            />
                           </div>
-                          <div className="flex">
-                            {renderStars(book.rating)}
-                          </div>
-                        </div>
-                        
-                        <p className="text-[#8BAE5A] text-xs mb-1">door {book.author}</p>
-                        <span className="inline-block bg-[#3A4D23] text-[#8BAE5A] text-xs px-2 py-1 rounded-full mb-2">
-                          {book.category}
-                        </span>
-                        <p className="text-gray-300 text-xs mb-3 line-clamp-2">{book.description}</p>
-                        
-                        {getAllowedLinkFor(book.title) && (
-                          <a
-                            href={getAllowedLinkFor(book.title) as string}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-[#8BAE5A] to-[#7A9E4A] text-white text-xs font-semibold rounded-lg hover:from-[#7A9E4A] hover:to-[#6B8D3A] transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105"
-                          >
-                            Bestellen
-                          </a>
                         )}
+                        {/* Book Info */}
+                        <div className="flex-1">
+                          <div className="flex items-start justify-between mb-2">
+                            <div className="flex items-center gap-1">
+                              <BookOpenIcon className="w-4 h-4 text-[#8BAE5A]" />
+                              <h3 className="text-sm font-bold text-white">{book.title}</h3>
+                            </div>
+                            <div className="flex">{renderStars(book.rating)}</div>
+                          </div>
+                          <p className="text-[#8BAE5A] text-xs mb-1">door {book.author}</p>
+                          <span className="inline-block bg-[#3A4D23] text-[#8BAE5A] text-xs px-2 py-1 rounded-full mb-2">{book.category}</span>
+                          <div className="flex items-center gap-2 mt-2">
+                            {getAllowedLinkFor(book.title) && (
+                              <a
+                                href={getAllowedLinkFor(book.title) as string}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-[#8BAE5A] to-[#7A9E4A] text-white text-xs font-semibold rounded-lg hover:from-[#7A9E4A] hover:to-[#6B8D3A] transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105"
+                              >
+                                Bestellen
+                              </a>
+                            )}
+                            <button
+                              onClick={() => toggleRead(book.id)}
+                              className={"inline-flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-200 shadow-md hover:shadow-lg " + btnClass}
+                            >
+                              {isRead ? 'Gelezen • Ongedaan maken' : 'Markeer als gelezen'}
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
@@ -181,53 +230,60 @@ export default function BoekenkamerPage() {
           {regularBooks.length > 0 && (
             <div>
               <h2 className="text-2xl font-bold text-white mb-6">Alle Boeken</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {regularBooks.map((book) => (
-                  <div key={book.id} className="bg-[#232D1A]/60 rounded-lg shadow-md border border-[#3A4D23]/30 p-3 hover:border-[#8BAE5A]/40 transition-all duration-300">
-                    <div className="flex gap-3">
-                      {/* Book Cover */}
-                      {book.cover_image_url && (
-                        <div className="flex-shrink-0">
-                          <img 
-                            src={book.cover_image_url} 
-                            alt={book.title}
-                            className="w-16 h-24 object-contain rounded-lg bg-gray-100"
-                          />
-                        </div>
-                      )}
-                      
-                      {/* Book Info */}
-                      <div className="flex-1">
-                        <div className="flex items-start justify-between mb-1">
-                          <div className="flex items-center gap-1">
-                            <BookOpenIcon className="w-3 h-3 text-[#8BAE5A]" />
-                            <h3 className="text-xs font-bold text-white">{book.title}</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {regularBooks.map((book) => {
+                  const isRead = readBooks.has(book.id);
+                  const btnClass = isRead
+                    ? 'bg-green-700 text-white hover:bg-green-600'
+                    : 'bg-[#3A4D23] text-[#8BAE5A] hover:bg-[#4A5D33]';
+                  return (
+                    <div key={book.id} className={`${isRead ? 'bg-green-900/20 border-green-600/50' : 'bg-[#232D1A]/60 border-[#3A4D23]/30'} rounded-lg shadow-md border p-3 hover:border-[#8BAE5A]/40 transition-all duration-300`}>
+                      <div className="flex gap-3">
+                        {/* Book Cover */}
+                        {book.cover_image_url && (
+                          <div className="flex-shrink-0">
+                            <img
+                              src={book.cover_image_url}
+                              alt={book.title}
+                              className="w-16 h-24 object-contain rounded-lg bg-gray-100"
+                            />
                           </div>
-                          <div className="flex">
-                            {renderStars(book.rating)}
-                          </div>
-                        </div>
-                        
-                        <p className="text-[#8BAE5A] text-xs mb-1">door {book.author}</p>
-                        <span className="inline-block bg-[#3A4D23] text-[#8BAE5A] text-xs px-1.5 py-0.5 rounded-full mb-1">
-                          {book.category}
-                        </span>
-                        <p className="text-gray-300 text-xs mb-2 line-clamp-2">{book.description}</p>
-                        
-                        {getAllowedLinkFor(book.title) && (
-                          <a
-                            href={getAllowedLinkFor(book.title) as string}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-[#8BAE5A] to-[#7A9E4A] text-white text-xs font-semibold rounded-lg hover:from-[#7A9E4A] hover:to-[#6B8D3A] transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105"
-                          >
-                            Bestellen
-                          </a>
                         )}
+                        {/* Book Info */}
+                        <div className="flex-1">
+                          <div className="flex items-start justify-between mb-1">
+                            <div className="flex items-center gap-1">
+                              <BookOpenIcon className="w-3 h-3 text-[#8BAE5A]" />
+                              <h3 className="text-xs font-bold text-white">{book.title}</h3>
+                            </div>
+                            <div className="flex">{renderStars(book.rating)}</div>
+                          </div>
+                          <p className="text-[#8BAE5A] text-xs mb-1">door {book.author}</p>
+                          <span className="inline-block bg-[#3A4D23] text-[#8BAE5A] text-xs px-1.5 py-0.5 rounded-full mb-1">{book.category}</span>
+                          <p className="text-gray-300 text-xs mb-2 line-clamp-2">{book.description}</p>
+                          <div className="flex items-center gap-2 mt-2">
+                            {getAllowedLinkFor(book.title) && (
+                              <a
+                                href={getAllowedLinkFor(book.title) as string}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-[#8BAE5A] to-[#7A9E4A] text-white text-xs font-semibold rounded-lg hover:from-[#7A9E4A] hover:to-[#6B8D3A] transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105"
+                              >
+                                Bestellen
+                              </a>
+                            )}
+                            <button
+                              onClick={() => toggleRead(book.id)}
+                              className={"inline-flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-200 shadow-md hover:shadow-lg " + btnClass}
+                            >
+                              {isRead ? 'Gelezen • Ongedaan maken' : 'Markeer als gelezen'}
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}

@@ -260,7 +260,7 @@ async function fetchTrainingStats(userId: string) {
     console.log('📊 Fetching training stats for user:', userId);
     
     // Get current active schema period from user_schema_periods table
-    const { data: schemaPeriod, error: periodError } = await supabaseAdmin
+    const { data: schemaPeriods, error: periodError } = await supabaseAdmin
       .from('user_schema_periods')
       .select(`
         id,
@@ -278,7 +278,10 @@ async function fetchTrainingStats(userId: string) {
       `)
       .eq('user_id', userId)
       .eq('status', 'active')
-      .single();
+      .order('start_date', { ascending: false })
+      .limit(1);
+
+    const schemaPeriod = Array.isArray(schemaPeriods) ? schemaPeriods[0] : schemaPeriods as any;
 
     if (periodError || !schemaPeriod) {
       console.log('⚠️ No active schema period found for user:', periodError?.message || 'No data');
@@ -525,14 +528,26 @@ async function fetchBoekenkamerStats(userId: string) {
   try {
     console.log('📚 Fetching boekenkamer stats for user:', userId);
     
-    // Get total number of available books
-    const { data: allBooks, error: allBooksError } = await supabaseAdmin
-      .from('books')
-      .select('id')
-      .eq('status', 'published');
-
-    if (allBooksError) {
-      console.log('⚠️ Error fetching total books:', allBooksError);
+    // Prefer the same source as Boekenkamer page for consistency
+    let totalBooks = 0;
+    try {
+      const base = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+      const resp = await fetch(`${base}/api/books`, { cache: 'no-store' });
+      if (resp.ok) {
+        const json = await resp.json();
+        totalBooks = Array.isArray(json?.books) ? json.books.length : 0; // currently 12
+      }
+    } catch (e) {
+      console.log('⚠️ Fallback to DB for books count due to fetch error');
+    }
+    // Fallback to DB count if API not available
+    if (!totalBooks) {
+      const { data: allBooks, error: allBooksError } = await supabaseAdmin
+        .from('books')
+        .select('id')
+        .eq('status', 'published');
+      if (!allBooksError) totalBooks = allBooks?.length || 0;
+      else console.log('⚠️ Error fetching total books:', allBooksError);
     }
 
     // Get books read by user
@@ -558,7 +573,6 @@ async function fetchBoekenkamerStats(userId: string) {
       console.log('⚠️ Error fetching today\'s completed books:', todayError);
     }
 
-    const totalBooks = allBooks?.length || 0;
     const readBooksCount = readBooks?.length || 0;
     const completedTodayCount = completedToday?.length || 0;
     

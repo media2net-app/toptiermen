@@ -564,6 +564,12 @@ function LoginPageContent() {
           
           <button
             type="submit"
+            onClick={(e) => {
+              try {
+                // Some browsers/extensions can block form submit; call handler explicitly
+                handleLogin(e as any);
+              } catch {}
+            }}
             disabled={loginState.isLoading || loginState.showLoadingOverlay}
             className={`w-full py-3 sm:py-4 rounded-xl bg-gradient-to-r from-[#B6C948] to-[#3A4D23] text-[#181F17] font-semibold text-base sm:text-lg shadow-lg hover:from-[#B6C948] hover:to-[#B6C948] transition-all duration-200 border border-[#B6C948] font-figtree ${
               loginState.isLoading || loginState.showLoadingOverlay

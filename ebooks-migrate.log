@@ -1,0 +1,141 @@
+=== Batch V2 migration start ===
+
+--- Migrating: het-belang-van-kracht-spiermassa-en-conditie ---
+Summary chars src=466 dest=466 diff=0
+Disclaimer detected in source: NO
+✅ Wrote public/ebooksv2/het-belang-van-kracht-spiermassa-en-conditie.html
+Back URL: /dashboard/academy/0d02e65a-c109-440d-9286-690b21fbdecb/25ad414f-dcf5-4f89-af2e-3406971da3ce
+
+--- Migrating: status-zelfrespect-en-aantrekkingskracht ---
+Summary chars src=9755 dest=9755 diff=0
+Disclaimer detected in source: YES
+✅ Wrote public/ebooksv2/status-zelfrespect-en-aantrekkingskracht.html
+Back URL: /dashboard/academy/0d02e65a-c109-440d-9286-690b21fbdecb/b5ddffc2-e3ff-4ee2-b683-03db5e9e9367
+
+--- Migrating: vitaliteit-en-levensduur ---
+Summary chars src=9527 dest=9527 diff=0
+Disclaimer detected in source: YES
+✅ Wrote public/ebooksv2/vitaliteit-en-levensduur.html
+Back URL: /dashboard/academy/0d02e65a-c109-440d-9286-690b21fbdecb/fb9b50c4-a675-432f-9e1f-ca00ec774d00
+
+--- Migrating: embrace-the-suck ---
+Summary chars src=10032 dest=10032 diff=0
+Disclaimer detected in source: YES
+✅ Wrote public/ebooksv2/embrace-the-suck.html
+Back URL: /dashboard/academy/0d02e65a-c109-440d-9286-690b21fbdecb/fe9e98a5-6241-4b7e-85bb-d4e2e631b21b
+
+--- Migrating: wat-is-mentale-kracht ---
+Summary chars src=398 dest=398 diff=0
+Disclaimer detected in source: NO
+✅ Wrote public/ebooksv2/wat-is-mentale-kracht.html
+Back URL: /dashboard/academy/c66b25e3-869f-4c2c-8037-a552726c6b62/def1adb6-1802-4875-a5e3-f9df1afeee3e
+
+--- Migrating: een-onbreekbare-mindset ---
+Summary chars src=2848 dest=2848 diff=0
+Disclaimer detected in source: NO
+✅ Wrote public/ebooksv2/een-onbreekbare-mindset.html
+Back URL: /dashboard/academy/c66b25e3-869f-4c2c-8037-a552726c6b62/275dce47-df0d-4121-afdc-89a632b25a79
+
+--- Migrating: mentale-weerbaarheid-in-de-praktijk ---
+Summary chars src=3179 dest=3179 diff=0
+Disclaimer detected in source: YES
+✅ Wrote public/ebooksv2/mentale-weerbaarheid-in-de-praktijk.html
+Back URL: /dashboard/academy/c66b25e3-869f-4c2c-8037-a552726c6b62/2b358488-7f45-43a9-aecc-3db899019471
+
+--- Migrating: wordt-een-onbreekbare-man ---
+Summary chars src=3524 dest=3524 diff=0
+Disclaimer detected in source: NO
+✅ Wrote public/ebooksv2/wordt-een-onbreekbare-man.html
+Back URL: /dashboard/academy/c66b25e3-869f-4c2c-8037-a552726c6b62/2ea3e004-dc7a-4e2a-beb2-1ede0763d033
+
+--- Migrating: de-financile-mindset ---
+Summary chars src=8296 dest=8296 diff=0
+Disclaimer detected in source: YES
+✅ Wrote public/ebooksv2/de-financile-mindset.html
+Back URL: /dashboard/academy/309b7450-3c77-4aa5-bc14-f5514cafd886/575b7d7c-1bad-4660-abf7-0507f6fca2e9
+
+--- Migrating: grip-op-je-geld ---
+Summary chars src=5381 dest=5381 diff=0
+Disclaimer detected in source: YES
+✅ Wrote public/ebooksv2/grip-op-je-geld.html
+Back URL: /dashboard/academy/309b7450-3c77-4aa5-bc14-f5514cafd886/b852aa9b-ad36-4202-b7e4-a8a58c4a5adc
+
+--- Migrating: van-werknemer-naar-eigen-verdienmodellen ---
+Summary chars src=868 dest=868 diff=0
+Disclaimer detected in source: YES
+✅ Wrote public/ebooksv2/van-werknemer-naar-eigen-verdienmodellen.html
+Back URL: /dashboard/academy/309b7450-3c77-4aa5-bc14-f5514cafd886/83a68df6-52d7-4f64-9333-4e9811f5cd46
+
+--- Migrating: vermogen-opbouwen-begin-met-investeren ---
+Summary chars src=917 dest=917 diff=0
+Disclaimer detected in source: YES
+✅ Wrote public/ebooksv2/vermogen-opbouwen-begin-met-investeren.html
+Back URL: /dashboard/academy/309b7450-3c77-4aa5-bc14-f5514cafd886/02e056c2-db70-41c6-8fb5-fea3472b38e8
+
+--- Migrating: financile-vrijheid-en-legacy ---
+Summary chars src=5988 dest=5988 diff=0
+Disclaimer detected in source: YES
+✅ Wrote public/ebooksv2/financile-vrijheid-en-legacy.html
+Back URL: /dashboard/academy/309b7450-3c77-4aa5-bc14-f5514cafd886/be4630d9-e366-4388-88cf-c71d9bf69d0a
+
+--- Migrating: waarom-een-brotherhood ---
+Summary chars src=6189 dest=6189 diff=0
+Disclaimer detected in source: NO
+✅ Wrote public/ebooksv2/waarom-een-brotherhood.html
+Back URL: /dashboard/academy/6102f6c8-7f38-4501-ab94-e9a68622e46f/f449b3f0-1dd6-4020-a44e-4f276eaa34e0
+
+--- Migrating: eer-en-loyaliteit ---
+Summary chars src=7008 dest=7008 diff=0
+Disclaimer detected in source: NO
+✅ Wrote public/ebooksv2/eer-en-loyaliteit.html
+Back URL: /dashboard/academy/6102f6c8-7f38-4501-ab94-e9a68622e46f/376405c4-33da-4c25-a83c-2cfd54e99b42
+
+--- Migrating: bouw-de-juiste-kring ---
+Summary chars src=6469 dest=6469 diff=0
+Disclaimer detected in source: YES
+✅ Wrote public/ebooksv2/bouw-de-juiste-kring.html
+Back URL: /dashboard/academy/6102f6c8-7f38-4501-ab94-e9a68622e46f/0d4b5757-3fc2-4295-859d-e0d6e255b4ab
+
+--- Migrating: cut-the-weak ---
+Summary chars src=5753 dest=5753 diff=0
+Disclaimer detected in source: NO
+✅ Wrote public/ebooksv2/cut-the-weak.html
+Back URL: /dashboard/academy/6102f6c8-7f38-4501-ab94-e9a68622e46f/6d8fd15c-c6e0-4f28-ac2e-083e2b121cfa
+
+--- Migrating: hoe-je-je-broeders-versterkt-en-samen-groeit ---
+Summary chars src=5712 dest=5712 diff=0
+Disclaimer detected in source: NO
+✅ Wrote public/ebooksv2/hoe-je-je-broeders-versterkt-en-samen-groeit.html
+Back URL: /dashboard/academy/6102f6c8-7f38-4501-ab94-e9a68622e46f/0a4fa127-88fa-402c-92c2-50d6814aabf3
+
+--- Migrating: de-basisprincipes-van-voeding ---
+Summary chars src=388 dest=388 diff=0
+Disclaimer detected in source: NO
+✅ Wrote public/ebooksv2/de-basisprincipes-van-voeding.html
+Back URL: /dashboard/academy/f5dfaee3-87a7-4d32-9548-751391642e2b/c607f6ff-737d-4a4e-a4d6-0bf1a9ab4234
+
+--- Migrating: hydratatie-en-water-inname ---
+Summary chars src=383 dest=383 diff=0
+Disclaimer detected in source: NO
+✅ Wrote public/ebooksv2/hydratatie-en-water-inname.html
+Back URL: /dashboard/academy/f5dfaee3-87a7-4d32-9548-751391642e2b/76d62836-cbbc-4453-88ac-e1220eb7d91a
+
+--- Migrating: slaap-de-vergeten-superkracht ---
+Summary chars src=409 dest=409 diff=0
+Disclaimer detected in source: NO
+✅ Wrote public/ebooksv2/slaap-de-vergeten-superkracht.html
+Back URL: /dashboard/academy/f5dfaee3-87a7-4d32-9548-751391642e2b/ebcba654-e979-4176-9fa0-ef66a650832c
+
+--- Migrating: energie-en-focus ---
+Summary chars src=435 dest=435 diff=0
+Disclaimer detected in source: NO
+✅ Wrote public/ebooksv2/energie-en-focus.html
+Back URL: /dashboard/academy/f5dfaee3-87a7-4d32-9548-751391642e2b/6ffd2993-3a8c-40fa-a273-17b046cee4f2
+
+--- Migrating: gezondheid-als-fundament ---
+Summary chars src=422 dest=422 diff=0
+Disclaimer detected in source: NO
+✅ Wrote public/ebooksv2/gezondheid-als-fundament.html
+Back URL: /dashboard/academy/f5dfaee3-87a7-4d32-9548-751391642e2b/d8b02260-dbe6-47db-85db-96d8e6a57814
+
+=== Done. Migrated 23 file(s). ===

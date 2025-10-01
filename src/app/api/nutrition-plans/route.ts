@@ -63,11 +63,14 @@ export async function GET(request: NextRequest) {
       updated_at: plan.updated_at
     }));
 
-    console.log(`✅ Frontend nutrition plans fetched successfully: ${transformedPlans.length} plans`);
+    // Exclude test V2 plans from public frontend by default
+    const filteredForFrontend = transformedPlans.filter(p => !String(p.plan_id || '').endsWith('-v2'));
+
+    console.log(`✅ Frontend nutrition plans fetched successfully: ${filteredForFrontend.length} plans (V2 hidden)`);
     
     return NextResponse.json({ 
       success: true, 
-      plans: transformedPlans
+      plans: filteredForFrontend
     });
 
   } catch (error) {

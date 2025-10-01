@@ -133,25 +133,54 @@ export async function POST(request: NextRequest) {
       .eq('status', 'active')
       .single();
 
-    // If user has an existing active schema and is switching to a different one, reset all training data
+    // If switching to a different schema, decide whether to reset based on completion
     if (existingPeriods && existingPeriods.training_schema_id !== schemaId) {
-      console.log('🔄 User switching schemas, resetting all training data...');
-      
+      let shouldReset = true;
       try {
-        // Call the reset API to clear all training data
-        const resetResponse = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/reset-training-data`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId: actualUserId, newSchemaId: schemaId })
-        });
+        // 1) Check if existing schema progress is completed
+        const { data: progress } = await supabase
+          .from('user_training_schema_progress')
+          .select('completed_days, completed_at')
+          .eq('user_id', actualUserId)
+          .eq('schema_id', existingPeriods.training_schema_id)
+          .maybeSingle();
 
-        if (resetResponse.ok) {
-          console.log('✅ Training data reset successfully');
-        } else {
-          console.log('⚠️ Warning: Failed to reset training data, continuing with schema switch');
+        // 2) Determine frequency for completion threshold
+        let freq = 7;
+        const { data: tp } = await supabase
+          .from('user_training_profiles')
+          .select('training_frequency')
+          .eq('user_id', actualUserId)
+          .maybeSingle();
+        if (tp && typeof tp.training_frequency === 'number') freq = Math.max(1, tp.training_frequency);
+
+        // 3) If completed_at set or days >= freq*8, we consider the previous schema completed
+        const days = progress?.completed_days ?? 0;
+        const completed = !!progress?.completed_at || days >= freq * 8;
+        if (completed) {
+          shouldReset = false; // keep historical data when progressing to next schema
+          console.log('ℹ️ Previous schema completed; skipping reset and preserving progress.');
         }
-      } catch (error) {
-        console.log('⚠️ Warning: Error calling reset API, continuing with schema switch:', error);
+      } catch (e) {
+        console.log('⚠️ Could not evaluate completion state, defaulting to reset');
+      }
+
+      if (shouldReset) {
+        console.log('🔄 Switching mid-period (not completed), resetting training data...');
+        try {
+          const resetResponse = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/reset-training-data`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: actualUserId, newSchemaId: schemaId })
+          });
+          if (resetResponse.ok) {
+            console.log('✅ Training data reset successfully');
+          } else {
+            console.log('⚠️ Warning: Failed to reset training data, continuing with schema switch');
+          }
+        } catch (error) {
+          console.log('⚠️ Warning: Error calling reset API, continuing with schema switch:', error);
+        }
       }
     }
 
@@ -217,6 +246,40 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('✅ Training schema period created:', periodData);
+
+    // Ensure a progress row exists for the newly selected schema (initialize at 0/freq*8)
+    try {
+      // Determine frequency for target total days
+      let freq = 7;
+      const { data: tp2 } = await supabase
+        .from('user_training_profiles')
+        .select('training_frequency')
+        .eq('user_id', actualUserId)
+        .maybeSingle();
+      if (tp2 && typeof tp2.training_frequency === 'number') freq = Math.max(1, tp2.training_frequency);
+
+      const { data: existingProgress } = await supabase
+        .from('user_training_schema_progress')
+        .select('id')
+        .eq('user_id', actualUserId)
+        .eq('schema_id', schemaId)
+        .maybeSingle();
+      if (!existingProgress) {
+        const nowIso = new Date().toISOString();
+        await supabase
+          .from('user_training_schema_progress')
+          .insert({
+            user_id: actualUserId,
+            schema_id: schemaId,
+            completed_days: 0,
+            total_days: freq * 8,
+            current_day: 0,
+            started_at: nowIso,
+          });
+      }
+    } catch (initErr) {
+      console.log('⚠️ Could not initialize progress for new schema:', initErr);
+    }
 
     return NextResponse.json({ 
       success: true,

@@ -57,3 +57,23 @@ next-env.d.ts
 *.mkv
 *.webm
 *.flv
+
+# --- Deployment size optimization (exclude non-runtime assets) ---
+# Infra, db, scripts, docs not needed at runtime on Vercel
+supabase/
+scripts/
+docs/
+prisma/
+backups/
+backup/
+
+# Large static content not required for app runtime
+public/ebooksv2/
+public/videos/
+public/raw-assets/
+public/uploads/
+
+# IDE and misc
+.idea/
+vscode/
+*.map

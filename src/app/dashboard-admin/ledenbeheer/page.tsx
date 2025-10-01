@@ -954,9 +954,24 @@ export default function Ledenbeheer() {
       const userType = getUserType(member);
       const packageInfo = getPackageDisplay(member);
       const paymentInfo = getPaymentStatusDisplay(member);
+      const canQuickDelete = userType.type !== 'Admin';
       return [
         member.full_name || 'Onbekend',
         member.email || 'Geen e-mail',
+        // Quick delete cell: icon-only button, hidden for Admin users
+        canQuickDelete ? (
+          <button
+            key={`quick-del-${member.id}`}
+            onClick={() => openDeleteModal(member)}
+            className="inline-flex items-center justify-center w-8 h-8 rounded-md bg-red-600 hover:bg-red-500 text-white"
+            title="Permanent verwijderen"
+            aria-label={`Verwijder ${member.email}`}
+          >
+            <NoSymbolIcon className="w-4 h-4" />
+          </button>
+        ) : (
+          <span className="text-gray-500 text-xs">—</span>
+        ),
         `${userType.icon} ${userType.type}`,
         member.rank || 'Rookie',
         getStatusText(member.status),
@@ -976,7 +991,7 @@ export default function Ledenbeheer() {
     });
   }, [currentMembers]);
 
-  const tableHeaders = ['Lid', 'Email', 'Type', 'Rang', 'Status', 'Punten', 'Missies', 'Pakket', 'Betalingsstatus', 'Lid sinds', 'Laatste activiteit'];
+  const tableHeaders = ['Lid', 'Email', 'Verwijder', 'Type', 'Rang', 'Status', 'Punten', 'Missies', 'Pakket', 'Betalingsstatus', 'Lid sinds', 'Laatste activiteit'];
 
   const renderActions = (item: any) => {
     // Find member by email (item[1] is the email)

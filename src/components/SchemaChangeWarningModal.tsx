@@ -14,13 +14,17 @@ interface SchemaChangeWarningModalProps {
   onClose: () => void;
   onConfirm: () => void;
   currentSchemaName: string;
+  mode?: 'warning' | 'completed';
+  nextSchemaLabel?: string;
 }
 
 export default function SchemaChangeWarningModal({ 
   isOpen, 
   onClose, 
   onConfirm,
-  currentSchemaName 
+  currentSchemaName,
+  mode = 'warning',
+  nextSchemaLabel
 }: SchemaChangeWarningModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -75,21 +79,32 @@ export default function SchemaChangeWarningModal({
               <XMarkIcon className="w-6 h-6" />
             </button>
 
-            {/* Warning Icon */}
+            {/* Icon */}
             <div className="flex justify-center mb-6">
-              <div className="p-4 bg-gradient-to-r from-[#F59E0B] to-[#D97706] rounded-full">
-                <ExclamationTriangleIcon className="w-12 h-12 text-white" />
-              </div>
+              {mode === 'warning' ? (
+                <div className="p-4 bg-gradient-to-r from-[#F59E0B] to-[#D97706] rounded-full">
+                  <ExclamationTriangleIcon className="w-12 h-12 text-white" />
+                </div>
+              ) : (
+                <div className="p-4 bg-gradient-to-r from-emerald-500 to-green-600 rounded-full">
+                  <CheckCircleIcon className="w-12 h-12 text-white" />
+                </div>
+              )}
             </div>
 
             {/* Title */}
             <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold text-white mb-2">
-                Schema Wijzigen?
-              </h2>
-              <p className="text-gray-300 text-lg">
-                Je hebt momenteel een actief trainingsschema
-              </p>
+              {mode === 'warning' ? (
+                <>
+                  <h2 className="text-2xl font-bold text-white mb-2">Schema Wijzigen?</h2>
+                  <p className="text-gray-300 text-lg">Je hebt momenteel een actief trainingsschema</p>
+                </>
+              ) : (
+                <>
+                  <h2 className="text-2xl font-bold text-white mb-2">Volgend Schema Starten</h2>
+                  <p className="text-gray-300 text-lg">Schema 1 is afgerond. Bevestig selectie {nextSchemaLabel || 'Schema 2'} en ga door naar Mijn Trainingen om te starten.</p>
+                </>
+              )}
             </div>
 
             {/* Current Schema Info */}
@@ -103,19 +118,32 @@ export default function SchemaChangeWarningModal({
               </div>
             </div>
 
-            {/* Warning Message */}
-            <div className="bg-[#F59E0B]/10 border border-[#F59E0B]/30 rounded-xl p-4 mb-6">
-              <div className="flex items-start gap-3">
-                <ClockIcon className="w-6 h-6 text-[#F59E0B] mt-0.5 flex-shrink-0" />
-                <div>
-                  <p className="text-white font-medium mb-2">Belangrijke Waarschuwing</p>
-                  <p className="text-gray-300 text-sm leading-relaxed">
-                    We adviseren om een trainingsschema minimaal <strong>8 weken</strong> te volgen voor optimale resultaten. 
-                    Door je schema nu te wijzigen, wordt je huidige voortgang gereset en start je opnieuw.
-                  </p>
+            {mode === 'warning' ? (
+              <div className="bg-[#F59E0B]/10 border border-[#F59E0B]/30 rounded-xl p-4 mb-6">
+                <div className="flex items-start gap-3">
+                  <ClockIcon className="w-6 h-6 text-[#F59E0B] mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-white font-medium mb-2">Belangrijke Waarschuwing</p>
+                    <p className="text-gray-300 text-sm leading-relaxed">
+                      We adviseren om een trainingsschema minimaal <strong>8 weken</strong> te volgen voor optimale resultaten.
+                      Door je schema nu te wijzigen, wordt je huidige voortgang gereset en start je opnieuw.
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div className="bg-emerald-900/20 border border-emerald-600/40 rounded-xl p-4 mb-6">
+                <div className="flex items-start gap-3">
+                  <CheckCircleIcon className="w-6 h-6 text-emerald-400 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-white font-medium mb-2">Schema 1 voltooid</p>
+                    <p className="text-gray-300 text-sm leading-relaxed">
+                      Bevestig de selectie van {nextSchemaLabel || 'Schema 2'} om door te gaan. Je voortgang van Schema 1 blijft bewaard.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Action Buttons */}
             <div className="flex gap-3">
@@ -127,9 +155,13 @@ export default function SchemaChangeWarningModal({
               </button>
               <button
                 onClick={onConfirm}
-                className="flex-1 px-6 py-3 bg-gradient-to-r from-[#F59E0B] to-[#D97706] text-white rounded-xl font-medium hover:from-[#D97706] hover:to-[#B45309] transition-all"
+                className={
+                  mode === 'warning'
+                    ? 'flex-1 px-6 py-3 bg-gradient-to-r from-[#F59E0B] to-[#D97706] text-white rounded-xl font-medium hover:from-[#D97706] hover:to-[#B45309] transition-all'
+                    : 'flex-1 px-6 py-3 bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-xl font-medium hover:from-emerald-400 hover:to-green-500 transition-all'
+                }
               >
-                Ja, Schema Wijzigen
+                {mode === 'warning' ? 'Ja, Schema Wijzigen' : 'Bevestigen'}
               </button>
             </div>
 

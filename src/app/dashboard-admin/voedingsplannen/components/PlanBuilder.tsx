@@ -141,6 +141,27 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
   const [availableCategories, setAvailableCategories] = useState<string[]>([]);
   const [availableUnitTypes, setAvailableUnitTypes] = useState<string[]>([]);
 
+  // V2 display-only targets (UI only). If plan_id ends with -v2, show 90% kcal with original macro ratios.
+  const isV2Plan = String((plan?.plan_id || formData?.plan_id || '')).endsWith('-v2');
+  const baseKcal = (formData.target_calories
+    || Math.max(1, Math.round(((formData.target_protein || 0) * 4) + ((formData.target_carbs || 0) * 4) + ((formData.target_fat || 0) * 9))));
+  const pShare = baseKcal > 0 ? Math.max(0, Math.min(1, ((formData.target_protein || 0) * 4) / baseKcal)) : 0;
+  const cShare = baseKcal > 0 ? Math.max(0, Math.min(1, ((formData.target_carbs || 0) * 4) / baseKcal)) : 0;
+  const fShare = baseKcal > 0 ? Math.max(0, Math.min(1, ((formData.target_fat || 0) * 9) / baseKcal)) : 0;
+  const v2Cal = Math.round(baseKcal * 0.90);
+  const displayTargets = {
+    calories: isV2Plan ? v2Cal : (formData.target_calories || 0),
+    protein: isV2Plan ? Math.round((v2Cal * pShare) / 4) : (formData.target_protein || 0),
+    carbs: isV2Plan ? Math.round((v2Cal * cShare) / 4) : (formData.target_carbs || 0),
+    fat: isV2Plan ? Math.round((v2Cal * fShare) / 9) : (formData.target_fat || 0),
+  };
+
+  // Targets to use in UI progress bars/texts
+  const targetCaloriesForUI = displayTargets.calories;
+  const targetProteinForUI = displayTargets.protein;
+  const targetCarbsForUI = displayTargets.carbs;
+  const targetFatForUI = displayTargets.fat;
+
   useEffect(() => {
     fetchIngredients();
   }, []);
@@ -714,17 +735,17 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
                     </div>
                     <div className="text-xs text-gray-400 mb-1">kcal gemiddeld</div>
                     <div className="text-xs text-[#B6C948]">
-                      {formData.target_calories ? 
-                        `${Math.round((getWeeklyTotal().calories / formData.target_calories) * 100)}% van doel` : 
+                      {targetCaloriesForUI ? 
+                        `${Math.round((getWeeklyTotal().calories / targetCaloriesForUI) * 100)}% van doel` : 
                         'Geen doel'
                       }
                     </div>
-                    {formData.target_calories && (
+                    {targetCaloriesForUI && (
                       <div className="w-full bg-[#0F150E] rounded-full h-1.5 mt-1">
                         <div 
-                          className={`h-1.5 rounded-full transition-all duration-300 ${getProgressBarColor(getWeeklyTotal().calories, formData.target_calories)}`}
+                          className={`h-1.5 rounded-full transition-all duration-300 ${getProgressBarColor(getWeeklyTotal().calories, targetCaloriesForUI)}`}
                           style={{ 
-                            width: `${Math.min((getWeeklyTotal().calories / formData.target_calories) * 100, 100)}%`
+                            width: `${Math.min((getWeeklyTotal().calories / targetCaloriesForUI) * 100, 100)}%`
                           }}
                         ></div>
                       </div>
@@ -738,17 +759,17 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
                     </div>
                     <div className="text-xs text-gray-400 mb-1">Eiwit gemiddeld</div>
                     <div className="text-xs text-[#B6C948]">
-                      {formData.target_protein ? 
-                        `${Math.round((getWeeklyTotal().protein / formData.target_protein) * 100)}% van doel` : 
+                      {targetProteinForUI ? 
+                        `${Math.round((getWeeklyTotal().protein / targetProteinForUI) * 100)}% van doel` : 
                         'Geen doel'
                       }
                     </div>
-                    {formData.target_protein && (
+                    {targetProteinForUI && (
                       <div className="w-full bg-[#0F150E] rounded-full h-1.5 mt-1">
                         <div 
-                          className={`h-1.5 rounded-full transition-all duration-300 ${getProgressBarColor(getWeeklyTotal().protein, formData.target_protein)}`}
+                          className={`h-1.5 rounded-full transition-all duration-300 ${getProgressBarColor(getWeeklyTotal().protein, targetProteinForUI)}`}
                           style={{ 
-                            width: `${Math.min((getWeeklyTotal().protein / formData.target_protein) * 100, 100)}%` 
+                            width: `${Math.min((getWeeklyTotal().protein / targetProteinForUI) * 100, 100)}%` 
                           }}
                         ></div>
                       </div>
@@ -762,17 +783,17 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
                     </div>
                     <div className="text-xs text-gray-400 mb-1">Koolhydraten gemiddeld</div>
                     <div className="text-xs text-[#B6C948]">
-                      {formData.target_carbs ? 
-                        `${Math.round((getWeeklyTotal().carbs / formData.target_carbs) * 100)}% van doel` : 
+                      {targetCarbsForUI ? 
+                        `${Math.round((getWeeklyTotal().carbs / targetCarbsForUI) * 100)}% van doel` : 
                         'Geen doel'
                       }
                     </div>
-                    {formData.target_carbs && (
+                    {targetCarbsForUI && (
                       <div className="w-full bg-[#0F150E] rounded-full h-1.5 mt-1">
                         <div 
-                          className={`h-1.5 rounded-full transition-all duration-300 ${getProgressBarColor(getWeeklyTotal().carbs, formData.target_carbs)}`}
+                          className={`h-1.5 rounded-full transition-all duration-300 ${getProgressBarColor(getWeeklyTotal().carbs, targetCarbsForUI)}`}
                           style={{ 
-                            width: `${Math.min((getWeeklyTotal().carbs / formData.target_carbs) * 100, 100)}%` 
+                            width: `${Math.min((getWeeklyTotal().carbs / targetCarbsForUI) * 100, 100)}%` 
                           }}
                         ></div>
                       </div>
@@ -786,17 +807,17 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
                     </div>
                     <div className="text-xs text-gray-400 mb-1">Vet gemiddeld</div>
                     <div className="text-xs text-[#B6C948]">
-                      {formData.target_fat ? 
-                        `${Math.round((getWeeklyTotal().fat / formData.target_fat) * 100)}% van doel` : 
+                      {targetFatForUI ? 
+                        `${Math.round((getWeeklyTotal().fat / targetFatForUI) * 100)}% van doel` : 
                         'Geen doel'
                       }
                     </div>
-                    {formData.target_fat && (
+                    {targetFatForUI && (
                       <div className="w-full bg-[#0F150E] rounded-full h-1.5 mt-1">
                         <div 
-                          className={`h-1.5 rounded-full transition-all duration-300 ${getProgressBarColor(getWeeklyTotal().fat, formData.target_fat)}`}
+                          className={`h-1.5 rounded-full transition-all duration-300 ${getProgressBarColor(getWeeklyTotal().fat, targetFatForUI)}`}
                           style={{ 
-                            width: `${Math.min((getWeeklyTotal().fat / formData.target_fat) * 100, 100)}%` 
+                            width: `${Math.min((getWeeklyTotal().fat / targetFatForUI) * 100, 100)}%` 
                           }}
                         ></div>
                       </div>
@@ -1120,16 +1141,16 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
                         {/* Calories Progress */}
                         <div className="text-center">
                           <div className="text-sm text-white mb-1">
-                            Doel: {formData.target_calories || 0} kcal
+                            Doel: {targetCaloriesForUI || 0} kcal
                           </div>
                           <div className="text-3xl font-bold text-[#8BAE5A] mb-2">
                             {getDayTotal(selectedDay).calories}
                           </div>
                           <div className="text-sm text-gray-400 mb-1">kcal</div>
                           <div className="text-xs text-[#B6C948]">
-                            {formData.target_calories ? (() => {
+                            {targetCaloriesForUI ? (() => {
                               const current = getDayTotal(selectedDay).calories;
-                              const target = formData.target_calories;
+                              const target = targetCaloriesForUI;
                               const difference = current - target;
                               const percentage = Math.round((current / target) * 100);
                               
@@ -1142,12 +1163,12 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
                               }
                             })() : 'Geen doel ingesteld'}
                           </div>
-                          {formData.target_calories && (
+                          {targetCaloriesForUI && (
                             <div className="w-full bg-[#0F150E] rounded-full h-2 mt-2">
                               <div 
-                                className={`h-2 rounded-full transition-all duration-300 ${getProgressBarColor(getDayTotal(selectedDay).calories, formData.target_calories)}`}
+                                className={`h-2 rounded-full transition-all duration-300 ${getProgressBarColor(getDayTotal(selectedDay).calories, targetCaloriesForUI)}`}
                                 style={{ 
-                                  width: `${Math.min((getDayTotal(selectedDay).calories / formData.target_calories) * 100, 100)}%`
+                                  width: `${Math.min((getDayTotal(selectedDay).calories / targetCaloriesForUI) * 100, 100)}%`
                                 }}
                               ></div>
                             </div>
@@ -1157,16 +1178,16 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
                         {/* Protein Progress */}
                         <div className="text-center">
                           <div className="text-sm text-white mb-1">
-                            Doel: {formData.target_protein || 0}g
+                            Doel: {targetProteinForUI || 0}g
                           </div>
                           <div className="text-2xl font-bold text-blue-400 mb-2">
                             {Math.round(getDayTotal(selectedDay).protein * 10) / 10}g
                           </div>
                           <div className="text-sm text-gray-400 mb-1">Eiwit</div>
                           <div className="text-xs text-[#B6C948]">
-                            {formData.target_protein ? (() => {
+                            {targetProteinForUI ? (() => {
                               const current = getDayTotal(selectedDay).protein;
-                              const target = formData.target_protein;
+                              const target = targetProteinForUI;
                               const difference = current - target;
                               const percentage = Math.round((current / target) * 100);
                               
@@ -1179,12 +1200,12 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
                               }
                             })() : 'Geen doel ingesteld'}
                           </div>
-                          {formData.target_protein && (
+                          {targetProteinForUI && (
                             <div className="w-full bg-[#0F150E] rounded-full h-2 mt-2">
                               <div 
-                                className={`h-2 rounded-full transition-all duration-300 ${getProgressBarColor(getDayTotal(selectedDay).protein, formData.target_protein)}`}
+                                className={`h-2 rounded-full transition-all duration-300 ${getProgressBarColor(getDayTotal(selectedDay).protein, targetProteinForUI)}`}
                                 style={{ 
-                                  width: `${Math.min((getDayTotal(selectedDay).protein / formData.target_protein) * 100, 100)}%` 
+                                  width: `${Math.min((getDayTotal(selectedDay).protein / targetProteinForUI) * 100, 100)}%` 
                                 }}
                               ></div>
                             </div>
@@ -1194,16 +1215,16 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
                         {/* Carbs Progress */}
                         <div className="text-center">
                           <div className="text-sm text-white mb-1">
-                            Doel: {formData.target_carbs || 0}g
+                            Doel: {targetCarbsForUI || 0}g
                           </div>
                           <div className="text-2xl font-bold text-orange-400 mb-2">
                             {Math.round(getDayTotal(selectedDay).carbs * 10) / 10}g
                           </div>
                           <div className="text-sm text-gray-400 mb-1">Koolhydraten</div>
                           <div className="text-xs text-[#B6C948]">
-                            {formData.target_carbs ? (() => {
+                            {targetCarbsForUI ? (() => {
                               const current = getDayTotal(selectedDay).carbs;
-                              const target = formData.target_carbs;
+                              const target = targetCarbsForUI;
                               const difference = current - target;
                               const percentage = Math.round((current / target) * 100);
                               
@@ -1216,12 +1237,12 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
                               }
                             })() : 'Geen doel ingesteld'}
                           </div>
-                          {formData.target_carbs && (
+                          {targetCarbsForUI && (
                             <div className="w-full bg-[#0F150E] rounded-full h-2 mt-2">
                               <div 
-                                className={`h-2 rounded-full transition-all duration-300 ${getProgressBarColor(getDayTotal(selectedDay).carbs, formData.target_carbs)}`}
+                                className={`h-2 rounded-full transition-all duration-300 ${getProgressBarColor(getDayTotal(selectedDay).carbs, targetCarbsForUI)}`}
                                 style={{ 
-                                  width: `${Math.min((getDayTotal(selectedDay).carbs / formData.target_carbs) * 100, 100)}%` 
+                                  width: `${Math.min((getDayTotal(selectedDay).carbs / targetCarbsForUI) * 100, 100)}%` 
                                 }}
                               ></div>
                             </div>
@@ -1231,16 +1252,16 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
                         {/* Fat Progress */}
                         <div className="text-center">
                           <div className="text-sm text-white mb-1">
-                            Doel: {formData.target_fat || 0}g
+                            Doel: {targetFatForUI || 0}g
                           </div>
                           <div className="text-2xl font-bold text-yellow-400 mb-2">
                             {Math.round(getDayTotal(selectedDay).fat * 10) / 10}g
                           </div>
                           <div className="text-sm text-gray-400 mb-1">Vet</div>
                           <div className="text-xs text-[#B6C948]">
-                            {formData.target_fat ? (() => {
+                            {targetFatForUI ? (() => {
                               const current = getDayTotal(selectedDay).fat;
-                              const target = formData.target_fat;
+                              const target = targetFatForUI;
                               const difference = current - target;
                               const percentage = Math.round((current / target) * 100);
                               
@@ -1253,12 +1274,12 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
                               }
                             })() : 'Geen doel ingesteld'}
                           </div>
-                          {formData.target_fat && (
+                          {targetFatForUI && (
                             <div className="w-full bg-[#0F150E] rounded-full h-2 mt-2">
                               <div 
-                                className={`h-2 rounded-full transition-all duration-300 ${getProgressBarColor(getDayTotal(selectedDay).fat, formData.target_fat)}`}
+                                className={`h-2 rounded-full transition-all duration-300 ${getProgressBarColor(getDayTotal(selectedDay).fat, targetFatForUI)}`}
                                 style={{ 
-                                  width: `${Math.min((getDayTotal(selectedDay).fat / formData.target_fat) * 100, 100)}%` 
+                                  width: `${Math.min((getDayTotal(selectedDay).fat / targetFatForUI) * 100, 100)}%` 
                                 }}
                               ></div>
                             </div>

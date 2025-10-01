@@ -215,6 +215,33 @@ export class EmailService {
 
   getTemplate(template: string, variables: Record<string, string>): { subject: string; html: string; text: string } {
     const templates = {
+      'platform_relaunch': {
+        subject: 'Platform her-lancering 3 oktober 20:00',
+        html: `
+          <div style="background:linear-gradient(135deg,#0F1419 0%,#1F2D17 100%);padding:32px 0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#E5E7EB;">
+            <div style="max-width:640px;margin:0 auto;background:#0F1419;border:1px solid #2A3A1A;border-radius:16px;overflow:hidden;box-shadow:0 20px 40px rgba(0,0,0,.35)">
+              <div style="background:linear-gradient(135deg,#8BAE5A 0%,#B6C948 100%);padding:28px 24px;text-align:center">
+                <img src="http://localhost:3000/_next/image?url=%2Flogo_white-full.svg&w=128&q=75" alt="Top Tier Men" style="width:128px;height:auto;display:block;margin:0 auto 10px auto;border-radius:8px;" />
+                <h1 style="margin:0;color:#0F1419;font-weight:800;font-size:22px;letter-spacing:.5px;">Top Tier Men</h1>
+              </div>
+              <div style="padding:28px 24px">
+                <h2 style="margin:0 0 8px 0;color:#8BAE5A;font-size:18px;font-weight:700">Platform her-lancering 3 oktober 20:00</h2>
+                <p style="margin:8px 0 16px 0;line-height:1.6">Het platform is gereed voor gebruik! Wij zijn dit momenteel met een aantal testgebruikers nogmaals grondig aan het controleren, maar kunnen je vertellen dat we a.s. vrijdag <strong>3 oktober om 20:00</strong> opnieuw live gaan!</p>
+                <p style="margin:8px 0;line-height:1.6"><strong>Excuus</strong> dat het langer heeft geduurd dan gepland.</p>
+                <p style="margin:0 0 16px 0;line-height:1.6">Het platform is nu <strong>volledig voorzien van alle functionaliteiten</strong>.</p>
+                <div style="background:rgba(139,174,90,.12);border-left:4px solid #8BAE5A;padding:14px 16px;border-radius:6px;margin:16px 0">
+                  <p style="margin:0;line-height:1.6"><strong>Belangrijk:</strong> We resetten alle accounts, dus iedereen zal weer vanaf onboarding beginnen.</p>
+                </div>
+                <p style="margin:16px 0 0 0;line-height:1.6">Tot snel,<br/>Het Top Tier Men team</p>
+              </div>
+              <div style="padding:16px 24px;border-top:1px solid #2A3A1A;text-align:center;color:#9CA3AF;font-size:12px">
+                Deze e-mail is alleen als test verstuurd naar chielvanderzee@gmail.com
+              </div>
+            </div>
+          </div>
+        `,
+        text: `Platform her-lancering 3 oktober 20:00\n\nHet platform is gereed voor gebruik! We controleren momenteel alles met een aantal testgebruikers, maar we kunnen melden dat we a.s. vrijdag 3 oktober om 20:00 opnieuw live gaan!\n\nExcuus dat het langer heeft geduurd dan gepland.\nHet platform is nu volledig voorzien van alle functionaliteiten.\n\nBelangrijk: We resetten alle accounts, dus iedereen zal weer vanaf onboarding beginnen.\n\nTot snel,\nHet Top Tier Men team`
+      },
       'platform-update': {
         subject: '🚀 Platform gereed voor gebruik!',
         html: `

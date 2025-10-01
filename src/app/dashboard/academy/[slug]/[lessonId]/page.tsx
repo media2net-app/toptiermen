@@ -1433,10 +1433,14 @@ export default function LessonDetailPage() {
                 <div className="mb-4">
                   <button
                     onClick={async () => {
-                      if (module.order_index !== 1) {
-                        // Temporarily disabled for modules 2–7
-                        return;
-                      }
+                      // Build slug from current lesson title for ebook filename matching
+                      const rawTitle = (lesson?.title || '').toLowerCase()
+                        .normalize('NFD').replace(/[\u0300-\u036f]/g, ''); // strip accents
+                      const ebookSlug = rawTitle
+                        .replace(/[^a-z0-9\s-]/g, '')
+                        .replace(/\s+/g, '-')
+                        .replace(/-+/g, '-')
+                        .replace(/^-+|-+$/g, '');
                       // 1) Use DB file_url if explicitly set
                       if (ebook?.file_url) {
                         const directUrl = ebook.file_url as string;
@@ -1444,13 +1448,7 @@ export default function LessonDetailPage() {
                         window.location.href = directUrl;
                         return;
                       }
-
-                      // 2) Build slug from lesson title
-                      const slug = lesson.title
-                        .toLowerCase()
-                        .replace(/[^a-z0-9\s]/g, '')
-                        .replace(/\s+/g, '-')
-                        .replace(/^-+|-+$/g, '');
+                      
 
                       // 3) Candidate v2 URLs to try (alias + slug)
                       const v2Alias: { [slug: string]: string } = {
@@ -1461,9 +1459,9 @@ export default function LessonDetailPage() {
                       };
 
                       const candidates = [
-                        `/ebooksv2/${v2Alias[slug] || slug}.html`,
+                        `/ebooksv2/${v2Alias[ebookSlug] || ebookSlug}.html`,
                         // Also try the alternate if alias was applied first
-                        v2Alias[slug] ? `/ebooksv2/${slug}.html` : ''
+                        v2Alias[ebookSlug] ? `/ebooksv2/${ebookSlug}.html` : ''
                       ].filter(Boolean) as string[];
 
                       // 4) HEAD check for first existing v2 URL
@@ -1481,29 +1479,23 @@ export default function LessonDetailPage() {
                       }
 
                       // 5) Navigate to v2 if found, else fallback to legacy
-                      targetUrl = targetUrl || `/ebooks/${slug}.html`;
+                      targetUrl = targetUrl || `/ebooks/${ebookSlug}.html`;
                       console.log('📖 Opening ebook:', targetUrl);
                       window.location.href = targetUrl;
                     }}
-                    disabled={module.order_index !== 1}
-                    className={`inline-flex items-center px-4 py-2 rounded-lg transition-all duration-200 font-semibold shadow-md ${
-                      module.order_index === 1
-                        ? 'bg-gradient-to-r from-[#8BAE5A] to-[#B6C948] text-white hover:from-[#B6C948] hover:to-[#8BAE5A] hover:shadow-lg transform hover:scale-105'
-                        : 'bg-gray-300 text-gray-600 cursor-not-allowed'
-                    }`}
+                    disabled={false}
+                    className={`inline-flex items-center px-4 py-2 rounded-lg transition-all duration-200 font-semibold shadow-md bg-gradient-to-r from-[#8BAE5A] to-[#B6C948] text-white hover:from-[#B6C948] hover:to-[#8BAE5A] hover:shadow-lg transform hover:scale-105`}
                   >
                     <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                     </svg>
-                    {module.order_index === 1 ? 'Bekijk E-book' : 'E-book binnenkort beschikbaar'}
+                    {'Bekijk E-book'}
                     <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                     </svg>
                   </button>
                   <p className="text-xs text-gray-500 mt-2">
-                    {module.order_index === 1
-                      ? 'Het ebook opent in hetzelfde tabblad met alle praktische informatie en oefeningen.'
-                      : 'Voor modules 2 t/m 7 worden de ebooks binnenkort toegevoegd.'}
+                    Het ebook opent in hetzelfde tabblad met alle praktische informatie en oefeningen.
                   </p>
                 </div>
               </div>
@@ -1575,52 +1567,64 @@ export default function LessonDetailPage() {
 
       {/* Lesson list */}
       <div className="mt-8">
-        <h3 className="text-lg font-semibold text-[#8BAE5A] mb-4">Lessen in deze module</h3>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {lessons.map((l, index) => (
-              <button
-                key={l.id}
-                onClick={() => {
-                  if (l.id !== lessonId) {
-                    console.log('🔄 Navigating to lesson...');
-                    // Reset any stuck states before navigation
-                    setIsVideoLoading(false);
-                    setShowVideoOverlay(true);
-                    setNavigating(true);
-                    
-                    // Use a small delay to ensure state updates
-                    setTimeout(() => {
-                      router.push(`/dashboard/academy/${module.id}/${l.id}`);
-                    }, 50);
+        <div className="rounded-2xl border border-[#3A4D23] bg-[#181F17] p-3 sm:p-6">
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
+            <h3 className="text-lg sm:text-2xl font-extrabold text-[#8BAE5A]">Lessen in deze module</h3>
+            <span className="hidden sm:inline-flex items-center justify-center text-xs font-semibold text-[#B6C948] bg-[#232D1A] border border-[#3A4D23] rounded-full w-7 h-7">
+              {lessons.length}
+            </span>
+          </div>
+
+          <div className="space-y-2">
+            {lessons.map((l, index) => {
+              const isActive = l.id === lessonId;
+              const isDone = completedLessonIds.includes(l.id);
+              const idx = String(index + 1).padStart(2, '0');
+              return (
+                <button
+                  key={l.id}
+                  onClick={() => {
+                    if (!isActive) {
+                      console.log('🔄 Navigating to lesson...');
+                      setIsVideoLoading(false);
+                      setShowVideoOverlay(true);
+                      setNavigating(true);
+                      setTimeout(() => {
+                        router.push(`/dashboard/academy/${module.id}/${l.id}`);
+                      }, 50);
+                    }
+                  }}
+                  disabled={isActive || navigating}
+                  className={
+                    `w-full text-left px-3 py-3 sm:px-5 sm:py-4 rounded-lg border transition-all flex items-center justify-between ` +
+                    (isActive
+                      ? 'bg-[#8BAE5A] text-[#181F17] border-[#8BAE5A] cursor-default'
+                      : isDone
+                        ? 'bg-[#232D1A] text-white border-[#3A4D23] hover:bg-[#3A4D23]'
+                        : 'bg-[#181F17] text-gray-200 border-[#3A4D23] hover:bg-[#232D1A]')
                   }
-                }}
-                disabled={l.id === lessonId || navigating}
-                className={`block w-full text-left p-4 rounded-lg border transition-colors ${
-                  l.id === lessonId
-                    ? 'bg-[#8BAE5A] text-[#181F17] border-[#8BAE5A] cursor-default'
-                    : completedLessonIds.includes(l.id)
-                    ? 'bg-[#232D1A] text-[#8BAE5A] border-[#3A4D23] hover:bg-[#3A4D23] cursor-pointer'
-                    : 'bg-[#181F17] text-gray-300 border-[#3A4D23] hover:bg-[#232D1A] cursor-pointer'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <span className="w-6 h-6 rounded-full border flex items-center justify-center text-sm font-bold">
-                      {index + 1}
+                >
+                  <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+                    <span className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-black border ${isActive ? 'border-[#181F17] text-[#181F17] bg-white/20' : 'border-[#3A4D23] text-[#8BAE5A]'}`}>
+                      {idx}
                     </span>
-                    <span>{l.title}</span>
+                    <span className={`${isActive ? 'font-bold' : 'font-medium'} block text-sm leading-snug sm:text-base sm:leading-normal whitespace-normal break-words max-w-[60%] sm:max-w-none`}>{l.title}</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    {completedLessonIds.includes(l.id) && (
-                      <span className="text-green-400">✓</span>
+                  <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm flex-shrink-0">
+                    {isDone && (
+                      <span className={`hidden sm:inline-flex items-center gap-1 ${isActive ? 'text-[#181F17]' : 'text-[#8BAE5A]'}`}>
+                        <span>✓</span>
+                        <span>Voltooid</span>
+                      </span>
                     )}
-                    <span className="text-sm opacity-75">{l.duration}</span>
+                    <span className={`opacity-80 ${isActive ? 'text-[#181F17]' : 'text-gray-300'}`}>{l.duration}</span>
                   </div>
-                </div>
-              </button>
-            ))}
+                </button>
+              );
+            })}
           </div>
         </div>
+      </div>
         
         {/* Emergency navigation reset button */}
         {navigating && showForceButton && (

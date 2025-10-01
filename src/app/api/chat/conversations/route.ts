@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
     // Batch fetch all profiles
     const { data: profiles, error: profilesError } = await supabase
       .from('profiles')
-      .select('id, display_name, full_name, avatar_url, rank')
+      .select('id, display_name, full_name, email, avatar_url, rank')
       .in('id', participantIds);
 
     if (profilesError) {
@@ -127,7 +127,7 @@ export async function GET(request: NextRequest) {
         id: conv.id,
         participant: {
           id: otherParticipantId,
-          name: profile?.display_name || profile?.full_name || 'Onbekende gebruiker',
+          name: profile?.display_name || profile?.full_name || profile?.email || 'Onbekende gebruiker',
           avatar: profile?.avatar_url || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
           rank: profile?.rank || 'Member'
         },

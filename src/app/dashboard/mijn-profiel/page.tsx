@@ -1,11 +1,13 @@
 'use client';
 import ClientLayout from '@/app/components/ClientLayout';
 import { useState, useEffect, useRef } from 'react';
+import NextDynamic from 'next/dynamic';
 import { CameraIcon, TrashIcon, PlusIcon, UserGroupIcon, TrophyIcon, FireIcon, BookOpenIcon, ArrowDownTrayIcon, ShieldCheckIcon, BellIcon, PencilIcon, CheckIcon, XMarkIcon, ExclamationTriangleIcon } from '@heroicons/react/24/solid';
-import CropModal from '../../../components/CropModal';
-import BadgeDisplay from '@/components/BadgeDisplay';
+// Lazy-load heavy components to reduce initial bundle and speed up first paint
+const CropModal = NextDynamic(() => import('../../../components/CropModal'), { ssr: false });
+const BadgeDisplay = NextDynamic(() => import('@/components/BadgeDisplay'), { ssr: false, loading: () => <div className="text-sm text-gray-400">Badges laden…</div> });
 import { toast } from 'react-hot-toast';
-import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/lib/supabase';
 import { convertHeicToJpeg, isHeicFile } from '@/lib/heic-converter';
 
@@ -54,7 +56,7 @@ const interestOptions = [
 ];
 
 export default function MijnProfiel() {
-  const { user, signOut } = useSupabaseAuth();
+  const { user, logout, logoutAndRedirect } = useAuth();
   const [activeTab, setActiveTab] = useState('publiek');
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -90,6 +92,10 @@ export default function MijnProfiel() {
     xp_reward: number;
     unlocked_at?: string;
   }>>([]);
+  // Track which secondary tabs have loaded their data
+  const [loadedVoortgang, setLoadedVoortgang] = useState(false);
+  const [loadedAffiliate, setLoadedAffiliate] = useState(false);
+  const [loadedPushState, setLoadedPushState] = useState(false);
   
   // Affiliate states
   const [affiliateData, setAffiliateData] = useState({
@@ -103,6 +109,9 @@ export default function MijnProfiel() {
   const [editingAffiliateCode, setEditingAffiliateCode] = useState(false);
   const [newAffiliateCode, setNewAffiliateCode] = useState('');
   const [savingAffiliateCode, setSavingAffiliateCode] = useState(false);
+  
+  // Base site URL for affiliate link rendering
+  const siteBaseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://toptiermen.eu';
   
   // Push notification states
   const [pushSubscription, setPushSubscription] = useState<any>(null);
@@ -165,37 +174,47 @@ export default function MijnProfiel() {
       await fetchUserProfile();
       setLoading(false); // allow UI to render with profile
 
-      // 2) Fetch secondary data in background (don't block render)
-      const bgTasks = [
-        fetchBadgesAndRanks(),
-        fetchAffiliateData(),
-        // Note: push subscription check should never block initial render
-        fetchPushSubscription()
-      ];
-      // Use Promise.allSettled so failures don't block the rest
-      Promise.allSettled(bgTasks).then((results) => {
-        results.forEach((r, i) => {
-          if (r.status === 'rejected') {
-            console.warn('Background task failed:', i, r.reason);
-          }
-        });
-      });
-
       console.timeEnd('⏱️ fetchAllData_total');
     } catch (error) {
       console.error('Error fetching data:', error);
       setError('Er is een fout opgetreden bij het laden van je profiel');
+    } finally {
+      // Hard guarantee: never keep spinner forever
       setLoading(false);
     }
   };
 
+  // On-demand loading for secondary tabs to avoid work on initial render
+  useEffect(() => {
+    if (!user) return;
+    if (activeTab === 'voortgang' && !loadedVoortgang) {
+      fetchBadgesAndRanks().finally(() => setLoadedVoortgang(true));
+    }
+    if (activeTab === 'affiliate' && !loadedAffiliate) {
+      fetchAffiliateData().finally(() => setLoadedAffiliate(true));
+    }
+    if (activeTab === 'privacy' && !loadedPushState) {
+      fetchPushSubscription().finally(() => setLoadedPushState(true));
+    }
+  }, [activeTab, user]);
+
   const fetchUserProfile = async () => {
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id,email,full_name,display_name,avatar_url,cover_url,interests,bio,location,is_public,show_email,created_at')
-        .eq('id', user?.id)
-        .single();
+      // Timeout wrapper using Promise.race (no .catch needed on PromiseLike)
+      const withTimeout = async <T,>(p: PromiseLike<T>, ms = 5000): Promise<T> => {
+        const timeout = new Promise<T>((_, reject) => {
+          setTimeout(() => reject(new Error(`Timeout after ${ms}ms`)), ms);
+        });
+        return (Promise.race([Promise.resolve(p), timeout]) as Promise<T>);
+      };
+
+      const { data, error } = await withTimeout<any>(
+        supabase
+          .from('profiles')
+          .select('id,email,full_name,display_name,avatar_url,cover_url,interests,bio,location,is_public,show_email,created_at')
+          .eq('id', user?.id)
+          .single()
+      );
 
       if (error) {
         console.error('Error fetching profile:', error);
@@ -208,7 +227,21 @@ export default function MijnProfiel() {
         }
       } else {
         console.log('Profile found:', data);
-        setProfile(data);
+        // Normalize to match UserProfile (no nulls for required fields)
+        const normalized: UserProfile = {
+          id: data.id,
+          email: data.email || '',
+          full_name: data.full_name || '',
+          display_name: data.display_name ?? undefined,
+          avatar_url: data.avatar_url ?? undefined,
+          cover_url: data.cover_url ?? undefined,
+          bio: data.bio ?? undefined,
+          location: data.location ?? undefined,
+          is_public: data.is_public ?? undefined,
+          show_email: data.show_email ?? undefined,
+          created_at: data.created_at,
+        } as UserProfile;
+        setProfile(normalized);
       }
     } catch (error) {
       console.error('Error in fetchUserProfile:', error);
@@ -553,8 +586,14 @@ export default function MijnProfiel() {
 
     try {
       console.log('Creating new profile for user:', user.id);
-      
-      const { data, error } = await supabase
+      const withTimeout = async <T,>(p: PromiseLike<T>, ms = 5000): Promise<T> => {
+        const timeout = new Promise<T>((_, reject) => {
+          setTimeout(() => reject(new Error(`Timeout after ${ms}ms`)), ms);
+        });
+        return (Promise.race([Promise.resolve(p), timeout]) as Promise<T>);
+      };
+
+      const createQuery = supabase
         .from('profiles')
         .insert({
           id: user?.id,
@@ -567,18 +606,45 @@ export default function MijnProfiel() {
         .select()
         .single();
 
+      const createRes: any = await withTimeout<any>(createQuery as unknown as Promise<any>);
+      const { data, error } = createRes as { data: any; error: any };
+
       if (error) {
         console.error('Error creating profile:', error);
         throw error;
       } else {
         console.log('Profile created successfully:', data);
-        setProfile(data);
+        const normalized: UserProfile = {
+          id: data.id,
+          email: data.email || '',
+          full_name: data.full_name || '',
+          display_name: data.display_name ?? undefined,
+          avatar_url: data.avatar_url ?? undefined,
+          cover_url: data.cover_url ?? undefined,
+          bio: data.bio ?? undefined,
+          location: data.location ?? undefined,
+          is_public: data.is_public ?? undefined,
+          show_email: data.show_email ?? undefined,
+          created_at: data.created_at,
+        } as UserProfile;
+        setProfile(normalized);
       }
     } catch (error) {
       console.error('Error creating profile:', error);
       throw error;
     }
   };
+
+  // Watchdog: if loading stays true for too long, fail gracefully
+  useEffect(() => {
+    if (!loading) return;
+    const watchdog = setTimeout(() => {
+      console.warn('⚠️ Loading watchdog triggered on Mijn Profiel. Forcing UI to show with fallback.');
+      setLoading(false);
+      setError(prev => prev || 'Langzaam netwerk of time-out bij laden van profiel. Probeer het opnieuw.');
+    }, 6000);
+    return () => clearTimeout(watchdog);
+  }, [loading]);
 
   const updateProfile = async (updates: Partial<UserProfile>, opts: { silent?: boolean } = {}) => {
     if (!profile) return;
@@ -754,8 +820,7 @@ export default function MijnProfiel() {
       
       // Sign out and redirect to home
       setTimeout(() => {
-        signOut();
-        window.location.href = '/';
+        logoutAndRedirect('/');
       }, 2000);
 
     } catch (error) {
@@ -981,7 +1046,7 @@ export default function MijnProfiel() {
           <div className="text-center">
             <div className="text-[#8BAE5A] text-xl mb-4">Gebruiker niet gevonden</div>
             <button 
-              onClick={() => signOut()} 
+              onClick={() => logoutAndRedirect('/login')} 
               className="px-4 py-2 bg-[#8BAE5A] text-[#181F17] rounded-lg font-semibold hover:bg-[#A6C97B] transition-colors"
             >
               Opnieuw inloggen
@@ -1509,16 +1574,16 @@ export default function MijnProfiel() {
                 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3 md:gap-4">
                   <div className="bg-[#232D1A] rounded-lg p-3 sm:p-4 text-center">
-                    <div className="text-base sm:text-lg md:text-2xl font-bold text-[#8BAE5A] mb-1">€25</div>
-                    <div className="text-white text-xs sm:text-sm">Per Nieuwe Lid</div>
-                  </div>
-                  <div className="bg-[#232D1A] rounded-lg p-3 sm:p-4 text-center">
-                    <div className="text-base sm:text-lg md:text-2xl font-bold text-[#8BAE5A] mb-1">€5</div>
-                    <div className="text-white text-xs sm:text-sm">Maandelijkse Commissie</div>
+                    <div className="text-base sm:text-lg md:text-2xl font-bold text-[#8BAE5A] mb-1">20%</div>
+                    <div className="text-white text-xs sm:text-sm">Commissie op aankoopbedrag excl. 21% btw</div>
                   </div>
                   <div className="bg-[#232D1A] rounded-lg p-3 sm:p-4 text-center">
                     <div className="text-base sm:text-lg md:text-2xl font-bold text-[#8BAE5A] mb-1">10%</div>
-                    <div className="text-white text-xs sm:text-sm">Extra Korting</div>
+                    <div className="text-white text-xs sm:text-sm">Korting voor nieuwe klant</div>
+                  </div>
+                  <div className="bg-[#232D1A] rounded-lg p-3 sm:p-4 text-center">
+                    <div className="text-base sm:text-lg md:text-2xl font-bold text-[#8BAE5A] mb-1">Via Link</div>
+                    <div className="text-white text-xs sm:text-sm">Automatische toewijzing</div>
                   </div>
                 </div>
               </div>
@@ -1598,12 +1663,12 @@ export default function MijnProfiel() {
                     <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                       <input
                         type="text"
-                        value={`https://toptiermen.com/ref/${affiliateData.affiliate_code || user?.id || 'your-id'}`}
+                        value={`${siteBaseUrl.replace(/\/$/, '')}/ref/${affiliateData.affiliate_code || user?.id || 'your-id'}`}
                         readOnly
                         className="flex-1 bg-[#232D1A] text-white px-3 py-2 sm:px-4 sm:py-3 rounded-lg border border-[#3A4D23] focus:outline-none focus:border-[#8BAE5A] text-sm"
                       />
                       <button
-                        onClick={() => navigator.clipboard.writeText(`https://toptiermen.com/ref/${affiliateData.affiliate_code || user?.id || 'your-id'}`)}
+                        onClick={() => navigator.clipboard.writeText(`${siteBaseUrl.replace(/\/$/, '')}/ref/${affiliateData.affiliate_code || user?.id || 'your-id'}`)}
                         className="px-3 py-2 sm:px-4 sm:py-3 bg-[#8BAE5A] text-white rounded-lg font-semibold hover:bg-[#9BBE6A] transition-colors text-sm"
                         title="Kopieer affiliate link"
                       >
@@ -1613,7 +1678,7 @@ export default function MijnProfiel() {
                   </div>
                 )}
                 <p className="text-[#8BAE5A] text-xs sm:text-sm">
-                  Deel deze link met vrienden, familie en je netwerk. Voor elke nieuwe lid die zich registreert via jouw link, verdien je €25 direct en €5 per maand.
+                  Deel deze link met je netwerk. Nieuwe klanten krijgen <strong>10% korting</strong> via jouw link. Jij ontvangt <strong>21% commissie</strong> over het aankoopbedrag <strong>excl. 21% btw</strong> (aankoopbedragen zijn incl. btw).
                 </p>
               </div>
             </div>
@@ -1752,7 +1817,7 @@ export default function MijnProfiel() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <h4 className="font-semibold text-white text-xs sm:text-sm md:text-base mb-1">Verdien Commissie</h4>
-                      <p className="text-[#8BAE5A] text-xs sm:text-sm leading-relaxed">Je ontvangt €25 direct en €5 per maand voor elke actieve referral</p>
+                      <p className="text-[#8BAE5A] text-xs sm:text-sm leading-relaxed">Je ontvangt <strong>20% commissie</strong> – <strong>Commissie op aankoopbedrag excl. 21% btw</strong>. De nieuwe klant krijgt <strong>10% korting</strong> via jouw link.</p>
                     </div>
                   </div>
                   

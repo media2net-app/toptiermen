@@ -135,24 +135,45 @@ export async function GET(request: Request) {
         };
       });
 
+      // Get training frequency to compute total_days as freq*8 for display
+      let displayProgress = progressData || null as any;
+      try {
+        const { data: tp } = await supabase
+          .from('user_training_profiles')
+          .select('training_frequency')
+          .eq('user_id', userId)
+          .maybeSingle();
+        // Fallback: use number of schema days as weekly frequency if profile missing
+        const daysPerWeekFallback = Math.max(1, (daysWithExercises?.length || 0));
+        const freq = Math.max(1, tp?.training_frequency ?? daysPerWeekFallback ?? 7);
+        if (displayProgress) {
+          const completedDays = displayProgress.completed_days ?? 0;
+          displayProgress = {
+            ...displayProgress,
+            total_days: freq * 8,
+            completed_days: completedDays,
+          };
+        }
+      } catch {}
+
       console.log('✅ Active training schema fetched successfully');
       return NextResponse.json({
         hasActiveSchema: true,
         schema: schemaData,
         days: daysWithCompletion || [],
-        progress: progressData || null
-      });
+        progress: displayProgress || null
+      }, { headers: { 'Cache-Control': 'no-store, max-age=0' } });
 
     } catch (error) {
       console.log('⚠️  Database not available, using fallback');
       return NextResponse.json({ 
         hasActiveSchema: false,
         message: 'Database not available'
-      });
+      }, { headers: { 'Cache-Control': 'no-store, max-age=0' } });
     }
 
   } catch (error) {
     console.error('❌ Error in user training schema GET:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500, headers: { 'Cache-Control': 'no-store, max-age=0' } });
   }
 } 

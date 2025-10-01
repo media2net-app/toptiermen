@@ -9,12 +9,18 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
 export async function POST(request: NextRequest) {
   try {
     console.log('🧹 Starting forum posts cleanup...');
+    const topicId = 19; // Voorstellen - Nieuwe Leden / Algemeen voorstellen
 
-    // Frodo's author ID (the one we want to keep)
-    const frodoAuthorId = 'f58e8d0f-595a-4a90-bf83-7da5a3ff2db8';
-    const topicId = 19; // Voorstellen - Nieuwe Leden topic
+    // Resolve authors to keep by name from profiles (fallback to manual names in content)
+    const keepAuthorNames = ['Frodo van Houten', 'Sten Mets'];
+    const { data: authors, error: authorsErr } = await supabase
+      .from('profiles')
+      .select('id, full_name, display_name')
+      .in('full_name', keepAuthorNames);
+    if (authorsErr) console.warn('⚠️ Error fetching authors:', authorsErr.message);
+    const keepAuthorIds = new Set((authors || []).map(a => a.id));
 
-    // Get all posts for this topic
+    // Fetch all posts for the topic
     const { data: posts, error: fetchError } = await supabase
       .from('forum_posts')
       .select('id, author_id, content')
@@ -27,52 +33,59 @@ export async function POST(request: NextRequest) {
 
     console.log(`📋 Found ${posts.length} posts in topic ${topicId}`);
 
-    // Filter posts to delete (all except Frodo's)
-    const postsToDelete = posts.filter(post => post.author_id !== frodoAuthorId);
-    const frodoPosts = posts.filter(post => post.author_id === frodoAuthorId);
+    // Target excerpts to match the exact two messages
+    const frodoSnippet = 'Hallo allemaal, ik ben Frodo van Houten';
+    const stenSnippet = 'Mijn naam is Sten Mets';
 
-    console.log(`✅ Keeping ${frodoPosts.length} posts from Frodo:`);
-    frodoPosts.forEach(post => {
-      console.log(`   - ID ${post.id}: "${post.content.substring(0, 50)}..."`);
+    const keep = posts.filter(p => {
+      const text = (p.content || '').toLowerCase();
+      const isAuthorKept = keepAuthorIds.has(p.author_id);
+      const matchesSnippet = text.includes(frodoSnippet.toLowerCase()) || text.includes(stenSnippet.toLowerCase());
+      // Keep if author matches and content matches expected snippet
+      return isAuthorKept && matchesSnippet;
     });
+    const keepIds = new Set(keep.map(p => p.id));
+    const postsToDelete = posts.filter(p => !keepIds.has(p.id));
 
-    console.log(`🗑️ Deleting ${postsToDelete.length} test posts:`);
-    postsToDelete.forEach(post => {
-      console.log(`   - ID ${post.id}: "${post.content.substring(0, 50)}..."`);
-    });
+    console.log(`✅ Keeping ${keep.length} target posts (Frodo & Sten).`);
+    keep.forEach(p => console.log(`   • Keep ID ${p.id}: "${(p.content||'').substring(0, 60)}..."`));
+    console.log(`🗑️ Deleting ${postsToDelete.length} other posts.`);
+    postsToDelete.forEach(p => console.log(`   • Delete ID ${p.id}: "${(p.content||'').substring(0, 60)}..."`));
 
     if (postsToDelete.length === 0) {
-      console.log('✅ No posts to delete. Only Frodo\'s posts remain.');
+      console.log('✅ No posts to delete. Only target posts remain.');
       return NextResponse.json({ 
         success: true, 
-        message: 'No posts to delete. Only Frodo\'s posts remain.',
-        kept: frodoPosts.length,
-        deleted: 0
+        message: 'No posts to delete. Only target posts remain.',
+        kept: keep.length,
+        deleted: 0,
+        keptIds: Array.from(keepIds)
       });
     }
 
-    // Delete the test posts
+    // Delete all other posts
     const postIdsToDelete = postsToDelete.map(post => post.id);
-    
-    const { error: deleteError } = await supabase
-      .from('forum_posts')
-      .delete()
-      .in('id', postIdsToDelete);
-
-    if (deleteError) {
-      console.error('❌ Error deleting posts:', deleteError);
-      return NextResponse.json({ error: 'Failed to delete posts' }, { status: 500 });
+    if (postIdsToDelete.length > 0) {
+      const { error: deleteError } = await supabase
+        .from('forum_posts')
+        .delete()
+        .in('id', postIdsToDelete);
+      if (deleteError) {
+        console.error('❌ Error deleting posts:', deleteError);
+        return NextResponse.json({ error: 'Failed to delete posts' }, { status: 500 });
+      }
     }
 
-    console.log(`🎉 Successfully deleted ${postsToDelete.length} test posts!`);
-    console.log(`✅ Only Frodo's posts remain in the forum.`);
+    console.log(`🎉 Successfully deleted ${postsToDelete.length} posts!`);
+    console.log(`✅ Only Frodo & Sten target posts remain in the forum.`);
 
     return NextResponse.json({ 
       success: true, 
-      message: `Successfully deleted ${postsToDelete.length} test posts`,
-      kept: frodoPosts.length,
+      message: `Successfully deleted ${postsToDelete.length} posts`,
+      kept: keep.length,
       deleted: postsToDelete.length,
-      deletedPosts: postsToDelete.map(p => ({ id: p.id, content: p.content.substring(0, 50) + '...' }))
+      deletedPosts: postsToDelete.map(p => ({ id: p.id, content: (p.content||'').substring(0, 50) + '...' })),
+      keptIds: Array.from(keepIds)
     });
 
   } catch (error) {

@@ -16,6 +16,36 @@ import AdminCard from '@/components/admin/AdminCard';
 import AdminStatsCard from '@/components/admin/AdminStatsCard';
 import AdminButton from '@/components/admin/AdminButton';
 
+// Progress bar color helper (module scope)
+const barColor = (avg: number, target: number) => {
+  const t = Math.max(1, target);
+  const diffPct = Math.abs((avg - t) / t) * 100;
+  if (diffPct <= 5) return 'bg-[#8BAE5A]'; // groen
+  if (diffPct <= 10) return 'bg-[#E6B800]'; // oranje
+  return 'bg-[#EF4444]'; // rood
+};
+
+// Known meal keys ordering and labels (including aliases)
+const MEAL_KEYS_ORDER = [
+  'ontbijt',
+  'ochtend_snack', 'ontbijt_snack',
+  'lunch',
+  'middag_snack', 'lunch_snack',
+  'diner',
+  'avond_snack', 'diner_snack',
+];
+const MEAL_LABELS: Record<string, string> = {
+  ontbijt: 'Ontbijt',
+  ochtend_snack: 'Ochtend snack',
+  ontbijt_snack: 'Ochtend snack',
+  lunch: 'Lunch',
+  middag_snack: 'Middag snack',
+  lunch_snack: 'Middag snack',
+  diner: 'Diner',
+  avond_snack: 'Avond snack',
+  diner_snack: 'Avond snack',
+};
+
 // V1.2: Use regular Supabase client instead of service role
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -48,7 +78,7 @@ const getUnitTypeLabel = (unitType?: string) => {
     'per_handful': 'Per handje',
     'per_plakje': 'Per plakje'
   };
-  
+
   return unitTypeMap[unitType || 'per_100g'] || unitType || 'Per 100 gram';
 };
 
@@ -108,7 +138,7 @@ interface NutritionPlan {
 }
 
 export default function AdminVoedingsplannenPage() {
-  const [activeTab, setActiveTab] = useState('voeding');
+  const [activeTab, setActiveTab] = useState<'voeding' | 'voeding_v2' | 'custom'>('voeding');
   const [editMode, setEditMode] = useState(false);
   const [showFoodItemModal, setShowFoodItemModal] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<NutritionPlan | null>(null);
@@ -123,6 +153,160 @@ export default function AdminVoedingsplannenPage() {
   const [customPlans, setCustomPlans] = useState<any[]>([]);
   const [isLoadingCustomPlans, setIsLoadingCustomPlans] = useState(false);
 
+  // Test Profiel state
+  const [testWeight, setTestWeight] = useState<number>(100);
+  const [testHeight, setTestHeight] = useState<number>(180);
+  const [testAge, setTestAge] = useState<number>(30);
+  const [testGender, setTestGender] = useState<'male' | 'female'>('male');
+  const [testActivity, setTestActivity] = useState<'sedentary' | 'light' | 'moderate' | 'very' | 'extra'>('moderate');
+  const [testGoal, setTestGoal] = useState<'onderhoud' | 'droogtrainen' | 'spiermassa'>('onderhoud');
+  const [testPlanId, setTestPlanId] = useState<string | undefined>(undefined);
+  const [testResult, setTestResult] = useState<null | {
+    planName: string;
+    avgCalories: number; avgProtein: number; avgCarbs: number; avgFat: number;
+    targetCalories: number; targetProtein: number; targetCarbs: number; targetFat: number;
+  }>(null);
+  // Local editable copy of selected plan for test mode (not persisted)
+  const [testWorkingPlan, setTestWorkingPlan] = useState<NutritionPlan | null>(null);
+  const [testSelectedDay, setTestSelectedDay] = useState<string>('maandag');
+  const [showIngredientDetails, setShowIngredientDetails] = useState<boolean>(true);
+
+  // Recompute when profile inputs change (targets update) – do not scale portions
+  useEffect(() => {
+    if (testWorkingPlan) {
+      recomputeAveragesFromWorking(testWorkingPlan);
+    }
+  }, [testWeight, testHeight, testAge, testGender, testActivity, testGoal]);
+
+  // Helpers for test targets (Mifflin-St Jeor + activity + simple goal factor)
+  const calcBmr = (gender: 'male' | 'female', weight: number, height: number, age: number) => {
+    return gender === 'male'
+      ? 10 * weight + 6.25 * height - 5 * age + 5
+      : 10 * weight + 6.25 * height - 5 * age - 161;
+  };
+  const activityFactor = (lvl: typeof testActivity) => ({
+    sedentary: 1.2, light: 1.375, moderate: 1.55, very: 1.725, extra: 1.9
+  })[lvl] || 1.55;
+  const goalAdj = (goal: typeof testGoal) => ({
+    onderhoud: 1.0, droogtrainen: 0.85, spiermassa: 1.10
+  })[goal] || 1.0;
+  const calcTargets = () => {
+    const bmr = calcBmr(testGender, testWeight, testHeight, testAge);
+    const kcal = Math.round(bmr * activityFactor(testActivity) * goalAdj(testGoal));
+    // Macro split: Protein 2.0 g/kg, Fat 25% kcal, Carbs rest
+    const protein = Math.round(testWeight * 2.0);
+    const fat = Math.round((kcal * 0.25) / 9);
+    const carbs = Math.max(0, Math.round((kcal - protein * 4 - fat * 9) / 4));
+    return { kcal, protein, carbs, fat };
+  };
+
+  // Pure helper to compute targets for an arbitrary profile (used by V2 display only)
+  const calcTargetsForProfile = (
+    gender: 'male' | 'female',
+    weight: number,
+    height: number,
+    age: number,
+    activity: 'sedentary' | 'light' | 'moderate' | 'very' | 'extra',
+    goal: 'onderhoud' | 'droogtrainen' | 'spiermassa'
+  ) => {
+    const bmr = calcBmr(gender, weight, height, age);
+    const kcal = Math.round(bmr * activityFactor(activity) * goalAdj(goal));
+    const protein = Math.round(weight * 2.0);
+    const fat = Math.round((kcal * 0.25) / 9);
+    const carbs = Math.max(0, Math.round((kcal - protein * 4 - fat * 9) / 4));
+    return { kcal, protein, carbs, fat };
+  };
+
+  const handleRunTest = () => {
+    if (!testPlanId) { setTestResult(null); return; }
+    const plan = plans.find(p => String(p.id || p.plan_id) === String(testPlanId));
+    if (!plan) { setTestResult(null); return; }
+    // Deep clone to work on a mutable copy
+    const working = JSON.parse(JSON.stringify(plan)) as NutritionPlan;
+    setTestWorkingPlan(working);
+    const status = getPlanStatus(working);
+    const t = calcTargets();
+    setTestResult({
+      planName: plan.name,
+      avgCalories: (status as any).avgCalories ?? 0,
+      avgProtein: (status as any).avgProtein ?? 0,
+      avgCarbs: (status as any).avgCarbs ?? 0,
+      avgFat: (status as any).avgFat ?? 0,
+      targetCalories: t.kcal,
+      targetProtein: t.protein,
+      targetCarbs: t.carbs,
+      targetFat: t.fat,
+    });
+  };
+
+  // --- Test recompute helpers (preview only) ---
+  type MealNutri = { calories: number; protein: number; carbs: number; fat: number };
+  const computeMealNutrition = (ingredients: Array<{ amount: number; unit?: string; calories_per_100g: number; protein_per_100g: number; carbs_per_100g: number; fat_per_100g: number; }>): MealNutri => {
+    let c = 0, p = 0, cb = 0, f = 0;
+    for (const ing of (ingredients || [])) {
+      // Assume amount in gram; fallback: treat amount as gram-equivalent
+      const grams = Number(ing.amount) || 0;
+      c += (grams * (ing.calories_per_100g || 0)) / 100;
+      p += (grams * (ing.protein_per_100g || 0)) / 100;
+      cb += (grams * (ing.carbs_per_100g || 0)) / 100;
+      f += (grams * (ing.fat_per_100g || 0)) / 100;
+    }
+    return { calories: Math.round(c), protein: Math.round(p), carbs: Math.round(cb), fat: Math.round(f) };
+  };
+
+  const recomputeAveragesFromWorking = (working: NutritionPlan | null) => {
+    if (!working || !working.meals || !working.meals.weekly_plan) return;
+    const days = ['maandag','dinsdag','woensdag','donderdag','vrijdag','zaterdag','zondag'];
+    const getOrderedMealKeys = (dayObj: any) => {
+      const present = Object.keys(dayObj || {});
+      const ordered = MEAL_KEYS_ORDER.filter(k => present.includes(k));
+      const extras = present.filter(k => !MEAL_KEYS_ORDER.includes(k));
+      return [...ordered, ...extras];
+    };
+    let totalCalories = 0, totalProtein = 0, totalCarbs = 0, totalFat = 0;
+    for (const d of days) {
+      const dayObj: any = (working.meals as any).weekly_plan[d] || {};
+      for (const m of getOrderedMealKeys(dayObj)) {
+        const mealObj: any = dayObj[m];
+        if (mealObj && Array.isArray(mealObj.ingredients)) {
+          const nut = computeMealNutrition(mealObj.ingredients);
+          // Store back into meal nutrition preview
+          mealObj.nutrition = nut;
+          totalCalories += nut.calories;
+          totalProtein += nut.protein;
+          totalCarbs += nut.carbs;
+          totalFat += nut.fat;
+        }
+      }
+    }
+    const avgCalories = Math.round(totalCalories / 7);
+    const avgProtein = Math.round(totalProtein / 7);
+    const avgCarbs = Math.round(totalCarbs / 7);
+    const avgFat = Math.round(totalFat / 7);
+    const t = calcTargets();
+    setTestResult({
+      planName: working.name,
+      avgCalories, avgProtein, avgCarbs, avgFat,
+      targetCalories: t.kcal,
+      targetProtein: t.protein,
+      targetCarbs: t.carbs,
+      targetFat: t.fat,
+    });
+  };
+
+  const onChangeIngredientAmount = (day: string, mealKey: string, index: number, newAmount: number) => {
+    if (!testWorkingPlan || !testWorkingPlan.meals?.weekly_plan) return;
+    const working = JSON.parse(JSON.stringify(testWorkingPlan)) as NutritionPlan;
+    const meal: any = (working.meals as any).weekly_plan?.[day]?.[mealKey];
+    if (!meal || !meal.ingredients || !meal.ingredients[index]) return;
+    meal.ingredients[index].amount = Math.max(0, Number(newAmount) || 0);
+    // Recompute meal and overall averages
+    const nut = computeMealNutrition(meal.ingredients);
+    meal.nutrition = nut;
+    setTestWorkingPlan(working);
+    recomputeAveragesFromWorking(working);
+  };
+
   // Helper function to calculate plan completion status
   const getPlanStatus = (plan: NutritionPlan) => {
     if (!plan.meals || !plan.meals.weekly_plan) {
@@ -131,7 +315,12 @@ export default function AdminVoedingsplannenPage() {
 
     const weeklyPlan = plan.meals.weekly_plan;
     const days = ['maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag', 'zondag'];
-    const meals = ['ontbijt', 'ontbijt_snack', 'lunch', 'lunch_snack', 'diner', 'diner_snack'];
+    const getOrderedMealKeys = (dayObj: any) => {
+      const present = Object.keys(dayObj || {});
+      const ordered = MEAL_KEYS_ORDER.filter(k => present.includes(k));
+      const extras = present.filter(k => !MEAL_KEYS_ORDER.includes(k));
+      return [...ordered, ...extras];
+    };
     
     let totalMeals = 0;
     let filledMeals = 0;
@@ -141,21 +330,21 @@ export default function AdminVoedingsplannenPage() {
     let totalFat = 0;
 
     days.forEach(day => {
-      meals.forEach(meal => {
+      const dayObj: any = (weeklyPlan as any)[day] || {};
+      getOrderedMealKeys(dayObj).forEach(meal => {
         totalMeals++;
-        if (weeklyPlan[day] && weeklyPlan[day][meal] && weeklyPlan[day][meal].ingredients && weeklyPlan[day][meal].ingredients.length > 0) {
+        if (dayObj && dayObj[meal] && dayObj[meal].ingredients && dayObj[meal].ingredients.length > 0) {
           filledMeals++;
           // Use the new database structure - nutrition is directly in the meal object
-          if (weeklyPlan[day][meal].nutrition) {
-            totalCalories += weeklyPlan[day][meal].nutrition.calories || 0;
-            totalProtein += weeklyPlan[day][meal].nutrition.protein || 0;
-            totalCarbs += weeklyPlan[day][meal].nutrition.carbs || 0;
-            totalFat += weeklyPlan[day][meal].nutrition.fat || 0;
+          if (dayObj[meal].nutrition) {
+            totalCalories += dayObj[meal].nutrition.calories || 0;
+            totalProtein += dayObj[meal].nutrition.protein || 0;
+            totalCarbs += dayObj[meal].nutrition.carbs || 0;
+            totalFat += dayObj[meal].nutrition.fat || 0;
           }
         }
       });
     });
-
     const completion = Math.round((filledMeals / totalMeals) * 100);
     const avgCalories = totalCalories / 7; // Average per day
     const avgProtein = totalProtein / 7;
@@ -372,6 +561,31 @@ export default function AdminVoedingsplannenPage() {
     return () => clearTimeout(timer);
   }, []);
 
+  // Ensure V2 clones exist when navigating to Voedingsplannen V2 tab
+  useEffect(() => {
+    const ensureV2Clones = async () => {
+      try {
+        const hasV2 = plans.some((p: any) => String(p.plan_id || '').endsWith('-v2'));
+        if (!hasV2) {
+          console.log('🧬 No V2 plans found. Cloning base plans to V2...');
+          const res = await fetch('/api/admin/clone-nutrition-plans-v2', { method: 'POST' });
+          if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            console.error('❌ Clone V2 failed:', err.error || res.statusText);
+          } else {
+            console.log('✅ V2 clone complete. Refreshing plans...');
+            await fetchPlans();
+          }
+        }
+      } catch (e) {
+        console.error('❌ Error ensuring V2 clones:', e);
+      }
+    };
+    if (activeTab === 'voeding_v2') {
+      ensureV2Clones();
+    }
+  }, [activeTab, plans]);
+
   // Emergency fallback - if after 3 seconds we still have no data, try direct API calls
   useEffect(() => {
     const emergencyTimer = setTimeout(async () => {
@@ -453,6 +667,28 @@ export default function AdminVoedingsplannenPage() {
       }
 
       console.log('✅ Plan saved successfully:', result);
+
+      // If we created a new plan from the V2 tab, enforce -v2 suffix on plan_id
+      try {
+        if (!selectedPlan && activeTab === 'voeding_v2' && result?.plan?.id && String(result?.plan?.plan_id || '').endsWith('-v2') === false) {
+          const v2PlanId = `${result.plan.plan_id}-v2`;
+          console.log('🧬 Enforcing V2 suffix on new plan:', v2PlanId);
+          const updRes = await fetch('/api/admin/nutrition-plans', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: result.plan.id, plan_id: v2PlanId }),
+          });
+          const updJson = await updRes.json().catch(() => ({}));
+          if (!updRes.ok) {
+            console.error('❌ Failed to set -v2 suffix on new plan:', updJson.error || updRes.statusText);
+          } else {
+            console.log('✅ V2 suffix applied to new plan');
+          }
+        }
+      } catch (e) {
+        console.error('❌ Error enforcing V2 suffix:', e);
+      }
+
       await fetchAllData();
       
       // Use a small delay to ensure state has updated, then find the updated plan
@@ -508,6 +744,15 @@ export default function AdminVoedingsplannenPage() {
 
   const handleEditPlan = async (plan: NutritionPlan) => {
     console.log('🔄 Opening plan for editing:', plan.name);
+    // Ensure correct tab context is active based on plan_id
+    try {
+      const pid = String((plan as any).plan_id || '');
+      if (pid.endsWith('-v2')) {
+        setActiveTab('voeding_v2');
+      } else {
+        setActiveTab('voeding');
+      }
+    } catch {}
     
     // Load fresh data from the new API to ensure we have the latest
     try {
@@ -634,6 +879,7 @@ export default function AdminVoedingsplannenPage() {
   };
 
   const filteredPlans = plans
+    .filter(plan => !String((plan as any).plan_id || '').endsWith('-v2'))
     .filter(plan =>
       plan.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       plan.description.toLowerCase().includes(searchTerm.toLowerCase())
@@ -647,6 +893,21 @@ export default function AdminVoedingsplannenPage() {
       if (!aIsCarnivore && bIsCarnivore) return 1;
       
       // Within each type, sort by calories (low to high)
+      return (a.target_calories || 0) - (b.target_calories || 0);
+    });
+
+  // Filtered V2 plans (copy of filteredPlans logic but only plans with plan_id ending in -v2)
+  const filteredPlansV2 = plans
+    .filter(plan => String((plan as any).plan_id || '').endsWith('-v2'))
+    .filter(plan =>
+      plan.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      plan.description.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .sort((a, b) => {
+      const aIsCarnivore = a.name.toLowerCase().includes('carnivoor');
+      const bIsCarnivore = b.name.toLowerCase().includes('carnivoor');
+      if (aIsCarnivore && !bIsCarnivore) return -1;
+      if (!aIsCarnivore && bIsCarnivore) return 1;
       return (a.target_calories || 0) - (b.target_calories || 0);
     });
 
@@ -724,6 +985,16 @@ export default function AdminVoedingsplannenPage() {
             Voedingsplannen
           </button>
           <button
+            onClick={() => setActiveTab('voeding_v2')}
+            className={`px-4 py-2 rounded-lg transition-colors ${
+              activeTab === 'voeding_v2'
+                ? 'bg-[#8BAE5A] text-[#181F17] font-semibold'
+                : 'bg-[#232D1A] text-gray-300 hover:bg-[#2A3420]'
+            }`}
+          >
+            Voedingsplannen V2
+          </button>
+          <button
             onClick={() => setActiveTab('custom')}
             className={`px-4 py-2 rounded-lg transition-colors ${
               activeTab === 'custom'
@@ -756,9 +1027,11 @@ export default function AdminVoedingsplannenPage() {
                   <XMarkIcon className="w-5 h-5" />
                 </button>
               )}
-            </div>
-            
+
+        {/* Removed Test profiel UI */}
           </div>
+          
+        </div>
           {searchTerm && (
             <div className="mt-2 text-sm text-gray-400">
               <span>
@@ -923,6 +1196,183 @@ export default function AdminVoedingsplannenPage() {
                  })}
               </div>
             )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'voeding_v2' && (
+          <div>
+            {editMode && selectedPlan ? (
+              // Edit Mode - Show PlanBuilder integrated in content (for V2 plan as well)
+              <div>
+                {/* Back Button */}
+                <div className="mb-6">
+                  <button
+                    onClick={handleBackToOverview}
+                    disabled={savingBeforeBack}
+                    className="flex items-center space-x-2 text-[#8BAE5A] hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {savingBeforeBack ? (
+                      <div className="w-5 h-5 border-2 border-[#8BAE5A] border-t-transparent rounded-full animate-spin"></div>
+                    ) : (
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
+                    )}
+                    <span>{savingBeforeBack ? 'Opslaan...' : 'Terug naar overzicht'}</span>
+                  </button>
+                </div>
+
+                {/* PlanBuilder integrated in content */}
+                <div className="bg-[#0F150E] rounded-xl border border-[#3A4D23]">
+                  <PlanBuilder
+                    plan={selectedPlan}
+                    onSave={handleSavePlan}
+                    onClose={handleBackToOverview}
+                    isPageMode={true}
+                  />
+                </div>
+              </div>
+            ) : (
+              // Overview Mode - Show V2 plans list
+              <div>
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-xl font-semibold">Voedingsplannen V2</h2>
+                  <AdminButton
+                    onClick={() => {
+                      setSelectedPlan(null);
+                      setEditMode(true);
+                    }}
+                    icon={<PlusIcon className="w-4 h-4" />}
+                    variant="primary"
+                  >
+                    + Nieuw Plan
+                  </AdminButton>
+                </div>
+
+                {filteredPlansV2.length === 0 ? (
+                  <div className="text-center py-12">
+                    <ChartBarIcon className="mx-auto h-12 w-12 text-gray-400" />
+                    <h3 className="mt-2 text-sm font-medium text-gray-300">Geen V2 voedingsplannen</h3>
+                    <p className="mt-1 text-sm text-gray-400">
+                      De V2 varianten worden automatisch aangemaakt wanneer je deze tab opent. Ververs de pagina indien nodig.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {filteredPlansV2.map((plan) => {
+                      const planStatus = getPlanStatus(plan);
+                      // Compute display-only values for a 90kg profile by scaling calories to 90%
+                      // and keeping the ORIGINAL macro percentages intact.
+                      const baseKcal = Number(plan.target_calories) || Math.max(1,
+                        Math.round((Number(plan.target_protein||0)*4) + (Number(plan.target_carbs||0)*4) + (Number(plan.target_fat||0)*9))
+                      );
+                      const v2Kcal = Math.round(baseKcal * 0.90); // 90kg vs 100kg
+                      const pShare = Math.max(0, Math.min(1, (Number(plan.target_protein||0)*4) / baseKcal));
+                      const cShare = Math.max(0, Math.min(1, (Number(plan.target_carbs||0)*4) / baseKcal));
+                      const fShare = Math.max(0, Math.min(1, (Number(plan.target_fat||0)*9) / baseKcal));
+                      const displayTargets = {
+                        kcal: v2Kcal,
+                        protein: Math.round((v2Kcal * pShare) / 4),
+                        carbs: Math.round((v2Kcal * cShare) / 4),
+                        fat: Math.round((v2Kcal * fShare) / 9),
+                        pPct: Math.round(pShare * 100),
+                        cPct: Math.round(cShare * 100),
+                        fPct: Math.round(fShare * 100),
+                      };
+                      return (
+                        <div key={plan.id} className="bg-[#181F17] rounded-xl border border-[#3A4D23] overflow-hidden hover:border-[#8BAE5A]/50 transition-all duration-200 group">
+                          {/* Header */}
+                          <div className="bg-gradient-to-r from-[#8BAE5A]/10 to-[#B6C948]/10 p-4 border-b border-[#3A4D23]">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <h3 className="text-lg font-bold text-[#8BAE5A] mb-1">{plan.name}</h3>
+                                <p className="text-gray-300 text-sm leading-relaxed">{plan.description}</p>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Profile Data */}
+                          <div className="p-4 border-b border-[#3A4D23]">
+                            <div className="bg-[#0F150E] rounded-lg p-3 border border-[#2A3520]">
+                              <div className="flex items-center justify-center space-x-2">
+                                <div className="w-2 h-2 bg-[#8BAE5A] rounded-full"></div>
+                                <span className="text-xs text-[#8BAE5A] font-medium">Gebaseerd op profieldata</span>
+                              </div>
+                              <div className="text-xs text-[#B6C948] text-center mt-1">90kg - Staand (Matig actief)</div>
+                            </div>
+                          </div>
+
+                          {/* Nutrition Overview (scaled to 90% kcal, original macro ratios) */}
+                          {true && (
+                            <div className="p-4">
+                              <div className="space-y-3">
+                                {/* Calories */}
+                                <div className="text-center">
+                                  <div className="text-2xl font-bold text-white">{displayTargets.kcal}</div>
+                                  <div className="text-sm text-gray-400">kcal per dag</div>
+                                </div>
+
+                                {/* Macros Grid */}
+                                <div className="grid grid-cols-3 gap-3">
+                                  {true && (
+                                    <div className="text-center">
+                                      <div className="text-lg font-semibold text-white">{displayTargets.protein}g</div>
+                                      <div className="text-xs text-[#8BAE5A] font-medium">
+                                        {displayTargets.pPct}%
+                                      </div>
+                                      <div className="text-xs text-gray-400">Eiwit</div>
+                                    </div>
+                                  )}
+                                  {true && (
+                                    <div className="text-center">
+                                      <div className="text-lg font-semibold text-white">{displayTargets.carbs}g</div>
+                                      <div className="text-xs text-[#8BAE5A] font-medium">
+                                        {displayTargets.cPct}%
+                                      </div>
+                                      <div className="text-xs text-gray-400">Koolhydraten</div>
+                                    </div>
+                                  )}
+                                  {true && (
+                                    <div className="text-center">
+                                      <div className="text-lg font-semibold text-white">{displayTargets.fat}g</div>
+                                      <div className="text-xs text-[#8BAE5A] font-medium">
+                                        {displayTargets.fPct}%
+                                      </div>
+                                      <div className="text-xs text-gray-400">Vet</div>
+                                    </div>
+                                  )}
+                                </div>
+
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Actions */}
+                          <div className="p-4 bg-[#0F150E] border-t border-[#3A4D23]">
+                            <div className="flex space-x-2">
+                              <button
+                                onClick={() => handleEditPlan(plan)}
+                                className="flex-1 bg-[#8BAE5A] hover:bg-[#8BAE5A]/80 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center justify-center space-x-2"
+                              >
+                                <PencilIcon className="w-4 h-4" />
+                                <span>Bewerken</span>
+                              </button>
+                              <button
+                                onClick={() => plan.id && handleDeletePlan(plan.id)}
+                                className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center justify-center space-x-2"
+                              >
+                                <TrashIcon className="w-4 h-4" />
+                                <span>Verwijderen</span>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             )}
           </div>

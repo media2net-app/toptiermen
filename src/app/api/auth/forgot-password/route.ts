@@ -7,7 +7,6 @@ function generateTempPassword(): string {
   const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   const lowercase = 'abcdefghijklmnopqrstuvwxyz';
   const numbers = '0123456789';
-  const symbols = '!@#$%^&*()_+-=[]{}|;:,.<>?';
   
   // Create a password with guaranteed 12+ characters
   let password = '';
@@ -16,10 +15,9 @@ function generateTempPassword(): string {
   password += uppercase[Math.floor(Math.random() * uppercase.length)];
   password += lowercase[Math.floor(Math.random() * lowercase.length)];
   password += numbers[Math.floor(Math.random() * numbers.length)];
-  password += symbols[Math.floor(Math.random() * symbols.length)];
   
   // Add 8 more random characters to ensure 12+ total
-  const allChars = uppercase + lowercase + numbers + symbols;
+  const allChars = uppercase + lowercase + numbers; // Alphanumeric only
   for (let i = 0; i < 8; i++) {
     password += allChars[Math.floor(Math.random() * allChars.length)];
   }

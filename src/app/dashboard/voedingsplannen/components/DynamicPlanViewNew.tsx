@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import { computeScaling20Targets } from '@/lib/nutrition/scaling20';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 import { 
@@ -167,8 +168,36 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
   const [showDebugPanel, setShowDebugPanel] = useState(false);
   const [isStickyActive, setIsStickyActive] = useState(false);
   const [smartScalingEnabled, setSmartScalingEnabled] = useState(true);
+  // Scaling 2.0: pull user weight and apply client-side scaling
+  const [userWeightKg, setUserWeightKg] = useState<number>(100);
+  const baseWeightKg = 100; // baseline plans are designed for 100kg
   
   const { isAdmin } = useSupabaseAuth();
+
+  // Ingredient database - loaded from API (must be declared before usage below)
+  const [ingredientDatabase, setIngredientDatabase] = useState<any>({});
+
+  // Load ingredient database from API
+  useEffect(() => {
+    const loadIngredientDatabase = async () => {
+      try {
+        // Add cache-busting parameter
+        const response = await fetch(`/api/nutrition-ingredients?t=${Date.now()}`);
+        const data = await response.json();
+        if (data.success && data.ingredients) {
+          setIngredientDatabase(data.ingredients);
+          console.log('✅ Loaded ingredient database:', Object.keys(data.ingredients).length, 'ingredients');
+          if (data.lastUpdated) {
+            console.log('📅 Ingredients last updated:', new Date(data.lastUpdated).toISOString());
+          }
+        }
+      } catch (error) {
+        console.error('❌ Error loading ingredient database:', error);
+      }
+    };
+
+    loadIngredientDatabase();
+  }, []);
 
   // Scroll detection for sticky behavior
   useEffect(() => {
@@ -192,6 +221,214 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Fetch user profile to get weight for Scaling 2.0
+  useEffect(() => {
+    const loadProfile = async () => {
+      if (!userId) return;
+      try {
+        const res = await fetch(`/api/nutrition-profile?userId=${userId}`, { cache: 'no-store' });
+        if (!res.ok) return;
+        const json = await res.json();
+        const w = Number(json?.profile?.weight || 100);
+        if (w && !Number.isNaN(w)) setUserWeightKg(w);
+      } catch (e) { /* ignore */ }
+    };
+    loadProfile();
+  }, [userId]);
+
+  // Helper: round by unit category
+  const roundAmountByUnit = (unit: string, amount: number) => {
+    if (unit === 'per_piece' || unit === 'per_plakje' || unit === 'stuk' || unit === 'handje') return Math.max(0, Math.round(amount));
+    if (unit === 'g') return Math.round(amount); // grams integer
+    if (unit === 'per_100g') return Math.round(amount * 10) / 10; // 0.1 x 100g = 10g steps
+    if (unit === 'per_ml') return Math.round(amount); // ml integer
+    return Math.round(amount * 10) / 10;
+  };
+
+  // Compute day targets from original totals preserving macro ratios, then scale by factor
+  const computeDayTargets = (dayKey: string, sourcePlan: any) => {
+    const day = sourcePlan?.meals?.weekly_plan?.[dayKey];
+    if (!day) return { calories: 0, protein: 0, carbs: 0, fat: 0 };
+    let totals = { calories: 0, protein: 0, carbs: 0, fat: 0 };
+    ['ontbijt','ochtend_snack','lunch','lunch_snack','diner','avond_snack'].forEach(mt => {
+      const m = day?.[mt];
+      const t = m?.totals || m?.nutrition || { calories: 0, protein: 0, carbs: 0, fat: 0 };
+      totals.calories += t.calories || 0; totals.protein += t.protein || 0; totals.carbs += t.carbs || 0; totals.fat += t.fat || 0;
+    });
+    const baseKcal = Math.max(1, Math.round(totals.calories));
+    const input = {
+      baseKcal,
+      baseProteinG: Math.max(0, totals.protein),
+      baseCarbsG: Math.max(0, totals.carbs),
+      baseFatG: Math.max(0, totals.fat),
+      baseWeightKg,
+      userWeightKg,
+    };
+    const s = computeScaling20Targets(input);
+    return { calories: s.kcal, protein: s.proteinG, carbs: s.carbsG, fat: s.fatG };
+  };
+
+  // Apply Scaling 2.0 to the in-memory plan (client-only)
+  const applyScaling20 = (original: any) => {
+    if (!original || !original.meals?.weekly_plan) return null;
+    const factor = baseWeightKg > 0 ? (userWeightKg / baseWeightKg) : 1;
+    const week = JSON.parse(JSON.stringify(original.meals.weekly_plan));
+
+    const adjusterPref = {
+      protein: ['Whey Shake','Magere Kwark','Kipfilet'],
+      carbs: ['Basmati Rijst','Rijstwafel','Havermout'],
+      fat: ['Olijfolie','Roomboter','Amandelen']
+    };
+
+    const mealKeys = ['ontbijt','ochtend_snack','lunch','lunch_snack','diner','avond_snack'];
+
+    const adjustByName = (dayObj: any, name: string, deltaG: number) => {
+      for (const mk of mealKeys) {
+        const meal = dayObj?.[mk];
+        if (!meal?.ingredients) continue;
+        const idx = meal.ingredients.findIndex((ing: any) => ing.name === name);
+        if (idx === -1) continue;
+        const ing = meal.ingredients[idx];
+        const unit = ing.unit || 'per_100g';
+        if (unit === 'per_piece' || unit === 'per_plakje' || unit === 'stuk' || unit === 'handje') {
+          // change by 1 piece if significant
+          const step = deltaG > 0 ? 1 : -1;
+          const newAmt = Math.max(0, (ing.amount || 0) + step);
+          ing.amount = roundAmountByUnit(unit, newAmt);
+          return true;
+        }
+        // grams-based
+        const newAmt = (unit === 'per_100g') ? (ing.amount || 0) + (deltaG / 100) : (ing.amount || 0) + deltaG; // per_100g uses units = 100g
+        ing.amount = roundAmountByUnit(unit, newAmt);
+        return true;
+      }
+      return false;
+    };
+
+    const days = Object.keys(week);
+    for (const day of days) {
+      const dayObj = week[day];
+      // 1) initial scale
+      for (const mk of mealKeys) {
+        const meal = dayObj?.[mk];
+        if (!meal?.ingredients) continue;
+        meal.ingredients.forEach((ing: any) => {
+          const unit = ing.unit || 'per_100g';
+          const scaled = unit === 'per_piece' || unit === 'per_plakje' || unit === 'stuk' || unit === 'handje'
+            ? Math.max(0, Math.round((ing.amount || 0) * factor))
+            : (ing.amount || 0) * factor;
+          ing.originalAmount = ing.originalAmount ?? ing.amount;
+          ing.amount = roundAmountByUnit(unit, scaled);
+        });
+      }
+
+      // 2) compute targets and current totals
+      const targets = computeDayTargets(day, { meals: { weekly_plan: week } });
+      const totalsNow = ((): { calories:number; protein:number; carbs:number; fat:number } => {
+        let t = { calories: 0, protein: 0, carbs: 0, fat: 0 };
+        for (const mk of mealKeys) {
+          const meal = dayObj?.[mk];
+          if (!meal?.ingredients) continue;
+          let m = { calories: 0, protein: 0, carbs: 0, fat: 0 };
+          meal.ingredients.forEach((ing: any) => {
+            const n = calculateIngredientNutrition(ing);
+            m.calories += n.calories; m.protein += n.protein; m.carbs += n.carbs; m.fat += n.fat;
+          });
+          meal.nutrition = m;
+          t.calories += m.calories; t.protein += m.protein; t.carbs += m.carbs; t.fat += m.fat;
+        }
+        return { calories: Math.round(t.calories), protein: Math.round(t.protein), carbs: Math.round(t.carbs), fat: Math.round(t.fat) };
+      })();
+
+      // 3) simple compensation loop using adjusters (small steps)
+      const maxSteps = 20;
+      let steps = 0;
+      const within = (cur:number, tgt:number, tolPct=5) => (Math.abs((cur/tgt)*100 - 100) <= tolPct);
+      while (steps < maxSteps && (
+        !(within(totalsNow.calories, targets.calories)) ||
+        !(within(totalsNow.protein, targets.protein)) ||
+        !(within(totalsNow.carbs, targets.carbs)) ||
+        !(within(totalsNow.fat, targets.fat))
+      )) {
+        steps++;
+        // decide which macro to fix first by largest deviation
+        const deviations = [
+          { key: 'protein', cur: totalsNow.protein, tgt: targets.protein },
+          { key: 'carbs', cur: totalsNow.carbs, tgt: targets.carbs },
+          { key: 'fat', cur: totalsNow.fat, tgt: targets.fat },
+        ].sort((a,b)=> Math.abs((b.cur/b.tgt)-1) - Math.abs((a.cur/a.tgt)-1));
+        const top = deviations[0];
+        const dir = top.cur < top.tgt ? 1 : -1;
+        const stepG = top.key === 'fat' ? 3 : 10; // small nudge
+        let adjusted = false;
+        for (const name of adjusterPref[top.key as 'protein'|'carbs'|'fat']) {
+          adjusted = adjustByName(dayObj, name, dir * stepG);
+          if (adjusted) break;
+        }
+        if (!adjusted) break; // cannot adjust
+        // recompute totalsNow
+        let t = { calories: 0, protein: 0, carbs: 0, fat: 0 };
+        for (const mk of mealKeys) {
+          const meal = dayObj?.[mk];
+          if (!meal?.ingredients) continue;
+          let m = { calories: 0, protein: 0, carbs: 0, fat: 0 };
+          meal.ingredients.forEach((ing: any) => {
+            const n = calculateIngredientNutrition(ing);
+            m.calories += n.calories; m.protein += n.protein; m.carbs += n.carbs; m.fat += n.fat;
+          });
+          meal.nutrition = m;
+          t.calories += m.calories; t.protein += m.protein; t.carbs += m.carbs; t.fat += m.fat;
+        }
+        totalsNow.calories = Math.round(t.calories);
+        totalsNow.protein = Math.round(t.protein);
+        totalsNow.carbs = Math.round(t.carbs);
+        totalsNow.fat = Math.round(t.fat);
+      }
+
+      // save dailyTotals
+      dayObj.dailyTotals = {
+        calories: Math.round(totalsNow.calories),
+        protein: Math.round(totalsNow.protein),
+        carbs: Math.round(totalsNow.carbs),
+        fat: Math.round(totalsNow.fat)
+      };
+    }
+
+    return week;
+  };
+
+  // When original plan, ingredients and profile are ready, apply Scaling 2.0
+  useEffect(() => {
+    if (!planData?.weekPlan || !ingredientDatabase || !userWeightKg) return;
+    if (!smartScalingEnabled) return;
+    const factor = baseWeightKg > 0 ? (userWeightKg / baseWeightKg) : 1;
+    // If factor is ~1, do NOT modify anything. Respect backend as source of truth.
+    if (Math.abs(factor - 1) < 0.001) {
+      console.log('Scaling 2.0 skipped: factor ~ 1, backend plan is leading');
+      return;
+    }
+    // Re-fetch original plan structure via last fetched raw to avoid double-scaling
+    const loadOriginalAgainAndScale = async () => {
+      try {
+        const res = await fetch(`/api/nutrition-plan-original?planId=${planId}`, { cache: 'no-store' });
+        if (!res.ok) return;
+        const json = await res.json();
+        const original = json?.plan || json;
+        const scaledWeek = applyScaling20(original);
+        if (scaledWeek) {
+          setPlanData(prev => prev ? ({ ...prev, weekPlan: scaledWeek, scalingInfo: {
+            basePlanCalories: 0,
+            scaleFactor: factor,
+            targetCalories: 0,
+            planTargetCalories: 0,
+          } }) : prev);
+        }
+      } catch (e) { /* ignore */ }
+    };
+    loadOriginalAgainAndScale();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ingredientDatabase, userWeightKg, smartScalingEnabled, planId]);
 
   // Fetch dynamic plan data
   const fetchDynamicPlan = async () => {
@@ -504,45 +741,39 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
     }
   };
 
-  // Ingredient database - loaded from API
-  const [ingredientDatabase, setIngredientDatabase] = useState<any>({});
-
-  // Load ingredient database from API
-  useEffect(() => {
-    const loadIngredientDatabase = async () => {
-      try {
-        // Add cache-busting parameter
-        const response = await fetch(`/api/nutrition-ingredients?t=${Date.now()}`);
-        const data = await response.json();
-        if (data.success && data.ingredients) {
-          setIngredientDatabase(data.ingredients);
-          console.log('✅ Loaded ingredient database:', Object.keys(data.ingredients).length, 'ingredients');
-          if (data.lastUpdated) {
-            console.log('📅 Ingredients last updated:', new Date(data.lastUpdated).toISOString());
-          }
-        }
-      } catch (error) {
-        console.error('❌ Error loading ingredient database:', error);
-      }
-    };
-
-    loadIngredientDatabase();
-  }, []);
+  
 
   // Calculate nutrition for a single ingredient based on amount and unit
   const calculateIngredientNutrition = (ingredient: any) => {
     const amount = ingredient.amount || 0;
     const name = ingredient.name || '';
-    
-    // Get nutrition data from database
-    const nutritionData = ingredientDatabase[name];
-    if (!nutritionData) {
+
+    // Prefer macro values embedded in the plan ingredient (backend-leading)
+    const embed = {
+      calories_per_100g: ingredient.calories_per_100g,
+      protein_per_100g: ingredient.protein_per_100g,
+      carbs_per_100g: ingredient.carbs_per_100g,
+      fat_per_100g: ingredient.fat_per_100g,
+      unit_type: ingredient.unit
+    };
+
+    // Fallback to ingredient database by name
+    const db = ingredientDatabase[name];
+    if (!db && (embed.calories_per_100g == null)) {
       console.warn(`⚠️ Nutrition data not found for ingredient: ${name}`);
       return { calories: 0, protein: 0, carbs: 0, fat: 0 };
     }
 
-    // Use database unit_type as source of truth
-    const unit = nutritionData.unit_type || ingredient.unit || 'per_100g';
+    const nutritionData = {
+      calories_per_100g: embed.calories_per_100g ?? db?.calories_per_100g ?? 0,
+      protein_per_100g: embed.protein_per_100g ?? db?.protein_per_100g ?? 0,
+      carbs_per_100g: embed.carbs_per_100g ?? db?.carbs_per_100g ?? 0,
+      fat_per_100g: embed.fat_per_100g ?? db?.fat_per_100g ?? 0,
+      unit_type: embed.unit_type ?? db?.unit_type ?? 'per_100g'
+    };
+
+    // Use ingredient.unit if present, else database unit_type
+    const unit = ingredient.unit || nutritionData.unit_type || 'per_100g';
 
     // Convert based on unit type
     let multiplier = 1;
@@ -586,15 +817,25 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
     const amount = ingredient.amount || 0;
     const name = ingredient.name || '';
     const scaleFactor = planData?.scalingInfo?.scaleFactor || 1;
-    
-    // Get nutrition data from database
-    const nutritionData = ingredientDatabase[name];
-    if (!nutritionData) {
-      return { calories: 0, protein: 0, carbs: 0, fat: 0 };
-    }
 
-    // Use database unit_type as source of truth
-    const unit = nutritionData.unit_type || ingredient.unit || 'per_100g';
+    // Prefer embedded values from plan
+    const embed = {
+      calories_per_100g: ingredient.calories_per_100g,
+      protein_per_100g: ingredient.protein_per_100g,
+      carbs_per_100g: ingredient.carbs_per_100g,
+      fat_per_100g: ingredient.fat_per_100g,
+      unit_type: ingredient.unit
+    };
+    const db = ingredientDatabase[name];
+    const nutritionData = {
+      calories_per_100g: embed.calories_per_100g ?? db?.calories_per_100g ?? 0,
+      protein_per_100g: embed.protein_per_100g ?? db?.protein_per_100g ?? 0,
+      carbs_per_100g: embed.carbs_per_100g ?? db?.carbs_per_100g ?? 0,
+      fat_per_100g: embed.fat_per_100g ?? db?.fat_per_100g ?? 0,
+      unit_type: embed.unit_type ?? db?.unit_type ?? 'per_100g'
+    } as any;
+
+    const unit = ingredient.unit || nutritionData.unit_type || 'per_100g';
 
     // Use originalAmount if available, otherwise calculate from scaled amount
     const originalAmount = ingredient.originalAmount || (scaleFactor !== 1 ? amount / scaleFactor : amount);

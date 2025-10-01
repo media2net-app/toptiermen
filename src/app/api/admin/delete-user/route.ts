@@ -22,24 +22,41 @@ async function safeDelete(table: string, column: string, userId: string) {
 async function handleDelete(req: NextRequest) {
   try {
     let userId: string | undefined;
+    let email: string | undefined;
     // Some environments strip bodies from DELETE; try both body and searchParams
     try {
       const body = await req.json();
       userId = body?.userId;
+      email = body?.email;
     } catch {}
-    if (!userId) {
-      const sp = req.nextUrl.searchParams;
-      userId = sp.get('userId') || undefined;
+    const sp = req.nextUrl.searchParams;
+    userId = userId || sp.get('userId') || undefined;
+    email = email || sp.get('email') || undefined;
+    if (!userId && !email) {
+      return NextResponse.json({ error: 'userId of email is verplicht (JSON body of query ?userId=... of ?email=...)' }, { status: 400 });
     }
-    if (!userId) {
-      return NextResponse.json({ error: 'userId is verplicht (body JSON of query param ?userId=...)' }, { status: 400 });
+
+    // If email provided but not userId, try to resolve auth user
+    if (!userId && email) {
+      // Resolve via profiles table (authoritative link to auth.users id)
+      const { data: prof, error: profErr } = await supabaseAdmin
+        .from('profiles')
+        .select('id')
+        .eq('email', email)
+        .maybeSingle();
+      if (!profErr && prof?.id) userId = prof.id;
     }
 
     // First: delete the auth user (primary source of truth)
-    const { error: authErr } = await supabaseAdmin.auth.admin.deleteUser(userId);
-    if (authErr) {
-      console.error('❌ Auth delete error:', authErr.message);
-      return NextResponse.json({ error: authErr.message || 'Fout bij verwijderen van auth gebruiker' }, { status: 400 });
+    let authDeleted = false;
+    if (userId) {
+      const { error: authErr } = await supabaseAdmin.auth.admin.deleteUser(userId);
+      if (authErr) {
+        // Continue if user does not exist in auth; otherwise report but proceed with DB cleanup
+        console.warn('⚠️ Auth delete warning:', authErr.message);
+      } else {
+        authDeleted = true;
+      }
     }
 
     // Then best-effort: delete related data in DB (ignore failures per table)
@@ -50,8 +67,18 @@ async function handleDelete(req: NextRequest) {
       ['workout_sessions', 'user_id'],
       ['user_challenges', 'user_id'],
       ['challenge_completions', 'user_id'],
+      ['user_activities', 'user_id'],
+      ['user_session_logs', 'user_id'],
+      ['user_session_summary', 'user_id'],
+      ['user_recent_activities', 'user_id'],
+      ['user_daily_progress', 'user_id'],
+      ['user_weekly_stats', 'user_id'],
+      ['user_goals', 'user_id'],
+      ['user_habits', 'user_id'],
+      ['user_habit_logs', 'user_id'],
       ['forum_posts', 'author_id'],
       ['forum_topics', 'author_id'],
+      ['forum_comments', 'user_id'],
       ['user_preferences', 'user_id'],
       ['badges_awarded', 'user_id'],
       ['user_stats', 'user_id'],
@@ -95,8 +122,8 @@ async function handleDelete(req: NextRequest) {
       }
     }
 
-    // Auth deletion succeeded, return success regardless of per-table DB cleanup issues
-    return NextResponse.json({ success: true, message: 'Gebruiker permanent verwijderd', details: { perTableErrors } });
+    // Return success regardless of per-table DB cleanup issues
+    return NextResponse.json({ success: true, message: 'Gebruiker permanent verwijderd', details: { authDeleted, perTableErrors } });
   } catch (e: any) {
     console.error('❌ delete-user route error:', e?.message || e);
     return NextResponse.json({ error: 'Er is een fout opgetreden bij het verwijderen', details: e?.message || String(e) }, { status: 500 });

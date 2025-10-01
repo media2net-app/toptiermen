@@ -222,6 +222,14 @@ const SidebarContent = ({ pathname }: { pathname: string }) => {
         { label: 'Systeem Updates', icon: ArrowPathIcon, href: '/systeem-status', badge: 'V1.2' }
       ]
     },
+    {
+      label: 'DATABASE',
+      type: 'section',
+      items: [
+        { label: 'Trainingschemas', icon: DocumentTextIcon, href: '/dashboard-admin/database/trainingschemas', badge: 'NEW' },
+        { label: 'Ebook Scraper', icon: BookOpenIcon, href: '/dashboard-admin/database/ebook-scraper', badge: 'NEW' },
+      ]
+    },
   ];
 
   return (

@@ -55,21 +55,11 @@ export const useSessionMonitor = () => {
     // Check immediately
     checkSessionHealth();
     
-    // Check every 2 minutes
+    // Check every 2 minutes (no visibilitychange listener to prevent focus-refresh side effects)
     const interval = setInterval(checkSessionHealth, 2 * 60 * 1000);
-    
-    // Check when user comes back to tab
-    const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        checkSessionHealth();
-      }
-    };
-    
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    
+
     return () => {
       clearInterval(interval);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
       setIsMonitoring(false);
     };
   }, [user, isMonitoring, checkSessionHealth]);

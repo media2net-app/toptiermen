@@ -151,6 +151,97 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // If this is Schema 2 completion, unlock Schema 3 similarly
+    if (schemaData.schema_nummer === 2) {
+      console.log('🔓 Unlocking Schema 3...');
+
+      // Find training goal and equipment type for this schema
+      const { data: schema2Meta, error: schema2MetaErr } = await supabaseAdmin
+        .from('user_training_schema_progress')
+        .select(`
+          training_schemas!inner(
+            training_goal,
+            equipment_type
+          )
+        `)
+        .eq('user_id', userId)
+        .eq('schema_id', schemaId)
+        .single();
+
+      if (schema2MetaErr) {
+        console.error('❌ Error fetching schema 2 details:', schema2MetaErr);
+        return NextResponse.json({ error: 'Failed to fetch schema details' }, { status: 500 });
+      }
+
+      const trainingGoal = (schema2Meta as any).training_schemas?.[0]?.training_goal;
+      const equipmentType = (schema2Meta as any).training_schemas?.[0]?.equipment_type;
+
+      console.log('🎯 Looking for Schema 3 with:', { trainingGoal, equipmentType });
+
+      const { data: schema3Data, error: schema3Error } = await supabaseAdmin
+        .from('training_schemas')
+        .select('id, name')
+        .eq('schema_nummer', 3)
+        .eq('training_goal', trainingGoal)
+        .eq('equipment_type', equipmentType)
+        .single();
+
+      if (schema3Error) {
+        console.log('⚠️ Schema 3 not found or not available yet');
+        return NextResponse.json({ 
+          success: true, 
+          message: 'Schema 2 completed, but Schema 3 not available yet',
+          schema2Completed: true,
+          schema3Unlocked: false
+        });
+      }
+
+      console.log('✅ Schema 3 found:', schema3Data);
+
+      // Ensure a progress row exists for Schema 3
+      const { data: existingS3, error: existingS3Err } = await supabaseAdmin
+        .from('user_training_schema_progress')
+        .select('schema_id')
+        .eq('user_id', userId)
+        .eq('schema_id', schema3Data.id)
+        .maybeSingle();
+
+      if (!existingS3 && !existingS3Err) {
+        const { error: newS3Err } = await supabaseAdmin
+          .from('user_training_schema_progress')
+          .insert({
+            user_id: userId,
+            schema_id: schema3Data.id,
+            current_day: 1,
+            total_days_completed: 0,
+            total_workouts_completed: 0,
+            started_at: new Date().toISOString(),
+            completed_at: null
+          });
+        if (newS3Err) {
+          console.warn('⚠️ Failed creating Schema 3 progress (will continue):', newS3Err);
+        }
+      }
+
+      // Set user's selected schema to Schema 3
+      const { error: profileUpdateErr3 } = await supabaseAdmin
+        .from('profiles')
+        .update({ selected_schema_id: schema3Data.id, updated_at: new Date().toISOString() })
+        .eq('id', userId);
+      if (profileUpdateErr3) {
+        console.warn('⚠️ Failed to update profiles.selected_schema_id to schema 3:', profileUpdateErr3);
+      }
+
+      return NextResponse.json({
+        success: true,
+        message: 'Schema 2 completed and Schema 3 unlocked',
+        schema2Completed: true,
+        schema3Unlocked: true,
+        schema3Id: schema3Data.id,
+        schema3Name: schema3Data.name
+      });
+    }
+
     // For other schemas, just mark as completed
     return NextResponse.json({ 
       success: true, 

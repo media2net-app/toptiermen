@@ -8,7 +8,6 @@ import { Database } from '@/types/database.types';
 
 
 // Force dynamic rendering to prevent navigator errors
-export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 type User = Database['public']['Tables']['users']['Row'];
@@ -20,6 +19,7 @@ interface Profile {
   display_name: string | null;
   email: string;
   rank: string;
+  special_rank?: string | null; // Special ranks for Rick and Chiel
   points: number;
   missions_completed: number;
   avatar_url: string | null;
@@ -318,6 +318,14 @@ export default function LedenOverzicht() {
     return rankObj ? rankObj.icon : '👊';
   };
 
+  // Special rank labels for specific members (by email)
+  const getSpecialRank = (email?: string | null) => {
+    if (!email) return null;
+    if (email.toLowerCase() === 'rick@toptiermen.eu') return 'Founder Top Tier Men';
+    if (email.toLowerCase() === 'chiel@media2net.nl') return 'Ontwikkelaar Top Tier Men';
+    return null;
+  };
+
   const getMemberInterests = (interests: any): string[] => {
     if (!interests) return [];
     if (Array.isArray(interests)) return interests;
@@ -486,7 +494,7 @@ export default function LedenOverzicht() {
         </div>
       </div>
       {/* Leden Gallerij */}
-      <div className="grid grid-cols-2 gap-2 sm:gap-3 md:gap-4 lg:gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4 lg:gap-6">
         {filtered.map((m) => {
           const memberInterests = getMemberInterests(m.interests);
           const memberRank = m.current_rank?.name || m.fallback_rank || 'Recruit';
@@ -500,6 +508,7 @@ export default function LedenOverzicht() {
           const displayRank = m.current_rank ? `Level ${m.current_rank.rank_order} - ${m.current_rank.name}` : memberRank;
           const displayXP = m.current_xp || 0;
           const displayBadges = m.badges_count || 0;
+          const specialRank = getSpecialRank(m.email);
           
           // Generate initials for default avatar
           const getInitials = (name: string) => {
@@ -544,7 +553,7 @@ export default function LedenOverzicht() {
                 <div className="text-sm sm:text-base md:text-lg font-bold text-white text-center group-hover:text-[#FFD700] transition-colors break-words w-full">{memberName}</div>
                 <div className="flex items-center gap-1 sm:gap-2 text-[#FFD700] font-semibold text-xs sm:text-sm text-center">
                   <span>{rankIcon}</span>
-                  <span className="break-words text-xs sm:text-sm">{displayRank}</span>
+                  <span className="break-words text-xs sm:text-sm">{specialRank || displayRank}</span>
                 </div>
                 <div className="text-xs text-[#8BAE5A] mb-1 text-center break-words">{m.location || 'Locatie onbekend'}</div>
                 {memberInterests.length > 0 && (

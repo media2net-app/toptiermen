@@ -303,6 +303,7 @@ export default function MijnChallengesPage() {
   const [showForcedOnboarding, setShowForcedOnboarding] = useState(false);
   const [showContinueButton, setShowContinueButton] = useState(false);
   const continueRef = useRef<HTMLDivElement | null>(null);
+  const continueBtnId = 'onb-challenges-continue-btn';
 
   // Helper function to check if mission was completed today
   const isChallengeCompletedToday = (completionDate: string | null | undefined): boolean => {
@@ -453,7 +454,10 @@ export default function MijnChallengesPage() {
     if (shouldShow) {
       // Scroll into view when it appears
       setTimeout(() => {
-        continueRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Ensure the modal will be centered in viewport and CTA focused
+        try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch {}
+        try { document.getElementById(continueBtnId)?.focus(); } catch {}
+        try { continueRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch {}
       }, 300);
     }
   }, [currentStep, isCompleted, challenges.length]);
@@ -879,22 +883,22 @@ export default function MijnChallengesPage() {
     <ClientLayout>
       <OnboardingV2Progress />
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-2 drop-shadow-lg">Mijn Challenges</h1>
-        <p className="text-[#8BAE5A] text-sm sm:text-lg mb-6 sm:mb-8">Voltooi dagelijkse challenges en verdien XP</p>
+        <h1 className="text-xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-1 sm:mb-2 drop-shadow-lg">Mijn Challenges</h1>
+        <p className="text-[#8BAE5A] text-xs sm:text-base mb-4 sm:mb-6">Voltooi dagelijkse challenges en verdien XP</p>
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-8">
-          <div className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-3 sm:p-4 text-center">
-            <div className="text-xl sm:text-2xl font-bold text-[#FFD700]">{summary.completedToday}</div>
-            <div className="text-[#8BAE5A] text-xs sm:text-sm">Vandaag Voltooid</div>
+        <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-4 sm:mb-6">
+          <div className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-2 sm:p-3 text-center">
+            <div className="text-lg sm:text-2xl font-bold text-[#FFD700]">{summary.completedToday}</div>
+            <div className="text-[#8BAE5A] text-[10px] sm:text-xs">Vandaag Voltooid</div>
           </div>
-          <div className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-3 sm:p-4 text-center">
-            <div className="text-xl sm:text-2xl font-bold text-[#FFD700]">{summary.totalToday}</div>
-            <div className="text-[#8BAE5A] text-xs sm:text-sm">Totaal Vandaag</div>
+          <div className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-2 sm:p-3 text-center">
+            <div className="text-lg sm:text-2xl font-bold text-[#FFD700]">{summary.totalToday}</div>
+            <div className="text-[#8BAE5A] text-[10px] sm:text-xs">Totaal Vandaag</div>
           </div>
-          <div className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-3 sm:p-4 text-center">
-            <div className="text-xl sm:text-2xl font-bold text-[#FFD700]">{summary.dailyStreak}</div>
-            <div className="text-[#8BAE5A] text-xs sm:text-sm">Dagelijkse Streak</div>
+          <div className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-2 sm:p-3 text-center">
+            <div className="text-lg sm:text-2xl font-bold text-[#FFD700]">{summary.dailyStreak}</div>
+            <div className="text-[#8BAE5A] text-[10px] sm:text-xs">Dagelijkse Streak</div>
           </div>
         </div>
 
@@ -903,21 +907,37 @@ export default function MijnChallengesPage() {
 
         {/* DEBUG: Show current state */}
 
-        {/* Onboarding Continue Button - requires manual click */}
+        {/* Onboarding Continue Modal */}
         {showContinueButton && (
-          <div
-            ref={continueRef}
-            className="mt-6 sm:mt-8 flex flex-col items-center justify-center text-center"
-          >
-            <p className="text-gray-300 text-sm sm:text-base mb-3">
-              Je hebt 3 challenges geselecteerd. Klik op de knop hieronder om verder te gaan met onboarding.
-            </p>
-            <button
-              onClick={completeOnboardingStep}
-              className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] hover:from-[#7A9E4A] hover:to-[#E6C200] text-white px-8 py-3 rounded-lg font-bold text-base sm:text-lg transition-all duration-300 transform hover:scale-105 shadow-lg"
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => { /* prevent closing by backdrop for forced focus */ }} />
+            <div
+              ref={continueRef}
+              className="relative w-full max-w-md bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/50 rounded-2xl p-5 shadow-2xl"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="continue-onboarding-title"
             >
-              Doorgaan →
-            </button>
+              <div className="flex items-start gap-3">
+                <div className="shrink-0 w-8 h-8 rounded-lg bg-[#8BAE5A]/20 border border-[#8BAE5A]/40 flex items-center justify-center text-[#8BAE5A] text-sm">3</div>
+                <div className="text-left">
+                  <h3 id="continue-onboarding-title" className="sr-only">Onboarding verder gaan</h3>
+                  <p className="text-white text-sm leading-snug mb-3">
+                    Je hebt 3 challenges geselecteerd. Klik op de knop hieronder om verder te gaan met onboarding.
+                  </p>
+                  <div className="flex">
+                    <button
+                      id={continueBtnId}
+                      autoFocus
+                      onClick={completeOnboardingStep}
+                      className="w-full bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] hover:from-[#7A9E4A] hover:to-[#E6C200] text-[#0F1411] px-4 py-2 rounded-lg font-bold text-base transition-all duration-200 shadow-lg"
+                    >
+                      Doorgaan →
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
@@ -1101,53 +1121,53 @@ export default function MijnChallengesPage() {
 
         {/* TO DO Challenges */}
         {pendingChallenges.length > 0 && (
-          <div className="mb-6 sm:mb-8">
-            <h2 className="text-xl sm:text-2xl font-bold text-white mb-3 sm:mb-4">Te Doen</h2>
-            <div className="space-y-3 sm:space-y-4">
+          <div className="mb-5 sm:mb-7">
+            <h2 className="text-lg sm:text-2xl font-bold text-white mb-2 sm:mb-3">Te Doen</h2>
+            <div className="space-y-2 sm:space-y-3">
               {pendingChallenges.map((mission) => (
                 <div
                   key={mission.id}
-                  className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-4 sm:p-6 hover:border-[#8BAE5A]/50 transition-all duration-200"
+                  className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-3 sm:p-4 hover:border-[#8BAE5A]/50 transition-all duration-200"
                 >
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
-                    <div className="flex items-start gap-3 sm:gap-4 flex-1 min-w-0">
-                      <div className="text-2xl sm:text-3xl flex-shrink-0">{mission.icon}</div>
+                  <div className="flex flex-row items-start justify-between gap-2.5 sm:gap-3">
+                    <div className="flex items-start gap-2.5 sm:gap-3 flex-1 min-w-0">
+                      <div className="text-xl sm:text-2xl flex-shrink-0">{mission.icon}</div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="text-base sm:text-lg font-semibold text-white break-words leading-tight">{mission.title}</h3>
-                        <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-1">
-                          <span className="text-xs sm:text-sm text-[#8BAE5A]">{mission.type}</span>
-                          <span className="text-xs sm:text-sm text-gray-400">{mission.category}</span>
+                        <h3 className="text-sm sm:text-base font-semibold text-white break-words leading-snug">{mission.title}</h3>
+                        <div className="flex flex-wrap items-center gap-1.5 sm:gap-3 mt-0.5">
+                          <span className="text-[11px] sm:text-sm text-[#8BAE5A]">{mission.type}</span>
+                          <span className="text-[11px] sm:text-sm text-gray-400">{mission.category}</span>
                           {mission.shared && (
-                            <span className="text-xs sm:text-sm text-[#FFD700]">👥 Gedeeld</span>
+                            <span className="text-[11px] sm:text-sm text-[#FFD700]">👥 Gedeeld</span>
                           )}
                         </div>
                         {mission.accountabilityPartner && (
-                          <p className="text-xs sm:text-sm text-gray-400 mt-1 break-words">
+                          <p className="text-[11px] sm:text-sm text-gray-400 mt-0.5 break-words">
                             Accountability Partner: {mission.accountabilityPartner}
                           </p>
                         )}
                         {mission.created_at && (
-                          <p className="text-xs sm:text-sm text-gray-400 mt-1">
+                          <p className="text-[11px] sm:text-sm text-gray-400 mt-0.5">
                             Toegevoegd op: {new Date(mission.created_at).toLocaleDateString('nl-NL')}
                           </p>
                         )}
                       </div>
                     </div>
-                    <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 sm:gap-4 flex-shrink-0">
-                      <div className="text-right">
-                        <div className="text-base sm:text-lg font-bold text-[#FFD700]">+{mission.xp_reward} XP</div>
-                        <div className="text-xs sm:text-sm text-gray-400">{mission.badge}</div>
+                    <div className="flex flex-col items-end gap-1.5 sm:gap-2 flex-shrink-0">
+                      <div className="text-right leading-none">
+                        <div className="text-sm sm:text-lg font-bold text-[#FFD700]">+{mission.xp_reward} XP</div>
+                        <div className="text-[11px] sm:text-sm text-gray-400">{mission.badge}</div>
                       </div>
-                      <div className="flex gap-2">
+                      <div className="flex gap-1.5 sm:gap-2">
                         <button
                           onClick={() => toggleChallenge(mission.id)}
-                          className="bg-gradient-to-r from-[#8BAE5A] to-[#6B8E3A] hover:from-[#7A9D4A] hover:to-[#5A7D2A] text-white font-semibold px-3 sm:px-4 py-2 rounded-lg transition-all duration-200 text-xs sm:text-sm"
+                          className="bg-gradient-to-r from-[#8BAE5A] to-[#6B8E3A] hover:from-[#7A9D4A] hover:to-[#5A7D2A] text-white font-semibold px-2.5 sm:px-3 py-1.5 rounded-lg transition-all duration-200 text-xs sm:text-sm"
                         >
                           Voltooien
                         </button>
                         <button
                           onClick={() => handleDeleteClick(mission)}
-                          className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold px-3 sm:px-4 py-2 rounded-lg transition-all duration-200 text-sm sm:text-base flex items-center gap-1"
+                          className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold px-2.5 sm:px-3 py-1.5 rounded-lg transition-all duration-200 text-xs sm:text-sm flex items-center gap-1"
                           title="Verwijder challenge"
                         >
                           🗑️ <span className="hidden sm:inline">Verwijder</span>
@@ -1164,52 +1184,52 @@ export default function MijnChallengesPage() {
         {/* Completed Challenges */}
         {completedChallenges.length > 0 && (
           <div>
-            <h2 className="text-xl sm:text-2xl font-bold text-white mb-3 sm:mb-4">Voltooid</h2>
-            <div className="space-y-3 sm:space-y-4">
+            <h2 className="text-lg sm:text-2xl font-bold text-white mb-2 sm:mb-3">Voltooid</h2>
+            <div className="space-y-2 sm:space-y-3">
               {completedChallenges.map((mission) => (
                 <div
                   key={mission.id}
-                  className="bg-gradient-to-br from-[#1A1F2E] to-[#232D1A] border border-[#3A4D23]/50 rounded-xl p-4 sm:p-6 opacity-75"
+                  className="bg-gradient-to-br from-[#1A1F2E] to-[#232D1A] border border-[#3A4D23]/50 rounded-xl p-3 sm:p-4 opacity-75"
                 >
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
-                    <div className="flex items-start gap-3 sm:gap-4 flex-1 min-w-0">
-                      <div className="text-2xl sm:text-3xl flex-shrink-0">{mission.icon}</div>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3">
+                    <div className="flex items-start gap-2.5 sm:gap-3 flex-1 min-w-0">
+                      <div className="text-xl sm:text-2xl flex-shrink-0">{mission.icon}</div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="text-base sm:text-lg font-semibold text-white line-through break-words leading-tight">{mission.title}</h3>
-                        <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-1">
-                          <span className="text-xs sm:text-sm text-[#8BAE5A]">{mission.type}</span>
-                          <span className="text-xs sm:text-sm text-gray-400">{mission.category}</span>
+                        <h3 className="text-sm sm:text-base font-semibold text-white line-through break-words leading-snug">{mission.title}</h3>
+                        <div className="flex flex-wrap items-center gap-1.5 sm:gap-3 mt-0.5">
+                          <span className="text-[11px] sm:text-sm text-[#8BAE5A]">{mission.type}</span>
+                          <span className="text-[11px] sm:text-sm text-gray-400">{mission.category}</span>
                           {mission.shared && (
-                            <span className="text-xs sm:text-sm text-[#FFD700]">👥 Gedeeld</span>
+                            <span className="text-[11px] sm:text-sm text-[#FFD700]">👥 Gedeeld</span>
                           )}
                         </div>
                         {mission.last_completion_date && (
-                          <p className="text-xs sm:text-sm text-gray-400 mt-1">
+                          <p className="text-[11px] sm:text-sm text-gray-400 mt-0.5">
                             Voltooid op: {new Date(mission.last_completion_date).toLocaleDateString('nl-NL')}
                           </p>
                         )}
                         {mission.created_at && (
-                          <p className="text-xs sm:text-sm text-gray-400 mt-1">
+                          <p className="text-[11px] sm:text-sm text-gray-400 mt-0.5">
                             Toegevoegd op: {new Date(mission.created_at).toLocaleDateString('nl-NL')}
                           </p>
                         )}
                       </div>
                     </div>
-                    <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 sm:gap-4 flex-shrink-0">
-                      <div className="text-right">
-                        <div className="text-base sm:text-lg font-bold text-[#FFD700]">+{mission.xp_reward} XP</div>
-                        <div className="text-xs sm:text-sm text-gray-400">{mission.badge}</div>
+                    <div className="flex flex-col items-end gap-1.5 sm:gap-2 flex-shrink-0">
+                      <div className="text-right leading-none">
+                        <div className="text-sm sm:text-lg font-bold text-[#FFD700]">+{mission.xp_reward} XP</div>
+                        <div className="text-[11px] sm:text-sm text-gray-400">{mission.badge}</div>
                       </div>
-                      <div className="flex gap-2">
+                      <div className="flex gap-1.5 sm:gap-2">
                         <button
                           onClick={() => toggleChallenge(mission.id)}
-                          className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white font-semibold px-3 sm:px-4 py-2 rounded-lg transition-all duration-200 text-xs sm:text-sm"
+                          className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white font-semibold px-2.5 sm:px-3 py-1.5 rounded-lg transition-all duration-200 text-xs sm:text-sm"
                         >
                           Ongedaan
                         </button>
                         <button
                           onClick={() => handleDeleteClick(mission)}
-                          className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold px-3 sm:px-4 py-2 rounded-lg transition-all duration-200 text-sm sm:text-base flex items-center gap-1"
+                          className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold px-2.5 sm:px-3 py-1.5 rounded-lg transition-all duration-200 text-xs sm:text-sm flex items-center gap-1"
                           title="Verwijder challenge"
                         >
                           🗑️ <span className="hidden sm:inline">Verwijder</span>

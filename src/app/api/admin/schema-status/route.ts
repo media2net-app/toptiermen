@@ -7,6 +7,7 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const email = searchParams.get('email');
+    const selectedOnly = searchParams.get('selectedOnly') === 'true';
     if (!email) return NextResponse.json({ error: 'Missing email' }, { status: 400 });
 
     // lookup user id and selected schema
@@ -22,11 +23,24 @@ export async function GET(request: NextRequest) {
 
     const userId = profile.id;
 
+    // fetch training frequency from user_training_profiles (fallback 7)
+    let trainingFrequency = 7;
+    {
+      const { data: up, error: upErr } = await supabaseAdmin
+        .from('user_training_profiles')
+        .select('training_frequency')
+        .eq('user_id', userId)
+        .maybeSingle();
+      if (!upErr && up && typeof up.training_frequency === 'number') {
+        trainingFrequency = Math.max(1, up.training_frequency);
+      }
+    }
+
     // fetch all progress rows (no join to avoid ambiguity)
     const { data: progressData, error: progressError } = await supabaseAdmin
       .from('user_training_schema_progress')
       .select(
-        'schema_id, total_days_completed, completed_days, current_day, started_at, completed_at'
+        'schema_id, completed_days, current_day, started_at, completed_at'
       )
       .eq('user_id', userId);
 
@@ -34,8 +48,14 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: progressError.message }, { status: 500 });
     }
 
+    // Optionally filter to selected schema only
+    let filteredProgress = (progressData || []) as any[];
+    if (selectedOnly && profile.selected_schema_id) {
+      filteredProgress = filteredProgress.filter((p: any) => p.schema_id === profile.selected_schema_id);
+    }
+
     // fetch schemas for involved schema_ids
-    const schemaIds = Array.from(new Set((progressData || []).map((p: any) => p.schema_id))).filter(Boolean);
+    const schemaIds = Array.from(new Set((filteredProgress || []).map((p: any) => p.schema_id))).filter(Boolean);
     let schemaMap: Record<string, any> = {};
     if (schemaIds.length > 0) {
       const { data: schemas, error: schemasError } = await supabaseAdmin
@@ -49,15 +69,15 @@ export async function GET(request: NextRequest) {
     }
 
     // derive simple status
-    const sorted = (progressData || []).sort((a: any, b: any) => {
+    const sorted = (filteredProgress || []).sort((a: any, b: any) => {
       const an = schemaMap[a.schema_id]?.schema_nummer ?? 0;
       const bn = schemaMap[b.schema_id]?.schema_nummer ?? 0;
       return an - bn;
     });
 
     const statuses = sorted.map((p: any) => {
-      const total = (p.total_days_completed ?? p.completed_days ?? 0) as number;
-      const weeks = Math.floor(total / 7);
+      const total = (p.completed_days ?? 0) as number;
+      const weeks = p.completed_at ? 8 : Math.floor(total / trainingFrequency);
       return {
         schemaId: p.schema_id,
         schemaName: schemaMap[p.schema_id]?.name,

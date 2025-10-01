@@ -132,6 +132,7 @@ const baseMenu = [
   { label: 'Brotherhood', icon: UsersIcon, href: '/dashboard/brotherhood', onboardingStep: 6 },
   { label: 'Social Feed', icon: ChatBubbleLeftRightIcon, parent: 'Brotherhood', href: '/dashboard/brotherhood/social-feed', isSub: true, onboardingStep: 7 },
   { label: 'Forum', icon: FireIcon, parent: 'Brotherhood', href: '/dashboard/brotherhood/forum', isSub: true, onboardingStep: 4, isBasicTierStep: true },
+  { label: 'Inbox', icon: ChatBubbleLeftRightIcon, parent: 'Dashboard', href: '/dashboard/inbox', isSub: true, onboardingStep: 1 },
   { label: 'Leden', icon: UsersIcon, parent: 'Brotherhood', href: '/dashboard/brotherhood/leden', isSub: true, onboardingStep: 7 },
   { label: 'Boekenkamer', icon: BookOpenIcon, href: '/dashboard/boekenkamer', onboardingStep: 7, adminOnly: false },
   { label: 'Badges & Rangen', icon: StarIcon, href: '/dashboard/badges-en-rangen', onboardingStep: 7 },
@@ -189,12 +190,29 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus, setIsMobileMenuOp
     menuLength: mobileMenu.length
   });
 
+  // HARD GATE (mobile): If onboarding not completed and on step 6, show only Brotherhood > Forum
+  const mobileGatedMenu = (!onboardingCompleted && actualCurrentStep === 6)
+    ? mobileMenu.filter((item) => {
+        if (!('parent' in item)) {
+          return item.label === 'Brotherhood';
+        }
+        return item.parent === 'Brotherhood' && item.label === 'Forum';
+      })
+    : mobileMenu;
+
 
   // Function to check if a menu item should be visible based on subscription tier and admin status
   const isMenuItemVisible = (item: any) => {
     // Check admin-only items first - specifically allow rick@toptiermen.eu and chiel@media2net.nl
     if (item.adminOnly && user?.email !== 'rick@toptiermen.eu' && user?.email !== 'chiel@media2net.nl') {
       return false;
+    }
+    // HARD GATE visibility: if onboarding not completed and on step 6, only show Brotherhood > Forum
+    if (!(actualOnboardingStatus?.onboarding_completed ?? isCompleted) && actualCurrentStep === 6) {
+      if (!('parent' in item)) {
+        return item.label === 'Brotherhood';
+      }
+      return item.parent === 'Brotherhood' && item.label === 'Forum';
     }
     
     // Show nutrition and training items to all users, but they'll see upgrade screen if Basic Tier
@@ -346,14 +364,14 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus, setIsMobileMenuOp
     }
     
     // Auto-open Brotherhood submenu during onboarding step 6 (forum introduction)
-    if (!isCompleted && actualCurrentStep === 6) {
+    if (!(actualOnboardingStatus?.onboarding_completed ?? isCompleted) && actualCurrentStep === 6) {
       setOpenBrotherhood(true);
     }
-  }, [safePathname, isCompleted, actualCurrentStep]);
+  }, [safePathname, isCompleted, actualOnboardingStatus?.onboarding_completed, actualCurrentStep]);
 
   return (
     <nav className="flex flex-col gap-2">
-      {mobileMenu.map((item) => {
+      {mobileGatedMenu.map((item) => {
         // Onboarding button is now handled by getMenu function
         
         // Skip menu items that are not visible based on subscription tier
@@ -382,14 +400,14 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus, setIsMobileMenuOp
                              item.label === 'Brotherhood' ? setOpenBrotherhood : 
                              item.label === 'Mind & Focus' ? setOpenMindFocus : 
                              () => {};
-            let subItems = mobileMenu.filter(sub => 'parent' in sub && sub.parent === item.label);
+            let subItems = mobileGatedMenu.filter(sub => 'parent' in sub && sub.parent === item.label);
             
             // For Mind & Focus, only show subpages if intake is completed
             if (item.label === 'Mind & Focus' && !mindFocusIntakeCompleted) {
               subItems = subItems.filter(sub => sub.label === 'Mijn Mind & Focus');
             }
             const hasActiveSubItem = subItems.some(sub => 
-              !isCompleted 
+              !(actualOnboardingStatus?.onboarding_completed ?? isCompleted)
                 ? (sub.href === safePathname && sub.onboardingStep === actualCurrentStep) ||
                   (actualCurrentStep === 6 && sub.label === 'Forum')
                 : sub.href === safePathname
@@ -454,11 +472,19 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus, setIsMobileMenuOp
                         return (
                           <Link
                             key={sub.label}
-                            href={sub.href || '#'}
-                            onClick={(sub as any).disabled ? (e) => e.preventDefault() : onLinkClick}
+                            href={isMenuItemDisabled(sub) ? '#' : (sub.href || '#')}
+                            onClick={(e) => {
+                              const disabled = isMenuItemDisabled(sub) || (sub as any).disabled;
+                              if (disabled) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                return;
+                              }
+                              if (onLinkClick) onLinkClick();
+                            }}
                             title={(sub as any).disabled ? "Binnenkort online" : undefined}
                             className={`block px-4 py-2 rounded-lg text-xs transition-all duration-150 ${
-                              (sub as any).disabled
+                              isMenuItemDisabled(sub)
                                 ? 'text-gray-500 cursor-not-allowed opacity-50'
                                 : isSubActive 
                                 ? 'bg-[#8BAE5A] text-black font-semibold' 
@@ -483,7 +509,7 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus, setIsMobileMenuOp
           const isOnboardingItem = 'isOnboardingItem' in item && item.isOnboardingItem;
           
           // Only the onboarding menu item should be yellow during onboarding
-          const shouldBeYellow = isOnboardingItem && !isCompleted && !actualOnboardingStatus?.onboarding_completed;
+          const shouldBeYellow = isOnboardingItem && !(actualOnboardingStatus?.onboarding_completed ?? isCompleted);
           
           // Special case: Onboarding menu item should always be yellow during onboarding, never disabled
           if (isDisabled && !isOnboardingItem) {
@@ -499,22 +525,23 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus, setIsMobileMenuOp
             );
           }
           
+          const topDisabled = isMenuItemDisabled(item) || (item as any).disabled;
+          const computedHref = topDisabled ? '#' : ((item.href) || '#');
           return (
             <Link
               key={item.label}
-              href={(item as any).disabled ? '#' : (('isDynamic' in item && item.isDynamic) && ('isOnboardingItem' in item && item.isOnboardingItem) && !isCompleted ? 
-                (actualCurrentStep === 0 ? '/dashboard/welcome-video-v2' :
-                 actualCurrentStep === 1 ? '/dashboard/profiel' :
-                 actualCurrentStep === 2 ? '/dashboard/mijn-challenges' :
-                 actualCurrentStep === 3 ? '/dashboard/trainingsschemas' :
-                 actualCurrentStep === 4 ? '/dashboard/voedingsplannen-v2' :
-                 actualCurrentStep === 5 ? '/dashboard/voedingsplannen-v2' :
-                 actualCurrentStep === 6 ? '/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden' :
-                 '/dashboard/welcome-video') : (item.href || '#'))}
-              onClick={(item as any).disabled ? (e) => e.preventDefault() : (e) => handleMobileLinkClick(item.href || '#', item.label, e)}
+              href={computedHref}
+              onClick={(e) => {
+                if (topDisabled) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  return;
+                }
+                handleMobileLinkClick(item.href || '#', item.label, e);
+              }}
               title={(item as any).disabled ? "Binnenkort online" : undefined}
               className={`grid grid-cols-[auto_1fr] items-center gap-4 px-4 py-3 rounded-xl font-bold uppercase text-sm tracking-wide transition-all duration-500 font-figtree ${
-                (item as any).disabled
+                topDisabled
                   ? 'text-gray-500 cursor-not-allowed opacity-50'
                   : isActive
                   ? 'bg-[#8BAE5A] text-black shadow-lg'
@@ -525,7 +552,7 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus, setIsMobileMenuOp
                       : 'text-white hover:text-[#8BAE5A] hover:bg-[#3A4D23]/50'
               }`}
             >
-              <item.icon className={`w-6 h-6 ${(item as any).disabled ? 'text-gray-500' : isActive ? 'text-white' : shouldBeYellow ? 'text-[#FFD700]' : 'text-[#8BAE5A]'}`} />
+              <item.icon className={`w-6 h-6 ${topDisabled ? 'text-gray-500' : isActive ? 'text-white' : shouldBeYellow ? 'text-[#FFD700]' : 'text-[#8BAE5A]'}`} />
               <div className="flex items-center justify-between w-full">
                 <span className="truncate">{item.label}</span>
               </div>
@@ -759,10 +786,19 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
     effectiveLoadingSidebar ? undefined : (actualOnboardingStatus?.onboarding_completed || isCompleted), 
     effectiveLoadingSidebar
   );
+  // HARD GATE: If onboarding not completed and on step 6, show only Brotherhood > Forum
+  const gatedMenu = (!(actualOnboardingStatus?.onboarding_completed ?? isCompleted) && actualCurrentStep === 6)
+    ? sidebarMenu.filter((item) => {
+        if (!('parent' in item)) {
+          return item.label === 'Brotherhood';
+        }
+        return item.parent === 'Brotherhood' && item.label === 'Forum';
+      })
+    : sidebarMenu;
   
   return (
     <nav className="flex flex-col gap-2">
-      {sidebarMenu.map((item) => {
+      {gatedMenu.map((item) => {
         // Onboarding button is now handled by getMenu function
         
         // Skip menu items that are not visible based on subscription tier
@@ -773,11 +809,11 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
         if (!('parent' in item)) {
           // During onboarding, only the current step should be active
           // Special case for step 6: Brotherhood should be active when on forum pages
-          const isActive = !isCompleted 
+          const isActive = !(actualOnboardingStatus?.onboarding_completed ?? isCompleted)
             ? (safePathname === item.href && item.onboardingStep === actualCurrentStep) ||
               (actualCurrentStep === 6 && item.label === 'Brotherhood')
             : safePathname === item.href;
-          const hasSubmenu = sidebarMenu.some(sub => 'parent' in sub && sub.parent === item.label);
+          const hasSubmenu = gatedMenu.some(sub => 'parent' in sub && sub.parent === item.label);
 
           if (hasSubmenu) {
             const isOpen = item.label === 'Dashboard' ? openDashboard : 
@@ -787,7 +823,7 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
                              item.label === 'Brotherhood' ? setOpenBrotherhood : 
                              item.label === 'Mind & Focus' ? setOpenMindFocus : 
                              () => {};
-            let subItems = sidebarMenu.filter(sub => 'parent' in sub && sub.parent === item.label);
+            let subItems = gatedMenu.filter(sub => 'parent' in sub && sub.parent === item.label);
             
             // For Mind & Focus, only show subpages if intake is completed
             if (item.label === 'Mind & Focus' && !mindFocusIntakeCompleted) {

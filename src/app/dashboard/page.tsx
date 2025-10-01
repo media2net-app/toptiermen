@@ -9,6 +9,7 @@ import BadgeDisplay from '@/components/BadgeDisplay';
 import { useAuth } from '@/hooks/useAuth';
 import DashboardLoadingModal from '@/components/ui/DashboardLoadingModal';
 import { useRouter } from 'next/navigation';
+import InboxIcon from '@/components/InboxIcon';
 
 
 // Force dynamic rendering to prevent navigator errors
@@ -157,25 +158,28 @@ export default function Dashboard() {
     // If onboarding is not completed, redirect to the current step
     if (!onboarding?.isCompleted && onboarding?.currentStep !== null && !dashboardRedirectExecuted.current) {
       console.log(`🔄 Dashboard Redirect: User on step ${onboarding.currentStep}, isCompleted: ${onboarding.isCompleted}`);
-      
-      // Use unified auth hook for redirect path
-      const redirectPath = getRedirectPath();
-      
-      // Special case: step 2 stays on dashboard for goal setting modal
-      if (onboarding.currentStep === 2) {
-        console.log(`✅ Staying on dashboard for step 2 (goal setting modal)`);
-        return;
+
+      // Hard-gate steps 1 and 2 to isolated pages (prevent dashboard rendering behind)
+      let redirectPath = '';
+      if (onboarding.currentStep === 1) {
+        redirectPath = '/onboarding/step-1';
+      } else if (onboarding.currentStep === 2) {
+        redirectPath = '/onboarding/step-2';
+      } else {
+        // Fallback to unified hook for steps >= 3
+        redirectPath = getRedirectPath();
       }
-      
+
       // Mark redirect as executed to prevent multiple redirects
       dashboardRedirectExecuted.current = true;
-      
+
       console.log(`🔄 Redirecting to: ${redirectPath}`);
       // Use replace instead of push to prevent back button issues
       // Add small delay to prevent race conditions with loading overlays
       setTimeout(() => {
         router.replace(redirectPath);
-      }, 150);
+      }, 50);
+      return;
     } else if (onboarding?.isCompleted) {
       console.log(`✅ Onboarding completed, staying on dashboard`);
     } else {
@@ -183,11 +187,11 @@ export default function Dashboard() {
     }
   }, [user, onboarding, router, authLoading, getRedirectPath]);
 
-  // ✅ PHASE 2.1: Simplified fallback redirect using unified auth hook
+  // ✅ PHASE 2.1: Simplified fallback redirect using unified auth hook (reduced delay)
   useEffect(() => {
     if (!user || !user.email || authLoading || fallbackRedirectAttempted || dashboardRedirectExecuted.current) return;
     
-    // If onboarding context hasn't loaded after 3 seconds, try direct API call
+    // If onboarding context hasn't loaded shortly, try direct API call fast
     const timeout = setTimeout(async () => {
       if (onboarding === undefined) {
         console.log('🔄 Fallback: Onboarding context not loaded, trying direct API call...');
@@ -200,14 +204,20 @@ export default function Dashboard() {
           if (data.success && !data.onboarding.isCompleted && data.onboarding.currentStep !== null) {
             console.log(`🔄 Fallback redirect using unified auth hook`);
             dashboardRedirectExecuted.current = true;
-            const redirectPath = getRedirectPath();
+            // Hard-gate UI step 1/2 to isolated pages
+            const uiStep = data.onboarding.currentStep;
+            const redirectPath = uiStep === 1
+              ? '/onboarding/step-1'
+              : uiStep === 2
+                ? '/onboarding/step-2'
+                : getRedirectPath();
             router.replace(redirectPath);
           }
         } catch (error) {
           console.error('❌ Fallback redirect failed:', error);
         }
       }
-    }, 3000);
+    }, 200);
     
     return () => clearTimeout(timeout);
   }, [user, authLoading, onboarding, fallbackRedirectAttempted, router, getRedirectPath]);
@@ -220,6 +230,12 @@ export default function Dashboard() {
         if (!authLoading) {
           setLoading(false);
         }
+        return;
+      }
+
+      // Prevent loading dashboard data while user is gated in onboarding steps 1 or 2
+      if (!onboarding?.isCompleted && (onboarding?.currentStep === 1 || onboarding?.currentStep === 2)) {
+        setLoading(false);
         return;
       }
 
@@ -426,6 +442,16 @@ export default function Dashboard() {
     }
   }, [loading]);
 
+  // Suppress any dashboard UI until onboarding decision is made
+  if (!authLoading && user && onboarding === undefined) {
+    return null;
+  }
+
+  // While gated to onboarding step 1/2, do not render dashboard at all
+  if (!authLoading && !onboarding?.isCompleted && (onboarding?.currentStep === 1 || onboarding?.currentStep === 2)) {
+    return null;
+  }
+
   // Show loading modal while data is being fetched
   if (loading || authLoading) {
     return (
@@ -476,12 +502,18 @@ export default function Dashboard() {
       <ClientLayout>
         <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
           {/* Header */}
-          <div className="mb-6 sm:mb-8">
-            <h1 className="text-2xl sm:text-3xl md:text-5xl lg:text-7xl font-black uppercase tracking-tight mb-2 text-white leading-tight">
-              {getGreeting()},<br />
-              <span className="text-[#8BAE5A] break-words">{profile?.full_name || 'Gebruiker'}</span>!
-            </h1>
-            <p className="text-white text-sm sm:text-lg my-2 sm:my-4">Jouw persoonlijke Top Tier Men dashboard</p>
+          <div className="mb-6 sm:mb-8 flex items-start justify-between gap-4">
+            <div>
+              <h1 className="text-2xl sm:text-3xl md:text-5xl lg:text-7xl font-black uppercase tracking-tight mb-2 text-white leading-tight">
+                {getGreeting()},<br />
+                <span className="text-[#8BAE5A] break-words">{profile?.full_name || 'Gebruiker'}</span>!
+              </h1>
+              <p className="text-white text-sm sm:text-lg my-2 sm:my-4">Jouw persoonlijke Top Tier Men dashboard</p>
+            </div>
+            {/* Inbox icon in header */}
+            <div className="pt-1">
+              <InboxIcon />
+            </div>
           </div>
 
           {/* Badges Display */}
@@ -630,7 +662,7 @@ export default function Dashboard() {
             </Link>
 
             {/* Mind & Focus */}
-            <Link href="/dashboard/mind-en-focus" className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-4 sm:p-6 text-left transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#8BAE5A]/50 cursor-pointer block">
+            <Link href="/dashboard/mind-focus" className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-4 sm:p-6 text-left transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#8BAE5A]/50 cursor-pointer block">
               <div className="flex items-center justify-between mb-3 sm:mb-4">
                 <h3 className="text-lg sm:text-xl font-bold text-white">Mind & Focus</h3>
                 <BrainIcon className="w-6 h-6 text-[#8BAE5A]" />

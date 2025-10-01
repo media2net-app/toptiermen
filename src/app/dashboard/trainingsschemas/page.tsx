@@ -143,6 +143,7 @@ function TrainingschemasContent() {
   const searchParams = useSearchParams();
   // Ref to the continue button section for auto-scroll during onboarding
   const continueRef = useRef<HTMLDivElement | null>(null);
+  const trainingNextBtnId = 'onb-training-next-btn';
   // Ref to the calculator section to scroll into view when opened
   const calculatorRef = useRef<HTMLDivElement | null>(null);
   // Ref to the available training schemas section
@@ -152,22 +153,36 @@ function TrainingschemasContent() {
   const [scrollToAvailablePending, setScrollToAvailablePending] = useState(false);
 
   // DEBUG: Enhanced logging (moved after state declarations)
-
+  
   // Training schemas state
   const [trainingSchemas, setTrainingSchemas] = useState<TrainingSchema[]>([]);
   const [allTrainingSchemas, setAllTrainingSchemas] = useState<TrainingSchema[]>([]);
   const [trainingLoading, setTrainingLoading] = useState(true);
   const [trainingError, setTrainingError] = useState<string | null>(null);
-  const [userTrainingProfile, setUserTrainingProfile] = useState<TrainingProfile | null>(null);
   const [selectedTrainingSchema, setSelectedTrainingSchema] = useState<string | null>(null);
   const [unlockedSchemas, setUnlockedSchemas] = useState<{ [key: number]: boolean }>({ 1: true, 2: false, 3: false });
   const [schemaCompletionStatus, setSchemaCompletionStatus] = useState<{ [key: string]: boolean }>({});
+  const [schemaNumberCompletion, setSchemaNumberCompletion] = useState<{ [key: number]: boolean }>({});
+
+  // Focus-scroll the step-4 modal when it appears (during onboarding)
+  useEffect(() => {
+    if (selectedTrainingSchema && !isCompleted) {
+      setTimeout(() => {
+        try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch {}
+        try { document.getElementById(trainingNextBtnId)?.focus(); } catch {}
+        try { continueRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch {}
+      }, 150);
+    }
+  }, [selectedTrainingSchema, isCompleted]);
   const [showRequiredProfile, setShowRequiredProfile] = useState(false);
   const [showCalculator, setShowCalculator] = useState(false);
-  const [showWarningModal, setShowWarningModal] = useState(false);
   const [showSchemaWarningModal, setShowSchemaWarningModal] = useState(false);
+  const [schemaChangeModalMode, setSchemaChangeModalMode] = useState<'warning' | 'completed'>('warning');
+  const [nextSchemaLabel, setNextSchemaLabel] = useState<string | undefined>(undefined);
   const [schemaToChange, setSchemaToChange] = useState<string | null>(null);
   const [showSchemaChangeWarningModal, setShowSchemaChangeWarningModal] = useState(false);
+  const [userTrainingProfile, setUserTrainingProfile] = useState<TrainingProfile | null>(null);
+  const [showWarningModal, setShowWarningModal] = useState(false);
   const [showAllSchemas, setShowAllSchemas] = useState(false);
   const [selectedSchemaDetail, setSelectedSchemaDetail] = useState<TrainingSchema | null>(null);
   const [profileLoading, setProfileLoading] = useState(true);
@@ -183,6 +198,23 @@ function TrainingschemasContent() {
   const [showPostOnboardingModal, setShowPostOnboardingModal] = useState(false);
   const [selectedSchemaForModal, setSelectedSchemaForModal] = useState<TrainingSchema | null>(null);
   const [viewingDynamicPlan, setViewingDynamicPlan] = useState<{schemaId: string, schemaName: string} | null>(null);
+
+  // When coming from week 8 completion of Schema 2, auto-focus Schema 3 card
+  useEffect(() => {
+    try {
+      const focus3 = localStorage.getItem('ttm_focus_schema_3');
+      if (focus3 === 'true' && trainingSchemas.length > 0 && unlockedSchemas[3]) {
+        const schema3 = trainingSchemas.find(s => s.schema_nummer === 3);
+        if (schema3) {
+          setSelectedTrainingSchema(schema3.id);
+          setHighlightAvailable(true);
+          setTimeout(() => setHighlightAvailable(false), 1500);
+          try { availableSchemasRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch {}
+        }
+        localStorage.removeItem('ttm_focus_schema_3');
+      }
+    } catch {}
+  }, [trainingSchemas.length, unlockedSchemas[3]]);
   
   // Onboarding state
   const [onboardingStatus, setOnboardingStatus] = useState<any>(null);
@@ -340,17 +372,23 @@ function TrainingschemasContent() {
       if (data.success && data.schemas) {
         // Create a map of schema completion status
         const completionStatus: Record<string, boolean> = {};
+        const numberCompletion: Record<number, boolean> = {};
         data.schemas.forEach((schema: any) => {
-          if (schema.completed_at) {
+          const completed = !!schema.completed_at;
+          if (completed) {
             completionStatus[schema.schema_id] = true;
+            const num = schema.schema_number || schema.schema_nummer || schema.schema?.schema_nummer;
+            if (typeof num === 'number') numberCompletion[num] = true;
           }
         });
         setSchemaCompletionStatus(completionStatus);
-        console.log('✅ Schema completion status loaded:', completionStatus);
+        setSchemaNumberCompletion(numberCompletion);
+        console.log('✅ Schema completion status loaded:', { byId: completionStatus, byNumber: numberCompletion });
       }
     } catch (error) {
       console.error('❌ Error fetching schema completion status:', error);
       setSchemaCompletionStatus({});
+      setSchemaNumberCompletion({});
     }
   };
 
@@ -1247,9 +1285,18 @@ function TrainingschemasContent() {
       if (currentSchemaPeriod && 
           currentSchemaPeriod.status === 'active' && 
           currentSchemaPeriod.training_schema_id !== schemaId) {
-        console.log('⚠️ User trying to change active schema, showing warning');
+        // If the current schema is completed (8/8), show completed confirmation modal
+        const isCurrentCompleted = !!schemaCompletionStatus[currentSchemaPeriod.training_schema_id];
+        if (isCurrentCompleted) {
+          console.log('✅ Current schema completed; proceeding directly to next schema without warning');
+          await selectTrainingSchemaDirect(schemaId);
+          return;
+        }
         setSchemaToChange(schemaId);
-        setShowSchemaWarningModal(true);
+        console.log('⚠️ User trying to change active schema mid-period, showing warning');
+        setSchemaChangeModalMode('warning');
+        setNextSchemaLabel(undefined);
+        setShowSchemaChangeWarningModal(true);
         return;
       }
 
@@ -2107,52 +2154,50 @@ function TrainingschemasContent() {
       {!isCompleted && <OnboardingV2Progress />}
       {!isCompleted && <OnboardingNotice />}
       
-      {/* Continue to Voedingsplannen Button - Only show during onboarding and when schema is selected */}
+      {/* Continue to Voedingsplannen Modal - focus-driven */}
       {userTrainingProfile && trainingSchemas.length > 0 && !isCompleted && selectedTrainingSchema && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mx-3 sm:mx-4 md:mx-6 mb-4 sm:mb-6"
-          ref={continueRef}
-        >
-          <div className="bg-gradient-to-r from-[#8BAE5A]/10 to-[#8BAE5A]/5 border border-[#8BAE5A]/30 rounded-2xl p-4 sm:p-6">
-            <div className="flex items-center justify-center gap-2 sm:gap-3 mb-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+          <div
+            ref={continueRef}
+            className="relative w-full max-w-md bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/50 rounded-2xl p-5 shadow-2xl"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="next-step-training"
+          >
+            <div className="flex items-start gap-3 mb-3">
               <div className="p-2 bg-[#8BAE5A]/20 rounded-lg">
                 <CheckIcon className="h-5 w-5 sm:h-6 sm:w-6 text-[#8BAE5A]" />
               </div>
               <div>
-                <h3 className="text-base sm:text-lg font-semibold text-white">Trainingsschema Geselecteerd!</h3>
-                <p className="text-xs sm:text-sm text-gray-400">Je bent klaar voor de volgende stap</p>
+                <h3 id="next-step-training" className="text-base sm:text-lg font-semibold text-white">Trainingsschema Geselecteerd!</h3>
+                <p className="text-xs sm:text-sm text-gray-300">Je bent klaar voor de volgende stap</p>
               </div>
             </div>
-            
             <button
               data-next-step-button
+              id={trainingNextBtnId}
+              autoFocus
               onClick={async () => {
                 try {
                   await completeStep(3); // Database step 3 = SELECT_TRAINING for UI step 4
-                  console.log('✅ Training schema step completed, redirecting to nutrition plans...');
-                  // Use router.push instead of window.location.href for better navigation
                   router.push('/dashboard/voedingsplannen-v2');
                 } catch (error) {
-                  console.error('❌ Error completing training step:', error);
                   toast.error('Er is een fout opgetreden bij het voltooien van de stap');
                 }
               }}
-              className="flex items-center gap-2 px-6 sm:px-8 py-2 sm:py-3 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold shadow-lg shadow-[#8BAE5A]/20 mx-auto text-sm sm:text-base"
+              className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold shadow-lg shadow-[#8BAE5A]/20 text-sm sm:text-base"
             >
-              <span className="hidden sm:inline">Doorgaan naar Voedingsplannen</span>
-              <span className="sm:hidden">Volgende Stap</span>
+              <span>Volgende Stap</span>
               <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </button>
-            
-            <p className="mt-3 sm:mt-4 text-xs sm:text-sm text-gray-400 px-4">
+            <p className="mt-3 text-xs sm:text-sm text-gray-400 text-center">
               Je kunt later altijd terugkomen om je trainingsschema te wijzigen
             </p>
           </div>
-        </motion.div>
+        </div>
       )}
       
       <div className="w-full p-3 sm:p-4 md:p-6">
@@ -2587,10 +2632,19 @@ function TrainingschemasContent() {
                   <div className={`${highlightAvailable ? 'ring-2 ring-[#8BAE5A] ring-offset-2 ring-offset-[#0F1419] rounded-lg transition' : ''}`}>
                     <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-semibold text-white break-words">Beschikbare Trainingsschemas</h2>
                     <p className="text-xs sm:text-sm text-gray-400 break-words">Beschikbaar op basis van jouw profiel</p>
-                    <div className="mt-2 p-2 sm:p-3 bg-[#8BAE5A]/10 border border-[#8BAE5A]/30 rounded-lg">
-                      <p className="text-xs sm:text-sm text-[#8BAE5A] leading-relaxed break-words">
-                        <span className="font-semibold">📅 8-weken systeem:</span> Trainingsschemas gaan per 8 weken. Schema 2 wordt beschikbaar na voltooiing van schema 1. <span className="font-semibold">Consistentie zorgt voor resultaat</span> - volg een schema minimaal 8 weken.
-                      </p>
+                    <div className="mt-2 space-y-2">
+                      <div className="p-2 sm:p-3 bg-[#8BAE5A]/10 border border-[#8BAE5A]/30 rounded-lg">
+                        <p className="text-xs sm:text-sm text-[#8BAE5A] leading-relaxed break-words">
+                          <span className="font-semibold">📅 8-weken systeem:</span> Trainingsschemas gaan per 8 weken. Schema 2 wordt beschikbaar na voltooiing van schema 1. <span className="font-semibold">Consistentie zorgt voor resultaat</span> - volg een schema minimaal 8 weken.
+                        </p>
+                      </div>
+                      {unlockedSchemas[3] && (
+                        <div className="p-2 sm:p-3 bg-emerald-600/10 border border-emerald-500/30 rounded-lg">
+                          <p className="text-xs sm:text-sm text-emerald-400 leading-relaxed break-words">
+                            ✅ Schema 2 voltooid. <span className="font-semibold">Schema 3 is nu beschikbaar.</span>
+                          </p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -2640,30 +2694,48 @@ function TrainingschemasContent() {
                   // Progressive unlocking: Schema 1 is always unlocked, Schema 2 unlocks after 8 weeks of Schema 1, Schema 3 unlocks after 8 weeks of Schema 2
                   // Schema 1 is always unlocked, even if it's a placeholder
                   const isPlaceholder = schema.status === 'coming_soon';
-                  const isLocked = schema.schema_nummer === 1 ? false : (isPlaceholder || !unlockedSchemas[schema.schema_nummer || 1]);
+                  const isLockedBase = schema.schema_nummer === 1 ? false : (isPlaceholder || !unlockedSchemas[schema.schema_nummer || 1]);
                   
-                  // Check if schema is completed
-                  const isCompleted = schemaCompletionStatus[schema.id] || false;
+                  // Check if schema is completed (by id OR by schema_nummer fallback)
+                  const completedByNumber = (() => {
+                    if (!schema.schema_nummer) return false;
+                    if (schema.schema_nummer === 1) return !!schemaNumberCompletion[1] || !!unlockedSchemas[2];
+                    if (schema.schema_nummer === 2) return !!schemaNumberCompletion[2] || !!unlockedSchemas[3]; // treat schema 2 as completed if schema 3 is unlocked
+                    return !!schemaNumberCompletion[schema.schema_nummer];
+                  })();
+                  const isCompleted = !!schemaCompletionStatus[schema.id] || completedByNumber;
+
+                  // Additional UI guards
+                  // - Completed Schema 1 may not be re-selected
+                  // - Schema 3 only selectable when Schema 2 is completed
+                  const schema2Id = trainingSchemas.find(s => s.schema_nummer === 2)?.id;
+                  const isSchema2Completed = (schema2Id ? !!schemaCompletionStatus[schema2Id] : false) || !!schemaNumberCompletion[2] || !!unlockedSchemas[3];
+                  const blockCompletedSchema1 = isSchema1 && isCompleted; // disable click for completed schema 1
+                  const blockSchema3Until2Done = isSchema3 && !isSchema2Completed; // lock schema 3 until 2 completed
+                  const isDisabled = isLockedBase || blockCompletedSchema1 || blockSchema3Until2Done;
+                  const isStyledLocked = isLockedBase || blockSchema3Until2Done; // styling/banner only for real locks, not completed schema 1
                   
+                  // Treat selection highlight only if not completed
+                  const isSelectedActive = selectedTrainingSchema === schema.id && !isCompleted;
                   return (
                     <motion.div
                       key={schema.id}
-                      whileHover={isLocked ? {} : { scale: 1.02, y: -5 }}
+                      whileHover={isDisabled ? {} : { scale: 1.02, y: -5 }}
                       className={`p-3 sm:p-4 md:p-6 rounded-2xl border-2 transition-all duration-300 shadow-lg ${
-                        isLocked
+                        isStyledLocked
                           ? 'border-gray-600 bg-[#1A1A1A]/30 opacity-50 cursor-not-allowed'
-                          : selectedTrainingSchema === schema.id
+                          : isSelectedActive
                           ? 'border-[#8BAE5A] bg-[#8BAE5A]/10 shadow-[#8BAE5A]/20'
                           : 'border-gray-700 bg-[#1A1A1A]/50 hover:border-[#8BAE5A]/50 hover:shadow-[#8BAE5A]/10'
                       }`}
                     >
                     <div className="flex items-start justify-between mb-3 sm:mb-4">
                       <div className="flex items-center space-x-2 sm:space-x-3">
-                        <div className={`p-2 sm:p-3 rounded-xl ${isLocked ? 'bg-gray-600/20' : 'bg-[#8BAE5A]/20'}`}>
-                          <AcademicCapIcon className={`h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 ${isLocked ? 'text-gray-500' : 'text-[#8BAE5A]'}`} />
+                        <div className={`p-2 sm:p-3 rounded-xl ${isStyledLocked ? 'bg-gray-600/20' : 'bg-[#8BAE5A]/20'}`}>
+                          <AcademicCapIcon className={`h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 ${isStyledLocked ? 'text-gray-500' : 'text-[#8BAE5A]'}`} />
                         </div>
                         <div>
-                          <h3 className={`text-sm sm:text-base md:text-lg font-semibold ${isLocked ? 'text-gray-500' : 'text-white'}`}>
+                          <h3 className={`text-sm sm:text-base md:text-lg font-semibold ${isStyledLocked ? 'text-gray-500' : 'text-white'}`}>
                             {schema.name}
                             {isCompleted && (
                               <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-500/20 text-green-400 border border-green-500/30">
@@ -2684,23 +2756,23 @@ function TrainingschemasContent() {
                           </h3>
                         </div>
                       </div>
-                      {!isLocked && selectedTrainingSchema === schema.id && (
+                      {!isStyledLocked && isSelectedActive && (
                         <div className="p-1.5 sm:p-2 bg-[#8BAE5A] rounded-full">
                           <CheckIcon className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5 text-[#232D1A]" />
                         </div>
                       )}
-                      {isLocked && (
+                      {isStyledLocked && (
                         <div className="p-1.5 sm:p-2 bg-gray-600 rounded-full">
                           <span className="text-gray-400 text-xs">🔒</span>
                         </div>
                       )}
                     </div>
 
-                    <p className={`text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-3 ${isLocked ? 'text-gray-500' : 'text-gray-300'}`}>
+                    <p className={`text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-3 ${isStyledLocked ? 'text-gray-500' : 'text-gray-300'}`}>
                       {schema.description}
                     </p>
 
-                    {isLocked && (
+                    {isStyledLocked && (
                       <div className="mb-3 sm:mb-4 p-2 sm:p-3 bg-gray-800/50 border border-gray-700 rounded-lg">
                         <div className="flex items-center gap-2 text-gray-400 text-xs sm:text-sm">
                           <span className="text-yellow-500">🔒</span>
@@ -2718,48 +2790,61 @@ function TrainingschemasContent() {
                       </div>
                     )}
 
-                    <div className={`flex flex-col sm:flex-row sm:items-center sm:justify-between text-xs sm:text-sm mb-3 sm:mb-4 md:mb-6 gap-2 sm:gap-0 ${isLocked ? 'text-gray-500' : 'text-gray-400'}`}>
+                    <div className={`flex flex-col sm:flex-row sm:items-center sm:justify-between text-xs sm:text-sm mb-3 sm:mb-4 md:mb-6 gap-2 sm:gap-0 ${isStyledLocked ? 'text-gray-500' : 'text-gray-400'}`}>
                       <div className="flex items-center space-x-2 sm:space-x-3 md:space-x-4">
                         <div className="flex items-center space-x-1">
-                          <FireIcon className={`h-3 w-3 sm:h-4 sm:w-4 ${isLocked ? 'text-gray-500' : 'text-[#8BAE5A]'}`} />
+                          <FireIcon className={`h-3 w-3 sm:h-4 sm:w-4 ${isStyledLocked ? 'text-gray-500' : 'text-[#8BAE5A]'}`} />
                           <span className="text-xs sm:text-sm">{schema.rep_range}</span>
                         </div>
                       </div>
                       <span className={`px-2 sm:px-3 py-1 rounded-full text-xs font-medium self-start sm:self-auto ${
-                        isLocked ? 'bg-gray-700 text-gray-500' : 'bg-[#3A4D23]'
+                        isStyledLocked ? 'bg-gray-700 text-gray-500' : 'bg-[#3A4D23]'
                       }`}>
                         {schema.category}
                       </span>
                     </div>
 
+                      {(() => {
+                        const isCurrent = selectedTrainingSchema === schema.id;
+                        const isCurrentCompleted = isCurrent && !!schemaCompletionStatus[schema.id];
+                        return null;
+                      })()}
                       <div className="flex gap-2">
                         <button
                           onClick={() => {
-                            console.log('🔘 Select button clicked:', { schemaId: schema.id, isLocked, schemaName: schema.name });
-                            if (!isLocked && selectedTrainingSchema !== schema.id) {
+                            console.log('🔘 Select button clicked:', { schemaId: schema.id, isLocked: isDisabled, schemaName: schema.name });
+                            if (!isDisabled && !isCompleted && selectedTrainingSchema !== schema.id) {
                               selectTrainingSchema(schema.id);
                             }
                           }}
-                          disabled={isLocked}
+                          disabled={isDisabled || isCompleted}
                           className={`flex-1 py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium transition-colors text-xs sm:text-sm ${
-                            isLocked
-                              ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
-                              : selectedTrainingSchema === schema.id
+                            isDisabled
+                              ? (isCompleted && (isSchema1 || isSchema2) ? 'bg-emerald-700/40 text-emerald-300 cursor-not-allowed' : 'bg-gray-700 text-gray-500 cursor-not-allowed')
+                              : isCompleted
+                              ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/30 cursor-not-allowed'
+                              : isSelectedActive
                               ? 'bg-[#8BAE5A] text-[#232D1A] shadow-lg shadow-[#8BAE5A]/20'
                               : 'bg-[#3A4D23] text-white hover:bg-[#4A5D33]'
                           }`}
                         >
-                          {isPlaceholder ? 'Binnenkort' : isLocked ? 'Vergrendeld' : selectedTrainingSchema === schema.id ? 'Actief' : 'Selecteer Schema'}
+                          {isPlaceholder
+                            ? 'Binnenkort'
+                            : isDisabled
+                            ? (isCompleted && (isSchema1 || isSchema2) ? 'Voltooid' : 'Vergrendeld')
+                            : isCompleted
+                            ? 'Voltooid'
+                            : (isSelectedActive ? 'Actief' : 'Selecteer Schema')}
                         </button>
                         <button
-                          onClick={() => !isLocked && handlePrintSchema(schema.id)}
-                          disabled={isLocked}
+                          onClick={() => !isDisabled && handlePrintSchema(schema.id)}
+                          disabled={isDisabled}
                           className={`py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium transition-colors text-xs sm:text-sm flex items-center justify-center ${
-                            isLocked
+                            isDisabled
                               ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
                               : 'bg-[#1E3A8A] text-white hover:bg-[#1E40AF]'
                           }`}
-                          title={isPlaceholder ? 'Binnenkort beschikbaar' : isLocked ? 'Vergrendeld' : 'Print schema'}
+                          title={isPlaceholder ? 'Binnenkort beschikbaar' : isStyledLocked ? 'Vergrendeld' : 'Print schema'}
                         >
                           <PrinterIcon className="w-4 h-4" />
                         </button>
@@ -2980,8 +3065,21 @@ function TrainingschemasContent() {
       <SchemaChangeWarningModal
         isOpen={showSchemaChangeWarningModal}
         onClose={() => setShowSchemaChangeWarningModal(false)}
-        onConfirm={handleProfileEditWithWarning}
+        onConfirm={schemaChangeModalMode === 'completed'
+          ? async () => {
+              if (!schemaToChange) return;
+              await selectTrainingSchemaDirect(schemaToChange);
+              setSchemaToChange(null);
+              setShowSchemaChangeWarningModal(false);
+            }
+          : async () => {
+              await confirmSchemaChange();
+              setShowSchemaChangeWarningModal(false);
+            }
+        }
         currentSchemaName={currentSchemaPeriod?.training_schemas?.name || 'Huidige Schema'}
+        mode={schemaChangeModalMode}
+        nextSchemaLabel={nextSchemaLabel}
       />
     </PageLayout>
   );

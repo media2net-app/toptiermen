@@ -113,25 +113,13 @@ const WelcomeVideoStep = ({ onComplete }: { onComplete: () => void }) => {
       </div>
 
       {/* Primary next button when video finished */}
-      {videoWatched ? (
+      {videoWatched && (
         <button
           onClick={onComplete}
           className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] hover:from-[#7A9E4A] hover:to-[#E6C200] text-white px-6 py-3 sm:px-8 sm:py-4 rounded-lg font-bold text-sm sm:text-lg transition-all duration-300 transform hover:scale-105 shadow-lg"
         >
           Volgende Stap →
         </button>
-      ) : (
-        <div className="flex flex-col items-center gap-3">
-          <button
-            onClick={onComplete}
-            className="bg-[#3A4D23] hover:bg-[#445a29] text-white px-6 py-3 sm:px-8 sm:py-4 rounded-lg font-bold text-sm sm:text-lg transition-colors shadow-md"
-          >
-            Problemen met video? Ga verder →
-          </button>
-          <p className="text-gray-400 text-xs sm:text-sm max-w-md">
-            Als de video niet goed afspeelt op jouw apparaat (bijv. iOS/Android), kun je hier toch doorgaan. Je kunt de video later terugkijken via het dashboard.
-          </p>
-        </div>
       )}
     </div>
   );

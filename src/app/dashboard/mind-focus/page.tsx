@@ -96,6 +96,26 @@ export default function MindFocusPage() {
   
   const [isSaving, setIsSaving] = useState(false);
 
+  // Reset intake/profile
+  const resetIntake = async () => {
+    if (!user) return;
+    const ok = window.confirm('Weet je zeker dat je je Mind & Focus intake wilt resetten?');
+    if (!ok) return;
+    try {
+      const res = await fetch(`/api/mind-focus/intake?userId=${user.id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Failed to reset');
+      // Reset local state
+      setHasExistingProfile(false);
+      setStressAssessment({ workStress: 5, personalStress: 5, sleepQuality: 5, energyLevel: 5, focusProblems: false, irritability: false });
+      setLifestyleInfo({ workSchedule: '9-17', freeTime: [], familyObligations: [], sportSchedule: '3x per week', stressTriggers: [] });
+      setPersonalGoals({ improveFocus: false, reduceStress: false, betterSleep: false, moreEnergy: false, workLifeBalance: false });
+      setCurrentView('intake');
+    } catch (e) {
+      console.error(e);
+      alert('Reset mislukt. Probeer opnieuw.');
+    }
+  };
+
   // Load existing profile data on component mount
   useEffect(() => {
     const loadExistingProfile = async () => {
@@ -164,11 +184,8 @@ export default function MindFocusPage() {
         console.log('✅ Intake data saved successfully');
         setHasExistingProfile(true);
         setCurrentView('dashboard');
-        
-        // Force reload to ensure clean state
-        setTimeout(() => {
-          window.location.reload();
-        }, 1000);
+        // Navigate to Mind & Focus dashboard without full reload
+        router.replace('/dashboard/mind-focus');
       } else {
         console.error('❌ Failed to save intake data:', data.error);
       }
@@ -232,81 +249,75 @@ export default function MindFocusPage() {
   const renderDashboard = () => (
     <div className="min-h-screen bg-gradient-to-br from-[#0A0F0A] to-[#1A2A1A]">
       <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-8">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-3xl font-bold text-white">Mind & Focus Dashboard</h1>
-            <p className="text-[#8BAE5A] mt-2">Welkom terug! Laten we je mentale welzijn verbeteren.</p>
+            <p className="text-[#8BAE5A] mt-2">Overzicht van je tools en voortgang.</p>
+          </div>
+          <button onClick={resetIntake} className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg text-sm">Reset intake</button>
+        </div>
+
+        {/* Quick actions row: 4 buttons */}
+        <div className="bg-[#1A2A1A]/80 border border-[#2A3A1A] rounded-xl p-4 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            {meditationTypes.map((type) => (
+              <button
+                key={type.id}
+                onClick={() => router.push(`/dashboard/mind-focus/${type.id}-training`)}
+                className="flex items-center justify-center gap-2 bg-[#232D1A] hover:bg-[#2A3A1A] text-white rounded-lg py-3 px-3 border border-[#2A3A1A]"
+              >
+                <span className={`w-6 h-6 ${type.color} rounded-full flex items-center justify-center text-white`}>{type.iconComponent}</span>
+                <span className="text-sm font-semibold">{type.name}</span>
+              </button>
+            ))}
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Quick Actions */}
-          <div className="lg:col-span-2">
-            <h2 className="text-2xl font-bold text-white mb-6">Quick Actions</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {meditationTypes.map((type) => (
-                <div
-                  key={type.id}
-                  className="bg-[#1A2A1A]/80 rounded-xl p-6 border border-[#2A3A1A] hover:border-[#3A4A2A] transition-all duration-300 cursor-pointer"
-                  onClick={() => router.push(`/dashboard/mind-focus/${type.id}-training`)}
-                >
-                  <div className="flex items-center gap-4 mb-3">
-                    <div className={`w-12 h-12 ${type.color} rounded-full flex items-center justify-center text-white`}>
-                      {type.iconComponent}
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-bold text-white">{type.name}</h3>
-                      <p className="text-[#8BAE5A] text-sm">{type.description}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center text-[#8BAE5A] text-sm">
-                    <PlayIcon className="w-4 h-4 mr-2" />
-                    Start Sessie
-                  </div>
-                </div>
-              ))}
-            </div>
+        {/* Progress table */}
+        <div className="bg-[#1A2A1A]/80 border border-[#2A3A1A] rounded-xl overflow-hidden">
+          <div className="px-5 py-4 border-b border-[#2A3A1A]">
+            <h2 className="text-xl font-bold text-white">Voortgang & Opties</h2>
+            <p className="text-[#8BAE5A] text-sm">Alle onderdelen van de module in één overzicht.</p>
           </div>
-
-          {/* Stats */}
-          <div>
-            <h2 className="text-2xl font-bold text-white mb-6">Jouw Progress</h2>
-            <div className="space-y-4">
-              <div className="bg-[#1A2A1A]/80 rounded-xl p-6 border border-[#2A3A1A]">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[#8BAE5A]">Deze Week</span>
-                  <span className="text-white font-bold">3 sessies</span>
-                </div>
-                <div className="w-full bg-[#2A3A1A] rounded-full h-2">
-                  <div className="bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] h-2 rounded-full" style={{ width: '60%' }}></div>
-                </div>
-              </div>
-
-              <div className="bg-[#1A2A1A]/80 rounded-xl p-6 border border-[#2A3A1A]">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[#8BAE5A]">Streak</span>
-                  <span className="text-white font-bold">5 dagen</span>
-                </div>
-                <div className="flex">
-                  {[...Array(7)].map((_, i) => (
-                    <div
-                      key={i}
-                      className={`w-3 h-3 rounded-full mr-1 ${i < 5 ? 'bg-[#8BAE5A]' : 'bg-[#2A3A1A]'}`}
-                    />
-                  ))}
-                </div>
-              </div>
-
-              <div className="bg-[#1A2A1A]/80 rounded-xl p-6 border border-[#2A3A1A]">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[#8BAE5A]">Focus Score</span>
-                  <span className="text-white font-bold">8.2/10</span>
-                </div>
-                <div className="w-full bg-[#2A3A1A] rounded-full h-2">
-                  <div className="bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] h-2 rounded-full" style={{ width: '82%' }}></div>
-                </div>
-              </div>
-            </div>
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-left">
+              <thead className="bg-[#0F140F] text-[#8BAE5A] text-xs uppercase">
+                <tr>
+                  <th className="px-5 py-3">Onderdeel</th>
+                  <th className="px-5 py-3">Status</th>
+                  <th className="px-5 py-3">Laatste gebruik</th>
+                  <th className="px-5 py-3">Actie</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#2A3A1A] text-sm">
+                {[
+                  { key: 'focus', label: 'Focus Training' },
+                  { key: 'stress', label: 'Stress Release' },
+                  { key: 'sleep', label: 'Sleep Preparation' },
+                  { key: 'recovery', label: 'Recovery' },
+                  { key: 'journal', label: 'Dagboek (Journal)' },
+                  { key: 'gratitude', label: 'Dankbaarheid' },
+                  { key: 'breathing', label: 'Ademhalingsoefeningen' },
+                ].map((row) => (
+                  <tr key={row.key} className="hover:bg-[#232D1A]">
+                    <td className="px-5 py-3 text-white">{row.label}</td>
+                    <td className="px-5 py-3"><span className="inline-flex items-center px-2 py-1 rounded-md text-xs bg-[#26331A] text-[#B6C948]">Beschikbaar</span></td>
+                    <td className="px-5 py-3 text-gray-300">—</td>
+                    <td className="px-5 py-3">
+                      {['focus','stress','sleep','recovery'].includes(row.key) ? (
+                        <button
+                          onClick={() => router.push(`/dashboard/mind-focus/${row.key}-training`)}
+                          className="px-3 py-1.5 text-xs rounded-md bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] text-[#1A2A1A] font-semibold hover:from-[#7A9D4A] hover:to-[#e0903f]"
+                        >Start</button>
+                      ) : (
+                        <button className="px-3 py-1.5 text-xs rounded-md bg-[#2A3A1A] text-white border border-[#3A4A2A] cursor-not-allowed">Binnenkort</button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -318,16 +329,16 @@ export default function MindFocusPage() {
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-3xl font-bold text-white mb-8 text-center">
-            Mind & Focus Assessment
+            Mind & Focus Intake
           </h1>
           <p className="text-[#8BAE5A] text-center mb-8">
             Help ons je persoonlijke programma samen te stellen door een paar vragen te beantwoorden.
           </p>
           
           <div className="bg-[#1A2A1A]/80 rounded-xl p-8 border border-[#2A3A1A]">
-            {/* Stress Assessment */}
+            {/* Stress Intake */}
             <div className="mb-8">
-              <h2 className="text-xl font-bold text-white mb-4">Stress Assessment</h2>
+              <h2 className="text-xl font-bold text-white mb-4">Stress intake</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-[#8BAE5A] mb-2">Werk stress (1-10)</label>
@@ -468,7 +479,7 @@ export default function MindFocusPage() {
                 disabled={isSaving}
                 className="bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] text-[#1A2A1A] px-8 py-4 rounded-xl font-bold text-lg hover:from-[#7A9D4A] hover:to-[#e0903f] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isSaving ? 'Opslaan...' : 'Assessment Voltooien'}
+                {isSaving ? 'Opslaan...' : 'Intake voltooien'}
               </button>
             </div>
           </div>
