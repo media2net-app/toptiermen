@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { computeScaling20Targets } from '@/lib/nutrition/scaling20';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { useRouter, useParams } from 'next/navigation';
 import { useSubscription } from '@/hooks/useSubscription';
@@ -90,10 +89,8 @@ export default function NutritionPlanDetailPage() {
   const [editingMealType, setEditingMealType] = useState<string>('');
   const [editingDay, setEditingDay] = useState<string>('');
   const [showSimpleModal, setShowSimpleModal] = useState(false);
-  // Scaling 2.0 toggle (visible)
-  const [scalingEnabled, setScalingEnabled] = useState<boolean>(false);
   // Debug panel
-  const [showDebug, setShowDebug] = useState<boolean>(false);
+  const [showDebug, setShowDebug] = useState<boolean>(true);
 
   // Reset modal state when component mounts
   useEffect(() => {
@@ -174,21 +171,17 @@ export default function NutritionPlanDetailPage() {
     try {
       console.log('🔧 DEBUG: loadOriginalPlanData called with planId:', planId);
       setLoadingOriginal(true);
-      const response = await fetch(`/api/nutrition-plan-original?planId=${planId}`, { cache: 'no-store' });
+      // Prefer admin meals endpoint to ensure we mirror exact backend meals + nutrition
+      const response = await fetch(`/api/admin/plan-meals?planId=${planId}`);
       
       if (!response.ok) {
-        throw new Error(`Failed to fetch original plan data: ${response.status}`);
+        throw new Error(`Failed to fetch plan meals: ${response.status}`);
       }
       
       const data = await response.json();
-      console.log('🔧 DEBUG: Original plan data received:', data);
-      
-      // The API returns { success: true, plan: {...} }, so we need to extract the plan
-      if (data.success && data.plan) {
-        setOriginalPlanData(data.plan);
-      } else {
-        setOriginalPlanData(data);
-      }
+      console.log('🔧 DEBUG: Plan meals data received:', data);
+      const plan = data?.plan || data;
+      setOriginalPlanData(plan);
     } catch (err) {
       console.error('🔧 DEBUG: Error loading original plan data:', err);
       setError(err instanceof Error ? err.message : 'Failed to load plan data');
@@ -233,76 +226,16 @@ export default function NutritionPlanDetailPage() {
   // Find the selected plan based on planId
   useEffect(() => {
     if (plans.length > 0 && planId) {
-      const plan = plans.find(p => p.plan_id === planId || p.id === planId);
+      const plan = plans.find(p => p.plan_id === planId || String(p.id) === String(planId));
       if (plan) {
         setSelectedPlan(plan);
-        loadOriginalPlanData(plan.plan_id || plan.id.toString());
+        // Use numeric id for admin endpoint
+        loadOriginalPlanData(plan.id.toString());
       }
     }
   }, [plans, planId, loadOriginalPlanData]);
 
-  // Calculate BMR using Mifflin-St Jeor Equation
-  const calculateBMR = (weight: number, height: number, age: number, gender: string) => {
-    if (gender === 'male') {
-      return 10 * weight + 6.25 * height - 5 * age + 5;
-    } else {
-      return 10 * weight + 6.25 * height - 5 * age - 161;
-    }
-  };
-
-  // Calculate TDEE
-  const calculateTDEE = (bmr: number, activityLevel: string) => {
-    const multipliers = {
-      'sedentary': 1.2,
-      'light': 1.375,
-      'moderate': 1.55,
-      'active': 1.725,
-      'very_active': 1.9
-    };
-    return bmr * (multipliers[activityLevel as keyof typeof multipliers] || 1.55);
-  };
-
-  // Calculate personalized calories
-  const calculatePersonalizedCalories = (baseCalories: number, userProfile: UserProfile) => {
-    // Calculate based on user profile data
-    
-    const bmr = calculateBMR(userProfile.weight, userProfile.height, userProfile.age, userProfile.gender);
-    const tdee = calculateTDEE(bmr, userProfile.activity_level);
-    
-    // Adjust based on fitness goal
-    let adjustment = 0;
-    if (userProfile.fitness_goal === 'droogtrainen') {
-      adjustment = -500; // 500 calorie deficit
-    } else if (userProfile.fitness_goal === 'spiermassa') {
-      adjustment = 500; // 500 calorie surplus
-    }
-    
-    return Math.round(tdee + adjustment);
-  };
-
-  // Plan-led targets: backend is source of truth; optionally apply Scaling 2.0 by weight while preserving macro ratios
-  const calculatePlanLedTargets = (plan: NutritionPlan | null, weightKg: number, allowScaling: boolean) => {
-    if (!plan) return { protein: 0, carbs: 0, fat: 0, calories: 0 };
-    const baseProteinG = Number(plan.target_protein) || 0;
-    const baseCarbsG = Number(plan.target_carbs) || 0;
-    const baseFatG = Number(plan.target_fat) || 0;
-    const baseKcal = Number(plan.target_calories) || Math.max(1, Math.round(baseProteinG*4 + baseCarbsG*4 + baseFatG*9));
-    const factor = (100 > 0) ? ((weightKg || 100) / 100) : 1;
-    // Guard: if factor ~ 1, return exact backend targets
-    if (!allowScaling || Math.abs(factor - 1) < 0.001) {
-      return { protein: baseProteinG, carbs: baseCarbsG, fat: baseFatG, calories: baseKcal };
-    }
-    const input = {
-      baseKcal,
-      baseProteinG,
-      baseCarbsG,
-      baseFatG,
-      baseWeightKg: 100,
-      userWeightKg: weightKg || 100,
-    };
-    const scaled = computeScaling20Targets(input);
-    return { protein: scaled.proteinG, carbs: scaled.carbsG, fat: scaled.fatG, calories: scaled.kcal };
-  };
+  // Removed all smart-scaling logic. Use backend plan targets as-is.
 
   // Get current ingredients for a specific meal and day
   const getCurrentIngredients = (mealType: string, day: string) => {
@@ -606,10 +539,15 @@ export default function NutritionPlanDetailPage() {
     );
   }
 
-  // Use plan-led targets (backend) with optional Scaling 2.0
+  // Use plan-led targets (backend) directly without scaling
   const personalizedMacros = useMemo(
-    () => calculatePlanLedTargets(selectedPlan, userProfile.weight, scalingEnabled),
-    [selectedPlan, userProfile.weight, scalingEnabled]
+    () => ({
+      calories: selectedPlan?.target_calories || 0,
+      protein: selectedPlan?.target_protein || 0,
+      carbs: selectedPlan?.target_carbs || 0,
+      fat: selectedPlan?.target_fat || 0,
+    }),
+    [selectedPlan]
   );
   // Get current day totals - recalculate when customAmounts change
   const dayTotals = useMemo(() => {
@@ -701,6 +639,66 @@ export default function NutritionPlanDetailPage() {
     personalizedMacros.fat
   );
 
+  // Debug: per-meal comparison between backend nutrition and recomputed ingredients
+  const mealComparisons = useMemo(() => {
+    const out: Array<{ mealType: string; label: string; backend: DayTotals; computed: DayTotals; delta: DayTotals } > = [];
+    const dayData: any = originalPlanData?.meals?.weekly_plan?.[selectedDay];
+    if (!dayData) return out;
+    const mealOrder = ['ontbijt','ochtend_snack','lunch','lunch_snack','diner','avond_snack'];
+    mealOrder.forEach((mealType) => {
+      const meal = dayData[mealType];
+      if (!meal?.ingredients) return;
+      const label = mealType === 'ochtend_snack' ? 'Ochtend Snack' :
+                    mealType === 'lunch_snack' ? 'Lunch Snack' :
+                    mealType === 'avond_snack' ? 'Avond Snack' :
+                    mealType.charAt(0).toUpperCase() + mealType.slice(1);
+
+      // backend nutrition (rounded)
+      const backend: DayTotals = meal?.nutrition ? {
+        calories: Math.round(Number(meal.nutrition.calories) || 0),
+        protein: Math.round(((Number(meal.nutrition.protein) || 0)) * 10) / 10,
+        carbs:   Math.round(((Number(meal.nutrition.carbs)   || 0)) * 10) / 10,
+        fat:     Math.round(((Number(meal.nutrition.fat)     || 0)) * 10) / 10,
+      } : { calories: 0, protein: 0, carbs: 0, fat: 0 };
+
+      // computed from ingredients
+      let c = { calories: 0, protein: 0, carbs: 0, fat: 0 };
+      meal.ingredients.forEach((ingredient: any) => {
+        const key = `${selectedDay}_${mealType}_${ingredient.name}`;
+        const customAmount = (customAmounts as any)[key];
+        let amount = customAmount !== undefined ? customAmount : (ingredient.amount || 0);
+        const unit = String(ingredient.unit || '').toLowerCase();
+        let mult = 1;
+        if (['per_piece','stuk','stuks','per_plakje','plakje','plakjes','handje','per_handful'].includes(unit)) mult = amount;
+        else if (['per_100g','g','gram'].includes(unit)) mult = amount / 100;
+        else if (['per_ml','ml'].includes(unit)) mult = amount / 100;
+        else if (['per_tbsp','tbsp','eetlepel'].includes(unit)) mult = (amount * 15) / 100;
+        else if (['per_tsp','tsp','theelepel'].includes(unit)) mult = (amount * 5) / 100;
+        else if (['per_cup','cup','kop'].includes(unit)) mult = (amount * 240) / 100;
+        else if (['per_30g'].includes(unit)) mult = (amount * 30) / 100;
+        else mult = amount / 100;
+        c.calories += (Number(ingredient.calories_per_100g)||0) * mult;
+        c.protein  += (Number(ingredient.protein_per_100g)||0)  * mult;
+        c.carbs    += (Number(ingredient.carbs_per_100g)||0)    * mult;
+        c.fat      += (Number(ingredient.fat_per_100g)||0)      * mult;
+      });
+      const computed: DayTotals = {
+        calories: Math.round(c.calories),
+        protein: Math.round(c.protein * 10) / 10,
+        carbs:   Math.round(c.carbs   * 10) / 10,
+        fat:     Math.round(c.fat     * 10) / 10,
+      };
+      const delta: DayTotals = {
+        calories: +(computed.calories - backend.calories).toFixed(1),
+        protein:  +(computed.protein  - backend.protein ).toFixed(1),
+        carbs:    +(computed.carbs    - backend.carbs   ).toFixed(1),
+        fat:      +(computed.fat      - backend.fat     ).toFixed(1),
+      };
+      out.push({ mealType, label, backend, computed, delta });
+    });
+    return out;
+  }, [originalPlanData, selectedDay, customAmounts]);
+
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white">
       {/* Header */}
@@ -716,13 +714,6 @@ export default function NutritionPlanDetailPage() {
             <RocketLaunchIcon className="h-8 w-8 text-[#8BAE5A]" />
             <h1 className="text-2xl font-bold">{selectedPlan.name}</h1>
             <div className="ml-auto flex items-center gap-2">
-              <button
-                onClick={() => setScalingEnabled(s => !s)}
-                className={`px-3 py-1 rounded text-sm border ${scalingEnabled ? 'bg-[#8BAE5A] text-[#181F17] border-[#8BAE5A]' : 'bg-[#232D1A] text-white border-[#3A4D23] hover:bg-[#2A2A2A]'}`}
-                title="Scaling 2.0 aan/uit"
-              >
-                Scaling 2.0: {scalingEnabled ? 'Aan' : 'Uit'}
-              </button>
               <button
                 onClick={() => setShowDebug(d => !d)}
                 className="px-3 py-1 rounded text-sm border bg-[#232D1A] text-white border-[#3A4D23] hover:bg-[#2A2A2A]"
@@ -956,32 +947,45 @@ export default function NutritionPlanDetailPage() {
 
                 if (!mealData || !mealData.ingredients) return null;
 
-                // Calculate meal totals
-                const mealTotals = mealData.ingredients.reduce((totals: any, ingredient: any) => {
+                // Calculate meal totals (prefer backend 'nutrition' for exact match)
+                const computedTotals = mealData.ingredients.reduce((totals: any, ingredient: any) => {
                   const customAmount = customAmounts[getIngredientKey(mealType, ingredient.name, selectedDay)] || ingredient.amount;
                   let amount = customAmount;
+                  const unit = String(ingredient.unit || '').toLowerCase();
                   
-                  // Calculate multiplier based on unit type
+                  // Calculate multiplier based on unit type (mirror backend)
                   let multiplier = 1;
-                  if (ingredient.unit === 'per_piece' || ingredient.unit === 'per_plakje' || ingredient.unit === 'stuk') {
+                  if (['per_piece','stuk','stuks','per_plakje','plakje','plakjes','handje','per_handful'].includes(unit)) {
                     multiplier = amount;
-                  } else if (ingredient.unit === 'per_100g' || ingredient.unit === 'g') {
+                  } else if (['per_100g','g','gram'].includes(unit)) {
                     multiplier = amount / 100;
-                  } else if (ingredient.unit === 'per_ml') {
-                    multiplier = amount / 100;
-                  } else if (ingredient.unit === 'handje') {
-                    multiplier = amount;
+                  } else if (['per_ml','ml'].includes(unit)) {
+                    multiplier = amount / 100; // ~1ml = 1g
                   } else {
                     multiplier = amount / 100;
                   }
                   
-                  totals.calories += (ingredient.calories_per_100g || 0) * multiplier;
-                  totals.protein += (ingredient.protein_per_100g || 0) * multiplier;
-                  totals.carbs += (ingredient.carbs_per_100g || 0) * multiplier;
-                  totals.fat += (ingredient.fat_per_100g || 0) * multiplier;
+                  totals.calories += (Number(ingredient.calories_per_100g) || 0) * multiplier;
+                  totals.protein  += (Number(ingredient.protein_per_100g)  || 0) * multiplier;
+                  totals.carbs    += (Number(ingredient.carbs_per_100g)    || 0) * multiplier;
+                  totals.fat      += (Number(ingredient.fat_per_100g)      || 0) * multiplier;
                   
                   return totals;
                 }, { calories: 0, protein: 0, carbs: 0, fat: 0 });
+
+                const mealTotals = mealData.nutrition && typeof mealData.nutrition === 'object'
+                  ? {
+                      calories: Math.round(Number(mealData.nutrition.calories) || 0),
+                      protein: Math.round((Number(mealData.nutrition.protein) || 0) * 10) / 10,
+                      carbs: Math.round((Number(mealData.nutrition.carbs) || 0) * 10) / 10,
+                      fat: Math.round((Number(mealData.nutrition.fat) || 0) * 10) / 10,
+                    }
+                  : {
+                      calories: Math.round(computedTotals.calories),
+                      protein: Math.round(computedTotals.protein * 10) / 10,
+                      carbs: Math.round(computedTotals.carbs * 10) / 10,
+                      fat: Math.round(computedTotals.fat * 10) / 10,
+                    };
 
                 return (
                   <div key={mealType} className="bg-[#232D1A] rounded-lg border border-[#3A4D23] overflow-hidden">
@@ -1033,24 +1037,33 @@ export default function NutritionPlanDetailPage() {
                               const customAmount = customAmounts[ingredientKey];
                               let amount = customAmount !== undefined ? customAmount : (ingredient.amount || 0);
                               
-                              // Calculate individual ingredient totals
+                              // Calculate individual ingredient totals (mirror backend unit rules)
                               let multiplier = 1;
-                              if (ingredient.unit === 'per_piece' || ingredient.unit === 'per_plakje' || ingredient.unit === 'stuk') {
-                                multiplier = amount;
-                              } else if (ingredient.unit === 'per_100g' || ingredient.unit === 'g') {
-                                multiplier = amount / 100;
-                              } else if (ingredient.unit === 'per_ml') {
-                                multiplier = amount / 100;
-                              } else if (ingredient.unit === 'handje') {
-                                multiplier = amount;
-                              } else {
-                                multiplier = amount / 100;
+                              {
+                                const unit = String(ingredient.unit || '').toLowerCase();
+                                if (['per_piece','stuk','stuks','per_plakje','plakje','plakjes','handje','per_handful'].includes(unit)) {
+                                  multiplier = amount;
+                                } else if (['per_100g','g','gram'].includes(unit)) {
+                                  multiplier = amount / 100;
+                                } else if (['per_ml','ml'].includes(unit)) {
+                                  multiplier = amount / 100; // ~1ml = 1g
+                                } else if (['per_tbsp','tbsp','eetlepel'].includes(unit)) {
+                                  multiplier = (amount * 15) / 100;
+                                } else if (['per_tsp','tsp','theelepel'].includes(unit)) {
+                                  multiplier = (amount * 5) / 100;
+                                } else if (['per_cup','cup','kop'].includes(unit)) {
+                                  multiplier = (amount * 240) / 100;
+                                } else if (['per_30g'].includes(unit)) {
+                                  multiplier = (amount * 30) / 100;
+                                } else {
+                                  multiplier = amount / 100;
+                                }
                               }
 
-                              const ingredientCalories = (ingredient.calories_per_100g || 0) * multiplier;
-                              const ingredientProtein = (ingredient.protein_per_100g || 0) * multiplier;
-                              const ingredientCarbs = (ingredient.carbs_per_100g || 0) * multiplier;
-                              const ingredientFat = (ingredient.fat_per_100g || 0) * multiplier;
+                              const ingredientCalories = (Number(ingredient.calories_per_100g) || 0) * multiplier;
+                              const ingredientProtein  = (Number(ingredient.protein_per_100g)  || 0) * multiplier;
+                              const ingredientCarbs    = (Number(ingredient.carbs_per_100g)    || 0) * multiplier;
+                              const ingredientFat      = (Number(ingredient.fat_per_100g)      || 0) * multiplier;
 
                               // Convert database unit names to user-friendly labels
                               const getUnitLabel = (unit: string) => {
@@ -1124,6 +1137,56 @@ export default function NutritionPlanDetailPage() {
                 <p>weekly_plan: {originalPlanData?.meals?.weekly_plan ? '✅' : '❌'}</p>
                 <p>selectedDay ({selectedDay}): {originalPlanData?.meals?.weekly_plan?.[selectedDay] ? '✅' : '❌'}</p>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Debug Comparison Panel */}
+        {showDebug && (
+          <div className="bg-[#181F17] rounded-xl p-6 mt-6 border border-[#3A4D23]">
+            <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+              <ExclamationTriangleIcon className="h-5 w-5 text-yellow-400" />
+              Debug: Vergelijk Backend vs Berekend ({selectedDay})
+            </h2>
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-sm">
+                <thead className="text-[#8BAE5A]">
+                  <tr className="border-b border-[#3A4D23]">
+                    <th className="text-left py-2">Maaltijd</th>
+                    <th className="text-right py-2">Backend kcal</th>
+                    <th className="text-right py-2">Comp kcal</th>
+                    <th className="text-right py-2">Δ kcal</th>
+                    <th className="text-right py-2">Backend eiwit</th>
+                    <th className="text-right py-2">Comp eiwit</th>
+                    <th className="text-right py-2">Δ eiwit</th>
+                    <th className="text-right py-2">Backend kh</th>
+                    <th className="text-right py-2">Comp kh</th>
+                    <th className="text-right py-2">Δ kh</th>
+                    <th className="text-right py-2">Backend vet</th>
+                    <th className="text-right py-2">Comp vet</th>
+                    <th className="text-right py-2">Δ vet</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {mealComparisons.map((m) => (
+                    <tr key={m.mealType} className="border-b border-[#2A3A1A] last:border-b-0">
+                      <td className="py-2 text-white">{m.label}</td>
+                      <td className="py-2 text-right">{m.backend.calories.toFixed(0)}</td>
+                      <td className="py-2 text-right">{m.computed.calories.toFixed(0)}</td>
+                      <td className={`py-2 text-right ${m.delta.calories === 0 ? 'text-gray-400' : 'text-yellow-400'}`}>{m.delta.calories.toFixed(1)}</td>
+                      <td className="py-2 text-right">{m.backend.protein.toFixed(1)}g</td>
+                      <td className="py-2 text-right">{m.computed.protein.toFixed(1)}g</td>
+                      <td className={`py-2 text-right ${m.delta.protein === 0 ? 'text-gray-400' : 'text-yellow-400'}`}>{m.delta.protein.toFixed(1)}g</td>
+                      <td className="py-2 text-right">{m.backend.carbs.toFixed(1)}g</td>
+                      <td className="py-2 text-right">{m.computed.carbs.toFixed(1)}g</td>
+                      <td className={`py-2 text-right ${m.delta.carbs === 0 ? 'text-gray-400' : 'text-yellow-400'}`}>{m.delta.carbs.toFixed(1)}g</td>
+                      <td className="py-2 text-right">{m.backend.fat.toFixed(1)}g</td>
+                      <td className="py-2 text-right">{m.computed.fat.toFixed(1)}g</td>
+                      <td className={`py-2 text-right ${m.delta.fat === 0 ? 'text-gray-400' : 'text-yellow-400'}`}>{m.delta.fat.toFixed(1)}g</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         )}

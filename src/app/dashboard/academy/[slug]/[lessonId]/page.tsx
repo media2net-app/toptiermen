@@ -1180,7 +1180,7 @@ export default function LessonDetailPage() {
             Terug naar module overzicht
           </button>
           
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
             {prevLesson && (
               <button
                 onClick={() => {
@@ -1205,12 +1205,12 @@ export default function LessonDetailPage() {
                   }, 50);
                 }}
                 disabled={navigating}
-                className="px-4 py-2 bg-[#232D1A] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors disabled:opacity-50 flex items-center gap-2"
+                className="px-3 py-2 sm:px-4 sm:py-2 text-sm sm:text-base bg-[#232D1A] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors disabled:opacity-50 flex items-center gap-2"
               >
                 {navigating ? (
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#8BAE5A]"></div>
                 ) : null}
-                Vorige les
+                <span className="sm:inline">Vorige les</span>
               </button>
             )}
             
@@ -1238,12 +1238,12 @@ export default function LessonDetailPage() {
                   }, 50);
                 }}
                 disabled={navigating}
-                className="px-4 py-2 bg-[#8BAE5A] text-[#181F17] rounded-lg hover:bg-[#B6C948] transition-colors disabled:opacity-50 flex items-center gap-2"
+                className="px-3 py-2 sm:px-4 sm:py-2 text-sm sm:text-base bg-[#8BAE5A] text-[#181F17] rounded-lg hover:bg-[#B6C948] transition-colors disabled:opacity-50 flex items-center gap-2"
               >
                 {navigating ? (
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#181F17]"></div>
                 ) : null}
-                Volgende les
+                <span className="sm:inline">Volgende les</span>
               </button>
             )}
           </div>
@@ -1521,14 +1521,14 @@ export default function LessonDetailPage() {
                   }, 50);
                 }}
                 disabled={navigating}
-                className="px-6 py-3 bg-[#232D1A] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors font-semibold disabled:opacity-50 flex items-center gap-2 w-full sm:w-auto"
+                className="px-3 py-2 sm:px-6 sm:py-3 text-sm sm:text-base bg-[#232D1A] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors font-semibold disabled:opacity-50 flex items-center gap-2 w-full sm:w-auto"
               >
                 {navigating ? (
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#8BAE5A]"></div>
                 ) : (
                   "←"
                 )}
-                <span className="truncate">Vorige les: {prevLesson.title}</span>
+                <span className="truncate"><span className="sm:inline">Vorige les</span><span className="hidden sm:inline">: {prevLesson.title}</span></span>
               </button>
             ) : (
               <div></div>
@@ -1549,9 +1549,9 @@ export default function LessonDetailPage() {
                   }, 50);
                 }}
                 disabled={navigating}
-                className="px-6 py-3 bg-[#8BAE5A] text-[#181F17] rounded-lg hover:bg-[#B6C948] transition-colors font-semibold disabled:opacity-50 flex items-center gap-2 w-full sm:w-auto"
+                className="px-3 py-2 sm:px-6 sm:py-3 text-sm sm:text-base bg-[#8BAE5A] text-[#181F17] rounded-lg hover:bg-[#B6C948] transition-colors font-semibold disabled:opacity-50 flex items-center gap-2 w-full sm:w-auto"
               >
-                <span className="truncate">Volgende les: {nextLesson.title}</span>
+                <span className="truncate"><span className="sm:inline">Volgende les</span><span className="hidden sm:inline">: {nextLesson.title}</span></span>
                 {navigating ? (
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#181F17]"></div>
                 ) : (

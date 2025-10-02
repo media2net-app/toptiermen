@@ -137,6 +137,8 @@ export default function VoedingsplannenV2Page() {
   const [selectedPlanForModal, setSelectedPlanForModal] = useState<NutritionPlan | null>(null);
   // Onboarding next-step modal when a plan is selected during onboarding
   const [showOnboardingNextModal, setShowOnboardingNextModal] = useState(false);
+  // Unavailable notice modal for 'Bekijk Plan'
+  const [showPlanUnavailableModal, setShowPlanUnavailableModal] = useState(false);
   const nutritionNextBtnId = 'onb-nutrition-next-btn';
   const nextModalRef = useRef<HTMLDivElement | null>(null);
   // Ingredient lookup from DB (name -> macros/unit)
@@ -306,8 +308,11 @@ export default function VoedingsplannenV2Page() {
   }, [selectedPlan]);
 
   // If we have an active selectedPlanId and plans are loaded, auto-select and load detail
+  // Skip this behavior during onboarding step 5 to avoid redirecting to plan detail
   useEffect(() => {
     if (selectedPlan || !selectedPlanId || plans.length === 0) return;
+    // Onboarding: do NOT open detail view (we show modal instead)
+    if (!isCompleted && currentStep === 5) return;
     const plan = plans.find(p => (p.plan_id || p.id) === selectedPlanId);
     if (plan) {
       setSelectedPlan(plan);
@@ -318,7 +323,7 @@ export default function VoedingsplannenV2Page() {
         .then(data => setOriginalPlanData(data.plan ? data.plan : data))
         .catch(err => console.error('Error preloading original plan data:', err));
     }
-  }, [selectedPlanId, plans, selectedPlan]);
+  }, [selectedPlanId, plans, selectedPlan, isCompleted, currentStep]);
 
   // Debug: Log modal state changes
   useEffect(() => {
@@ -598,91 +603,71 @@ export default function VoedingsplannenV2Page() {
     }
   };
 
-  // Function to calculate personalized targets for a plan (supports override profile)
+  // Function to calculate display targets for a plan
+  // IMPORTANT: Use admin DB targets exactly as configured (custom macros)
   const calculatePersonalizedTargets = (plan: NutritionPlan | any, profileOverride?: UserProfile) => {
-    const profile = profileOverride || userProfile;
-    if (!profile) return null;
+    if (!plan) return null;
 
-    // Use TTM Formula: weight x 22 x activity_level
-    const activityMultipliers = {
-      sedentary: 1.1,
-      moderate: 1.3,
-      very_active: 1.6
-    } as const;
-    
-    const baseCalories = profile.weight * 22 * activityMultipliers[profile.activity_level];
+    // 1) Prefer explicit targets from the plan (DB), including meals.* if present
+    const planTargetCalories = plan?.target_calories ?? plan?.meals?.target_calories ?? 0;
+    const planTargetProtein  = plan?.target_protein  ?? plan?.meals?.target_protein  ?? null;
+    const planTargetCarbs    = plan?.target_carbs    ?? plan?.meals?.target_carbs    ?? null;
+    const planTargetFat      = plan?.target_fat      ?? plan?.meals?.target_fat      ?? null;
 
-    // Apply goal adjustment based on the PLAN's goal, not user's fitness goal
-    const goalAdjustments = {
-      droogtrainen: -500,
-      onderhoud: 0,
-      spiermassa: 400
-    } as const;
-    
-    // Use the plan's goal for calorie adjustment
-    const planGoal = plan.goal?.toLowerCase() || 'onderhoud';
-    const goalAdjustment = goalAdjustments[planGoal as keyof typeof goalAdjustments] || 0;
-    const targetCalories = Math.round(baseCalories + goalAdjustment);
+    const hasAllMacroGrams = [planTargetProtein, planTargetCarbs, planTargetFat].every(v => typeof v === 'number' && !Number.isNaN(v));
 
-    // Use macro percentages from database if available, otherwise fallback to hardcoded
-    let proteinPercentage, carbsPercentage, fatPercentage;
-    
-    if (plan.protein_percentage && plan.carbs_percentage && plan.fat_percentage) {
-      // Use database percentages
-      proteinPercentage = plan.protein_percentage;
-      carbsPercentage = plan.carbs_percentage;
-      fatPercentage = plan.fat_percentage;
-      
-      console.log('🎯 Using database macro percentages:', {
-        protein_percentage: proteinPercentage,
-        carbs_percentage: carbsPercentage,
-        fat_percentage: fatPercentage
-      });
-    } else {
-      // Fallback to hardcoded percentages based on plan type
-      const isCarnivore = plan.name.toLowerCase().includes('carnivoor');
-    
-    if (isCarnivore) {
-      // Carnivore plans: higher protein, lower carbs
-      proteinPercentage = 35;
-      carbsPercentage = 5;
-      fatPercentage = 60;
-    } else {
-        // Regular plans: CORRECTED percentages for onderhoud (35%, 40%, 25%)
-        proteinPercentage = 35;  // 35% for onderhoud
-        carbsPercentage = 40;    // 40% for onderhoud
-        fatPercentage = 25;      // 25% for onderhoud
-      }
-      
-      console.log('🎯 Using fallback hardcoded percentages:', {
-        proteinPercentage,
-        carbsPercentage,
-        fatPercentage
-      });
+    // 2) If grams are defined in DB, use them directly
+    if (planTargetCalories && hasAllMacroGrams) {
+      return {
+        targetCalories: Math.round(planTargetCalories),
+        targetProtein: Math.round(planTargetProtein as number),
+        targetCarbs: Math.round(planTargetCarbs as number),
+        targetFat: Math.round(planTargetFat as number),
+      };
     }
 
-    const targetProtein = Math.round((targetCalories * proteinPercentage / 100) / 4); // 4 kcal per gram protein
-    const targetCarbs = Math.round((targetCalories * carbsPercentage / 100) / 4);     // 4 kcal per gram carbs
-    const targetFat = Math.round((targetCalories * fatPercentage / 100) / 9);         // 9 kcal per gram fat
+    // 3) Otherwise, compute grams from DB macro percentages if present
+    const proteinPercentage = plan?.protein_percentage ?? plan?.meals?.protein_percentage ?? null;
+    const carbsPercentage   = plan?.carbs_percentage   ?? plan?.meals?.carbs_percentage   ?? null;
+    const fatPercentage     = plan?.fat_percentage     ?? plan?.meals?.fat_percentage     ?? null;
 
-    console.log('🧮 Macro calculation details:', {
-      targetCalories,
-      proteinPercentage,
-      carbsPercentage,
-      fatPercentage,
-      proteinCalories: targetCalories * proteinPercentage / 100,
-      carbsCalories: targetCalories * carbsPercentage / 100,
-      fatCalories: targetCalories * fatPercentage / 100,
-      targetProtein,
-      targetCarbs,
-      targetFat
-    });
+    if (planTargetCalories && proteinPercentage && carbsPercentage && fatPercentage) {
+      const targetProtein = Math.round((planTargetCalories * proteinPercentage / 100) / 4);
+      const targetCarbs   = Math.round((planTargetCalories * carbsPercentage / 100) / 4);
+      const targetFat     = Math.round((planTargetCalories * fatPercentage / 100) / 9);
+      return {
+        targetCalories: Math.round(planTargetCalories),
+        targetProtein,
+        targetCarbs,
+        targetFat,
+      };
+    }
+
+    // 4) Final fallback: compute from user profile using simple formula + sensible defaults per plan type
+    const profile = profileOverride || userProfile;
+    if (!profile) return {
+      targetCalories: Math.round(planTargetCalories || 0),
+      targetProtein: Math.round(planTargetProtein || 0),
+      targetCarbs: Math.round(planTargetCarbs || 0),
+      targetFat: Math.round(planTargetFat || 0),
+    };
+
+    const activityMultipliers = { sedentary: 1.1, moderate: 1.3, very_active: 1.6 } as const;
+    const baseCalories = profile.weight * 22 * activityMultipliers[profile.activity_level];
+    const goalAdjustments = { droogtrainen: -500, onderhoud: 0, spiermassa: 400 } as const;
+    const planGoal = (plan.goal?.toLowerCase?.() || 'onderhoud') as keyof typeof goalAdjustments;
+    const targetCalories = Math.round(baseCalories + (goalAdjustments[planGoal] ?? 0));
+
+    const isCarnivore = String(plan.name || '').toLowerCase().includes('carnivoor');
+    const pPct = isCarnivore ? 35 : 35;  // defaults aligned with onderhoud UI
+    const cPct = isCarnivore ? 5  : 40;
+    const fPct = isCarnivore ? 60 : 25;
 
     return {
       targetCalories,
-      targetProtein,
-      targetCarbs,
-      targetFat
+      targetProtein: Math.round((targetCalories * pPct) / 100 / 4),
+      targetCarbs: Math.round((targetCalories * cPct) / 100 / 4),
+      targetFat: Math.round((targetCalories * fPct) / 100 / 9),
     };
   };
 
@@ -706,10 +691,19 @@ export default function VoedingsplannenV2Page() {
 
     ['ontbijt', 'ochtend_snack', 'lunch', 'lunch_snack', 'diner', 'avond_snack'].forEach(mealType => {
       const meal = dayMeals[mealType];
-      console.log(`🔍 ${mealType}:`, meal ? 'exists' : 'missing', meal?.totals ? 'has totals' : 'no totals');
+      const hasTotals = !!meal?.totals;
+      const hasNutrition = !!meal?.nutrition;
+      console.log(`🔍 ${mealType}:`, meal ? 'exists' : 'missing', hasTotals ? 'has totals' : (hasNutrition ? 'has nutrition' : 'no totals'));      
       
-      if (meal?.totals) {
-        // Use existing totals if available
+      if (hasNutrition) {
+        // Backend stores 'nutrition' with rounded values
+        console.log(`📊 ${mealType} nutrition:`, meal.nutrition);
+        totals.calories += meal.nutrition.calories || 0;
+        totals.protein += meal.nutrition.protein || 0;
+        totals.carbs += meal.nutrition.carbs || 0;
+        totals.fat += meal.nutrition.fat || 0;
+      } else if (hasTotals) {
+        // Legacy/local computed totals
         console.log(`📊 ${mealType} totals:`, meal.totals);
         totals.calories += meal.totals.calories || 0;
         totals.protein += meal.totals.protein || 0;
@@ -749,13 +743,13 @@ export default function VoedingsplannenV2Page() {
           let multiplier = 1;
           
           // Handle different unit types based on database unit_type (matching backend exactly)
-          if (ingredient.unit === 'per_piece' || ingredient.unit === 'per_plakje' || ingredient.unit === 'stuk') {
+          if (ingredient.unit === 'per_piece' || ingredient.unit === 'stuks' || ingredient.unit === 'stuk' || ingredient.unit === 'per_plakje' || ingredient.unit === 'plakje' || ingredient.unit === 'plakjes') {
             multiplier = amount;
-          } else if (ingredient.unit === 'per_100g' || ingredient.unit === 'g') {
+          } else if (ingredient.unit === 'per_100g' || ingredient.unit === 'g' || ingredient.unit === 'gram') {
             multiplier = amount / 100;
           } else if (ingredient.unit === 'per_ml') {
             multiplier = amount / 100; // Assuming 1ml = 1g for liquids
-          } else if (ingredient.unit === 'handje') {
+          } else if (ingredient.unit === 'per_handful' || ingredient.unit === 'handje' || ingredient.unit === 'handjes') {
             multiplier = amount;
           } else {
             // Default to per 100g calculation
@@ -776,8 +770,15 @@ export default function VoedingsplannenV2Page() {
       }
     });
 
-    console.log('📊 Final day totals for', day, ':', totals);
-    return totals;
+    // Align rounding with backend summarize style
+    const rounded = {
+      calories: Math.round(totals.calories),
+      protein: Math.round(totals.protein * 10) / 10,
+      carbs: Math.round(totals.carbs * 10) / 10,
+      fat: Math.round(totals.fat * 10) / 10,
+    };
+    console.log('📊 Final day totals for', day, ':', rounded);
+    return rounded;
   };
 
   // Get current day totals - recalculate when customAmounts change
@@ -1644,12 +1645,9 @@ export default function VoedingsplannenV2Page() {
 
 
   const handlePlanView = (plan: NutritionPlan) => {
-    console.log('🔧 DEBUG: handlePlanView called with plan:', { name: plan.name, id: plan.plan_id || plan.id });
-    
-    setSelectedPlan(plan);
-    setShowOriginalData(true);
-    setScalingInfo(null); // Reset scaling info
-    loadOriginalPlanData(plan.plan_id || plan.id.toString());
+    // Navigate to detail page using numeric ID to align with admin meals endpoint
+    const idToLoad = String(plan.id);
+    router.push(`/dashboard/voedingsplannen-v2/${idToLoad}`);
   };
 
   const handlePlanSelect = async (plan: NutritionPlan) => {
@@ -3021,6 +3019,70 @@ export default function VoedingsplannenV2Page() {
         onClose={() => setShowPostOnboardingModal(false)}
         selectedPlan={selectedPlanForModal}
       />
+
+      {/* Onboarding Next-Step Modal (Step 5 -> Step 6) */}
+      <ModalBase isOpen={!isCompleted && showOnboardingNextModal} onClose={() => setShowOnboardingNextModal(false)}>
+        <div ref={nextModalRef} className="relative bg-[#181F17] border border-[#3A4D23] rounded-xl p-6 text-white">
+          <div className="flex items-start justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-[#8BAE5A]/20 rounded-lg">
+                <CheckCircleIcon className="w-6 h-6 text-[#8BAE5A]" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold">Voedingsplan geselecteerd</h3>
+                <p className="text-gray-300 text-sm">Je hebt een plan gekozen. Ga verder naar stap 6.</p>
+              </div>
+            </div>
+            <button
+              onClick={() => setShowOnboardingNextModal(false)}
+              className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+              aria-label="Sluiten"
+            >
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+          </div>
+
+          <p className="text-gray-300 mb-6 text-sm">
+            We hebben je keuze opgeslagen. Klik op "Ga verder" om door te gaan naar de volgende stap van de onboarding.
+          </p>
+
+          <div className="flex justify-end">
+            <button
+              id={nutritionNextBtnId}
+              onClick={async () => {
+                try {
+                  // Complete DB step 4 (SELECT_NUTRITION)
+                  await completeStep(4);
+                } catch {}
+                setShowOnboardingNextModal(false);
+                // Route to dashboard; dashboard redirect logic will send user to step 6
+                router.replace('/dashboard');
+              }}
+              className="px-5 py-2 rounded-lg bg-gradient-to-r from-[#B6C948] to-[#8BAE5A] text-[#181F17] font-semibold hover:from-[#8BAE5A] hover:to-[#B6C948] transition-colors text-sm"
+            >
+              Ga verder naar stap 6 →
+            </button>
+          </div>
+        </div>
+      </ModalBase>
+
+      {/* Plan Unavailable Notice Modal */}
+      <ModalBase isOpen={showPlanUnavailableModal} onClose={() => setShowPlanUnavailableModal(false)}>
+        <div className="relative bg-[#181F17] border border-[#3A4D23] rounded-xl p-6 text-white">
+          <h3 className="text-xl font-bold mb-3">Voedingsplan tijdelijk niet beschikbaar</h3>
+          <p className="text-gray-300 mb-4">
+            Huidige voedingsplannen zijn niet voorzien van auto scaling, en dus niet beschikbaar, onze excuses voor het ongemak (wij werken aan de oplossing).
+          </p>
+          <div className="flex justify-end">
+            <button
+              onClick={() => setShowPlanUnavailableModal(false)}
+              className="px-4 py-2 bg-[#3A4D23] hover:bg-[#4A5D33] rounded-lg"
+            >
+              Sluiten
+            </button>
+          </div>
+        </div>
+      </ModalBase>
     </div>
   );
 }

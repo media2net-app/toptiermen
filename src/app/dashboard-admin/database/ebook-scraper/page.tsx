@@ -85,19 +85,212 @@ export default function EbookScraperPage() {
     return items;
   }, []);
 
+  // Core state
   const [isRunning, setIsRunning] = useState(false);
   const [results, setResults] = useState<SaveResult[]>([]);
   const [stored, setStored] = useState<Record<string, StoredItem>>({});
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [v2files, setV2files] = useState<{name: string; url: string}[]>([]);
+  const [v2Compliance, setV2Compliance] = useState<Record<string, { ok: boolean; layout: boolean; parts: { summary: boolean; checklist: boolean; huiswerk: boolean; reflectie: boolean }; details: string }>>({});
+  // Final check state for V2 ebooks
+  const [finalChecking, setFinalChecking] = useState(false);
+  const [finalCheckResults, setFinalCheckResults] = useState<Record<string, {
+    summaryOk: boolean;
+    nlOk: boolean;
+    simpleOk: boolean;
+    checklistOk: boolean;
+    reflectOk: boolean;
+    homeworkOk: boolean;
+    duplicateTitle: boolean;
+    templateOk?: boolean;
+    backLinkOk?: boolean;
+    backHref?: string;
+    headerOk?: boolean;
+    headerInfo?: { h1?: string; module?: string; les?: string };
+  }>>({});
 
-  const charCount = (url: string) => {
-    const s = stored[url];
-    if (!s) return 0;
-    return (s.summary_text || '')?.length || 0;
+  // ===== Final Check Helpers (V2 ebooks) =====
+  const isLikelyDutch = (text: string) => {
+    const common = ['de','het','een','en','van','te','ik','je','jij','we','wij','niet','met','voor','naar','zijn','hebben','dit','dat','om','als','ook','maar','dan','wat','hoe','waar','zijn','worden','doel'];
+    const words = text.toLowerCase().match(/[a-zà-ÿ']+/g) || [];
+    if (words.length < 50) return false;
+    const hits = words.filter(w => common.includes(w)).length;
+    return hits / words.length > 0.04;
   };
 
-  // Helpers to map /ebooks/ to /ebooksv2/
+  const isSimpleText = (text: string) => {
+    const sentences = text.split(/[.!?]\s+/).filter(Boolean);
+    if (sentences.length === 0) return false;
+    const words = text.split(/\s+/).filter(Boolean);
+    const avgLen = words.length / sentences.length;
+    const complex = words.filter(w => w.replace(/[^a-zA-Zà-ÿ']/g,'').length >= 13).length;
+    const complexRatio = complex / Math.max(words.length, 1);
+    return avgLen <= 18 && complexRatio <= 0.12;
+  };
+
+  const extractSection = (html: string, headingRegex: RegExp) => {
+    const text = html.replace(/<script[\s\S]*?<\/script>/gi,'').replace(/<style[\s\S]*?<\/style>/gi,'');
+    const plain = text.replace(/<[^>]+>/g, '\n');
+    const lines = plain.split(/\n+/).map(l => l.trim()).filter(Boolean);
+    let idx = lines.findIndex(l => headingRegex.test(l));
+    if (idx === -1) return '';
+    const out: string[] = [];
+    for (let i = idx + 1; i < lines.length; i++) {
+      const l = lines[i];
+      if (/^(inleiding|hoofdstuk|samenvatting|reflectie|reflectievragen|checklist|huiswerk|opdrachten|conclusie)\b/i.test(l)) break;
+      out.push(l);
+      if (out.join(' ').length > 12000) break;
+    }
+    return out.join('\n');
+  };
+
+  const countListItems = (html: string, sectionRegex: RegExp) => {
+    const section = extractSection(html, sectionRegex) || '';
+    const items1 = (section.match(/<li[\s\S]*?<\/li>/gi) || []).map(s => s.replace(/<[^>]+>/g,'').trim()).filter(Boolean);
+    const items2 = section.split(/\n+/).filter(l => /^(\-|\*|\d+\.|Stap\s+\d+)/i.test(l.trim()));
+    const combined = [...items1, ...items2].map(s => s.trim()).filter(Boolean);
+    const placeholderRegex = /^(Stap\s*1|Opdracht\s*1|Reflectievraag\s*1)$/i;
+    const exampleRegex = /voor(b| )?beeld\s*checklist\s*item/i;
+    const nonTrivialItems = combined.filter(s => s.length >= 30 && !placeholderRegex.test(s) && !exampleRegex.test(s));
+    const totalChars = (nonTrivialItems.join(' ').trim()).length;
+    const plainSection = section.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
+    const doelCount = (plainSection.match(/\bdoel\s*:/gi) || []).length;
+    const actieCount = (plainSection.match(/\bactie\s*:/gi) || []).length;
+    return { total: combined.length, nonTrivial: nonTrivialItems.length, chars: totalChars, sectionChars: plainSection.length, doelCount, actieCount };
+  };
+
+  const analyzeHtml = (html: string) => {
+    const plain = html.replace(/<script[\s\S]*?<\/script>/gi,'').replace(/<style[\s\S]*?<\/style>/gi,'').replace(/<[^>]+>/g,' ');
+    const plainCollapsed = plain.replace(/\s+/g,' ').trim();
+    const summaryText = extractSection(html, /samenvatting|uitgebreide\s+samenvatting/i);
+    // V2 ebooks hoeven GEEN ~10k samenvatting te hebben. Markeer als OK zodra er
+    // een samenvattingssectie aanwezig is met minimale inhoud.
+    const summaryOk = (summaryText || '').trim().length >= 30;
+    const nlOk = isLikelyDutch(plainCollapsed);
+    const simpleOk = isSimpleText(plainCollapsed);
+    const checklistInfo = countListItems(html, /checklist/i);
+    const checklistOk = checklistInfo.nonTrivial >= 1 && (checklistInfo.sectionChars >= 200 || checklistInfo.chars >= 200);
+    const reflectText = extractSection(html, /reflectievragen|reflectie/i);
+    const reflectOk = reflectText.length >= 200 && ((reflectText.match(/\?/g) || []).length >= 2);
+    const homeworkInfo = countListItems(html, /huiswerk|opdracht/i);
+    const hwSectionLen = extractSection(html, /huiswerk|opdracht/i).length;
+    const doelActiePairs = Math.min(homeworkInfo.doelCount || 0, homeworkInfo.actieCount || 0);
+    const homeworkOk = (homeworkInfo.sectionChars >= 200 || hwSectionLen >= 200) && (homeworkInfo.nonTrivial >= 1 || doelActiePairs >= 1);
+    // Duplicate title check for the summary heading
+    let duplicateTitle = false;
+    // Template checks
+    let templateOk = false;
+    let backLinkOk = false;
+    let backHref: string | undefined = undefined;
+    let headerOk = false;
+    let headerInfo: { h1?: string; module?: string; les?: string } = {};
+    try {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      const headingPattern = /uitgebreide\s+samenvatting(\s+van\s+de\s+les)?/i;
+      const headings = Array.from(doc.querySelectorAll('h1, h2, h3'))
+        .map(h => (h.textContent || '').trim())
+        .filter(t => headingPattern.test(t));
+      duplicateTitle = headings.length >= 2;
+
+      const hasHeader = !!doc.querySelector('.header, header');
+      const hasFooter = !!doc.querySelector('.footer, footer');
+      const backEl = doc.querySelector('a.sticky-back-btn') as HTMLAnchorElement | null;
+      backHref = (backEl?.getAttribute('href') || '').trim();
+      const hasBack = !!backEl || Array.from(doc.querySelectorAll('a, button')).some(el => /terug|back/i.test(el.textContent || ''));
+      const hasSections = ['samenvatting','huiswerk','checklists','reflectie'].every(id => !!doc.querySelector(`#${id}`));
+      const hasMarkers = /<!--\s*Uitgebreide Samenvatting:\s*1:1 OVERNEMEN\s*\(NIET WIJZIGEN\)\s*-->/.test(html) &&
+                         /<!--\s*Markeer deze sectie exact en wijzig de tekst niet\./i.test(html);
+      // Header content validation
+      const h1 = (doc.querySelector('.header h1, header h1')?.textContent || '').trim();
+      const modInfo = (doc.querySelector('.header .module-info, header .module-info')?.textContent || '').trim();
+      const parts = modInfo.split('|').map(p => p.trim());
+      const moduleLabel = parts[0] || '';
+      const lesLabel = parts[1] || '';
+      headerInfo = { h1, module: moduleLabel, les: lesLabel };
+      const modFmt = /^Module\s+\d{2}:\s+.+/i.test(moduleLabel) && !/n\.b\./i.test(moduleLabel);
+      const lesFmt = /^Les\s+\d{2}:\s+.+/i.test(lesLabel) && !/n\.b\./i.test(lesLabel);
+      headerOk = h1.length >= 5 && modFmt && lesFmt;
+
+      templateOk = hasHeader && hasFooter && hasBack && hasSections && hasMarkers && headerOk;
+      // Back-link rule: must not be '#' and must start with /dashboard/academy/
+      backLinkOk = !!backHref && backHref !== '#' && /^\/dashboard\/academy\//.test(backHref);
+    } catch {}
+    return { summaryOk, nlOk, simpleOk, checklistOk, reflectOk, homeworkOk, duplicateTitle, templateOk, backLinkOk, backHref, headerOk, headerInfo };
+  };
+
+  const runFinalCheck = async () => {
+    if (!v2FilesForFinalCheck.length) return;
+    setFinalChecking(true);
+    try {
+      const results: Record<string, any> = {};
+      const batch = 8;
+      for (let i = 0; i < v2FilesForFinalCheck.length; i += batch) {
+        const slice = v2FilesForFinalCheck.slice(i, i + batch);
+        const fetched = await Promise.allSettled(slice.map(async (f) => {
+          const res = await fetch(f.url, { cache: 'no-store' });
+          const html = await res.text();
+          return { url: f.url, checks: analyzeHtml(html) };
+        }));
+        fetched.forEach(item => {
+          if (item.status === 'fulfilled') results[item.value.url] = item.value.checks;
+        });
+        setFinalCheckResults(prev => ({ ...prev, ...results }));
+      }
+    } finally {
+      setFinalChecking(false);
+    }
+  };
+
+  const v2FilesForFinalCheck = useMemo(() => {
+    const exclude = [/^\.?tmp_eer_loyaliteit_summary\.html$/i, /^_template\.html$/i];
+    return v2files.filter(f => !exclude.some(rx => rx.test(f.name)));
+  }, [v2files]);
+
+  const finalStats = useMemo(() => {
+    const urls = v2FilesForFinalCheck.map(f => f.url);
+    let processed = 0, summaryOk = 0, nlOk = 0, simpleOk = 0, checklistOk = 0, reflectOk = 0, homeworkOk = 0, fullyOk = 0;
+    urls.forEach(u => {
+      const r = finalCheckResults[u];
+      if (!r) return;
+      processed++;
+      if (r.summaryOk) summaryOk++;
+      if (r.nlOk) nlOk++;
+      if (r.simpleOk) simpleOk++;
+      if (r.checklistOk) checklistOk++;
+      if (r.reflectOk) reflectOk++;
+      if (r.homeworkOk) homeworkOk++;
+      if (r.summaryOk && r.nlOk && r.simpleOk && r.checklistOk && r.reflectOk && r.homeworkOk) fullyOk++;
+    });
+    return { total: urls.length, processed, summaryOk, nlOk, simpleOk, checklistOk, reflectOk, homeworkOk, fullyOk };
+  }, [v2FilesForFinalCheck, finalCheckResults]);
+
+  // Basic fuzzy matching helpers (ensure declared before usage)
+  const normalizeSlug = (s: string) => s
+    .toLowerCase()
+    .replace(/\.html$/i, '')
+    .replace(/[^a-z0-9\-]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$|_/g, '');
+
+  const tokenize = (s: string) => {
+    const stop = new Set(['de','het','een','en','of','voor','met','naar','van','in','op','tot','aan','door','te','mijn','jouw','kort','korte','termijn','levensstijl','deze']);
+    return normalizeSlug(s)
+      .split('-')
+      .filter(t => t && !stop.has(t) && t.length > 1);
+  };
+
+  const jaccard = (a: string[] | string, b: string[] | string) => {
+    const A = Array.isArray(a) ? a : tokenize(a);
+    const B = Array.isArray(b) ? b : tokenize(b);
+    const setA = new Set(A);
+    const setB = new Set(B);
+    const inter = [...setA].filter(x => setB.has(x)).length;
+    const uni = new Set([...A, ...B]).size;
+    return uni === 0 ? 0 : inter / uni;
+  };
+
+  // Helper to extract slug/filename (used by module matching)
   const getSlug = (url: string) => {
     try {
       const u = new URL(url, window.location.origin);
@@ -105,13 +298,51 @@ export default function EbookScraperPage() {
       const file = parts[parts.length - 1];
       return file.replace(/\.html$/i, '');
     } catch {
-      // fallback for relative
       const path = url.split('?')[0];
       const parts = path.split('/');
       const file = parts[parts.length - 1];
       return file.replace(/\.html$/i, '');
     }
   };
+
+  // Group V2 files by module using fuzzy matching against MODULES definitions
+  const getBestModuleForV2 = (v2name: string): { module: string | null, score: number } => {
+    const v2tokens = tokenize(v2name.replace(/\.html$/i, ''));
+    let best: { module: string | null, score: number } = { module: null, score: 0 };
+    for (const [module, urls] of Object.entries(MODULES)) {
+      for (const u of urls) {
+        const slug = getSlug(u);
+        const score = jaccard(v2tokens, tokenize(slug));
+        if (score > best.score) best = { module, score };
+      }
+    }
+    return best;
+  };
+
+  const groupedV2 = useMemo(() => {
+    const order = Object.keys(MODULES);
+    const map: Record<string, { name: string, items: {name: string; url: string}[] }> = {};
+    order.forEach(m => { map[m] = { name: m, items: [] }; });
+    const other: {name: string; url: string}[] = [];
+    v2FilesForFinalCheck.forEach(f => {
+      const best = getBestModuleForV2(f.name);
+      if (best.module && best.score >= 0.35) map[best.module].items.push(f);
+      else other.push(f);
+    });
+    return { order, groups: map, other };
+  }, [v2FilesForFinalCheck]);
+
+  
+
+  const charCount = (url: string) => {
+    const s = stored[url];
+    if (!s) return 0;
+    return (s.summary_text || '')?.length || 0;
+  };
+
+  // (moved) useEffect is defined later after helpers
+
+  // Helpers to map /ebooks/ to /ebooksv2/
 
   const v2BySlug = useMemo(() => {
     const map: Record<string, string> = {};
@@ -121,6 +352,103 @@ export default function EbookScraperPage() {
     });
     return map;
   }, [v2files]);
+
+  // Check if a given V2 ebook page follows the template and has content sections filled
+  const checkV2Template = async (url: string) => {
+    if (!url || v2Compliance[url]) return; // cached
+    try {
+      const res = await fetch(url, { cache: 'no-store' });
+      const html = await res.text();
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+
+      // Layout checks
+      const headerPresent = !!doc.querySelector('header, .header, .ttm-header');
+      const footerPresent = !!doc.querySelector('footer, .footer, .ttm-footer');
+      const backBtn = Array.from(doc.querySelectorAll('a, button')).some(el => /terug|back/i.test(el.textContent || ''));
+
+      // Section helpers
+      const getSectionContentLength = (pattern: RegExp) => {
+        const h2 = Array.from(doc.querySelectorAll('h2, h3')).find(h => pattern.test((h.textContent || '').toLowerCase()));
+        if (!h2) return 0;
+        // Try next sibling or parent section
+        let container: Element | null = h2.nextElementSibling as Element | null;
+        if (!container || container.tagName.toLowerCase() === 'h2' || container.tagName.toLowerCase() === 'h3') {
+          container = h2.parentElement;
+        }
+        const text = (container?.textContent || '').trim();
+        return text.length;
+      };
+
+      const summaryLen = getSectionContentLength(/uitgebreide\s+samenvatting/);
+      const checklistLen = getSectionContentLength(/checklist/);
+      const huiswerkLen = getSectionContentLength(/huiswerk/);
+      const reflectieLen = getSectionContentLength(/reflectie\s*vragen|reflectievragen|reflectie/);
+
+      const parts = {
+        summary: summaryLen > 30,
+        checklist: checklistLen > 10,
+        huiswerk: huiswerkLen > 10,
+        reflectie: reflectieLen > 10,
+      };
+
+      const layout = headerPresent && footerPresent && backBtn;
+      const ok = layout && parts.summary && parts.checklist && parts.huiswerk && parts.reflectie;
+      const missing: string[] = [];
+      if (!headerPresent) missing.push('header');
+      if (!footerPresent) missing.push('footer');
+      if (!backBtn) missing.push('terug-knop');
+      if (!parts.summary) missing.push('samenvatting');
+      if (!parts.checklist) missing.push('checklist');
+      if (!parts.huiswerk) missing.push('huiswerk');
+      if (!parts.reflectie) missing.push('reflectie');
+
+      setV2Compliance(prev => ({
+        ...prev,
+        [url]: {
+          ok,
+          layout,
+          parts,
+          details: missing.length ? `Ontbreekt: ${missing.join(', ')}` : 'OK'
+        }
+      }));
+    } catch (e: any) {
+      setV2Compliance(prev => ({
+        ...prev,
+        [url]: { ok: false, layout: false, parts: { summary: false, checklist: false, huiswerk: false, reflectie: false }, details: e?.message || 'check failed' }
+      }));
+    }
+  };
+
+  // match stats will be computed after maps/functions are defined
+
+  const findFuzzyV2 = (ebookUrl: string): { url: string; score: number } | null => {
+    const slug = getSlug(ebookUrl);
+    const exact = v2BySlug[slug];
+    if (exact) return { url: exact, score: 1 };
+    const a = tokenize(slug);
+    let best: { url: string; score: number } | null = null;
+    for (const f of v2files) {
+      const b = tokenize(f.name.replace(/\.html$/i, ''));
+      const score = jaccard(a, b);
+      if (!best || score > best.score) best = { url: f.url, score };
+    }
+    if (best && best.score >= 0.35) return best; // threshold
+    return null;
+  };
+
+  // Now safe to compute match stats (after v2BySlug and findFuzzyV2 are defined)
+  const allEbookUrls = useMemo(() => Object.values(MODULES).flat(), []);
+  const isMatched = (u: string) => {
+    const slug = getSlug(u);
+    if (v2BySlug[slug]) return true;
+    const f = findFuzzyV2(u);
+    return !!f;
+  };
+  const matchedCount = useMemo(
+    () => allEbookUrls.filter((u) => isMatched(u)).length,
+    [allEbookUrls, v2BySlug, v2files]
+  );
 
   const createTable = async () => {
     const res = await fetch("/api/admin/ebook-summaries/table", { method: "POST" });
@@ -234,9 +562,173 @@ export default function EbookScraperPage() {
         </div>
       </div>
 
+      {/* Final Check Dashboard (V2) */}
+      <div className="bg-[#181F17] border border-[#3A4D23] rounded-lg p-4">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-lg font-semibold text-[#8BAE5A]">Final check – overzicht (V2)</h2>
+          <button
+            onClick={runFinalCheck}
+            disabled={finalChecking || v2files.length === 0}
+            className="px-3 py-2 rounded bg-[#B6C948] text-[#181F17] hover:bg-[#8BAE5A] disabled:opacity-50"
+          >
+            {finalChecking ? 'Bezig…' : 'Ververs status'}
+          </button>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+          <div className="bg-[#0F1419] border border-[#3A4D23] rounded-md p-3 text-center">
+            <div className="text-xs text-[#B6C948]">Totaal</div>
+            <div className="text-lg font-semibold text-white">{finalStats.total}</div>
+          </div>
+          <div className="bg-[#0F1419] border border-[#3A4D23] rounded-md p-3 text-center">
+            <div className="text-xs text-[#B6C948]">Verwerkt</div>
+            <div className="text-lg font-semibold text-white">{finalStats.processed}</div>
+          </div>
+          <div className="bg-[#0F1419] border border-[#3A4D23] rounded-md p-3 text-center">
+            <div className="text-xs text-[#B6C948]">Volledig OK</div>
+            <div className="text-lg font-semibold text-green-400">{finalStats.fullyOk}</div>
+          </div>
+          <div className="bg-[#0F1419] border border-[#3A4D23] rounded-md p-3 text-center">
+            <div className="text-xs text-[#B6C948]">Samenvatting OK</div>
+            <div className="text-lg font-semibold text-white">{finalStats.summaryOk}</div>
+          </div>
+          <div className="bg-[#0F1419] border border-[#3A4D23] rounded-md p-3 text-center">
+            <div className="text-xs text-[#B6C948]">Nederlands OK</div>
+            <div className="text-lg font-semibold text-white">{finalStats.nlOk}</div>
+          </div>
+          <div className="bg-[#0F1419] border border-[#3A4D23] rounded-md p-3 text-center">
+            <div className="text-xs text-[#B6C948]">Simpel OK</div>
+            <div className="text-lg font-semibold text-white">{finalStats.simpleOk}</div>
+          </div>
+          <div className="bg-[#0F1419] border border-[#3A4D23] rounded-md p-3 text-center">
+            <div className="text-xs text-[#B6C948]">Checklist OK</div>
+            <div className="text-lg font-semibold text-white">{finalStats.checklistOk}</div>
+          </div>
+          <div className="bg-[#0F1419] border border-[#3A4D23] rounded-md p-3 text-center">
+            <div className="text-xs text-[#B6C948]">Reflectie / Huiswerk</div>
+            <div className="text-lg font-semibold text-white">{finalStats.reflectOk}/{finalStats.homeworkOk}</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Final Check Table (V2) */}
+      <div className="bg-[#181F17] border border-[#3A4D23] rounded-lg p-4 overflow-x-auto">
+        <h3 className="text-md font-semibold text-[#B6C948] mb-2">Final check per ebook (V2)</h3>
+        <table className="min-w-full text-sm">
+          <thead>
+            <tr className="text-left text-[#B6C948]">
+              <th className="p-2">Ebook (url)</th>
+              <th className="p-2">Samenvatting sectie</th>
+              <th className="p-2">Nederlands</th>
+              <th className="p-2">Simpel/Doelgericht</th>
+              <th className="p-2">Checklist inhoud</th>
+              <th className="p-2">Reflectie inhoud</th>
+              <th className="p-2">Huiswerk inhoud</th>
+              <th className="p-2">Dubbele titel</th>
+              <th className="p-2">Template</th>
+              <th className="p-2">Terug-link</th>
+              <th className="p-2">Header</th>
+            </tr>
+          </thead>
+          <tbody>
+            {/* Render per module in the defined order */}
+            {groupedV2.order.map(module => (
+              <React.Fragment key={`hdr-${module}`}>
+                {groupedV2.groups[module].items.length > 0 && (
+                  <tr className="bg-[#0F1419]">
+                    <td className="p-2 text-[#B6C948] font-semibold" colSpan={11}>{module}</td>
+                  </tr>
+                )}
+                {groupedV2.groups[module].items.map(f => {
+                  const r = finalCheckResults[f.url];
+                  const Cell = ({ ok }: { ok: boolean | undefined }) => (
+                    <span className={`inline-flex items-center px-2 py-1 rounded text-xs ${ok === true ? 'bg-green-100 text-green-800' : ok === false ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800'}`}>
+                      {ok === true ? '✓' : ok === false ? '✕' : '…'}
+                    </span>
+                  );
+                  return (
+                    <tr key={f.url} className="border-t border-[#232D1A]">
+                      <td className="p-2">
+                        <div className="flex items-center gap-2">
+                          <Link href={f.url} target="_blank" className="text-[#8BAE5A] hover:underline break-all">{f.url}</Link>
+                          <a href={f.url} target="_blank" rel="noopener noreferrer" className="px-2 py-0.5 rounded border border-[#3A4D23] bg-[#232D1A] hover:bg-[#2A2A2A] text-xs text-[#B6C948] whitespace-nowrap" title="Open preview in nieuw tabblad">Preview</a>
+                        </div>
+                      </td>
+                      <td className="p-2"><Cell ok={r?.summaryOk} /></td>
+                      <td className="p-2"><Cell ok={r?.nlOk} /></td>
+                      <td className="p-2"><Cell ok={r?.simpleOk} /></td>
+                      <td className="p-2"><Cell ok={r?.checklistOk} /></td>
+                      <td className="p-2"><Cell ok={r?.reflectOk} /></td>
+                      <td className="p-2"><Cell ok={r?.homeworkOk} /></td>
+                      <td className="p-2"><Cell ok={r?.duplicateTitle === false} /></td>
+                      <td className="p-2">
+                        <div className="flex items-center gap-2">
+                          <Cell ok={r?.templateOk} />
+                          {r && r.templateOk === false && (
+                            <span className="text-[10px] text-gray-400" title="Moet de exacte _template.html structuur + markers bevatten">details</span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="p-2">
+                        <span title={r?.backHref || ''}>
+                          <Cell ok={r?.backLinkOk} />
+                        </span>
+                      </td>
+                      <td className="p-2">
+                        <span title={`h1: ${r?.headerInfo?.h1 || ''}\n${r?.headerInfo?.module || ''} | ${r?.headerInfo?.les || ''}`}>
+                          <Cell ok={r?.headerOk} />
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </React.Fragment>
+            ))}
+            {/* Render unmatched as Overig */}
+            {groupedV2.other.length > 0 && (
+              <tr className="bg-[#0F1419]"><td className="p-2 text-[#B6C948] font-semibold" colSpan={11}>Overig</td></tr>
+            )}
+            {groupedV2.other.map(f => {
+              const r = finalCheckResults[f.url];
+              const Cell = ({ ok }: { ok: boolean | undefined }) => (
+                <span className={`inline-flex items-center px-2 py-1 rounded text-xs ${ok === true ? 'bg-green-100 text-green-800' : ok === false ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800'}`}>
+                  {ok === true ? '✓' : ok === false ? '✕' : '…'}
+                </span>
+              );
+              return (
+                <tr key={f.url} className="border-t border-[#232D1A]">
+                  <td className="p-2">
+                    <div className="flex items-center gap-2">
+                      <Link href={f.url} target="_blank" className="text-[#8BAE5A] hover:underline break-all">{f.url}</Link>
+                      <a
+                        href={f.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-2 py-0.5 rounded border border-[#3A4D23] bg-[#232D1A] hover:bg-[#2A2A2A] text-xs text-[#B6C948] whitespace-nowrap"
+                        title="Open preview in nieuw tabblad"
+                      >
+                        Preview
+                      </a>
+                    </div>
+                  </td>
+                  <td className="p-2"><Cell ok={r?.summaryOk} /></td>
+                  <td className="p-2"><Cell ok={r?.nlOk} /></td>
+                  <td className="p-2"><Cell ok={r?.simpleOk} /></td>
+                  <td className="p-2"><Cell ok={r?.checklistOk} /></td>
+                  <td className="p-2"><Cell ok={r?.reflectOk} /></td>
+                  <td className="p-2"><Cell ok={r?.homeworkOk} /></td>
+                  <td className="p-2"><Cell ok={r?.duplicateTitle === false} /></td>
+                  <td className="p-2"><Cell ok={r?.templateOk} /></td>
+                  <td className="p-2"><span title={r?.backHref || ''}><Cell ok={r?.backLinkOk} /></span></td>
+                  <td className="p-2"><span title={`h1: ${r?.headerInfo?.h1 || ''}\n${r?.headerInfo?.module || ''} | ${r?.headerInfo?.les || ''}`}><Cell ok={r?.headerOk} /></span></td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
       <div className="text-sm text-gray-300 space-y-1">
-        <div>Scraped veld: <code>📚 Uitgebreide Samenvatting van de Les</code> uit elke ebook HTML.</div>
-        <div>DB status: groene ✅ betekent opgeslagen; klik "Preview" voor weergave.</div>
+        <div>Validatie: controleert of een <code>📚 Uitgebreide Samenvatting van de Les</code> sectie aanwezig is (geen ~10k-tekens meer vereist).</div>
+        <div>Status: groene ✅ betekent dat de sectie en overige onderdelen voldoen; klik "Preview" voor weergave.</div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -345,7 +837,8 @@ export default function EbookScraperPage() {
 
       {/* MATCH TABLE SECTION */}
       <div className="mt-10">
-        <h2 className="text-xl font-bold text-[#8BAE5A] mb-3">Match ebook</h2>
+        <h2 className="text-xl font-bold text-[#8BAE5A] mb-1">Match ebook</h2>
+        <div className="text-xs text-gray-300 mb-2">Matches: {matchedCount} / {allEbookUrls.length} • Missing: {allEbookUrls.length - matchedCount}</div>
         <div className="bg-[#181F17] border border-[#3A4D23] rounded-lg p-4 overflow-x-auto">
           <table className="min-w-full text-sm">
             <thead>
@@ -354,6 +847,7 @@ export default function EbookScraperPage() {
                 <th className="p-2">/ebooks/</th>
                 <th className="p-2">/ebooksv2/</th>
                 <th className="p-2">Status</th>
+                <th className="p-2">V2 Template</th>
                 <th className="p-2">Verschil (tekens)</th>
               </tr>
             </thead>
@@ -361,34 +855,55 @@ export default function EbookScraperPage() {
               {Object.entries(MODULES).map(([module, urls]) => (
                 urls.map((u) => {
                   const slug = getSlug(u);
-                  const v2 = v2BySlug[slug];
+                  const exact = v2BySlug[slug];
+                  const fuzzy = exact ? null : findFuzzyV2(u);
+                  const v2 = exact || fuzzy?.url;
                   const c1 = charCount(u);
                   const c2 = v2 ? charCount(v2) : 0;
                   const diff = c2 - c1;
-                  const status = v2 ? '✅ Match' : '❌ Geen match';
-                  const diffClass = v2 ? (diff >= 0 ? 'text-green-400' : 'text-red-400') : 'text-gray-400';
+                  const matched = !!v2;
+                  const status = matched ? '✅ Match' : '❌ Geen match';
+                  const diffClass = matched ? (diff >= 0 ? 'text-green-400' : 'text-red-400') : 'text-gray-400';
+                  // Trigger template check if not yet cached
+                  if (v2 && !v2Compliance[v2]) {
+                    void checkV2Template(v2);
+                  }
+                  const comp = v2 ? v2Compliance[v2] : undefined;
                   return (
-                    <tr key={`${module}-${u}`} className="border-t border-[#232D1A]">
+                    <tr key={`${module}-${u}`} className={matched ? "border-t border-[#232D1A]" : "bg-red-900/20 border-t border-[#5b1f1f]"}>
                       <td className="p-2 text-[#8BAE5A] whitespace-nowrap">{module}</td>
                       <td className="p-2">
                         <Link href={u} target="_blank" className="text-[#8BAE5A] hover:underline break-all">{u}</Link>
                         <span className="ml-2 text-xs text-gray-400">({c1} tekens)</span>
                       </td>
                       <td className="p-2">
-                        {v2 ? (
+                        {matched ? (
                           <>
-                            <Link href={v2} target="_blank" className="text-[#8BAE5A] hover:underline break-all">{v2}</Link>
-                            <span className="ml-2 text-xs text-gray-400">({c2} tekens)</span>
+                            <Link href={v2!} target="_blank" className="text-[#8BAE5A] hover:underline break-all">{v2}</Link>
+                            <span className="ml-2 text-xs text-gray-400">({c2} tekens{fuzzy ? ` • score ${fuzzy.score.toFixed(2)}` : ''})</span>
                           </>
                         ) : (
                           <span className="text-gray-400">—</span>
                         )}
                       </td>
                       <td className="p-2">
-                        <span className={v2 ? 'text-green-400' : 'text-red-400'}>{status}</span>
+                        <span className={matched ? 'text-green-400' : 'text-red-400'}>{status}</span>
+                      </td>
+                      <td className="p-2">
+                        {matched ? (
+                          comp ? (
+                            <span className={`${comp.ok ? 'text-green-400' : 'text-red-400'}`} title={comp.details}>
+                              {comp.ok ? '✔︎ OK' : '✖︎ Niet volledig'}
+                            </span>
+                          ) : (
+                            <span className="text-gray-400">controleren...</span>
+                          )
+                        ) : (
+                          <span className="text-gray-400">—</span>
+                        )}
                       </td>
                       <td className={`p-2 font-semibold ${diffClass}`}>
-                        {v2 ? (diff >= 0 ? `+${diff}` : `${diff}`) : '—'}
+                        {matched ? (diff >= 0 ? `+${diff}` : `${diff}`) : '—'}
                       </td>
                     </tr>
                   );

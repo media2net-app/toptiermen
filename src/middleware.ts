@@ -6,6 +6,14 @@ export async function middleware(req: NextRequest) {
   console.log(`🔍 Middleware executing for path: ${req.nextUrl.pathname}`);
   
   const res = NextResponse.next();
+  const path = req.nextUrl.pathname;
+
+  // Publicly accessible routes (quick fix): skip middleware entirely
+  // - Onboarding pages should always be accessible
+  // - Ebook static pages should always be accessible
+  if (path.startsWith('/onboarding') || path.startsWith('/ebooksv2')) {
+    return res;
+  }
   
   // Create a Supabase client configured to use cookies
   const supabase = createMiddlewareClient({ req, res });

@@ -11,14 +11,24 @@ export async function POST(request: NextRequest) {
     console.log('🧹 Starting forum posts cleanup...');
     const topicId = 19; // Voorstellen - Nieuwe Leden / Algemeen voorstellen
 
-    // Resolve authors to keep by name from profiles (fallback to manual names in content)
-    const keepAuthorNames = ['Frodo van Houten', 'Sten Mets'];
-    const { data: authors, error: authorsErr } = await supabase
+    // Resolve authors to keep: match 'Frodo' and 'Sven' case-insensitive in full_name or display_name
+    const orFrodo = 'full_name.ilike.%frodo%,display_name.ilike.%frodo%';
+    const orSven = 'full_name.ilike.%sven%,display_name.ilike.%sven%';
+    const { data: frodoMatches, error: errFrodo } = await supabase
       .from('profiles')
       .select('id, full_name, display_name')
-      .in('full_name', keepAuthorNames);
-    if (authorsErr) console.warn('⚠️ Error fetching authors:', authorsErr.message);
-    const keepAuthorIds = new Set((authors || []).map(a => a.id));
+      .or(orFrodo);
+    if (errFrodo) console.warn('⚠️ Error fetching Frodo profiles:', errFrodo.message);
+    const { data: svenMatches, error: errSven } = await supabase
+      .from('profiles')
+      .select('id, full_name, display_name')
+      .or(orSven);
+    if (errSven) console.warn('⚠️ Error fetching Sven profiles:', errSven.message);
+
+    const keepAuthorIds = new Set([
+      ...((frodoMatches || []).map(p => p.id)),
+      ...((svenMatches || []).map(p => p.id)),
+    ]);
 
     // Fetch all posts for the topic
     const { data: posts, error: fetchError } = await supabase
@@ -33,21 +43,12 @@ export async function POST(request: NextRequest) {
 
     console.log(`📋 Found ${posts.length} posts in topic ${topicId}`);
 
-    // Target excerpts to match the exact two messages
-    const frodoSnippet = 'Hallo allemaal, ik ben Frodo van Houten';
-    const stenSnippet = 'Mijn naam is Sten Mets';
-
-    const keep = posts.filter(p => {
-      const text = (p.content || '').toLowerCase();
-      const isAuthorKept = keepAuthorIds.has(p.author_id);
-      const matchesSnippet = text.includes(frodoSnippet.toLowerCase()) || text.includes(stenSnippet.toLowerCase());
-      // Keep if author matches and content matches expected snippet
-      return isAuthorKept && matchesSnippet;
-    });
+    // Keep posts authored by Frodo or Sven (matched via profile lookup)
+    const keep = posts.filter(p => keepAuthorIds.has(p.author_id));
     const keepIds = new Set(keep.map(p => p.id));
     const postsToDelete = posts.filter(p => !keepIds.has(p.id));
 
-    console.log(`✅ Keeping ${keep.length} target posts (Frodo & Sten).`);
+    console.log(`✅ Keeping ${keep.length} target posts (Frodo & Sven).`);
     keep.forEach(p => console.log(`   • Keep ID ${p.id}: "${(p.content||'').substring(0, 60)}..."`));
     console.log(`🗑️ Deleting ${postsToDelete.length} other posts.`);
     postsToDelete.forEach(p => console.log(`   • Delete ID ${p.id}: "${(p.content||'').substring(0, 60)}..."`));
@@ -77,7 +78,7 @@ export async function POST(request: NextRequest) {
     }
 
     console.log(`🎉 Successfully deleted ${postsToDelete.length} posts!`);
-    console.log(`✅ Only Frodo & Sten target posts remain in the forum.`);
+    console.log(`✅ Only Frodo & Sven target posts remain in the forum.`);
 
     return NextResponse.json({ 
       success: true, 

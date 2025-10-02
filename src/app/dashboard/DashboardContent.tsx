@@ -25,8 +25,9 @@ import {
   ChevronUpIcon, ChevronDownIcon, Bars3Icon, XMarkIcon, BellIcon,
   CheckCircleIcon, UserGroupIcon, TrophyIcon, 
   CalendarDaysIcon, ShoppingBagIcon, ChevronLeftIcon, ChevronRightIcon,
-  RocketLaunchIcon, TagIcon, ClockIcon, CpuChipIcon
+  RocketLaunchIcon, TagIcon, ClockIcon, CpuChipIcon, EnvelopeIcon
 } from '@heroicons/react/24/solid';
+import { useChatNotifications } from '@/hooks/useChatNotifications';
 import DebugPanel from '@/components/DebugPanel';
 import TestUserVideoModal from '@/components/TestUserVideoModal';
 import PWAInstallPrompt from '@/components/PWAInstallPrompt';
@@ -205,6 +206,11 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus, setIsMobileMenuOp
   const isMenuItemVisible = (item: any) => {
     // Check admin-only items first - specifically allow rick@toptiermen.eu and chiel@media2net.nl
     if (item.adminOnly && user?.email !== 'rick@toptiermen.eu' && user?.email !== 'chiel@media2net.nl') {
+      return false;
+    }
+    // TEMP: Only show Mind & Focus to chiel@media2net.nl
+    const isMindFocusItem = item.label === 'Mind & Focus' || item.parent === 'Mind & Focus';
+    if (isMindFocusItem && user?.email !== 'chiel@media2net.nl') {
       return false;
     }
     // HARD GATE visibility: if onboarding not completed and on step 6, only show Brotherhood > Forum
@@ -999,6 +1005,12 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, profile, isAdmin, logoutAndRedirect } = useSupabaseAuth();
+  const [unreadCount, setUnreadCount] = useState(0);
+  // Realtime inbox badge: increment on new message, reset via click handler in link
+  useChatNotifications(
+    () => setUnreadCount((c) => c + 1),
+    undefined
+  );
   const { session, stopWorkout } = useWorkoutSession();
   const { showDebug, toggleDebug } = useDebug();
   const { isCompleted, isLoading: onboardingLoading } = useOnboardingV2();
@@ -1463,8 +1475,22 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
                 </button>
               </div>
 
-              {/* Right Side - Admin + Logout */}
+              {/* Right Side - Inbox + Admin + Logout */}
               <div className="flex items-center gap-2">
+                {/* Inbox */}
+                <Link
+                  href="/dashboard/inbox"
+                  onClick={() => setUnreadCount(0)}
+                  className="relative inline-flex items-center justify-center px-3 py-1.5 sm:px-3 sm:py-2 bg-[#181F17] text-[#8BAE5A] rounded-lg border border-[#3A4D23] hover:bg-[#3A4D23] transition-colors"
+                  title="Inbox"
+                >
+                  <EnvelopeIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 rounded-full bg-red-600 text-white text-[10px] leading-[16px] text-center font-bold">
+                      {unreadCount}
+                    </span>
+                  )}
+                </Link>
                 {/* Admin Dashboard Button */}
                 {isAdmin && (
                   <Link

@@ -1,784 +1,380 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>De Kracht van Hoog Testosteron - Ebook | Top Tier Men</title>
-    <meta name="description" content="Uitgebreide gids over de kracht van hoog testosteron: praktische oefeningen, checklists en reflectie vragen voor persoonlijke groei.">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            line-height: 1.6;
-            color: #ffffff;
-            background: linear-gradient(135deg, #0A0F0A 0%, #181F17 50%, #232D1A 100%);
-            min-height: 100vh;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 3rem;
-            padding: 2rem;
-            background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
-            border-radius: 20px;
-            border: 1px solid #3A4D23;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        }
-
-        .logo {
-            margin: 0 auto 1rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        h1 {
-            font-size: 2.5rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, #ffffff 0%, #8BAE5A 50%, #B6C948 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 0.5rem;
-        }
-
-        .subtitle {
-            color: #8BAE5A;
-            font-size: 1.1rem;
-            font-weight: 500;
-        }
-
-        .module-info {
-            background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
-            padding: 1rem;
-            border-radius: 10px;
-            margin: 1rem 0;
-            border-left: 4px solid #8BAE5A;
-        }
-
-        .section {
-            background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
-            margin-bottom: 2rem;
-            padding: 2rem;
-            border-radius: 15px;
-            border: 1px solid #3A4D23;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .section h2 {
-            color: #B6C948;
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .section h3 {
-            color: #8BAE5A;
-            font-size: 1.3rem;
-            font-weight: 600;
-            margin: 1.5rem 0 1rem;
-        }
-
-        .section p {
-            margin-bottom: 1rem;
-            color: #e0e0e0;
-        }
-
-        .section ul, .section ol {
-            margin: 1rem 0;
-            padding-left: 2rem;
-        }
-
-        .section li {
-            margin-bottom: 0.5rem;
-            color: #e0e0e0;
-        }
-
-        .highlight-box {
-            background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
-            padding: 1.5rem;
-            border-radius: 10px;
-            border-left: 4px solid #B6C948;
-            margin: 1.5rem 0;
-        }
-
-        .exercise-box {
-            background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%);
-            padding: 1.5rem;
-            border-radius: 10px;
-            border: 1px solid #8BAE5A;
-            margin: 1rem 0;
-        }
-
-        .exercise-box h4 {
-            color: #B6C948;
-            font-size: 1.1rem;
-            margin-bottom: 1rem;
-        }
-
-        .checklist {
-            background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
-            padding: 1.5rem;
-            border-radius: 10px;
-            border: 1px solid #3A4D23;
-            margin: 1rem 0;
-        }
-
-        .checklist-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 0.8rem;
-            padding: 0.5rem;
-            background: rgba(58, 77, 35, 0.3);
-            border-radius: 8px;
-        }
-
-        .checklist-item input[type="checkbox"] {
-            margin-right: 1rem;
-            width: 18px;
-            height: 18px;
-            accent-color: #8BAE5A;
-        }
-
-        .reflection-question {
-            background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
-            padding: 1.5rem;
-            border-radius: 10px;
-            border-left: 4px solid #B6C948;
-            margin: 1rem 0;
-        }
-
-        .reflection-question h4 {
-            color: #B6C948;
-            margin-bottom: 1rem;
-        }
-
-        .action-plan {
-            background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%);
-            padding: 2rem;
-            border-radius: 15px;
-            border: 2px solid #8BAE5A;
-            margin: 2rem 0;
-        }
-
-        .action-plan h3 {
-            color: #B6C948;
-            text-align: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .action-step {
-            background: rgba(139, 174, 90, 0.1);
-            padding: 1rem;
-            border-radius: 8px;
-            margin: 1rem 0;
-            border-left: 3px solid #8BAE5A;
-        }
-
-        .action-step h4 {
-            color: #8BAE5A;
-            margin-bottom: 0.5rem;
-        }
-
-        .icon {
-            width: 24px;
-            height: 24px;
-            display: inline-block;
-            margin-right: 0.5rem;
-        }
-
-        .footer {
-            text-align: center;
-            margin-top: 3rem;
-            padding: 2rem;
-            background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
-            border-radius: 15px;
-            border: 1px solid #3A4D23;
-        }
-
-        .footer p {
-            color: #8BAE5A;
-            margin-bottom: 1rem;
-        }
-
-        .ttm-brand {
-            color: #B6C948;
-            font-weight: 700;
-        }
-
-        /* Sticky Back Button */
-        .sticky-back-btn {
-            position: fixed;
-            top: 50%;
-            right: 20px;
-            transform: translateY(-50%);
-            z-index: 1000;
-            background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%);
-            color: white;
-            border: none;
-            border-radius: 50px;
-            padding: 15px 20px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            box-shadow: 0 8px 25px rgba(139, 174, 90, 0.3);
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            text-decoration: none;
-            min-width: 120px;
-            justify-content: center;
-        }
-
-        .sticky-back-btn:hover {
-            background: linear-gradient(135deg, #B6C948 0%, #8BAE5A 100%);
-            transform: translateY(-50%) scale(1.05);
-            box-shadow: 0 12px 35px rgba(139, 174, 90, 0.4);
-        }
-
-        .sticky-back-btn:active {
-            transform: translateY(-50%) scale(0.95);
-        }
-
-        .sticky-back-btn svg {
-            width: 16px;
-            height: 16px;
-            fill: currentColor;
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                padding: 1rem;
-            }
-            
-            h1 {
-                font-size: 2rem;
-            }
-            
-            .section {
-                padding: 1.5rem;
-            }
-
-            .sticky-back-btn {
-                right: 10px;
-                padding: 12px 16px;
-                font-size: 12px;
-                min-width: 100px;
-            }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>De Kracht van Hoog Testosteron - Ebook | Top Tier Men</title>
+  <meta name="description" content="V2 ebook voor De Kracht van Hoog Testosteron binnen Top Tier Men Academy." />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.6; color: #ffffff;
+      background: linear-gradient(135deg, #0A0F0A 0%, #181F17 50%, #232D1A 100%);
+      min-height: 100vh;
+    }
+    .container { max-width: 800px; margin: 0 auto; padding: 2rem; }
+    .header {
+      text-align: center; margin-bottom: 3rem; padding: 2rem;
+      background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      border-radius: 20px; border: 1px solid #3A4D23;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    .logo { margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; }
+    h1 {
+      font-size: 2.5rem; font-weight: 800;
+      background: linear-gradient(135deg, #ffffff 0%, #8BAE5A 50%, #B6C948 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      margin-bottom: .5rem;
+    }
+    .subtitle { color: #8BAE5A; font-size: 1.1rem; font-weight: 500; }
+    .module-info {
+      background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1rem; border-radius: 10px; margin: 1rem 0; border-left: 4px solid #8BAE5A;
+    }
+    .section { background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      margin-bottom: 2rem; padding: 2rem; border-radius: 15px; border: 1px solid #3A4D23; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    .section h2 { color: #B6C948; font-size: 1.8rem; font-weight: 700; margin-bottom: 1.5rem; display: flex; align-items: center; gap: .5rem; }
+    .section h3 { color: #8BAE5A; font-size: 1.3rem; font-weight: 600; margin: 1.5rem 0 1rem; }
+    .section p { margin-bottom: 1rem; color: #e0e0e0; }
+    .section ul, .section ol { margin: 1rem 0; padding-left: 2rem; }
+    .section li { margin-bottom: .5rem; color: #e0e0e0; }
+    .highlight-box { background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1.5rem; border-radius: 10px; border-left: 4px solid #B6C948; margin: 1.5rem 0;
+    }
+    .exercise-box { background: linear-gradient(135deg, #232D1A 0%, #3A5D33 100%);
+      padding: 1.5rem; border-radius: 10px; border: 1px solid #8BAE5A; margin: 1rem 0;
+    }
+    .exercise-box h4 { color: #B6C948; font-size: 1.1rem; margin-bottom: 1rem; }
+    .checklist { background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      padding: 1.5rem; border-radius: 10px; border: 1px solid #3A4D23; margin: 1rem 0;
+    }
+    .checklist-item { display: flex; align-items: center; margin-bottom: .8rem; padding: .5rem; background: rgba(58,77,35,.3); border-radius: 8px; }
+    .checklist-item input[type="checkbox"] { margin-right: 1rem; width: 18px; height: 18px; accent-color: #8BAE5A; }
+    .reflection-question { background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1.5rem; border-radius: 10px; border-left: 4px solid #B6C948; margin: 1rem 0;
+    }
+    .reflection-question h4 { color: #B6C948; margin-bottom: 1rem; }
+    .action-plan { background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%);
+      padding: 2rem; border-radius: 15px; border: 2px solid #8BAE5A; margin: 2rem 0;
+    }
+    .action-step { background: rgba(139,174,90,.1); padding: 1rem; border-radius: 8px; margin: 1rem 0; border-left: 3px solid #8BAE5A; }
+    .footer { text-align: center; margin-top: 3rem; padding: 2rem; background: linear-gradient(135deg, #181F17 0%, #232D1A 100%); border-radius: 15px; border: 1px solid #3A4D23; }
+    .footer p { color: #8BAE5A; margin-bottom: 1rem; }
+    .ttm-brand { color: #B6C948; font-weight: 700; }
+    .sticky-back-btn { position: fixed; top: 50%; right: 20px; transform: translateY(-50%);
+      z-index: 1000; background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%);
+      color: #fff; border: none; border-radius: 50px; padding: 15px 20px; font-size: 14px; font-weight: 600; cursor: pointer;
+      box-shadow: 0 8px 25px rgba(139,174,90,.3); transition: all .3s ease; display: flex; align-items: center; gap: 8px; text-decoration: none; min-width: 120px; justify-content: center;
+    }
+    .sticky-back-btn:hover { background: linear-gradient(135deg, #B6C948 0%, #8BAE5A 100%); transform: translateY(-50%) scale(1.05); box-shadow: 0 12px 35px rgba(139,174,90,.4); }
+    .sticky-back-btn:active { transform: translateY(-50%) scale(.95); }
+    .sticky-back-btn svg { width: 16px; height: 16px; fill: currentColor; }
+    @media (max-width: 768px) {
+      .container { padding: 1rem; }
+      h1 { font-size: 2rem; }
+      .section { padding: 1.5rem; }
+      .sticky-back-btn { right: 10px; padding: 12px 16px; font-size: 12px; min-width: 100px; }
+    }
+  </style>
 </head>
 <body>
-    <!-- Sticky Back Button -->
-    <a href="/dashboard/academy/c671fea4-bfb1-4ccc-b23e-220e80783d06/42726b47-45c2-4519-8960-0c456c0754a5" class="sticky-back-btn" title="Terug naar les">
-        <svg viewBox="0 0 24 24">
-            <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
-        </svg>
-        Terug
-    </a>
+  <!-- Sticky Back Button: VERPLICHT naar juiste les URL -->
+  <a href="/dashboard/academy/c671fea4-bfb1-4ccc-b23e-220e80783d06/42726b47-45c2-4519-8960-0c456c0754a5" class="sticky-back-btn" title="Terug naar les">
+    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    Terug
+  </a>
 
-    <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <div class="logo">
-                <img src="/logo_white-full.svg" alt="Top Tier Men Logo" style="height:40px;width:auto" />
-            </div>
-            <h1>De Kracht van Hoog Testosteron</h1>
-            <p class="subtitle">Complete Gids voor Praktische Toepassing</p>
-            <div class="module-info"><strong>Module 01: Testosteron</strong> | <strong>Les 02: De Kracht van Hoog Testosteron</strong></div>
-        </div>
-
-        <!-- Uitgebreide Samenvatting -->
-        <div class="section">
-            <h2>📚 Uitgebreide Samenvatting van de Les</h2>
-            
-            <div class="highlight-box">
-                <h4>🎯 Les Overzicht</h4>
-                <p>In deze les hebben we de kracht van hoog testosteron behandeld. Dit is een cruciaal onderdeel van je ontwikkeling als Top Tier Man en vormt de basis voor verdere groei en prestaties.</p>
-            </div>
-
-            <h3>Wat Betekent Hoog Testosteron Precies?</h3>
-            <p>Hoog testosteron betekent dat je lichaam en geest op hun absolute best functioneren. Het is alsof je een raceauto hebt die op premium brandstof rijdt - alles werkt soepeler, krachtiger en efficiënter. Met optimale testosteronwaarden voel je je niet alleen beter, je presteert ook beter in alle aspecten van je leven.</p>
-            
-            <p>Denk aan testosteron als de "performance mode" van je lichaam. Net zoals een computer sneller werkt wanneer alle systemen optimaal zijn afgesteld, werkt je lichaam beter wanneer je testosteronwaarden hoog zijn. Je hebt meer energie, bent mentaal scherper, fysiek sterker, en emotioneel stabieler.</p>
-
-            <h3>De Vier Hoofdgebieden van Hoog Testosteron</h3>
-            <p>Hoog testosteron beïnvloedt vier cruciale gebieden van je leven. Elk van deze gebieden wordt aanzienlijk verbeterd wanneer je testosteronwaarden optimaal zijn:</p>
-            
-            <h4>1. Fysieke Prestaties en Kracht</h4>
-            <p>Met hoog testosteron voel je je fysiek onoverwinnelijk. Je spieren herstellen sneller na trainingen, je hebt meer uithoudingsvermogen, en je kunt zwaardere gewichten tillen. Het is alsof je lichaam een interne turbo heeft die altijd aan staat.</p>
-            
-            <ul>
-                <li><strong>Snellere spiergroei:</strong> Je lichaam bouwt efficiënter spieren op</li>
-                <li><strong>Betere herstel:</strong> Je herstelt sneller van trainingen en stress</li>
-                <li><strong>Meer kracht:</strong> Je kunt zwaardere gewichten tillen en langer doorgaan</li>
-                <li><strong>Hogere energie:</strong> Je voelt je de hele dag energiek en gemotiveerd</li>
-                <li><strong>Betere coördinatie:</strong> Je bewegingen worden vloeiender en preciezer</li>
-            </ul>
-
-            <h4>2. Mentale Scherpte en Focus</h4>
-            <p>Hoog testosteron maakt je mentaal scherper en gefocuster. Je kunt beter concentreren, sneller denken, en informatie beter verwerken. Het is alsof je hersenen op volle kracht draaien.</p>
-            
-            <ul>
-                <li><strong>Verbeterde concentratie:</strong> Je kunt je langer focussen op taken</li>
-                <li><strong>Snellere besluitvorming:</strong> Je neemt sneller en betere beslissingen</li>
-                <li><strong>Beter geheugen:</strong> Je onthoudt informatie beter en sneller</li>
-                <li><strong>Verhoogde creativiteit:</strong> Je hebt meer innovatieve ideeën</li>
-                <li><strong>Mentale veerkracht:</strong> Je kunt beter omgaan met mentale uitdagingen</li>
-            </ul>
-
-            <h4>3. Emotionele Stabiliteit en Zelfvertrouwen</h4>
-            <p>Met hoog testosteron voel je je emotioneel stabieler en zelfverzekerder. Je hebt minder stemmingswisselingen, voelt je positiever over jezelf, en bent beter bestand tegen stress.</p>
-            
-            <ul>
-                <li><strong>Hoger zelfvertrouwen:</strong> Je voelt je zekerder van jezelf en je capaciteiten</li>
-                <li><strong>Emotionele stabiliteit:</strong> Minder stemmingswisselingen en emotionele ups en downs</li>
-                <li><strong>Betere stressbestendigheid:</strong> Je kunt beter omgaan met druk en uitdagingen</li>
-                <li><strong>Positievere mindset:</strong> Je hebt een optimistischere kijk op het leven</li>
-                <li><strong>Verhoogde assertiviteit:</strong> Je durft voor jezelf op te komen</li>
-            </ul>
-
-            <h4>4. Seksuele Vitaliteit en Libido</h4>
-            <p>Hoog testosteron verhoogt je seksuele vitaliteit en libido aanzienlijk. Je hebt meer interesse in seks, betere prestaties, en meer tevredenheid in je seksleven.</p>
-            
-            <ul>
-                <li><strong>Verhoogde libido:</strong> Je hebt meer interesse en verlangen naar seks</li>
-                <li><strong>Betere erectiekwaliteit:</strong> Sterkere en langer aanhoudende erecties</li>
-                <li><strong>Meer seksuele energie:</strong> Je voelt je seksueel energiek en vitaal</li>
-                <li><strong>Verhoogde tevredenheid:</strong> Je geniet meer van seksuele activiteiten</li>
-                <li><strong>Betere intimiteit:</strong> Je bent meer betrokken bij je partner</li>
-            </ul>
-
-            <h3>De Voordelen van Hoog Testosteron</h3>
-            <p>Onderzoek toont aan dat mannen met hogere testosteronwaarden veel beter presteren op verschillende gebieden. Studies hebben aangetoond dat optimale testosteronwaarden leiden tot:</p>
-            
-            <ul>
-                <li><strong>Betere hersenfuncties:</strong> Snellere reactietijden en betere probleemoplossende vaardigheden</li>
-                <li><strong>Meer spierkracht:</strong> Tot 20% meer kracht bij optimale testosteronwaarden</li>
-                <li><strong>Sterkere botten:</strong> Sterkere botten en minder kans op breuken</li>
-                <li><strong>Betere hartgezondheid:</strong> Lager risico op hartproblemen</li>
-                <li><strong>Langer leven:</strong> Mannen met optimale testosteron leven langer en gezonder</li>
-            </ul>
-
-            <div class="highlight-box">
-                <h4>💡 Belangrijke Realiteit</h4>
-                <p>Hoog testosteron is niet alleen voor atleten of bodybuilders. Het is voor elke man die het beste uit zichzelf wil halen. Of je nu een kantoorbaan hebt, een eigen bedrijf runt, of met pensioen bent - optimale testosteronwaarden verbeteren je kwaliteit van leven aanzienlijk.</p>
-            </div>
-
-            <h3>Hoe Herken Je Hoog Testosteron?</h3>
-            <p>Mannen met hoog testosteron hebben bepaalde kenmerken die je kunt herkennen. Deze kenmerken zijn niet alleen fysiek, maar ook mentaal en emotioneel:</p>
-            
-            <h4>Fysieke Kenmerken:</h4>
-            <ul>
-                <li>Sterke, duidelijke spieren</li>
-                <li>Laag vetpercentage</li>
-                <li>Dikke, volle baard en lichaamshaar</li>
-                <li>Diepe, mannelijke stem</li>
-                <li>Brede schouders en smalle taille</li>
-                <li>Hoge energieniveaus gedurende de dag</li>
-            </ul>
-
-            <h4>Mentale en Emotionele Kenmerken:</h4>
-            <ul>
-                <li>Hoge mate van zelfvertrouwen</li>
-                <li>Sterke leiderschapskwaliteiten</li>
-                <li>Competitieve instelling</li>
-                <li>Goede besluitvorming onder druk</li>
-                <li>Emotionele stabiliteit</li>
-                <li>Hoge motivatie en drive</li>
-            </ul>
-
-            <h3>De Voordelen van Hoog Testosteron in het Dagelijks Leven</h3>
-            <p>Hoog testosteron beïnvloedt niet alleen je fysieke prestaties, maar ook je dagelijkse leven op manieren die je misschien niet verwacht:</p>
-            
-            <h4>Op het Werk:</h4>
-            <ul>
-                <li><strong>Betere prestaties:</strong> Je werkt efficiënter en productiever</li>
-                <li><strong>Leiderschapskwaliteiten:</strong> Je neemt natuurlijk de leiding</li>
-                <li><strong>Netwerken:</strong> Je bent zelfverzekerder in sociale situaties</li>
-                <li><strong>Onderhandelen:</strong> Je bent assertiever en overtuigender</li>
-                <li><strong>Stress management:</strong> Je kunt beter omgaan met werkdruk</li>
-            </ul>
-
-            <h4>In Relaties:</h4>
-            <ul>
-                <li><strong>Betere communicatie:</strong> Je bent zelfverzekerder in je communicatie</li>
-                <li><strong>Verhoogde intimiteit:</strong> Je hebt meer interesse in fysieke intimiteit</li>
-                <li><strong>Emotionele stabiliteit:</strong> Je bent een stabielere partner</li>
-                <li><strong>Besluitvorming:</strong> Je neemt betere beslissingen voor je relatie</li>
-                <li><strong>Bescherming:</strong> Je voelt je natuurlijk beschermend naar je partner</li>
-            </ul>
-
-            <h4>In Sociale Situaties:</h4>
-            <ul>
-                <li><strong>Zelfvertrouwen:</strong> Je voelt je comfortabel in groepen</li>
-                <li><strong>Charisma:</strong> Je trekt natuurlijk aandacht en respect</li>
-                <li><strong>Humor:</strong> Je bent spontaner en grappiger</li>
-                <li><strong>Competitie:</strong> Je geniet van gezonde competitie</li>
-                <li><strong>Netwerken:</strong> Je bouwt gemakkelijker nieuwe relaties op</li>
-            </ul>
-
-            <div class="highlight-box">
-                <h4>🎯 Het Goede Nieuws</h4>
-                <p>Hoog testosteron is niet iets waar je mee geboren wordt of niet. Het is iets dat je kunt optimaliseren door je levensstijl aan te passen. Door de juiste voeding, training, slaap, en stress management kun je je testosteronwaarden aanzienlijk verhogen en alle voordelen ervaren.</p>
-            </div>
-        </div>
-
-        <!-- Huiswerk Opdrachten -->
-        <div class="section">
-            <h2>📝 Huiswerk Opdrachten</h2>
-            <p><strong>Belangrijk:</strong> Deze opdrachten zijn specifiek gebaseerd op de les inhoud over de kracht van hoog testosteron en zijn ontworpen om je begrip te verdiepen en praktische toepassing te stimuleren.</p>
-
-            <div class="exercise-box">
-                <h4>Opdracht 1: Testosteron Impact Assessment</h4>
-                <p><strong>Doel:</strong> Evalueer hoe hoog testosteron je leven zou beïnvloeden en identificeer je prioriteiten.</p>
-                <p><strong>Actie:</strong> Beantwoord de volgende vragen eerlijk en noteer je antwoorden (1-10 schaal):</p>
-                <ul>
-                    <li>Hoe belangrijk is fysieke kracht en prestaties voor jou?</li>
-                    <li>Hoe tevreden ben je met je huidige mentale scherpte en focus?</li>
-                    <li>Hoe stabiel voel je je emotioneel de laatste tijd?</li>
-                    <li>Hoe tevreden ben je met je huidige zelfvertrouwen?</li>
-                    <li>Hoe belangrijk is seksuele vitaliteit voor jou?</li>
-                    <li>Hoe goed presteer je op je werk of in je carrière?</li>
-                    <li>Hoe tevreden ben je met je sociale vaardigheden?</li>
-                </ul>
-                <p><strong>Reflectie:</strong> Welke scores zijn het laagst? Dit zijn je prioriteiten voor testosteron optimalisatie.</p>
-            </div>
-
-            <div class="exercise-box">
-                <h4>Opdracht 2: Hoog Testosteron Dagboek (7 dagen)</h4>
-                <p><strong>Doel:</strong> Houd een week lang bij hoe je je voelt en identificeer patronen die wijzen op testosteron niveaus.</p>
-                <p><strong>Actie:</strong> Houd elke dag bij:</p>
-                <ul>
-                    <li><strong>Fysieke energie:</strong> Hoe energiek voel je je? (1-10)</li>
-                    <li><strong>Mentale scherpte:</strong> Hoe scherp en gefocust voel je je? (1-10)</li>
-                    <li><strong>Zelfvertrouwen:</strong> Hoe zelfverzekerd voel je je? (1-10)</li>
-                    <li><strong>Libido:</strong> Hoe is je seksuele drive vandaag? (1-10)</li>
-                    <li><strong>Emotionele stabiliteit:</strong> Hoe stabiel voel je je emotioneel? (1-10)</li>
-                    <li><strong>Competitieve drive:</strong> Hoe gemotiveerd ben je om te winnen/succesvol te zijn? (1-10)</li>
-                    <li><strong>Assertiviteit:</strong> Hoe assertief ben je in je communicatie? (1-10)</li>
-                    <li><strong>Notities:</strong> Wat viel je op vandaag? Welke patronen zie je?</li>
-                </ul>
-                <p><strong>Analyse:</strong> Aan het einde van de week, identificeer patronen en correlaties. Welke dagen voelde je je het beste?</p>
-            </div>
-
-            <div class="exercise-box">
-                <h4>Opdracht 3: Testosteron Optimalisatie Plan</h4>
-                <p><strong>Doel:</strong> Maak een concreet plan om je testosteron te optimaliseren en de voordelen van hoog testosteron te ervaren.</p>
-                <p><strong>Actie:</strong> Gebaseerd op je assessments, maak een 30-dagen plan:</p>
-                <ul>
-                    <li><strong>Week 1:</strong> Focus op slaap optimalisatie (7-9 uur per nacht, regelmatige bedtijden)</li>
-                    <li><strong>Week 2:</strong> Implementeer krachttraining (3x per week, compound oefeningen)</li>
-                    <li><strong>Week 3:</strong> Optimaliseer voeding (gezonde vetten, eiwit, minder suiker)</li>
-                    <li><strong>Week 4:</strong> Stress management (meditatie, ademhalingsoefeningen, zonlicht)</li>
-                </ul>
-                <p><strong>Metingen:</strong> Houd bij hoe je je voelt na elke week en pas je plan aan. Focus op de 4 hoofdgebieden: fysiek, mentaal, emotioneel, en seksueel.</p>
-            </div>
-
-            <div class="exercise-box">
-                <h4>Opdracht 4: Hoog Testosteron Mindset Oefening</h4>
-                <p><strong>Doel:</strong> Ontwikkel een mindset die gericht is op het maximaliseren van je testosteron potentieel.</p>
-                <p><strong>Actie:</strong> Oefen elke dag de volgende mindset technieken:</p>
-                <ul>
-                    <li><strong>Ochtend affirmaties:</strong> "Ik ben een man met hoog testosteron en onbeperkte energie"</li>
-                    <li><strong>Visualisatie:</strong> Stel je voor hoe je je voelt met optimale testosteronwaarden</li>
-                    <li><strong>Power poses:</strong> Doe 2 minuten power poses om je testosteron te verhogen</li>
-                    <li><strong>Competitieve mindset:</strong> Benader elke taak alsof het een competitie is</li>
-                    <li><strong>Assertieve communicatie:</strong> Oefen met assertiever communiceren</li>
-                </ul>
-                <p><strong>Reflectie:</strong> Houd bij hoe deze mindset oefeningen je gedrag en gevoel beïnvloeden.</p>
-            </div>
-
-            <div class="exercise-box">
-                <h4>Opdracht 5: Testosteron Educatie Research</h4>
-                <p><strong>Doel:</strong> Verdiep je kennis over hoe je testosteron kunt optimaliseren en de voordelen kunt maximaliseren.</p>
-                <p><strong>Actie:</strong> Onderzoek de volgende onderwerpen:</p>
-                <ul>
-                    <li>Welke voedingsmiddelen verhogen testosteron natuurlijk?</li>
-                    <li>Hoe beïnvloedt krachttraining je testosteron productie?</li>
-                    <li>Wat is de rol van slaap in testosteron productie?</li>
-                    <li>Hoe beïnvloedt stress (cortisol) je testosteron levels?</li>
-                    <li>Welke supplementen kunnen testosteron ondersteunen?</li>
-                    <li>Hoe meet je je testosteron levels en wat zijn optimale waarden?</li>
-                </ul>
-                <p><strong>Presentatie:</strong> Maak een korte samenvatting van je bevindingen en deel deze met anderen. Focus op praktische toepassingen.</p>
-            </div>
-        </div>
-
-        <!-- Testosteron Optimalisatie Checklists -->
-        <div class="section">
-            <h2>✅ Testosteron Optimalisatie Checklists</h2>
-            <p><strong>Doel:</strong> Deze checklists zijn specifiek ontworpen om je testosteron levels te ondersteunen en te optimaliseren voor maximale voordelen.</p>
-
-            <h3>Ochtend Routine (Testosteron Boost)</h3>
-            <div class="checklist">
-                <div class="checklist-item">
-                    <input type="checkbox" id="morning1">
-                    <label for="morning1">Drink een glas water direct na het opstaan</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="morning2">
-                    <label for="morning2">Krijg 10-15 minuten zonlicht op je huid (vitamine D)</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="morning3">
-                    <label for="morning3">Doe 2-3 minuten power poses (testosteron verhogend)</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="morning4">
-                    <label for="morning4">Eet een eiwitrijk ontbijt met gezonde vetten</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="morning5">
-                    <label for="morning5">Stel jezelf een competitief doel voor vandaag</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="morning6">
-                    <label for="morning6">Visualiseer jezelf met optimale testosteronwaarden</label>
-                </div>
-            </div>
-
-            <h3>Dagelijkse Testosteron Ondersteuning</h3>
-            <div class="checklist">
-                <div class="checklist-item">
-                    <input type="checkbox" id="daily1">
-                    <label for="daily1">Eet voldoende gezonde vetten (avocado, noten, olijfolie)</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="daily2">
-                    <label for="daily2">Vermijd suiker en bewerkte voeding</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="daily3">
-                    <label for="daily3">Blijf gehydrateerd (2-3 liter water)</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="daily4">
-                    <label for="daily4">Doe aan krachttraining of fysieke activiteit</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="daily5">
-                    <label for="daily5">Beheer stress met ademhalingsoefeningen</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="daily6">
-                    <label for="daily6">Wees assertief in je communicatie</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="daily7">
-                    <label for="daily7">Vermijd alcohol en roken</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="daily8">
-                    <label for="daily8">Neem voldoende magnesium en zink</label>
-                </div>
-            </div>
-
-            <h3>Avond Routine (Testosteron Herstel)</h3>
-            <div class="checklist">
-                <div class="checklist-item">
-                    <input type="checkbox" id="evening1">
-                    <label for="evening1">Vermijd schermen 1 uur voor het slapen</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="evening2">
-                    <label for="evening2">Zorg voor een koele, donkere slaapkamer</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="evening3">
-                    <label for="evening3">Ga op een vaste tijd naar bed (7-9 uur slaap)</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="evening4">
-                    <label for="evening4">Doe ontspanningsoefeningen voor het slapen</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="evening5">
-                    <label for="evening5">Evalueer je dag en vier je successen</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="evening6">
-                    <label for="evening6">Plan morgen met testosteron optimalisatie in gedachten</label>
-                </div>
-            </div>
-
-            <h3>Weekelijkse Testosteron Check</h3>
-            <div class="checklist">
-                <div class="checklist-item">
-                    <input type="checkbox" id="weekly1">
-                    <label for="weekly1">Krachttraining 3-4x per week (compound oefeningen)</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="weekly2">
-                    <label for="weekly2">High-intensity interval training (HIIT) 1-2x</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="weekly3">
-                    <label for="weekly3">Zonlicht blootstelling (vitamine D)</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="weekly4">
-                    <label for="weekly4">Sociale connectie en competitie</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="weekly5">
-                    <label for="weekly5">Evalueer je voortgang en pas aan waar nodig</label>
-                </div>
-            </div>
-
-            <h3>Avond Reflectie</h3>
-            <div class="checklist">
-                <div class="checklist-item">
-                    <input type="checkbox" id="evening1">
-                    <label for="evening1">Evalueer hoe je dag is verlopen</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="evening2">
-                    <label for="evening2">Identificeer wat goed ging en wat beter kan</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="evening3">
-                    <label for="evening3">Plan verbeteringen voor morgen</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="evening4">
-                    <label for="evening4">Wees dankbaar voor je groei en leerervaringen</label>
-                </div>
-            </div>
-        </div>
-
-        <!-- Reflectie Vragen -->
-        <div class="section">
-            <h2>🤔 Reflectie Vragen voor Persoonlijke Groei</h2>
-
-            <div class="reflection-question">
-                <h4>Vraag 1: Huidige Situatie</h4>
-                <p>Hoe zou je je huidige implementatie van de concepten uit deze les beoordelen op een schaal van 1-10? Wat zijn de specifieke gebieden waar je de meeste groei kunt maken?</p>
-            </div>
-
-            <div class="reflection-question">
-                <h4>Vraag 2: Uitdagingen</h4>
-                <p>Welke uitdagingen kom je tegen bij het toepassen van deze concepten? Hoe kun je deze uitdagingen omzetten in kansen voor groei?</p>
-            </div>
-
-            <div class="reflection-question">
-                <h4>Vraag 3: Impact</h4>
-                <p>Welke positieve veranderingen heb je al gemerkt sinds je begonnen bent met het toepassen van deze concepten? Hoe heeft dit je leven beïnvloed?</p>
-            </div>
-
-            <div class="reflection-question">
-                <h4>Vraag 4: Toekomst</h4>
-                <p>Hoe ziet je ideale implementatie van deze concepten eruit over 3 maanden? Welke specifieke doelen stel je jezelf?</p>
-            </div>
-
-            <div class="reflection-question">
-                <h4>Vraag 5: Ondersteuning</h4>
-                <p>Welke ondersteuning heb je nodig om deze concepten beter te kunnen toepassen? Hoe kun je jezelf en anderen helpen om te groeien?</p>
-            </div>
-        </div>
-
-        <!-- Volgende Stappen en Actieplan -->
-        <div class="section">
-            <h2>🚀 Volgende Stappen en Actieplan</h2>
-
-            <div class="action-plan">
-                <h3>30-Dagen Implementatie Plan</h3>
-
-                <div class="action-step">
-                    <h4>Week 1: Bewustwording en Baseline</h4>
-                    <ul>
-                        <li>Voltooi de zelf-assessment oefening</li>
-                        <li>Implementeer de ochtend routine</li>
-                        <li>Begin met dagelijkse bewustwording van de concepten</li>
-                        <li>Start met het bijhouden van je voortgang</li>
-                    </ul>
-                </div>
-
-                <div class="action-step">
-                    <h4>Week 2: Dagelijkse Implementatie</h4>
-                    <ul>
-                        <li>Pas de concepten toe in je dagelijkse activiteiten</li>
-                        <li>Focus op consistentie boven perfectie</li>
-                        <li>Identificeer en adresseer uitdagingen</li>
-                        <li>Bouw momentum op door kleine overwinningen</li>
-                    </ul>
-                </div>
-
-                <div class="action-step">
-                    <h4>Week 3: Optimalisatie en Verfijning</h4>
-                    <ul>
-                        <li>Evalueer je voortgang en pas je aanpak aan</li>
-                        <li>Verhoog de intensiteit waar mogelijk</li>
-                        <li>Integreer de concepten in nieuwe situaties</li>
-                        <li>Zoek naar manieren om anderen te helpen</li>
-                    </ul>
-                </div>
-
-                <div class="action-step">
-                    <h4>Week 4: Consolidatie en Planning</h4>
-                    <ul>
-                        <li>Consolideer je nieuwe gewoonten</li>
-                        <li>Plan voor langetermijn implementatie</li>
-                        <li>Stel nieuwe, uitdagende doelen</li>
-                        <li>Deel je ervaringen en leer van anderen</li>
-                    </ul>
-                </div>
-            </div>
-
-            <h3>Langetermijn Strategieën</h3>
-            <ul>
-                <li><strong>Maand 2-3:</strong> Verdieping en geavanceerde toepassing</li>
-                <li><strong>Maand 4-6:</strong> Integratie met andere ontwikkelingsgebieden</li>
-                <li><strong>Maand 6+:</strong> Mentorschap en doorgeven van kennis</li>
-            </ul>
-
-            <div class="highlight-box">
-                <h4>🎯 Belangrijke Herinnering</h4>
-                <p>Echte groei gebeurt door consistente, dagelijkse actie. Focus op progressie, niet op perfectie. Elke dag is een nieuwe kans om te groeien en jezelf te verbeteren.</p>
-            </div>
-        </div>
-
-        <!-- Footer -->
-        <div class="footer">
-            <p>Dit ebook is onderdeel van de <span class="ttm-brand">Top Tier Men</span> Academy</p>
-            <p>Module 01: Testosteron | Les 02: De Kracht van Hoog Testosteron</p>
-            <p>© 2025 Top Tier Men. Alle rechten voorbehouden.</p>
-        </div>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="logo">
+        <img src="/logo_white-full.svg" alt="Top Tier Men Logo" style="height:40px;width:auto" />
+      </div>
+      <h1>De Kracht van Hoog Testosteron</h1>
+      <p class="subtitle">Ontgrendel je volledige mannelijke potentieel</p>
+      <div class="module-info">
+        <strong>Module 01: Testosteron</strong> | <strong>Les 02: De Kracht van Hoog Testosteron</strong>
+      </div>
     </div>
 
-    <script>
-        // Simple functionality for checkboxes
-        document.addEventListener('DOMContentLoaded', function() {
-            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-            
-            checkboxes.forEach(checkbox => {
-                // Load saved state from localStorage
-                const savedState = localStorage.getItem(checkbox.id);
-                if (savedState === 'true') {
-                    checkbox.checked = true;
-                }
-                
-                // Save state when changed
-                checkbox.addEventListener('change', function() {
-                    localStorage.setItem(this.id, this.checked);
-                });
-            });
-        });
-    </script>
+    <!-- Medische Disclaimer -->
+    <div class="highlight-box" style="background: linear-gradient(135deg, #ce6629 0%, #ffbe43 100%); border-left: 4px solid #FFD700; margin: 1.5rem 0;">
+      <h4 style="color: #fff; font-weight: bold; text-align: left;">⚠️ BELANGRIJKE MEDISCHE WAARSCHUWING</h4>
+      <p style="color: #fff; font-weight: bold; text-align: left;">
+        De informatie in deze les is uitsluitend voor educatieve doeleinden en vormt geen medisch advies. 
+        Raadpleeg altijd een gekwalificeerde arts voordat je beslissingen neemt over je gezondheid, hormonen of medicatie. 
+        Testosteron optimalisatie kan medische risico's met zich meebrengen en moet altijd onder professionele begeleiding plaatsvinden. 
+        Top Tier Men is niet verantwoordelijk voor eventuele gevolgen van het volgen van de informatie in deze les zonder medisch advies.
+      </p>
+    </div>
+
+    <!-- Uitgebreide Samenvatting van de Les -->
+    <div class="section" id="samenvatting">
+      <h2>📚 Uitgebreide Samenvatting van de Les</h2>
+      
+      <div class="highlight-box">
+        <h4>🎯 Les Overzicht</h4>
+        <p>Hoog testosteron is de sleutel tot het ontgrendelen van je volledige mannelijke potentieel. Het is het verschil tussen overleven en excelleren, tussen gemiddeld zijn en top tier worden. In deze les leer je wat hoog testosteron precies betekent en hoe je het kunt bereiken.</p>
+      </div>
+
+      <h3>Wat is Hoog Testosteron Precies?</h3>
+      <p>Hoog testosteron betekent dat je lichaam en geest op hun absolute best functioneren. Het is alsof je een raceauto hebt die op premium brandstof rijdt - alles werkt soepeler, krachtiger en efficiënter. Met optimale testosteronwaarden voel je je niet alleen beter, je presteert ook beter in alle aspecten van je leven.</p>
+      
+      <p>Denk aan testosteron als de "prestatie modus" van je lichaam. Net zoals een computer sneller werkt wanneer alle systemen optimaal zijn afgesteld, werkt je lichaam beter wanneer je testosteronwaarden hoog zijn. Je hebt meer energie, bent mentaal scherper, fysiek sterker, en emotioneel stabieler.</p>
+
+      <h3>De Zeven Voordelen van Hoog Testosteron</h3>
+      <p>Hoog testosteron beïnvloedt elk aspect van je leven op een positieve manier. Hier zijn de belangrijkste voordelen die je kunt verwachten:</p>
+      
+      <h4>1. Explosieve Fysieke Kracht</h4>
+      <p>Met hoog testosteron voel je je fysiek onoverwinnelijk. Je spieren herstellen sneller na trainingen, je hebt meer uithoudingsvermogen, en je kunt zwaardere gewichten tillen. Het is alsof je lichaam een interne turbo heeft die altijd aan staat. Je bouwt sneller spieren op, herstelt sneller van stress, en hebt de hele dag door energie.</p>
+      
+      <h4>2. Mentale Scherpte en Focus</h4>
+      <p>Hoog testosteron maakt je mentaal scherper en gefocuster. Je kunt beter concentreren, sneller denken, en informatie beter verwerken. Het is alsof je hersenen op volle kracht draaien. Je neemt sneller en betere beslissingen, onthoudt informatie beter, en hebt meer creatieve ideeën.</p>
+      
+      <h4>3. Onwrikbaar Zelfvertrouwen</h4>
+      <p>Met hoog testosteron voel je je emotioneel stabieler en zelfverzekerder. Je hebt minder stemmingswisselingen, voelt je positiever over jezelf, en bent beter bestand tegen stress. Je durft voor jezelf op te komen, neemt natuurlijk de leiding, en voelt je comfortabel in sociale situaties.</p>
+      
+      <h4>4. Verhoogde Seksuele Vitaliteit</h4>
+      <p>Hoog testosteron verhoogt je seksuele vitaliteit en libido aanzienlijk. Je hebt meer interesse in seks, betere prestaties, en meer tevredenheid in je seksleven. Je hebt sterkere en langer aanhoudende erecties, meer seksuele energie, en bent meer betrokken bij je partner.</p>
+      
+      <h4>5. Betere Vetverbranding</h4>
+      <p>Hoog testosteron helpt je lichaam om vet te verbranden en spieren te behouden. Het maakt het makkelijker om een gezond gewicht te behouden zonder constant te hoeven diëten. Je metabolisme werkt efficiënter, je spieren groeien sneller, en je buikvet verdwijnt.</p>
+      
+      <h4>6. Sterkere Botten en Gewrichten</h4>
+      <p>Testosteron versterkt je botten en voorkomt osteoporose. Het helpt ook je gewrichten gezond te houden, zodat je minder kans hebt op blessures. Je botten worden sterker, je gewrichten soepeler, en je hebt meer kans om tot op hoge leeftijd actief te blijven.</p>
+      
+      <h4>7. Versterkt Immuunsysteem</h4>
+      <p>Hoog testosteron helpt je weerstand tegen ziekten te versterken. Je wordt minder snel ziek, herstelt sneller als je wel ziek wordt, en voelt je over het algemeen gezonder en vitaler. Je lichaam kan beter vechten tegen infecties en ziektes.</p>
+
+      <h3>Hoe Herken Je Hoog Testosteron?</h3>
+      <p>Mannen met hoog testosteron hebben bepaalde kenmerken die je kunt herkennen. Deze kenmerken zijn niet alleen fysiek, maar ook mentaal en emotioneel:</p>
+      
+      <h4>Fysieke Kenmerken:</h4>
+      <ul>
+        <li>Sterke, gedefinieerde spieren</li>
+        <li>Laag lichaamsvet percentage</li>
+        <li>Dikke, volle baard en lichaamshaar</li>
+        <li>Diepe, mannelijke stem</li>
+        <li>Brede schouders en smalle taille</li>
+        <li>Hoge energieniveaus gedurende de dag</li>
+        <li>Goede lichaamshouding en uitstraling</li>
+      </ul>
+      
+      <h4>Mentale en Emotionele Kenmerken:</h4>
+      <ul>
+        <li>Hoge mate van zelfvertrouwen</li>
+        <li>Sterke leiderschapskwaliteiten</li>
+        <li>Competitieve instelling</li>
+        <li>Goede besluitvorming onder druk</li>
+        <li>Emotionele stabiliteit</li>
+        <li>Hoge motivatie en drive</li>
+        <li>Assertiviteit en doorzettingsvermogen</li>
+      </ul>
+
+      <h3>De Dagelijkse Impact van Hoog Testosteron</h3>
+      <p>Hoog testosteron beïnvloedt niet alleen je fysieke prestaties, maar ook je dagelijkse leven op manieren die je misschien niet verwacht:</p>
+      
+      <h4>Op het Werk:</h4>
+      <ul>
+        <li><strong>Betere prestaties:</strong> Je werkt efficiënter en productiever</li>
+        <li><strong>Leiderschapskwaliteiten:</strong> Je neemt natuurlijk de leiding</li>
+        <li><strong>Netwerken:</strong> Je bent zelfverzekerder in sociale situaties</li>
+        <li><strong>Onderhandelen:</strong> Je bent assertiever en overtuigender</li>
+        <li><strong>Stress management:</strong> Je kunt beter omgaan met werkdruk</li>
+        <li><strong>Creativiteit:</strong> Je hebt meer innovatieve ideeën</li>
+      </ul>
+      
+      <h4>In Relaties:</h4>
+      <ul>
+        <li><strong>Betere communicatie:</strong> Je bent zelfverzekerder in je communicatie</li>
+        <li><strong>Verhoogde intimiteit:</strong> Je hebt meer interesse in fysieke intimiteit</li>
+        <li><strong>Emotionele stabiliteit:</strong> Je bent een stabielere partner</li>
+        <li><strong>Besluitvorming:</strong> Je neemt betere beslissingen voor je relatie</li>
+        <li><strong>Bescherming:</strong> Je voelt je natuurlijk beschermend naar je partner</li>
+        <li><strong>Romantiek:</strong> Je hebt meer energie voor romantische gebaren</li>
+      </ul>
+      
+      <h4>In Sociale Situaties:</h4>
+      <ul>
+        <li><strong>Zelfvertrouwen:</strong> Je voelt je comfortabel in groepen</li>
+        <li><strong>Charisma:</strong> Je trekt natuurlijk aandacht en respect</li>
+        <li><strong>Humor:</strong> Je bent spontaner en grappiger</li>
+        <li><strong>Competitie:</strong> Je geniet van gezonde competitie</li>
+        <li><strong>Netwerken:</strong> Je bouwt gemakkelijker nieuwe relaties op</li>
+        <li><strong>Invloed:</strong> Mensen luisteren naar je en respecteren je mening</li>
+      </ul>
+
+      <h3>De Wetenschap Achter Hoog Testosteron</h3>
+      <p>Wetenschappelijk onderzoek toont aan dat mannen met hogere testosteronwaarden significant beter presteren op verschillende gebieden. Studies hebben aangetoond dat optimale testosteronwaarden leiden tot:</p>
+      
+      <ul>
+        <li><strong>Betere cognitieve functies:</strong> Snellere reactietijden en betere probleemoplossende vaardigheden</li>
+        <li><strong>Verhoogde spierkracht:</strong> Tot 20% meer kracht bij optimale testosteronwaarden</li>
+        <li><strong>Verbeterde botdichtheid:</strong> Sterkere botten en minder kans op breuken</li>
+        <li><strong>Betere hartgezondheid:</strong> Lager risico op hart- en vaatziekten</li>
+        <li><strong>Verhoogde levensverwachting:</strong> Mannen met optimale testosteron leven langer en gezonder</li>
+        <li><strong>Betere mentale gezondheid:</strong> Minder depressie en angstklachten</li>
+        <li><strong>Hogere levenskwaliteit:</strong> Meer energie, vitaliteit en levensvreugde</li>
+      </ul>
+
+      <h3>De Mythes Over Hoog Testosteron</h3>
+      <p>Er bestaan veel misverstanden over hoog testosteron. Het is belangrijk om deze mythes te doorbreken:</p>
+      
+      <h4>Mythe 1: "Het is alleen voor atleten"</h4>
+      <p>Hoog testosteron is niet alleen voor atleten of bodybuilders. Het is voor elke man die het beste uit zichzelf wil halen. Of je nu een kantoorbaan hebt, een eigen bedrijf runt, of met pensioen bent - optimale testosteronwaarden verbeteren je kwaliteit van leven aanzienlijk.</p>
+      
+      <h4>Mythe 2: "Het maakt je agressief"</h4>
+      <p>Hoog testosteron maakt je niet agressief. Het maakt je zelfverzekerder en assertiever, wat vaak wordt verward met agressie. Mannen met optimale testosteron zijn juist vaak kalmer en meer in controle van hun emoties.</p>
+      
+      <h4>Mythe 3: "Je wordt er mee geboren"</h4>
+      <p>Hoog testosteron is niet iets waar je mee geboren wordt of niet. Het is iets dat je kunt optimaliseren door je levensstijl aan te passen. Door de juiste voeding, training, slaap, en stress management kun je je testosteronwaarden aanzienlijk verhogen.</p>
+
+      <h3>Hoe Bereik Je Hoog Testosteron?</h3>
+      <p>Het bereiken van hoog testosteron is een combinatie van verschillende factoren. Hier zijn de belangrijkste pijlers:</p>
+      
+      <h4>1. Krachttraining</h4>
+      <p>Regelmatige krachttraining is een van de krachtigste manieren om je testosteron te verhogen. Focus op compound oefeningen zoals squats, deadlifts, bench press en pull-ups. Train 3-4 keer per week met zware gewichten en beperk je trainingen tot 45-60 minuten.</p>
+      
+      <h4>2. Gezonde Voeding</h4>
+      <p>Je lichaam heeft de juiste voedingsstoffen nodig om testosteron te produceren. Eet voldoende eiwit, gezonde vetten, en micronutriënten zoals zink en magnesium. Vermijd suiker, bewerkte voeding, en alcohol.</p>
+      
+      <h4>3. Kwaliteitsslaap</h4>
+      <p>Slaap is cruciaal voor testosteron productie. Zorg voor 7-9 uur kwaliteitsslaap per nacht in een donkere, koele omgeving. Elimineer schermen 1 uur voor het slapen en houd een regelmatig slaapschema aan.</p>
+      
+      <h4>4. Stress Management</h4>
+      <p>Chronische stress verhoogt cortisol, wat testosteron verlaagt. Implementeer dagelijks stress-reducerende activiteiten zoals meditatie, diepe ademhaling, of een wandeling in de natuur.</p>
+      
+      <h4>5. Zonlicht en Vitamine D</h4>
+      <p>Vitamine D is belangrijk voor testosteron productie. Zorg voor voldoende zonlicht of neem een vitamine D supplement. Streef naar 15-30 minuten zonlicht per dag.</p>
+      
+      <h4>6. Sociale Connectie</h4>
+      <p>Sterke sociale relaties en verbindingen helpen je testosteron op peil te houden. Investeer in je vriendschappen, zoek sociale activiteiten op, en bouw een ondersteunend netwerk op.</p>
+
+      <div class="highlight-box">
+        <h4>💡 Belangrijke Realiteit</h4>
+        <p>Hoog testosteron is niet alleen voor atleten of bodybuilders. Het is voor elke man die het beste uit zichzelf wil halen. Of je nu een kantoorbaan hebt, een eigen bedrijf runt, of met pensioen bent - optimale testosteronwaarden verbeteren je kwaliteit van leven aanzienlijk.</p>
+      </div>
+
+      <div class="highlight-box">
+        <h4>🎯 Het Goede Nieuws</h4>
+        <p>Hoog testosteron is niet iets waar je mee geboren wordt of niet. Het is iets dat je kunt optimaliseren door je levensstijl aan te passen. Door de juiste voeding, training, slaap, en stress management kun je je testosteronwaarden aanzienlijk verhogen en alle voordelen ervaren.</p>
+      </div>
+
+      <div class="highlight-box">
+        <h4>🎯 Belangrijke Herinnering</h4>
+        <p>Hoog testosteron is de basis van mannelijke excellentie. Het is niet alleen een hormoon - het is de sleutel tot het ontgrendelen van je volledige potentieel als man. Door deze les te voltooien, begrijp je waarom testosteron optimalisatie de foundation is voor alles wat we doen bij Top Tier Men.</p>
+      </div>
+
+    </div>
+
+    <!-- Huiswerk Opdrachten -->
+    <div class="section" id="huiswerk">
+      <h2>📝 Huiswerk Opdrachten</h2>
+      
+      <div class="exercise-box">
+        <h4>Opdracht 1: Testosteron Status Check</h4>
+        <p><strong>Doel:</strong> Inzicht krijgen in je huidige testosteron niveau en de voordelen van hoog testosteron begrijpen.</p>
+        <p><strong>Actie:</strong> Beoordeel jezelf op alle fysieke en mentale kenmerken van hoog testosteron uit de les. Geef elke eigenschap een score van 1-10. Schrijf op welke voordelen van hoog testosteron je nu mist en welke je graag zou willen hebben. Dit wordt je persoonlijke motivatie voor testosteron optimalisatie.</p>
+      </div>
+      
+      <div class="exercise-box">
+        <h4>Opdracht 2: Levensstijl Impact Analyse</h4>
+        <p><strong>Doel:</strong> Identificeren hoe je huidige levensstijl je testosteron beïnvloedt.</p>
+        <p><strong>Actie:</strong> Analyseer je dagelijkse gewoontes op alle zes pijlers van testosteron optimalisatie: krachttraining, voeding, slaap, stress management, zonlicht, en sociale connectie. Geef elke pijler een score van 1-10 en noteer één concrete verbetering die je deze week kunt maken voor elke pijler.</p>
+      </div>
+      
+      <div class="exercise-box">
+        <h4>Opdracht 3: Hoog Testosteron Implementatie Plan</h4>
+        <p><strong>Doel:</strong> Een praktisch plan maken om je testosteron te verhogen.</p>
+        <p><strong>Actie:</strong> Kies de 3 belangrijkste testosteron-verhogende activiteiten uit de les die je deze week gaat implementeren. Plan specifieke tijden in je agenda en noteer na 7 dagen hoe je je voelt. Voorbeeld: 3x krachttraining, elke dag 8 uur slaap, en dagelijks 15 minuten zonlicht.</p>
+      </div>
+    </div>
+
+    <!-- Checklists -->
+    <div class="section" id="checklists">
+      <h2>✅ Checklists</h2>
+      <h3>Weekelijkse Testosteron Boost Routine</h3>
+      <div class="checklist">
+        <div class="checklist-item"><input type="checkbox" id="chk-1"><label for="chk-1">3x krachttraining gedaan (squats, deadlifts, bench press)</label></div>
+        <div class="checklist-item"><input type="checkbox" id="chk-2"><label for="chk-2">Elke dag 7-9 uur kwaliteitsslaap gehad</label></div>
+        <div class="checklist-item"><input type="checkbox" id="chk-3"><label for="chk-3">Dagelijks gezonde vetten gegeten (noten, avocado, olijfolie)</label></div>
+        <div class="checklist-item"><input type="checkbox" id="chk-4"><label for="chk-4">Minimaal 15 minuten zonlicht per dag gekregen</label></div>
+        <div class="checklist-item"><input type="checkbox" id="chk-5"><label for="chk-5">Stress-reducerende activiteit gedaan (meditatie, wandeling)</label></div>
+        <div class="checklist-item"><input type="checkbox" id="chk-6"><label for="chk-6">Geen alcohol of suikerrijke dranken gedronken</label></div>
+        <div class="checklist-item"><input type="checkbox" id="chk-7"><label for="chk-7">Sociale activiteit gedaan met vrienden of familie</label></div>
+      </div>
+    </div>
+
+    <!-- Reflectie Vragen -->
+    <div class="section" id="reflectie">
+      <h2>🤔 Reflectie Vragen</h2>
+      
+      <div class="reflection-question">
+        <h4>Reflectievraag 1: Huidige Status</h4>
+        <p>Welke voordelen van hoog testosteron herken je bij jezelf? Welke voordelen mis je het meest en hoe beïnvloedt dit je dagelijkse leven en prestaties?</p>
+      </div>
+      
+      <div class="reflection-question">
+        <h4>Reflectievraag 2: Levensstijl Impact</h4>
+        <p>Welke van de zes pijlers van testosteron optimalisatie (training, voeding, slaap, stress, zonlicht, sociale connectie) heeft de meeste verbetering nodig in jouw leven? Waarom denk je dat dit zo is?</p>
+      </div>
+      
+      <div class="reflection-question">
+        <h4>Reflectievraag 3: Toekomstvisie</h4>
+        <p>Hoe zou je leven eruit zien als je optimale testosteronwaarden had? Welke specifieke veranderingen zou je merken in je energie, kracht, focus, zelfvertrouwen en relaties?</p>
+      </div>
+    </div>
+
+    <!-- Actieplan -->
+    <div class="section action-plan" id="actieplan">
+      <h3>Actieplan</h3>
+      
+      <div class="action-step">
+        <h4>Stap 1: Testosteron Status Beoordelen</h4>
+        <p>Beoordeel jezelf op alle fysieke en mentale kenmerken van hoog testosteron. Geef elke eigenschap een score van 1-10 en identificeer je zwakste punten.</p>
+      </div>
+      
+      <div class="action-step">
+        <h4>Stap 2: Krachttraining Starten</h4>
+        <p>Begin met 3x per week krachttraining. Focus op compound oefeningen zoals squats, deadlifts, bench press en pull-ups die de meeste testosteron stimuleren.</p>
+      </div>
+      
+      <div class="action-step">
+        <h4>Stap 3: Slaap Optimaliseren</h4>
+        <p>Stel een vaste bedtijd in en zorg voor 7-9 uur slaap per nacht. Elimineer schermen 1 uur voor het slapen en creëer een donkere, koele slaapomgeving.</p>
+      </div>
+      
+      <div class="action-step">
+        <h4>Stap 4: Voeding Verbeteren</h4>
+        <p>Voeg meer gezonde vetten toe aan je dieet (noten, avocado, olijfolie) en elimineer suikerrijke dranken en bewerkte voeding. Eet voldoende eiwit en micronutriënten.</p>
+      </div>
+      
+      <div class="action-step">
+        <h4>Stap 5: Stress en Zonlicht</h4>
+        <p>Implementeer dagelijks 10-15 minuten stress-reducerende activiteiten en zorg voor minimaal 15 minuten zonlicht per dag om je vitamine D en testosteron te verhogen.</p>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <p>Dit ebook is onderdeel van de <span class="ttm-brand">Top Tier Men</span> Academy</p>
+      <p>Module 01: Testosteron | Les 02: De Kracht van Hoog Testosteron</p>
+      <p>© 2025 Top Tier Men. Alle rechten voorbehouden.</p>
+    </div>
+  </div>
+
+  <script>
+    // Checklist persistentie via localStorage
+    document.addEventListener('DOMContentLoaded', function() {
+      const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+      checkboxes.forEach(cb => {
+        const saved = localStorage.getItem(cb.id);
+        if (saved === 'true') cb.checked = true;
+        cb.addEventListener('change', function(){ localStorage.setItem(this.id, this.checked); });
+      });
+    });
+  </script>
 </body>
 </html>

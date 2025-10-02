@@ -182,22 +182,20 @@ export default function Inbox() {
 
   const fetchAvailableUsers = async () => {
     try {
-      console.log('Fetching available users...');
-      const { data: profiles, error } = await supabase
-        .from('profiles')
-        .select('id, display_name, full_name, avatar_url, rank')
-        .neq('id', user?.id)
-        .order('display_name', { ascending: true });
-
-      if (error) {
-        console.error('Error fetching available users:', error);
+      if (!user?.id) return;
+      console.log('Fetching available users via API...');
+      const res = await fetch(`/api/chat/available-users?excludeUserId=${encodeURIComponent(user.id)}`, { cache: 'no-store' });
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        console.error('Error fetching available users:', json.error || res.statusText);
+        setAvailableUsers([]);
         return;
       }
-
-      console.log('Available users loaded:', profiles?.length || 0, 'users');
-      setAvailableUsers(profiles || []);
+      console.log('Available users loaded:', json.items?.length || 0, 'users');
+      setAvailableUsers(json.items || []);
     } catch (error) {
       console.error('Error fetching available users:', error);
+      setAvailableUsers([]);
     }
   };
 

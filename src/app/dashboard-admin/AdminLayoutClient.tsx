@@ -45,6 +45,7 @@ import { SwipeIndicator } from '@/components/ui';
 import SessionMonitor from '@/components/SessionMonitor';
 import AuthDebugPanel from '@/components/AuthDebugPanel';
 import SupportButton from '@/components/SupportButton';
+import { useChatNotifications } from '@/hooks/useChatNotifications';
 
 // Type definitions for menu items
 interface MenuItem {
@@ -333,6 +334,15 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
   const { showDebug, setShowDebug } = useDebug();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  // Realtime chat notifications: increase unread counter when a new message arrives (not from self)
+  useChatNotifications(
+    () => {
+      setUnreadCount((c) => c + 1);
+    },
+    undefined
+  );
 
   // Check authentication with better handling - IMPROVED TO PREVENT LOOPS
   useEffect(() => {
@@ -502,6 +512,20 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
             <span className="hidden sm:inline text-[#8BAE5A] text-sm">
               {user?.email || 'Admin'}
             </span>
+            {/* Inbox icon with unread badge */}
+            <Link
+              href="/dashboard/inbox"
+              onClick={() => setUnreadCount(0)}
+              className="relative inline-flex items-center justify-center w-9 h-9 rounded-lg bg-[#181F17] border border-[#3A4D23] text-[#8BAE5A] hover:bg-[#232D1A] transition"
+              title="Inbox"
+            >
+              <EnvelopeIcon className="w-5 h-5" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-red-600 text-white text-[10px] leading-[18px] text-center font-bold">
+                  {unreadCount}
+                </span>
+              )}
+            </Link>
             
             {/* Cache Management - Only for Admin */}
             <div className="hidden sm:flex items-center gap-2">
@@ -600,6 +624,20 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
             </span>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
+            {/* Inbox icon (mobile) */}
+            <Link
+              href="/dashboard/inbox"
+              onClick={() => setUnreadCount(0)}
+              className="relative inline-flex items-center justify-center w-8 h-8 rounded-lg bg-[#181F17] border border-[#3A4D23] text-[#8BAE5A] hover:bg-[#232D1A] transition"
+              title="Inbox"
+            >
+              <EnvelopeIcon className="w-4 h-4" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 rounded-full bg-red-600 text-white text-[10px] leading-[16px] text-center font-bold">
+                  {unreadCount}
+                </span>
+              )}
+            </Link>
             {/* Cache Management for mobile */}
             <button
               onClick={async () => {

@@ -1,672 +1,222 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Identiteit Kernwaarden - Ebook | Top Tier Men</title>
-    <meta name="description" content="Uitgebreide gids over identiteit en kernwaarden: praktische oefeningen, checklists en reflectie vragen voor persoonlijke groei.">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            line-height: 1.6;
-            color: #ffffff;
-            background: linear-gradient(135deg, #0A0F0A 0%, #181F17 50%, #232D1A 100%);
-            min-height: 100vh;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 3rem;
-            padding: 2rem;
-            background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
-            border-radius: 20px;
-            border: 1px solid #3A4D23;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        }
-
-        .logo {
-            margin: 0 auto 1rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        h1 {
-            font-size: 2.5rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, #ffffff 0%, #8BAE5A 50%, #B6C948 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 0.5rem;
-        }
-
-        .subtitle {
-            color: #8BAE5A;
-            font-size: 1.1rem;
-            font-weight: 500;
-        }
-
-        .module-info {
-            background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
-            padding: 1rem;
-            border-radius: 10px;
-            margin: 1rem 0;
-            border-left: 4px solid #8BAE5A;
-        }
-
-        .section {
-            background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
-            margin-bottom: 2rem;
-            padding: 2rem;
-            border-radius: 15px;
-            border: 1px solid #3A4D23;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .section h2 {
-            color: #B6C948;
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .section h3 {
-            color: #8BAE5A;
-            font-size: 1.3rem;
-            font-weight: 600;
-            margin: 1.5rem 0 1rem;
-        }
-
-        .section p {
-            margin-bottom: 1rem;
-            color: #e0e0e0;
-        }
-
-        .section ul, .section ol {
-            margin: 1rem 0;
-            padding-left: 2rem;
-        }
-
-        .section li {
-            margin-bottom: 0.5rem;
-            color: #e0e0e0;
-        }
-
-        .highlight-box {
-            background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
-            padding: 1.5rem;
-            border-radius: 10px;
-            border-left: 4px solid #B6C948;
-            margin: 1.5rem 0;
-        }
-
-        .exercise-box {
-            background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%);
-            padding: 1.5rem;
-            border-radius: 10px;
-            border: 1px solid #8BAE5A;
-            margin: 1rem 0;
-        }
-
-        .exercise-box h4 {
-            color: #B6C948;
-            font-size: 1.1rem;
-            margin-bottom: 1rem;
-        }
-
-        .checklist {
-            background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
-            padding: 1.5rem;
-            border-radius: 10px;
-            border: 1px solid #3A4D23;
-            margin: 1rem 0;
-        }
-
-        .checklist-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 0.8rem;
-            padding: 0.5rem;
-            background: rgba(58, 77, 35, 0.3);
-            border-radius: 8px;
-        }
-
-        .checklist-item input[type="checkbox"] {
-            margin-right: 1rem;
-            width: 18px;
-            height: 18px;
-            accent-color: #8BAE5A;
-        }
-
-        .reflection-question {
-            background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
-            padding: 1.5rem;
-            border-radius: 10px;
-            border-left: 4px solid #B6C948;
-            margin: 1rem 0;
-        }
-
-        .reflection-question h4 {
-            color: #B6C948;
-            margin-bottom: 1rem;
-        }
-
-        .action-plan {
-            background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%);
-            padding: 2rem;
-            border-radius: 15px;
-            border: 2px solid #8BAE5A;
-            margin: 2rem 0;
-        }
-
-        .action-plan h3 {
-            color: #B6C948;
-            text-align: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .action-step {
-            background: rgba(139, 174, 90, 0.1);
-            padding: 1rem;
-            border-radius: 8px;
-            margin: 1rem 0;
-            border-left: 3px solid #8BAE5A;
-        }
-
-        .action-step h4 {
-            color: #8BAE5A;
-            margin-bottom: 0.5rem;
-        }
-
-        .icon {
-            width: 24px;
-            height: 24px;
-            display: inline-block;
-            margin-right: 0.5rem;
-        }
-
-        .footer {
-            text-align: center;
-            margin-top: 3rem;
-            padding: 2rem;
-            background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
-            border-radius: 15px;
-            border: 1px solid #3A4D23;
-        }
-
-        .footer p {
-            color: #8BAE5A;
-            margin-bottom: 1rem;
-        }
-
-        .ttm-brand {
-            color: #B6C948;
-            font-weight: 700;
-        }
-
-        /* Sticky Back Button */
-        .sticky-back-btn {
-            position: fixed;
-            top: 50%;
-            right: 20px;
-            transform: translateY(-50%);
-            z-index: 1000;
-            background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%);
-            color: white;
-            border: none;
-            border-radius: 50px;
-            padding: 15px 20px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            box-shadow: 0 8px 25px rgba(139, 174, 90, 0.3);
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            text-decoration: none;
-            min-width: 120px;
-            justify-content: center;
-        }
-
-        .sticky-back-btn:hover {
-            background: linear-gradient(135deg, #B6C948 0%, #8BAE5A 100%);
-            transform: translateY(-50%) scale(1.05);
-            box-shadow: 0 12px 35px rgba(139, 174, 90, 0.4);
-        }
-
-        .sticky-back-btn:active {
-            transform: translateY(-50%) scale(0.95);
-        }
-
-        .sticky-back-btn svg {
-            width: 16px;
-            height: 16px;
-            fill: currentColor;
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                padding: 1rem;
-            }
-            
-            h1 {
-                font-size: 2rem;
-            }
-            
-            .section {
-                padding: 1.5rem;
-            }
-
-            .sticky-back-btn {
-                right: 10px;
-                padding: 12px 16px;
-                font-size: 12px;
-                min-width: 100px;
-            }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Identiteit Kernwaarden - Ebook | Top Tier Men</title>
+  <meta name="description" content="V2 ebook voor Identiteit Kernwaarden binnen Top Tier Men Academy." />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.6; color: #ffffff;
+      background: linear-gradient(135deg, #0A0F0A 0%, #181F17 50%, #232D1A 100%);
+      min-height: 100vh;
+    }
+    .container { max-width: 800px; margin: 0 auto; padding: 2rem; }
+    .header {
+      text-align: center; margin-bottom: 3rem; padding: 2rem;
+      background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      border-radius: 20px; border: 1px solid #3A4D23;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    .logo { margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; }
+    h1 {
+      font-size: 2.5rem; font-weight: 800;
+      background: linear-gradient(135deg, #ffffff 0%, #8BAE5A 50%, #B6C948 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      margin-bottom: .5rem;
+    }
+    .subtitle { color: #8BAE5A; font-size: 1.1rem; font-weight: 500; }
+    .module-info {
+      background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1rem; border-radius: 10px; margin: 1rem 0; border-left: 4px solid #8BAE5A;
+    }
+    .section { background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      margin-bottom: 2rem; padding: 2rem; border-radius: 15px; border: 1px solid #3A4D23; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    .section h2 { color: #B6C948; font-size: 1.8rem; font-weight: 700; margin-bottom: 1.5rem; display: flex; align-items: center; gap: .5rem; }
+    .section h3 { color: #8BAE5A; font-size: 1.3rem; font-weight: 600; margin: 1.5rem 0 1rem; }
+    .section p { margin-bottom: 1rem; color: #e0e0e0; }
+    .section ul, .section ol { margin: 1rem 0; padding-left: 2rem; }
+    .section li { margin-bottom: .5rem; color: #e0e0e0; }
+    .highlight-box { background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1.5rem; border-radius: 10px; border-left: 4px solid #B6C948; margin: 1.5rem 0;
+    }
+    .exercise-box { background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%);
+      padding: 1.5rem; border-radius: 10px; border: 1px solid #8BAE5A; margin: 1rem 0;
+    }
+    .exercise-box h4 { color: #B6C948; font-size: 1.1rem; margin-bottom: 1rem; }
+    .checklist { background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      padding: 1.5rem; border-radius: 10px; border: 1px solid #3A4D23; margin: 1rem 0;
+    }
+    .checklist-item { display: flex; align-items: center; margin-bottom: .8rem; padding: .5rem; background: rgba(58,77,35,.3); border-radius: 8px; }
+    .checklist-item input[type="checkbox"] { margin-right: 1rem; width: 18px; height: 18px; accent-color: #8BAE5A; }
+    .reflection-question { background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1.5rem; border-radius: 10px; border-left: 4px solid #B6C948; margin: 1rem 0;
+    }
+    .reflection-question h4 { color: #B6C948; margin-bottom: 1rem; }
+    .action-plan { background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%);
+      padding: 2rem; border-radius: 15px; border: 2px solid #8BAE5A; margin: 2rem 0;
+    }
+    .action-step { background: rgba(139,174,90,.1); padding: 1rem; border-radius: 8px; margin: 1rem 0; border-left: 3px solid #8BAE5A; }
+    .footer { text-align: center; margin-top: 3rem; padding: 2rem; background: linear-gradient(135deg, #181F17 0%, #232D1A 100%); border-radius: 15px; border: 1px solid #3A4D23; }
+    .footer p { color: #8BAE5A; margin-bottom: 1rem; }
+    .ttm-brand { color: #B6C948; font-weight: 700; }
+    .sticky-back-btn { position: fixed; top: 50%; right: 20px; transform: translateY(-50%);
+      z-index: 1000; background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%);
+      color: #fff; border: none; border-radius: 50px; padding: 15px 20px; font-size: 14px; font-weight: 600; cursor: pointer;
+      box-shadow: 0 8px 25px rgba(139,174,90,.3); transition: all .3s ease; display: flex; align-items: center; gap: 8px; text-decoration: none; min-width: 120px; justify-content: center;
+    }
+    .sticky-back-btn:hover { background: linear-gradient(135deg, #B6C948 0%, #8BAE5A 100%); transform: translateY(-50%) scale(1.05); box-shadow: 0 12px 35px rgba(139,174,90,.4); }
+    .sticky-back-btn:active { transform: translateY(-50%) scale(.95); }
+    .sticky-back-btn svg { width: 16px; height: 16px; fill: currentColor; }
+    @media (max-width: 768px) {
+      .container { padding: 1rem; }
+      h1 { font-size: 2rem; }
+      .section { padding: 1.5rem; }
+      .sticky-back-btn { right: 10px; padding: 12px 16px; font-size: 12px; min-width: 100px; }
+    }
+  </style>
 </head>
 <body>
-    <!-- Sticky Back Button -->
-    <a href="https://platform.toptiermen.eu/dashboard/academy/ba58a203-b2d0-442b-83a3-62cfb0a79478/27022297-da6d-404e-b696-63453322c594" class="sticky-back-btn" title="Terug naar les">
-        <svg viewBox="0 0 24 24">
-            <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
-        </svg>
-        Terug
-    </a>
+  <a href="/dashboard/academy/ba58a203-b2d0-442b-83a3-62cfb0a79478/27022297-da6d-404e-b696-63453322c594" class="sticky-back-btn" title="Terug naar les">
+    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    Terug
+  </a>
 
-    <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <div class="logo">
-                <img src="/logo_white-full.svg" alt="Top Tier Men Logo" style="height:40px;width:auto" />
-            </div>
-            <h1>Identiteit Kernwaarden</h1>
-            <p class="subtitle">Complete Gids voor Praktische Toepassing</p>
-            <div class="module-info"><strong>Module 02: Discipline & Identiteit</strong> | <strong>Les 04: Identiteit Kernwaarden</strong></div>
-        </div>
-        
-        <!-- Uitgebreide Samenvatting -->
-        <div class="section">
-            <h2>📚 Uitgebreide Samenvatting van de Les</h2>
-            
-            <div class="highlight-box">
-                <h4>🎯 Les Overzicht</h4>
-                <p>In deze les hebben we identiteit en kernwaarden behandeld - de fundamentele bouwstenen van je karakter en besluitvorming. Je identiteit is wie je bent, en je kernwaarden zijn je innerlijke kompas. Dit vormt de basis voor alle andere aspecten van je ontwikkeling als Top Tier Man.</p>
-            </div>
-
-            <h3>Wat is Identiteit Precies?</h3>
-            <p>Je identiteit is de som van je overtuigingen, waarden, doelen en de manier waarop je jezelf ziet. Het is je innerlijke kompas dat je helpt om beslissingen te nemen en consistent te zijn in je acties. Je identiteit is niet iets dat je krijgt - het is iets dat je bewust construeert.</p>
-            
-            <p>Denk aan identiteit als de "onverzettelijke kern" van wie je bent. Het is niet afhankelijk van externe omstandigheden, maar van je interne overtuigingen en waarden. Wanneer je identiteit sterk is, word je consistent in je acties en bereik je je doelen effectiever.</p>
-
-            <h3>De 4 Lagen van Identiteit</h3>
-            
-            <h4>1. Fysieke Identiteit</h4>
-            <p>Dit is hoe je jezelf ziet in relatie tot je lichaam en fysieke prestaties. Het omvat je gezondheidsgewoonten, fitness niveau, en hoe je je lichaam behandelt. Een sterke fysieke identiteit betekent dat je jezelf ziet als iemand die gezond, sterk en vitaal is.</p>
-            
-            <h4>2. Mentale Identiteit</h4>
-            <p>Dit is hoe je jezelf ziet in relatie tot je intellect en vaardigheden. Het omvat je kennis, expertise, en je vermogen om problemen op te lossen. Een sterke mentale identiteit betekent dat je jezelf ziet als iemand die intelligent, bekwaam en leerzaam is.</p>
-            
-            <h4>3. Emotionele Identiteit</h4>
-            <p>Dit is hoe je jezelf ziet in relatie tot je emoties en relaties. Het omvat je vermogen om met emoties om te gaan, je empathie, en je verbindingen met anderen. Een sterke emotionele identiteit betekent dat je jezelf ziet als iemand die emotioneel intelligent en verbonden is.</p>
-            
-            <h4>4. Spirituele Identiteit</h4>
-            <p>Dit is hoe je jezelf ziet in relatie tot je waarden, principes en doel in het leven. Het omvat je morele kompas, je missie, en je verbinding met iets groters dan jezelf. Een sterke spirituele identiteit betekent dat je jezelf ziet als iemand die waarden heeft en een doel heeft.</p>
-
-            <h3>Wat zijn Kernwaarden?</h3>
-            <p>Kernwaarden zijn de fundamentele principes die je gedrag en beslissingen sturen. Ze zijn je innerlijke kompas dat je helpt om te bepalen wat belangrijk is en wat niet. Kernwaarden zijn niet iets dat je kiest - ze zijn iets dat je ontdekt door zelfreflectie en ervaring.</p>
-
-            <h3>Waarom Kernwaarden Essentieel zijn</h3>
-            <p>Kernwaarden zijn essentieel omdat ze je helpen om:</p>
-            <ul>
-                <li><strong>Consistente beslissingen te nemen:</strong> Wanneer je je kernwaarden kent, weet je altijd wat de juiste keuze is</li>
-                <li><strong>Prioriteiten te stellen:</strong> Je kernwaarden helpen je om te bepalen wat belangrijk is en wat niet</li>
-                <li><strong>Motivatie te behouden:</strong> Wanneer je handelt naar je kernwaarden, voel je je gemotiveerd en vervuld</li>
-                <li><strong>Relaties op te bouwen:</strong> Mensen met vergelijkbare waarden trekken elkaar aan</li>
-                <li><strong>Doelen te bereiken:</strong> Je kernwaarden geven je richting en focus</li>
-            </ul>
-
-            <h3>Het Verschil tussen Inherited en Chosen Values</h3>
-            <p>Niet alle waarden zijn authentiek. Sommige waarden heb je geërfd van je familie, cultuur, of omgeving. Andere waarden heb je bewust gekozen op basis van je ervaringen en reflectie. Het is belangrijk om het verschil te kennen tussen inherited values en chosen values.</p>
-
-            <h3>Praktische Toepassing in het Dagelijks Leven</h3>
-            <p>Identiteit en kernwaarden zijn niet alleen theoretisch interessant - ze zijn praktisch toepasbaar in je dagelijks leven. Door je identiteit te versterken en je kernwaarden te verduidelijken, word je consistenter in je acties en bereik je je doelen effectiever.</p>
-
-            <h3>Waarom Dit Belangrijk Is</h3>
-            <p>Identiteit en kernwaarden zijn de fundering voor alle andere persoonlijke ontwikkeling. Zonder deze basis blijven alle andere doelen, dromen en plannen oppervlakkig en afhankelijk van externe omstandigheden. Met een sterke identiteit en duidelijke kernwaarden wordt succes niet alleen mogelijk, maar onvermijdelijk.</p>
-        </div>
-        
-        <!-- Huiswerk Opdrachten -->
-        <div class="section">
-            <h2>📝 Huiswerk Opdrachten</h2>
-            <p><strong>Belangrijk:</strong> Deze opdrachten zijn specifiek gebaseerd op de les inhoud over identiteit en kernwaarden en zijn ontworpen om je begrip te verdiepen en praktische toepassing te stimuleren.</p>
-
-            <div class="exercise-box">
-                <h4>Opdracht 1: Identiteit Assessment</h4>
-                <p><strong>Doel:</strong> Evalueer je huidige identiteit in alle 4 lagen en identificeer verbeterpunten.</p>
-                <p><strong>Actie:</strong> Beantwoord de volgende vragen eerlijk en noteer je antwoorden:</p>
-                <ul>
-                    <li>Hoe zie je jezelf in elke laag van je identiteit (fysiek, mentaal, emotioneel, spiritueel)?</li>
-                    <li>Welke aspecten van je identiteit zijn het sterkst?</li>
-                    <li>Welke aspecten van je identiteit hebben de meeste aandacht nodig?</li>
-                    <li>Hoe heeft je identiteit je leven beïnvloed tot nu toe?</li>
-                    <li>Welke identiteit zou je willen hebben over 1 jaar?</li>
-                </ul>
-            </div>
-
-            <div class="exercise-box">
-                <h4>Opdracht 2: Kernwaarden Ontdekking</h4>
-                <p><strong>Doel:</strong> Identificeer je authentieke kernwaarden door diepe zelfreflectie.</p>
-                <p><strong>Actie:</strong> Voltooi de volgende stappen:</p>
-                <ul>
-                    <li>Schrijf 20 dingen op die belangrijk voor je zijn</li>
-                    <li>Rangschik ze van 1-20 (1 = meest belangrijk)</li>
-                    <li>De top 5 zijn je kernwaarden</li>
-                    <li>Voor elke kernwaarde, schrijf op waarom het belangrijk voor je is</li>
-                    <li>Identificeer welke waarden inherited zijn en welke chosen zijn</li>
-                </ul>
-            </div>
-
-            <div class="exercise-box">
-                <h4>Opdracht 3: Identiteit Versterking</h4>
-                <p><strong>Doel:</strong> Versterk je identiteit door bewuste acties en gewoonten.</p>
-                <p><strong>Actie:</strong> Kies 3 specifieke acties die je deze week gaat uitvoeren:</p>
-                <ul>
-                    <li>Actie 1: _________________________________ (bijv. "Ik ben iemand die elke dag traint")</li>
-                    <li>Actie 2: _________________________________ (bijv. "Ik ben iemand die altijd leest")</li>
-                    <li>Actie 3: _________________________________ (bijv. "Ik ben iemand die zijn woord houdt")</li>
-                </ul>
-                <p><strong>Regel:</strong> Focus op identiteit, niet op perfectie. Elke actie die je identiteit ondersteunt is een overwinning.</p>
-            </div>
-
-            <div class="exercise-box">
-                <h4>Opdracht 4: Kernwaarden Implementatie</h4>
-                <p><strong>Doel:</strong> Implementeer je kernwaarden in je dagelijkse beslissingen.</p>
-                <p><strong>Actie:</strong> Houd 7 dagen bij hoe je kernwaarden je beslissingen beïnvloeden:</p>
-                <ul>
-                    <li>Noteer elke dag 3 belangrijke beslissingen die je nam</li>
-                    <li>Voor elke beslissing, identificeer welke kernwaarde je volgde</li>
-                    <li>Evalueer of je beslissingen consistent waren met je kernwaarden</li>
-                    <li>Identificeer waar je je kernwaarden kon versterken</li>
-                </ul>
-            </div>
-
-            <div class="exercise-box">
-                <h4>Opdracht 5: Identiteit Educatie</h4>
-                <p><strong>Doel:</strong> Verdiep je kennis over identiteit en kernwaarden.</p>
-                <p><strong>Actie:</strong> Onderzoek de volgende onderwerpen:</p>
-                <ul>
-                    <li>Wat is het verschil tussen identiteit en persoonlijkheid?</li>
-                    <li>Hoe werken identiteit overtuigingen in je hersenen?</li>
-                    <li>Wat zijn de beste strategieën om identiteit te veranderen?</li>
-                    <li>Hoe kun je authentieke kernwaarden identificeren?</li>
-                    <li>Wat zijn de psychologische principes achter identiteit ontwikkeling?</li>
-                </ul>
-                <p><strong>Presentatie:</strong> Maak een korte samenvatting van je bevindingen en deel deze met anderen.</p>
-            </div>
-        </div>
-        
-        <!-- Identiteit & Kernwaarden Checklists -->
-        <div class="section">
-            <h2>✅ Identiteit & Kernwaarden Checklists</h2>
-            <p><strong>Doel:</strong> Deze checklists zijn specifiek ontworpen om je identiteit te versterken en je kernwaarden te implementeren.</p>
-
-            <h3>Ochtend Routine (Identiteit Versterking)</h3>
-            <div class="checklist">
-                <div class="checklist-item">
-                    <input type="checkbox" id="morning1">
-                    <label for="morning1">Herinner jezelf aan je gewenste identiteit ("Ik ben iemand die...")</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="morning2">
-                    <label for="morning2">Review je kernwaarden en hoe ze je dag zullen beïnvloeden</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="morning3">
-                    <label for="morning3">Visualiseer jezelf handelend naar je identiteit en kernwaarden</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="morning4">
-                    <label for="morning4">Stel jezelf de vraag: "Wat zou iemand met mijn identiteit doen?"</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="morning5">
-                    <label for="morning5">Begin met een kleine actie die je identiteit ondersteunt</label>
-                </div>
-            </div>
-
-            <h3>Dagelijkse Identiteit Ondersteuning</h3>
-            <div class="checklist">
-                <div class="checklist-item">
-                    <input type="checkbox" id="daily1">
-                    <label for="daily1">Handel naar je gewenste identiteit in elke beslissing</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="daily2">
-                    <label for="daily2">Gebruik je kernwaarden als kompas voor belangrijke keuzes</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="daily3">
-                    <label for="daily3">Vier elke actie die je identiteit ondersteunt</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="daily4">
-                    <label for="daily4">Leer van momenten waar je niet naar je identiteit handelde</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="daily5">
-                    <label for="daily5">Herinner jezelf regelmatig aan je kernwaarden</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="daily6">
-                    <label for="daily6">Gebruik identiteit-gebaseerde zelfspraak ("Ik ben iemand die...")</label>
-                </div>
-            </div>
-
-            <h3>Avond Identiteit Reflectie</h3>
-            <div class="checklist">
-                <div class="checklist-item">
-                    <input type="checkbox" id="evening1">
-                    <label for="evening1">Evalueer welke acties je identiteit ondersteunden</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="evening2">
-                    <label for="evening2">Identificeer waar je sterk was in je identiteit</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="evening3">
-                    <label for="evening3">Noteer waar je je identiteit kon versterken</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="evening4">
-                    <label for="evening4">Plan morgen met specifieke identiteit doelen</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="evening5">
-                    <label for="evening5">Celebreer je identiteit overwinningen</label>
-                </div>
-            </div>
-
-            <h3>Weekelijkse Identiteit Check</h3>
-            <div class="checklist">
-                <div class="checklist-item">
-                    <input type="checkbox" id="weekly1">
-                    <label for="weekly1">Evalueer hoe sterk je identiteit is geworden (1-10)</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="weekly2">
-                    <label for="weekly2">Controleer welke identiteit-gebaseerde gewoonten je hebt ontwikkeld</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="weekly3">
-                    <label for="weekly3">Identificeer patronen in je identiteit ontwikkeling</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="weekly4">
-                    <label for="weekly4">Plan verdere identiteit versterking voor de komende week</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="weekly5">
-                    <label for="weekly5">Stel nieuwe, uitdagende identiteit doelen</label>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Reflectie Vragen -->
-        <div class="section">
-            <h2>🤔 Reflectie Vragen voor Identiteit & Kernwaarden</h2>
-            <p><strong>Doel:</strong> Deze vragen helpen je om dieper na te denken over je identiteit ontwikkeling en kernwaarden implementatie.</p>
-
-            <div class="reflection-question">
-                <h4>Vraag 1: Huidige Identiteit Status</h4>
-                <p>Hoe zou je je huidige identiteit beoordelen op een schaal van 1-10? Welke specifieke overtuigingen heb je over jezelf? Wat zijn je grootste identiteit uitdagingen?</p>
-            </div>
-
-            <div class="reflection-question">
-                <h4>Vraag 2: Kernwaarden Identificatie</h4>
-                <p>Welke 5 kernwaarden zijn het belangrijkst voor jou? Welke van deze waarden zijn inherited en welke zijn chosen? Hoe beïnvloeden deze waarden je dagelijkse beslissingen?</p>
-            </div>
-
-            <div class="reflection-question">
-                <h4>Vraag 3: Impact van Identiteit op je Leven</h4>
-                <p>Hoe heeft je huidige identiteit je leven beïnvloed? Welke kansen heb je gemist door beperkende identiteit overtuigingen? Hoe zou je leven eruitzien als je je gewenste identiteit volledig had ontwikkeld?</p>
-            </div>
-
-            <div class="reflection-question">
-                <h4>Vraag 4: Identiteit & Kernwaarden Doelen</h4>
-                <p>Wat zijn je specifieke doelen voor identiteit ontwikkeling over de komende 3 maanden? Welke meetbare verbeteringen wil je zien in je identiteit-gebaseerde beslissingen en kernwaarden implementatie?</p>
-            </div>
-
-            <div class="reflection-question">
-                <h4>Vraag 5: Identiteit Implementatie Strategie</h4>
-                <p>Welke veranderingen in je identiteit ben je bereid te maken om je doelen te bereiken? Wat zijn je grootste uitdagingen bij het implementeren van identiteit-gebaseerde gewoonten? Hoe kun je jezelf verantwoordelijk houden?</p>
-            </div>
-
-            <div class="reflection-question">
-                <h4>Vraag 6: Langetermijn Identiteit Visie</h4>
-                <p>Hoe ziet je ideale identiteit eruit over 1 jaar? Welke rol spelen je kernwaarden in je algemene prestatie- en ontwikkelingsdoelen? Hoe kun je deze identiteit kennis doorgeven aan anderen?</p>
-            </div>
-        </div>
-
-        <!-- Volgende Stappen en Actieplan -->
-        <div class="section">
-            <h2>🚀 Volgende Stappen en Actieplan</h2>
-
-            <div class="action-plan">
-                <h3>30-Dagen Identiteit Ontwikkeling Plan</h3>
-
-                <div class="action-step">
-                    <h4>Week 1: Identiteit Bewustwording en Kernwaarden Ontdekking</h4>
-                    <ul>
-                        <li>Voltooi de identiteit assessment oefening</li>
-                        <li>Identificeer je 5 kernwaarden</li>
-                        <li>Implementeer de ochtend identiteit routine</li>
-                        <li>Begin met 3 kleine identiteit-versterkende gewoonten</li>
-                        <li>Start met kernwaarden implementatie dagboek</li>
-                    </ul>
-                </div>
-
-                <div class="action-step">
-                    <h4>Week 2: Identiteit Versterking en Kernwaarden Implementatie</h4>
-                    <ul>
-                        <li>Optimaliseer je identiteit-gebaseerde ochtend routine</li>
-                        <li>Implementeer kernwaarden in dagelijkse beslissingen</li>
-                        <li>Gebruik identiteit-gebaseerde zelfspraak dagelijks</li>
-                        <li>Handel naar je gewenste identiteit in elke beslissing</li>
-                        <li>Begin met avond identiteit reflectie routine</li>
-                    </ul>
-                </div>
-
-                <div class="action-step">
-                    <h4>Week 3: Identiteit Consolidatie en Uitbreiding</h4>
-                    <ul>
-                        <li>Verhoog de intensiteit van je identiteit gewoonten</li>
-                        <li>Integreer identiteit-gebaseerde discipline in nieuwe situaties</li>
-                        <li>Bouw momentum op door identiteit overwinningen</li>
-                        <li>Implementeer weekelijkse identiteit checks</li>
-                        <li>Zoek naar manieren om anderen te helpen met identiteit ontwikkeling</li>
-                    </ul>
-                </div>
-
-                <div class="action-step">
-                    <h4>Week 4: Identiteit Consolidatie en Planning</h4>
-                    <ul>
-                        <li>Consolideer alle nieuwe identiteit gewoonten</li>
-                        <li>Evalueer je identiteit ontwikkeling met het dagboek</li>
-                        <li>Meet je verbeteringen (identiteit sterkte, kernwaarden implementatie)</li>
-                        <li>Plan voor langetermijn identiteit onderhoud</li>
-                        <li>Stel nieuwe, uitdagende identiteit doelen</li>
-                    </ul>
-                </div>
-            </div>
-
-            <h3>Langetermijn Identiteit Strategieën</h3>
-            <ul>
-                <li><strong>Maand 2-3:</strong> Verdieping in geavanceerde identiteit ontwikkeling technieken</li>
-                <li><strong>Maand 4-6:</strong> Integratie met andere ontwikkelingsgebieden</li>
-                <li><strong>Maand 6+:</strong> Mentorschap en doorgeven van identiteit kennis</li>
-            </ul>
-
-            <h3>Identiteit Monitoring en Meting</h3>
-            <div class="highlight-box">
-                <h4>📊 Belangrijke Metingen</h4>
-                <ul>
-                    <li><strong>Subjectieve Metingen:</strong> Identiteit sterkte, kernwaarden consistentie, zelfspraak</li>
-                    <li><strong>Objectieve Metingen:</strong> Identiteit-gebaseerde acties, kernwaarden implementatie, beslissingsconsistentie</li>
-                    <li><strong>Reflectie Tests:</strong> Weekelijkse identiteit evaluatie en aanpassingen</li>
-                </ul>
-            </div>
-
-            <div class="highlight-box">
-                <h4>🎯 Belangrijke Herinnering</h4>
-                <p>Identiteit en kernwaarden ontwikkeling is een langetermijn proces. Focus op consistente, dagelijkse identiteit versterking en kernwaarden implementatie. Kleine identiteit veranderingen leiden tot grote resultaten. Elke dag is een nieuwe kans om je identiteit te versterken en je kernwaarden te implementeren.</p>
-            </div>
-        </div>
-
-        <!-- Footer -->
-        <div class="footer">
-            <p>Dit ebook is onderdeel van de <span class="ttm-brand">Top Tier Men</span> Academy</p>
-            <p>Module 02: Discipline & Identiteit | Les 04: Identiteit Kernwaarden</p>
-            <p>© 2025 Top Tier Men. Alle rechten voorbehouden.</p>
-        </div>
+  <div class="container">
+    <div class="header">
+      <div class="logo">
+        <img src="/logo_white-full.svg" alt="Top Tier Men Logo" style="height:40px;width:auto" />
+      </div>
+      <h1>Identiteit Kernwaarden</h1>
+      <p class="subtitle">Wie je bent bepaalt wat je doet</p>
+      <div class="module-info">
+        <strong>Module 02: Discipline & Identiteit</strong> | <strong>Les 04: Identiteit Kernwaarden</strong>
+      </div>
     </div>
 
-    <script>
-        // Simple functionality for checkboxes
-        document.addEventListener('DOMContentLoaded', function() {
-            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-            
-            checkboxes.forEach(checkbox => {
-                // Load saved state from localStorage
-                const savedState = localStorage.getItem(checkbox.id);
-                if (savedState === 'true') {
-                    checkbox.checked = true;
-                }
-                
-                // Save state when changed
-                checkbox.addEventListener('change', function() {
-                    localStorage.setItem(this.id, this.checked);
-                });
-            });
-        });
-    </script>
+    <div class="section" id="samenvatting">
+      <h2>📚 Uitgebreide Samenvatting van de Les</h2>
+<div class="highlight-box"><h4>🎯 Doel van deze les</h4><p>Identiteit en kernwaarden: je krijgt simpele, praktische regels, rituelen, scripts en checklists om direct toe te passen. Geen jargon; duidelijke stappen voor vandaag.</p></div><h3>Wat is identiteit?</h3><p>Je identiteit is wie je bent, niet wat je doet. Het is je kern, je fundament, je kompas. Je identiteit bepaalt je gedrag, je keuzes en je richting. Zonder heldere identiteit ben je een schip zonder kompas - je drijft maar rond zonder doel.</p><h3>Waarom kernwaarden belangrijk zijn</h3><p>Kernwaarden zijn je innerlijke richtlijnen. Ze helpen je beslissen wat goed en fout is, wat belangrijk is en wat niet. Ze geven je richting wanneer je twijfelt. Zonder duidelijke waarden leef je reactief - je reageert op wat er gebeurt in plaats van proactief te handelen vanuit je principes.</p><h3>De 5 fundamenten van identiteit</h3><ul><li><strong>1) Waarden:</strong> Wat vind je belangrijk? Wat drijft je? Wat geeft je leven betekenis?</li><li><strong>2) Overtuigingen:</strong> Wat geloof je over jezelf, anderen en de wereld?</li><li><strong>3) Gewoontes:</strong> Wat doe je automatisch? Welke patronen herhalen zich?</li><li><strong>4) Relaties:</strong> Met wie omring je je? Wie beïnvloedt je het meest?</li><li><strong>5) Doelen:</strong> Waar werk je naartoe? Wat wil je bereiken?</li></ul><h3>Kernwaarden identificeren</h3><p>Je kernwaarden zijn de 3-5 dingen die het belangrijkst zijn in je leven. Ze zijn je kompas in moeilijke momenten. Om ze te vinden, stel je jezelf deze vragen:</p><ul><li>Wat maakt me trots? Wanneer voel ik me het meest mezelf?</li><li>Waar krijg ik energie van? Wat geeft me voldoening?</li><li>Wat zou ik nooit willen verliezen? Wat is onvervangbaar?</li><li>Waar zou ik voor vechten? Waar zou ik voor sterven?</li></ul><h3>Top Tier Man kernwaarden</h3><ul><li><strong>Discipline:</strong> Je doet wat je moet doen, wanneer je het moet doen, ongeacht hoe je je voelt.</li><li><strong>Eer:</strong> Je woord is je bond. Je doet wat je zegt, je zegt wat je doet.</li><li><strong>Moed:</strong> Je gaat door waar anderen stoppen. Je doet moeilijke dingen.</li><li><strong>Verantwoordelijkheid:</strong> Je neemt eigenaarschap over je leven en je keuzes.</li><li><strong>Groei:</strong> Je wordt elke dag beter. Je investeert in jezelf.</li></ul><h3>Identiteit vs gedrag</h3><p>Je gedrag volgt je identiteit, niet andersom. Als je jezelf ziet als iemand die gezond eet, eet je automatisch gezond. Als je jezelf ziet als iemand die sport, sport je automatisch. Verander je identiteit, en je gedrag volgt.</p><h3>Hoe identiteit vormt</h3><ul><li><strong>Herhaling:</strong> Je wordt wat je herhaalt. Elke dag bouw je aan je identiteit.</li><li><strong>Omgeving:</strong> Je neemt de norm over van je omgeving. Kies je omgeving zorgvuldig.</li><li><strong>Rituelen:</strong> Dagelijkse rituelen versterken je identiteit.</li><li><strong>Verhalen:</strong> De verhalen die je jezelf vertelt bepalen wie je bent.</li></ul><h3>Identiteit veranderen</h3><p>Identiteit verander je niet in één dag. Het is een proces van kleine stappen:</p><ol><li><strong>Bewustwording:</strong> Weet wie je nu bent en wie je wilt worden.</li><li><strong>Kleine acties:</strong> Begin met kleine dingen die passen bij je nieuwe identiteit.</li><li><strong>Consistentie:</strong> Herhaal deze acties dagelijks.</li><li><strong>Bevestiging:</strong> Bevestig je nieuwe identiteit met woorden en daden.</li></ol><h3>Dagelijkse identiteitsrituelen</h3><ul><li><strong>Ochtend:</strong> Begin de dag met een intentie die past bij je identiteit.</li><li><strong>Momenten van keuze:</strong> Bij elke keuze vraag je: "Wat zou iemand met mijn waarden doen?"</li><li><strong>Avond:</strong> Reflecteer op je dag. Heb je geleefd volgens je waarden?</li></ul><h3>Identiteit en doelen</h3><p>Je doelen moeten passen bij je identiteit. Als je jezelf ziet als een atleet, zijn fitnessdoelen logisch. Als je jezelf ziet als een ondernemer, zijn zakelijke doelen logisch. Doelen die niet passen bij je identiteit zijn moeilijk te bereiken.</p><h3>Identiteit en relaties</h3><p>Je identiteit wordt beïnvloed door de mensen om je heen. Omring je met mensen die de identiteit hebben die jij wilt. Vermijd mensen die je naar beneden trekken of je identiteit ondermijnen.</p><h3>Identiteit en uitdagingen</h3><p>Uitdagingen testen je identiteit. In moeilijke momenten zie je wie je echt bent. Gebruik uitdagingen om je identiteit te versterken. Elke keer dat je doorzet, bevestig je je identiteit.</p><h3>Identiteit en succes</h3><p>Succes volgt identiteit. Als je de juiste identiteit hebt, komt succes vanzelf. Focus op wie je bent, niet op wat je wilt hebben. Word de persoon die het succes verdient.</p><h3>Veelgemaakte identiteitsfouten</h3><ul><li><strong>Identiteit baseren op prestaties:</strong> "Ik ben een succesvolle zakenman" in plaats van "Ik ben iemand die waarde creëert."</li><li><strong>Identiteit baseren op bezittingen:</strong> "Ik ben rijk" in plaats van "Ik ben iemand die waarde toevoegt."</li><li><strong>Identiteit baseren op wat anderen denken:</strong> "Ik ben populair" in plaats van "Ik ben iemand die anderen helpt."</li><li><strong>Geen identiteit hebben:</strong> Reageren op omstandigheden in plaats van handelen vanuit principes.</li></ul><h3>Identiteit en karakter</h3><p>Karakter is wie je bent als niemand kijkt. Het is je ware identiteit. Bouw karakter door kleine dingen goed te doen, dag in dag uit. Karakter is je fundament.</p><h3>Identiteit en leiderschap</h3><p>Leiderschap begint met zelfleiderschap. Je kunt alleen anderen leiden als je jezelf kunt leiden. Leiderschap is identiteit in actie - je leeft voor wat je belangrijk vindt.</p><h3>Identiteit en legacy</h3><p>Je legacy is wat je achterlaat. Het is de impact die je hebt op anderen en de wereld. Leef vanuit je identiteit en je legacy wordt automatisch positief.</p><h3>Identiteit en geluk</h3><p>Geluk komt van het leven volgens je waarden. Als je leeft volgens je identiteit, voel je je vervuld. Als je leeft tegen je identiteit in, voel je je leeg.</p><h3>Identiteit en vrijheid</h3><p>Echte vrijheid komt van het hebben van een sterke identiteit. Als je weet wie je bent, kun je nee zeggen tegen wat niet past. Je bent vrij om te kiezen wat bij je past.</p><h3>Identiteit en verantwoordelijkheid</h3><p>Identiteit brengt verantwoordelijkheid met zich mee. Als je jezelf ziet als een leider, heb je de verantwoordelijkheid om te leiden. Als je jezelf ziet als een beschermer, heb je de verantwoordelijkheid om te beschermen.</p><h3>Identiteit en groei</h3><p>Identiteit is niet statisch. Het groeit en ontwikkelt zich. Maar de kern blijft hetzelfde. Je kernwaarden veranderen niet, maar je begrip ervan wordt dieper.</p><h3>Identiteit en authenticiteit</h3><p>Authenticiteit is het leven volgens je ware identiteit. Het is eerlijk zijn over wie je bent en wat je belangrijk vindt. Authenticiteit trekt de juiste mensen en kansen aan.</p><h3>Identiteit en moed</h3><p>Moed is het handelen volgens je identiteit, zelfs wanneer het moeilijk is. Het is het verdedigen van je waarden, zelfs wanneer het pijn doet. Moed versterkt je identiteit.</p><h3>Identiteit en discipline</h3><p>Discipline is identiteit in actie. Het is het doen van wat je moet doen, omdat het past bij wie je bent. Discipline is niet zelfkastijding, het is zelfrespect.</p><h3>Identiteit en respect</h3><p>Respect verdien je door te leven volgens je identiteit. Mensen respecteren je niet voor wat je hebt, maar voor wie je bent. Respect komt van consistentie tussen woorden en daden.</p><h3>Identiteit en vertrouwen</h3><p>Vertrouwen komt van het kennen van je identiteit. Als je weet wie je bent, weet je wat je moet doen. Vertrouwen is identiteit in actie.</p><h3>Identiteit en liefde</h3><p>Liefde begint met zelfliefde. Zelfliefde begint met het accepteren van je identiteit. Als je van jezelf houdt, kun je van anderen houden.</p><h3>Identiteit en betekenis</h3><p>Betekenis vind je door te leven volgens je identiteit. Als je leeft volgens je waarden, heeft je leven betekenis. Betekenis komt van het bijdragen aan iets groters dan jezelf.</p><h3>Identiteit en vrede</h3><p>Vrede komt van het leven volgens je identiteit. Als je leeft volgens je waarden, voel je je vredig. Vrede is identiteit in balans.</p><h3>Identiteit en kracht</h3><p>Kracht komt van het kennen van je identiteit. Als je weet wie je bent, weet je waar je voor staat. Kracht is identiteit in actie.</p><h3>Identiteit en wijsheid</h3><p>Wijsheid komt van het leven volgens je identiteit. Als je leeft volgens je waarden, maak je wijze keuzes. Wijsheid is identiteit in praktijk.</p><h3>Identiteit en geloof</h3><p>Geloof in jezelf komt van het kennen van je identiteit. Als je weet wie je bent, geloof je in wat je kunt bereiken. Geloof is identiteit in vertrouwen.</p><h3>Identiteit en hoop</h3><p>Hoop komt van het leven volgens je identiteit. Als je leeft volgens je waarden, heb je hoop voor de toekomst. Hoop is identiteit in verwachting.</p><h3>Identiteit en liefde voor het leven</h3><p>Liefde voor het leven komt van het leven volgens je identiteit. Als je leeft volgens je waarden, hou je van het leven. Liefde voor het leven is identiteit in vreugde.</p><h3>Concrete stappen voor vandaag</h3><ol><li>Schrijf je top 5 kernwaarden op</li><li>Definieer wie je wilt zijn in 3 woorden</li><li>Kies 1 kleine actie die past bij je identiteit</li><li>Plan een dagelijks identiteitsritueel</li><li>Evalueer elke avond of je hebt geleefd volgens je waarden</li></ol><h3>Afsluiting</h3><p>Je identiteit is je kompas in het leven. Het bepaalt je keuzes, je richting en je impact. Bouw een sterke identiteit op basis van duidelijke waarden. Leef volgens deze waarden, dag in dag uit. Word de persoon die je wilt zijn, en alles wat je wilt bereiken zal volgen.</p>
+    </div>
+
+    <div class="section" id="huiswerk">
+      <h2>📝 Huiswerk Opdrachten</h2>
+      
+      <div class="exercise-box">
+        <h4>Opdracht 1: Kernwaarden Identificeren</h4>
+        <p><strong>Doel:</strong> Je top 5 kernwaarden identificeren en definiëren wat ze betekenen voor jou.</p>
+        <p><strong>Actie:</strong> Beantwoord de vragen: Wat maakt me trots? Waar krijg ik energie van? Wat zou ik nooit willen verliezen? Waar zou ik voor vechten? Schrijf je top 5 kernwaarden op en definieer wat elk betekent voor jou. Houd dit 7 dagen bij en evalueer.</p>
+      </div>
+
+      <div class="exercise-box">
+        <h4>Opdracht 2: Identiteitsritueel Implementeren</h4>
+        <p><strong>Doel:</strong> Een dagelijks ritueel opzetten dat je identiteit versterkt.</p>
+        <p><strong>Actie:</strong> Kies 1 kleine actie die past bij je identiteit (bijv. 10 minuten lezen als je jezelf ziet als een leergierig persoon). Plan dit in je ochtendritueel. Houd 7 dagen bij of je dit hebt gedaan en hoe het voelde.</p>
+      </div>
+
+      <div class="exercise-box">
+        <h4>Opdracht 3: Avondreflectie op Identiteit</h4>
+        <p><strong>Doel:</strong> Bewustwording creëren of je leeft volgens je waarden en identiteit.</p>
+        <p><strong>Actie:</strong> Plan elke avond 5 minuten reflectietijd. Vraag jezelf: Heb ik vandaag geleefd volgens mijn waarden? Welke keuzes paste bij mijn identiteit? Welke niet? Wat ga ik morgen anders doen? Houd dit 7 dagen vol.</p>
+      </div>
+    </div>
+
+    <div class="section" id="checklists">
+      <h2>✅ Checklists</h2>
+      
+      <h3>Weekchecklist "Identiteit Kernwaarden"</h3>
+      <div class="checklist">
+        <div class="checklist-item">
+          <input type="checkbox" id="identiteit-1">
+          <label for="identiteit-1">Top 5 kernwaarden geïdentificeerd en gedefinieerd</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="identiteit-2">
+          <label for="identiteit-2">Identiteitsritueel geïmplementeerd en 7 dagen uitgevoerd</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="identiteit-3">
+          <label for="identiteit-3">Avondreflectie op identiteit 7 dagen uitgevoerd</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="identiteit-4">
+          <label for="identiteit-4">Wie ik wil zijn gedefinieerd in 3 woorden</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="identiteit-5">
+          <label for="identiteit-5">1 kleine actie gekozen die past bij mijn identiteit</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="identiteit-6">
+          <label for="identiteit-6">Geëvalueerd of ik heb geleefd volgens mijn waarden</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="section" id="reflectie">
+      <h2>🤔 Reflectie Vragen</h2>
+      
+      <div class="reflection-question">
+        <h4>Huidige Identiteit</h4>
+        <p>Wie ben je nu? Hoe zou je jezelf beschrijven in 3 woorden? Welke waarden leef je nu uit? Welke waarden zou je willen toevoegen of versterken?</p>
+      </div>
+
+      <div class="reflection-question">
+        <h4>Gewenste Identiteit</h4>
+        <p>Wie wil je zijn? Hoe zou je jezelf willen beschrijven in 3 woorden? Welke waarden wil je uitdragen? Wat is het verschil tussen wie je nu bent en wie je wilt zijn?</p>
+      </div>
+
+      <div class="reflection-question">
+        <h4>Actie en Verandering</h4>
+        <p>Welke kleine actie kun je vandaag doen die past bij je gewenste identiteit? Wat weerhoudt je ervan om nu te beginnen? Wat is je eerste stap om je identiteit te versterken?</p>
+      </div>
+    </div>
+
+    <div class="section" id="actieplan">
+      <h2>🎯 Actieplan</h2>
+      
+      <div class="action-plan">
+        <div class="action-step">
+          <strong>Stap 1:</strong> Identificeer je top 5 kernwaarden. Beantwoord de vragen: Wat maakt me trots? Waar krijg ik energie van? Wat zou ik nooit willen verliezen? Waar zou ik voor vechten? Schrijf ze op en definieer wat elk betekent voor jou.
+        </div>
+        
+        <div class="action-step">
+          <strong>Stap 2:</strong> Implementeer een identiteitsritueel. Kies 1 kleine actie die past bij je identiteit. Plan dit in je ochtendritueel. Houd 7 dagen bij of je dit hebt gedaan en hoe het voelde.
+        </div>
+        
+        <div class="action-step">
+          <strong>Stap 3:</strong> Start met avondreflectie. Plan elke avond 5 minuten reflectietijd. Vraag jezelf: Heb ik vandaag geleefd volgens mijn waarden? Welke keuzes paste bij mijn identiteit? Wat ga ik morgen anders doen?
+        </div>
+        
+        <div class="action-step">
+          <strong>Stap 4:</strong> Definieer wie je wilt zijn in 3 woorden. Maak dit concreet en specifiek. Schrijf op wat dit betekent voor je dagelijkse keuzes en gedrag.
+        </div>
+        
+        <div class="action-step">
+          <strong>Stap 5:</strong> Evalueer na 1 week. Wat heb je geleerd over je identiteit? Wat werkte? Wat niet? Pas je plan aan. Blijf consistent en bouw langzaam op. Identiteit bouw je dag in dag uit.
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p>Dit ebook is onderdeel van de <span class="ttm-brand">Top Tier Men</span> Academy</p>
+      <p>Module 02: Discipline & Identiteit | Les 04: Identiteit Kernwaarden</p>
+      <p>© 2025 Top Tier Men. Alle rechten voorbehouden.</p>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+      checkboxes.forEach(cb => {
+        const saved = localStorage.getItem(cb.id);
+        if (saved === 'true') cb.checked = true;
+        cb.addEventListener('change', function(){ localStorage.setItem(this.id, this.checked); });
+      });
+    });
+  </script>
 </body>
 </html>

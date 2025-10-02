@@ -176,6 +176,8 @@ function TrainingschemasContent() {
   }, [selectedTrainingSchema, isCompleted]);
   const [showRequiredProfile, setShowRequiredProfile] = useState(false);
   const [showCalculator, setShowCalculator] = useState(false);
+  // New: centered modal to prompt user to start training profile
+  const [showProfilePromptModal, setShowProfilePromptModal] = useState(false);
   const [showSchemaWarningModal, setShowSchemaWarningModal] = useState(false);
   const [schemaChangeModalMode, setSchemaChangeModalMode] = useState<'warning' | 'completed'>('warning');
   const [nextSchemaLabel, setNextSchemaLabel] = useState<string | undefined>(undefined);
@@ -237,6 +239,23 @@ function TrainingschemasContent() {
       }, 100);
     }
   }, [showRequiredProfile, showCalculator]);
+
+  // Accessibility: close modal on Escape
+  useEffect(() => {
+    if (!showProfilePromptModal) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setShowProfilePromptModal(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [showProfilePromptModal]);
+
+  // Auto-open modal when there is no profile (and not loading)
+  useEffect(() => {
+    if (!profileLoading && !userTrainingProfile && !showRequiredProfile && !showCalculator) {
+      setShowProfilePromptModal(true);
+    }
+  }, [profileLoading, userTrainingProfile, showRequiredProfile, showCalculator]);
 
   // When profile and filtered schemas are ready and a scroll is pending, perform the scroll
   useEffect(() => {
@@ -2596,24 +2615,79 @@ function TrainingschemasContent() {
           </div>
         )}
 
-        {/* No Profile - Show Calculator Button */}
-        {!profileLoading && !userTrainingProfile && !showRequiredProfile && (
-          <div className="text-center py-8 sm:py-12 mb-6 sm:mb-8">
-            <CalculatorIcon className="mx-auto h-12 w-12 sm:h-16 sm:w-16 text-[#8BAE5A] mb-3 sm:mb-4" />
-            <h3 className="text-lg sm:text-xl font-semibold text-white mb-2">
-              Vul je trainingsprofiel in
-            </h3>
-            <p className="text-sm sm:text-base text-gray-300 mb-4 sm:mb-6 px-4">
-              Vul je trainingsvoorkeuren in om gepersonaliseerde trainingsschemas te krijgen die perfect bij jou passen.
-            </p>
-            <button
-              onClick={() => setShowRequiredProfile(true)}
-              className="px-6 sm:px-8 py-2 sm:py-3 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold text-sm sm:text-base"
+        {/* Inline teaser removed: content appears only in centered modal */}
+
+        {/* Centered Modal for Training Profile Prompt */}
+        <AnimatePresence>
+          {showProfilePromptModal && (
+            <motion.div
+              role="dialog"
+              aria-modal="true"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 flex items-center justify-center"
             >
-              Start Trainingsprofiel
-            </button>
-          </div>
-        )}
+              {/* Backdrop */}
+              <div
+                className="absolute inset-0 bg-black/60"
+                onClick={() => setShowProfilePromptModal(false)}
+              />
+              {/* Modal card */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.96, y: 8 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.96, y: 8 }}
+                transition={{ type: 'spring', stiffness: 260, damping: 24 }}
+                className="relative z-10 w-[92vw] max-w-lg rounded-2xl border border-[#3A4D23]/40 bg-[#232D1A]/95 shadow-2xl p-6"
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-[#8BAE5A]/20">
+                      <CalculatorIcon className="h-6 w-6 text-[#8BAE5A]" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-white">Vul je trainingsprofiel in</h3>
+                      <p className="text-gray-300 text-sm">Gepersonaliseerde schemas die bij jou passen.</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowProfilePromptModal(false)}
+                    className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+                    aria-label="Sluiten"
+                  >
+                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                  </button>
+                </div>
+
+                <p className="text-gray-300 mb-6 text-sm">
+                  Vul je trainingsvoorkeuren in om direct de beste schema's te krijgen voor jouw doel, frequentie en materiaal.
+                </p>
+
+                <div className="flex items-center justify-end gap-3">
+                  <button
+                    onClick={() => setShowProfilePromptModal(false)}
+                    className="px-4 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-gray-800 transition-colors text-sm"
+                  >
+                    Annuleren
+                  </button>
+                  <button
+                    id={trainingNextBtnId}
+                    onClick={() => {
+                      setShowProfilePromptModal(false);
+                      // Open calculator section and focus-scroll
+                      setShowCalculator(true);
+                      setShowRequiredProfile(true);
+                    }}
+                    className="px-5 py-2 rounded-lg bg-[#8BAE5A] text-[#232D1A] font-semibold hover:bg-[#7A9D4A] transition-colors text-sm"
+                  >
+                    Start Trainingsprofiel
+                  </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Training Schemas */}
         {!profileLoading && userTrainingProfile && (

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { supabase } from '@/lib/supabase';
 import { 
@@ -51,6 +51,16 @@ export default function EbookControlePage() {
   const [selectedModule, setSelectedModule] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [scanning, setScanning] = useState(false);
+  // Final check state
+  const [finalChecking, setFinalChecking] = useState(false);
+  const [finalCheckResults, setFinalCheckResults] = useState<Record<string, {
+    summaryOk: boolean;
+    nlOk: boolean;
+    simpleOk: boolean;
+    checklistOk: boolean;
+    reflectOk: boolean;
+    homeworkOk: boolean;
+  }>>({});
 
   // Laad ebooks data
   const fetchEbooks = async () => {
@@ -74,11 +84,111 @@ export default function EbookControlePage() {
     }
   };
 
+  
+
   // Removed testEbookAccess function - direct links are more reliable
 
   useEffect(() => {
     fetchEbooks();
   }, []);
+
+  // ---------- Final Check Logic ----------
+  const isLikelyDutch = (text: string) => {
+    const common = ['de','het','een','en','van','te','ik','je','jij','we','wij','niet','met','voor','naar','zijn','hebben','dit','dat','om','als','ook','maar','dan','wat','hoe','waar','zijn','worden','doel'];
+    const words = text.toLowerCase().match(/[a-zà-ÿ']+/g) || [];
+    if (words.length < 50) return false;
+    const hits = words.filter(w => common.includes(w)).length;
+    return hits / words.length > 0.04; // 4% common-word ratio
+  };
+
+  const isSimpleText = (text: string) => {
+    const sentences = text.split(/[.!?]\s+/).filter(Boolean);
+    if (sentences.length === 0) return false;
+    const words = text.split(/\s+/).filter(Boolean);
+    const avgLen = words.length / sentences.length; // words per sentence
+    const complex = words.filter(w => w.replace(/[^a-zA-Zà-ÿ']/g,'').length >= 13).length;
+    const complexRatio = complex / Math.max(words.length, 1);
+    return avgLen <= 18 && complexRatio <= 0.12;
+  };
+
+  const extractSection = (html: string, headingRegex: RegExp) => {
+    // crude text extraction between heading and next heading
+    const text = html.replace(/<script[\s\S]*?<\/script>/gi,'').replace(/<style[\s\S]*?<\/style>/gi,'');
+    const plain = text.replace(/<[^>]+>/g, '\n');
+    const lines = plain.split(/\n+/).map(l => l.trim()).filter(Boolean);
+    let idx = lines.findIndex(l => headingRegex.test(l));
+    if (idx === -1) return '';
+    let buf: string[] = [];
+    for (let i = idx + 1; i < lines.length; i++) {
+      const l = lines[i];
+      if (/^(#{1,6}|\d+\.|\*|\-|=|\w+:?\s*)$/i.test(l)) { /* ignore minimal markers */ }
+      if (/^(inleiding|hoofdstuk|samenvatting|reflectie|reflectievragen|checklist|huiswerk|opdrachten|conclusie)\b/i.test(l)) break;
+      buf.push(l);
+      if (buf.join(' ').length > 12000) break; // cap buffer
+    }
+    return buf.join('\n');
+  };
+
+  const countListItems = (html: string, sectionRegex: RegExp) => {
+    const section = extractSection(html, sectionRegex) || '';
+    const items1 = (section.match(/<li[\s\S]*?<\/li>/gi) || []).map(s => s.replace(/<[^>]+>/g,'').trim()).filter(Boolean);
+    const items2 = section.split(/\n+/).filter(l => /^(\-|\*|\d+\.|Stap\s+\d+)/i.test(l.trim()));
+    const combined = [...items1, ...items2].map(s => s.trim()).filter(Boolean);
+    const nonTrivial = combined.filter(s => s.length > 20 && !/^Stap\s*1\b/i.test(s));
+    return { total: combined.length, nonTrivial: nonTrivial.length };
+  };
+
+  const analyzeHtml = (html: string) => {
+    const plain = html.replace(/<script[\s\S]*?<\/script>/gi,'').replace(/<style[\s\S]*?<\/style>/gi,'').replace(/<[^>]+>/g,' ');
+    const plainCollapsed = plain.replace(/\s+/g,' ').trim();
+
+    const summaryText = extractSection(html, /samenvatting|uitgebreide\s+samenvatting/i);
+    const summaryLen = (summaryText || '').length;
+    const summaryOk = summaryLen >= 9000; // ~10k chars target
+
+    const nlOk = isLikelyDutch(plainCollapsed);
+    const simpleOk = isSimpleText(plainCollapsed);
+
+    const checklist = countListItems(html, /checklist/i);
+    const checklistOk = checklist.nonTrivial >= 1; // at least more than just Stap 1
+
+    const reflectText = extractSection(html, /reflectievragen|reflectie/i);
+    const reflectQuestions = (reflectText.match(/\?/g) || []).length;
+    const reflectOk = reflectText.length > 80 && reflectQuestions >= 2; // ensure content and multiple questions
+
+    const homework = countListItems(html, /huiswerk|opdracht/i);
+    const homeworkOk = homework.nonTrivial >= 2 || extractSection(html, /huiswerk|opdracht/i).length > 120;
+
+    return { summaryOk, nlOk, simpleOk, checklistOk, reflectOk, homeworkOk };
+  };
+
+  const runFinalCheck = async () => {
+    if (!ebooks.length) return;
+    setFinalChecking(true);
+    try {
+      const results: Record<string, any> = {};
+      const batchSize = 8;
+      for (let i = 0; i < ebooks.length; i += batchSize) {
+        const slice = ebooks.slice(i, i + batchSize);
+        const fetched = await Promise.allSettled(slice.map(async (eb) => {
+          const res = await fetch(eb.path, { cache: 'no-store' });
+          const html = await res.text();
+          return { id: eb.id, checks: analyzeHtml(html) };
+        }));
+        fetched.forEach(item => {
+          if (item.status === 'fulfilled') {
+            results[item.value.id] = item.value.checks;
+          }
+        });
+        setFinalCheckResults(prev => ({ ...prev, ...results })); // progressive updates
+      }
+      setError(null);
+    } catch (e: any) {
+      setError('Final check fout: ' + (e?.message || String(e)));
+    } finally {
+      setFinalChecking(false);
+    }
+  };
 
   // Scan ebooks functie
   const scanEbooks = async () => {
@@ -110,6 +220,26 @@ export default function EbookControlePage() {
     
     return matchesStyle && matchesModule && matchesSearch;
   });
+
+  // Aggregated dashboard stats for Final Check (depends on filteredEbooks)
+  const finalStats = useMemo(() => {
+    const ids = filteredEbooks.map(e => e.id);
+    let processed = 0;
+    let summaryOk = 0, nlOk = 0, simpleOk = 0, checklistOk = 0, reflectOk = 0, homeworkOk = 0, fullyOk = 0;
+    ids.forEach(id => {
+      const r = finalCheckResults[id];
+      if (!r) return;
+      processed++;
+      if (r.summaryOk) summaryOk++;
+      if (r.nlOk) nlOk++;
+      if (r.simpleOk) simpleOk++;
+      if (r.checklistOk) checklistOk++;
+      if (r.reflectOk) reflectOk++;
+      if (r.homeworkOk) homeworkOk++;
+      if (r.summaryOk && r.nlOk && r.simpleOk && r.checklistOk && r.reflectOk && r.homeworkOk) fullyOk++;
+    });
+    return { processed, summaryOk, nlOk, simpleOk, checklistOk, reflectOk, homeworkOk, fullyOk, total: ids.length };
+  }, [finalCheckResults, filteredEbooks]);
 
   // Statistieken
   const stats = {
@@ -143,6 +273,109 @@ export default function EbookControlePage() {
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8BAE5A] mx-auto"></div>
           <p className="mt-4 text-[#8BAE5A]">Laden van ebook data...</p>
+        </div>
+
+        {/* Final Check Dashboard Stats */}
+        <div className="bg-[#232D1A] border border-[#3A4D23] rounded-lg p-6 mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-[#8BAE5A]">Final check – overzicht</h2>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={runFinalCheck}
+                disabled={finalChecking}
+                className="px-3 py-2 rounded-md font-semibold bg-[#B6C948] text-[#181F17] hover:bg-[#8BAE5A] disabled:opacity-50"
+                title="Herbereken status"
+              >
+                {finalChecking ? 'Bezig…' : 'Ververs status'}
+              </button>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+            <div className="bg-[#181F17] border border-[#3A4D23] rounded-md p-3 text-center">
+              <div className="text-xs text-[#B6C948]">Totaal</div>
+              <div className="text-lg font-semibold text-white">{finalStats.total}</div>
+            </div>
+            <div className="bg-[#181F17] border border-[#3A4D23] rounded-md p-3 text-center">
+              <div className="text-xs text-[#B6C948]">Verwerkt</div>
+              <div className="text-lg font-semibold text-white">{finalStats.processed}</div>
+            </div>
+            <div className="bg-[#181F17] border border-[#3A4D23] rounded-md p-3 text-center">
+              <div className="text-xs text-[#B6C948]">Volledig OK</div>
+              <div className="text-lg font-semibold text-green-400">{finalStats.fullyOk}</div>
+            </div>
+            <div className="bg-[#181F17] border border-[#3A4D23] rounded-md p-3 text-center">
+              <div className="text-xs text-[#B6C948]">Samenvatting OK</div>
+              <div className="text-lg font-semibold text-white">{finalStats.summaryOk}</div>
+            </div>
+            <div className="bg-[#181F17] border border-[#3A4D23] rounded-md p-3 text-center">
+              <div className="text-xs text-[#B6C948]">Nederlands OK</div>
+              <div className="text-lg font-semibold text-white">{finalStats.nlOk}</div>
+            </div>
+            <div className="bg-[#181F17] border border-[#3A4D23] rounded-md p-3 text-center">
+              <div className="text-xs text-[#B6C948]">Simpel OK</div>
+              <div className="text-lg font-semibold text-white">{finalStats.simpleOk}</div>
+            </div>
+            <div className="bg-[#181F17] border border-[#3A4D23] rounded-md p-3 text-center">
+              <div className="text-xs text-[#B6C948]">Checklist OK</div>
+              <div className="text-lg font-semibold text-white">{finalStats.checklistOk}</div>
+            </div>
+            <div className="bg-[#181F17] border border-[#3A4D23] rounded-md p-3 text-center">
+              <div className="text-xs text-[#B6C948]">Reflectie / Huiswerk</div>
+              <div className="text-lg font-semibold text-white">{finalStats.reflectOk}/{finalStats.homeworkOk}</div>
+            </div>
+          </div>
+          <p className="text-xs text-[#B6C948] mt-2">Tip: klik op "Ververs status" om tussendoor de actuele voortgang te herberekenen.</p>
+        </div>
+
+        {/* Final check */}
+        <div className="bg-[#232D1A] border border-[#3A4D23] rounded-lg p-6 mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-[#8BAE5A]">Final check</h2>
+            <button
+              onClick={runFinalCheck}
+              disabled={finalChecking}
+              className="bg-[#B6C948] text-[#181F17] px-3 py-2 rounded-md hover:bg-[#8BAE5A] disabled:opacity-50 font-semibold"
+            >
+              {finalChecking ? 'Bezig met controleren…' : 'Controleer alle v2 ebooks'}
+            </button>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-[#3A4D23]">
+              <thead className="bg-[#181F17]">
+                <tr>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-[#B6C948] uppercase">Ebook</th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-[#B6C948] uppercase">Uitgebreide samenvatting (~10k)</th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-[#B6C948] uppercase">Nederlands</th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-[#B6C948] uppercase">Simpel/Doelgericht</th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-[#B6C948] uppercase">Checklist inhoud</th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-[#B6C948] uppercase">Reflectievragen inhoud</th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-[#B6C948] uppercase">Huiswerk inhoud</th>
+                </tr>
+              </thead>
+              <tbody className="bg-[#232D1A] divide-y divide-[#3A4D23]">
+                {filteredEbooks.map(ebook => {
+                  const r = finalCheckResults[ebook.id];
+                  const Cell = ({ ok }: { ok: boolean | undefined }) => (
+                    <span className={`inline-flex items-center px-2 py-1 rounded text-xs ${ok === true ? 'bg-green-100 text-green-800' : ok === false ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800'}`}>
+                      {ok === true ? '✓' : ok === false ? '✕' : '…'}
+                    </span>
+                  );
+                  return (
+                    <tr key={ebook.id}>
+                      <td className="px-4 py-2 text-sm text-white whitespace-nowrap max-w-[240px] truncate" title={ebook.title}>{ebook.title}</td>
+                      <td className="px-4 py-2"><Cell ok={r?.summaryOk} /></td>
+                      <td className="px-4 py-2"><Cell ok={r?.nlOk} /></td>
+                      <td className="px-4 py-2"><Cell ok={r?.simpleOk} /></td>
+                      <td className="px-4 py-2"><Cell ok={r?.checklistOk} /></td>
+                      <td className="px-4 py-2"><Cell ok={r?.reflectOk} /></td>
+                      <td className="px-4 py-2"><Cell ok={r?.homeworkOk} /></td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          <p className="text-xs text-[#B6C948] mt-2">Heuristieken: taalcheck via veelvoorkomende NL-woorden, eenvoud via gemiddelde zinslengte en complexe-woorden ratio, secties via headings Regex (Checklist/Reflectie/Huiswerk). Samenvatting zoekt (Uitgebreide) Samenvatting en controleert lengte.</p>
         </div>
       </div>
     );

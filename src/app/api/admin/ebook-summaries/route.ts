@@ -1,17 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
+type StoredItem = {
+  id: string;
+  url: string;
+  module: string | null;
+  title: string | null;
+  summary_text: string | null;
+  summary_html?: string | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const supabase = supabaseUrl && supabaseServiceKey
+  ? createClient(supabaseUrl, supabaseServiceKey)
+  : null;
 
-const supabase = createClient(
-  supabaseUrl || 'https://placeholder.supabase.co',
-  supabaseServiceKey || 'placeholder-key'
-);
+// Supabase-backed implementation
 
 export async function POST(req: NextRequest) {
   try {
-    if (!supabaseUrl || !supabaseServiceKey) {
+    if (!supabaseUrl || !supabaseServiceKey || !supabase) {
       return NextResponse.json(
         { success: false, error: 'Missing Supabase env vars: set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY' },
         { status: 500 }
@@ -76,7 +87,7 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   try {
-    if (!supabaseUrl || !supabaseServiceKey) {
+    if (!supabaseUrl || !supabaseServiceKey || !supabase) {
       return NextResponse.json(
         { success: false, error: 'Missing Supabase env vars' },
         { status: 500 }

@@ -244,6 +244,16 @@ async function main() {
     return;
   }
   
+  // 4. Werk tekentellingen (char_count en summary_char_count) bij
+  try {
+    console.log('\n🧮 Bijwerken van tekentellingen (incl. V2 samenvatting)...');
+    const { main: updateCharCounts } = require('./update-ebooks-charcount');
+    await updateCharCounts();
+    console.log('✅ Tekentellingen bijgewerkt');
+  } catch (e) {
+    console.error('❌ Fout bij bijwerken tekentellingen:', e.message);
+  }
+  
   console.log('\n🎉 Academy Ebooks Scan Voltooid!');
   console.log(`📚 ${ebooks.length} ebooks gescand en opgeslagen`);
   

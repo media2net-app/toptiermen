@@ -1,819 +1,222 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fysieke Dominantie Belangrijk - Ebook | Top Tier Men</title>
-    <meta name="description" content="Uitgebreide gids over waarom fysieke dominantie zo belangrijk is: praktische oefeningen, checklists en reflectie vragen voor persoonlijke groei.">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            line-height: 1.6;
-            color: #ffffff;
-            background: linear-gradient(135deg, #0A0F0A 0%, #181F17 50%, #232D1A 100%);
-            min-height: 100vh;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 3rem;
-            padding: 2rem;
-            background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
-            border-radius: 20px;
-            border: 1px solid #3A4D23;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        }
-
-        .logo {
-            margin: 0 auto 1rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        h1 {
-            font-size: 2.5rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, #ffffff 0%, #8BAE5A 50%, #B6C948 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 0.5rem;
-        }
-
-        .subtitle {
-            color: #8BAE5A;
-            font-size: 1.1rem;
-            font-weight: 500;
-        }
-
-        .module-info {
-            background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
-            padding: 1rem;
-            border-radius: 10px;
-            margin: 1rem 0;
-            border-left: 4px solid #8BAE5A;
-        }
-
-        .section {
-            background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
-            margin-bottom: 2rem;
-            padding: 2rem;
-            border-radius: 15px;
-            border: 1px solid #3A4D23;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .section h2 {
-            color: #B6C948;
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .section h3 {
-            color: #8BAE5A;
-            font-size: 1.3rem;
-            font-weight: 600;
-            margin: 1.5rem 0 1rem;
-        }
-
-        .section p {
-            margin-bottom: 1rem;
-            color: #e0e0e0;
-        }
-
-        .section ul, .section ol {
-            margin: 1rem 0;
-            padding-left: 2rem;
-        }
-
-        .section li {
-            margin-bottom: 0.5rem;
-            color: #e0e0e0;
-        }
-
-        .highlight-box {
-            background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
-            padding: 1.5rem;
-            border-radius: 10px;
-            border-left: 4px solid #B6C948;
-            margin: 1.5rem 0;
-        }
-
-        .exercise-box {
-            background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%);
-            padding: 1.5rem;
-            border-radius: 10px;
-            border: 1px solid #8BAE5A;
-            margin: 1rem 0;
-        }
-
-        .exercise-box h4 {
-            color: #B6C948;
-            font-size: 1.1rem;
-            margin-bottom: 1rem;
-        }
-
-        .checklist {
-            background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
-            padding: 1.5rem;
-            border-radius: 10px;
-            border: 1px solid #3A4D23;
-            margin: 1rem 0;
-        }
-
-        .checklist-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 0.8rem;
-            padding: 0.5rem;
-            background: rgba(58, 77, 35, 0.3);
-            border-radius: 8px;
-        }
-
-        .checklist-item input[type="checkbox"] {
-            margin-right: 1rem;
-            width: 18px;
-            height: 18px;
-            accent-color: #8BAE5A;
-        }
-
-        .reflection-question {
-            background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
-            padding: 1.5rem;
-            border-radius: 10px;
-            border-left: 4px solid #B6C948;
-            margin: 1rem 0;
-        }
-
-        .reflection-question h4 {
-            color: #B6C948;
-            margin-bottom: 1rem;
-        }
-
-        .action-plan {
-            background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%);
-            padding: 2rem;
-            border-radius: 15px;
-            border: 2px solid #8BAE5A;
-            margin: 2rem 0;
-        }
-
-        .action-plan h3 {
-            color: #B6C948;
-            text-align: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .action-step {
-            background: rgba(139, 174, 90, 0.1);
-            padding: 1rem;
-            border-radius: 8px;
-            margin: 1rem 0;
-            border-left: 3px solid #8BAE5A;
-        }
-
-        .action-step h4 {
-            color: #8BAE5A;
-            margin-bottom: 0.5rem;
-        }
-
-        .footer {
-            text-align: center;
-            margin-top: 3rem;
-            padding: 2rem;
-            background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
-            border-radius: 15px;
-            border: 1px solid #3A4D23;
-        }
-
-        .footer p {
-            color: #8BAE5A;
-            margin-bottom: 1rem;
-        }
-
-        .ttm-brand {
-            color: #B6C948;
-            font-weight: 700;
-        }
-
-        /* Sticky Back Button */
-        .sticky-back-btn {
-            position: fixed;
-            top: 50%;
-            right: 20px;
-            transform: translateY(-50%);
-            z-index: 1000;
-            background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%);
-            color: white;
-            border: none;
-            border-radius: 50px;
-            padding: 15px 20px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            box-shadow: 0 8px 25px rgba(139, 174, 90, 0.3);
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            text-decoration: none;
-            min-width: 120px;
-            justify-content: center;
-        }
-
-        .sticky-back-btn:hover {
-            background: linear-gradient(135deg, #B6C948 0%, #8BAE5A 100%);
-            transform: translateY(-50%) scale(1.05);
-            box-shadow: 0 12px 35px rgba(139, 174, 90, 0.4);
-        }
-
-        .sticky-back-btn:active {
-            transform: translateY(-50%) scale(0.95);
-        }
-
-        .sticky-back-btn svg {
-            width: 16px;
-            height: 16px;
-            fill: currentColor;
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                padding: 1rem;
-            }
-            
-            h1 {
-                font-size: 2rem;
-            }
-            
-            .section {
-                padding: 1.5rem;
-            }
-
-            .sticky-back-btn {
-                right: 10px;
-                padding: 12px 16px;
-                font-size: 12px;
-                min-width: 100px;
-            }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fysieke Dominantie Belangrijk - Ebook | Top Tier Men</title>
+  <meta name="description" content="V2 ebook voor Fysieke Dominantie Belangrijk binnen Top Tier Men Academy." />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.6; color: #ffffff;
+      background: linear-gradient(135deg, #0A0F0A 0%, #181F17 50%, #232D1A 100%);
+      min-height: 100vh;
+    }
+    .container { max-width: 800px; margin: 0 auto; padding: 2rem; }
+    .header {
+      text-align: center; margin-bottom: 3rem; padding: 2rem;
+      background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      border-radius: 20px; border: 1px solid #3A4D23;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    .logo { margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; }
+    h1 {
+      font-size: 2.5rem; font-weight: 800;
+      background: linear-gradient(135deg, #ffffff 0%, #8BAE5A 50%, #B6C948 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      margin-bottom: .5rem;
+    }
+    .subtitle { color: #8BAE5A; font-size: 1.1rem; font-weight: 500; }
+    .module-info {
+      background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1rem; border-radius: 10px; margin: 1rem 0; border-left: 4px solid #8BAE5A;
+    }
+    .section { background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      margin-bottom: 2rem; padding: 2rem; border-radius: 15px; border: 1px solid #3A4D23; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    .section h2 { color: #B6C948; font-size: 1.8rem; font-weight: 700; margin-bottom: 1.5rem; display: flex; align-items: center; gap: .5rem; }
+    .section h3 { color: #8BAE5A; font-size: 1.3rem; font-weight: 600; margin: 1.5rem 0 1rem; }
+    .section p { margin-bottom: 1rem; color: #e0e0e0; }
+    .section ul, .section ol { margin: 1rem 0; padding-left: 2rem; }
+    .section li { margin-bottom: .5rem; color: #e0e0e0; }
+    .highlight-box { background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1.5rem; border-radius: 10px; border-left: 4px solid #B6C948; margin: 1.5rem 0;
+    }
+    .exercise-box { background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%);
+      padding: 1.5rem; border-radius: 10px; border: 1px solid #8BAE5A; margin: 1rem 0;
+    }
+    .exercise-box h4 { color: #B6C948; font-size: 1.1rem; margin-bottom: 1rem; }
+    .checklist { background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      padding: 1.5rem; border-radius: 10px; border: 1px solid #3A4D23; margin: 1rem 0;
+    }
+    .checklist-item { display: flex; align-items: center; margin-bottom: .8rem; padding: .5rem; background: rgba(58,77,35,.3); border-radius: 8px; }
+    .checklist-item input[type="checkbox"] { margin-right: 1rem; width: 18px; height: 18px; accent-color: #8BAE5A; }
+    .reflection-question { background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1.5rem; border-radius: 10px; border-left: 4px solid #B6C948; margin: 1rem 0;
+    }
+    .reflection-question h4 { color: #B6C948; margin-bottom: 1rem; }
+    .action-plan { background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%);
+      padding: 2rem; border-radius: 15px; border: 2px solid #8BAE5A; margin: 2rem 0;
+    }
+    .action-step { background: rgba(139,174,90,.1); padding: 1rem; border-radius: 8px; margin: 1rem 0; border-left: 3px solid #8BAE5A; }
+    .footer { text-align: center; margin-top: 3rem; padding: 2rem; background: linear-gradient(135deg, #181F17 0%, #232D1A 100%); border-radius: 15px; border: 1px solid #3A4D23; }
+    .footer p { color: #8BAE5A; margin-bottom: 1rem; }
+    .ttm-brand { color: #B6C948; font-weight: 700; }
+    .sticky-back-btn { position: fixed; top: 50%; right: 20px; transform: translateY(-50%);
+      z-index: 1000; background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%);
+      color: #fff; border: none; border-radius: 50px; padding: 15px 20px; font-size: 14px; font-weight: 600; cursor: pointer;
+      box-shadow: 0 8px 25px rgba(139,174,90,.3); transition: all .3s ease; display: flex; align-items: center; gap: 8px; text-decoration: none; min-width: 120px; justify-content: center;
+    }
+    .sticky-back-btn:hover { background: linear-gradient(135deg, #B6C948 0%, #8BAE5A 100%); transform: translateY(-50%) scale(1.05); box-shadow: 0 12px 35px rgba(139,174,90,.4); }
+    .sticky-back-btn:active { transform: translateY(-50%) scale(.95); }
+    .sticky-back-btn svg { width: 16px; height: 16px; fill: currentColor; }
+    @media (max-width: 768px) {
+      .container { padding: 1rem; }
+      h1 { font-size: 2rem; }
+      .section { padding: 1.5rem; }
+      .sticky-back-btn { right: 10px; padding: 12px 16px; font-size: 12px; min-width: 100px; }
+    }
+  </style>
 </head>
 <body>
-    <!-- Sticky Back Button -->
-    <a href="https://platform.toptiermen.eu/dashboard/academy/ba58a203-b2d0-442b-83a3-62cfb0a79478/66a4a5fc-c9dc-452e-954b-bbb0aca66a65" class="sticky-back-btn" title="Terug naar les">
-        <svg viewBox="0 0 24 24">
-            <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
-        </svg>
-        Terug
-    </a>
+  <a href="/dashboard/academy/0d02e65a-c109-440d-9286-690b21fbdecb/50bbaa53-b117-42b3-9221-ee1f4f59a2de" class="sticky-back-btn" title="Terug naar les">
+    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    Terug
+  </a>
 
-    <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <div class="logo">
-                <img src="/logo_white-full.svg" alt="Top Tier Men Logo" style="height:40px;width:auto" />
-            </div>
-            <h1>Fysieke Dominantie Belangrijk</h1>
-            <p class="subtitle">Complete Gids voor Praktische Toepassing</p>
-            <div class="module-info"><strong>Module 03: Fysieke Dominantie</strong> | <strong>Les 01: Waarom is Fysieke Dominantie zo Belangrijk</strong></div>
-        </div>
-        
-        <!-- Uitgebreide Samenvatting -->
-        <div class="section">
-          <h2>📚 Uitgebreide Samenvatting van de Les</h2>
-          
-          <div class="highlight-box">
-            <h4>🎯 Les Overzicht</h4>
-            <p>In deze les hebben we waarom is fysieke dominantie zo belangrijk? behandeld. Dit is een cruciaal onderdeel van je ontwikkeling als Top Tier Man en vormt de basis voor verdere groei en prestaties.</p>
-          </div>
-
-          <h3>Belangrijkste Inzichten</h3>
-          <ul>
-            <li><strong>Wat fysieke dominantie is:</strong> Een fundamenteel concept dat je dagelijks kunt toepassen</li><li><strong>Fysieke dominantie = Je lichaam straalt kracht en vertrouwen uit.:</strong> Een fundamenteel concept dat je dagelijks kunt toepassen</li><li><strong>Waarom fysieke aanwezigheid belangrijk is:</strong> Een fundamenteel concept dat je dagelijks kunt toepassen</li><li><strong>1. Eerste indrukken:</strong> Een fundamenteel concept dat je dagelijks kunt toepassen</li><li><strong>Voorbeelden::</strong> Een fundamenteel concept dat je dagelijks kunt toepassen</li>
-            <li><strong>Praktische Toepassing:</strong> Het verschil tussen kennis en wijsheid ligt in de dagelijkse implementatie</li>
-            <li><strong>Consistentie:</strong> Kleine, dagelijkse acties leiden tot grote, langetermijn resultaten</li>
-          </ul>
-
-          <h3>Waarom Dit Belangrijk Is</h3>
-          <p>De concepten uit deze les zijn niet alleen theoretisch interessant, maar vormen de praktische basis voor je dagelijkse leven. Door deze principes consequent toe te passen, bouw je aan een sterke fundering voor alle andere aspecten van je ontwikkeling.</p>
-
-          <h3>Wat is Fysieke Dominantie Precies?</h3>
-          <p>Fysieke dominantie is het vermogen om je lichaam te gebruiken om kracht, vertrouwen en aanwezigheid uit te stralen. Het is niet alleen over spierkracht, maar over de manier waarop je je lichaam gebruikt om respect en autoriteit te verkrijgen.</p>
-          
-          <p>Denk aan fysieke dominantie als de "visuele taal" van kracht. Net zoals woorden je gedachten communiceren, communiceert je lichaam je innerlijke kracht. Zonder fysieke dominantie blijf je onzichtbaar. Met fysieke dominantie word je onvergetelijk.</p>
-
-          <h3>De 5 Fundamentele Pijlers van Fysieke Dominantie</h3>
-          <p>Fysieke dominantie is gebouwd op vijf fundamentele pijlers die samen een onverzettelijke aanwezigheid creëren. Deze pijlers zijn de basis van alle fysieke dominantie prestaties.</p>
-          
-          <h4>1. Houding en Uitstraling</h4>
-          <p>Houding en uitstraling zijn de eerste pijler van fysieke dominantie. Het is de manier waarop je je lichaam positioneert om kracht en vertrouwen uit te stralen.</p>
-          
-          <p><strong>Houding Principes:</strong></p>
-          <ul>
-            <li><strong>Rechte Rug:</strong> Je rug recht houden om kracht uit te stralen</li>
-            <li><strong>Open Borst:</strong> Je borst open houden om vertrouwen te tonen</li>
-            <li><strong>Hoofd Omhoog:</strong> Je hoofd omhoog houden om trots te tonen</li>
-            <li><strong>Schouders Achteruit:</strong> Je schouders achteruit houden om ruimte in te nemen</li>
-          </ul>
-          
-          <h4>2. Beweging en Gebaren</h4>
-          <p>Beweging en gebaren zijn de tweede pijler van fysieke dominantie. Het is de manier waarop je beweegt om kracht en controle uit te stralen.</p>
-          
-          <p><strong>Beweging Principes:</strong></p>
-          <ul>
-            <li><strong>Gecontroleerde Beweging:</strong> Elke beweging met controle uitvoeren</li>
-            <li><strong>Zelfverzekerde Gebaren:</strong> Gebaren die zelfvertrouwen tonen</li>
-            <li><strong>Ruimte Innemen:</strong> Beweging die ruimte claimt</li>
-            <li><strong>Krachtige Stappen:</strong> Stappen die kracht en doelgerichtheid tonen</li>
-          </ul>
-          
-          <h4>3. Oogcontact en Focus</h4>
-          <p>Oogcontact en focus zijn de derde pijler van fysieke dominantie. Het is de manier waarop je je ogen gebruikt om aandacht en respect te verkrijgen.</p>
-          
-          <p><strong>Oogcontact Principes:</strong></p>
-          <ul>
-            <li><strong>Directe Blik:</strong> Direct oogcontact maken zonder weg te kijken</li>
-            <li><strong>Zelfverzekerde Focus:</strong> Focus die zelfvertrouwen toont</li>
-            <li><strong>Respectvolle Aandacht:</strong> Aandacht die respect toont</li>
-            <li><strong>Krachtige Uitdrukking:</strong> Uitdrukking die kracht toont</li>
-          </ul>
-          
-          <h4>4. Stem en Toon</h4>
-          <p>Stem en toon zijn de vierde pijler van fysieke dominantie. Het is de manier waarop je je stem gebruikt om autoriteit en kracht uit te stralen.</p>
-          
-          <p><strong>Stem Principes:</strong></p>
-          <ul>
-            <li><strong>Diepe Stem:</strong> Een diepe, krachtige stem gebruiken</li>
-            <li><strong>Duidelijke Articulatie:</strong> Duidelijk articuleren om begrepen te worden</li>
-            <li><strong>Gecontroleerde Toon:</strong> Toon die controle en kracht toont</li>
-            <li><strong>Zelfverzekerde Projectie:</strong> Stem die ruimte vult</li>
-          </ul>
-          
-          <h4>5. Ruimte en Aanwezigheid</h4>
-          <p>Ruimte en aanwezigheid zijn de vijfde pijler van fysieke dominantie. Het is de manier waarop je ruimte gebruikt om je aanwezigheid te maximaliseren.</p>
-          
-          <p><strong>Ruimte Principes:</strong></p>
-          <ul>
-            <li><strong>Ruimte Claimen:</strong> Ruimte claimen door je positie</li>
-            <li><strong>Centrale Positie:</strong> Jezelf in centrale posities plaatsen</li>
-            <li><strong>Open Lichaamstaal:</strong> Lichaamstaal die ruimte inneemt</li>
-            <li><strong>Dominante Houding:</strong> Houding die dominantie toont</li>
-          </ul>
-
-          <h3>Waarom Fysieke Dominantie zo Krachtig is</h3>
-          <p>Fysieke dominantie is zo krachtig omdat het werkt op het diepste niveau van menselijke interactie. Het is de eerste indruk die je maakt en de laatste herinnering die je achterlaat.</p>
-          
-          <h4>Eerste Indrukken en Onmiddellijke Impact</h4>
-          <p>Fysieke dominantie creëert onmiddellijke impact door de eerste indruk die je maakt. Mensen beoordelen je binnen seconden op basis van je fysieke aanwezigheid.</p>
-          
-          <p><strong>Eerste Indruk Voordelen:</strong></p>
-          <ul>
-            <li><strong>Onmiddellijk Respect:</strong> Respect verkrijgen zonder woorden</li>
-            <li><strong>Autoriteit Claimen:</strong> Autoriteit claimen door aanwezigheid</li>
-            <li><strong>Vertrouwen Opwekken:</strong> Vertrouwen opwekken door kracht</li>
-            <li><strong>Aandacht Trekken:</strong> Aandacht trekken door dominantie</li>
-          </ul>
-          
-          <h4>Non-verbale Communicatie</h4>
-          <p>Fysieke dominantie is de sterkste vorm van non-verbale communicatie. Het communiceert je innerlijke kracht zonder woorden te gebruiken.</p>
-          
-          <p><strong>Non-verbale Voordelen:</strong></p>
-          <ul>
-            <li><strong>Universele Taal:</strong> Taal die iedereen begrijpt</li>
-            <li><strong>Onmiddellijke Impact:</strong> Impact zonder woorden</li>
-            <li><strong>Emotionele Reactie:</strong> Emotionele reactie opwekken</li>
-            <li><strong>Onbewuste Invloed:</strong> Onbewuste invloed uitoefenen</li>
-          </ul>
-          
-          <h4>Psychologische Impact</h4>
-          <p>Fysieke dominantie heeft diepe psychologische impact op anderen. Het activeert primitieve hersenprocessen die respect en volgzaamheid opwekken.</p>
-          
-          <p><strong>Psychologische Voordelen:</strong></p>
-          <ul>
-            <li><strong>Respect Opwekken:</strong> Respect opwekken door aanwezigheid</li>
-            <li><strong>Autoriteit Vestigen:</strong> Autoriteit vestigen door dominantie</li>
-            <li><strong>Vertrouwen Creëren:</strong> Vertrouwen creëren door kracht</li>
-            <li><strong>Leiderschap Tonen:</strong> Leiderschap tonen door aanwezigheid</li>
-          </ul>
-
-          <h3>Hoe Fysieke Dominantie Werkt in je Hersenen</h3>
-          <p>Fysieke dominantie werkt door specifieke neurologische processen die je hersenen trainen om kracht en vertrouwen uit te stralen. Deze processen maken fysieke dominantie automatisch.</p>
-          
-          <h4>Neurologische Basis van Fysieke Dominantie</h4>
-          <p>Fysieke dominantie werkt door het trainen van je voorste deel van je hersenen en het ontwikkelen van nieuwe verbindingen. Wanneer je fysieke dominantie ontwikkelt, train je je hersenen om kracht en vertrouwen uit te stralen.</p>
-          
-          <p><strong>Neurologische Processen:</strong></p>
-          <ul>
-            <li><strong>Voorste Hersenen Training:</strong> Je planning en besluitvorming trainen voor dominantie</li>
-            <li><strong>Nieuwe Verbindingen Ontwikkelen:</strong> Nieuwe paden ontwikkelen voor dominantie gedrag</li>
-            <li><strong>Automatisering:</strong> Dominantie gedrag automatisch maken</li>
-            <li><strong>Consistentie:</strong> Consistent handelen naar je dominantie</li>
-          </ul>
-          
-          <h4>Hoe Fysieke Dominantie je Hersenen Verandert</h4>
-          <p>Fysieke dominantie verandert je hersenen door het ontwikkelen van nieuwe neurale paden die specifiek zijn voor dominantie gedrag. Deze paden maken dominantie automatisch en natuurlijk.</p>
-          
-          <p><strong>Hersenen Veranderingen:</strong></p>
-          <ul>
-            <li><strong>Nieuwe Neurale Paden:</strong> Nieuwe paden ontwikkelen voor dominantie gedrag</li>
-            <li><strong>Versterkte Verbindingen:</strong> Bestaande verbindingen versterken voor dominantie</li>
-            <li><strong>Automatische Processen:</strong> Automatische processen ontwikkelen voor dominantie</li>
-            <li><strong>Consistentie:</strong> Consistent handelen naar je dominantie</li>
-          </ul>
-
-          <h3>Waarom Fysieke Dominantie Moeilijk Voelt</h3>
-          <p>Fysieke dominantie voelt moeilijk omdat het een fundamentele verandering vereist in je lichaamstaal en zelfbeeld. Het is niet alleen een gedrag, maar een manier van zijn.</p>
-          
-          <h4>Zelfbeeld Verandering Uitdagingen</h4>
-          <p>Zelfbeeld verandering is een van de moeilijkste veranderingen die je kunt maken. Het vereist dat je je zelfbeeld en overtuigingen over jezelf verandert.</p>
-          
-          <p><strong>Zelfbeeld Uitdagingen:</strong></p>
-          <ul>
-            <li><strong>Zelfbeeld Verandering:</strong> Je zelfbeeld veranderen is moeilijk</li>
-            <li><strong>Overtuigingen Veranderen:</strong> Overtuigingen over jezelf veranderen is moeilijk</li>
-            <li><strong>Gedrag Automatiseren:</strong> Gedrag automatisch maken is moeilijk</li>
-            <li><strong>Consistentie Behouden:</strong> Consistentie behouden is moeilijk</li>
-          </ul>
-          
-          <h4>Hoe Fysieke Dominantie Uitdagingen Overwint</h4>
-          <p>Fysieke dominantie overwint uitdagingen door het ontwikkelen van nieuwe gewoonten en automatische responsen. Deze gewoonten maken dominantie natuurlijk en automatisch.</p>
-          
-          <p><strong>Uitdaging Overwinnende Strategieën:</strong></p>
-          <ul>
-            <li><strong>Gewoonte Ontwikkeling:</strong> Nieuwe gewoonten ontwikkelen voor dominantie</li>
-            <li><strong>Automatische Respons:</strong> Automatische responsen ontwikkelen voor dominantie</li>
-            <li><strong>Zelfbeeld Versterking:</strong> Je zelfbeeld versterken voor dominantie</li>
-            <li><strong>Systemen Bouwen:</strong> Systemen bouwen die dominantie ondersteunen</li>
-          </ul>
-
-          <h3>De 3 Fundamentele Bouwstenen van Fysieke Dominantie</h3>
-          <p>Fysieke dominantie is gebouwd op drie fundamentele bouwstenen die samen een onverzettelijke aanwezigheid creëren. Deze bouwstenen zijn de basis van alle fysieke dominantie prestaties.</p>
-          
-          <h4>1. Houding en Uitstraling</h4>
-          <p>Houding en uitstraling zijn de eerste bouwsteen van fysieke dominantie. Het is de manier waarop je je lichaam positioneert om kracht en vertrouwen uit te stralen.</p>
-          
-          <p><strong>Houding Principes:</strong></p>
-          <ul>
-            <li><strong>Rechte Rug:</strong> Je rug recht houden om kracht uit te stralen</li>
-            <li><strong>Open Borst:</strong> Je borst open houden om vertrouwen te tonen</li>
-            <li><strong>Hoofd Omhoog:</strong> Je hoofd omhoog houden om trots te tonen</li>
-            <li><strong>Schouders Achteruit:</strong> Je schouders achteruit houden om ruimte in te nemen</li>
-          </ul>
-          
-          <h4>2. Beweging en Gebaren</h4>
-          <p>Beweging en gebaren zijn de tweede bouwsteen van fysieke dominantie. Het is de manier waarop je beweegt om kracht en controle uit te stralen.</p>
-          
-          <p><strong>Beweging Principes:</strong></p>
-          <ul>
-            <li><strong>Gecontroleerde Beweging:</strong> Elke beweging met controle uitvoeren</li>
-            <li><strong>Zelfverzekerde Gebaren:</strong> Gebaren die zelfvertrouwen tonen</li>
-            <li><strong>Ruimte Innemen:</strong> Beweging die ruimte claimt</li>
-            <li><strong>Krachtige Stappen:</strong> Stappen die kracht en doelgerichtheid tonen</li>
-          </ul>
-          
-          <h4>3. Ruimte en Aanwezigheid</h4>
-          <p>Ruimte en aanwezigheid zijn de derde bouwsteen van fysieke dominantie. Het is de manier waarop je ruimte gebruikt om je aanwezigheid te maximaliseren.</p>
-          
-          <p><strong>Ruimte Principes:</strong></p>
-          <ul>
-            <li><strong>Ruimte Claimen:</strong> Ruimte claimen door je positie</li>
-            <li><strong>Centrale Positie:</strong> Jezelf in centrale posities plaatsen</li>
-            <li><strong>Open Lichaamstaal:</strong> Lichaamstaal die ruimte inneemt</li>
-            <li><strong>Dominante Houding:</strong> Houding die dominantie toont</li>
-          </ul>
-        </div>
-        
-        <!-- Huiswerk Opdrachten -->
-        <div class="section">
-            <h2>📝 Huiswerk Opdrachten</h2>
-            <p><strong>Belangrijk:</strong> Deze opdrachten zijn specifiek gebaseerd op de les inhoud over fysieke dominantie en zijn ontworpen om je begrip te verdiepen en praktische toepassing te stimuleren.</p>
-
-            <div class="exercise-box">
-                <h4>Opdracht 1: Fysieke Dominantie Assessment</h4>
-                <p><strong>Doel:</strong> Evalueer je huidige fysieke dominantie en identificeer verbeterpunten.</p>
-                <p><strong>Actie:</strong> Beantwoord de volgende vragen eerlijk en noteer je antwoorden:</p>
-                <ul>
-                    <li>Hoe zou je je huidige fysieke dominantie beoordelen op een schaal van 1-10?</li>
-                    <li>Welke van de 5 pijlers zijn het sterkst in je leven?</li>
-                    <li>Welke pijlers hebben de meeste aandacht nodig?</li>
-                    <li>Hoe heeft je fysieke dominantie je leven beïnvloed tot nu toe?</li>
-                    <li>Welke fysieke dominantie zou je willen hebben over 1 jaar?</li>
-                </ul>
-            </div>
-
-            <div class="exercise-box">
-                <h4>Opdracht 2: Fysieke Kracht Ontwikkeling</h4>
-                <p><strong>Doel:</strong> Ontwikkel je fysieke kracht door gerichte training.</p>
-                <p><strong>Actie:</strong> Voltooi de volgende stappen:</p>
-                <ul>
-                    <li>Test je huidige kracht in 5 basisoefeningen</li>
-                    <li>Stel specifieke krachtdoelen voor de komende 3 maanden</li>
-                    <li>Ontwerp een trainingsprogramma dat past bij je niveau</li>
-                    <li>Begin met 3 trainingen per week</li>
-                    <li>Houd je voortgang bij in een dagboek</li>
-                </ul>
-            </div>
-
-            <div class="exercise-box">
-                <h4>Opdracht 3: Houding en Uitstraling Verbetering</h4>
-                <p><strong>Doel:</strong> Verbeter je houding en uitstraling voor meer fysieke dominantie.</p>
-                <p><strong>Actie:</strong> Kies 3 specifieke verbeteringen die je deze week gaat uitvoeren:</p>
-                <ul>
-                    <li>Verbetering 1: _________________________________ (bijv. "Ik sta altijd rechtop")</li>
-                    <li>Verbetering 2: _________________________________ (bijv. "Ik maak altijd oogcontact")</li>
-                    <li>Verbetering 3: _________________________________ (bijv. "Ik neem altijd ruimte in")</li>
-                </ul>
-                <p><strong>Regel:</strong> Focus op consistentie, niet op perfectie. Elke verbetering die je houding ondersteunt is een overwinning.</p>
-            </div>
-
-            <div class="exercise-box">
-                <h4>Opdracht 4: Fysieke Dominantie Implementatie</h4>
-                <p><strong>Doel:</strong> Implementeer fysieke dominantie in je dagelijkse leven.</p>
-                <p><strong>Actie:</strong> Houd 7 dagen bij hoe je fysieke dominantie je dagelijks leven beïnvloedt:</p>
-                <ul>
-                    <li>Noteer elke dag 3 momenten waar je fysieke dominantie toonde</li>
-                    <li>Voor elk moment, identificeer welke pijler je gebruikte</li>
-                    <li>Evalueer of je fysieke dominantie consistent was</li>
-                    <li>Identificeer waar je je fysieke dominantie kon versterken</li>
-                </ul>
-            </div>
-
-            <div class="exercise-box">
-                <h4>Opdracht 5: Fysieke Dominantie Educatie</h4>
-                <p><strong>Doel:</strong> Verdiep je kennis over fysieke dominantie.</p>
-                <p><strong>Actie:</strong> Onderzoek de volgende onderwerpen:</p>
-                <ul>
-                    <li>Wat is het verschil tussen fysieke dominantie en agressie?</li>
-                    <li>Hoe werken fysieke dominantie overtuigingen in je hersenen?</li>
-                    <li>Wat zijn de beste strategieën om fysieke dominantie te ontwikkelen?</li>
-                    <li>Hoe kun je authentieke fysieke dominantie identificeren?</li>
-                    <li>Wat zijn de psychologische principes achter fysieke dominantie ontwikkeling?</li>
-                </ul>
-                <p><strong>Presentatie:</strong> Maak een korte samenvatting van je bevindingen en deel deze met anderen.</p>
-            </div>
-        </div>
-        
-        <!-- Fysieke Dominantie Checklists -->
-        <div class="section">
-            <h2>✅ Fysieke Dominantie Checklists</h2>
-            <p><strong>Doel:</strong> Deze checklists zijn specifiek ontworpen om je fysieke dominantie te versterken en je fysieke kracht te implementeren.</p>
-
-            <h3>Ochtend Routine (Fysieke Dominantie Versterking)</h3>
-            <div class="checklist">
-                <div class="checklist-item">
-                    <input type="checkbox" id="morning1">
-                    <label for="morning1">Herinner jezelf aan je fysieke dominantie ("Ik ben fysiek dominant en krachtig")</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="morning2">
-                    <label for="morning2">Doe 10 push-ups om je kracht te activeren</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="morning3">
-                    <label for="morning3">Sta rechtop en neem een dominante houding aan</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="morning4">
-                    <label for="morning4">Visualiseer jezelf als fysiek dominant en krachtig</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="morning5">
-                    <label for="morning5">Begin met een kleine fysieke actie die je dominantie ondersteunt</label>
-                </div>
-            </div>
-
-            <h3>Dagelijkse Fysieke Dominantie Ondersteuning</h3>
-            <div class="checklist">
-                <div class="checklist-item">
-                    <input type="checkbox" id="daily1">
-                    <label for="daily1">Handel naar je fysieke dominantie in elke situatie</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="daily2">
-                    <label for="daily2">Gebruik je fysieke kracht als kompas voor belangrijke keuzes</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="daily3">
-                    <label for="daily3">Vier elke actie die je fysieke dominantie ondersteunt</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="daily4">
-                    <label for="daily4">Leer van momenten waar je niet naar je fysieke dominantie handelde</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="daily5">
-                    <label for="daily5">Herinner jezelf regelmatig aan je fysieke kracht</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="daily6">
-                    <label for="daily6">Gebruik fysieke dominantie-gebaseerde zelfspraak ("Ik ben fysiek dominant en krachtig")</label>
-                </div>
-            </div>
-
-            <h3>Avond Fysieke Dominantie Reflectie</h3>
-            <div class="checklist">
-                <div class="checklist-item">
-                    <input type="checkbox" id="evening1">
-                    <label for="evening1">Evalueer welke acties je fysieke dominantie ondersteunden</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="evening2">
-                    <label for="evening2">Identificeer waar je sterk was in je fysieke dominantie</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="evening3">
-                    <label for="evening3">Noteer waar je je fysieke dominantie kon versterken</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="evening4">
-                    <label for="evening4">Plan morgen met specifieke fysieke dominantie doelen</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="evening5">
-                    <label for="evening5">Celebreer je fysieke dominantie overwinningen</label>
-                </div>
-            </div>
-
-            <h3>Weekelijkse Fysieke Dominantie Check</h3>
-            <div class="checklist">
-                <div class="checklist-item">
-                    <input type="checkbox" id="weekly1">
-                    <label for="weekly1">Evalueer hoe sterk je fysieke dominantie is geworden (1-10)</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="weekly2">
-                    <label for="weekly2">Controleer welke fysieke dominantie-gebaseerde gewoonten je hebt ontwikkeld</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="weekly3">
-                    <label for="weekly3">Identificeer patronen in je fysieke dominantie ontwikkeling</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="weekly4">
-                    <label for="weekly4">Plan verdere fysieke dominantie versterking voor de komende week</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" id="weekly5">
-                    <label for="weekly5">Stel nieuwe, uitdagende fysieke dominantie doelen</label>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Reflectie Vragen -->
-        <div class="section">
-            <h2>🤔 Reflectie Vragen voor Fysieke Dominantie</h2>
-            <p><strong>Doel:</strong> Deze vragen helpen je om dieper na te denken over je fysieke dominantie ontwikkeling en fysieke kracht implementatie.</p>
-
-            <div class="reflection-question">
-                <h4>Vraag 1: Huidige Fysieke Dominantie Status</h4>
-                <p>Hoe zou je je huidige fysieke dominantie beoordelen op een schaal van 1-10? Welke specifieke fysieke overtuigingen heb je over jezelf? Wat zijn je grootste fysieke dominantie uitdagingen?</p>
-            </div>
-
-            <div class="reflection-question">
-                <h4>Vraag 2: Fysieke Kracht Identificatie</h4>
-                <p>Welke 5 fysieke krachten zijn het belangrijkst voor jou? Welke van deze krachten zijn inherited en welke zijn chosen? Hoe beïnvloeden deze krachten je dagelijkse beslissingen?</p>
-            </div>
-
-            <div class="reflection-question">
-                <h4>Vraag 3: Impact van Fysieke Dominantie op je Leven</h4>
-                <p>Hoe heeft je huidige fysieke dominantie je leven beïnvloed? Welke kansen heb je gemist door beperkende fysieke overtuigingen? Hoe zou je leven eruitzien als je je gewenste fysieke dominantie volledig had ontwikkeld?</p>
-            </div>
-
-            <div class="reflection-question">
-                <h4>Vraag 4: Fysieke Dominantie & Kracht Doelen</h4>
-                <p>Wat zijn je specifieke doelen voor fysieke dominantie ontwikkeling over de komende 3 maanden? Welke meetbare verbeteringen wil je zien in je fysieke dominantie-gebaseerde beslissingen en kracht implementatie?</p>
-            </div>
-
-            <div class="reflection-question">
-                <h4>Vraag 5: Fysieke Dominantie Implementatie Strategie</h4>
-                <p>Welke veranderingen in je fysieke dominantie ben je bereid te maken om je doelen te bereiken? Wat zijn je grootste uitdagingen bij het implementeren van fysieke dominantie-gebaseerde gewoonten? Hoe kun je jezelf verantwoordelijk houden?</p>
-            </div>
-
-            <div class="reflection-question">
-                <h4>Vraag 6: Langetermijn Fysieke Dominantie Visie</h4>
-                <p>Hoe ziet je ideale fysieke dominantie eruit over 1 jaar? Welke rol spelen je fysieke krachten in je algemene prestatie- en ontwikkelingsdoelen? Hoe kun je deze fysieke dominantie kennis doorgeven aan anderen?</p>
-            </div>
-        </div>
-
-        <!-- Volgende Stappen en Actieplan -->
-        <div class="section">
-            <h2>🚀 Volgende Stappen en Actieplan</h2>
-
-            <div class="action-plan">
-                <h3>30-Dagen Fysieke Dominantie Ontwikkeling Plan</h3>
-
-                <div class="action-step">
-                    <h4>Week 1: Fysieke Dominantie Bewustwording en Kracht Ontdekking</h4>
-                    <ul>
-                        <li>Voltooi de fysieke dominantie assessment oefening</li>
-                        <li>Identificeer je 5 fysieke kernkrachten</li>
-                        <li>Implementeer de ochtend fysieke dominantie routine</li>
-                        <li>Begin met 3 kleine fysieke dominantie-versterkende gewoonten</li>
-                        <li>Start met fysieke kracht implementatie dagboek</li>
-                    </ul>
-                </div>
-
-                <div class="action-step">
-                    <h4>Week 2: Fysieke Dominantie Versterking en Kracht Implementatie</h4>
-                    <ul>
-                        <li>Optimaliseer je fysieke dominantie-gebaseerde ochtend routine</li>
-                        <li>Implementeer fysieke kracht in dagelijkse beslissingen</li>
-                        <li>Gebruik fysieke dominantie-gebaseerde zelfspraak dagelijks</li>
-                        <li>Handel naar je gewenste fysieke dominantie in elke beslissing</li>
-                        <li>Begin met avond fysieke dominantie reflectie routine</li>
-                    </ul>
-                </div>
-
-                <div class="action-step">
-                    <h4>Week 3: Fysieke Dominantie Consolidatie en Uitbreiding</h4>
-                    <ul>
-                        <li>Verhoog de intensiteit van je fysieke dominantie gewoonten</li>
-                        <li>Integreer fysieke dominantie-gebaseerde discipline in nieuwe situaties</li>
-                        <li>Bouw momentum op door fysieke dominantie overwinningen</li>
-                        <li>Implementeer weekelijkse fysieke dominantie checks</li>
-                        <li>Zoek naar manieren om anderen te helpen met fysieke dominantie ontwikkeling</li>
-                    </ul>
-                </div>
-
-                <div class="action-step">
-                    <h4>Week 4: Fysieke Dominantie Consolidatie en Planning</h4>
-                    <ul>
-                        <li>Consolideer alle nieuwe fysieke dominantie gewoonten</li>
-                        <li>Evalueer je fysieke dominantie ontwikkeling met het dagboek</li>
-                        <li>Meet je verbeteringen (fysieke dominantie sterkte, kracht implementatie)</li>
-                        <li>Plan voor langetermijn fysieke dominantie onderhoud</li>
-                        <li>Stel nieuwe, uitdagende fysieke dominantie doelen</li>
-                    </ul>
-                </div>
-            </div>
-
-            <h3>Langetermijn Fysieke Dominantie Strategieën</h3>
-            <ul>
-                <li><strong>Maand 2-3:</strong> Verdieping in geavanceerde fysieke dominantie ontwikkeling technieken</li>
-                <li><strong>Maand 4-6:</strong> Integratie met andere ontwikkelingsgebieden</li>
-                <li><strong>Maand 6+:</strong> Mentorschap en doorgeven van fysieke dominantie kennis</li>
-            </ul>
-
-            <h3>Fysieke Dominantie Monitoring en Meting</h3>
-            <div class="highlight-box">
-                <h4>📊 Belangrijke Metingen</h4>
-                <ul>
-                    <li><strong>Subjectieve Metingen:</strong> Fysieke dominantie sterkte, kracht consistentie, zelfspraak</li>
-                    <li><strong>Objectieve Metingen:</strong> Fysieke dominantie-gebaseerde acties, kracht implementatie, beslissingsconsistentie</li>
-                    <li><strong>Reflectie Tests:</strong> Weekelijkse fysieke dominantie evaluatie en aanpassingen</li>
-                </ul>
-            </div>
-
-            <div class="highlight-box">
-                <h4>🎯 Belangrijke Herinnering</h4>
-                <p>Fysieke dominantie ontwikkeling is een langetermijn proces. Focus op consistente, dagelijkse fysieke dominantie versterking en kracht implementatie. Kleine fysieke dominantie veranderingen leiden tot grote resultaten. Elke dag is een nieuwe kans om je fysieke dominantie te versterken en je kracht te implementeren.</p>
-            </div>
-        </div>
-
-        <!-- Footer -->
-        <div class="footer">
-            <p>Dit ebook is onderdeel van de <span class="ttm-brand">Top Tier Men</span> Academy</p>
-            <p>Module 03: Fysieke Dominantie | Les 01: Waarom is Fysieke Dominantie zo Belangrijk</p>
-            <p>© 2025 Top Tier Men. Alle rechten voorbehouden.</p>
-        </div>
+  <div class="container">
+    <div class="header">
+      <div class="logo">
+        <img src="/logo_white-full.svg" alt="Top Tier Men Logo" style="height:40px;width:auto" />
+      </div>
+      <h1>Fysieke Dominantie Belangrijk</h1>
+      <p class="subtitle">Waarom fysieke dominantie zo belangrijk is</p>
+      <div class="module-info">
+        <strong>Module 03: Fysieke Dominantie</strong> | <strong>Les 01: Waarom is fysieke dominantie zo belangrijk?</strong>
+      </div>
     </div>
 
-    <script>
-        // Simple functionality for checkboxes
-        document.addEventListener('DOMContentLoaded', function() {
-            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-            
-            checkboxes.forEach(checkbox => {
-                // Load saved state from localStorage
-                const savedState = localStorage.getItem(checkbox.id);
-                if (savedState === 'true') {
-                    checkbox.checked = true;
-                }
-                
-                // Save state when changed
-                checkbox.addEventListener('change', function() {
-                    localStorage.setItem(this.id, this.checked);
-                });
-            });
-        });
-    </script>
+    <div class="section" id="samenvatting">
+      <h2>📚 Uitgebreide Samenvatting van de Les</h2>
+<div class="highlight-box"><h4>🎯 Doel van deze les</h4><p>Fysieke dominantie is de basis van alles. Het is niet alleen over hoe je eruitziet, maar over hoe sterk, fit en veerkrachtig je bent. Een sterk lichaam geeft je mentale kracht, zelfvertrouwen, energie en respect van anderen. Het is de fundering waarop je alle andere aspecten van je leven bouwt.</p></div><h3>Wat is fysieke dominantie?</h3><p>Fysieke dominantie betekent dat je lichaam sterk, fit en veerkrachtig is. Het betekent dat je meer kunt dan de gemiddelde man. Het betekent dat je lichaam je dient in plaats van dat je je lichaam dient. Het is niet over perfectie, maar over functionele kracht en gezondheid.</p><h3>Waarom is het zo belangrijk?</h3><h4>Mentale kracht</h4><p>Een sterk lichaam geeft je een sterke geest. Wanneer je weet dat je fysiek sterk bent, voel je je mentaal onverslaanbaar. Je hebt meer zelfvertrouwen, meer discipline en meer doorzettingsvermogen. Je lichaam en geest zijn verbonden.</p><h4>Energie en vitaliteit</h4><p>Een fit lichaam geeft je meer energie. Je voelt je alert, gefocust en klaar voor uitdagingen. Je slaapt beter, eet beter en voelt je gewoon beter. Energie is alles - zonder energie kun je niets bereiken.</p><h4>Respect en status</h4><p>Mensen respecteren een sterk, fit lichaam. Het toont discipline, zelfzorg en kracht. Het geeft je een voordeel in sociale situaties, op het werk en in relaties. Fysieke kracht straalt uit.</p><h4>Zelfvertrouwen</h4><p>Wanneer je sterk bent, voel je je zelfverzekerd. Je loopt rechtop, je maakt oogcontact, je spreekt met autoriteit. Zelfvertrouwen komt van binnen, maar een sterk lichaam helpt enorm.</p><h4>Functionele kracht</h4><p>Een sterk lichaam helpt je in het dagelijks leven. Je kunt zware dingen tillen, lang lopen, trappen nemen zonder moe te worden. Je bent minder snel ziek, herstelt sneller en blijft langer gezond.</p><h3>De 4 pijlers van fysieke dominantie</h3><h4>1. Kracht</h4><p>Kracht is de basis. Het betekent dat je zware dingen kunt tillen, duwen en trekken. Kracht geeft je vertrouwen en respect. Je traint met gewichten, doet compound oefeningen en bouwt functionele kracht op.</p><h4>2. Conditie</h4><p>Conditie betekent dat je lang kunt bewegen zonder moe te worden. Je kunt rennen, fietsen, zwemmen of wandelen zonder buiten adem te raken. Conditie geeft je energie en uithoudingsvermogen.</p><h4>3. Mobiliteit</h4><p>Mobiliteit betekent dat je lichaam soepel en flexibel is. Je kunt bewegen zonder pijn of beperkingen. Je doet stretchen, yoga of andere mobiliteitswerk. Dit voorkomt blessures en houdt je lichaam jong.</p><h4>4. Voeding</h4><p>Voeding is brandstof voor je lichaam. Je eet voedsel dat je lichaam voedt en versterkt. Je eet genoeg eiwitten, groenten, gezonde vetten en complexe koolhydraten. Je vermijdt bewerkt voedsel en suiker.</p><h3>Hoe begin je?</h3><h4>Stap 1: Evalueer je huidige staat</h4><p>Kijk eerlijk naar je lichaam. Wat is je sterke punt? Wat is je zwakke punt? Waar wil je verbeteren? Maak een plan op basis van waar je nu staat.</p><h4>Stap 2: Kies je focus</h4><p>Begin met één ding. Wil je sterker worden? Conditie opbouwen? Afvallen? Spiermassa opbouwen? Kies één focus en ga daar volledig voor.</p><h4>Stap 3: Maak een plan</h4><p>Plan je trainingen. Wanneer ga je trainen? Wat ga je doen? Hoe vaak? Maak het concreet en realistisch. Begin klein en bouw langzaam op.</p><h4>Stap 4: Start vandaag</h4><p>Wacht niet tot maandag of volgende maand. Start vandaag. Doe één oefening, maak één wandeling, eet één gezonde maaltijd. Elke dag telt.</p><h3>Training principes</h3><h4>Consistentie</h4><p>Consistentie is belangrijker dan perfectie. Het is beter om 3 keer per week te trainen dan 1 keer per week perfect. Maak een schema dat je kunt volhouden.</p><h4>Progressie</h4><p>Word elke keer een beetje beter. Voeg gewicht toe, doe meer herhalingen, train langer. Kleine verbeteringen leiden tot grote resultaten.</p><h4>Variatie</h4><p>Varieer je training. Doe verschillende oefeningen, verschillende intensiteiten, verschillende activiteiten. Dit houdt je lichaam en geest scherp.</p><h4>Herstel</h4><p>Herstel is net zo belangrijk als training. Slaap genoeg, eet goed, neem rustdagen. Je lichaam wordt sterker tijdens rust, niet tijdens training.</p><h3>Voeding principes</h3><h4>Eiwitten</h4><p>Eet genoeg eiwitten voor spieropbouw en herstel. Vlees, vis, eieren, zuivel, bonen, noten. Streef naar 1.6-2.2 gram per kilo lichaamsgewicht.</p><h4>Groenten</h4><p>Eet veel groenten voor vitamines, mineralen en vezels. Verschillende kleuren, verschillende soorten. Groenten zijn de basis van een gezond dieet.</p><h4>Gezonde vetten</h4><p>Eet gezonde vetten voor hormonen en energie. Avocado, olijfolie, noten, zalm, eieren. Vetten zijn niet de vijand, ze zijn essentieel.</p><h4>Water</h4><p>Drink genoeg water. Water is essentieel voor alle lichaamsfuncties. Streef naar 3-4 liter per dag, meer als je veel traint.</p><h3>Mentale aspecten</h3><h4>Discipline</h4><p>Fysieke dominantie vereist discipline. Je moet trainen ook als je geen zin hebt. Je moet gezond eten ook als je trek hebt in junkfood. Discipline bouw je door consistentie.</p><h4>Doorzettingsvermogen</h4><p>Resultaten komen niet snel. Je moet volhouden als het moeilijk wordt. Je moet blijven trainen als je geen vooruitgang ziet. Doorzettingsvermogen is wat je onderscheidt.</p><h4>Zelfrespect</h4><p>Je lichaam verdient respect. Zorg ervoor, train het, voed het goed. Wanneer je je lichaam respecteert, respecteren anderen jou ook meer.</p><h3>Veelgemaakte fouten</h3><h4>Te snel te veel</h4><p>Mensen willen te snel resultaten. Ze trainen te veel, te zwaar, te vaak. Dit leidt tot blessures en burn-out. Begin klein en bouw langzaam op.</p><h4>Geen plan</h4><p>Mensen trainen zonder plan. Ze doen wat ze leuk vinden, niet wat ze nodig hebben. Maak een plan en houd je eraan.</p><h4>Geen voeding</h4><p>Mensen trainen hard maar eten slecht. Voeding is 70% van het resultaat. Je kunt niet trainen om een slecht dieet te compenseren.</p><h4>Geen herstel</h4><p>Mensen trainen elke dag zonder rust. Herstel is essentieel voor vooruitgang. Neem rustdagen, slaap genoeg, eet goed.</p><h3>Praktische tips</h3><h4>Begin klein</h4><p>Begin met 10 minuten training per dag. Bouw langzaam op naar 30-45 minuten. Het is beter om klein te beginnen en vol te houden dan groot te beginnen en op te geven.</p><h4>Maak het makkelijk</h4><p>Zet je sportkleren klaar. Plan je trainingen in je agenda. Maak gezonde maaltijden vooraf klaar. Hoe makkelijker je het maakt, hoe waarschijnlijker je het doet.</p><h4>Zoek steun</h4><p>Train met anderen, zoek een coach, word lid van een groep. Steun van anderen helpt je vol te houden en beter te worden.</p><h4>Track je voortgang</h4><p>Houd bij wat je doet. Weeg jezelf, meet je kracht, noteer je trainingen. Zien dat je vooruitgaat motiveert je om door te gaan.</p><h3>Resultaten van fysieke dominantie</h3><ul><li><strong>Meer energie:</strong> je voelt je alert en vitaal de hele dag</li><li><strong>Meer zelfvertrouwen:</strong> je weet dat je sterk en fit bent</li><li><strong>Meer respect:</strong> anderen respecteren je fysieke kracht</li><li><strong>Betere gezondheid:</strong> je bent minder vaak ziek en herstelt sneller</li><li><strong>Meer discipline:</strong> training bouwt mentale kracht op</li><li><strong>Betere prestaties:</strong> fysieke kracht helpt in alle aspecten van je leven</li></ul><h3>Start vandaag</h3><p>Fysieke dominantie begint vandaag. Je hoeft niet perfect te zijn, je hoeft alleen te beginnen. Doe één oefening, maak één wandeling, eet één gezonde maaltijd. Elke dag bouw je aan een sterker, fitter, dominanter lichaam. Dit is de basis van alles. Dit is waarom fysieke dominantie zo belangrijk is.</p>
+    </div>
+
+    <div class="section" id="huiswerk">
+      <h2>📝 Huiswerk Opdrachten</h2>
+      
+      <div class="exercise-box">
+        <h4>Opdracht 1: Huidige Staat Evalueren</h4>
+        <p><strong>Doel:</strong> Eerlijk kijken naar je huidige fysieke staat en verbeterpunten identificeren.</p>
+        <p><strong>Actie:</strong> Meet je gewicht, test je kracht (push-ups, squats), evalueer je conditie (5 minuten lopen), en noteer je voeding van vandaag. Identificeer je 3 grootste verbeterpunten en maak een plan.</p>
+      </div>
+
+      <div class="exercise-box">
+        <h4>Opdracht 2: Training Plan Maken</h4>
+        <p><strong>Doel:</strong> Een realistisch en haalbaar training plan opstellen dat je kunt volhouden.</p>
+        <p><strong>Actie:</strong> Plan 3 trainingen per week in je agenda. Kies 5-8 basisoefeningen (squats, push-ups, lunges, plank, etc.) en bepaal sets/herhalingen. Start deze week en houd je voortgang bij.</p>
+      </div>
+
+      <div class="exercise-box">
+        <h4>Opdracht 3: Voeding Audit</h4>
+        <p><strong>Doel:</strong> Je huidige voeding evalueren en verbeteren voor betere fysieke prestaties.</p>
+        <p><strong>Actie:</strong> Houd 3 dagen je voeding bij. Evalueer: eet je genoeg eiwitten? Genoeg groenten? Te veel suiker? Maak 3 concrete verbeteringen en implementeer ze deze week.</p>
+      </div>
+    </div>
+
+    <div class="section" id="checklists">
+      <h2>✅ Checklists</h2>
+      
+      <h3>Weekchecklist "Fysieke Dominantie"</h3>
+      <div class="checklist">
+        <div class="checklist-item">
+          <input type="checkbox" id="fysiek-1">
+          <label for="fysiek-1">Huidige staat geëvalueerd (gewicht, kracht, conditie, voeding)</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="fysiek-2">
+          <label for="fysiek-2">Training plan gemaakt en 3 sessies gepland in agenda</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="fysiek-3">
+          <label for="fysiek-3">3 dagen voeding bijgehouden en geëvalueerd</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="fysiek-4">
+          <label for="fysiek-4">3 concrete voeding verbeteringen geïmplementeerd</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="fysiek-5">
+          <label for="fysiek-5">Alle geplande training sessies uitgevoerd</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="fysiek-6">
+          <label for="fysiek-6">Voortgang bijgehouden (gewicht, kracht, energie)</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="section" id="reflectie">
+      <h2>🤔 Reflectie Vragen</h2>
+      
+      <div class="reflection-question">
+        <h4>Huidige Fysieke Staat</h4>
+        <p>Hoe zou je je huidige fysieke staat omschrijven? Wat is je sterkste punt en wat is je grootste verbeterpunt? Waarom is dit belangrijk voor jou?</p>
+      </div>
+
+      <div class="reflection-question">
+        <h4>Motivatie en Doelen</h4>
+        <p>Wat motiveert je om fysiek sterker te worden? Wat is je doel over 3 maanden? Wat is je doel over 1 jaar? Hoe zal je leven eruitzien als je dit bereikt?</p>
+      </div>
+
+      <div class="reflection-question">
+        <h4>Obstakels en Oplossingen</h4>
+        <p>Wat zijn de 3 grootste obstakels die je tegenhoudt om fysiek dominant te worden? Hoe kun je elk obstakel overwinnen? Wat is je plan voor als je geen motivatie hebt?</p>
+      </div>
+    </div>
+
+    <div class="section" id="actieplan">
+      <h2>🎯 Actieplan</h2>
+      
+      <div class="action-plan">
+        <div class="action-step">
+          <strong>Stap 1:</strong> Evalueer je huidige staat. Meet gewicht, test kracht en conditie, houd voeding bij. Identificeer je 3 grootste verbeterpunten en maak een plan.
+        </div>
+        
+        <div class="action-step">
+          <strong>Stap 2:</strong> Maak een realistisch training plan. Plan 3 sessies per week, kies basisoefeningen, bepaal sets/herhalingen. Start deze week en houd voortgang bij.
+        </div>
+        
+        <div class="action-step">
+          <strong>Stap 3:</strong> Audit je voeding. Houd 3 dagen bij wat je eet. Evalueer eiwitten, groenten, suiker. Maak 3 concrete verbeteringen en implementeer ze.
+        </div>
+        
+        <div class="action-step">
+          <strong>Stap 4:</strong> Voer je training plan uit. Doe alle geplande sessies, ook als je geen zin hebt. Houd bij wat je doet en hoe je je voelt.
+        </div>
+        
+        <div class="action-step">
+          <strong>Stap 5:</strong> Evalueer na 2 weken. Wat werkt? Wat niet? Pas je plan aan. Blijf consistent en bouw langzaam op. Fysieke dominantie is een marathon, geen sprint.
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p>Dit ebook is onderdeel van de <span class="ttm-brand">Top Tier Men</span> Academy</p>
+      <p>Module 03: Fysieke Dominantie | Les 01: Waarom is fysieke dominantie zo belangrijk?</p>
+      <p>© 2025 Top Tier Men. Alle rechten voorbehouden.</p>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+      checkboxes.forEach(cb => {
+        const saved = localStorage.getItem(cb.id);
+        if (saved === 'true') cb.checked = true;
+        cb.addEventListener('change', function(){ localStorage.setItem(this.id, this.checked); });
+      });
+    });
+  </script>
 </body>
 </html>

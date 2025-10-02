@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { useOnboardingV2 } from '@/contexts/OnboardingV2Context';
@@ -95,6 +96,8 @@ export default function MindFocusPage() {
   });
   
   const [isSaving, setIsSaving] = useState(false);
+  // Typeform-style step index (0..N)
+  const [tfStep, setTfStep] = useState(0);
 
   // Reset intake/profile
   const resetIntake = async () => {
@@ -324,169 +327,193 @@ export default function MindFocusPage() {
     </div>
   );
 
-  const renderIntakeForm = () => (
-    <div className="min-h-screen bg-gradient-to-br from-[#0A0F0A] to-[#1A2A1A]">
-      <div className="container mx-auto px-4 py-12">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-3xl font-bold text-white mb-8 text-center">
-            Mind & Focus Intake
-          </h1>
-          <p className="text-[#8BAE5A] text-center mb-8">
-            Help ons je persoonlijke programma samen te stellen door een paar vragen te beantwoorden.
-          </p>
-          
-          <div className="bg-[#1A2A1A]/80 rounded-xl p-8 border border-[#2A3A1A]">
-            {/* Stress Intake */}
-            <div className="mb-8">
-              <h2 className="text-xl font-bold text-white mb-4">Stress intake</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-[#8BAE5A] mb-2">Werk stress (1-10)</label>
-                  <input
-                    type="range"
-                    min="1"
-                    max="10"
-                    value={stressAssessment.workStress}
-                    onChange={(e) => setStressAssessment(prev => ({ ...prev, workStress: parseInt(e.target.value) }))}
-                    className="w-full h-2 bg-[#2A3A1A] rounded-lg appearance-none cursor-pointer"
-                  />
-                  <div className="text-white text-center mt-1">{stressAssessment.workStress}/10</div>
-                </div>
-                
-                <div>
-                  <label className="block text-[#8BAE5A] mb-2">Persoonlijke stress (1-10)</label>
-                  <input
-                    type="range"
-                    min="1"
-                    max="10"
-                    value={stressAssessment.personalStress}
-                    onChange={(e) => setStressAssessment(prev => ({ ...prev, personalStress: parseInt(e.target.value) }))}
-                    className="w-full h-2 bg-[#2A3A1A] rounded-lg appearance-none cursor-pointer"
-                  />
-                  <div className="text-white text-center mt-1">{stressAssessment.personalStress}/10</div>
-                </div>
-                
-                <div>
-                  <label className="block text-[#8BAE5A] mb-2">Slaapkwaliteit (1-10)</label>
-                  <input
-                    type="range"
-                    min="1"
-                    max="10"
-                    value={stressAssessment.sleepQuality}
-                    onChange={(e) => setStressAssessment(prev => ({ ...prev, sleepQuality: parseInt(e.target.value) }))}
-                    className="w-full h-2 bg-[#2A3A1A] rounded-lg appearance-none cursor-pointer"
-                  />
-                  <div className="text-white text-center mt-1">{stressAssessment.sleepQuality}/10</div>
-                </div>
-                
-                <div>
-                  <label className="block text-[#8BAE5A] mb-2">Energie level (1-10)</label>
-                  <input
-                    type="range"
-                    min="1"
-                    max="10"
-                    value={stressAssessment.energyLevel}
-                    onChange={(e) => setStressAssessment(prev => ({ ...prev, energyLevel: parseInt(e.target.value) }))}
-                    className="w-full h-2 bg-[#2A3A1A] rounded-lg appearance-none cursor-pointer"
-                  />
-                  <div className="text-white text-center mt-1">{stressAssessment.energyLevel}/10</div>
-                </div>
-              </div>
-              
-              <div className="mt-6 space-y-3">
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={stressAssessment.focusProblems}
-                    onChange={(e) => setStressAssessment(prev => ({ ...prev, focusProblems: e.target.checked }))}
-                    className="mr-3"
-                  />
-                  <span className="text-white">Ik heb problemen met concentratie</span>
-                </label>
-                
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={stressAssessment.irritability}
-                    onChange={(e) => setStressAssessment(prev => ({ ...prev, irritability: e.target.checked }))}
-                    className="mr-3"
-                  />
-                  <span className="text-white">Ik voel me snel geïrriteerd of agressief</span>
-                </label>
-              </div>
-            </div>
+  const renderIntakeForm = () => {
+    const totalSteps = 7;
+    const nextStep = () => setTfStep((s) => Math.min(s + 1, totalSteps - 1));
+    const prevStep = () => setTfStep((s) => Math.max(s - 1, 0));
 
-            {/* Personal Goals */}
-            <div className="mb-8">
-              <h2 className="text-xl font-bold text-white mb-4">Persoonlijke Doelen</h2>
-              <div className="space-y-3">
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={personalGoals.improveFocus}
-                    onChange={(e) => setPersonalGoals(prev => ({ ...prev, improveFocus: e.target.checked }))}
-                    className="mr-3"
-                  />
-                  <span className="text-white">Verbeter focus en concentratie</span>
-                </label>
-                
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={personalGoals.reduceStress}
-                    onChange={(e) => setPersonalGoals(prev => ({ ...prev, reduceStress: e.target.checked }))}
-                    className="mr-3"
-                  />
-                  <span className="text-white">Verminder stress</span>
-                </label>
-                
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={personalGoals.betterSleep}
-                    onChange={(e) => setPersonalGoals(prev => ({ ...prev, betterSleep: e.target.checked }))}
-                    className="mr-3"
-                  />
-                  <span className="text-white">Beter slapen</span>
-                </label>
-                
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={personalGoals.moreEnergy}
-                    onChange={(e) => setPersonalGoals(prev => ({ ...prev, moreEnergy: e.target.checked }))}
-                    className="mr-3"
-                  />
-                  <span className="text-white">Meer energie</span>
-                </label>
-                
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={personalGoals.workLifeBalance}
-                    onChange={(e) => setPersonalGoals(prev => ({ ...prev, workLifeBalance: e.target.checked }))}
-                    className="mr-3"
-                  />
-                  <span className="text-white">Betere werk/privé balans</span>
-                </label>
-              </div>
-            </div>
+    const ProgressBar = () => (
+      <div className="w-full h-2 bg-[#2A3A1A] rounded-lg overflow-hidden">
+        <div
+          className="h-full bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] transition-all duration-300"
+          style={{ width: `${Math.round(((tfStep + 1) / totalSteps) * 100)}%` }}
+        />
+      </div>
+    );
 
-            {/* Submit Button */}
-            <div className="text-center">
-              <button
-                onClick={saveIntakeData}
-                disabled={isSaving}
-                className="bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] text-[#1A2A1A] px-8 py-4 rounded-xl font-bold text-lg hover:from-[#7A9D4A] hover:to-[#e0903f] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isSaving ? 'Opslaan...' : 'Intake voltooien'}
-              </button>
-            </div>
+    const StepShell: React.FC<{ title: string; children: React.ReactNode; canNext?: boolean; showBack?: boolean; onNext?: () => void; ctaText?: string }>
+      = ({ title, children, canNext = true, showBack = tfStep > 0, onNext, ctaText }) => (
+      <div className="bg-[#1A2A1A]/80 rounded-xl p-6 md:p-8 border border-[#2A3A1A]">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl md:text-2xl font-bold text-white">{title}</h2>
+          <div className="w-40"><ProgressBar /></div>
+        </div>
+        <div className="mb-6">
+          {children}
+        </div>
+        <div className="flex items-center justify-between">
+          <button
+            onClick={prevStep}
+            className={`px-4 py-2 rounded-lg text-sm border ${showBack ? 'border-[#3A4A2A] text-white hover:bg-[#2A3A1A]' : 'opacity-0 pointer-events-none'}`}
+          >Terug</button>
+          <button
+            onClick={onNext || nextStep}
+            disabled={!canNext || isSaving}
+            className="px-6 py-2 rounded-lg font-semibold bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] text-[#1A2A1A] disabled:opacity-50"
+          >{ctaText || 'Volgende'}</button>
+        </div>
+      </div>
+    );
+
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#0A0F0A] to-[#1A2A1A]">
+        <div className="container mx-auto px-4 py-12">
+          <div className="max-w-2xl mx-auto">
+            <h1 className="text-3xl font-bold text-white mb-6 text-center">Mind & Focus Intake</h1>
+            <p className="text-[#8BAE5A] text-center mb-8">Beantwoord enkele korte vragen. Je voortgang wordt bewaard tot je afrondt.</p>
+
+            {tfStep === 0 && (
+              <StepShell title="Werk stress (1-10)">
+                <input
+                  type="range"
+                  min="1"
+                  max="10"
+                  value={stressAssessment.workStress}
+                  onChange={(e) => setStressAssessment(prev => ({ ...prev, workStress: parseInt(e.target.value) }))}
+                  className="w-full h-2 bg-[#2A3A1A] rounded-lg appearance-none cursor-pointer"
+                />
+                <div className="text-white text-center mt-2">{stressAssessment.workStress}/10</div>
+              </StepShell>
+            )}
+
+            {tfStep === 1 && (
+              <StepShell title="Persoonlijke stress (1-10)">
+                <input
+                  type="range"
+                  min="1"
+                  max="10"
+                  value={stressAssessment.personalStress}
+                  onChange={(e) => setStressAssessment(prev => ({ ...prev, personalStress: parseInt(e.target.value) }))}
+                  className="w-full h-2 bg-[#2A3A1A] rounded-lg appearance-none cursor-pointer"
+                />
+                <div className="text-white text-center mt-2">{stressAssessment.personalStress}/10</div>
+              </StepShell>
+            )}
+
+            {tfStep === 2 && (
+              <StepShell title="Slaapkwaliteit (1-10)">
+                <input
+                  type="range"
+                  min="1"
+                  max="10"
+                  value={stressAssessment.sleepQuality}
+                  onChange={(e) => setStressAssessment(prev => ({ ...prev, sleepQuality: parseInt(e.target.value) }))}
+                  className="w-full h-2 bg-[#2A3A1A] rounded-lg appearance-none cursor-pointer"
+                />
+                <div className="text-white text-center mt-2">{stressAssessment.sleepQuality}/10</div>
+              </StepShell>
+            )}
+
+            {tfStep === 3 && (
+              <StepShell title="Energie level (1-10)">
+                <input
+                  type="range"
+                  min="1"
+                  max="10"
+                  value={stressAssessment.energyLevel}
+                  onChange={(e) => setStressAssessment(prev => ({ ...prev, energyLevel: parseInt(e.target.value) }))}
+                  className="w-full h-2 bg-[#2A3A1A] rounded-lg appearance-none cursor-pointer"
+                />
+                <div className="text-white text-center mt-2">{stressAssessment.energyLevel}/10</div>
+              </StepShell>
+            )}
+
+            {tfStep === 4 && (
+              <StepShell title="Herken je één of meer van deze?">
+                <div className="space-y-3">
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={stressAssessment.focusProblems}
+                      onChange={(e) => setStressAssessment(prev => ({ ...prev, focusProblems: e.target.checked }))}
+                      className="mr-3"
+                    />
+                    <span className="text-white">Ik heb problemen met concentratie</span>
+                  </label>
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={stressAssessment.irritability}
+                      onChange={(e) => setStressAssessment(prev => ({ ...prev, irritability: e.target.checked }))}
+                      className="mr-3"
+                    />
+                    <span className="text-white">Ik voel me snel geïrriteerd of agressief</span>
+                  </label>
+                </div>
+              </StepShell>
+            )}
+
+            {tfStep === 5 && (
+              <StepShell title="Persoonlijke doelen">
+                <div className="space-y-3">
+                  <label className="flex items-center">
+                    <input type="checkbox" checked={personalGoals.improveFocus} onChange={(e) => setPersonalGoals(p => ({ ...p, improveFocus: e.target.checked }))} className="mr-3" />
+                    <span className="text-white">Verbeter focus en concentratie</span>
+                  </label>
+                  <label className="flex items-center">
+                    <input type="checkbox" checked={personalGoals.reduceStress} onChange={(e) => setPersonalGoals(p => ({ ...p, reduceStress: e.target.checked }))} className="mr-3" />
+                    <span className="text-white">Verminder stress</span>
+                  </label>
+                  <label className="flex items-center">
+                    <input type="checkbox" checked={personalGoals.betterSleep} onChange={(e) => setPersonalGoals(p => ({ ...p, betterSleep: e.target.checked }))} className="mr-3" />
+                    <span className="text-white">Beter slapen</span>
+                  </label>
+                  <label className="flex items-center">
+                    <input type="checkbox" checked={personalGoals.moreEnergy} onChange={(e) => setPersonalGoals(p => ({ ...p, moreEnergy: e.target.checked }))} className="mr-3" />
+                    <span className="text-white">Meer energie</span>
+                  </label>
+                  <label className="flex items-center">
+                    <input type="checkbox" checked={personalGoals.workLifeBalance} onChange={(e) => setPersonalGoals(p => ({ ...p, workLifeBalance: e.target.checked }))} className="mr-3" />
+                    <span className="text-white">Betere werk/privé balans</span>
+                  </label>
+                </div>
+              </StepShell>
+            )}
+
+            {tfStep === 6 && (
+              <StepShell title="Controleer en bevestig" ctaText={isSaving ? 'Opslaan...' : 'Intake voltooien'} onNext={saveIntakeData} canNext={!isSaving}>
+                <div className="grid grid-cols-1 gap-4 text-white text-sm">
+                  <div className="bg-[#232D1A] rounded-lg p-4 border border-[#2A3A1A]">
+                    <div className="font-semibold text-[#8BAE5A] mb-2">Scores</div>
+                    <div>Werk stress: {stressAssessment.workStress}/10</div>
+                    <div>Persoonlijke stress: {stressAssessment.personalStress}/10</div>
+                    <div>Slaapkwaliteit: {stressAssessment.sleepQuality}/10</div>
+                    <div>Energie level: {stressAssessment.energyLevel}/10</div>
+                  </div>
+                  <div className="bg-[#232D1A] rounded-lg p-4 border border-[#2A3A1A]">
+                    <div className="font-semibold text-[#8BAE5A] mb-2">Signalen</div>
+                    <div>{stressAssessment.focusProblems ? '• Concentratieproblemen' : '• Geen concentratieproblemen gemeld'}</div>
+                    <div>{stressAssessment.irritability ? '• Snel geïrriteerd / agressief' : '• Geen irritatie/agressie gemeld'}</div>
+                  </div>
+                  <div className="bg-[#232D1A] rounded-lg p-4 border border-[#2A3A1A]">
+                    <div className="font-semibold text-[#8BAE5A] mb-2">Doelen</div>
+                    <ul className="list-disc pl-5 space-y-1">
+                      {personalGoals.improveFocus && <li>Verbeter focus en concentratie</li>}
+                      {personalGoals.reduceStress && <li>Verminder stress</li>}
+                      {personalGoals.betterSleep && <li>Beter slapen</li>}
+                      {personalGoals.moreEnergy && <li>Meer energie</li>}
+                      {personalGoals.workLifeBalance && <li>Betere werk/privé balans</li>}
+                      {!personalGoals.improveFocus && !personalGoals.reduceStress && !personalGoals.betterSleep && !personalGoals.moreEnergy && !personalGoals.workLifeBalance && <li>Geen doelen geselecteerd</li>}
+                    </ul>
+                  </div>
+                </div>
+              </StepShell>
+            )}
           </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   // Show loading state while checking for existing profile
   if (isLoadingProfile) {

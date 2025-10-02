@@ -24,12 +24,28 @@ export async function GET(request: NextRequest) {
 
     console.log('📋 Fetching ORIGINAL plan (no scaling):', planId);
 
-    // Fetch the original plan from database
-    const { data: planData, error } = await supabase
+    // Fetch the original plan from database, support both id and plan_id
+    // Try by id first, then by plan_id
+    let planData: any = null;
+    let error: any = null;
+
+    // 1) Try match by id
+    let resp = await supabase
       .from('nutrition_plans')
       .select('*')
-      .eq('plan_id', planId)
+      .eq('id', planId)
       .single();
+    planData = resp.data; error = resp.error;
+
+    // 2) If not found by id, try by plan_id
+    if (error || !planData) {
+      const resp2 = await supabase
+        .from('nutrition_plans')
+        .select('*')
+        .eq('plan_id', planId)
+        .single();
+      planData = resp2.data; error = resp2.error;
+    }
 
     if (error) {
       console.error('Error fetching plan:', error);
