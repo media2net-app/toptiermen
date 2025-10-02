@@ -138,37 +138,38 @@ export default function DebtSnowball() {
 
   return (
     <Card>
-      <div className="font-bold text-lg mb-2">
+      {/* Titel compacter op mobiel */}
+      <div className="font-bold text-base sm:text-lg mb-1 sm:mb-2 leading-tight">
         🏔️ Schulden-Sneeuwbal Calculator
       </div>
-      <div className="p-4">
+      <div className="p-3 sm:p-4">
         {/* Strategy Selection */}
-        <div className="bg-[#181F17] rounded-xl p-4">
-          <h3 className="text-[#8BAE5A] font-semibold mb-3">Kies je Strategie</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="bg-[#181F17] rounded-xl p-3 sm:p-4">
+          <h3 className="text-[#8BAE5A] font-semibold mb-2 sm:mb-3 text-sm sm:text-base">Kies je Strategie</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-3">
             <button
               onClick={() => setStrategy('snowball')}
-              className={`p-4 rounded-lg border-2 transition-all w-full text-left break-words whitespace-normal min-w-0 ${
+              className={`p-3 sm:p-4 rounded-lg border-2 transition-all w-full text-left break-words whitespace-normal min-w-0 ${
                 strategy === 'snowball'
                   ? 'border-[#8BAE5A] bg-[#8BAE5A]/10'
                   : 'border-[#3A4D23] bg-[#232D1A] hover:border-[#8BAE5A]/50'
               }`}
             >
-              <div className="text-base sm:text-lg font-bold text-white mb-1">Sneeuwbal Methode</div>
-              <div className="text-xs sm:text-sm text-[#A3AED6]">
+              <div className="text-sm sm:text-lg font-bold text-white mb-0.5 sm:mb-1">Sneeuwbal Methode</div>
+              <div className="text-xs sm:text-sm text-[#A3AED6] leading-snug">
                 Los eerst de kleinste schuld af voor psychologische winst
               </div>
             </button>
             <button
               onClick={() => setStrategy('avalanche')}
-              className={`p-4 rounded-lg border-2 transition-all w-full text-left break-words whitespace-normal min-w-0 ${
+              className={`p-3 sm:p-4 rounded-lg border-2 transition-all w-full text-left break-words whitespace-normal min-w-0 ${
                 strategy === 'avalanche'
                   ? 'border-[#8BAE5A] bg-[#8BAE5A]/10'
                   : 'border-[#3A4D23] bg-[#232D1A] hover:border-[#8BAE5A]/50'
               }`}
             >
-              <div className="text-base sm:text-lg font-bold text-white mb-1">Lawaai Methode</div>
-              <div className="text-xs sm:text-sm text-[#A3AED6]">
+              <div className="text-sm sm:text-lg font-bold text-white mb-0.5 sm:mb-1">Lawaai Methode</div>
+              <div className="text-xs sm:text-sm text-[#A3AED6] leading-snug">
                 Los eerst de schuld met hoogste rente af voor financiële winst
               </div>
             </button>

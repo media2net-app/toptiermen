@@ -36,18 +36,8 @@ export function SessionRecovery({ children }: SessionRecoveryProps) {
     }
   }, [sessionStatus]);
 
-  // Auto-recovery when user comes back to tab
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (!document.hidden && user && !loading) {
-        // Use the session monitor to check health
-        checkSessionHealth();
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, [user, loading, checkSessionHealth]);
+  // Note: intentionally no visibilitychange listener here
+  // to avoid any refresh side-effects when returning to the tab.
 
   const handleRecovery = async () => {
     setIsRecovering(true);

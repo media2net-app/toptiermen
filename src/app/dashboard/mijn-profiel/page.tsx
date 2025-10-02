@@ -165,10 +165,14 @@ export default function MijnProfiel() {
 
   const fetchAllData = async () => {
     try {
+      if (typeof document !== 'undefined' && document.hidden) {
+        console.log('Tab hidden: defer fetchAllData');
+        return;
+      }
       setLoading(true);
       setError(null);
       console.time('⏱️ fetchAllData_total');
-      console.log('Fetching profile (primary) first, then secondary data in background...');
+      console.log('Fetching profile (primary) first...');
 
       // 1) Fetch critical data FIRST (profile) to render the page ASAP
       await fetchUserProfile();
@@ -177,6 +181,11 @@ export default function MijnProfiel() {
       console.timeEnd('⏱️ fetchAllData_total');
     } catch (error) {
       console.error('Error fetching data:', error);
+      // Als tab verborgen is, geen error tonen en loading uitzetten
+      if (typeof document !== 'undefined' && document.hidden) {
+        setLoading(false);
+        return;
+      }
       setError('Er is een fout opgetreden bij het laden van je profiel');
     } finally {
       // Hard guarantee: never keep spinner forever
@@ -200,51 +209,40 @@ export default function MijnProfiel() {
 
   const fetchUserProfile = async () => {
     try {
-      // Timeout wrapper using Promise.race (no .catch needed on PromiseLike)
-      const withTimeout = async <T,>(p: PromiseLike<T>, ms = 5000): Promise<T> => {
-        const timeout = new Promise<T>((_, reject) => {
-          setTimeout(() => reject(new Error(`Timeout after ${ms}ms`)), ms);
-        });
-        return (Promise.race([Promise.resolve(p), timeout]) as Promise<T>);
-      };
-
-      const { data, error } = await withTimeout<any>(
-        supabase
-          .from('profiles')
-          .select('id,email,full_name,display_name,avatar_url,cover_url,interests,bio,location,is_public,show_email,created_at')
-          .eq('id', user?.id)
-          .single()
-      );
-
-      if (error) {
-        console.error('Error fetching profile:', error);
-        // Create profile if it doesn't exist
-        if (error.code === 'PGRST116') {
-          console.log('Profile not found, creating new profile...');
-          await createUserProfile();
-        } else {
-          throw error; // Re-throw other errors
-        }
-      } else {
-        console.log('Profile found:', data);
-        // Normalize to match UserProfile (no nulls for required fields)
-        const normalized: UserProfile = {
-          id: data.id,
-          email: data.email || '',
-          full_name: data.full_name || '',
-          display_name: data.display_name ?? undefined,
-          avatar_url: data.avatar_url ?? undefined,
-          cover_url: data.cover_url ?? undefined,
-          bio: data.bio ?? undefined,
-          location: data.location ?? undefined,
-          is_public: data.is_public ?? undefined,
-          show_email: data.show_email ?? undefined,
-          created_at: data.created_at,
-        } as UserProfile;
-        setProfile(normalized);
+      if (!user?.id) return;
+      const res = await fetch(`/api/profile?userId=${encodeURIComponent(user.id)}`, { cache: 'no-store' });
+      if (!res.ok) {
+        const txt = await res.text();
+        throw new Error(`API ${res.status}: ${txt}`);
       }
+      const payload = await res.json();
+      const data = payload.profile;
+      if (!data) {
+        // Create profile if missing
+        await createUserProfile();
+        return;
+      }
+      const normalized: UserProfile = {
+        id: data.id,
+        email: data.email || '',
+        full_name: data.full_name || '',
+        display_name: data.display_name ?? undefined,
+        avatar_url: data.avatar_url ?? undefined,
+        cover_url: data.cover_url ?? undefined,
+        bio: data.bio ?? undefined,
+        location: data.location ?? undefined,
+        is_public: data.is_public ?? undefined,
+        show_email: data.show_email ?? undefined,
+        created_at: data.created_at,
+      } as UserProfile;
+      setProfile(normalized);
     } catch (error) {
       console.error('Error in fetchUserProfile:', error);
+      // If tab is hidden, don't surface an error; we'll retry on visibility
+      if (typeof document !== 'undefined' && document.hidden) {
+        console.log('Tab hidden during fetchUserProfile, deferring error handling');
+        return;
+      }
       throw error; // Re-throw to be caught by fetchAllData
     }
   };
@@ -635,16 +633,36 @@ export default function MijnProfiel() {
     }
   };
 
-  // Watchdog: if loading stays true for too long, fail gracefully
+  // Watchdog: avoid firing while tab is hidden; be gentle on timeouts
   useEffect(() => {
     if (!loading) return;
+    if (typeof document !== 'undefined' && document.hidden) return; // pause while hidden
     const watchdog = setTimeout(() => {
-      console.warn('⚠️ Loading watchdog triggered on Mijn Profiel. Forcing UI to show with fallback.');
+      console.warn('⚠️ Loading watchdog triggered on Mijn Profiel. Showing UI without hard error.');
       setLoading(false);
-      setError(prev => prev || 'Langzaam netwerk of time-out bij laden van profiel. Probeer het opnieuw.');
-    }, 6000);
+      // Do not set error here to avoid scary message after tab switch
+    }, 15000); // more generous timeout
     return () => clearTimeout(watchdog);
   }, [loading]);
+
+  // Retry gently when returning to the tab if we were loading or had a soft failure
+  useEffect(() => {
+    const onVisible = () => {
+      if (typeof document === 'undefined') return;
+      if (!document.hidden && user) {
+        if (loading || !profile) {
+          console.log('🔄 Visibility change: retrying profile fetch');
+          fetchUserProfile().catch(() => {/* swallow */});
+          setLoading(false);
+          setError(null);
+        }
+      }
+    };
+    if (typeof document !== 'undefined') {
+      document.addEventListener('visibilitychange', onVisible);
+      return () => document.removeEventListener('visibilitychange', onVisible);
+    }
+  }, [loading, user, profile]);
 
   const updateProfile = async (updates: Partial<UserProfile>, opts: { silent?: boolean } = {}) => {
     if (!profile) return;

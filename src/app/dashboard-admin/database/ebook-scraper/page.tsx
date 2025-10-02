@@ -91,6 +91,37 @@ export default function EbookScraperPage() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [v2files, setV2files] = useState<{name: string; url: string}[]>([]);
 
+  const charCount = (url: string) => {
+    const s = stored[url];
+    if (!s) return 0;
+    return (s.summary_text || '')?.length || 0;
+  };
+
+  // Helpers to map /ebooks/ to /ebooksv2/
+  const getSlug = (url: string) => {
+    try {
+      const u = new URL(url, window.location.origin);
+      const parts = u.pathname.split('/');
+      const file = parts[parts.length - 1];
+      return file.replace(/\.html$/i, '');
+    } catch {
+      // fallback for relative
+      const path = url.split('?')[0];
+      const parts = path.split('/');
+      const file = parts[parts.length - 1];
+      return file.replace(/\.html$/i, '');
+    }
+  };
+
+  const v2BySlug = useMemo(() => {
+    const map: Record<string, string> = {};
+    v2files.forEach(f => {
+      const slug = f.name.replace(/\.html$/i, '');
+      map[slug] = f.url;
+    });
+    return map;
+  }, [v2files]);
+
   const createTable = async () => {
     const res = await fetch("/api/admin/ebook-summaries/table", { method: "POST" });
     const json = await res.json();
@@ -228,7 +259,7 @@ export default function EbookScraperPage() {
                         {r?.error ? ` • ${r.error}` : ""}
                       </span>
                       <span className={s ? "text-[#8BAE5A]" : "text-red-400"}>
-                        {s ? "✅ opgeslagen" : "— niet in DB"}
+                        {s ? `✅ opgeslagen • ${charCount(u)} tekens` : "— niet in DB"}
                       </span>
                       {s && (
                         <button
@@ -293,7 +324,7 @@ export default function EbookScraperPage() {
                         Scrape
                       </button>
                       <span className={`text-xs ${s ? 'text-[#8BAE5A]' : 'text-red-400'}`}>
-                        {s ? '✅ opgeslagen' : '— niet in DB'}
+                        {s ? `✅ opgeslagen • ${charCount(f.url)} tekens` : '— niet in DB'}
                       </span>
                       {s && (
                         <button
@@ -309,6 +340,62 @@ export default function EbookScraperPage() {
               })}
             </ul>
           )}
+        </div>
+      </div>
+
+      {/* MATCH TABLE SECTION */}
+      <div className="mt-10">
+        <h2 className="text-xl font-bold text-[#8BAE5A] mb-3">Match ebook</h2>
+        <div className="bg-[#181F17] border border-[#3A4D23] rounded-lg p-4 overflow-x-auto">
+          <table className="min-w-full text-sm">
+            <thead>
+              <tr className="text-left text-[#B6C948]">
+                <th className="p-2">Module</th>
+                <th className="p-2">/ebooks/</th>
+                <th className="p-2">/ebooksv2/</th>
+                <th className="p-2">Status</th>
+                <th className="p-2">Verschil (tekens)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {Object.entries(MODULES).map(([module, urls]) => (
+                urls.map((u) => {
+                  const slug = getSlug(u);
+                  const v2 = v2BySlug[slug];
+                  const c1 = charCount(u);
+                  const c2 = v2 ? charCount(v2) : 0;
+                  const diff = c2 - c1;
+                  const status = v2 ? '✅ Match' : '❌ Geen match';
+                  const diffClass = v2 ? (diff >= 0 ? 'text-green-400' : 'text-red-400') : 'text-gray-400';
+                  return (
+                    <tr key={`${module}-${u}`} className="border-t border-[#232D1A]">
+                      <td className="p-2 text-[#8BAE5A] whitespace-nowrap">{module}</td>
+                      <td className="p-2">
+                        <Link href={u} target="_blank" className="text-[#8BAE5A] hover:underline break-all">{u}</Link>
+                        <span className="ml-2 text-xs text-gray-400">({c1} tekens)</span>
+                      </td>
+                      <td className="p-2">
+                        {v2 ? (
+                          <>
+                            <Link href={v2} target="_blank" className="text-[#8BAE5A] hover:underline break-all">{v2}</Link>
+                            <span className="ml-2 text-xs text-gray-400">({c2} tekens)</span>
+                          </>
+                        ) : (
+                          <span className="text-gray-400">—</span>
+                        )}
+                      </td>
+                      <td className="p-2">
+                        <span className={v2 ? 'text-green-400' : 'text-red-400'}>{status}</span>
+                      </td>
+                      <td className={`p-2 font-semibold ${diffClass}`}>
+                        {v2 ? (diff >= 0 ? `+${diff}` : `${diff}`) : '—'}
+                      </td>
+                    </tr>
+                  );
+                })
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
