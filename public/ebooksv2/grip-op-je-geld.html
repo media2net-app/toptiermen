@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Grip op je Geld - Ebook | Top Tier Men</title>
+  <meta name="description" content="V2 ebook voor Grip op je Geld binnen Top Tier Men Academy." />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.6; color: #ffffff;
+      background: linear-gradient(135deg, #0A0F0A 0%, #181F17 50%, #232D1A 100%);
+      min-height: 100vh;
+    }
+    .container { max-width: 800px; margin: 0 auto; padding: 2rem; }
+    .header {
+      text-align: center; margin-bottom: 3rem; padding: 2rem;
+      background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      border-radius: 20px; border: 1px solid #3A4D23;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    .logo { margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; }
+    h1 {
+      font-size: 2.5rem; font-weight: 800;
+      background: linear-gradient(135deg, #ffffff 0%, #8BAE5A 50%, #B6C948 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      margin-bottom: .5rem;
+    }
+    .subtitle { color: #8BAE5A; font-size: 1.1rem; font-weight: 500; }
+    .module-info {
+      background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1rem; border-radius: 10px; margin: 1rem 0; border-left: 4px solid #8BAE5A;
+    }
+    .section { background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      margin-bottom: 2rem; padding: 2rem; border-radius: 15px; border: 1px solid #3A4D23; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    .section h2 { color: #B6C948; font-size: 1.8rem; font-weight: 700; margin-bottom: 1.5rem; display: flex; align-items: center; gap: .5rem; }
+    .section h3 { color: #8BAE5A; font-size: 1.3rem; font-weight: 600; margin: 1.5rem 0 1rem; }
+    .section p { margin-bottom: 1rem; color: #e0e0e0; }
+    .section ul, .section ol { margin: 1rem 0; padding-left: 2rem; }
+    .section li { margin-bottom: .5rem; color: #e0e0e0; }
+    .highlight-box { background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1.5rem; border-radius: 10px; border-left: 4px solid #B6C948; margin: 1.5rem 0;
+    }
+    .exercise-box { background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%);
+      padding: 1.5rem; border-radius: 10px; border: 1px solid #8BAE5A; margin: 1rem 0;
+    }
+    .exercise-box h4 { color: #B6C948; font-size: 1.1rem; margin-bottom: 1rem; }
+    .checklist { background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      padding: 1.5rem; border-radius: 10px; border: 1px solid #3A4D23; margin: 1rem 0;
+    }
+    .checklist-item { display: flex; align-items: center; margin-bottom: .8rem; padding: .5rem; background: rgba(58,77,35,.3); border-radius: 8px; }
+    .checklist-item input[type="checkbox"] { margin-right: 1rem; width: 18px; height: 18px; accent-color: #8BAE5A; }
+    .reflection-question { background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1.5rem; border-radius: 10px; border-left: 4px solid #B6C948; margin: 1rem 0;
+    }
+    .reflection-question h4 { color: #B6C948; margin-bottom: 1rem; }
+    .action-plan { background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%);
+      padding: 2rem; border-radius: 15px; border: 2px solid #8BAE5A; margin: 2rem 0;
+    }
+    .action-step { background: rgba(139,174,90,.1); padding: 1rem; border-radius: 8px; margin: 1rem 0; border-left: 3px solid #8BAE5A; }
+    .footer { text-align: center; margin-top: 3rem; padding: 2rem; background: linear-gradient(135deg, #181F17 0%, #232D1A 100%); border-radius: 15px; border: 1px solid #3A4D23; }
+    .footer p { color: #8BAE5A; margin-bottom: 1rem; }
+    .ttm-brand { color: #B6C948; font-weight: 700; }
+    .sticky-back-btn { position: fixed; top: 50%; right: 20px; transform: translateY(-50%);
+      z-index: 1000; background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%);
+      color: #fff; border: none; border-radius: 50px; padding: 15px 20px; font-size: 14px; font-weight: 600; cursor: pointer;
+      box-shadow: 0 8px 25px rgba(139,174,90,.3); transition: all .3s ease; display: flex; align-items: center; gap: 8px; text-decoration: none; min-width: 120px; justify-content: center;
+    }
+    .sticky-back-btn:hover { background: linear-gradient(135deg, #B6C948 0%, #8BAE5A 100%); transform: translateY(-50%) scale(1.05); box-shadow: 0 12px 35px rgba(139,174,90,.4); }
+    .sticky-back-btn:active { transform: translateY(-50%) scale(.95); }
+    .sticky-back-btn svg { width: 16px; height: 16px; fill: currentColor; }
+    @media (max-width: 768px) {
+      .container { padding: 1rem; }
+      h1 { font-size: 2rem; }
+      .section { padding: 1.5rem; }
+      .sticky-back-btn { right: 10px; padding: 12px 16px; font-size: 12px; min-width: 100px; }
+    }
+  </style>
+</head>
+<body>
+  <a href="/dashboard/academy/309b7450-3c77-4aa5-bc14-f5514cafd886/b852aa9b-ad36-4202-b7e4-a8a58c4a5adc" class="sticky-back-btn" title="Terug naar les">
+    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    Terug
+  </a>
+
+  <div class="container">
+    <div class="header">
+      <div class="logo">
+        <img src="/logo_white-full.svg" alt="Top Tier Men Logo" style="height:40px;width:auto" />
+      </div>
+      <h1>Grip op je Geld</h1>
+      <p class="subtitle">Direct grip op je financiën krijgen</p>
+      <div class="module-info">
+        <strong>Module 05: Business and Finance</strong> | <strong>Les 02: Grip op je Geld</strong>
+      </div>
+    </div>
+
+    <!-- Financiële Disclaimer -->
+    <div class="highlight-box" style="background: linear-gradient(135deg, #ce6629 0%, #ffbe43 100%); border-left: 4px solid #FFD700; margin: 1.5rem 0;">
+      <h4 style="color: #fff; font-weight: bold; text-align: left;">⚠️ BELANGRIJKE FINANCIËLE WAARSCHUWING</h4>
+      <p style="color: #fff; font-weight: bold; text-align: left;">
+        De informatie in deze les is uitsluitend voor educatieve doeleinden en vormt geen financieel advies. 
+        Raadpleeg altijd een gekwalificeerde financieel adviseur voordat je beslissingen neemt over je financiën, investeringen of geld. 
+        Alle investeringen brengen risico's met zich mee en kunnen leiden tot verliezen. 
+        Top Tier Men is niet verantwoordelijk voor eventuele financiële gevolgen van het volgen van de informatie in deze les zonder professioneel advies.
+      </p>
+    </div>
+
+    <div class="section" id="samenvatting">
+      <h2>📚 Uitgebreide Samenvatting van de Les</h2>
+<div class="highlight-box"><h4>🎯 Doel van deze les</h4><p>In deze samenvatting krijg je een helder, praktisch systeem om direct grip op je geld te krijgen. Geen ingewikkelde spreadsheets, wél duidelijke potjes, automatische overboekingen, maandrituelen, en harde regels die je elke maand geld en rust opleveren. Pas dit stap voor stap toe en je financiën worden voorspelbaar, stabiel en schaalbaar – zodat je ruimte maakt voor sparen en investeren.</p></div><h3>Waarom nu grip pakken?</h3><p>Zonder grip lekt geld weg via kleine beslissingen: bezorging, impuls-aankopen, dubbele abonnementen, benzine omrijden, vergeten opzegtermijnen. Met grip kies je bewust, bouw je een buffer op en creëer je ruimte om te investeren. Rust in je geld = rust in je hoofd. Je gaat van "ik hoop dat het lukt" naar "ik stuur elke euro".</p><h3>Direct starten: 60–90 minuten Sessie</h3><ol><li>Download de transacties van de laatste 3–6 maanden (bank-app of web).</li><li>Categoriseer: wonen, vervoer, boodschappen, verzekeringen, abonnementen, fun, zorg, sparen/invest, éénmalig.</li><li>Markeer je top-5 geldlekken (bezorging, impuls, appjes, brandstof, parkeren, snacken, online impulsen).</li><li>Kies 3 directe snijpunten: vandaag opzeggen/verlaging/limiet instellen.</li></ol><h3>Het 5-Potjes Systeem</h3><ul><li><strong>1) Vaste lasten-rekening</strong> — huur/hypotheek, energie, verzekeringen, telefoon, internet, gemeentebelastingen.</li><li><strong>2) Leefgeld-rekening</strong> — boodschappen, tanken, koffie, kleinigheden, uitjes. Wekelijks budget. Op=op.</li><li><strong>3) Sparen/Buffer</strong> — noodbuffer (3–6 maanden) + reserveringen (zorg, onderhoud, jaarlijkse lasten).</li><li><strong>4) Investeren</strong> — beleggingen/ETF's/individueel; apart van sparen om verleiding te minimaliseren.</li><li><strong>5) Onvoorzien</strong> — klein potje voor reparaties/pech. Voorkomt dure creditcard/roodstand.</li></ul><h3>Automatiseren (zodat wilskracht geen factor is)</h3><ul><li><strong>Pay Yourself First:</strong> direct na salaris een automatische overboeking naar Sparen en Investeren.</li><li><strong>Vaste Lasten:</strong> alles via de vaste-lasten-rekening op één vaste dag in de maand.</li><li><strong>Leefgeld:</strong> wekelijks een vast bedrag naar je leefgeld-rekening. Betaal dagelijkse uitgaven alleen hiervandaan.</li><li><strong>Reserveringen:</strong> maandelijkse kleine automatische bedragen voor jaarlijkse posten (wegenbelasting, verzekeringen, APK, zorg).</li></ul><h3>Harde Regels die geld besparen</h3><ul><li><strong>48-uurs regel:</strong> Aankopen > €100 pas na 48 uur bedenktijd.</li><li><strong>Abonnementen audit:</strong> Elk kwartaal herzien. Alles zonder duidelijke waarde gaat eruit.</li><li><strong>Bezorging:</strong> Max X keer per maand. Standaard = thuis koken (plannen op zondag).</li><li><strong>Cashback/punten:</strong> Nooit een reden om extra uit te geven. Alleen pakken als je het toch al kocht.</li><li><strong>Op=op-principe:</strong> Leefgeld op? Dan stop je. Geen geld verschuiven buiten afgesproken uitzonderingen.</li><li><strong>1-in-1-uit:</strong> Voor non-essentials (kleding/gadgets): koop iets nieuws = doe iets ouds weg (vermindert impuls).</li></ul><h3>Maandritueel (30–45 min, vaste dag)</h3><ol><li>Bank-app check: klopt alles? Onbekende transacties markeren.</li><li>Budget vs. Realiteit: per categorie vs. plan (boodschappen, fun, vervoer, etc.).</li><li>Aanpassen potjes voor volgende maand (verhoog/verlaag met kleine stappen).</li><li>Reserveringen nalopen: staat de buffer nog on track? Jaarlasten gevuld?</li><li>Top-3 geldlekken vastleggen en aanpak-kaarten schrijven (wat, waardoor, nieuwe regel).</li></ol><h3>Weekritueel (10–15 min)</h3><ul><li>Saldo leefgeld checken; weekend plannen binnen budget.</li><li>Boodschappenlijst + weekmenu (3 vaste recepten + 1 variatie + 1 restjesdag).</li><li>1 abonnement check (rotating). Klein stukje "schoonmaak" elke week.</li></ul><h3>Dagritueel (2–5 min)</h3><ul><li>1x per dag banksaldo leefgeld bekijken (niet vaker). Geen app-scroll valkuil.</li><li>Kleine uitgave direct taggen (koffie, snack, impuls) om bewustwording te houden.</li></ul><h3>Sparen en Investeren: simpele spelregels</h3><ul><li><strong>Noodbuffer</strong>: eerst 1.000 euro mini-buffer, daarna 3–6 maanden basislasten.</li><li><strong>Verdeling</strong>: start met 10% sparen en 10% investeren. Schaal deze op met inkomenstoename.</li><li><strong>Automatisch</strong>: vaste dag voor ETF/portefeuille-buy. Emotieloos, consistent.</li><li><strong>Bonus/extra inkomsten</strong>: 50% naar sparen/investeren, 30% naar schulden, 20% fun.</li></ul><h3>Schuldenplan (als van toepassing)</h3><ol><li>Maak een lijst van alle schulden: saldo, rente, minimale aflossing, boetevrijheid.</li><li>Kies methode: Snowball (kleinste eerst) of Avalanche (hoogste rente eerst).</li><li>Minimaliseer alle niet-essentiële uitgaven tijdelijk; verhoog aflossing op het gekozen doel.</li><li>Vier elke aflossingsmijlpaal (psychologische beloning, maar goedkoop: gratis/kleine beloningen).</li></ol><h3>Variabele kosten slimmer managen</h3><ul><li><strong>Boodschappen:</strong> weekmenu, één vaste grote boodschappenronde, koop huismerken, vermijd honger-shoppen.</li><li><strong>Vervoer:</strong> combineer ritten, plan routes, bandenspanning checken (brandstof), rij rustiger.</li><li><strong>Energie:</strong> 19 graden overdag, 15–16 's nachts, korter douchen, apparaten echt uit.</li><li><strong>Telecom/Internet:</strong> bundels vergelijken bij contractverlenging; bel en vraag korting.</li></ul><h3>Abonnementen Audit Framework (10 min/maand)</h3><ul><li>Vraag: "Wat krijg ik hier concreet voor terug?"</li><li>Geen duidelijk antwoord? Stoppen.</li><li>Dubbel of overlapping? Eentje eruit.</li><li>Gebruik "pauzeren" als test: mis je het? Zo niet, definitief opzeggen.</li></ul><h3>Cash Only Challenge (2 weken)</h3><ul><li>Voor snacks/koffie/klein vermaak een vast bedrag contant opnemen.</li><li>Betaal alles contant. Op=op. Bewustzijn stijgt direct.</li></ul><h3>No-Spend Days (1–2 dagen/week)</h3><p>Plan 1–2 dagen zonder uitgaven. Maak gratis activiteiten lijst (wandeling, thuis trainen, meal-prep, lezen, skill bouwen). Door default geen geld uit te geven, bouw je een spaarspier.</p><h3>Jaarplanning (voor voorspelbaarheid)</h3><ul><li>Kalender met grote uitgaven: verzekeringen, belastingen, onderhoud, cadeaus, vakanties.</li><li>Reserveringen uitsmeren per maand (automatisch). Geen verrassingen = geen stress.</li></ul><h3>Veelgemaakte fouten (en fixes)</h3><ul><li><strong>Te optimistisch budget:</strong> Start realistischer, verlaag later.</li><li><strong>Geld verschuiven:</strong> Alleen op basis van vooraf gedefinieerde uitzonderingen.</li><li><strong>Geen review-moment:</strong> Zet een herhalende kalender-notificatie.</li><li><strong>Te veel categorieën:</strong> Houd het simpel. Minder frictie = meer volhouden.</li></ul><h3>Tools</h3><ul><li>Bank-app categorieën of notities.</li><li>Spreadsheet (simpel): kolommen per maand, rijen per categorie.</li><li>Herinneringen-app voor maand/kwartaal audit.</li></ul><h3>Meetpunten (maandelijks meten)</h3><ul><li>Spaarratio (% van inkomen).</li><li>Invest-ratio (% van inkomen).</li><li>Vaste lasten als % van inkomen.</li><li>Leefgeld gemiddeld per week.</li><li>Schuldsaldo trend (indien van toepassing).</li><li>Buffer-maanden (hoeveel maanden kun je overbruggen?).</li></ul><h3>Voorbeeld verdeling (startpunt)</h3><ul><li>Vaste lasten 45–55%</li><li>Leefgeld 20–30%</li><li>Sparen 10–15%</li><li>Investeren 5–10%</li><li>Onvoorzien 2–5%</li></ul><p>Let op: Dit is een startpunt. Pas aan op basis van jouw situatie, maar wijzig in kleine stappen.</p><h3>Script voor verhogingen</h3><p>Wanneer inkomen stijgt: verhoog automatisch sparen/investeren eerst (minimaal +2–5%-punt), daarna pas lifestyle. Vermijd levensstijl-inflatie.</p><h3>Evaluatievragen (maand/kwartaal)</h3><ul><li>Welke 3 uitgaven gaven de minste waarde? Wat doe ik volgende maand anders?</li><li>Welke regel werkte het best? Welke was moeilijk? Hoe maak ik die makkelijker (frictie verhogen/verlagen)?</li><li>Ben ik dichter bij mijn buffer-doel? Wat is de volgende kleine stap?</li></ul><h3>Troubleshooting</h3><ul><li><strong>Het lukt niet om binnen leefgeld te blijven</strong> — Verlaag frictie (1x per week boodschappen), verhoog frictie (geen bezorg-apps op eerste homescherm), stel limieten in.</li><li><strong>Onverwachte kosten</strong> — Onvoorzien-potje en reserveringen opschalen met €10–€25/maand tot het past.</li><li><strong>Partner niet aan boord</strong> — 20-minuten money-meeting per week, gezamenlijke doelen, kleine winsten vieren.</li></ul><h3>Accountability</h3><ul><li>Stel een vaste dag en tijd in je agenda. Nooit overslaan; desnoods korter, maar wel doen.</li><li>Deel je meetpunten maandelijks met iemand (buddy/partner/coach).</li><li>Gebruik checklists en vink daadwerkelijk af (dopamine, momentum).</li></ul><h3>Veelgestelde vragen</h3><ol><li><strong>Wat als mijn inkomen onregelmatig is?</strong> Werk met een inkomenspakket: tel alle binnenkomende bedragen per maand op, betaal jezelf een vast loon op de 1e (bijv. 60–70% van je gemiddelde). De rest naar buffer/zakelijk.</li><li><strong>Hoe ga ik om met feestdagen/vakanties?</strong> Reserveer maandelijks een klein vast bedrag (bijv. €30–€100) in een apart potje. Boek vakantie pas als het potje gevuld is.</li><li><strong>Moet ik beleggen als ik schulden heb?</strong> Meestal niet. Focus op hoge-rente schulden eerst. Beleggen kan klein (bijv. €25/maand) voor ritme, maar schulden aflossen levert vaak zekere "rendement".</li><li><strong>Hoe krijg ik mijn partner mee?</strong> Plan een wekelijkse money-meeting van 20 minuten, vier kleine wins, kies gezamenlijk 1 regel per week om te testen. Maak het spelenderwijs, niet belerend.</li><li><strong>Wat als ik vaak terugval?</strong> Verlaag drempels (meal-prep, standaard boodschappenlijst), verhoog frictie (apps verplaatsen, limieten instellen), werk met buddy-accountability.</li></ol><h3>Praktische scripts</h3><ul><li><strong>Provider korting bellen:</strong> "Ik ben X jaar klant, vergelijk nu aanbieders. Kunnen we het bedrag verlagen of een loyaliteitskorting regelen?"</li><li><strong>Abonnement opzeggen:</strong> "Ik zie de waarde niet terug. Ik zeg per vandaag op."</li><li><strong>Vrienden & uit eten:</strong> "Ik zit in een spaardoel. Ik haak later aan of doe een koffie mee. Thanks voor het begrip."</li></ul><h3>Voorbeeld weekbudget (alleen leefgeld)</h3><ul><li>Ma–Do: €10 per dag (koffie/snack klein)</li><li>Vr: €15</li><li>Za: €20</li><li>Zo: €10</li><li>Totaal: €75/week — pas aan op jouw situatie, maar houd het vast voor 4 weken en evalueer.</li></ul><h3>Case studies (kort)</h3><ul><li><strong>Case 1:</strong> alleen 48-uurs regel + abonnementen audit: €120/maand bespaard.</li><li><strong>Case 2:</strong> 5 potjes + leefgeld wekelijks: impulskosten -40% in 2 maanden.</li><li><strong>Case 3:</strong> paar belletjes met providers: €35/maand minder vaste lasten.</li></ul><h3>Resultaten van grip op je geld</h3><ul><li><strong>Rust:</strong> je weet waar je geld naartoe gaat</li><li><strong>Controle:</strong> je stuurt elke euro bewust</li><li><strong>Buffer:</strong> je hebt geld voor onverwachte kosten</li><li><strong>Investeren:</strong> je bouwt vermogen op voor de toekomst</li><li><strong>Vrijheid:</strong> je hebt keuzes omdat je geld hebt</li></ul><h3>Start vandaag</h3><p>Grip op je geld begint vandaag. Download je transacties, categoriseer ze, markeer je geldlekken. Zet 5 potjes op, stel automatische overboekingen in. Plan je rituelen. Elke dag bouw je aan financiële rust en controle. Dit is de basis van financiële vrijheid.</p>
+    </div>
+
+    <div class="section" id="huiswerk">
+      <h2>📝 Huiswerk Opdrachten</h2>
+      
+      <div class="exercise-box">
+        <h4>Opdracht 1: Financiële Audit</h4>
+        <p><strong>Doel:</strong> Je huidige financiële situatie volledig in kaart brengen en geldlekken identificeren.</p>
+        <p><strong>Actie:</strong> Download 3-6 maanden transacties van je bank. Categoriseer alle uitgaven (wonen, vervoer, boodschappen, verzekeringen, abonnementen, fun, zorg). Markeer je top-5 geldlekken en kies 3 directe snijpunten die je vandaag kunt aanpakken.</p>
+      </div>
+
+      <div class="exercise-box">
+        <h4>Opdracht 2: 5-Potjes Systeem Opzetten</h4>
+        <p><strong>Doel:</strong> Een automatisch geldbeheersysteem implementeren dat je wilskracht overbodig maakt.</p>
+        <p><strong>Actie:</strong> Zet 5 bankrekeningen op: vaste lasten, leefgeld, sparen/buffer, investeren, onvoorzien. Stel automatische overboekingen in direct na salaris. Plan wekelijkse leefgeld transfers. Test het systeem 1 maand.</p>
+      </div>
+
+      <div class="exercise-box">
+        <h4>Opdracht 3: Maandritueel Implementeren</h4>
+        <p><strong>Doel:</strong> Een consistent review- en aanpassingssysteem opbouwen voor je financiën.</p>
+        <p><strong>Actie:</strong> Plan een vast moment (30-45 min) elke maand voor financiële review. Check alle transacties, vergelijk budget vs realiteit, pas potjes aan, evalueer geldlekken. Houd dit 3 maanden vol en documenteer verbeteringen.</p>
+      </div>
+    </div>
+
+    <div class="section" id="checklists">
+      <h2>✅ Checklists</h2>
+      
+      <h3>Weekchecklist "Grip op je Geld"</h3>
+      <div class="checklist">
+        <div class="checklist-item">
+          <input type="checkbox" id="geld-1">
+          <label for="geld-1">Financiële audit uitgevoerd (transacties gedownload en gecategoriseerd)</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="geld-2">
+          <label for="geld-2">Top-5 geldlekken geïdentificeerd en 3 directe snijpunten aangepakt</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="geld-3">
+          <label for="geld-3">5-Potjes systeem opgezet met automatische overboekingen</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="geld-4">
+          <label for="geld-4">Maandritueel gepland en 1 maand uitgevoerd</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="geld-5">
+          <label for="geld-5">Weekritueel geïmplementeerd (leefgeld check, boodschappenlijst, abonnement check)</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="geld-6">
+          <label for="geld-6">Harde regels ingesteld (48-uurs regel, op=op principe, abonnementen audit)</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="section" id="reflectie">
+      <h2>🤔 Reflectie Vragen</h2>
+      
+      <div class="reflection-question">
+        <h4>Huidige Financiële Situatie</h4>
+        <p>Hoe zou je je huidige grip op je geld beoordelen? Welke van je top-5 geldlekken kost je het meeste per maand? Waarom heb je dit nog niet eerder aangepakt?</p>
+      </div>
+
+      <div class="reflection-question">
+        <h4>Gewoontes en Automatisering</h4>
+        <p>Welke financiële gewoontes heb je al die werken? Welke kosten je geld? Hoe kun je meer automatiseren zodat je minder wilskracht nodig hebt voor je geld?</p>
+      </div>
+
+      <div class="reflection-question">
+        <h4>Doelen en Prioriteiten</h4>
+        <p>Wat is je belangrijkste financiële doel voor de komende 3 maanden? Wat weerhoudt je ervan om vandaag te beginnen met het 5-potjes systeem? Wat is je eerste kleine stap?</p>
+      </div>
+    </div>
+
+    <div class="section" id="actieplan">
+      <h2>🎯 Actieplan</h2>
+      
+      <div class="action-plan">
+        <div class="action-step">
+          <strong>Stap 1:</strong> Voer een financiële audit uit. Download 3-6 maanden transacties, categoriseer alles, identificeer je top-5 geldlekken en pak 3 directe snijpunten vandaag aan.
+        </div>
+        
+        <div class="action-step">
+          <strong>Stap 2:</strong> Zet het 5-potjes systeem op. Maak 5 bankrekeningen, stel automatische overboekingen in, plan wekelijkse leefgeld transfers. Test het systeem 1 maand.
+        </div>
+        
+        <div class="action-step">
+          <strong>Stap 3:</strong> Implementeer je maandritueel. Plan een vast moment (30-45 min) voor financiële review. Check transacties, vergelijk budget vs realiteit, pas potjes aan.
+        </div>
+        
+        <div class="action-step">
+          <strong>Stap 4:</strong> Stel harde regels in. Implementeer 48-uurs regel, op=op principe, abonnementen audit. Start met weekritueel voor leefgeld en boodschappen.
+        </div>
+        
+        <div class="action-step">
+          <strong>Stap 5:</strong> Evalueer na 1 maand. Wat werkt? Wat niet? Pas je systeem aan. Blijf consistent en bouw langzaam op. Grip op je geld is een marathon, geen sprint.
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p>Dit ebook is onderdeel van de <span class="ttm-brand">Top Tier Men</span> Academy</p>
+      <p>Module 05: Business and Finance | Les 02: Grip op je Geld</p>
+      <p>© 2025 Top Tier Men. Alle rechten voorbehouden.</p>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+      checkboxes.forEach(cb => {
+        const saved = localStorage.getItem(cb.id);
+        if (saved === 'true') cb.checked = true;
+        cb.addEventListener('change', function(){ localStorage.setItem(this.id, this.checked); });
+      });
+    });
+  </script>
+</body>
+</html>

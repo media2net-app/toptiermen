@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gezondheid als Fundament - Ebook | Top Tier Men</title>
+  <meta name="description" content="V2 ebook voor Gezondheid als Fundament binnen Top Tier Men Academy." />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.6; color: #ffffff;
+      background: linear-gradient(135deg, #0A0F0A 0%, #181F17 50%, #232D1A 100%);
+      min-height: 100vh;
+    }
+    .container { max-width: 800px; margin: 0 auto; padding: 2rem; }
+    .header {
+      text-align: center; margin-bottom: 3rem; padding: 2rem;
+      background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      border-radius: 20px; border: 1px solid #3A4D23;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    .logo { margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; }
+    h1 {
+      font-size: 2.5rem; font-weight: 800;
+      background: linear-gradient(135deg, #ffffff 0%, #8BAE5A 50%, #B6C948 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      margin-bottom: .5rem;
+    }
+    .subtitle { color: #8BAE5A; font-size: 1.1rem; font-weight: 500; }
+    .module-info {
+      background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1rem; border-radius: 10px; margin: 1rem 0; border-left: 4px solid #8BAE5A;
+    }
+    .section { background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      margin-bottom: 2rem; padding: 2rem; border-radius: 15px; border: 1px solid #3A4D23; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    .section h2 { color: #B6C948; font-size: 1.8rem; font-weight: 700; margin-bottom: 1.5rem; display: flex; align-items: center; gap: .5rem; }
+    .section h3 { color: #8BAE5A; font-size: 1.3rem; font-weight: 600; margin: 1.5rem 0 1rem; }
+    .section p { margin-bottom: 1rem; color: #e0e0e0; }
+    .section ul, .section ol { margin: 1rem 0; padding-left: 2rem; }
+    .section li { margin-bottom: .5rem; color: #e0e0e0; }
+    .highlight-box { background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1.5rem; border-radius: 10px; border-left: 4px solid #B6C948; margin: 1.5rem 0;
+    }
+    .exercise-box { background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%);
+      padding: 1.5rem; border-radius: 10px; border: 1px solid #8BAE5A; margin: 1rem 0;
+    }
+    .exercise-box h4 { color: #B6C948; font-size: 1.1rem; margin-bottom: 1rem; }
+    .checklist { background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      padding: 1.5rem; border-radius: 10px; border: 1px solid #3A4D23; margin: 1rem 0;
+    }
+    .checklist-item { display: flex; align-items: center; margin-bottom: .8rem; padding: .5rem; background: rgba(58,77,35,.3); border-radius: 8px; }
+    .checklist-item input[type="checkbox"] { margin-right: 1rem; width: 18px; height: 18px; accent-color: #8BAE5A; }
+    .reflection-question { background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1.5rem; border-radius: 10px; border-left: 4px solid #B6C948; margin: 1rem 0;
+    }
+    .reflection-question h4 { color: #B6C948; margin-bottom: 1rem; }
+    .action-plan { background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%);
+      padding: 2rem; border-radius: 15px; border: 2px solid #8BAE5A; margin: 2rem 0;
+    }
+    .action-step { background: rgba(139,174,90,.1); padding: 1rem; border-radius: 8px; margin: 1rem 0; border-left: 3px solid #8BAE5A; }
+    .footer { text-align: center; margin-top: 3rem; padding: 2rem; background: linear-gradient(135deg, #181F17 0%, #232D1A 100%); border-radius: 15px; border: 1px solid #3A4D23; }
+    .footer p { color: #8BAE5A; margin-bottom: 1rem; }
+    .ttm-brand { color: #B6C948; font-weight: 700; }
+    .sticky-back-btn { position: fixed; top: 50%; right: 20px; transform: translateY(-50%);
+      z-index: 1000; background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%);
+      color: #fff; border: none; border-radius: 50px; padding: 15px 20px; font-size: 14px; font-weight: 600; cursor: pointer;
+      box-shadow: 0 8px 25px rgba(139,174,90,.3); transition: all .3s ease; display: flex; align-items: center; gap: 8px; text-decoration: none; min-width: 120px; justify-content: center;
+    }
+    .sticky-back-btn:hover { background: linear-gradient(135deg, #B6C948 0%, #8BAE5A 100%); transform: translateY(-50%) scale(1.05); box-shadow: 0 12px 35px rgba(139,174,90,.4); }
+    .sticky-back-btn:active { transform: translateY(-50%) scale(.95); }
+    .sticky-back-btn svg { width: 16px; height: 16px; fill: currentColor; }
+    @media (max-width: 768px) {
+      .container { padding: 1rem; }
+      h1 { font-size: 2rem; }
+      .section { padding: 1.5rem; }
+      .sticky-back-btn { right: 10px; padding: 12px 16px; font-size: 12px; min-width: 100px; }
+    }
+  </style>
+</head>
+<body>
+  <a href="/dashboard/academy/f5dfaee3-87a7-4d32-9548-751391642e2b/d8b02260-dbe6-47db-85db-96d8e6a57814" class="sticky-back-btn" title="Terug naar les">
+    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    Terug
+  </a>
+
+  <div class="container">
+    <div class="header">
+      <div class="logo">
+        <img src="/logo_white-full.svg" alt="Top Tier Men Logo" style="height:40px;width:auto" />
+      </div>
+      <h1>Gezondheid als Fundament</h1>
+      <p class="subtitle">De basis van alles wat je wilt bereiken</p>
+      <div class="module-info">
+        <strong>Module 07: Voeding & Gezondheid</strong> | <strong>Les 05: Gezondheid als Fundament</strong>
+      </div>
+    </div>
+
+    <div class="section" id="samenvatting">
+      <h2>📚 Uitgebreide Samenvatting van de Les</h2>
+<div class="highlight-box"><h4>🎯 Les Overzicht</h4><p>Deze les maakt gezondheid eenvoudig en praktisch. Je leert hoe je een stevige basis bouwt waarop alles rust: je energie, je focus, je training, je relaties en je werk. Gezondheid is geen vage term; het is een set kleine gewoontes die je elke dag herhaalt. Als de basis klopt, wordt de rest lichter en leuker.</p></div><h3>Waarom gezondheid je fundament is</h3><p>Alles wat je wilt doen, kost energie en aandacht. Zonder een gezond lijf en rustige kop, betaal je te veel voor elke taak: je raakt sneller moe, je hebt minder geduld, je maakt slechtere keuzes, en je bent minder consistent. Met een sterk fundament voel je je stabiel, helder en sterk. Je presteert beter met minder moeite. Dit fundament bouw je met vijf pijlers: slaap, voeding, beweging, stressbeheersing en sociale omgeving.</p><h3>De 5 pijlers van gezondheid</h3><ul><li><strong>1) Slaap:</strong> 7–9 uur, vaste tijden, donkere koele kamer, rustig avondritueel.</li><li><strong>2) Voeding:</strong> echt eten, eiwit + groente bij elke maaltijd, water als basis, vaste eetmomenten.</li><li><strong>3) Beweging:</strong> 7–10k stappen per dag, 3x per week krachttraining, korte beweegmomenten tussendoor.</li><li><strong>4) Stressbeheersing:</strong> ademhaling, wandelen, daglicht, plannen op papier, micro-pauzes.</li><li><strong>5) Sociale omgeving:</strong> mensen die je sterker maken, duidelijke grenzen, accountability.</li></ul><h3>Slaap: herstel dat je wint</h3><p>Slaap is je hefboom. Goede slaap maakt je alerter, sterker, rustiger en wilskrachtiger. Een simpel plan:</p><ul><li><strong>Vaste tijden:</strong> ga elke dag rond dezelfde tijd naar bed en uit bed.</li><li><strong>Avondlanding (60–90 min):</strong> licht laag, schermen dimmen, korte wandeling of warme douche.</li><li><strong>Kamer:</strong> donker, koel (18–19°C), stil. Telefoon uit zicht.</li><li><strong>Cafeïne:</strong> vóór 14:00. Alcohol beperkt; het breekt slaapkwaliteit af.</li><li><strong>Lig je wakker?</strong> Sta even op, lees iets korts, adem rustig, probeer opnieuw.</li></ul><h3>Voeding: bouwstenen voor je lijf</h3><p>Eet vooral echt eten. Houd je ritme simpel en herhaalbaar:</p><ul><li><strong>2–4 vaste eetmomenten:</strong> minder snacken = stabielere energie.</li><li><strong>Eiwit + groente standaard:</strong> kip, rund, eieren, zalm, kwark; groente bij elke maaltijd.</li><li><strong>Koolhydraten slim:</strong> aardappels, rijst, volkoren, fruit. Rond training wat meer.</li><li><strong>Vetten uit goede bronnen:</strong> olijfolie, roomboter, noten, eieren, vette vis.</li><li><strong>Water:</strong> 2–3 liter per dag. Koffie/thee zonder suiker is oké.</li></ul><div class="highlight-box"><h4>Maaltijd-indeling (hand-methode)</h4><ul><li><strong>Eiwit:</strong> 1–2 handpalmen per maaltijd.</li><li><strong>Koolhydraten:</strong> 1 vuist (meer bij training, minder bij rust).</li><li><strong>Vetten:</strong> 1 duim of kleine hand noten.</li><li><strong>Groente:</strong> halve tot hele bord vol.</li></ul></div><h3>Beweging: elke dag iets</h3><ul><li><strong>Stappen:</strong> 7–10k per dag. Splits in 2–3 wandelingen van 10–20 min.</li><li><strong>Kracht:</strong> 3x per week 40–60 min. Compound bewegingen, progressie bijhouden.</li><li><strong>Tussendoor:</strong> 3–5 min losmaken: heupen, borst openen, nek, polsen.</li></ul><p>Beweging verbetert doorbloeding, houding, lichaamstaal en hormoonbalans. Je voelt je sterker en zelfverzekerder. Het is de goedkoopste vorm van therapie.</p><h3>Stress omlaag, rust omhoog</h3><p>Stress is niet alleen drukte; het is een staat van je zenuwstelsel. Bouw drie remmen in je dag:</p><ul><li><strong>Adem 2 min:</strong> 4 tellen in, 6–8 tellen uit. Hartslag zakt, hoofd klaart op.</li><li><strong>Wandel 5–10 min:</strong> buitenlucht, licht en ritme geven kalmte en ideeën.</li><li><strong>Schrijf het op:</strong> 5 regels: wat moet echt vandaag, wat kan later? Weg uit je hoofd, op papier.</li></ul><h3>Sociale omgeving: je kring tilt je op</h3><ul><li><strong>Kies mensen die je sterker maken:</strong> discipline, eerlijkheid, groei.</li><li><strong>Grenzen:</strong> zeg vaker "nee" tegen onzin. Bewaak je avondroutine en werkblokken.</li><li><strong>Accountability:</strong> spreek doelen hardop uit, rapporteer wekelijks.</li></ul><h3>Gezond dagritme</h3><ol><li>Sta op op vaste tijd. Water + licht + korte beweging.</li><li>Eiwit-ontbijt of vroeg lunch. Geen suikerdrank als start.</li><li>2 focusblokken in de ochtend. Tussenin: 5–10 min wandelen.</li><li>Lunch: eiwit + groente + slimme koolhydraten.</li><li>Middag: 1–2 focusblokken. Korte adem- of wandelpauze.</li><li>Na werk: stappen of krachttraining (40–60 min).</li><li>Avond: licht laag, schermen minder, kort buiten. Notities voor morgen. Op tijd slapen.</li></ol><h3>Weekstructuur die blijft plakken</h3><ul><li><strong>Ma:</strong> 2–3 werkblokken, wandeling, vroege avond.</li><li><strong>Di:</strong> werk + krachttraining.</li><li><strong>Wo:</strong> werkblokken, sociale taken geclusterd, rustige avond.</li><li><strong>Do:</strong> werk + krachttraining, eiwit-rijker eten.</li><li><strong>Vr:</strong> 2 blokken, week afronden, licht avondeten, slaap prioriteit.</li><li><strong>Za:</strong> lange wandeling, huishoudelijk werk, mobiliteit of korte kracht.</li><li><strong>Zo:</strong> boodschappen, mealprep, weekplanning, vroeg naar bed.</li></ul><h3>Preventie: problemen vóór zijn</h3><ul><li><strong>Check-ups:</strong> 1–2x per jaar, inclusief bloedwerk (vitamine D, ijzer, schildklier, lipiden, glucose).</li><li><strong>Signalen serieus nemen:</strong> aanhoudende moeheid, pijn, slaapproblemen: pak ze vroeg aan.</li><li><strong>Mentale hygiëne:</strong> minder doomscrollen, meer lezen, wandelen, praten.</li></ul><h3>Veelgemaakte fouten + fixes</h3><ul><li><strong>Te ambitieus starten:</strong> begin met 1–2 gewoontes (water + 2 wandelingen). Voeg pas later toe.</li><li><strong>Alles perfect willen:</strong> 80–90% goed is beter en vol te houden.</li><li><strong>Avond vol prikkels:</strong> stel een wekker voor je avondroutine. Licht laag = brein landt.</li><li><strong>Snacken door stress:</strong> adem 2 min + 5 min wandelen. Dan pas beslissen.</li><li><strong>Te weinig eiwit:</strong> 2 handpalmen per maaltijd. Hou het standaard.</li></ul><h3>Mini-handleidingen per pijler</h3><h4>Slaap (10 stappen)</h4><ol><li>Vaste bed- en wektijd (±30 min marge).</li><li>Na eten: licht dimmen, beeldschermen omlaag.</li><li>Korte wandeling of warme douche.</li><li>Kamer donker, koel, stil.</li><li>Telefoon buiten bereik; wekker analoog desnoods.</li><li>Geen cafeïne na 14:00.</li><li>Alcohol zelden; kwaliteit zakt.</li><li>Notities voor morgen (rust in je hoofd).</li><li>Lees 10 min, geen intens scherm.</li><li>Lig je wakker? Sta op, lees kort, adem, probeer opnieuw.</li></ol><h4>Voeding (10 regels)</h4><ol><li>Echt eten > bewerkte troep.</li><li>Eiwit + groente elke maaltijd.</li><li>Vaste eetmomenten (2–4).</li><li>Koolhydraten rond training verhogen.</li><li>Vetten klein maar kwalitatief.</li><li>2–3 liter water per dag.</li><li>Ontbijt of vroeg lunch; geen zoet als start.</li><li>Mealprep 1–2x per week.</li><li>Boodschappenlijst standaardiseren.</li><li>80–90% goed = winst op lange termijn.</li></ol><h4>Beweging (10 regels)</h4><ol><li>Dagelijks stappen (7–10k).</li><li>3x per week kracht (40–60 min).</li><li>Compound eerst: squat, hinge, push, pull.</li><li>Progressie bijhouden (logboek).</li><li>Korte wandelingen als reset.</li><li>Mobiliteit 5 min per dag.</li><li>Goede houding tijdens werk.</li><li>Rustdagen echt rust, wel stappen.</li><li>Train eerder op de dag als mogelijk.</li><li>Maak het leuk en haalbaar.</li></ol><h4>Stress (10 regels)</h4><ol><li>Adem dagelijks 2 min (4 in, 6–8 uit).</li><li>Daglicht in de ochtend.</li><li>2–3 micro-pauzes per dag.</li><li>Wandeling na lunch.</li><li>Schrijf taken op papier.</li><li>Focus op 3 prioriteiten.</li><li>Notificaties uit tijdens werk.</li><li>Grenzen aan schermtijd.</li><li>1 uur voor bed: prikkels omlaag.</li><li>Praat met iemand als het vastloopt.</li></ol><h4>Sociaal (10 regels)</h4><ol><li>Omring je met bouwers, niet brekers.</li><li>Plan 1 moment per week met een sterke vriend/broeder.</li><li>Wees eerlijk over je doelen.</li><li>Vraag om check-in (accountability).</li><li>Bescherm je avondroutine.</li><li>Zeg "nee" tegen tijdvreters.</li><li>Vier kleine overwinningen samen.</li><li>Help anderen groeien.</li><li>Hou discussies kort en duidelijk.</li><li>Laat je standaard zien met je daden.</li></ol><h3>Concrete weekopdracht</h3><ol><li>Kies 2 gewoontes voor deze week (bijv. 2 liter water + 2 wandelingen van 10 min per dag).</li><li>Plan ze in je agenda op vaste tijden.</li><li>Zet triggers klaar (fles water op je bureau, schoenen bij de deur).</li><li>Houd 7 dagen bij: gedaan of niet, zonder oordeel.</li><li>Reflecteer zondag: wat werkte, wat was lastig, wat pas je aan?</li></ol><h3>Voorbeeld-dag (praktisch en haalbaar)</h3><ul><li><strong>07:00</strong> opstaan, water, licht, 5 min wandelen/ademen</li><li><strong>07:30</strong> eiwit-ontbijt (eieren of kwark), koffie</li><li><strong>08:30</strong> focusblok 1 (50 min), 10 min pauze buiten</li><li><strong>09:40</strong> focusblok 2 (50 min), water</li><li><strong>11:00</strong> 10 min wandelen + lichte mobiliteit</li><li><strong>12:30</strong> lunch: eiwit + groente + slimme koolhydraten</li><li><strong>14:00</strong> korte taken, 10 min pauze</li><li><strong>15:00</strong> focusblok 3 (50 min), water</li><li><strong>17:30</strong> krachttraining of 30 min stevige wandeling</li><li><strong>19:00</strong> avondeten: eiwit + groente + aardappels/rijst</li><li><strong>20:30</strong> licht laag, korte wandeling, notities voor morgen</li><li><strong>22:00</strong> bedtijd</li></ul><h3>Q&A (veelgestelde vragen)</h3><ul><li><strong>Moet ik calorieën tellen?</strong> Niet nodig als je handmaten gebruikt en 80–90% echt eten kiest.</li><li><strong>Wat als ik onregelmatig werk?</strong> Kies 2–3 anker-momenten (bijv. start werk, midden, einde) voor eten en water.</li><li><strong>Wat als ik geen tijd heb voor sport?</strong> Doe 20–30 min kracht + 2 wandelingen. Beter kort en consistent dan niets.</li><li><strong>Hoe ga ik om met sociale druk?</strong> Kies vooruit: of je drinkt/cheat of niet. Eén keuze, geen discussie in je hoofd.</li></ul><h3>Afsluiting</h3><p>Gezondheid is geen groot project. Het is herhaling van simpele keuzes. Als je dagelijks water, slaap, echt eten, stappen, adem en een rustige avondroutine herhaalt, bouw je een fundament waar je jaren op kunt staan. Eenvoud wint. Consistentie maakt het verschil.</p>
+    </div>
+
+    <div class="section" id="huiswerk">
+      <h2>📝 Huiswerk Opdrachten</h2>
+      
+      <div class="exercise-box">
+        <h4>Opdracht 1: 2 Gezondheidsgewoontes Starten</h4>
+        <p><strong>Doel:</strong> 2 concrete gezondheidsgewoontes implementeren die je kunt volhouden.</p>
+        <p><strong>Actie:</strong> Kies 2 gewoontes voor deze week (bijv. 2 liter water + 2 wandelingen van 10 min per dag). Plan ze in je agenda op vaste tijden. Zet triggers klaar (fles water op bureau, schoenen bij deur). Houd 7 dagen bij wat je doet.</p>
+      </div>
+
+      <div class="exercise-box">
+        <h4>Opdracht 2: Slaapritme Optimaliseren</h4>
+        <p><strong>Doel:</strong> Je slaapkwaliteit verbeteren door een consistent slaapritme op te bouwen.</p>
+        <p><strong>Actie:</strong> Stel vaste bed- en wektijden in (±30 min marge). Start een avondroutine van 60-90 minuten voor bedtijd. Maak je kamer donker, koel en stil. Houd een week bij hoe je slaapt en hoe je je voelt.</p>
+      </div>
+
+      <div class="exercise-box">
+        <h4>Opdracht 3: Voeding Audit en Verbetering</h4>
+        <p><strong>Doel:</strong> Je voeding evalueren en verbeteren met de hand-methode.</p>
+        <p><strong>Actie:</strong> Houd 3 dagen je voeding bij. Evalueer: eet je genoeg eiwit (1-2 handpalmen per maaltijd)? Genoeg groenten (halve tot hele bord)? Vaste eetmomenten? Maak 3 concrete verbeteringen en implementeer ze.</p>
+      </div>
+    </div>
+
+    <div class="section" id="checklists">
+      <h2>✅ Checklists</h2>
+      
+      <h3>Weekchecklist "Gezondheid als Fundament"</h3>
+      <div class="checklist">
+        <div class="checklist-item">
+          <input type="checkbox" id="gezond-1">
+          <label for="gezond-1">2 gezondheidsgewoontes gekozen en 7 dagen uitgevoerd</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="gezond-2">
+          <label for="gezond-2">Slaapritme geoptimaliseerd met vaste tijden en avondroutine</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="gezond-3">
+          <label for="gezond-3">3 dagen voeding bijgehouden en geëvalueerd</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="gezond-4">
+          <label for="gezond-4">3 concrete voeding verbeteringen geïmplementeerd</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="gezond-5">
+          <label for="gezond-5">Dagelijks 7-10k stappen behaald</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="gezond-6">
+          <label for="gezond-6">Stress management toegepast (ademhaling, wandelen, notities)</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="section" id="reflectie">
+      <h2>🤔 Reflectie Vragen</h2>
+      
+      <div class="reflection-question">
+        <h4>Huidige Gezondheidstoestand</h4>
+        <p>Hoe zou je je huidige energieniveau, slaapkwaliteit en algehele gezondheid beoordelen? Welke van de 5 pijlers (slaap, voeding, beweging, stress, sociaal) heeft de meeste aandacht nodig?</p>
+      </div>
+
+      <div class="reflection-question">
+        <h4>Gewoontes en Consistentie</h4>
+        <p>Welke gezondheidsgewoontes heb je al? Welke mis je nog? Wat is het moeilijkst om consistent te doen en waarom? Hoe kun je dit makkelijker maken?</p>
+      </div>
+
+      <div class="reflection-question">
+        <h4>Prioriteiten en Doelen</h4>
+        <p>Als je over 3 maanden een stevig gezondheidsfundament wilt hebben, welke 3 dingen zijn dan het belangrijkst? Wat weerhoudt je ervan om vandaag te beginnen? Wat is je eerste kleine stap?</p>
+      </div>
+    </div>
+
+    <div class="section" id="actieplan">
+      <h2>🎯 Actieplan</h2>
+      
+      <div class="action-plan">
+        <div class="action-step">
+          <strong>Stap 1:</strong> Kies 2 gezondheidsgewoontes voor deze week. Plan ze in je agenda op vaste tijden. Zet triggers klaar om het makkelijker te maken. Houd 7 dagen bij wat je doet.
+        </div>
+        
+        <div class="action-step">
+          <strong>Stap 2:</strong> Optimaliseer je slaapritme. Stel vaste bed- en wektijden in. Start een avondroutine van 60-90 minuten. Maak je kamer donker, koel en stil. Houd bij hoe je slaapt.
+        </div>
+        
+        <div class="action-step">
+          <strong>Stap 3:</strong> Audit je voeding. Houd 3 dagen bij wat je eet. Evalueer eiwit, groenten, eetmomenten. Maak 3 concrete verbeteringen en implementeer ze met de hand-methode.
+        </div>
+        
+        <div class="action-step">
+          <strong>Stap 4:</strong> Voeg beweging toe. Streef naar 7-10k stappen per dag. Plan 3 krachttraining sessies per week. Doe korte wandelingen als stress-reset.
+        </div>
+        
+        <div class="action-step">
+          <strong>Stap 5:</strong> Evalueer na 2 weken. Wat werkt? Wat niet? Pas je plan aan. Blijf consistent en bouw langzaam op. Gezondheid is een marathon, geen sprint.
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p>Dit ebook is onderdeel van de <span class="ttm-brand">Top Tier Men</span> Academy</p>
+      <p>Module 07: Voeding & Gezondheid | Les 05: Gezondheid als Fundament</p>
+      <p>© 2025 Top Tier Men. Alle rechten voorbehouden.</p>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+      checkboxes.forEach(cb => {
+        const saved = localStorage.getItem(cb.id);
+        if (saved === 'true') cb.checked = true;
+        cb.addEventListener('change', function(){ localStorage.setItem(this.id, this.checked); });
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bouw de juiste Kring - Ebook | Top Tier Men</title>
+  <meta name="description" content="V2 ebook voor Bouw de juiste Kring binnen Top Tier Men Academy." />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.6; color: #ffffff;
+      background: linear-gradient(135deg, #0A0F0A 0%, #181F17 50%, #232D1A 100%);
+      min-height: 100vh;
+    }
+    .container { max-width: 800px; margin: 0 auto; padding: 2rem; }
+    .header {
+      text-align: center; margin-bottom: 3rem; padding: 2rem;
+      background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      border-radius: 20px; border: 1px solid #3A4D23;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    .logo { margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; }
+    h1 {
+      font-size: 2.5rem; font-weight: 800;
+      background: linear-gradient(135deg, #ffffff 0%, #8BAE5A 50%, #B6C948 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      margin-bottom: .5rem;
+    }
+    .subtitle { color: #8BAE5A; font-size: 1.1rem; font-weight: 500; }
+    .module-info {
+      background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1rem; border-radius: 10px; margin: 1rem 0; border-left: 4px solid #8BAE5A;
+    }
+    .section { background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      margin-bottom: 2rem; padding: 2rem; border-radius: 15px; border: 1px solid #3A4D23; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    .section h2 { color: #B6C948; font-size: 1.8rem; font-weight: 700; margin-bottom: 1.5rem; display: flex; align-items: center; gap: .5rem; }
+    .section h3 { color: #8BAE5A; font-size: 1.3rem; font-weight: 600; margin: 1.5rem 0 1rem; }
+    .section p { margin-bottom: 1rem; color: #e0e0e0; }
+    .section ul, .section ol { margin: 1rem 0; padding-left: 2rem; }
+    .section li { margin-bottom: .5rem; color: #e0e0e0; }
+    .highlight-box { background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1.5rem; border-radius: 10px; border-left: 4px solid #B6C948; margin: 1.5rem 0;
+    }
+    .exercise-box { background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%);
+      padding: 1.5rem; border-radius: 10px; border: 1px solid #8BAE5A; margin: 1rem 0;
+    }
+    .exercise-box h4 { color: #B6C948; font-size: 1.1rem; margin-bottom: 1rem; }
+    .checklist { background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      padding: 1.5rem; border-radius: 10px; border: 1px solid #3A4D23; margin: 1rem 0;
+    }
+    .checklist-item { display: flex; align-items: center; margin-bottom: .8rem; padding: .5rem; background: rgba(58,77,35,.3); border-radius: 8px; }
+    .checklist-item input[type="checkbox"] { margin-right: 1rem; width: 18px; height: 18px; accent-color: #8BAE5A; }
+    .reflection-question { background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1.5rem; border-radius: 10px; border-left: 4px solid #B6C948; margin: 1rem 0;
+    }
+    .reflection-question h4 { color: #B6C948; margin-bottom: 1rem; }
+    .action-plan { background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%);
+      padding: 2rem; border-radius: 15px; border: 2px solid #8BAE5A; margin: 2rem 0;
+    }
+    .action-step { background: rgba(139,174,90,.1); padding: 1rem; border-radius: 8px; margin: 1rem 0; border-left: 3px solid #8BAE5A; }
+    .footer { text-align: center; margin-top: 3rem; padding: 2rem; background: linear-gradient(135deg, #181F17 0%, #232D1A 100%); border-radius: 15px; border: 1px solid #3A4D23; }
+    .footer p { color: #8BAE5A; margin-bottom: 1rem; }
+    .ttm-brand { color: #B6C948; font-weight: 700; }
+    .sticky-back-btn { position: fixed; top: 50%; right: 20px; transform: translateY(-50%);
+      z-index: 1000; background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%);
+      color: #fff; border: none; border-radius: 50px; padding: 15px 20px; font-size: 14px; font-weight: 600; cursor: pointer;
+      box-shadow: 0 8px 25px rgba(139,174,90,.3); transition: all .3s ease; display: flex; align-items: center; gap: 8px; text-decoration: none; min-width: 120px; justify-content: center;
+    }
+    .sticky-back-btn:hover { background: linear-gradient(135deg, #B6C948 0%, #8BAE5A 100%); transform: translateY(-50%) scale(1.05); box-shadow: 0 12px 35px rgba(139,174,90,.4); }
+    .sticky-back-btn:active { transform: translateY(-50%) scale(.95); }
+    .sticky-back-btn svg { width: 16px; height: 16px; fill: currentColor; }
+    @media (max-width: 768px) {
+      .container { padding: 1rem; }
+      h1 { font-size: 2rem; }
+      .section { padding: 1.5rem; }
+      .sticky-back-btn { right: 10px; padding: 12px 16px; font-size: 12px; min-width: 100px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Sticky Back Button: VERPLICHT naar juiste les URL -->
+  <a href="/dashboard/academy/6102f6c8-7f38-4501-ab94-e9a68622e46f/0d4b5757-3fc2-4295-859d-e0d6e255b4ab" class="sticky-back-btn" title="Terug naar les">
+    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    Terug
+  </a>
+
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="logo">
+        <img src="/logo_white-full.svg" alt="Top Tier Men Logo" style="height:40px;width:auto" />
+      </div>
+      <h1>Bouw de juiste Kring</h1>
+      <p class="subtitle"></p>
+      <div class="module-info">
+        <strong>Module 06: Brotherhood</strong> | <strong>Les 03: Bouw de juiste Kring </strong>
+      </div>
+    </div>
+
+    <!-- Uitgebreide Samenvatting: 1:1 OVERNEMEN (NIET WIJZIGEN) -->
+    <!-- Markeer deze sectie exact en wijzig de tekst niet. -->
+    <div class="section" id="samenvatting">
+      <h2>📚 Uitgebreide Samenvatting van de Les</h2>
+<div class="highlight-box">  <h4>🎯 Les Overzicht</h4>  <p>    Deze les gaat over je kring: met wie je jezelf omringt bepaalt je standaard. Een sterke kring tilt je omhoog,    een zwakke kring trekt je omlaag. Je leert concreet hoe je je omgeving scherpt: wie je dichterbij haalt,    wie je op afstand zet, en hoe je dagelijks gedrag en resultaat verbetert door bewuste keuzes in relaties.    Eenvoudig, direct toepasbaar, zonder zachte compromissen.  </p></div><h3>Waarom je kring alles beïnvloedt</h3><p>  Je gaat leven op het gemiddelde van je omgeving: taal, gewoontes, ambities, normen. Als je vrienden laat,  slordig en negatief zijn, word jij dat ook sneller. Als je kring traint, plant, leest en doorpakt, groei jij  mee. De snelste manier om je leven te verbeteren is je kring upgraden. Niet door mensen te "veranderen",  maar door je eigen standaard te kiezen en je afstand bewust te managen.</p><h3>De 5 lagen van je kring</h3><ul>  <li><strong>Kern (1–3 mensen):</strong> absolute vertrouwelingen; zien je winst en je fouten; eerlijk en loyaal.</li>  <li><strong>Inner circle (3–7):</strong> mannen die bouwen; trainen, leren, ondernemen, vaderen met intentie.</li>  <li><strong>Bondgenoten (10–20):</strong> netwerk voor specifieke doelen: business, sport, skills.</li>  <li><strong>Bekenden:</strong> sociaal, vriendelijk, maar niet leidend in jouw gedrag.</li>  <li><strong>Afstand:</strong> negatieve patronen, drama, jaloezie, sabotage: afstand is liefde voor je missie.</li></ul><h3>Eigenschappen van een sterke kring</h3><ul>  <li><strong>Discipline:</strong> afspraken nakomen, op tijd, geen excuses.</li>  <li><strong>Waarheid:</strong> eerlijk spreken, ook als het schuurt; feedback is een dienst.</li>  <li><strong>Ambitie:</strong> doelen op papier, meetbare stappen, weekreview.</li>  <li><strong>Actie:</strong> praten is niets zonder doen; kleine daily reps.</li>  <li><strong>Loyaliteit:</strong> geen roddel; conflicten direct en privé oplossen.</li></ul><h3>Scan van je huidige kring (30 minuten)</h3><ol>  <li>Schrijf 15 namen die je week beïnvloeden (werk, sport, familie, online).</li>  <li>Noteer per naam: energie +/−, gedrag +/−, ambitie +/−, betrouwbaarheid +/−.</li>  <li>Markeer: wie tilt je omhoog (A), wie is neutraal (B), wie trekt je omlaag (C).</li>  <li>Beslis: A dichterbij, B selectief, C op afstand. Duidelijk is vriendelijk.</li></ol><h3>Grenzen in de praktijk</h3><ul>  <li><strong>Tijd:</strong> plan vooruit. Wie niet in je agenda past, bepaalt jouw koers niet.</li>  <li><strong>Gesprek:</strong> houd het kort, duidelijk, zonder uitlegdrang: "Ik focus voorlopig op X."</li>  <li><strong>Omgeving:</strong> minder kroeg, meer gym/werkplek/bibliotheek.</li>  <li><strong>Online:</strong> ontvolg mensen die je standaard omlaag halen; volg bouwers.</li></ul><h3>Je kern bouwen (12 weken)</h3><ol>  <li>Kies 1–3 mannen met dezelfde richting: gezondheid, business, karakter.</li>  <li>Wekelijkse check-in (45–60 min): cijfers, acties, obstakels, eerlijke feedback.</li>  <li>Dagelijkse "done"-ping (2 minuten): 1 appje met je belangrijkste taak afgerond.</li>  <li>Elke maand samen discomfort: koude training, hike, run, pitch, presentatie.</li></ol><h3>Gespreksregels die groeien</h3><ul>  <li>Geen slachtoffertaal. We zetten stappen of we plannen hulp.</li>  <li>Kort en concreet. Feiten, actie, datum.</li>  <li>Feedback is welkom. We vallen gedrag aan, niet personen.</li>  <li>Geen roddel. Problemen bespreken we met de betrokkene.</li></ul><h3>Rituelen voor een sterke kring</h3><ul>  <li><strong>Maandag:</strong> doelen van de week delen (3 prioriteiten).</li>  <li><strong>Woensdag:</strong> tussentijdse check (wat blokkeert?).</li>  <li><strong>Vrijdag:</strong> review (wat is gelukt, wat leer je, wat volgt?).</li>  <li><strong>Maandelijks:</strong> gezamenlijke uitdaging (fysiek/skills).</li></ul><h3>Wanneer afstand nemen?</h3><ul>  <li>Herhaling van leugens, chaos, jaloezie, passief-agressieve steken.</li>  <li>Grenzen worden genegeerd of belachelijk gemaakt.</li>  <li>Je groeit, de ander saboteert of bagatelliseert het.</li></ul><p>  Afstand kan stil en respectvol. Je verschuift je tijd en aandacht. Je hoeft niemand te "repareren".</p><h3>Nieuwe kring vinden</h3><ul>  <li>Ga waar bouwers zijn: gym, opleidingen, business-events, vrijwilligerswerk.</li>  <li>Kom opdagen. Stel vragen. Bied waarde. Wees consistent.</li>  <li>Begin klein: een wekelijkse koffie met iemand die je scherp zet.</li></ul><h3>Thuisfront en familie</h3><p>  Hou van iedereen; laat niet iedereen dichtbij. Met familie stel je rustige grenzen en bouw je aan het  voorbeeld: je traint, werkt, leert, bent aanwezig. Respecteer je eigen missie en je rol als man.</p><h3>Online vs offline</h3><ul>  <li>Online kan inspireren, maar is geen vervanger voor echte accountability.</li>  <li>Gebruik online om te leren en plannen; voer ze offline uit.</li></ul><h3>Checklist "Bouw de juiste kring"</h3><ol>  <li>Scan je contacten (A/B/C). Plan tijd voor A, beperk C.</li>  <li>Stel grenzen. Kort, respectvol, zonder schuldgevoel.</li>  <li>Plan wekelijkse check-ins met je kern.</li>  <li>Ontvolg online ruis; volg bouwers.</li>  <li>Zoek nieuwe plekken met hoge standaard en kom opdagen.</li></ol><h3>Veelgemaakte fouten</h3><ul>  <li>Iedereen willen meenemen. Je taak is je eigen standaard, niet evangeliseren.</li>  <li>Uitstellen "om de vrede". Je betaalt met je toekomst. Wees duidelijk.</li>  <li>Te veel praten, te weinig doen. Laat je daden je verhaal vertellen.</li></ul><h3>Weekopdracht (concreet)</h3><ol>  <li>Schrijf vandaag je 15 namen. Markeer A/B/C.</li>  <li>Plan deze week 1 check-in met een A en 1 ontmoeting met een potentiële A.</li>  <li>Zet 2 grenzen bij C (tijd/locatie/onderwerp). Kort en respectvol.</li>  <li>Ontvolg 20 accounts die je standaard omlaag halen. Volg 5 bouwers.</li></ol><h3>Dagelijkse standaard (7 regels)</h3><ol>  <li>Op tijd. Afspraak is afspraak.</li>  <li>Helder. Kort. Eerlijk.</li>  <li>Geen roddel. Probleem → betrokkene.</li>  <li>1 ding afmaken vóór je praat.</li>  <li>Elke dag trainen of wandelen.</li>  <li>Elke dag lezen/leren (20 min).</li>  <li>Elke dag 1 man sterker maken (bericht, hulp, feedback).</li></ol><div class="highlight-box">  <h4>Samenvatting in 10 regels</h4>  <ol>    <li>Je wordt het gemiddelde van je kring.</li>    <li>Kies bewust wie dichtbij komt.</li>    <li>Bescherm je tijd en energie.</li>    <li>Wees eerlijk, kort en consequent.</li>    <li>Zoek bouwers en kom opdagen.</li>    <li>Plan rituelen voor accountability.</li>    <li>Geen roddel, wel directe feedback.</li>    <li>Afstand is soms liefde voor je missie.</li>    <li>Laat daden je verhaal vertellen.</li>    <li>Herhaal dit 12 weken en evalueer.</li>  </ol></div><h3>Afsluiting</h3><p>  Een sterke kring is geen toeval. Je bouwt het met keuzes, grenzen en ritme. Omring je met mannen die bouwen,  spreek de waarheid, train samen, werk samen, groei samen. Als je je kring scherpt, wordt jouw standaard je  vloertje – en daarboven ga je bouwen.</p>
+    </div>
+
+    <!-- Huiswerk Opdrachten -->
+    <div class="section" id="huiswerk">
+      <h2>📝 Huiswerk Opdrachten</h2>
+      
+      <div class="exercise-box">
+        <h4>Opdracht 1: Kring Scan en Actie</h4>
+        <p><strong>Doel:</strong> Je huidige kring analyseren en concrete stappen zetten.</p>
+        <p><strong>Actie:</strong> Schrijf 15 namen op die je week beïnvloeden. Geef elke persoon een score voor energie (+/−), gedrag (+/−), ambitie (+/−) en betrouwbaarheid (+/−). Markeer wie je omhoog tilt (A), neutraal is (B) of omlaag trekt (C). Maak een plan: A dichterbij, B selectief, C op afstand.</p>
+      </div>
+
+      <div class="exercise-box">
+        <h4>Opdracht 2: Grenzen Stellen</h4>
+        <p><strong>Doel:</strong> Duidelijke grenzen zetten met mensen die je standaard omlaag halen.</p>
+        <p><strong>Actie:</strong> Kies 3 mensen uit je C-lijst. Schrijf voor elk een korte, respectvolle boodschap op: "Ik focus de komende maand op [jouw doel], dus ben minder beschikbaar voor [activiteit/gesprek]." Stuur deze berichten deze week.</p>
+      </div>
+
+      <div class="exercise-box">
+        <h4>Opdracht 3: Nieuwe Kring Bouwen</h4>
+        <p><strong>Doel:</strong> Actief op zoek naar mensen die je standaard omhoog tillen.</p>
+        <p><strong>Actie:</strong> Identificeer 3 plekken waar bouwers zijn (gym, opleiding, business-events, vrijwilligerswerk). Bezoek deze week 1 plek en spreek 1 persoon aan. Stel 2 vragen en bied hulp aan. Plan een vervolgafspraak.</p>
+      </div>
+    </div>
+
+    <!-- Checklists -->
+    <div class="section" id="checklists">
+      <h2>✅ Checklists</h2>
+      
+      <h3>Weekchecklist "Bouw de juiste kring"</h3>
+      <div class="checklist">
+        <div class="checklist-item">
+          <input type="checkbox" id="kring-1">
+          <label for="kring-1">15 namen gescand en A/B/C ingedeeld</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="kring-2">
+          <label for="kring-2">3 grenzen gesteld bij C-mensen</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="kring-3">
+          <label for="kring-3">1 check-in gepland met A-persoon</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="kring-4">
+          <label for="kring-4">20 online accounts ontvolgd die je standaard omlaag halen</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="kring-5">
+          <label for="kring-5">5 nieuwe bouwers gevolgd online</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="kring-6">
+          <label for="kring-6">1 nieuwe plek bezocht waar bouwers zijn</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reflectie Vragen -->
+    <div class="section" id="reflectie">
+      <h2>🤔 Reflectie Vragen</h2>
+      
+      <div class="reflection-question">
+        <h4>Kring Impact</h4>
+        <p>Welke 3 mensen uit je huidige kring hebben de grootste negatieve impact op je energie en doelen? Wat kost dit je per week in tijd en focus?</p>
+      </div>
+
+      <div class="reflection-question">
+        <h4>Standaard Verhogen</h4>
+        <p>Als je 6 maanden lang alleen tijd zou doorbrengen met mensen die je standaard omhoog tillen, hoe zou je leven er dan uitzien? Wat zou er anders zijn?</p>
+      </div>
+
+      <div class="reflection-question">
+        <h4>Grenzen en Verantwoordelijkheid</h4>
+        <p>Waarom stel je nu nog geen duidelijke grenzen met mensen die je energie kosten? Welke angst of overtuiging houdt je tegen?</p>
+      </div>
+    </div>
+
+    <!-- Actieplan -->
+    <div class="section" id="actieplan">
+      <h2>🎯 Actieplan</h2>
+      
+      <div class="action-plan">
+        <div class="action-step">
+          <strong>Stap 1:</strong> Voer deze week de kring scan uit. Schrijf 15 namen op en geef ze A/B/C scores. Analyseer wat je ziet en maak een plan.
+        </div>
+        
+        <div class="action-step">
+          <strong>Stap 2:</strong> Stel 3 duidelijke grenzen met C-mensen. Gebruik korte, respectvolle berichten. Plan je tijd anders in.
+        </div>
+        
+        <div class="action-step">
+          <strong>Stap 3:</strong> Plan 2 wekelijkse check-ins met A-mensen. Gebruik de gespreksregels: kort, concreet, geen roddel, focus op actie.
+        </div>
+        
+        <div class="action-step">
+          <strong>Stap 4:</strong> Bezoek deze maand 4 plekken waar bouwers zijn. Spreek mensen aan, stel vragen, bied waarde. Bouw nieuwe contacten op.
+        </div>
+        
+        <div class="action-step">
+          <strong>Stap 5:</strong> Evalueer na 4 weken. Wie tilt je omhoog? Wie kost energie? Pas je plan aan en herhaal dit proces elke maand.
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <p>Dit ebook is onderdeel van de <span class="ttm-brand">Top Tier Men</span> Academy</p>
+      <p>Module 06: Brotherhood | Les 03: Bouw de juiste Kring </p>
+      <p>© 2025 Top Tier Men. Alle rechten voorbehouden.</p>
+    </div>
+  </div>
+
+  <script>
+    // Checklist persistentie via localStorage
+    document.addEventListener('DOMContentLoaded', function() {
+      const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+      checkboxes.forEach(cb => {
+        const saved = localStorage.getItem(cb.id);
+        if (saved === 'true') cb.checked = true;
+        cb.addEventListener('change', function(){ localStorage.setItem(this.id, this.checked); });
+      });
+    });
+  </script>
+</body>
+</html>

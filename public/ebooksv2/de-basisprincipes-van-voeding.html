@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>De Basisprincipes van Voeding - Ebook | Top Tier Men</title>
+  <meta name="description" content="V2 ebook voor De Basisprincipes van Voeding binnen Top Tier Men Academy." />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.6; color: #ffffff;
+      background: linear-gradient(135deg, #0A0F0A 0%, #181F17 50%, #232D1A 100%);
+      min-height: 100vh;
+    }
+    .container { max-width: 800px; margin: 0 auto; padding: 2rem; }
+    .header {
+      text-align: center; margin-bottom: 3rem; padding: 2rem;
+      background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      border-radius: 20px; border: 1px solid #3A4D23;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    .logo { margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; }
+    h1 {
+      font-size: 2.5rem; font-weight: 800;
+      background: linear-gradient(135deg, #ffffff 0%, #8BAE5A 50%, #B6C948 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      margin-bottom: .5rem;
+    }
+    .subtitle { color: #8BAE5A; font-size: 1.1rem; font-weight: 500; }
+    .module-info {
+      background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1rem; border-radius: 10px; margin: 1rem 0; border-left: 4px solid #8BAE5A;
+    }
+    .section { background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      margin-bottom: 2rem; padding: 2rem; border-radius: 15px; border: 1px solid #3A4D23; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    .section h2 { color: #B6C948; font-size: 1.8rem; font-weight: 700; margin-bottom: 1.5rem; display: flex; align-items: center; gap: .5rem; }
+    .section h3 { color: #8BAE5A; font-size: 1.3rem; font-weight: 600; margin: 1.5rem 0 1rem; }
+    .section p { margin-bottom: 1rem; color: #e0e0e0; }
+    .section ul, .section ol { margin: 1rem 0; padding-left: 2rem; }
+    .section li { margin-bottom: .5rem; color: #e0e0e0; }
+    .highlight-box { background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1.5rem; border-radius: 10px; border-left: 4px solid #B6C948; margin: 1.5rem 0;
+    }
+    .exercise-box { background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%);
+      padding: 1.5rem; border-radius: 10px; border: 1px solid #8BAE5A; margin: 1rem 0;
+    }
+    .exercise-box h4 { color: #B6C948; font-size: 1.1rem; margin-bottom: 1rem; }
+    .checklist { background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      padding: 1.5rem; border-radius: 10px; border: 1px solid #3A4D23; margin: 1rem 0;
+    }
+    .checklist-item { display: flex; align-items: center; margin-bottom: .8rem; padding: .5rem; background: rgba(58,77,35,.3); border-radius: 8px; }
+    .checklist-item input[type="checkbox"] { margin-right: 1rem; width: 18px; height: 18px; accent-color: #8BAE5A; }
+    .reflection-question { background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1.5rem; border-radius: 10px; border-left: 4px solid #B6C948; margin: 1rem 0;
+    }
+    .reflection-question h4 { color: #B6C948; margin-bottom: 1rem; }
+    .action-plan { background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%);
+      padding: 2rem; border-radius: 15px; border: 2px solid #8BAE5A; margin: 2rem 0;
+    }
+    .action-step { background: rgba(139,174,90,.1); padding: 1rem; border-radius: 8px; margin: 1rem 0; border-left: 3px solid #8BAE5A; }
+    .footer { text-align: center; margin-top: 3rem; padding: 2rem; background: linear-gradient(135deg, #181F17 0%, #232D1A 100%); border-radius: 15px; border: 1px solid #3A4D23; }
+    .footer p { color: #8BAE5A; margin-bottom: 1rem; }
+    .ttm-brand { color: #B6C948; font-weight: 700; }
+    .sticky-back-btn { position: fixed; top: 50%; right: 20px; transform: translateY(-50%);
+      z-index: 1000; background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%);
+      color: #fff; border: none; border-radius: 50px; padding: 15px 20px; font-size: 14px; font-weight: 600; cursor: pointer;
+      box-shadow: 0 8px 25px rgba(139,174,90,.3); transition: all .3s ease; display: flex; align-items: center; gap: 8px; text-decoration: none; min-width: 120px; justify-content: center;
+    }
+    .sticky-back-btn:hover { background: linear-gradient(135deg, #B6C948 0%, #8BAE5A 100%); transform: translateY(-50%) scale(1.05); box-shadow: 0 12px 35px rgba(139,174,90,.4); }
+    .sticky-back-btn:active { transform: translateY(-50%) scale(.95); }
+    .sticky-back-btn svg { width: 16px; height: 16px; fill: currentColor; }
+    @media (max-width: 768px) {
+      .container { padding: 1rem; }
+      h1 { font-size: 2rem; }
+      .section { padding: 1.5rem; }
+      .sticky-back-btn { right: 10px; padding: 12px 16px; font-size: 12px; min-width: 100px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Sticky Back Button: VERPLICHT naar juiste les URL -->
+  <a href="/dashboard/academy/f5dfaee3-87a7-4d32-9548-751391642e2b/c607f6ff-737d-4a4e-a4d6-0bf1a9ab4234" class="sticky-back-btn" title="Terug naar les">
+    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    Terug
+  </a>
+
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="logo">
+        <img src="/logo_white-full.svg" alt="Top Tier Men Logo" style="height:40px;width:auto" />
+      </div>
+      <h1>De Basisprincipes van Voeding</h1>
+      <p class="subtitle"></p>
+      <div class="module-info">
+        <strong>Module 07: Voeding & Gezondheid</strong> | <strong>Les 01: De Basisprincipes van Voeding</strong>
+      </div>
+    </div>
+
+    <!-- Uitgebreide Samenvatting: 1:1 OVERNEMEN (NIET WIJZIGEN) -->
+    <!-- Markeer deze sectie exact en wijzig de tekst niet. -->
+    <div class="section" id="samenvatting">
+      <h2>📚 Uitgebreide Samenvatting van de Les</h2>
+<div class="highlight-box">  <h4>🎯 Les Overzicht</h4>  <p>Deze les maakt voeding simpel. Je leert wat je elke dag kunt eten, hoeveel ongeveer, wat je beter laat staan en hoe je dit zonder stress volhoudt. Geen moeilijke woorden of strenge diëten. Gewoon duidelijke regels die je meteen kunt gebruiken.</p></div><h3>Waarom voeding de basis is</h3><p>Voeding is je brandstof. Eet je goed, dan heb je meer energie, denk je scherper, slaap je beter en herstel je sneller. Je voelt je rustiger en sterker. Eet je rommel, dan ben je sloom, snel hongerig en wisselt je stemming. De winst zit in kleine, herhaalbare keuzes.</p><h3>De 7 simpele spelregels</h3><ul>  <li><strong>1) Eet vooral echt eten:</strong> vlees, vis, eieren, groente, fruit, aardappels/rijst, havermout, yoghurt/kwark, noten, olijfolie.</li>  <li><strong>2) Eet genoeg eiwit:</strong> 2 handpalmen per maaltijd (kip, rund, eieren, kwark, zalm). Eiwit verzadigt en beschermt je spieren.</li>  <li><strong>3) Groente bij elke hoofdmaaltijd:</strong> vul de helft van je bord. Je zit voller en krijgt wat je lichaam nodig heeft.</li>  <li><strong>4) Slimme koolhydraten:</strong> aardappels, rijst, volkoren wraps, havermout, fruit. Beperk snelle suiker en witte troep.</li>  <li><strong>5) Vetten uit goede bronnen:</strong> olijfolie, roomboter, eieren, vette vis, noten. Weinig gefrituurd of bewerkt vet.</li>  <li><strong>6) Drink water:</strong> 2–3 liter per dag. Begin de ochtend met 1 groot glas. Koffie/thee zonder suiker is prima.</li>  <li><strong>7) Vaste eetmomenten:</strong> 2–4 maaltijden per dag werkt voor de meeste mannen. Kies een ritme en hou het vast.</li></ul><h3>Hoeveel heb je ongeveer nodig?</h3><p>Reken niet alles. Gebruik je hand als maat:</p><ul>  <li><strong>Eiwit:</strong> 1–2 handpalmen per maaltijd.</li>  <li><strong>Koolhydraten:</strong> 1 vuist per maaltijd (meer op trainingsdagen, minder op rustdagen).</li>  <li><strong>Vetten:</strong> 1 duim olijfolie/roomboter of kleine hand noten.</li>  <li><strong>Groente:</strong> halve tot hele bord vol, minstens 2 kleuren per dag.</li></ul><div class="highlight-box">  <h4>💡 Snelle richtlijn</h4>  <p>Afvallen: minder koolhydraten buiten je training, meer groente en eiwit. Aankomen: voeg dagelijks 1 extra vuist koolhydraten toe en een schaaltje kwark of glas melk.</p></div><h3>Wat eet je per maaltijd?</h3><h4>Ontbijt (kies 1)</h4><ul>  <li>Havermout met melk of water, 1 schep eiwit of 2 eieren ernaast, stuk fruit.</li>  <li>Volle kwark met banaan en handje noten, kaneel. Honing alleen rond training.</li>  <li>4 eieren (omelet/roerei), 1–2 volkoren wraps met spinazie en tomaat.</li></ul><h4>Lunch (kies 1)</h4><ul>  <li>Kip/rund/tonijn + grote salade + olijfolie + aardappels of rijst.</li>  <li>2–3 volkoren wraps met kip/rund, sla, paprika, avocado of olijfolie.</li>  <li>Restjes avondeten: vlees/vis + groente + aardappels/rijst.</li></ul><h4>Avond (kies 1)</h4><ul>  <li>Zalm of witte vis + broccoli/sperziebonen + aardappels met roomboter.</li>  <li>Rundergehakt/kip met rijst, ui, paprika, wortel, olijfolie en kruiden.</li>  <li>Biefstuk/kipdij + zoete aardappel + grote salade.</li></ul><h4>Tussendoor (optioneel)</h4><ul>  <li>Fruit, handje noten, stuk kaas, bakje kwark.</li>  <li>Koffie/thee zonder suiker. Water als basis.</li></ul><h3>Boodschappenlijst (simpel)</h3><ul>  <li><strong>Eiwit:</strong> kipfilet, kipdij, rundergehakt, biefstuk, eieren, zalm, tonijn op water, kwark, yoghurt.</li>  <li><strong>Koolhydraten:</strong> aardappels, rijst, volkoren wraps, havermout, fruit.</li>  <li><strong>Vetten:</strong> olijfolie, roomboter, avocado, noten.</li>  <li><strong>Groente:</strong> broccoli, spinazie, wortel, paprika, tomaat, komkommer, sperziebonen, gemengde sla.</li>  <li><strong>Extra:</strong> kruiden, zout, peper, knoflook, citroen.</li></ul><h3>Wat beter laten</h3><ul>  <li>Frisdrank en suikerdrank als standaard.</li>  <li>Snoep, koek, chips als dagelijkse gewoonte.</li>  <li>Ultra bewerkte troep met lange ingrediëntenlijsten.</li>  <li>Elke dag fastfood of kant-en-klaar.</li>  <li>Alcohol als routine. Bewaar het voor momenten die tellen.</li></ul><div class="highlight-box">  <h4>⚠️ Veelgemaakte fouten</h4>  <ul>    <li>Te weinig eiwit → honger en snacken.</li>    <li>Maaltijden overslaan → later slechte keuzes.</li>    <li>Te weinig water → loom, hoofdpijn, trek in zoet.</li>    <li>Te streng → 5 dagen perfect, daarna alles los. 80–90% goed is beter en vol te houden.</li>  </ul></div><h3>Ritme dat werkt</h3><p>Kies een vast schema en hou het saai-goed:</p><ul>  <li><strong>Optie A (3 maaltijden):</strong> 08:00, 13:00, 18:00. Klein tussendoortje om 16:00 indien nodig.</li>  <li><strong>Optie B (2 grote maaltijden):</strong> 12:00 en 19:00. Alleen als je je hiermee goed voelt.</li>  <li><strong>Optie C (4 maaltijden):</strong> kleiner ontbijt, lunch, pre-workout snack, avond.</li></ul><h3>Trainingsdagen vs rustdagen</h3><ul>  <li><strong>Trainingsdag:</strong> iets meer koolhydraten rond je training (rijst, aardappel, fruit). Eiwit blijft gelijk.</li>  <li><strong>Rustdag:</strong> minder koolhydraten, extra groente. Eiwit blijft gelijk.</li></ul><h3>Eenvoudige weekplanning</h3><ul>  <li><strong>Maandag:</strong> kip + rijst + groente</li>  <li><strong>Dinsdag:</strong> zalm + aardappel + groente</li>  <li><strong>Woensdag:</strong> gehakt bowl (rijst, groente, olijfolie)</li>  <li><strong>Donderdag:</strong> kip wraps (kip, groente, avocado)</li>  <li><strong>Vrijdag:</strong> biefstuk + zoete aardappel + salade</li>  <li><strong>Zaterdag:</strong> vis of kip met veel groente; iets extra's mag</li>  <li><strong>Zondag:</strong> grote pan basis (kip/gehakt + groente + rijst) voor 2–3 dagen</li></ul><h3>Praktische hacks</h3><ul>  <li>Kook in het groot: bak 1 kg kip/gehakt en verdeel in bakjes.</li>  <li>Altijd in huis: eieren, kwark, rijst, aardappels, diepvriesgroente, fruit, olijfolie.</li>  <li>Snelle noodmaaltijd: eieren + groenten in 10 minuten klaar.</li>  <li>Neem een fles water mee en vul die 3–4 keer per dag.</li>  <li>Maak 1 maaltijd per dag standaard. Minder keuzes = meer rust.</li></ul><h3>Omgaan met sociale situaties</h3><ul>  <li>Restaurant: kies vlees/vis, groente, aardappels/rijst. Saus apart.</li>  <li>Bezoek: eet vooraf eiwit + groente. Je maakt betere keuzes.</li>  <li>Feest: kies 1 ding dat je echt wilt, geniet, en ga terug naar je plan.</li></ul><div class="highlight-box">  <h4>✅ Samenvatting in 10 regels</h4>  <ol>    <li>Eet vooral echt eten en weinig troep.</li>    <li>Elke maaltijd: eiwit + groente.</li>    <li>Koolhydraten slim en rond training.</li>    <li>Goede vetten, kleine porties.</li>    <li>Drink 2–3 liter water.</li>    <li>2–4 vaste eetmomenten per dag.</li>    <li>80–90% goed is goed genoeg.</li>    <li>Kook vooruit en hou het simpel.</li>    <li>Gebruik je plan, niet je stemming.</li>    <li>Herhaal dit maanden. Consistentie wint.</li>  </ol></div><h3>Mindset die helpt</h3><p>Zie eten als gereedschap. Niet als troost of afleiding. Goede voeding is een keuze die je sterker maakt. Eet met aandacht, stop op 80–90% vol, en herhaal simpele keuzes. Zo maak je jezelf elke week een beetje beter.</p><h3>Start vandaag</h3><ul>  <li>Koop voor 3 dagen: kip, eieren, kwark, rijst, aardappels, broccoli, wortel, paprika, sla, olijfolie, fruit.</li>  <li>Plan 6 maaltijden vooruit en schrijf ze op.</li>  <li>Begin morgen met water + eiwitontbijt. Geen suikerdrank, geen rommel.</li></ul><p>Voeding is geen puzzel. Het is herhalen van simpele keuzes. Volg dit 4–8 weken en je merkt het in energie, training, humeur en uiterlijk. Hou het plan simpel en mannelijk. Dat werkt.</p>
+    </div>
+
+    <!-- Huiswerk Opdrachten -->
+    <div class="section" id="huiswerk">
+      <h2>📝 Huiswerk Opdrachten</h2>
+      
+      <div class="exercise-box">
+        <h4>Opdracht 1: Voedingsplan Maken</h4>
+        <p><strong>Doel:</strong> Een praktisch voedingsplan opstellen dat je kunt volhouden.</p>
+        <p><strong>Actie:</strong> Plan 6 maaltijden voor de komende 3 dagen. Gebruik de boodschappenlijst uit de les en schrijf exact op wat je eet en wanneer. Houd het simpel: eiwit + groente + koolhydraten. Evalueer na 3 dagen wat werkte en wat niet.</p>
+      </div>
+
+      <div class="exercise-box">
+        <h4>Opdracht 2: Boodschappen en Meal Prep</h4>
+        <p><strong>Doel:</strong> Je omgeving voorbereiden voor succesvolle voeding.</p>
+        <p><strong>Actie:</strong> Ga boodschappen doen met de lijst uit de les. Kook 1 kg kip/gehakt en verdeel in bakjes. Snijd groente voor en bewaar in de koelkast. Maak je koelkast en keuken functioneel voor goede keuzes. Doe dit deze week.</p>
+      </div>
+
+      <div class="exercise-box">
+        <h4>Opdracht 3: Hydratatie en Timing</h4>
+        <p><strong>Doel:</strong> Water inname en eetmomenten optimaliseren.</p>
+        <p><strong>Actie:</strong> Begin elke ochtend met 1 groot glas water. Zet een fles water op je bureau en vul deze 3-4 keer per dag. Plan 3 vaste eetmomenten en houd je eraan. Schrijf op hoeveel water je drinkt en hoe je je voelt bij verschillende eetmomenten.</p>
+      </div>
+    </div>
+
+    <!-- Checklists -->
+    <div class="section" id="checklists">
+      <h2>✅ Checklists</h2>
+      
+      <h3>Weekchecklist "De Basisprincipes van Voeding"</h3>
+      <div class="checklist">
+        <div class="checklist-item">
+          <input type="checkbox" id="voeding-1">
+          <label for="voeding-1">6 maaltijden gepland voor 3 dagen</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="voeding-2">
+          <label for="voeding-2">Boodschappen gedaan met de lijst uit de les</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="voeding-3">
+          <label for="voeding-3">1 kg vlees gekookt en verdeeld in bakjes</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="voeding-4">
+          <label for="voeding-4">Groente gesneden en opgeslagen</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="voeding-5">
+          <label for="voeding-5">Elke ochtend begonnen met 1 groot glas water</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="voeding-6">
+          <label for="voeding-6">3 vaste eetmomenten per dag gevolgd</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reflectie Vragen -->
+    <div class="section" id="reflectie">
+      <h2>🤔 Reflectie Vragen</h2>
+      
+      <div class="reflection-question">
+        <h4>Huidige Voedingspatroon</h4>
+        <p>Wat eet je nu meestal op een dag? Welke 3 dingen zouden het meeste verschil maken als je ze zou veranderen? Waarom eet je zoals je nu eet?</p>
+      </div>
+
+      <div class="reflection-question">
+        <h4>Obstakels en Uitdagingen</h4>
+        <p>Wat zijn jouw grootste uitdagingen met voeding? Tijd, geld, kennis, motivatie, of iets anders? Welke kleine stap kun je vandaag zetten om dit aan te pakken?</p>
+      </div>
+
+      <div class="reflection-question">
+        <h4>Doelen en Resultaten</h4>
+        <p>Wat wil je bereiken met betere voeding? Meer energie, betere prestaties, gewichtsverlies, of iets anders? Hoe zou je leven er anders uitzien als je je voedingsdoelen behaalt?</p>
+      </div>
+    </div>
+
+    <!-- Actieplan -->
+    <div class="section" id="actieplan">
+      <h2>🎯 Actieplan</h2>
+      
+      <div class="action-plan">
+        <div class="action-step">
+          <strong>Stap 1:</strong> Plan deze week je eerste 6 maaltijden. Gebruik de simpele formule: eiwit + groente + koolhydraten. Houd het basis en praktisch.
+        </div>
+        
+        <div class="action-step">
+          <strong>Stap 2:</strong> Ga boodschappen doen met de lijst uit de les. Kook in het groot en verdeel in bakjes. Maak je keuken functioneel voor goede keuzes.
+        </div>
+        
+        <div class="action-step">
+          <strong>Stap 3:</strong> Begin elke ochtend met water en plan 3 vaste eetmomenten. Houd bij hoeveel water je drinkt en hoe je je voelt.
+        </div>
+        
+        <div class="action-step">
+          <strong>Stap 4:</strong> Evalueer na 1 week. Wat werkte? Wat niet? Pas je plan aan. Focus op consistentie, niet perfectie.
+        </div>
+        
+        <div class="action-step">
+          <strong>Stap 5:</strong> Bouw langzaam uit. Voeg nieuwe gewoontes toe als de basis goed loopt. Herhaal dit proces elke week voor 4-8 weken.
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <p>Dit ebook is onderdeel van de <span class="ttm-brand">Top Tier Men</span> Academy</p>
+      <p>Module 07: Voeding & Gezondheid | Les 01: De Basisprincipes van Voeding</p>
+      <p>© 2025 Top Tier Men. Alle rechten voorbehouden.</p>
+    </div>
+  </div>
+
+  <script>
+    // Checklist persistentie via localStorage
+    document.addEventListener('DOMContentLoaded', function() {
+      const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+      checkboxes.forEach(cb => {
+        const saved = localStorage.getItem(cb.id);
+        if (saved === 'true') cb.checked = true;
+        cb.addEventListener('change', function(){ localStorage.setItem(this.id, this.checked); });
+      });
+    });
+  </script>
+</body>
+</html>

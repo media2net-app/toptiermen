@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Waarom een Brotherhood - Ebook | Top Tier Men</title>
+  <meta name="description" content="V2 ebook voor Waarom een Brotherhood binnen Top Tier Men Academy." />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.6; color: #ffffff;
+      background: linear-gradient(135deg, #0A0F0A 0%, #181F17 50%, #232D1A 100%);
+      min-height: 100vh;
+    }
+    .container { max-width: 800px; margin: 0 auto; padding: 2rem; }
+    .header {
+      text-align: center; margin-bottom: 3rem; padding: 2rem;
+      background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      border-radius: 20px; border: 1px solid #3A4D23;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    .logo { margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; }
+    h1 {
+      font-size: 2.5rem; font-weight: 800;
+      background: linear-gradient(135deg, #ffffff 0%, #8BAE5A 50%, #B6C948 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      margin-bottom: .5rem;
+    }
+    .subtitle { color: #8BAE5A; font-size: 1.1rem; font-weight: 500; }
+    .module-info {
+      background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1rem; border-radius: 10px; margin: 1rem 0; border-left: 4px solid #8BAE5A;
+    }
+    .section { background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      margin-bottom: 2rem; padding: 2rem; border-radius: 15px; border: 1px solid #3A4D23; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    .section h2 { color: #B6C948; font-size: 1.8rem; font-weight: 700; margin-bottom: 1.5rem; display: flex; align-items: center; gap: .5rem; }
+    .section h3 { color: #8BAE5A; font-size: 1.3rem; font-weight: 600; margin: 1.5rem 0 1rem; }
+    .section p { margin-bottom: 1rem; color: #e0e0e0; }
+    .section ul, .section ol { margin: 1rem 0; padding-left: 2rem; }
+    .section li { margin-bottom: .5rem; color: #e0e0e0; }
+    .highlight-box { background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1.5rem; border-radius: 10px; border-left: 4px solid #B6C948; margin: 1.5rem 0;
+    }
+    .exercise-box { background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%);
+      padding: 1.5rem; border-radius: 10px; border: 1px solid #8BAE5A; margin: 1rem 0;
+    }
+    .exercise-box h4 { color: #B6C948; font-size: 1.1rem; margin-bottom: 1rem; }
+    .checklist { background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      padding: 1.5rem; border-radius: 10px; border: 1px solid #3A4D23; margin: 1rem 0;
+    }
+    .checklist-item { display: flex; align-items: center; margin-bottom: .8rem; padding: .5rem; background: rgba(58,77,35,.3); border-radius: 8px; }
+    .checklist-item input[type="checkbox"] { margin-right: 1rem; width: 18px; height: 18px; accent-color: #8BAE5A; }
+    .reflection-question { background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1.5rem; border-radius: 10px; border-left: 4px solid #B6C948; margin: 1rem 0;
+    }
+    .reflection-question h4 { color: #B6C948; margin-bottom: 1rem; }
+    .action-plan { background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%);
+      padding: 2rem; border-radius: 15px; border: 2px solid #8BAE5A; margin: 2rem 0;
+    }
+    .action-step { background: rgba(139,174,90,.1); padding: 1rem; border-radius: 8px; margin: 1rem 0; border-left: 3px solid #8BAE5A; }
+    .footer { text-align: center; margin-top: 3rem; padding: 2rem; background: linear-gradient(135deg, #181F17 0%, #232D1A 100%); border-radius: 15px; border: 1px solid #3A4D23; }
+    .footer p { color: #8BAE5A; margin-bottom: 1rem; }
+    .ttm-brand { color: #B6C948; font-weight: 700; }
+    .sticky-back-btn { position: fixed; top: 50%; right: 20px; transform: translateY(-50%);
+      z-index: 1000; background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%);
+      color: #fff; border: none; border-radius: 50px; padding: 15px 20px; font-size: 14px; font-weight: 600; cursor: pointer;
+      box-shadow: 0 8px 25px rgba(139,174,90,.3); transition: all .3s ease; display: flex; align-items: center; gap: 8px; text-decoration: none; min-width: 120px; justify-content: center;
+    }
+    .sticky-back-btn:hover { background: linear-gradient(135deg, #B6C948 0%, #8BAE5A 100%); transform: translateY(-50%) scale(1.05); box-shadow: 0 12px 35px rgba(139,174,90,.4); }
+    .sticky-back-btn:active { transform: translateY(-50%) scale(.95); }
+    .sticky-back-btn svg { width: 16px; height: 16px; fill: currentColor; }
+    @media (max-width: 768px) {
+      .container { padding: 1rem; }
+      h1 { font-size: 2rem; }
+      .section { padding: 1.5rem; }
+      .sticky-back-btn { right: 10px; padding: 12px 16px; font-size: 12px; min-width: 100px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Sticky Back Button: VERPLICHT naar juiste les URL -->
+  <a href="/dashboard/academy/6102f6c8-7f38-4501-ab94-e9a68622e46f/f449b3f0-1dd6-4020-a44e-4f276eaa34e0" class="sticky-back-btn" title="Terug naar les">
+    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    Terug
+  </a>
+
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="logo">
+        <img src="/logo_white-full.svg" alt="Top Tier Men Logo" style="height:40px;width:auto" />
+      </div>
+      <h1>Waarom een Brotherhood</h1>
+      <p class="subtitle"></p>
+      <div class="module-info">
+        <strong>Module 06: Brotherhood</strong> | <strong>Les 01: Waarom een Brotherhood</strong>
+      </div>
+    </div>
+
+    <!-- Uitgebreide Samenvatting: 1:1 OVERNEMEN (NIET WIJZIGEN) -->
+    <!-- Markeer deze sectie exact en wijzig de tekst niet. -->
+    <div class="section" id="samenvatting">
+      <h2>📚 Uitgebreide Samenvatting van de Les</h2>
+<div class="highlight-box">
+  <h4>🎯 Doel van deze les</h4>
+  <p>
+    Je leert waarom je een sterke mannenkring nodig hebt en hoe je een echte brotherhood bouwt.
+    Een brotherhood versnelt jouw groei door waarheid, accountability en gedeelde standaarden.
+    Je krijgt een praktisch systeem om een brotherhood te starten of je bestaande vriendengroep te versterken.
+  </p>
+</div>
+
+<h3>Waarom een brotherhood?</h3>
+<ul>
+  <li><strong>Standaard:</strong> Je gaat leven op het niveau van je kring. Hoge standaard = hoge daden.</li>
+  <li><strong>Accountability:</strong> Je levert, omdat je woord telt en iemand meekijkt.</li>
+  <li><strong>Mentale rust:</strong> Je staat er niet alleen voor; dat geeft durf en kalmte.</li>
+  <li><strong>Snellere groei:</strong> Kennis en ervaring worden gedeeld; je leercurve wordt korter.</li>
+  <li><strong>Bescherming:</strong> In tegenslag heb je rugdekking; in winst blijft je ego nuchter.</li>
+</ul>
+
+<h3>Vrienden vs brotherhood</h3>
+<ul>
+  <li><strong>Vrienden:</strong> Leuk, gezellig, vrijblijvend.</li>
+  <li><strong>Brotherhood:</strong> Leuk én serieus: waarheid, ritme, afspraken, resultaten.</li>
+</ul>
+
+<h3>De 6 pilaren van een brotherhood</h3>
+<ul>
+  <li><strong>1) Waarheid:</strong> Kort, eerlijk, zonder laklaag.</li>
+  <li><strong>2) Loyaliteit:</strong> Publiek krediet, privé correctie; geen roddel.</li>
+  <li><strong>3) Ritme:</strong> Vaste calls en ontmoetingen; niet "als het uitkomt".</li>
+  <li><strong>4) Missie:</strong> Gedeelde richting (gezondheid, werk, karakter, gezin).</li>
+  <li><strong>5) Discomfort:</strong> Samen moeilijke dingen doen; groei door frictie.</li>
+  <li><strong>6) Resultaat:</strong> Elke week iets aantoonbaars.</li>
+</ul>
+
+<h3>Hoe bouw je een brotherhood (stappenplan)</h3>
+<ol>
+  <li><strong>Kies mannen:</strong> 3–5 mannen met vergelijkbare richting en bereidheid tot waarheid.</li>
+  <li><strong>Stel regels op:</strong> Op tijd, camera aan, cijfers, geen roddel, respectvolle scherpte.</li>
+  <li><strong>Plan ritme:</strong> Vaste weekcall (60 min), maandelijkse fysieke ontmoeting, kwartaaldoelen.</li>
+  <li><strong>Meetpunten:</strong> Per man 3 meetbare metrics (gezondheid/werk/karakter).</li>
+  <li><strong>Rollen:</strong> Initiator, timekeeper, notulist, coach van de week.</li>
+  <li><strong>Feedback-model:</strong> Feit → effect → voorstel. Kort en direct.</li>
+</ol>
+
+<h3>Weekcall (60 minuten structuur)</h3>
+<ol>
+  <li><strong>Levering (10):</strong> Ja/nee op de acties van vorige week.</li>
+  <li><strong>Obstakel (15):</strong> 1 blokkade per man; feitelijk, zonder verhalen.</li>
+  <li><strong>Oplossing (20):</strong> 2–3 voorstellen, kies 1 concrete stap.</li>
+  <li><strong>Commit (10):</strong> 3 acties met datum/tijd; klein maar echt.</li>
+  <li><strong>Sluit (5):</strong> Wie helpt wie; samenvatting door notulist.</li>
+</ol>
+
+<h3>Dagelijkse discipline</h3>
+<ul>
+  <li><strong>"Done"-ping:</strong> 1 bericht per dag met je belangrijkste resultaat.</li>
+  <li><strong>Mini-check:</strong> Vraag/hulp in 1–2 minuten; geen romans.</li>
+  <li><strong>Discomfort:</strong> Plan 1 lastig ding per week en deel het bewijs.</li>
+</ul>
+
+<h3>Conflicten en grenzen</h3>
+<ul>
+  <li>Conflicten binnen 48 uur bespreken; kort, kalm, met oplossingsvoorstel.</li>
+  <li>Feedback privé; publiek geen afbranding.</li>
+  <li>Grenzen respecteren: tijden, afspraken, familie; we bouwen, we breken niet.</li>
+</ul>
+
+<h3>Veelgemaakte fouten</h3>
+<ul>
+  <li><strong>Vrijblijvendheid:</strong> Geen ritme = geen resultaat. Leg vast, herhaal.</li>
+  <li><strong>Te veel mannen:</strong> Keep it small: 3–5 werkt het beste.</li>
+  <li><strong>Vage acties:</strong> Elke actie heeft datum/tijd of het is geen actie.</li>
+  <li><strong>Roddelen/venten:</strong> Lucht je hart bij de juiste persoon of in de juiste vorm; anders stil.</li>
+</ul>
+
+<h3>Voorbeeld-setup (eerste 4 weken)</h3>
+<ol>
+  <li>Week 1: Regels, meetpunten, eerste acties, discomfort plannen.</li>
+  <li>Week 2: Eerste leveringen, obstakels, bijsturen, gezamenlijke training.</li>
+  <li>Week 3: Verdieping feedback, 1 op 1's, kleine viering van resultaten.</li>
+  <li>Week 4: Review kwartaaldoel, plannen volgende maand.</li>
+</ol>
+
+<h3>Waarom dit werkt</h3>
+<p>
+  Mannen groeien in ritme, onder druk en in waarheid. Een brotherhood geeft structuur (ritme), scherpte 
+  (feedback) en kracht (loyaliteit). Daardoor ontstaan minder excuses en meer daden. Je wordt wie je vaak 
+  ziet; kies wijs wie je vaak ziet.
+</p>
+
+<h3>Samenvatting in 10 regels</h3>
+<ol>
+  <li>Kleine, sterke groep (3–5).</li>
+  <li>Waarheid, loyaliteit, ritme, resultaat.</li>
+  <li>Vaste weekcall met structuur.</li>
+  <li>Meten van gezondheid/werk/karakter.</li>
+  <li>Dagelijks "done"-ping.</li>
+  <li>Geen roddel; feedback privé.</li>
+  <li>Discomfort = groei; plan het.</li>
+  <li>Rollen verdelen: initiator, timekeeper, notulist, coach.</li>
+  <li>Conflicten binnen 48 uur oplossen.</li>
+  <li>Herhalen → groeien → winnen.</li>
+</ol>
+
+<h3>Afsluiting</h3>
+<p>
+  Een brotherhood is een werkplaats, geen praatclub. Met simpele regels en een vast ritme wordt iedereen 
+  sterker, eerlijker en effectiever. Bouw de mannen om je heen, en je bouwt jezelf – sneller dan alleen.
+</p>
+    </div>
+
+    <!-- Huiswerk Opdrachten -->
+    <div class="section">
+      <h2>📝 Huiswerk Opdrachten</h2>
+      
+      <div class="exercise-box">
+        <h4>Opdracht 1: Je Ideale Brotherhood Identificeren (30 minuten)</h4>
+        <p>Bepaal wat je zoekt in een brotherhood:</p>
+        <ul>
+          <li><strong>Doelen:</strong> Schrijf op wat jouw 3 belangrijkste doelen zijn (gezondheid, werk, karakter)</li>
+          <li><strong>Waarden:</strong> Welke waarden zijn voor jou belangrijk? (eerlijkheid, ambitie, loyaliteit, etc.)</li>
+          <li><strong>Mannen lijst:</strong> Maak een lijst van 5-7 mannen die mogelijk geschikt zijn voor jouw brotherhood</li>
+          <li><strong>Criteria:</strong> Bedenk 3 criteria waaraan een man moet voldoen om in jouw brotherhood te passen</li>
+        </ul>
+        <p>Prioriteer je lijst: wie past het beste bij jouw doelen en waarden?</p>
+      </div>
+
+      <div class="exercise-box">
+        <h4>Opdracht 2: Brotherhood Regels en Ritme Ontwerpen (45 minuten)</h4>
+        <p>Ontwerp de basis van je brotherhood:</p>
+        <ul>
+          <li><strong>Regels:</strong> Schrijf 5-7 duidelijke regels op (op tijd, camera aan, geen roddel, etc.)</li>
+          <li><strong>Weekcall structuur:</strong> Plan de 60-minuten agenda met tijdsindeling</li>
+          <li><strong>Meetpunten:</strong> Bepaal voor elke man 3 meetbare metrics (gewicht, omzet, leesboeken, etc.)</li>
+          <li><strong>Rollen:</strong> Verdeel de rollen: initiator, timekeeper, notulist, coach van de week</li>
+        </ul>
+        <p>Maak een concrete agenda voor je eerste weekcall en deel deze met je potentiële brotherhood.</p>
+      </div>
+
+      <div class="exercise-box">
+        <h4>Opdracht 3: Eerste Brotherhood Acties Plannen (30 minuten)</h4>
+        <p>Start je brotherhood praktisch:</p>
+        <ul>
+          <li><strong>Uitnodiging:</strong> Schrijf een bericht om 3-4 mannen uit te nodigen voor je brotherhood</li>
+          <li><strong>Eerste meeting:</strong> Plan een kennismakingsgesprek van 30 minuten per man</li>
+          <li><strong>Commitment check:</strong> Bedenk 3 vragen om te testen of iemand serieus is</li>
+          <li><strong>Proefperiode:</strong> Plan een 4-weken proefperiode met duidelijke evaluatie</li>
+        </ul>
+        <p>Stuur vandaag nog de eerste uitnodigingen uit en plan de eerste gesprekken.</p>
+      </div>
+    </div>
+
+    <!-- Checklist -->
+    <div class="section">
+      <h2>✅ Checklist</h2>
+      <div class="checklist">
+        <div class="checklist-item">
+          <input type="checkbox" id="check1" />
+          <label for="check1">Ideale brotherhood doelen en waarden bepaald</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="check2" />
+          <label for="check2">Lijst van 5-7 potentiële mannen gemaakt</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="check3" />
+          <label for="check3">Brotherhood regels en ritme ontworpen</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="check4" />
+          <label for="check4">Eerste weekcall agenda gemaakt</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="check5" />
+          <label for="check5">Uitnodigingen verstuurd naar potentiële leden</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="check6" />
+          <label for="check6">Eerste brotherhood meeting gepland en gehouden</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reflectie Vragen -->
+    <div class="section">
+      <h2>🤔 Reflectie Vragen</h2>
+      
+      <div class="reflection-question">
+        <h4>Vraag 1: Waarom een Brotherhood</h4>
+        <p>Wat is het grootste verschil tussen jouw huidige vriendengroep en een echte brotherhood? Welke veranderingen heb je nodig om van je vrienden een echte brotherhood te maken?</p>
+      </div>
+
+      <div class="reflection-question">
+        <h4>Vraag 2: Jouw Rol en Verantwoordelijkheid</h4>
+        <p>Ben jij bereid om de waarheid te zeggen, ook als dat ongemakkelijk is? Hoe ga je om met feedback die je niet wilt horen, en hoe zorg je dat je zelf constructieve feedback geeft?</p>
+      </div>
+
+      <div class="reflection-question">
+        <h4>Vraag 3: Commitment en Discipline</h4>
+        <p>Kun je je voorstellen om wekelijks een uur te investeren in je brotherhood, zelfs als je het druk hebt? Wat is jouw plan om consistent te blijven, ook als het moeilijk wordt?</p>
+      </div>
+    </div>
+
+    <!-- Actieplan -->
+    <div class="section">
+      <h2>🎯 Actieplan</h2>
+      <div class="action-plan">
+        <h3>Jouw 5 Stappen Actieplan</h3>
+        <div class="action-step">
+          <strong>Stap 1:</strong> Bepaal je doelen, waarden en criteria voor je ideale brotherhood. Maak een lijst van 5-7 potentiële leden.
+        </div>
+        <div class="action-step">
+          <strong>Stap 2:</strong> Ontwerp de regels, ritme en structuur van je brotherhood. Maak een concrete weekcall agenda.
+        </div>
+        <div class="action-step">
+          <strong>Stap 3:</strong> Stuur uitnodigingen uit naar de mannen die het beste passen bij jouw visie.
+        </div>
+        <div class="action-step">
+          <strong>Stap 4:</strong> Houd individuele kennismakingsgesprekken en test het commitment van elke kandidaat.
+        </div>
+        <div class="action-step">
+          <strong>Stap 5:</strong> Start je brotherhood met een 4-weken proefperiode en evalueer na een maand.
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Footer -->
+    <div class="footer">
+      <p>Dit ebook is onderdeel van de <span class="ttm-brand">Top Tier Men</span> Academy</p>
+      <p>Module 06: Brotherhood | Les 01: Waarom een Brotherhood</p>
+      <p>© 2025 Top Tier Men. Alle rechten voorbehouden.</p>
+    </div>
+  </div>
+
+  <script>
+    // Checklist persistentie via localStorage
+    document.addEventListener('DOMContentLoaded', function() {
+      const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+      checkboxes.forEach(cb => {
+        const saved = localStorage.getItem(cb.id);
+        if (saved === 'true') cb.checked = true;
+        cb.addEventListener('change', function(){ localStorage.setItem(this.id, this.checked); });
+      });
+    });
+  </script>
+</body>
+</html>

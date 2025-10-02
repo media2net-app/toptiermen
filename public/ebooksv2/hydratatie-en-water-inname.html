@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hydratatie en Water Inname - Ebook | Top Tier Men</title>
+  <meta name="description" content="V2 ebook voor Hydratatie en Water Inname binnen Top Tier Men Academy." />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.6; color: #ffffff;
+      background: linear-gradient(135deg, #0A0F0A 0%, #181F17 50%, #232D1A 100%);
+      min-height: 100vh;
+    }
+    .container { max-width: 800px; margin: 0 auto; padding: 2rem; }
+    .header {
+      text-align: center; margin-bottom: 3rem; padding: 2rem;
+      background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      border-radius: 20px; border: 1px solid #3A4D23;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    .logo { margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; }
+    h1 {
+      font-size: 2.5rem; font-weight: 800;
+      background: linear-gradient(135deg, #ffffff 0%, #8BAE5A 50%, #B6C948 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      margin-bottom: .5rem;
+    }
+    .subtitle { color: #8BAE5A; font-size: 1.1rem; font-weight: 500; }
+    .module-info {
+      background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1rem; border-radius: 10px; margin: 1rem 0; border-left: 4px solid #8BAE5A;
+    }
+    .section { background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      margin-bottom: 2rem; padding: 2rem; border-radius: 15px; border: 1px solid #3A4D23; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    .section h2 { color: #B6C948; font-size: 1.8rem; font-weight: 700; margin-bottom: 1.5rem; display: flex; align-items: center; gap: .5rem; }
+    .section h3 { color: #8BAE5A; font-size: 1.3rem; font-weight: 600; margin: 1.5rem 0 1rem; }
+    .section p { margin-bottom: 1rem; color: #e0e0e0; }
+    .section ul, .section ol { margin: 1rem 0; padding-left: 2rem; }
+    .section li { margin-bottom: .5rem; color: #e0e0e0; }
+    .highlight-box { background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1.5rem; border-radius: 10px; border-left: 4px solid #B6C948; margin: 1.5rem 0;
+    }
+    .exercise-box { background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%);
+      padding: 1.5rem; border-radius: 10px; border: 1px solid #8BAE5A; margin: 1rem 0;
+    }
+    .exercise-box h4 { color: #B6C948; font-size: 1.1rem; margin-bottom: 1rem; }
+    .checklist { background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      padding: 1.5rem; border-radius: 10px; border: 1px solid #3A4D23; margin: 1rem 0;
+    }
+    .checklist-item { display: flex; align-items: center; margin-bottom: .8rem; padding: .5rem; background: rgba(58,77,35,.3); border-radius: 8px; }
+    .checklist-item input[type="checkbox"] { margin-right: 1rem; width: 18px; height: 18px; accent-color: #8BAE5A; }
+    .reflection-question { background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1.5rem; border-radius: 10px; border-left: 4px solid #B6C948; margin: 1rem 0;
+    }
+    .reflection-question h4 { color: #B6C948; margin-bottom: 1rem; }
+    .action-plan { background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%);
+      padding: 2rem; border-radius: 15px; border: 2px solid #8BAE5A; margin: 2rem 0;
+    }
+    .action-step { background: rgba(139,174,90,.1); padding: 1rem; border-radius: 8px; margin: 1rem 0; border-left: 3px solid #8BAE5A; }
+    .footer { text-align: center; margin-top: 3rem; padding: 2rem; background: linear-gradient(135deg, #181F17 0%, #232D1A 100%); border-radius: 15px; border: 1px solid #3A4D23; }
+    .footer p { color: #8BAE5A; margin-bottom: 1rem; }
+    .ttm-brand { color: #B6C948; font-weight: 700; }
+    .sticky-back-btn { position: fixed; top: 50%; right: 20px; transform: translateY(-50%);
+      z-index: 1000; background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%);
+      color: #fff; border: none; border-radius: 50px; padding: 15px 20px; font-size: 14px; font-weight: 600; cursor: pointer;
+      box-shadow: 0 8px 25px rgba(139,174,90,.3); transition: all .3s ease; display: flex; align-items: center; gap: 8px; text-decoration: none; min-width: 120px; justify-content: center;
+    }
+    .sticky-back-btn:hover { background: linear-gradient(135deg, #B6C948 0%, #8BAE5A 100%); transform: translateY(-50%) scale(1.05); box-shadow: 0 12px 35px rgba(139,174,90,.4); }
+    .sticky-back-btn:active { transform: translateY(-50%) scale(.95); }
+    .sticky-back-btn svg { width: 16px; height: 16px; fill: currentColor; }
+    @media (max-width: 768px) {
+      .container { padding: 1rem; }
+      h1 { font-size: 2rem; }
+      .section { padding: 1.5rem; }
+      .sticky-back-btn { right: 10px; padding: 12px 16px; font-size: 12px; min-width: 100px; }
+    }
+  </style>
+</head>
+<body>
+  <a href="/dashboard/academy/f5dfaee3-87a7-4d32-9548-751391642e2b/76d62836-cbbc-4453-88ac-e1220eb7d91a" class="sticky-back-btn" title="Terug naar les">
+    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    Terug
+  </a>
+
+  <div class="container">
+    <div class="header">
+      <div class="logo">
+        <img src="/logo_white-full.svg" alt="Top Tier Men Logo" style="height:40px;width:auto" />
+      </div>
+      <h1>Hydratatie en Water Inname</h1>
+      <p class="subtitle">De basis van energie en gezondheid</p>
+      <div class="module-info">
+        <strong>Module 07: Voeding & Gezondheid</strong> | <strong>Les 02: Hydratatie en Water Inname</strong>
+      </div>
+    </div>
+
+    <div class="section" id="samenvatting">
+      <h2>📚 Uitgebreide Samenvatting van de Les</h2>
+<div class="highlight-box"><h4>🎯 Les Overzicht</h4><p>In deze les leer je hydratatie praktisch en simpel toe te passen. Water is de snelste, goedkoopste manier om je energie, focus en herstel te verbeteren. We maken een plan dat je elke dag kunt herhalen: hoeveel je drinkt, wanneer je drinkt, hoe je tekorten voorkomt en hoe je dit volhoudt zonder gedoe.</p></div><h3>Waarom water telt</h3><p>Te weinig drinken maakt je traag, chagrijnig en sneller afgeleid. Het vergroot je honger, je grijpt sneller naar zoet, je traint minder sterk en je slaapt slechter. Met voldoende water is je hoofd helder, je huid beter, je spieren herstellen sneller en je prestaties zijn stabieler. Hydratatie is de makkelijkste winst.</p><h3>De 8 regels voor slimme hydratatie</h3><ul><li><strong>1) Start met water:</strong> elke ochtend 1 groot glas direct na het opstaan.</li><li><strong>2) Dagdoel:</strong> 2–3 liter per dag. Bij hitte of zware training: +0,5–1 liter.</li><li><strong>3) Verdeel je inname:</strong> drink bij elke maaltijd + vaste drinkmomenten tussendoor.</li><li><strong>4) Zout, kalium, magnesium:</strong> vooral bij veel zweten; balans voorkomt hoofdpijn en kramp.</li><li><strong>5) Cafeïne slim:</strong> koffie/thee tellen mee, maar niet te laat en niet als vervanger van water.</li><li><strong>6) Vocht uit eten:</strong> groente, fruit, soep: helpt mee, maar water blijft basis.</li><li><strong>7) Smaak zonder suiker:</strong> citroen, limoen, munt; vermijd frisdrank als standaard.</li><li><strong>8) Avondplanning:</strong> laatste uur voor bed: niet te veel om nachtelijk plassen te beperken.</li></ul><h3>Hoe weet je of je genoeg drinkt?</h3><ul><li><strong>Kleur van urine:</strong> lichtgeel is goed; donkergeel = vaak te weinig.</li><li><strong>Signalen:</strong> droge mond, hoofdpijn, loom, prikkelbaar, dorst = bijtanken.</li><li><strong>Prestaties:</strong> snel vermoeid tijdens training of concentratie weg? Check je water.</li></ul><h3>Praktische dagplanning</h3><ul><li><strong>Ochtend:</strong> 1 groot glas water bij opstaan. Koffie/thee ná water. Ontbijt? Nog een glas.</li><li><strong>Voor lunch:</strong> 0,5 liter verdeeld in 1–2 porties. Zet je fles zichtbaar.</li><li><strong>Lunch:</strong> 1 glas water. Maak er een vast ritueel van.</li><li><strong>Middag:</strong> 0,5–1 liter verdeeld. Koppelen aan focuspauzes en wandeling.</li><li><strong>Avondeten:</strong> 1 glas water. Daarna nog wat slokjes, maar niet overdrijven.</li><li><strong>Laat op de avond:</strong> klein glas indien dorst. Niet forceren.</li></ul><h3>Hydratatie rond training</h3><ul><li><strong>Vóór:</strong> 300–500 ml water in de 60 min voor je training. Bij hitte: iets meer.</li><li><strong>Tijdens:</strong> kleine slokjes per set/rust. Geen liters in één keer.</li><li><strong>Na:</strong> 300–500 ml. Zweet je veel? Voeg een snufje zout of elektrolyten toe.</li></ul><div class="highlight-box"><h4>Elektrolyten simpel</h4><p>Bij veel zweten verlies je niet alleen water maar ook mineralen. Voeg bij warme dagen of lange trainingen een snufje zout aan je water toe, eet kaliumrijke voeding (bananen, aardappels) en overweeg magnesium in de avond. Dit helpt tegen hoofdpijn, kramp, onrust en slechte slaap.</p></div><h3>Veelgemaakte fouten en snelle fixes</h3><ul><li><strong>Pas laat beginnen met drinken:</strong> start direct na opstaan. Dit zet je dag goed neer.</li><li><strong>Vergeten te drinken:</strong> neem een 1-literfles mee en vul die 2–3 keer. Zet herinneringen in je pauzes.</li><li><strong>Frisdrank als standaard:</strong> vervang door water met citroen of bruiswater. Hou zoet voor af en toe.</li><li><strong>Te veel 's avonds:</strong> verschuif je inname naar de ochtend/middag.</li><li><strong>Geen water tijdens werken:</strong> maak het zichtbaar op je bureau. Wat in zicht staat, gebruik je.</li></ul><h3>Slimme gewoontes die blijven plakken</h3><ul><li><strong>Ritueel:</strong> water bij elke maaltijd + vaste drinkmomenten tussen je focusblokken.</li><li><strong>Triggers:</strong> fles bij je laptop, fles in je tas, glas in de keuken klaarzetten voor het slapen.</li><li><strong>Accountability:</strong> noteer 7 dagen hoeveel je drinkt. Tik gewoon vinkjes: gehaald of niet.</li><li><strong>Voorraad:</strong> altijd citroen, limoen of munt in huis. Houd het aantrekkelijk zonder suiker.</li></ul><h3>Hydratatie en eten</h3><p>Drinken en eten versterken elkaar. Veel mannen verwarren dorst met trek. Probeer dit:</p><ul><li>Heb je trek buiten je eetmoment? Drink 1 glas water, wacht 10 minuten en kijk opnieuw.</li><li>Eet meer groente en fruit: ze bevatten vocht en vezels, houden je vol en helpen je darmen.</li><li>Te zout gegeten? Drink extra water en voeg de volgende maaltijd meer groente toe.</li></ul><h3>Werk, schermen en water</h3><ul><li><strong>Pauzes:</strong> elke 50 minuten even opstaan, slok water, paar stappen.</li><li><strong>Omgeving:</strong> fles binnen handbereik en in je zicht. Telefoon weg tijdens een focusblok.</li><li><strong>Team/collega's:</strong> neem samen een waterpauze. Sociaal en functioneel.</li></ul><h3>Hydratatie op reis</h3><ul><li>Neem een herbruikbare fles mee. Vul na security of bij stops.</li><li>Drink bij elke stop 1 glas water. Eet licht: eiwit + groente, vermijd suikerdrank.</li><li>Vlieg je? Extra drinken (lucht is droog), kleine slokjes, wandeling in het gangpad.</li></ul><h3>Hydratatie en slaap</h3><ul><li>Drink genoeg overdag om 's avonds niet te hoeven "inhalen".</li><li>Laatste uur voor slapen: kleine slokjes. Vermijd grote glazen.</li><li>Word je 's nachts dorstig wakker? Overdag meer verdelen, eventueel snufje zout bij hitte.</li></ul><h3>Voorbeeld-dag met drinkmomenten</h3><ul><li><strong>07:00</strong> groot glas water, licht, korte wandeling</li><li><strong>08:00</strong> ontbijt + glas water</li><li><strong>09:30</strong> 250 ml water</li><li><strong>11:00</strong> 250 ml water + korte wandeling</li><li><strong>12:30</strong> lunch + glas water</li><li><strong>14:30</strong> 250–500 ml water (afhankelijk van dorst/weer)</li><li><strong>16:30</strong> 250 ml water + adem 2 min</li><li><strong>18:30</strong> avondeten + glas water</li><li><strong>20:30</strong> kleine slokjes indien dorst; licht laag</li></ul><h3>Hydratatie en gezondheid</h3><ul><li><strong>Immuunsysteem:</strong> voldoende water helpt je lichaam afvalstoffen afvoeren</li><li><strong>Huid:</strong> gehydrateerde huid ziet er gezonder uit en voelt beter</li><li><strong>Spijsvertering:</strong> water helpt bij vertering en voorkomt constipatie</li><li><strong>Gewrichten:</strong> water houdt je gewrichten soepel en voorkomt stijfheid</li><li><strong>Hersenen:</strong> uitdroging beïnvloedt concentratie, geheugen en stemming</li></ul><h3>Waterkwaliteit en bronnen</h3><ul><li><strong>Kraanwater:</strong> in Nederland meestal van goede kwaliteit en veilig</li><li><strong>Gefilterd water:</strong> kan smaak verbeteren en bepaalde stoffen verwijderen</li><li><strong>Mineraalwater:</strong> bevat extra mineralen, maar kraanwater is vaak voldoende</li><li><strong>Alkaline water:</strong> geen bewezen voordelen boven gewoon water</li></ul><h3>Hydratatie en leeftijd</h3><ul><li><strong>Jongere mannen:</strong> vaak actiever, meer water nodig bij sport</li><li><strong>Middenleeftijd:</strong> focus op consistentie, niet op perfectie</li><li><strong>Oudere mannen:</strong> dorstgevoel neemt af, bewust drinken wordt belangrijker</li></ul><h3>Mythes vs realiteit</h3><ul><li><strong>"Ik heb geen dorst, dus ik heb geen water nodig":</strong> dorst loopt achter; plan je water.</li><li><strong>"Alleen sportdrank hydrateert goed":</strong> voor de meeste dagen is water + zout + echt eten genoeg.</li><li><strong>"Meer water is altijd beter":</strong> te veel ineens kan onhandig zijn; verdeel slim over de dag.</li><li><strong>"8 glazen per dag is perfect":</strong> hoeveelheid hangt af van activiteit, weer, lichaamsgrootte.</li></ul><h3>30-dagen water challenge</h3><ol><li>Week 1: 2 liter per dag, fles in zicht, glas bij opstaan.</li><li>Week 2: 2,5 liter, extra bij training/hitte, 2 wandelpauzes koppelen aan water.</li><li>Week 3: 3 liter (indien passend), elektrolyten bij zweten, frisdrank minimaliseren.</li><li>Week 4: verfijn op gevoel: hoeveel liter geeft jou de beste energie en slaap?</li></ol><h3>Troubleshooting</h3><ul><li><strong>Veel naar het toilet:</strong> verdeel je inname; minder grote klappen, meer kleine slokjes.</li><li><strong>Hoofdpijn ondanks drinken:</strong> voeg wat zout toe, eet meer groente/fruit, check cafeïne.</li><li><strong>Onrustige nacht:</strong> verschuif water naar ochtend/middag, laatste uur weinig.</li><li><strong>Geen dorst:</strong> maak het een gewoonte, niet afhankelijk van dorstgevoel.</li></ul><h3>Langetermijn voordelen</h3><ul><li><strong>Energie:</strong> consistent gehydrateerd = stabielere energie door de dag</li><li><strong>Focus:</strong> minder brain fog, betere concentratie</li><li><strong>Sportprestaties:</strong> betere uithoudingsvermogen en herstel</li><li><strong>Gezondheid:</strong> ondersteuning van alle lichaamsfuncties</li><li><strong>Uiterlijk:</strong> gezondere huid, minder wallen</li></ul><h3>Veelgestelde vragen</h3><ul><li><strong>Hoeveel water moet ik per dag drinken?</strong> 2-3 liter is een goed uitgangspunt, pas aan op activiteit en weer.</li><li><strong>Telt koffie en thee mee?</strong> Ja, maar water blijft de basis. Niet te veel cafeïne 's avonds.</li><li><strong>Wat als ik veel naar het toilet moet?</strong> Verdeel je inname beter, drink niet alles in één keer.</li><li><strong>Is meer water altijd beter?</strong> Nee, te veel water kan gevaarlijk zijn. Houd het redelijk.</li><li><strong>Hoe weet ik of ik genoeg drink?</strong> Lichtgeel urine, geen dorst, goede energie en focus.</li></ul><h3>Concrete stappen voor vandaag</h3><ol><li>Zet een glas water naast je bed voor morgenochtend</li><li>Koop een 1-liter fles en neem die mee naar werk</li><li>Plan drinkmomenten: bij opstaan, bij elke maaltijd, bij pauzes</li><li>Start met 2 liter per dag en bouw langzaam op</li><li>Houd 7 dagen bij hoeveel je drinkt</li></ol><div class="highlight-box"><h4>Checklist 10 punten</h4><ol><li>Glas water bij opstaan.</li><li>Dagdoel 2–3 liter.</li><li>Fles in zicht.</li><li>Drinkmomenten koppelen aan pauzes.</li><li>Elektrolyten bij veel zweten.</li><li>Minder frisdrank; meer water met citroen.</li><li>Niet "inhalen" voor bedtijd.</li><li>Extra bij hitte/training.</li><li>Urinekleur checken.</li><li>7 dagen tracken en bijsturen.</li></ol></div><h3>Afsluiting</h3><p>Hydratatie is eenvoudige discipline: water als basis, verdeeld over de dag, met kleine slimme aanpassingen. Als je dit 2–4 weken volhoudt, merk je dat je hoofd helderder is, je training beter gaat en je stemming stabieler is. Houd het simpel, zichtbaar en herhaalbaar. Dat is winnen.</p>
+    </div>
+
+    <div class="section" id="huiswerk">
+      <h2>📝 Huiswerk Opdrachten</h2>
+      
+      <div class="exercise-box">
+        <h4>Opdracht 1: Water Ritueel Opzetten</h4>
+        <p><strong>Doel:</strong> Een dagelijks water drink ritueel implementeren dat je automatisch volhoudt.</p>
+        <p><strong>Actie:</strong> Zet een glas water naast je bed voor morgenochtend. Koop een 1-liter fles en neem die mee naar werk. Plan drinkmomenten: bij opstaan, bij elke maaltijd, bij pauzes. Start met 2 liter per dag.</p>
+      </div>
+
+      <div class="exercise-box">
+        <h4>Opdracht 2: 7-Dagen Water Tracking</h4>
+        <p><strong>Doel:</strong> Bewustwording van je huidige water inname en het opbouwen van een nieuwe gewoonte.</p>
+        <p><strong>Actie:</strong> Houd 7 dagen bij hoeveel water je drinkt. Noteer hoeveel glazen/flesjes per dag. Check je urine kleur en energie niveau. Evalueer na 7 dagen wat je geleerd hebt en pas je plan aan.</p>
+      </div>
+
+      <div class="exercise-box">
+        <h4>Opdracht 3: Elektrolyten en Training Hydratatie</h4>
+        <p><strong>Doel:</strong> Je hydratatie optimaliseren rond training en bij warm weer.</p>
+        <p><strong>Actie:</strong> Test je hydratatie rond training: drink 300-500ml voor, tijdens en na training. Bij warm weer of veel zweten: voeg een snufje zout toe aan je water. Eet kaliumrijke voeding (bananen, aardappels). Evalueer je energie en herstel.</p>
+      </div>
+    </div>
+
+    <div class="section" id="checklists">
+      <h2>✅ Checklists</h2>
+      
+      <h3>Weekchecklist "Hydratatie en Water Inname"</h3>
+      <div class="checklist">
+        <div class="checklist-item">
+          <input type="checkbox" id="water-1">
+          <label for="water-1">Water ritueel opgezet (glas naast bed, 1-liter fles gekocht)</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="water-2">
+          <label for="water-2">7 dagen water inname bijgehouden en geëvalueerd</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="water-3">
+          <label for="water-3">Dagdoel van 2-3 liter per dag behaald</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="water-4">
+          <label for="water-4">Drinkmomenten gepland (opstaan, maaltijden, pauzes)</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="water-5">
+          <label for="water-5">Hydratatie rond training geoptimaliseerd</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="water-6">
+          <label for="water-6">Elektrolyten toegevoegd bij warm weer of veel zweten</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="section" id="reflectie">
+      <h2>🤔 Reflectie Vragen</h2>
+      
+      <div class="reflection-question">
+        <h4>Huidige Hydratatie Gewoontes</h4>
+        <p>Hoe zou je je huidige water inname beoordelen? Hoeveel water drink je gemiddeld per dag? Welke signalen van uitdroging herken je bij jezelf (dorst, hoofdpijn, vermoeidheid)?</p>
+      </div>
+
+      <div class="reflection-question">
+        <h4>Obstakels en Uitdagingen</h4>
+        <p>Wat weerhoudt je ervan om consistent genoeg water te drinken? Vergeet je het vaak, vind je het smaakloos, of drink je liever andere dranken? Hoe kun je deze obstakels overwinnen?</p>
+      </div>
+
+      <div class="reflection-question">
+        <h4>Doelen en Verbetering</h4>
+        <p>Wat zijn je doelen voor je hydratatie? Hoe wil je je voelen als je goed gehydrateerd bent? Wat is je eerste stap om vandaag te beginnen met betere hydratatie gewoontes?</p>
+      </div>
+    </div>
+
+    <div class="section" id="actieplan">
+      <h2>🎯 Actieplan</h2>
+      
+      <div class="action-plan">
+        <div class="action-step">
+          <strong>Stap 1:</strong> Zet een water ritueel op. Zet een glas water naast je bed, koop een 1-liter fles en neem die mee naar werk. Plan drinkmomenten bij opstaan, maaltijden en pauzes. Start met 2 liter per dag.
+        </div>
+        
+        <div class="action-step">
+          <strong>Stap 2:</strong> Houd 7 dagen je water inname bij. Noteer hoeveel glazen/flesjes per dag. Check je urine kleur en energie niveau. Evalueer na 7 dagen wat je geleerd hebt en pas je plan aan.
+        </div>
+        
+        <div class="action-step">
+          <strong>Stap 3:</strong> Optimaliseer je hydratatie rond training. Drink 300-500ml voor, tijdens en na training. Bij warm weer of veel zweten: voeg een snufje zout toe. Eet kaliumrijke voeding.
+        </div>
+        
+        <div class="action-step">
+          <strong>Stap 4:</strong> Bouw langzaam op naar 2-3 liter per dag. Verdeel je inname over de dag. Vermijd grote hoeveelheden 's avonds. Houd het simpel en herhaalbaar.
+        </div>
+        
+        <div class="action-step">
+          <strong>Stap 5:</strong> Evalueer na 2 weken. Wat merk je aan je energie, focus en algemeen welzijn? Pas je plan aan op basis van wat werkt. Maak hydratatie een automatische gewoonte.
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p>Dit ebook is onderdeel van de <span class="ttm-brand">Top Tier Men</span> Academy</p>
+      <p>Module 07: Voeding & Gezondheid | Les 02: Hydratatie en Water Inname</p>
+      <p>© 2025 Top Tier Men. Alle rechten voorbehouden.</p>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+      checkboxes.forEach(cb => {
+        const saved = localStorage.getItem(cb.id);
+        if (saved === 'true') cb.checked = true;
+        cb.addEventListener('change', function(){ localStorage.setItem(this.id, this.checked); });
+      });
+    });
+  </script>
+</body>
+</html>

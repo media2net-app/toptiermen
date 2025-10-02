@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Embrace The Suck - Ebook | Top Tier Men</title>
+  <meta name="description" content="V2 ebook voor Embrace The Suck binnen Top Tier Men Academy." />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.6; color: #ffffff;
+      background: linear-gradient(135deg, #0A0F0A 0%, #181F17 50%, #232D1A 100%);
+      min-height: 100vh;
+    }
+    .container { max-width: 800px; margin: 0 auto; padding: 2rem; }
+    .header {
+      text-align: center; margin-bottom: 3rem; padding: 2rem;
+      background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      border-radius: 20px; border: 1px solid #3A4D23;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    .logo { margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; }
+    h1 {
+      font-size: 2.5rem; font-weight: 800;
+      background: linear-gradient(135deg, #ffffff 0%, #8BAE5A 50%, #B6C948 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      margin-bottom: .5rem;
+    }
+    .subtitle { color: #8BAE5A; font-size: 1.1rem; font-weight: 500; }
+    .module-info {
+      background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1rem; border-radius: 10px; margin: 1rem 0; border-left: 4px solid #8BAE5A;
+    }
+    .section { background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      margin-bottom: 2rem; padding: 2rem; border-radius: 15px; border: 1px solid #3A4D23; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    .section h2 { color: #B6C948; font-size: 1.8rem; font-weight: 700; margin-bottom: 1.5rem; display: flex; align-items: center; gap: .5rem; }
+    .section h3 { color: #8BAE5A; font-size: 1.3rem; font-weight: 600; margin: 1.5rem 0 1rem; }
+    .section p { margin-bottom: 1rem; color: #e0e0e0; }
+    .section ul, .section ol { margin: 1rem 0; padding-left: 2rem; }
+    .section li { margin-bottom: .5rem; color: #e0e0e0; }
+    .highlight-box { background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1.5rem; border-radius: 10px; border-left: 4px solid #B6C948; margin: 1.5rem 0;
+    }
+    .exercise-box { background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%);
+      padding: 1.5rem; border-radius: 10px; border: 1px solid #8BAE5A; margin: 1rem 0;
+    }
+    .exercise-box h4 { color: #B6C948; font-size: 1.1rem; margin-bottom: 1rem; }
+    .checklist { background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      padding: 1.5rem; border-radius: 10px; border: 1px solid #3A4D23; margin: 1rem 0;
+    }
+    .checklist-item { display: flex; align-items: center; margin-bottom: .8rem; padding: .5rem; background: rgba(58,77,35,.3); border-radius: 8px; }
+    .checklist-item input[type="checkbox"] { margin-right: 1rem; width: 18px; height: 18px; accent-color: #8BAE5A; }
+    .reflection-question { background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1.5rem; border-radius: 10px; border-left: 4px solid #B6C948; margin: 1rem 0;
+    }
+    .reflection-question h4 { color: #B6C948; margin-bottom: 1rem; }
+    .action-plan { background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%);
+      padding: 2rem; border-radius: 15px; border: 2px solid #8BAE5A; margin: 2rem 0;
+    }
+    .action-step { background: rgba(139,174,90,.1); padding: 1rem; border-radius: 8px; margin: 1rem 0; border-left: 3px solid #8BAE5A; }
+    .footer { text-align: center; margin-top: 3rem; padding: 2rem; background: linear-gradient(135deg, #181F17 0%, #232D1A 100%); border-radius: 15px; border: 1px solid #3A4D23; }
+    .footer p { color: #8BAE5A; margin-bottom: 1rem; }
+    .ttm-brand { color: #B6C948; font-weight: 700; }
+    .sticky-back-btn { position: fixed; top: 50%; right: 20px; transform: translateY(-50%);
+      z-index: 1000; background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%);
+      color: #fff; border: none; border-radius: 50px; padding: 15px 20px; font-size: 14px; font-weight: 600; cursor: pointer;
+      box-shadow: 0 8px 25px rgba(139,174,90,.3); transition: all .3s ease; display: flex; align-items: center; gap: 8px; text-decoration: none; min-width: 120px; justify-content: center;
+    }
+    .sticky-back-btn:hover { background: linear-gradient(135deg, #B6C948 0%, #8BAE5A 100%); transform: translateY(-50%) scale(1.05); box-shadow: 0 12px 35px rgba(139,174,90,.4); }
+    .sticky-back-btn:active { transform: translateY(-50%) scale(.95); }
+    .sticky-back-btn svg { width: 16px; height: 16px; fill: currentColor; }
+    @media (max-width: 768px) {
+      .container { padding: 1rem; }
+      h1 { font-size: 2rem; }
+      .section { padding: 1.5rem; }
+      .sticky-back-btn { right: 10px; padding: 12px 16px; font-size: 12px; min-width: 100px; }
+    }
+  </style>
+</head>
+<body>
+  <a href="/dashboard/academy/0d02e65a-c109-440d-9286-690b21fbdecb/fe9e98a5-6241-4b7e-85bb-d4e2e631b21b" class="sticky-back-btn" title="Terug naar les">
+    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    Terug
+  </a>
+
+  <div class="container">
+    <div class="header">
+      <div class="logo">
+        <img src="/logo_white-full.svg" alt="Top Tier Men Logo" style="height:40px;width:auto" />
+      </div>
+      <h1>Embrace The Suck</h1>
+      <p class="subtitle"></p>
+      <div class="module-info">
+        <strong>Module 03: Fysieke Dominantie</strong> | <strong>Les 05: Embrace The Suck</strong>
+      </div>
+    </div>
+
+    <div class="section" id="samenvatting">
+      <h2>📚 Uitgebreide Samenvatting van de Les</h2>
+<div class="highlight-box"><h4>🎯 Doel van deze les</h4><p>Embrace The Suck gaat over het omarmen van ongemak, uitdaging en moeilijkheid als de weg naar groei. Het is niet over lijden om het lijden, maar over het accepteren dat echte vooruitgang pijn kost. Je leert hoe je van moeilijkheid je vriend maakt in plaats van je vijand. Dit is de mentaliteit die je onderscheidt van de massa die wegrent voor uitdagingen.</p></div><h3>Wat betekent "Embrace The Suck"?</h3><p>Het betekent dat je ongemak, pijn, uitdaging en moeilijkheid omarmt als onderdeel van je groei. Het is niet masochisme, maar realisme. Alles wat de moeite waard is kost moeite. Alles wat je sterker maakt is eerst moeilijk. Door dit te accepteren en er zelfs naar te zoeken, word je onverslaanbaar. Je wordt de man die niet vlucht voor uitdagingen, maar ze aangaat.</p><h3>Waarom ongemak nodig is</h3><p>Je lichaam en geest groeien alleen door stress. Geen stress betekent geen groei. Comfort is de vijand van vooruitgang. Elke keer dat je ongemak vermijdt, word je zwakker. Elke keer dat je het omarmt, word je sterker. Dit geldt voor fysieke training, mentale uitdagingen, sociale situaties en persoonlijke ontwikkeling. Ongemak is niet je vijand, het is je leraar.</p><h3>De 3 niveaus van ongemak</h3><h4>Niveau 1: Oncomfortabel</h4><p>Dit is waar de meeste mensen stoppen. Ze voelen ongemak en stoppen. Dit is waar jij begint. Je herkent ongemak en blijft doorgaan. Voorbeelden: koude douche, zware training, moeilijk gesprek.</p><h4>Niveau 2: Pijnlijk</h4><p>Dit is waar groei echt begint. Het doet pijn, maar je weet dat het je sterker maakt. Je ademt door de pijn heen en blijft bewegen. Voorbeelden: laatste herhalingen, lange runs, confrontaties.</p><h4>Niveau 3: Extreem</h4><p>Dit is waar transformatie gebeurt. Je gaat verder dan je dacht mogelijk. Dit niveau bouw je langzaam op. Voorbeelden: marathons, extreme koude, grote risico's.</p><h3>Fysiek ongemak omarmen</h3><h4>Training</h4><ul><li><strong>Laatste herhalingen:</strong> de herhalingen die pijn doen zijn de belangrijkste.</li><li><strong>Extra set:</strong> als je denkt dat je klaar bent, doe er nog één.</li><li><strong>Geen pauzes:</strong> soms train je door vermoeidheid heen.</li><li><strong>Zware gewichten:</strong> kies gewichten die moeilijk zijn, niet comfortabel.</li></ul><h4>Koude therapie</h4><ul><li><strong>Koude douche:</strong> begin elke dag met 30 seconden koud water.</li><li><strong>IJsbad:</strong> 1-2 keer per week 5-10 minuten in koud water.</li><li><strong>Koude zwemmen:</strong> zwem in koud water voor mentale sterkte.</li><li><strong>Winter training:</strong> train buiten in alle weersomstandigheden.</li></ul><h4>Voeding</h4><ul><li><strong>Honger:</strong> leer omgaan met honger zonder meteen te eten.</li><li><strong>Intermitterend vasten:</strong> eet niet 16-20 uur per dag.</li><li><strong>Geen suiker:</strong> elimineer suiker voor mentale discipline.</li><li><strong>Water vasten:</strong> af en toe 24-48 uur alleen water.</li></ul><h3>Mentaal ongemak omarmen</h3><h4>Angst aangaan</h4><ul><li><strong>Publiek spreken:</strong> zoek situaties waar je moet spreken.</li><li><strong>Sociale uitdagingen:</strong> praat met vreemden, maak connecties.</li><li><strong>Nieuwe vaardigheden:</strong> leer dingen die moeilijk zijn.</li><li><strong>Feedback vragen:</strong> vraag om eerlijke feedback, ook als het pijn doet.</li></ul><h4>Falen accepteren</h4><ul><li><strong>Falen is data:</strong> elke mislukking leert je iets.</li><li><strong>Sneller falen:</strong> faal vaak en faal snel om sneller te leren.</li><li><strong>Publiek falen:</strong> faal waar anderen het zien.</li><li><strong>Falen vieren:</strong> als je faalt, betekent het dat je probeert.</li></ul><h4>Onzekerheid omarmen</h4><ul><li><strong>Nieuwe projecten:</strong> begin dingen waar je geen ervaring mee hebt.</li><li><strong>Onbekende situaties:</strong> zoek bewust situaties die onbekend zijn.</li><li><strong>Geen controle:</strong> laat los wat je niet kunt controleren.</li><li><strong>Chaos omarmen:</strong> soms is chaos nodig voor creativiteit.</li></ul><h3>Emotioneel ongemak omarmen</h3><h4>Kwetsbaarheid</h4><ul><li><strong>Eerlijk zijn:</strong> wees eerlijk over je zwakheden.</li><li><strong>Hulp vragen:</strong> vraag om hulp als je het nodig hebt.</li><li><strong>Emoties uiten:</strong> toon je emoties in plaats van ze te verbergen.</li><li><strong>Fouten toegeven:</strong> geef toe wanneer je fout zit.</li></ul><h4>Confrontatie</h4><ul><li><strong>Moeilijke gesprekken:</strong> voer gesprekken die je liever vermijdt.</li><li><strong>Grenzen stellen:</strong> zeg nee tegen dingen die niet goed zijn.</li><li><strong>Conflicten oplossen:</strong> ga conflicten niet uit de weg.</li><li><strong>Waarheid spreken:</strong> spreek waarheid ook als het pijn doet.</li></ul><h3>Dagelijkse ongemak rituelen</h3><h4>Ochtend</h4><ul><li>Koude douche (2-5 minuten)</li><li>Zware oefening (10-20 herhalingen)</li><li>Iets moeilijks doen voor ontbijt</li></ul><h4>Middag</h4><ul><li>Moeilijk gesprek voeren</li><li>Nieuwe vaardigheid oefenen</li><li>Feedback vragen</li></ul><h4>Avond</h4><ul><li>Review van ongemak van de dag</li><li>Plan voor morgen moeilijkste taak</li><li>Dankbaarheid voor uitdagingen</li></ul><h3>Weekelijkse ongemak uitdagingen</h3><ul><li><strong>Maandag:</strong> fysieke uitdaging (zware training, koude douche)</li><li><strong>Dinsdag:</strong> sociale uitdaging (nieuwe mensen ontmoeten)</li><li><strong>Woensdag:</strong> mentale uitdaging (nieuwe vaardigheid leren)</li><li><strong>Donderdag:</strong> emotionele uitdaging (moeilijk gesprek)</li><li><strong>Vrijdag:</strong> extreme uitdaging (iets wat je eng vindt)</li><li><strong>Zaterdag:</strong> groepsuitdaging (samen met anderen)</li><li><strong>Zondag:</strong> reflectie en planning</li></ul><h3>Maandelijkse extreme uitdagingen</h3><ul><li><strong>24-uur vasten:</strong> eet 24 uur niets</li><li><strong>Koude training:</strong> 1 uur in koud water</li><li><strong>Publiek optreden:</strong> spreek voor een groep</li><li><strong>Nieuwe vaardigheid:</strong> leer iets compleet nieuws</li><li><strong>Fysieke uitdaging:</strong> marathon, triatlon, of extreme training</li></ul><h3>Mindset verschuivingen</h3><h4>Van vermijden naar zoeken</h4><p>In plaats van ongemak te vermijden, zoek je het op. Je vraagt je af: "Wat is de moeilijkste versie van dit?" en kiest die.</p><h4>Van klagen naar accepteren</h4><p>In plaats van te klagen over hoe moeilijk iets is, accepteer je dat het moeilijk is en doe je het toch.</p><h4>Van comfort naar groei</h4><p>In plaats van comfort te zoeken, zoek je groei. Comfort is de vijand van vooruitgang.</p><h4>Van pijn naar kracht</h4><p>In plaats van pijn te zien als iets slechts, zie je het als bewijs dat je groeit.</p><h3>Praktische technieken</h3><h4>Ademhaling</h4><ul><li><strong>Diep ademhalen:</strong> in moeilijke momenten, adem diep in en uit.</li><li><strong>Ademhaling tellen:</strong> tel je ademhalingen tijdens ongemak.</li><li><strong>Pauzes:</strong> neem bewust pauzes om te ademen.</li></ul><h4>Visualisatie</h4><ul><li><strong>Doel voor ogen:</strong> houd je doel voor ogen tijdens ongemak.</li><li><strong>Succes verbeelden:</strong> stel je voor hoe je succesvol bent.</li><li><strong>Sterke versie:</strong> stel je voor hoe je sterke versie dit zou doen.</li></ul><h4>Mantra's</h4><ul><li>"Dit is waar groei gebeurt"</li><li>"Pijn is tijdelijk, kracht is permanent"</li><li>"Ik ben sterker dan ik denk"</li><li>"Dit maakt me onverslaanbaar"</li></ul><h3>Veelgemaakte fouten</h3><ul><li><strong>Te snel te ver:</strong> begin klein en bouw langzaam op.</li><li><strong>Alleen fysiek:</strong> ongemak is ook mentaal en emotioneel.</li><li><strong>Geen doel:</strong> ongemak zonder doel is masochisme.</li><li><strong>Geen recovery:</strong> bouw herstel in na extreme uitdagingen.</li><li><strong>Vergelijken:</strong> focus op je eigen groei, niet op anderen.</li></ul><h3>Wanneer stoppen</h3><p>Ongemak omarmen betekent niet dat je alles moet doorstaan. Stop bij:</p><ul><li>Echte verwonding (niet alleen pijn)</li><li>Extreme vermoeidheid zonder herstel</li><li>Mentale breakdown</li><li>Gevaren voor anderen</li></ul><h3>Resultaten van omarmen</h3><ul><li><strong>Mentale sterkte:</strong> je wordt mentaal onverslaanbaar.</li><li><strong>Fysieke kracht:</strong> je lichaam wordt sterker en veerkrachtiger.</li><li><strong>Zelfvertrouwen:</strong> je weet dat je alles kunt doorstaan.</li><li><strong>Respect:</strong> anderen respecteren je voor je doorzettingsvermogen.</li><li><strong>Leiderschap:</strong> je wordt een voorbeeld voor anderen.</li></ul><h3>Start vandaag</h3><p>Kies 1 ongemak dat je vandaag kunt omarmen. Begin klein maar begin nu. Elke dag omarm je iets moeilijks. Elke dag word je sterker. Elke dag word je de man die niet vlucht voor uitdagingen, maar ze aangaat. Dit is hoe je onverslaanbaar wordt.</p>
+    </div>
+
+    <div class="section" id="huiswerk">
+      <h2>📝 Huiswerk Opdrachten</h2>
+      
+      <div class="exercise-box">
+        <h4>Opdracht 1: Dagelijks Ongemak Ritueel</h4>
+        <p><strong>Doel:</strong> Een dagelijks ritueel opbouwen om ongemak te omarmen.</p>
+        <p><strong>Actie:</strong> Start elke ochtend met een koude douche van 2-5 minuten. Voeg 1 extra zware set toe aan je training. Doe elke dag 1 ding dat je ongemakkelijk vindt. Houd dit 7 dagen vol en evalueer hoe je mentale sterkte groeit.</p>
+      </div>
+
+      <div class="exercise-box">
+        <h4>Opdracht 2: Weekelijkse Ongemak Uitdaging</h4>
+        <p><strong>Doel:</strong> Verschillende soorten ongemak ervaren en omarmen.</p>
+        <p><strong>Actie:</strong> Plan voor elke dag van de week een andere ongemak uitdaging: fysiek (maandag), sociaal (dinsdag), mentaal (woensdag), emotioneel (donderdag), extreem (vrijdag). Documenteer je ervaring en hoe je groeit.</p>
+      </div>
+
+      <div class="exercise-box">
+        <h4>Opdracht 3: Mindset Audit</h4>
+        <p><strong>Doel:</strong> Je huidige relatie met ongemak evalueren en verbeteren.</p>
+        <p><strong>Actie:</strong> Schrijf op wanneer je ongemak vermijdt en waarom. Identificeer 3 situaties waarin je comfort zoekt in plaats van groei. Maak een plan om deze mindset te veranderen en test het deze week.</p>
+      </div>
+    </div>
+
+    <div class="section" id="checklists">
+      <h2>✅ Checklists</h2>
+      
+      <h3>Weekchecklist "Embrace The Suck"</h3>
+      <div class="checklist">
+        <div class="checklist-item">
+          <input type="checkbox" id="suck-1">
+          <label for="suck-1">7 dagen koude douche in de ochtend (2-5 minuten)</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="suck-2">
+          <label for="suck-2">Elke dag 1 extra zware set tijdens training</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="suck-3">
+          <label for="suck-3">5 verschillende ongemak uitdagingen deze week gedaan</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="suck-4">
+          <label for="suck-4">Mindset audit uitgevoerd en 3 verbeterpunten geïdentificeerd</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="suck-5">
+          <label for="suck-5">1 moeilijk gesprek gevoerd die je liever vermeed</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="suck-6">
+          <label for="suck-6">Nieuwe vaardigheid geoefend die je ongemakkelijk vindt</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="section" id="reflectie">
+      <h2>🤔 Reflectie Vragen</h2>
+      
+      <div class="reflection-question">
+        <h4>Jouw Relatie met Ongemak</h4>
+        <p>Hoe reageer je normaal gesproken op ongemak? Vlucht je ervoor of omarm je het? Welke specifieke soorten ongemak vind je het moeilijkst om te accepteren?</p>
+      </div>
+
+      <div class="reflection-question">
+        <h4>Comfort vs Groei</h4>
+        <p>In welke situaties zoek je comfort in plaats van groei? Wat zou er gebeuren als je deze situaties zou omarmen als kansen voor ontwikkeling?</p>
+      </div>
+
+      <div class="reflection-question">
+        <h4>Jouw Limieten Verleggen</h4>
+        <p>Wat is het laatste dat je deed dat echt ongemakkelijk was? Hoe voelde je je daarna? Welke limiet wil je deze maand verleggen?</p>
+      </div>
+    </div>
+
+    <div class="section" id="actieplan">
+      <h2>🎯 Actieplan</h2>
+      
+      <div class="action-plan">
+        <div class="action-step">
+          <strong>Stap 1:</strong> Start je dagelijks ongemak ritueel. Begin elke ochtend met een koude douche en voeg extra uitdaging toe aan je training. Houd dit 7 dagen vol.
+        </div>
+        
+        <div class="action-step">
+          <strong>Stap 2:</strong> Plan 5 verschillende ongemak uitdagingen voor deze week. Variatie in fysiek, mentaal, sociaal en emotioneel ongemak. Documenteer je ervaring.
+        </div>
+        
+        <div class="action-step">
+          <strong>Stap 3:</strong> Voer een mindset audit uit. Identificeer waar je comfort zoekt in plaats van groei en maak een plan om dit te veranderen.
+        </div>
+        
+        <div class="action-step">
+          <strong>Stap 4:</strong> Voer 1 moeilijk gesprek of confrontatie die je liever vermeed. Oefen een nieuwe vaardigheid die je ongemakkelijk vindt.
+        </div>
+        
+        <div class="action-step">
+          <strong>Stap 5:</strong> Evalueer je groei na een week. Welke ongemak uitdagingen gaven je het meeste resultaat? Bouw deze uit en voeg nieuwe toe.
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p>Dit ebook is onderdeel van de <span class="ttm-brand">Top Tier Men</span> Academy</p>
+      <p>Module 03: Fysieke Dominantie | Les 05: Embrace The Suck</p>
+      <p>© 2025 Top Tier Men. Alle rechten voorbehouden.</p>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+      checkboxes.forEach(cb => {
+        const saved = localStorage.getItem(cb.id);
+        if (saved === 'true') cb.checked = true;
+        cb.addEventListener('change', function(){ localStorage.setItem(this.id, this.checked); });
+      });
+    });
+  </script>
+</body>
+</html>

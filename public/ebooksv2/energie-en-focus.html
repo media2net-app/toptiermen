@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Energie en Focus - Ebook | Top Tier Men</title>
+  <meta name="description" content="Maximaliseer je energie en focus met bewezen strategieën voor optimale prestaties." />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.6; color: #ffffff;
+      background: linear-gradient(135deg, #0A0F0A 0%, #181F17 50%, #232D1A 100%);
+      min-height: 100vh;
+    }
+    .container { max-width: 800px; margin: 0 auto; padding: 2rem; }
+    .header {
+      text-align: center; margin-bottom: 3rem; padding: 2rem;
+      background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      border-radius: 20px; border: 1px solid #3A4D23;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    .logo { margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; }
+    h1 {
+      font-size: 2.5rem; font-weight: 800;
+      background: linear-gradient(135deg, #ffffff 0%, #8BAE5A 50%, #B6C948 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      margin-bottom: .5rem;
+    }
+    .subtitle { color: #8BAE5A; font-size: 1.1rem; font-weight: 500; }
+    .module-info {
+      background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1rem; border-radius: 10px; margin: 1rem 0; border-left: 4px solid #8BAE5A;
+    }
+    .section { background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      margin-bottom: 2rem; padding: 2rem; border-radius: 15px; border: 1px solid #3A4D23; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    .section h2 { color: #B6C948; font-size: 1.8rem; font-weight: 700; margin-bottom: 1.5rem; display: flex; align-items: center; gap: .5rem; }
+    .section h3 { color: #8BAE5A; font-size: 1.3rem; font-weight: 600; margin: 1.5rem 0 1rem; }
+    .section p { margin-bottom: 1rem; color: #e0e0e0; }
+    .section ul, .section ol { margin: 1rem 0; padding-left: 2rem; }
+    .section li { margin-bottom: .5rem; color: #e0e0e0; }
+    .highlight-box { background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1.5rem; border-radius: 10px; border-left: 4px solid #B6C948; margin: 1.5rem 0;
+    }
+    .exercise-box { background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%);
+      padding: 1.5rem; border-radius: 10px; border: 1px solid #8BAE5A; margin: 1rem 0;
+    }
+    .exercise-box h4 { color: #B6C948; font-size: 1.1rem; margin-bottom: 1rem; }
+    .checklist { background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      padding: 1.5rem; border-radius: 10px; border: 1px solid #3A4D23; margin: 1rem 0;
+    }
+    .checklist-item { display: flex; align-items: center; margin-bottom: .8rem; padding: .5rem; background: rgba(58,77,35,.3); border-radius: 8px; }
+    .checklist-item input[type="checkbox"] { margin-right: 1rem; width: 18px; height: 18px; accent-color: #8BAE5A; }
+    .reflection-question { background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1.5rem; border-radius: 10px; border-left: 4px solid #B6C948; margin: 1rem 0;
+    }
+    .reflection-question h4 { color: #B6C948; margin-bottom: 1rem; }
+    .action-plan { background: linear-gradient(135deg, #232D1A 0%, #3A4D33 100%);
+      padding: 2rem; border-radius: 15px; border: 2px solid #8BAE5A; margin: 2rem 0;
+    }
+    .action-step { background: rgba(139,174,90,.1); padding: 1rem; border-radius: 8px; margin: 1rem 0; border-left: 3px solid #8BAE5A; }
+    .footer { text-align: center; margin-top: 3rem; padding: 2rem; background: linear-gradient(135deg, #181F17 0%, #232D1A 100%); border-radius: 15px; border: 1px solid #3A4D23; }
+    .footer p { color: #8BAE5A; margin-bottom: 1rem; }
+    .ttm-brand { color: #B6C948; font-weight: 700; }
+    .sticky-back-btn { position: fixed; top: 50%; right: 20px; transform: translateY(-50%);
+      z-index: 1000; background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%);
+      color: #fff; border: none; border-radius: 50px; padding: 15px 20px; font-size: 14px; font-weight: 600; cursor: pointer;
+      box-shadow: 0 8px 25px rgba(139,174,90,.3); transition: all .3s ease; display: flex; align-items: center; gap: 8px; text-decoration: none; min-width: 120px; justify-content: center;
+    }
+    .sticky-back-btn:hover { background: linear-gradient(135deg, #B6C948 0%, #8BAE5A 100%); transform: translateY(-50%) scale(1.05); box-shadow: 0 12px 35px rgba(139,174,90,.4); }
+    .sticky-back-btn:active { transform: translateY(-50%) scale(.95); }
+    .sticky-back-btn svg { width: 16px; height: 16px; fill: currentColor; }
+    @media (max-width: 768px) {
+      .container { padding: 1rem; }
+      h1 { font-size: 2rem; }
+      .section { padding: 1.5rem; }
+      .sticky-back-btn { right: 10px; padding: 12px 16px; font-size: 12px; min-width: 100px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Sticky Back Button -->
+  <a href="/dashboard/academy/f5dfaee3-87a7-4d32-9548-751391642e2b/6ffd2993-3a8c-40fa-a273-17b046cee4f2" class="sticky-back-btn" title="Terug naar les">
+    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    Terug
+  </a>
+
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="logo">
+        <img src="/logo_white-full.svg" alt="Top Tier Men Logo" style="height:40px;width:auto" />
+      </div>
+      <h1>Energie en Focus</h1>
+      <p class="subtitle">Maximaliseer je energie en focus met bewezen strategieën voor optimale prestaties</p>
+      <div class="module-info">
+        <strong>Module 07: Voeding & Gezondheid</strong> | <strong>Les 04: Energie en Focus</strong>
+      </div>
+    </div>
+
+    <!-- Uitgebreide Samenvatting -->
+    <div class="section" id="samenvatting">
+      <h2>📚 Uitgebreide Samenvatting van de Les</h2>
+      
+      <div class="highlight-box">
+        <h4>🎯 Les Overzicht</h4>
+        <p>Deze les maakt energie en focus simpel, concreet en haalbaar. Je leert hoe je elke dag stabiel presteert zonder te leunen op willekeur, geluk of motivatie. Het doel is dat je je lichaam en je dag zó inricht dat je energie door de dag heen gelijk blijft, en je aandacht scherp is wanneer het moet. We combineren voeding, slaap, beweging, omgeving, planning en een paar eenvoudige gewoontes tot een plan dat je direct kunt toepassen. Geen moeilijke woorden. Geen ingewikkelde theorie. Alleen dingen die werken in het echte leven, ook als je agenda vol is.</p>
+      </div>
+
+      <h3>Waarom dit belangrijk is</h3>
+      <p>Als je energie inzakt, zakt alles mee: je geduld, je discipline, je productiviteit, je stemming en je keuzes. Je traint minder hard, je eet minder goed, je stelt uit en je raakt sneller afgeleid. Wanneer je dit omdraait en jouw basis op orde brengt, merk je het overal: je werkt rustiger en sneller, je maakt betere keuzes, je blijft kalm onder druk en je kunt langere blokken geconcentreerd werken zonder te struikelen over prikkels. Focus is geen talent; het is een gevolg van structuur. Energie is geen toeval; het is een gevolg van gewoontes.</p>
+
+      <h3>De 6 pijlers: één simpel plan</h3>
+      <ul>
+        <li><strong>1) Ochtendstart:</strong> water, licht, adem, beweging, eiwit. Zo zet je je lichaam "aan".</li>
+        <li><strong>2) Eetritme:</strong> 2–4 vaste maaltijden, eiwit + groente bij elke maaltijd, water als basis.</li>
+        <li><strong>3) Bewegen:</strong> 7–10k stappen per dag, 3x per week kracht. Korte wandelingen breken dipjes.</li>
+        <li><strong>4) Focusblokken:</strong> 50 minuten 1 taak, 10 minuten echte pauze. Telefoon weg, meldingen uit.</li>
+        <li><strong>5) Omgeving:</strong> leeg bureau, gesloten tabs, koptelefoon, vaste werkplek, vaste routine.</li>
+        <li><strong>6) Avondlanding:</strong> schermen dimmen, licht laag, korte wandeling, notities voor morgen, op tijd slapen.</li>
+      </ul>
+
+      <h3>Ochtendstart die werkt (15–25 min)</h3>
+      <p>De start van je dag bepaalt vaak de toon. Als je je dag begint met water, licht, rust en een duidelijke eerste actie, win je al voordat werk of sociale prikkels je aandacht vragen.</p>
+      <ul>
+        <li><strong>Water (1 groot glas):</strong> je lichaam is uitgedroogd na de nacht. Drink direct bij het opstaan.</li>
+        <li><strong>Licht:</strong> stap naar buiten of bij een raam voor daglicht. Dit zet je biologische klok en maakt je alerter.</li>
+        <li><strong>Adem (2–3 min):</strong> lang uitademen (bijv. 4 tellen in, 6–8 tellen uit) geeft rust zonder sloom te worden.</li>
+        <li><strong>Beweging (5–10 min):</strong> rustig wandelen of mobiliteit. Je lichaam wordt warm, je hoofd wordt helder.</li>
+        <li><strong>Eiwitrijke start:</strong> eiwit houdt je langer vol. Bijvoorbeeld eieren met groente of kwark met fruit en noten.</li>
+      </ul>
+
+      <h3>Voeding voor stabiele energie</h3>
+      <p>Eten is brandstof. Focus op simpele patronen:</p>
+      <ul>
+        <li><strong>2–4 vaste maaltijden:</strong> minder snacken betekent minder pieken en dalen. Kies een ritme en houd het vast.</li>
+        <li><strong>Eiwit + groente bij elke maaltijd:</strong> eiwit verzadigt, groente geeft volume en voedingsstoffen.</li>
+        <li><strong>Koolhydraten slim:</strong> aardappels, rijst, volkoren wraps, havermout en fruit. Rond training iets meer; op rustdagen iets minder.</li>
+        <li><strong>Vetten uit goede bronnen:</strong> olijfolie, roomboter, eieren, vette vis, noten. Niet overdrijven.</li>
+        <li><strong>Water als basis:</strong> 2–3 liter per dag. Koffie/thee zonder suiker mag, maar niet laat op de dag.</li>
+      </ul>
+
+      <div class="highlight-box">
+        <h4>Praktische richtlijn per maaltijd</h4>
+        <ul>
+          <li><strong>Eiwit:</strong> 1–2 handpalmen (kip, rund, eieren, zalm, kwark).</li>
+          <li><strong>Koolhydraten:</strong> 1 vuist (meer bij training, minder bij rust).</li>
+          <li><strong>Vetten:</strong> 1 duim (olijfolie/roomboter of kleine hand noten).</li>
+          <li><strong>Groente:</strong> halve tot hele bord vol.</li>
+        </ul>
+      </div>
+
+      <h3>Voorbeelden per maaltijd</h3>
+      <h4>Ontbijt (kies 1)</h4>
+      <ul>
+        <li>4 eieren (omelet/roerei) met spinazie en tomaat, 1–2 volkoren wraps ernaast.</li>
+        <li>Kwark met banaan en hand noten, kaneel. Honing alleen rond training.</li>
+        <li>Havermout met melk of water, 1 schep eiwit, stuk fruit.</li>
+      </ul>
+
+      <h4>Lunch (kies 1)</h4>
+      <ul>
+        <li>Kip/rund/tonijn + grote salade + olijfolie + aardappels of rijst.</li>
+        <li>2–3 volkoren wraps met kip/rund, sla, paprika, avocado of olijfolie.</li>
+        <li>Restjes avondeten: vlees/vis + groente + aardappels/rijst.</li>
+      </ul>
+
+      <h4>Avond (kies 1)</h4>
+      <ul>
+        <li>Zalm of witte vis + broccoli/sperziebonen + aardappels met roomboter.</li>
+        <li>Rundergehakt/kip met rijst, ui, paprika, wortel, olijfolie, kruiden.</li>
+        <li>Biefstuk/kipdij + zoete aardappel + grote salade.</li>
+      </ul>
+
+      <h4>Tussendoor (optioneel)</h4>
+      <ul>
+        <li>Fruit, handje noten, stukje kaas, bakje kwark.</li>
+        <li>Koffie/thee zonder suiker. Water als basis.</li>
+      </ul>
+
+      <h3>Hydratatie en micronutriënten</h3>
+      <p>Te weinig drinken maakt je suf, prikkelbaar en hongerig. Zorg voor 2–3 liter per dag. Bij warmte of zware training: extra 0,5–1 liter. Overweeg wat zout, kalium en magnesium bij veel zweten. Begin je dag met een groot glas water en zet je fles in het zicht. Neem 2–3 drinkmomenten vast in je dag (bijv. na elke maaltijd).</p>
+
+      <h3>Beweging: motor van energie</h3>
+      <ul>
+        <li><strong>Stappen:</strong> 7–10k per dag. Korte wandelingen (5–10 min) rond lunch en in de late middag.</li>
+        <li><strong>Krachttraining:</strong> 3x per week (40–60 min). Compound oefeningen, progressie per week.</li>
+        <li><strong>Mini-beweging:</strong> heupmobiliteit, borst openen, nek ontspannen, polsen los. 3–5 min per paar uur.</li>
+      </ul>
+
+      <p>Beweging verbetert doorbloeding en hersenfunctie. Je hoofd wordt helderder en je stemming gelijkmatiger. Het is vaak de snelste manier om uit een dip te komen: sta op, loop 5 minuten, reset je houding en adem rustig.</p>
+
+      <h3>Focusblokken die je kunt volhouden</h3>
+      <p>Werk in "sprints": 50 minuten 1 taak, 10 minuten pauze. Herhaal 3–4 keer per dag afhankelijk van je agenda. Het doel is niet om 8 uur achter elkaar te vuren, maar om 3–5 raketten af te schieten die echt raken.</p>
+      <ul>
+        <li><strong>Voor je blok:</strong> kies 1 taak, sluit alle extra tabs, leg je telefoon uit zicht (bijv. in een lade).</li>
+        <li><strong>Tijdens:</strong> alleen die taak. Alles wat binnenvalt, noteer je op papier en ga door.</li>
+        <li><strong>Pauze (10 min):</strong> even staan, water, 2–3 min ademhalen, kort naar buiten, geen social media.</li>
+      </ul>
+
+      <div class="highlight-box">
+        <h4>Dagplanning in 6 stappen</h4>
+        <ol>
+          <li>Schrijf 's avonds 3 prioriteiten op (niet 10). Morgen begin je met de lastigste.</li>
+          <li>Start met water, licht, adem, korte beweging.</li>
+          <li>Doe 2 focusblokken in de ochtend (meeste impact), 1–2 in de middag.</li>
+          <li>Plan vaste eetmomenten en 2–3 watermomenten.</li>
+          <li>Wandel 2x kort (5–10 min) om dipjes te breken.</li>
+          <li>Land je dag: licht laag, telefoon weg, notities voor morgen, vaste bedtijd.</li>
+        </ol>
+      </div>
+
+      <h3>Omgeving die focus afdwingt</h3>
+      <ul>
+        <li><strong>Leeg bureau:</strong> wat er ligt, trekt aandacht. Houd alleen wat je nodig hebt.</li>
+        <li><strong>Gesloten tabs:</strong> 1 venster, 1 taak. Pin alleen wat je echt gebruikt.</li>
+        <li><strong>Koptelefoon:</strong> zelfde afspeellijst, zelfde volume. Dit wordt je "focus-signaal".</li>
+        <li><strong>Telefoon ver weg:</strong> in een lade of andere kamer. Meldingen uit.</li>
+        <li><strong>Vaste werkplek:</strong> zelfde stoel, zelfde licht, zelfde start. Ritueel geeft snelheid.</li>
+      </ul>
+
+      <h3>Middagdip? Zo fix je 'm</h3>
+      <ul>
+        <li><strong>Water + frisse lucht (5 min):</strong> loop naar buiten, adem lang uit.</li>
+        <li><strong>Mini-maaltijd met eiwit:</strong> kwark of eieren; geen zoet. Zo voorkom je crash.</li>
+        <li><strong>Korte reset:</strong> 2 minuten stretchen of 10 lucht-squats om je bloed te laten lopen.</li>
+        <li><strong>Focus reset:</strong> nieuwe 50-minuten blok met 1 heldere taak en een lege tafel.</li>
+      </ul>
+
+      <h3>Slapen als superkracht</h3>
+      <p>Slaap maakt alles makkelijker. Met 7–9 uur slaap heb je meer wilskracht, betere stemming en sterkere focus. Voor de avond: schermen en fel licht naar beneden, korte wandeling of warme douche, notities voor morgen, op tijd naar bed. Geen cafeïne laat op de dag. Zie slaap als onderdeel van je werk: het is je herstel.</p>
+
+      <h3>Stress omlaag, focus omhoog</h3>
+      <p>Hoge stress zuigt je energie leeg. Je denkt kortzichtig, je gaat snacken, je stelt uit. Bouw drie simpele "remmen" in je dag:</p>
+      <ul>
+        <li><strong>Adem (2 min):</strong> 4 tellen in, 6–8 tellen uit. Direct rustiger.</li>
+        <li><strong>Wandel (5–10 min):</strong> buitenlucht kalmeert en geeft weer vaart.</li>
+        <li><strong>Schrijf het van je af:</strong> 5 regels op papier: wat moet echt vandaag, wat kan later?</li>
+      </ul>
+
+      <h3>Sociale prikkels temmen</h3>
+      <ul>
+        <li><strong>Berichten-bundels:</strong> 2 vaste momenten per dag voor chat/mail. Rest van de tijd dicht.</li>
+        <li><strong>Notificaties uit:</strong> jij kiest wanneer je kijkt, niet andersom.</li>
+        <li><strong>Korte antwoorden:</strong> duidelijk, vriendelijk, zonder extra lussen. Minder heen-en-weer spaart energie.</li>
+      </ul>
+
+      <h3>Brandstof vs beloning</h3>
+      <p>Zie eten als gereedschap, niet als beloning. Als je honger voelt, kies eiwit + groente en water. Als je moe bent, wandel 5 minuten en adem lang uit. Als je onrustig bent, schrijf 5 regels op. Koppel je acties aan het doel: beter presteren en rust in je hoofd.</p>
+
+      <h3>Weekstructuur die je volhoudt</h3>
+      <ul>
+        <li><strong>Maandag:</strong> 2 ochtendsprints, 1 middagsprint, 2 korte wandelingen, 3 vaste maaltijden.</li>
+        <li><strong>Dinsdag:</strong> idem + krachttraining (40–60 min).</li>
+        <li><strong>Woensdag:</strong> ochtendsprints, korte sociale taken geclusterd, rustige avond.</li>
+        <li><strong>Donderdag:</strong> idem + krachttraining. Eiwit rijker eten.</li>
+        <li><strong>Vrijdag:</strong> 2 sprints, afsluiten met planning voor volgende week.</li>
+        <li><strong>Zaterdag:</strong> wandeling, huishoudelijk werk, eventueel korte krachttraining of mobiliteit.</li>
+        <li><strong>Zondag:</strong> boodschappen, mealprep, weekplanning, vroeg naar bed.</li>
+      </ul>
+
+      <h3>Veelgemaakte fouten en simpele oplossingen</h3>
+      <ul>
+        <li><strong>Te veel kleine taken:</strong> bundel ze in 1 blok per dag.</li>
+        <li><strong>Te weinig water:</strong> zet een fles op je bureau en vul die 3x per dag.</li>
+        <li><strong>Snoepen bij moeheid:</strong> 5 min lopen + eiwitsnack i.p.v. zoet.</li>
+        <li><strong>Te laat koffie:</strong> houd het vóór 14:00. Slaap wint.</li>
+        <li><strong>Rommelige werkplek:</strong> eindig elke dag met 2 minuten opruimen.</li>
+      </ul>
+
+      <h3>10 regels om dagelijks te herhalen</h3>
+      <ol>
+        <li>Start met water, licht en adem.</li>
+        <li>Eet 2–4 vaste maaltijden, eiwit + groente standaard.</li>
+        <li>Drink 2–3 liter water per dag.</li>
+        <li>Beweeg: 7–10k stappen en 3x per week kracht.</li>
+        <li>Werk in 50-minuten blokken; houd pauzes echt.</li>
+        <li>Telefoon weg, meldingen uit tijdens werk.</li>
+        <li>Korte wandeling bij dip, geen snelle suiker.</li>
+        <li>Plan 's avonds 3 prioriteiten voor morgen.</li>
+        <li>Dim licht na het eten, rond vroeg af.</li>
+        <li>Slaap 7–9 uur. Elke nacht telt.</li>
+      </ol>
+
+      <h3>Afsluiting: eenvoudig is effectief</h3>
+      <p>Energie en focus komen niet uit trucjes. Ze komen uit een paar duidelijke keuzes die je elke dag herhaalt. Begin klein, maak het zichtbaar, en houd het saai-goed. Wat je elke dag herhaalt, word je goed in. Maak het je standaard en je wint, dag na dag.</p>
+    </div>
+
+    <!-- Huiswerk Opdrachten -->
+    <div class="section" id="huiswerk">
+      <h2>📝 Huiswerk Opdrachten</h2>
+      
+      <div class="exercise-box">
+        <h4>Opdracht 1: Ochtendstart Ritueel</h4>
+        <p><strong>Doel:</strong> Implementeer een effectief ochtendstart ritueel voor stabiele energie.</p>
+        <p><strong>Actie:</strong> Voer het 5-elementen ochtendstart ritueel uit gedurende 7 dagen: water (1 groot glas), licht (daglicht binnen 30 min), adem (2-3 min lang uitademen), beweging (5-10 min wandelen/mobiliteit), en eiwitrijke start. Meet elke dag je energieniveau op een schaal van 1-10.</p>
+        <p><strong>Resultaat:</strong> Na 7 dagen heb je een bewezen ochtendritueel dat je energie stabiliseert.</p>
+      </div>
+
+      <div class="exercise-box">
+        <h4>Opdracht 2: Focusblokken Systeem</h4>
+        <p><strong>Doel:</strong> Implementeer het 50-minuten focusblokken systeem voor betere productiviteit.</p>
+        <p><strong>Actie:</strong> Werk 7 dagen volgens het focusblokken systeem: 50 minuten 1 taak, 10 minuten echte pauze. Voor elk blok: kies 1 taak, sluit alle tabs, leg telefoon weg. Tijdens pauze: sta op, drink water, adem, ga naar buiten. Meet elke dag hoeveel blokken je voltooit en hoe gefocust je bent.</p>
+        <p><strong>Resultaat:</strong> Je hebt een bewezen focus systeem dat je productiviteit verhoogt.</p>
+      </div>
+
+      <div class="exercise-box">
+        <h4>Opdracht 3: Energie Stabilisatie</h4>
+        <p><strong>Doel:</strong> Stabiliseer je energie door de dag heen met voeding en beweging.</p>
+        <p><strong>Actie:</strong> Implementeer de energie stabilisatie strategieën 7 dagen: 2-4 vaste maaltijden met eiwit + groente, 2-3 liter water per dag, 7-10k stappen per dag, en bij middagdip: water + frisse lucht + eiwitsnack. Meet elke dag je energieniveau op 4 momenten (ochtend, middag, namiddag, avond).</p>
+        <p><strong>Resultaat:</strong> Je energie blijft stabiel door de dag heen zonder grote dips.</p>
+      </div>
+    </div>
+
+    <!-- Checklists -->
+    <div class="section" id="checklists">
+      <h2>✅ Checklists</h2>
+      
+      <h3>Dagelijkse Energie en Focus Checklist</h3>
+      <div class="checklist">
+        <div class="checklist-item">
+          <input type="checkbox" id="chk-1">
+          <label for="chk-1">Ochtendstart ritueel voltooid (water, licht, adem, beweging, eiwit)</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="chk-2">
+          <label for="chk-2">2-4 vaste maaltijden gegeten met eiwit + groente</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="chk-3">
+          <label for="chk-3">2-3 liter water gedronken</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="chk-4">
+          <label for="chk-4">7-10k stappen gelopen</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="chk-5">
+          <label for="chk-5">3-4 focusblokken van 50 minuten voltooid</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="chk-6">
+          <label for="chk-6">Telefoon weggelegd tijdens focusblokken</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="chk-7">
+          <label for="chk-7">2x korte wandeling gedaan (5-10 min)</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="chk-8">
+          <label for="chk-8">Avondlanding ritueel uitgevoerd</label>
+        </div>
+      </div>
+
+      <h3>Wekelijkse Energie en Focus Checklist</h3>
+      <div class="checklist">
+        <div class="checklist-item">
+          <input type="checkbox" id="chk-9">
+          <label for="chk-9">3x krachttraining voltooid (40-60 min)</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="chk-10">
+          <label for="chk-10">Werkplek georganiseerd en opgeruimd</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="chk-11">
+          <label for="chk-11">Weekplanning gemaakt met 3 prioriteiten per dag</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="chk-12">
+          <label for="chk-12">Sociale prikkels gebundeld (2x per dag checken)</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="chk-13">
+          <label for="chk-13">Cafeïne beperkt tot vóór 14:00</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="chk-14">
+          <label for="chk-14">7-9 uur slaap per nacht</label>
+        </div>
+      </div>
+
+      <h3>Maandelijkse Energie en Focus Checklist</h3>
+      <div class="checklist">
+        <div class="checklist-item">
+          <input type="checkbox" id="chk-15">
+          <label for="chk-15">Energie niveau geëvalueerd en geoptimaliseerd</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="chk-16">
+          <label for="chk-16">Focus systeem geëvalueerd en verbeterd</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="chk-17">
+          <label for="chk-17">Voeding geëvalueerd en aangepast</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="chk-18">
+          <label for="chk-18">Beweging routine geëvalueerd en verbeterd</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="chk-19">
+          <label for="chk-19">Omgeving geoptimaliseerd voor focus</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="chk-20">
+          <label for="chk-20">Doelen voor volgende maand gesteld</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reflectie Vragen -->
+    <div class="section" id="reflectie">
+      <h2>🤔 Reflectie Vragen</h2>
+      
+      <div class="reflection-question">
+        <h4>Ochtendstart en Energie</h4>
+        <p>Welk element uit je ochtendstart ritueel had de grootste impact op je energieniveau en waarom? Welke aanpassing zou je willen maken om je ochtend nog effectiever te maken?</p>
+      </div>
+
+      <div class="reflection-question">
+        <h4>Focusblokken en Productiviteit</h4>
+        <p>Hoeveel focusblokken van 50 minuten lukte het je gemiddeld per dag en waarom denk je dat dit zo was? Welke aanpassing in je focus systeem zou je willen maken om nog productiever te worden?</p>
+      </div>
+
+      <div class="reflection-question">
+        <h4>Energie Stabilisatie en Voeding</h4>
+        <p>Welke voeding of gewoonte had de grootste impact op het stabiliseren van je energie door de dag heen? Welke aanpassing zou je willen maken om je energie nog stabieler te houden?</p>
+      </div>
+    </div>
+
+    <!-- Actieplan -->
+    <div class="section" id="actieplan">
+      <h2>🎯 Actieplan</h2>
+      
+      <div class="action-plan">
+        <h3>5 Stappen om Energie en Focus te Optimaliseren</h3>
+        
+        <div class="action-step">
+          <h4>Stap 1: Ochtendstart Ritueel Implementeren</h4>
+          <p>Implementeer het 5-elementen ochtendstart ritueel elke dag: water (1 groot glas), licht (daglicht binnen 30 min), adem (2-3 min lang uitademen), beweging (5-10 min wandelen/mobiliteit), en eiwitrijke start. Dit zet je lichaam "aan" voor de dag.</p>
+        </div>
+
+        <div class="action-step">
+          <h4>Stap 2: Focusblokken Systeem Opzetten</h4>
+          <p>Werk volgens het focusblokken systeem: 50 minuten 1 taak, 10 minuten echte pauze. Voor elk blok: kies 1 taak, sluit alle tabs, leg telefoon weg. Tijdens pauze: sta op, drink water, adem, ga naar buiten. Herhaal 3-4 keer per dag.</p>
+        </div>
+
+        <div class="action-step">
+          <h4>Stap 3: Energie Stabilisatie</h4>
+          <p>Stabiliseer je energie door de dag heen: 2-4 vaste maaltijden met eiwit + groente, 2-3 liter water per dag, 7-10k stappen per dag, en bij middagdip: water + frisse lucht + eiwitsnack.</p>
+        </div>
+
+        <div class="action-step">
+          <h4>Stap 4: Omgeving Optimaliseren</h4>
+          <p>Richt je omgeving in voor focus: leeg bureau, gesloten tabs, koptelefoon, telefoon weg, vaste werkplek. Bundel sociale prikkels (2x per dag checken) en zet notificaties uit.</p>
+        </div>
+
+        <div class="action-step">
+          <h4>Stap 5: Continue Monitoring en Verbetering</h4>
+          <p>Monitor je energie en focus dagelijks en evalueer wekelijks wat werkt en wat niet. Pas je aanpak aan en voeg nieuwe gewoontes toe. Focus op consistentie en lange termijn resultaten.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <p>Dit ebook is onderdeel van de <span class="ttm-brand">Top Tier Men</span> Academy</p>
+      <p>Module 07: Voeding & Gezondheid | Les 04: Energie en Focus</p>
+      <p>© 2025 Top Tier Men. Alle rechten voorbehouden.</p>
+    </div>
+  </div>
+
+  <script>
+    // Checklist persistentie via localStorage
+    document.addEventListener('DOMContentLoaded', function() {
+      const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+      checkboxes.forEach(cb => {
+        const saved = localStorage.getItem(cb.id);
+        if (saved === 'true') cb.checked = true;
+        cb.addEventListener('change', function(){ localStorage.setItem(this.id, this.checked); });
+      });
+    });
+  </script>
+</body>
+</html>

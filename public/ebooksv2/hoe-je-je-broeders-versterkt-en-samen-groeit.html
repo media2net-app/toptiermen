@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hoe je je Broeders Versterkt en Samen Groeit - Ebook | Top Tier Men</title>
+  <meta name="description" content="V2 ebook voor Hoe je je Broeders Versterkt en Samen Groeit binnen Top Tier Men Academy." />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.6; color: #ffffff;
+      background: linear-gradient(135deg, #0A0F0A 0%, #181F17 50%, #232D1A 100%);
+      min-height: 100vh;
+    }
+    .container { max-width: 800px; margin: 0 auto; padding: 2rem; }
+    .header {
+      text-align: center; margin-bottom: 3rem; padding: 2rem;
+      background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      border-radius: 20px; border: 1px solid #3A4D23;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    .logo { margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; }
+    h1 {
+      font-size: 2.5rem; font-weight: 800;
+      background: linear-gradient(135deg, #ffffff 0%, #8BAE5A 50%, #B6C948 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      margin-bottom: .5rem;
+    }
+    .subtitle { color: #8BAE5A; font-size: 1.1rem; font-weight: 500; }
+    .module-info {
+      background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1rem; border-radius: 10px; margin: 1rem 0; border-left: 4px solid #8BAE5A;
+    }
+    .section { background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      margin-bottom: 2rem; padding: 2rem; border-radius: 15px; border: 1px solid #3A4D23; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    .section h2 { color: #B6C948; font-size: 1.8rem; font-weight: 700; margin-bottom: 1.5rem; display: flex; align-items: center; gap: .5rem; }
+    .section h3 { color: #8BAE5A; font-size: 1.3rem; font-weight: 600; margin: 1.5rem 0 1rem; }
+    .section p { margin-bottom: 1rem; color: #e0e0e0; }
+    .section ul, .section ol { margin: 1rem 0; padding-left: 2rem; }
+    .section li { margin-bottom: .5rem; color: #e0e0e0; }
+    .highlight-box { background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1.5rem; border-radius: 10px; border-left: 4px solid #B6C948; margin: 1.5rem 0;
+    }
+    .exercise-box { background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%);
+      padding: 1.5rem; border-radius: 10px; border: 1px solid #8BAE5A; margin: 1rem 0;
+    }
+    .exercise-box h4 { color: #B6C948; font-size: 1.1rem; margin-bottom: 1rem; }
+    .checklist { background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      padding: 1.5rem; border-radius: 10px; border: 1px solid #3A4D23; margin: 1rem 0;
+    }
+    .checklist-item { display: flex; align-items: center; margin-bottom: .8rem; padding: .5rem; background: rgba(58,77,35,.3); border-radius: 8px; }
+    .checklist-item input[type="checkbox"] { margin-right: 1rem; width: 18px; height: 18px; accent-color: #8BAE5A; }
+    .reflection-question { background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1.5rem; border-radius: 10px; border-left: 4px solid #B6C948; margin: 1rem 0;
+    }
+    .reflection-question h4 { color: #B6C948; margin-bottom: 1rem; }
+    .action-plan { background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%);
+      padding: 2rem; border-radius: 15px; border: 2px solid #8BAE5A; margin: 2rem 0;
+    }
+    .action-step { background: rgba(139,174,90,.1); padding: 1rem; border-radius: 8px; margin: 1rem 0; border-left: 3px solid #8BAE5A; }
+    .footer { text-align: center; margin-top: 3rem; padding: 2rem; background: linear-gradient(135deg, #181F17 0%, #232D1A 100%); border-radius: 15px; border: 1px solid #3A4D23; }
+    .footer p { color: #8BAE5A; margin-bottom: 1rem; }
+    .ttm-brand { color: #B6C948; font-weight: 700; }
+    .sticky-back-btn { position: fixed; top: 50%; right: 20px; transform: translateY(-50%);
+      z-index: 1000; background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%);
+      color: #fff; border: none; border-radius: 50px; padding: 15px 20px; font-size: 14px; font-weight: 600; cursor: pointer;
+      box-shadow: 0 8px 25px rgba(139,174,90,.3); transition: all .3s ease; display: flex; align-items: center; gap: 8px; text-decoration: none; min-width: 120px; justify-content: center;
+    }
+    .sticky-back-btn:hover { background: linear-gradient(135deg, #B6C948 0%, #8BAE5A 100%); transform: translateY(-50%) scale(1.05); box-shadow: 0 12px 35px rgba(139,174,90,.4); }
+    .sticky-back-btn:active { transform: translateY(-50%) scale(.95); }
+    .sticky-back-btn svg { width: 16px; height: 16px; fill: currentColor; }
+    @media (max-width: 768px) {
+      .container { padding: 1rem; }
+      h1 { font-size: 2rem; }
+      .section { padding: 1.5rem; }
+      .sticky-back-btn { right: 10px; padding: 12px 16px; font-size: 12px; min-width: 100px; }
+    }
+  </style>
+</head>
+<body>
+  <a href="/dashboard/academy/6102f6c8-7f38-4501-ab94-e9a68622e46f/0a4fa127-88fa-402c-92c2-50d6814aabf3" class="sticky-back-btn" title="Terug naar les">
+    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    Terug
+  </a>
+
+  <div class="container">
+    <div class="header">
+      <div class="logo">
+        <img src="/logo_white-full.svg" alt="Top Tier Men Logo" style="height:40px;width:auto" />
+      </div>
+      <h1>Hoe je je Broeders Versterkt en Samen Groeit</h1>
+      <p class="subtitle">Broederschap in actie</p>
+      <div class="module-info">
+        <strong>Module 06: Brotherhood</strong> | <strong>Les 05: Hoe je je Broeders Versterkt en Samen Groeit</strong>
+      </div>
+    </div>
+
+    <div class="section" id="samenvatting">
+      <h2>📚 Uitgebreide Samenvatting van de Les</h2>
+<div class="highlight-box"><h4>🎯 Les Overzicht</h4><p>Deze les gaat over broederschap in actie: hoe je je broeders versterkt en samen groeit. Geen lege woorden, maar dagelijkse daden: elkaar scherp zetten, verantwoordelijkheid delen, samen discomfort opzoeken en vooruitgang meten. Een sterke man bouwt niet alleen zichzelf, maar tilt ook zijn kring op.</p></div><h3>Waarom samen sterker is</h3><p>Alleen werken kan snel zijn, samen werken kom je verder. Met broeders die bouwen krijg je accountability, snelheid, veerkracht en een hogere standaard. Je neemt automatisch gedrag en taal over van je kring.</p><ul><li><strong>Accountability:</strong> je levert op omdat iemand meekijkt en je woord telt.</li><li><strong>Snelheid:</strong> je leert van elkaars fouten en verkort je leercurve.</li><li><strong>Veerkracht:</strong> in tegenslag sta je niet alleen, dat geeft rust en durf.</li><li><strong>Standaard:</strong> je pakt de norm over van je kring; maak die norm hoog.</li></ul><h3>De 6 bouwstenen van groeibroederschap</h3><ul><li><strong>1) Waarheid:</strong> kort, eerlijk, concreet; geen ego-spelletjes.</li><li><strong>2) Ritme:</strong> vaste calls en rituelen, niet "als het uitkomt".</li><li><strong>3) Actie:</strong> elke week resultaten, geen praat zonder bewijs.</li><li><strong>4) Discomfort:</strong> groei zit in frictie; plan het.</li><li><strong>5) Loyaliteit:</strong> publiek krediet, privé feedback; geen roddel.</li><li><strong>6) Meten:</strong> gezondheid, werk en karakter met simpele cijfers.</li></ul><h3>Wekelijks ritueel (60 minuten)</h3><ol><li><strong>Cijfers (10):</strong> wat heb je geleverd? Ja/nee, geen verhalen.</li><li><strong>Obstakel (15):</strong> 1 grootste blokkade per man, feitelijk.</li><li><strong>Brainstorm (20):</strong> 2–3 voorstellen; kies 1 concrete stap.</li><li><strong>Commit (10):</strong> 3 acties met datum/tijd; klein maar echt.</li><li><strong>Slot (5):</strong> samenvatting + wie wie helpt deze week.</li></ol><h3>Dagelijkse micro-rituelen</h3><ul><li><strong>"Done"-ping:</strong> stuur 1 bericht zodra je belangrijkste taak klaar is (bewijs > woorden).</li><li><strong>2-min check:</strong> vraag: "Wat blokkeert? Hoe help ik?"</li><li><strong>Mini-win delen:</strong> korte foto/tekst van training, studie, sales, discipline.</li></ul><h3>Feedback die bouwt (model)</h3><ol><li>Feit: wat zag ik? (concreet, zonder labels)</li><li>Effect: wat doet het? (op jou/het team/doel)</li><li>Voorstel: wat ga jij anders doen? (actie + datum)</li></ol><p>Kort, eerlijk, respectvol. Gedrag aanvallen, niet de persoon. Feedback is een dienst.</p><h3>Samen discomfort opzoeken</h3><ul><li>Fysiek: koude training, ruck/hike, hardlopen, zwaardere set.</li><li>Mentaal: sales-gesprekken, presentatie, moeilijke call, sollicitatie.</li><li>Discipline: 30 dagen vroeg op, 30 dagen geen alcohol, 30 dagen lezen.</li></ul><p>Plan 1 discomfort per week. Na afloop: wat leerde je, wat is de volgende stap?</p><h3>Rollen binnen de groep</h3><ul><li><strong>Initiator:</strong> plant, herinnert, zet de call op.</li><li><strong>Timekeeper:</strong> bewaakt tijden en structuur.</li><li><strong>Notulist:</strong> noteert commitments; deelt na afloop.</li><li><strong>Coach van de week:</strong> stelt 3 scherpe vragen, dwingt helderheid.</li></ul><h3>Regels die ruis weghalen</h3><ul><li>Op tijd of vooraf afmelden (korte reden + nieuw voorstel).</li><li>Geen telefoon tijdens call; camera aan.</li><li>Feiten boven verhalen; cijfers waar mogelijk.</li><li>Geen roddel. Issues gaan naar de betrokkene.</li></ul><h3>Wat meten we?</h3><ul><li>Gezondheid: slaapuren, stappen, trainingen, gewicht (wekelijks).</li><li>Werk/biz: sales-calls, omzet, pipeline, projecten afgerond.</li><li>Karakter: beloftes nagekomen, grenzen gesteld, moeilijke gesprekken gevoerd.</li></ul><h3>Veelgemaakte fouten (en fixes)</h3><ul><li><strong>Te lang praten:</strong> timekeeper onderbreekt; vervolg buiten de call.</li><li><strong>Vage acties:</strong> elke actie heeft datum/tijd of is geen actie.</li><li><strong>Geen opvolging:</strong> notulist stuurt direct na de call; iedereen bevestigt.</li><li><strong>Geen discomfort:</strong> plan 1 lastig ding per week, verplicht.</li></ul><h3>Weekopdracht</h3><ol><li>Vorm een groep van 3–5 mannen met dezelfde richting.</li><li>Plan 4 wekelijkse calls (zelfde dag/tijd) en zet de agenda vast.</li><li>Definieer 3 meetpunten per man (gezondheid/werk/karakter).</li><li>Plan 1 gezamenlijk discomfort per maand.</li></ol><h3>Accountability systemen</h3><ul><li><strong>Weekelijkse check-in:</strong> vaste dag/tijd, geen excuses.</li><li><strong>Gedeelde doelen:</strong> maak doelen zichtbaar voor de groep.</li><li><strong>Consequenties:</strong> kleine "straf" als je je commitment niet nakomt.</li><li><strong>Viering van wins:</strong> erken en vier elkaars successen.</li></ul><h3>Communicatie die werkt</h3><ul><li><strong>Direct en eerlijk:</strong> geen suikerlaagje, maar wel respectvol.</li><li><strong>Concreet:</strong> specifieke voorbeelden, geen vage feedback.</li><li><strong>Actiegericht:</strong> elke feedback eindigt met concrete volgende stap.</li><li><strong>Timing:</strong> feedback direct na observatie, niet weken later.</li></ul><h3>Groepsdynamiek optimaliseren</h3><ul><li><strong>Groepsgrootte:</strong> 3-5 mannen is optimaal voor diepgang.</li><li><strong>Gelijk niveau:</strong> vergelijkbare ambities en uitdagingen.</li><li><strong>Diversiteit:</strong> verschillende achtergronden brengen nieuwe inzichten.</li><li><strong>Commitment:</strong> iedereen moet 100% inzetten, geen half werk.</li></ul><h3>Conflicten oplossen</h3><ul><li><strong>Direct aanpakken:</strong> niet laten broeien, direct bespreken.</li><li><strong>Feitelijk blijven:</strong> focus op gedrag, niet op karakter.</li><li><strong>Zoek oplossing:</strong> niet wie heeft gelijk, maar hoe lossen we het op.</li><li><strong>Extern perspectief:</strong> soms helpt een neutrale derde partij.</li></ul><h3>Motivatie en energie behouden</h3><ul><li><strong>Variatie:</strong> wissel activiteiten en gespreksonderwerpen af.</li><li><strong>Nieuwe uitdagingen:</strong> voeg regelmatig nieuwe doelen toe.</li><li><strong>Succes vieren:</strong> erken vooruitgang, hoe klein ook.</li><li><strong>Persoonlijke groei:</strong> focus op ontwikkeling van elke individuele man.</li></ul><h3>Langetermijn denken</h3><p>Broederschap is geen sprint, het is een marathon. Je bouwt aan relaties die jaren meegaan. Focus op consistentie, niet op perfectie. 80% consistent is beter dan 100% onregelmatig. Elke week telt, elke call telt, elke commitment telt.</p><h3>Veelgestelde vragen</h3><ul><li><strong>Wat als iemand niet meedoet?</strong> Eerlijke feedback geven, consequenties stellen, zo nodig de groep aanpassen.</li><li><strong>Hoe vaak moeten we elkaar zien?</strong> Minimaal 1x per week virtueel, 1x per maand fysiek.</li><li><strong>Wat als we verschillende doelen hebben?</strong> Focus op proces en gewoontes, niet alleen op specifieke uitkomsten.</li><li><strong>Hoe ga je om met verschillende niveaus?</strong> Iedereen kan iets leren van anderen, ongeacht niveau.</li><li><strong>Wat als het niet klikt?</strong> Geef het tijd, maar wees eerlijk als het niet werkt.</li></ul><h3>Concrete stappen voor vandaag</h3><ol><li>Identificeer 3-5 mannen met vergelijkbare ambities</li><li>Plan eerste gesprek om doelen en verwachtingen af te stemmen</li><li>Stel basisregels op en plan eerste wekelijkse call</li><li>Definieer 3 meetpunten per persoon</li><li>Plan eerste gezamenlijke discomfort uitdaging</li></ol><div class="highlight-box"><h4>Samenvatting in 10 regels</h4><ol><li>Waarheid, ritme, actie, discomfort, loyaliteit.</li><li>Wekelijks 60-min protocol; dagelijks mini-rituelen.</li><li>Feiten en cijfers boven verhalen.</li><li>Feedback is een dienst; gedrag, geen persoon.</li><li>Discomfort = groei; plan het.</li><li>Rollen verdelen; structuur wint.</li><li>Regels: op tijd, camera aan, geen roddel.</li><li>Meet gezondheid, werk en karakter.</li><li>Herhaal 4 weken; evalueer en verscherp.</li><li>Bouw jezelf door je broeders te bouwen.</li></ol></div><h3>Afsluiting</h3><p>Broederschap is geen praatgroep. Het is een werkplaats waar mannen groter worden door elkaar eerlijk te houden, te helpen en te duwen. Met simpele rituelen en duidelijke regels groeit iedereen sneller. Bouw je broeders, en je bouwt jezelf.</p>
+    </div>
+
+    <div class="section" id="huiswerk">
+      <h2>📝 Huiswerk Opdrachten</h2>
+      
+      <div class="exercise-box">
+        <h4>Opdracht 1: Broederschap Groep Vormen</h4>
+        <p><strong>Doel:</strong> Een groep van 3-5 mannen vormen met vergelijkbare ambities en doelen.</p>
+        <p><strong>Actie:</strong> Identificeer 3-5 mannen in je netwerk met vergelijkbare doelen. Plan een eerste gesprek om doelen, verwachtingen en commitment af te stemmen. Stel basisregels op en plan de eerste wekelijkse call.</p>
+      </div>
+
+      <div class="exercise-box">
+        <h4>Opdracht 2: Wekelijkse Ritueel Implementeren</h4>
+        <p><strong>Doel:</strong> Het 60-minuten wekelijkse ritueel implementeren en 4 weken volhouden.</p>
+        <p><strong>Actie:</strong> Plan 4 wekelijkse calls op vaste dag/tijd. Verdeel rollen (initiator, timekeeper, notulist, coach). Voer het ritueel uit: cijfers, obstakels, brainstorm, commit, slot. Houd 4 weken vol en evalueer.</p>
+      </div>
+
+      <div class="exercise-box">
+        <h4>Opdracht 3: Meetpunten en Discomfort Uitdaging</h4>
+        <p><strong>Doel:</strong> Concrete meetpunten definiëren en gezamenlijke discomfort uitdaging plannen.</p>
+        <p><strong>Actie:</strong> Definieer 3 meetpunten per persoon (gezondheid, werk, karakter). Plan 1 gezamenlijke discomfort uitdaging per maand. Houd voortgang bij en vier successen. Evalueer na 1 maand wat werkt.</p>
+      </div>
+    </div>
+
+    <div class="section" id="checklists">
+      <h2>✅ Checklists</h2>
+      
+      <h3>Weekchecklist "Broederschap in Actie"</h3>
+      <div class="checklist">
+        <div class="checklist-item">
+          <input type="checkbox" id="broeder-1">
+          <label for="broeder-1">Broederschap groep van 3-5 mannen gevormd</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="broeder-2">
+          <label for="broeder-2">Eerste gesprek gevoerd over doelen en verwachtingen</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="broeder-3">
+          <label for="broeder-3">Basisregels opgesteld en 4 wekelijkse calls gepland</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="broeder-4">
+          <label for="broeder-4">Rollen verdeeld (initiator, timekeeper, notulist, coach)</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="broeder-5">
+          <label for="broeder-5">60-minuten wekelijkse ritueel 4 weken uitgevoerd</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="broeder-6">
+          <label for="broeder-6">3 meetpunten per persoon gedefinieerd en bijgehouden</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="section" id="reflectie">
+      <h2>🤔 Reflectie Vragen</h2>
+      
+      <div class="reflection-question">
+        <h4>Huidige Broederschap</h4>
+        <p>Hoe zou je je huidige vriendschappen en mannelijke relaties beoordelen? Welke mannen in je leven helpen je groeien en welke houden je tegen? Wat mis je in je huidige sociale kring?</p>
+      </div>
+
+      <div class="reflection-question">
+        <h4>Accountability en Feedback</h4>
+        <p>Hoe goed ben je in het geven en ontvangen van eerlijke feedback? Welke rol speel je meestal in groepen: leider, volger, of neutraal? Hoe kun je beter worden in het helpen van anderen groeien?</p>
+      </div>
+
+      <div class="reflection-question">
+        <h4>Commitment en Discipline</h4>
+        <p>Hoe goed ben je in het nakomen van je beloftes aan anderen? Wat weerhoudt je ervan om een echte broederschap te vormen? Wat is je eerste stap om vandaag te beginnen met het bouwen van sterke mannelijke relaties?</p>
+      </div>
+    </div>
+
+    <div class="section" id="actieplan">
+      <h2>🎯 Actieplan</h2>
+      
+      <div class="action-plan">
+        <div class="action-step">
+          <strong>Stap 1:</strong> Vorm een broederschap groep. Identificeer 3-5 mannen met vergelijkbare ambities. Plan een eerste gesprek om doelen, verwachtingen en commitment af te stemmen. Stel basisregels op.
+        </div>
+        
+        <div class="action-step">
+          <strong>Stap 2:</strong> Implementeer het wekelijkse ritueel. Plan 4 wekelijkse calls op vaste dag/tijd. Verdeel rollen (initiator, timekeeper, notulist, coach). Voer het 60-minuten ritueel uit.
+        </div>
+        
+        <div class="action-step">
+          <strong>Stap 3:</strong> Definieer meetpunten en discomfort uitdagingen. Stel 3 meetpunten per persoon op (gezondheid, werk, karakter). Plan 1 gezamenlijke discomfort uitdaging per maand.
+        </div>
+        
+        <div class="action-step">
+          <strong>Stap 4:</strong> Houd 4 weken vol en evalueer. Wat werkte? Wat niet? Pas het systeem aan. Vier successen en erken vooruitgang. Bouw langzaam op naar meer intensiteit.
+        </div>
+        
+        <div class="action-step">
+          <strong>Stap 5:</strong> Evalueer na 1 maand. Wat heeft iedereen geleerd? Hoe kunnen jullie als groep groeien? Pas het systeem aan en plan de volgende maand. Broederschap is een marathon, geen sprint.
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p>Dit ebook is onderdeel van de <span class="ttm-brand">Top Tier Men</span> Academy</p>
+      <p>Module 06: Brotherhood | Les 05: Hoe je je Broeders Versterkt en Samen Groeit</p>
+      <p>© 2025 Top Tier Men. Alle rechten voorbehouden.</p>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+      checkboxes.forEach(cb => {
+        const saved = localStorage.getItem(cb.id);
+        if (saved === 'true') cb.checked = true;
+        cb.addEventListener('change', function(){ localStorage.setItem(this.id, this.checked); });
+      });
+    });
+  </script>
+</body>
+</html>

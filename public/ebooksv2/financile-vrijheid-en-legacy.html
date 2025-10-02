@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Financiële Vrijheid en Legacy - Ebook | Top Tier Men</title>
+  <meta name="description" content="V2 ebook voor Financiële Vrijheid en Legacy binnen Top Tier Men Academy." />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.6; color: #ffffff;
+      background: linear-gradient(135deg, #0A0F0A 0%, #181F17 50%, #232D1A 100%);
+      min-height: 100vh;
+    }
+    .container { max-width: 800px; margin: 0 auto; padding: 2rem; }
+    .header {
+      text-align: center; margin-bottom: 3rem; padding: 2rem;
+      background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      border-radius: 20px; border: 1px solid #3A4D23;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    .logo { margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; }
+    h1 {
+      font-size: 2.5rem; font-weight: 800;
+      background: linear-gradient(135deg, #ffffff 0%, #8BAE5A 50%, #B6C948 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      margin-bottom: .5rem;
+    }
+    .subtitle { color: #8BAE5A; font-size: 1.1rem; font-weight: 500; }
+    .module-info {
+      background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1rem; border-radius: 10px; margin: 1rem 0; border-left: 4px solid #8BAE5A;
+    }
+    .section { background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      margin-bottom: 2rem; padding: 2rem; border-radius: 15px; border: 1px solid #3A4D23; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    .section h2 { color: #B6C948; font-size: 1.8rem; font-weight: 700; margin-bottom: 1.5rem; display: flex; align-items: center; gap: .5rem; }
+    .section h3 { color: #8BAE5A; font-size: 1.3rem; font-weight: 600; margin: 1.5rem 0 1rem; }
+    .section p { margin-bottom: 1rem; color: #e0e0e0; }
+    .section ul, .section ol { margin: 1rem 0; padding-left: 2rem; }
+    .section li { margin-bottom: .5rem; color: #e0e0e0; }
+    .highlight-box { background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1.5rem; border-radius: 10px; border-left: 4px solid #B6C948; margin: 1.5rem 0;
+    }
+    .exercise-box { background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%);
+      padding: 1.5rem; border-radius: 10px; border: 1px solid #8BAE5A; margin: 1rem 0;
+    }
+    .exercise-box h4 { color: #B6C948; font-size: 1.1rem; margin-bottom: 1rem; }
+    .checklist { background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      padding: 1.5rem; border-radius: 10px; border: 1px solid #3A4D23; margin: 1rem 0;
+    }
+    .checklist-item { display: flex; align-items: center; margin-bottom: .8rem; padding: .5rem; background: rgba(58,77,35,.3); border-radius: 8px; }
+    .checklist-item input[type="checkbox"] { margin-right: 1rem; width: 18px; height: 18px; accent-color: #8BAE5A; }
+    .reflection-question { background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1.5rem; border-radius: 10px; border-left: 4px solid #B6C948; margin: 1rem 0;
+    }
+    .reflection-question h4 { color: #B6C948; margin-bottom: 1rem; }
+    .action-plan { background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%);
+      padding: 2rem; border-radius: 15px; border: 2px solid #8BAE5A; margin: 2rem 0;
+    }
+    .action-step { background: rgba(139,174,90,.1); padding: 1rem; border-radius: 8px; margin: 1rem 0; border-left: 3px solid #8BAE5A; }
+    .footer { text-align: center; margin-top: 3rem; padding: 2rem; background: linear-gradient(135deg, #181F17 0%, #232D1A 100%); border-radius: 15px; border: 1px solid #3A4D23; }
+    .footer p { color: #8BAE5A; margin-bottom: 1rem; }
+    .ttm-brand { color: #B6C948; font-weight: 700; }
+    .sticky-back-btn { position: fixed; top: 50%; right: 20px; transform: translateY(-50%);
+      z-index: 1000; background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%);
+      color: #fff; border: none; border-radius: 50px; padding: 15px 20px; font-size: 14px; font-weight: 600; cursor: pointer;
+      box-shadow: 0 8px 25px rgba(139,174,90,.3); transition: all .3s ease; display: flex; align-items: center; gap: 8px; text-decoration: none; min-width: 120px; justify-content: center;
+    }
+    .sticky-back-btn:hover { background: linear-gradient(135deg, #B6C948 0%, #8BAE5A 100%); transform: translateY(-50%) scale(1.05); box-shadow: 0 12px 35px rgba(139,174,90,.4); }
+    .sticky-back-btn:active { transform: translateY(-50%) scale(.95); }
+    .sticky-back-btn svg { width: 16px; height: 16px; fill: currentColor; }
+    @media (max-width: 768px) {
+      .container { padding: 1rem; }
+      h1 { font-size: 2rem; }
+      .section { padding: 1.5rem; }
+      .sticky-back-btn { right: 10px; padding: 12px 16px; font-size: 12px; min-width: 100px; }
+    }
+  </style>
+</head>
+<body>
+  <a href="/dashboard/academy/309b7450-3c77-4aa5-bc14-f5514cafd886/be4630d9-e366-4388-88cf-c71d9bf69d0a" class="sticky-back-btn" title="Terug naar les">
+    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    Terug
+  </a>
+
+  <div class="container">
+    <div class="header">
+      <div class="logo">
+        <img src="/logo_white-full.svg" alt="Top Tier Men Logo" style="height:40px;width:auto" />
+      </div>
+      <h1>Financiële Vrijheid en Legacy</h1>
+      <p class="subtitle"></p>
+      <div class="module-info">
+        <strong>Module 05: Business and Finance</strong> | <strong>Les 05: Financiële Vrijheid en Legacy</strong>
+      </div>
+    </div>
+
+    <!-- Financiële Disclaimer -->
+    <div class="highlight-box" style="background: linear-gradient(135deg, #ce6629 0%, #ffbe43 100%); border-left: 4px solid #FFD700; margin: 1.5rem 0;">
+      <h4 style="color: #fff; font-weight: bold; text-align: left;">⚠️ BELANGRIJKE FINANCIËLE WAARSCHUWING</h4>
+      <p style="color: #fff; font-weight: bold; text-align: left;">
+        De informatie in deze les is uitsluitend voor educatieve doeleinden en vormt geen financieel advies. 
+        Raadpleeg altijd een gekwalificeerde financieel adviseur voordat je beslissingen neemt over je financiën, investeringen of geld. 
+        Alle investeringen brengen risico's met zich mee en kunnen leiden tot verliezen. 
+        Top Tier Men is niet verantwoordelijk voor eventuele financiële gevolgen van het volgen van de informatie in deze les zonder professioneel advies.
+      </p>
+    </div>
+
+    <div class="section" id="samenvatting">
+      <h2>📚 Uitgebreide Samenvatting van de Les</h2>
+<div class="highlight-box"><h4>🎯 Doel van deze les</h4><p>Je bouwt een plan naar financiële vrijheid en creëert een legacy die verder gaat dan jezelf. Vrijheid = keuzevrijheid: werken omdat je wilt, niet omdat je moet. Legacy = structurele waarde die blijft: voor je familie, je community en je missie. We maken het concreet met duidelijke fases, meetpunten, rituelen en afspraken.</p></div><h3>Definities (simpel en meetbaar)</h3><ul><li><strong>Financiële vrijheid:</strong> je (netto) passieve/semipassieve inkomsten >= je maandlasten + leefstijl.</li><li><strong>Legacy:</strong> systemen, waarden, kapitaal en kennis die blijven werken zonder jouw dag-tot-dag aanwezigheid.</li></ul><h3>Fase 1 — Stabiliteit (0–12 maanden)</h3><ul><li>Buffer 3–6 maanden, schulden met hoge rente afbouwen.</li><li>Grip op uitgaven (potjes, automatiseren, rituelen).</li><li>Investeren starten met kernportefeuille + automatische inleg.</li></ul><h3>Fase 2 — Groei (12–36 maanden)</h3><ul><li>Eigen verdienmodellen uitbouwen: service/productized/consulting/digitale producten.</li><li>MRR/ARR opbouwen (retainers, abonnementen, licenties).</li><li>Herinvesteren in vaardigheden, systemen, distributie.</li></ul><h3>Fase 3 — Vrijheid (36–72 maanden)</h3><ul><li>Maandelijkse vaste inkomsten (dividend/rente/huur/licenties/retainers) >= maandlasten.</li><li>Werk versimpelen: jij werkt aan visie, leiderschap, hoge-leverage acties.</li><li>Risico spreiden: meerdere inkomstenbronnen, reserves en verzekeringen op orde.</li></ul><h3>Fase 4 — Legacy (parallel vanaf vandaag)</h3><ul><li>Waarden en principes expliciet maken (documenteren en voorleven).</li><li>Familieprotocollen: geld, gezondheid, relaties, leren, doneren.</li><li>Structuren: holdings, stichtingen, fondsen, testament, volmachten.</li></ul><h3>Kernpijlers (4×)</h3><ul><li><strong>1) Mens:</strong> gezondheid, karakter, discipline, relaties.</li><li><strong>2) Geld:</strong> cashflow, buffer, investeren, risico-management.</li><li><strong>3) Werk:</strong> waardecreatie, systemen, leverage, team.</li><li><strong>4) Waarde-overdracht:</strong> opvoeding, mentorship, documentatie, filantropie.</li></ul><h3>Cashflowpiramide</h3><ul><li>Onder: salaris/ondernemersinkomen.</li><li>Midden: MRR (retainers/abonnementen/licenties).</li><li>Boven: semipassief (dividend/huur/rente/royalties).</li></ul><p>Doel: steeds grotere stabiele laag bovenin, zodat je onderin minder móet doen.</p><h3>Jaarplanning Vrijheid</h3><ul><li><strong>Q1:</strong> kosten verlagen 5–10%, inleg +2–5%-punt, MRR +20% target.</li><li><strong>Q2:</strong> één nieuw aanbod testen, distributie verdubbelen, rebalancen.</li><li><strong>Q3:</strong> team/automations bouwen, SOP's schrijven, belastingen optimaliseren.</li><li><strong>Q4:</strong> audit: meetpunten, risico's, juridische documenten, filantropie-plan.</li></ul><h3>Meetpunten (maand/kwartaal)</h3><ul><li>Vrijheidsratio = passieve inkomsten / lastencategorieën.</li><li>MRR/ARR en churn.</li><li>Inleg % en portfolio-kosten.</li><li>Buffer-maanden en schuldsaldo (indien).</li><li>Tijd in high-leverage activiteiten (uren/maand).</li></ul><h3>Freedom number (rekenkaart)</h3><ol><li>Maandlasten totaal (incl. levensstijl): €X.</li><li>Doel passieve inkomsten/maand: ≥ €X.</li><li>Route: MRR + dividend/rente/huur/licenties. Bouw bronnen stapsgewijs.</li></ol><h3>Risicomanagement</h3><ul><li>Emergency fund, verzekeringen (arbeidsongeschiktheid/beroeps/aansprakelijkheid) indien passend.</li><li>Diversificatie over assets/sectoren/regio's.</li><li>Contracten en IP vastleggen. Escrow/aanbetalingen.</li></ul><h3>Structuur en recht (NL – globaal)</h3><ul><li>Eenmanszaak/VOF → BV voor risico-afscherming en fiscale planning.</li><li>Holding + werk-BV structuur bij groei/risico's/participaties.</li><li>Testament, levenstestament (volmacht), huwelijkse voorwaarden/partnerschapsovereenkomst.</li></ul><h3>Legacy: 4 domeinen</h3><ul><li><strong>Kapitaal:</strong> geld en assets, maar ook de structuur eromheen.</li><li><strong>Karakter:</strong> waarden, normen, gedragscode – opgeschreven en voorgeleefd.</li><li><strong>Kennis:</strong> playbooks, fouten, lessen, netwerk – toegankelijk gemaakt.</li><li><strong>Community:</strong> bijdragen aan iets dat groter is dan jij.</li></ul><h3>Familieprotocollen (praktisch)</h3><ul><li>Maandelijkse family finance meeting (30 min): uitgaven, spaardoelen, investeringen, donaties.</li><li>Jaarlijkse skill-week: kinderen/familie leren 1 vaardigheid (geld, gezondheid, service).</li><li>Donatiebeleid: percentage winst of bedrag/maand, met impactrapportje.</li></ul><h3>Doneren met impact</h3><ul><li>Kies 1–2 thema's die je echt raken.</li><li>Werk met vaste percentages en periodieke evaluatie (impact/meetpunten).</li><li>Overweeg een stichting/fonds voor continuïteit en governance.</li></ul><h3>Systemen die blijven werken</h3><ul><li>SOP's en playbooks (sales, delivery, finance, risico, governance).</li><li>Document management (mappenstructuur, toegangsrechten, back-ups).</li><li>Rollenschema: wie doet wat als jij 3 maanden weg bent?</li></ul><h3>Team en overdraagbaarheid</h3><ul><li>Huur uit wat niet jouw kern is. Documenteer voordat je overdraagt.</li><li>Gebruik checklists en dashboards voor kwaliteitsbewaking.</li><li>Contracten met duidelijke meetpunten en exit-voorwaarden.</li></ul><h3>Rituelen (cadans)</h3><ul><li><strong>Wekelijks:</strong> 1 u Vrijheidsblok (cashflow + waardecreatie), 1 u Legacyblok (systeem/overdracht).</li><li><strong>Maandelijks:</strong> meetpunten-review, portfolio-check, MRR/ARR update, risico-audit mini.</li><li><strong>Kwartaal:</strong> strategie-dag, juridische/fiscale check, document-update.</li></ul><h3>Veelgemaakte fouten en fixes</h3><ul><li><strong>Vrijheid verwarren met niets doen</strong> → vrijheid is optie-waarde; je blijft creëren en bijdragen.</li><li><strong>Zonder plan beleggen</strong> → maak een IPS (Investment Policy Statement) en houd je eraan.</li><li><strong>Legacy uitstellen</strong> → begin klein: 1 document per maand, 1 waarde die je bewust overdraagt.</li><li><strong>Geen governance</strong> → leg besluitvorming vast, maak escalatiepaden.</li></ul><h3>Investment Policy Statement (IPS) – sjabloon</h3><ul><li>Doel: vrijheid in X jaar; doelbedrag €Y; maandinleg €Z.</li><li>Asset-allocatie: aandelen/obligaties/alternatieven, bandbreedtes.</li><li>Rebalancing: 2× per jaar, drempel 5–10%-punt.</li><li>Transactieregels: alleen op vaste dagen; geen impuls.</li></ul><h3>Checklist vrijheid</h3><ul><li>Freedom number berekend</li><li>MRR-doel en plan opgesteld</li><li>Portfolio en IPS vastgelegd</li><li>Buffer en verzekeringen op orde</li><li>Legacy-documenten begonnen</li></ul><h3>Actieplan (vandaag)</h3><ol><li>Bereken je freedom number en gap.</li><li>Kies 1 MRR-bron en zet 90-dagen sprint op.</li><li>Stel automatische inleg en rebalancing in.</li><li>Start je legacy-map: waarden, protocollen, contactlijst, documenten.</li><li>Plan maand- en kwartaalrituelen in je agenda.</li></ol><h3>Veelgestelde vragen</h3><ol><li><strong>Wanneer ben ik echt vrij?</strong> Als je passieve/semipassieve inkomsten meerdere maanden op rij je kosten dekken en je reserves op orde zijn.</li><li><strong>Moet ik vastgoed hebben?</strong> Niet per se. Focus op cashflowbronnen die jij kunt managen. Vastgoed is een optie, geen must.</li><li><strong>Hoe begin ik met legacy als ik weinig heb?</strong> Begin met waarden en kennis. Geld is één onderdeel; je karakter en systemen zijn fundamenteler.</li><li><strong>Wat als mijn situatie verandert?</strong> IPS en legacy-plan jaarlijks updaten. Flexibiliteit is onderdeel van het plan.</li></ol><h3>Resultaten van vrijheid en legacy</h3><ul><li><strong>Keuzevrijheid:</strong> je werkt omdat je wilt, niet omdat je moet.</li><li><strong>Rust:</strong> je weet dat je systeem voor je werkt.</li><li><strong>Impact:</strong> je draagt bij aan iets groters dan jezelf.</li><li><strong>Familie:</strong> je zorgt voor generaties na jou.</li><li><strong>Community:</strong> je bouwt aan een betere wereld.</li></ul><h3>Start vandaag</h3><p>Bereken je freedom number. Kies 1 MRR-bron om te ontwikkelen. Start je legacy-documenten. Plan je rituelen. Elke dag bouw je aan je vrijheid. Elke dag bouw je aan je legacy. Dit is hoe je een Top Tier Man wordt die niet alleen voor zichzelf leeft, maar voor generaties na hem.</p>
+    </div>
+
+    <div class="section" id="huiswerk">
+      <h2>📝 Huiswerk Opdrachten</h2>
+      
+      <div class="exercise-box">
+        <h4>Opdracht 1: Freedom Number Berekenen</h4>
+        <p><strong>Doel:</strong> Je concrete vrijheidsdoel bepalen en de gap met je huidige situatie.</p>
+        <p><strong>Actie:</strong> Bereken je maandlasten (incl. levensstijl). Bepaal hoeveel passieve inkomsten je nodig hebt. Maak een plan hoe je deze gap gaat dichten met MRR, investeringen en andere bronnen. Stel automatische inleg in.</p>
+      </div>
+
+      <div class="exercise-box">
+        <h4>Opdracht 2: MRR Bron Ontwikkelen</h4>
+        <p><strong>Doel:</strong> Een stabiele maandelijkse inkomstenbron opbouwen.</p>
+        <p><strong>Actie:</strong> Kies 1 MRR-bron (retainer, abonnement, licentie, digitale product) en zet een 90-dagen sprint op. Plan wekelijkse acties, meet voortgang en optimaliseer. Documenteer wat werkt en wat niet.</p>
+      </div>
+
+      <div class="exercise-box">
+        <h4>Opdracht 3: Legacy Documenten Starten</h4>
+        <p><strong>Doel:</strong> Begin maken met je legacy door waarden en systemen vast te leggen.</p>
+        <p><strong>Actie:</strong> Maak een legacy-map met: je waarden en principes, familieprotocollen voor geld en gezondheid, contactlijst van belangrijke mensen, en 1 document per maand over je lessen. Plan maandelijkse family finance meetings.</p>
+      </div>
+    </div>
+
+    <div class="section" id="checklists">
+      <h2>✅ Checklists</h2>
+      
+      <h3>Weekchecklist "Financiële Vrijheid en Legacy"</h3>
+      <div class="checklist">
+        <div class="checklist-item">
+          <input type="checkbox" id="freedom-1">
+          <label for="freedom-1">Freedom number berekend en plan gemaakt</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="freedom-2">
+          <label for="freedom-2">Automatische inleg en rebalancing ingesteld</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="freedom-3">
+          <label for="freedom-3">MRR-bron gekozen en 90-dagen sprint gestart</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="freedom-4">
+          <label for="freedom-4">Legacy-map aangemaakt met waarden en protocollen</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="freedom-5">
+          <label for="freedom-5">Maand- en kwartaalrituelen gepland in agenda</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="freedom-6">
+          <label for="freedom-6">1 maandelijkse family finance meeting gevoerd</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="section" id="reflectie">
+      <h2>🤔 Reflectie Vragen</h2>
+      
+      <div class="reflection-question">
+        <h4>Vrijheid en Legacy</h4>
+        <p>Welke 2 acties brengen jouw vrijheid het snelst dichterbij, en welke 2 acties bouwen vandaag al aan jouw legacy? Wat betekent vrijheid voor jou persoonlijk?</p>
+      </div>
+
+      <div class="reflection-question">
+        <h4>MRR en Passieve Inkomsten</h4>
+        <p>Welke MRR-bron past het beste bij jouw vaardigheden en interesses? Hoe kun je deze uitbouwen tot een stabiele inkomstenbron? Wat weerhoudt je ervan om vandaag te beginnen?</p>
+      </div>
+
+      <div class="reflection-question">
+        <h4>Impact en Bijdrage</h4>
+        <p>Wat wil je dat mensen over jou zeggen over 20 jaar? Hoe wil je dat je kinderen en kleinkinderen jouw legacy ervaren? Welke waarden wil je doorgeven?</p>
+      </div>
+    </div>
+
+    <div class="section" id="actieplan">
+      <h2>🎯 Actieplan</h2>
+      
+      <div class="action-plan">
+        <div class="action-step">
+          <strong>Stap 1:</strong> Bereken je freedom number en maak een plan om de gap te dichten. Stel automatische inleg en rebalancing in voor je investeringen.
+        </div>
+        
+        <div class="action-step">
+          <strong>Stap 2:</strong> Kies 1 MRR-bron die past bij jouw vaardigheden en start een 90-dagen sprint. Plan wekelijkse acties en meet voortgang.
+        </div>
+        
+        <div class="action-step">
+          <strong>Stap 3:</strong> Start je legacy-documenten. Maak een map met waarden, protocollen en contactlijsten. Plan maandelijkse family finance meetings.
+        </div>
+        
+        <div class="action-step">
+          <strong>Stap 4:</strong> Plan je vrijheids- en legacy-rituelen in je agenda. Wekelijkse blokken voor cashflow en waardecreatie, maandelijkse reviews.
+        </div>
+        
+        <div class="action-step">
+          <strong>Stap 5:</strong> Evalueer na 3 maanden je voortgang. Welke MRR-bron werkte het beste? Welke legacy-documenten zijn het meest waardevol? Bouw dit uit.
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p>Dit ebook is onderdeel van de <span class="ttm-brand">Top Tier Men</span> Academy</p>
+      <p>Module 05: Business and Finance | Les 05: Financiële Vrijheid en Legacy</p>
+      <p>© 2025 Top Tier Men. Alle rechten voorbehouden.</p>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+      checkboxes.forEach(cb => {
+        const saved = localStorage.getItem(cb.id);
+        if (saved === 'true') cb.checked = true;
+        cb.addEventListener('change', function(){ localStorage.setItem(this.id, this.checked); });
+      });
+    });
+  </script>
+</body>
+</html>

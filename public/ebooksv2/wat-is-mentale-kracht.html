@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wat is mentale kracht - Ebook | Top Tier Men</title>
+  <meta name="description" content="V2 ebook voor Wat is mentale kracht binnen Top Tier Men Academy." />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.6; color: #ffffff;
+      background: linear-gradient(135deg, #0A0F0A 0%, #181F17 50%, #232D1A 100%);
+      min-height: 100vh;
+    }
+    .container { max-width: 800px; margin: 0 auto; padding: 2rem; }
+    .header {
+      text-align: center; margin-bottom: 3rem; padding: 2rem;
+      background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      border-radius: 20px; border: 1px solid #3A4D23;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    .logo { margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; }
+    h1 {
+      font-size: 2.5rem; font-weight: 800;
+      background: linear-gradient(135deg, #ffffff 0%, #8BAE5A 50%, #B6C948 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      margin-bottom: .5rem;
+    }
+    .subtitle { color: #8BAE5A; font-size: 1.1rem; font-weight: 500; }
+    .module-info {
+      background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1rem; border-radius: 10px; margin: 1rem 0; border-left: 4px solid #8BAE5A;
+    }
+    .section { background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      margin-bottom: 2rem; padding: 2rem; border-radius: 15px; border: 1px solid #3A4D23; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    .section h2 { color: #B6C948; font-size: 1.8rem; font-weight: 700; margin-bottom: 1.5rem; display: flex; align-items: center; gap: .5rem; }
+    .section h3 { color: #8BAE5A; font-size: 1.3rem; font-weight: 600; margin: 1.5rem 0 1rem; }
+    .section p { margin-bottom: 1rem; color: #e0e0e0; }
+    .section ul, .section ol { margin: 1rem 0; padding-left: 2rem; }
+    .section li { margin-bottom: .5rem; color: #e0e0e0; }
+    .highlight-box { background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1.5rem; border-radius: 10px; border-left: 4px solid #B6C948; margin: 1.5rem 0;
+    }
+    .exercise-box { background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%);
+      padding: 1.5rem; border-radius: 10px; border: 1px solid #8BAE5A; margin: 1rem 0;
+    }
+    .exercise-box h4 { color: #B6C948; font-size: 1.1rem; margin-bottom: 1rem; }
+    .checklist { background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      padding: 1.5rem; border-radius: 10px; border: 1px solid #3A4D23; margin: 1rem 0;
+    }
+    .checklist-item { display: flex; align-items: center; margin-bottom: .8rem; padding: .5rem; background: rgba(58,77,35,.3); border-radius: 8px; }
+    .checklist-item input[type="checkbox"] { margin-right: 1rem; width: 18px; height: 18px; accent-color: #8BAE5A; }
+    .reflection-question { background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1.5rem; border-radius: 10px; border-left: 4px solid #B6C948; margin: 1rem 0;
+    }
+    .reflection-question h4 { color: #B6C948; margin-bottom: 1rem; }
+    .action-plan { background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%);
+      padding: 2rem; border-radius: 15px; border: 2px solid #8BAE5A; margin: 2rem 0;
+    }
+    .action-step { background: rgba(139,174,90,.1); padding: 1rem; border-radius: 8px; margin: 1rem 0; border-left: 3px solid #8BAE5A; }
+    .footer { text-align: center; margin-top: 3rem; padding: 2rem; background: linear-gradient(135deg, #181F17 0%, #232D1A 100%); border-radius: 15px; border: 1px solid #3A4D23; }
+    .footer p { color: #8BAE5A; margin-bottom: 1rem; }
+    .ttm-brand { color: #B6C948; font-weight: 700; }
+    .sticky-back-btn { position: fixed; top: 50%; right: 20px; transform: translateY(-50%);
+      z-index: 1000; background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%);
+      color: #fff; border: none; border-radius: 50px; padding: 15px 20px; font-size: 14px; font-weight: 600; cursor: pointer;
+      box-shadow: 0 8px 25px rgba(139,174,90,.3); transition: all .3s ease; display: flex; align-items: center; gap: 8px; text-decoration: none; min-width: 120px; justify-content: center;
+    }
+    .sticky-back-btn:hover { background: linear-gradient(135deg, #B6C948 0%, #8BAE5A 100%); transform: translateY(-50%) scale(1.05); box-shadow: 0 12px 35px rgba(139,174,90,.4); }
+    .sticky-back-btn:active { transform: translateY(-50%) scale(.95); }
+    .sticky-back-btn svg { width: 16px; height: 16px; fill: currentColor; }
+    @media (max-width: 768px) {
+      .container { padding: 1rem; }
+      h1 { font-size: 2rem; }
+      .section { padding: 1.5rem; }
+      .sticky-back-btn { right: 10px; padding: 12px 16px; font-size: 12px; min-width: 100px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Sticky Back Button: VERPLICHT naar juiste les URL -->
+  <a href="/dashboard/academy/c66b25e3-869f-4c2c-8037-a552726c6b62/def1adb6-1802-4875-a5e3-f9df1afeee3e" class="sticky-back-btn" title="Terug naar les">
+    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    Terug
+  </a>
+
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="logo">
+        <img src="/logo_white-full.svg" alt="Top Tier Men Logo" style="height:40px;width:auto" />
+      </div>
+      <h1>Wat is mentale kracht</h1>
+      <p class="subtitle"></p>
+      <div class="module-info">
+        <strong>Module 04: Mentale Kracht/Weerbaarheid</strong> | <strong>Les 01: Wat is mentale kracht</strong>
+      </div>
+    </div>
+
+    <!-- Uitgebreide Samenvatting: 1:1 OVERNEMEN (NIET WIJZIGEN) -->
+    <!-- Markeer deze sectie exact en wijzig de tekst niet. -->
+    <div class="section" id="samenvatting">
+      <h2>📚 Uitgebreide Samenvatting van de Les</h2>
+
+<div class="highlight-box">
+  <h4>🎯 Doel van deze les</h4>
+  <p>
+    Je leert wat <strong>mentale kracht</strong> is, hoe je het meetbaar maakt en hoe je het dagelijks traint met simpele
+    routines. Geen zweverig gedoe, wel concrete principes, checklists en rituelen zodat je kalm, doelgericht en
+    consistent blijft – ook onder druk.
+  </p>
+</div>
+
+<h3>Definitie (simpel)</h3>
+<p>
+  Mentale kracht = <strong>je aandacht en acties sturen in lijn met je waarden</strong>, ongeacht omstandigheden.
+  Het is trainbaar. Je bouwt het op als een spier: prikkel → herstel → adaptatie → hoger niveau.
+</p>
+
+<h3>Vier bouwstenen</h3>
+<ul>
+  <li><strong>1) Focus</strong> – Je kiest bewust wat nu belangrijk is en schermt ruis af.</li>
+  <li><strong>2) Emotie-regulatie</strong> – Je voelt emoties, maar ze besturen je gedrag niet.</li>
+  <li><strong>3) Stress-tolerantie</strong> – Je functioneert onder druk met een kalme basishouding.</li>
+  <li><strong>4) Volharding</strong> – Je doet wat nodig is, lang genoeg, ook als het saai of zwaar is.</li>
+</ul>
+
+<h3>Meetbaar maken (KPI’s)</h3>
+<ul>
+  <li>Focus-score: minuten diepe focus/dag (zonder notificaties/afleiding).</li>
+  <li>Emo-herstel: tijd (min) van trigger → baseline (adem laag/ritme stabiel).</li>
+  <li>Stress-score: RPE (1–10) vs. output kwaliteit (1–10).</li>
+  <li>Volharding: opeenvolgende dagen dat je kernrituelen hebt gedaan.</li>
+</ul>
+
+<h3>Dagritueel (ochtend)</h3>
+<ul>
+  <li><strong>Adem 3–5 min</strong> (4-7-8 of box-breathing): tempo verlagen, aandacht centreren.</li>
+  <li><strong>Intentie</strong>: 1 zin – “Vandaag prioriteer ik X en accepteer ik ongemak Y.”</li>
+  <li><strong>Top-3</strong>: 3 cruciale taken die je dag winnen (timed blokken).</li>
+  <li><strong>Fysiek</strong>: 5–10 min beweging (push/pull/squat/hinge/hinge). Activering = mentale scherpte.</li>
+</ul>
+
+<h3>Dagritueel (middag)</h3>
+<ul>
+  <li><strong>Reset-walk</strong> 10–15 min zonder telefoon.</li>
+  <li><strong>Micro-review</strong>: waar liep je vast? Welke gedachte hielp niet? Vervang door gedrag.</li>
+  <li><strong>Water/eiwit</strong>: biologie ondersteunt cognitieve functies.</li>
+</ul>
+
+<h3>Dagritueel (avond)</h3>
+<ul>
+  <li><strong>Cooldown</strong> 30–60 min schermvrij.</li>
+  <li><strong>Reflectie 3 regels</strong>: (1) wat ging goed, (2) wat was lastig, (3) één kleine verbetering.</li>
+  <li><strong>Voorbereiding</strong>: kleding, spullen, agenda voor morgen klaarleggen.</li>
+</ul>
+
+<h3>Focus-framework</h3>
+<ul>
+  <li><strong>Single-task</strong>: 25–50 min blokken, 5–10 min pauze (Pomodoro-variant).</li>
+  <li><strong>No-Notification Zone</strong>: apps stil, meldingen uit tijdens diepe werkblokken.</li>
+  <li><strong>Contextlijst</strong>: taken gegroepeerd per context (laptop, telefoon, kantoor).</li>
+  <li><strong>Rule of One</strong>: in elk blok maar één doel.</li>
+</ul>
+
+<h3>Emotie-regulatie toolkit</h3>
+<ul>
+  <li><strong>Label → Adem → Keuze</strong>: “Ik voel irritatie.” 6 langzame ademhalingen. Kies gedrag: kalm reageren of pauzeren.</li>
+  <li><strong>Naam geven</strong>: benoem gevoel en locatie in je lichaam (maakt afstand, verlaagt intensiteit).</li>
+  <li><strong>Staat wisselen</strong>: 20 air squats of koude plens water om te resetten.</li>
+</ul>
+
+<h3>Stress-tolerantie trainen</h3>
+<ul>
+  <li><strong>Progressive overload</strong>: klein beetje buiten comfortzone, wekelijks opschalen.</li>
+  <li><strong>Frictie-optimalisatie</strong>: vermijd onnodige stressoren (rommel, slechte slaap, junk).</li>
+  <li><strong>Herstelblokken</strong>: plan herstel net zo bewust als belasting.</li>
+</ul>
+
+<h3>Volharding bouwen</h3>
+<ul>
+  <li><strong>Identiteit eerst</strong>: “Ik ben iemand die X doet, elke dag.”</li>
+  <li><strong>Tiny habits</strong>: mini-actie die je altijd kunt doen (1 push-up, 1 zin schrijven).</li>
+  <li><strong>Streaks</strong>: maak het zichtbaar; breek de keten niet.</li>
+</ul>
+
+<h3>Weerbaarheid in vijf regels</h3>
+<ul>
+  <li>1) Kleine stap vandaag is belangrijker dan perfecte stap morgen.</li>
+  <li>2) Je bent niet je gedachten; je bent je acties.</li>
+  <li>3) Pijn is tijdelijk; trots is langdurig.</li>
+  <li>4) Frictie laag voor goed gedrag, hoog voor slecht gedrag.</li>
+  <li>5) Ritme wint van motivatie.</li>
+</ul>
+
+<h3>Triggers en tegenmaatregelen</h3>
+<ul>
+  <li><strong>Social scroll</strong> → telefoon in andere kamer tijdens werkblok; website blockers.</li>
+  <li><strong>Uitstel</strong> → 2-minuten regel: start met iets wat ≤2 min kost.</li>
+  <li><strong>Overwhelm</strong> → schrijf alles uit je hoofd; kies één micro-actie.</li>
+  <li><strong>Negatieve zelfspraak</strong> → schrijf tegenzin op, antwoord met gedrag: “Toch 10 min.”</li>
+</ul>
+
+<h3>Weekrituelen</h3>
+<ul>
+  <li>Zondag-plan: 3 hoofddoelen, deadlines, bloktijden.</li>
+  <li>Midweek-check: ben je op schema? Zo niet, schrappen of bijsturen.</li>
+  <li>Ereronde: noteer 3 wins; train je brein om progressie te zien.</li>
+</ul>
+
+<h3>Mentale voeding</h3>
+<ul>
+  <li>Curate je input: 80% leerzaam/bouwend, 20% entertainment.</li>
+  <li>Omring je met sterke mannen: accountability en standaard omhoog.</li>
+  <li>Dagelijks 10–20 min lezen (fysiek boek of samenvatting).</li>
+</ul>
+
+
+<h3>Veelgemaakte fouten (en fixes)</h3>
+<ul>
+  <li><strong>Alles tegelijk willen fixen</strong> → 1 bouwsteen per week.</li>
+  <li><strong>Geen herstel plannen</strong> → herstel in agenda, niet “als het uitkomt”.</li>
+  <li><strong>Negeren van biologie</strong> → slaap, voeding, beweging prioriteren.</li>
+</ul>
+
+    </div>
+
+    <!-- Huiswerk Opdrachten -->
+    <div class="section">
+      <h2>📝 Huiswerk Opdrachten</h2>
+      
+      <div class="exercise-box">
+        <h4>Opdracht 1: Je Mentale Kracht Baseline Meten (30 minuten)</h4>
+        <p>Bepaal waar je nu staat met mentale kracht:</p>
+        <ul>
+          <li><strong>Focus-test:</strong> Hoe lang kun je zonder afleiding werken? Test 1 uur diepe focus</li>
+          <li><strong>Emotie-regulatie:</strong> Noteer 3 momenten deze week dat je emoties je gedrag beïnvloedden</li>
+          <li><strong>Stress-tolerantie:</strong> Geef jezelf een score 1-10 voor hoe goed je functioneert onder druk</li>
+          <li><strong>Volharding:</strong> Hoeveel dagen achter elkaar doe je je belangrijkste gewoonte?</li>
+        </ul>
+        <p>Schrijf je scores op en kies 1 gebied waar je deze maand aan wilt werken.</p>
+      </div>
+
+      <div class="exercise-box">
+        <h4>Opdracht 2: Je Dagritueel Ontwerpen (45 minuten)</h4>
+        <p>Bouw je mentale kracht training in je dag:</p>
+        <ul>
+          <li><strong>Ochtendritueel:</strong> Plan 15 minuten: ademhaling (5 min), intentie (2 min), top-3 taken (5 min), beweging (3 min)</li>
+          <li><strong>Middag-reset:</strong> Plan 10 minuten wandelen zonder telefoon + water drinken</li>
+          <li><strong>Avondritueel:</strong> Plan 20 minuten: schermvrij (15 min), reflectie (5 min)</li>
+          <li><strong>Focusblokken:</strong> Plan 2 blokken van 45 minuten met volledige focus</li>
+        </ul>
+        <p>Test dit ritueel 1 week en pas aan waar nodig. Start klein en bouw op.</p>
+      </div>
+
+      <div class="exercise-box">
+        <h4>Opdracht 3: Je Emotie-Toolkit Bouwen (30 minuten)</h4>
+        <p>Maak je eigen toolkit voor emotie-regulatie:</p>
+        <ul>
+          <li><strong>Ademtechniek:</strong> Kies 1 techniek (4-7-8 of box-breathing) en oefen 5 minuten</li>
+          <li><strong>Fysieke reset:</strong> Kies 1 oefening (20 squats, koud water, wandeling) voor stress-momenten</li>
+          <li><strong>Mantra:</strong> Schrijf 1 zin die je helpt in moeilijke momenten</li>
+          <li><strong>Trigger-lijst:</strong> Schrijf op welke situaties jouw emoties triggeren</li>
+        </ul>
+        <p>Test je toolkit deze week en pas aan waar nodig. Maak het persoonlijk en praktisch.</p>
+      </div>
+    </div>
+
+    <!-- Checklist -->
+    <div class="section">
+      <h2>✅ Checklist</h2>
+      <div class="checklist">
+        <div class="checklist-item">
+          <input type="checkbox" id="check1" />
+          <label for="check1">Mentale kracht baseline gemeten en opgeschreven</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="check2" />
+          <label for="check2">Dagritueel ontworpen en 1 week getest</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="check3" />
+          <label for="check3">Emotie-toolkit gebouwd en toegepast</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="check4" />
+          <label for="check4">Focusblokken gepland en uitgevoerd</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="check5" />
+          <label for="check5">Ademtechniek gekozen en geoefend</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="check6" />
+          <label for="check6">Weekritueel (planning en reflectie) opgezet</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reflectie Vragen -->
+    <div class="section">
+      <h2>🤔 Reflectie Vragen</h2>
+      
+      <div class="reflection-question">
+        <h4>Vraag 1: Jouw Mentale Kracht</h4>
+        <p>Welke 1 gedrag kies jij deze week als jouw basistraining voor mentale kracht, en wanneer doe je het precies? Wat is jouw plan om dit vol te houden?</p>
+      </div>
+
+      <div class="reflection-question">
+        <h4>Vraag 2: Emoties en Stress</h4>
+        <p>Welke emoties beïnvloeden het meest jouw dagelijkse prestaties? Hoe ga je deze week anders om met stressvolle situaties door je nieuwe toolkit te gebruiken?</p>
+      </div>
+
+      <div class="reflection-question">
+        <h4>Vraag 3: Focus en Prioriteiten</h4>
+        <p>Wat zijn de 3 belangrijkste dingen die je elke dag moet doen om je doelen te bereiken? Hoe ga je ervoor zorgen dat je hierop focust zonder afleiding?</p>
+      </div>
+    </div>
+
+    <!-- Actieplan -->
+    <div class="section">
+      <h2>🎯 Actieplan</h2>
+      <div class="action-plan">
+        <h3>Jouw 5 Stappen Actieplan</h3>
+        <div class="action-step">
+          <strong>Stap 1:</strong> Meet je huidige mentale kracht op alle 4 gebieden en kies 1 focuspunt voor deze maand.
+        </div>
+        <div class="action-step">
+          <strong>Stap 2:</strong> Ontwerp en test je dagritueel: ochtend (15 min), middag (10 min), avond (20 min).
+        </div>
+        <div class="action-step">
+          <strong>Stap 3:</strong> Bouw je emotie-toolkit: ademtechniek, fysieke reset, mantra en trigger-lijst.
+        </div>
+        <div class="action-step">
+          <strong>Stap 4:</strong> Plan 2 focusblokken per dag van 45 minuten en elimineer alle afleidingen.
+        </div>
+        <div class="action-step">
+          <strong>Stap 5:</strong> Evalueer na 1 week en pas je systeem aan voor optimale resultaten.
+        </div>
+      </div>
+    </div>
+
+
+
+    <!-- Optioneel: Actieplan -->
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <p>Dit ebook is onderdeel van de <span class="ttm-brand">Top Tier Men</span> Academy</p>
+      <p>Module 04: Mentale Kracht/Weerbaarheid | Les 01: Wat is mentale kracht</p>
+      <p>© 2025 Top Tier Men. Alle rechten voorbehouden.</p>
+    </div>
+  </div>
+
+  <script>
+    // Checklist persistentie via localStorage
+    document.addEventListener('DOMContentLoaded', function() {
+      const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+      checkboxes.forEach(cb => {
+        const saved = localStorage.getItem(cb.id);
+        if (saved === 'true') cb.checked = true;
+        cb.addEventListener('change', function(){ localStorage.setItem(this.id, this.checked); });
+      });
+    });
+  </script>
+</body>
+</html>

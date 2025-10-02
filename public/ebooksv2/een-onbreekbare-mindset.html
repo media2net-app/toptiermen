@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Een Onbreekbare Mindset - Ebook | Top Tier Men</title>
+  <meta name="description" content="V2 ebook voor Een Onbreekbare Mindset binnen Top Tier Men Academy." />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.6; color: #ffffff;
+      background: linear-gradient(135deg, #0A0F0A 0%, #181F17 50%, #232D1A 100%);
+      min-height: 100vh;
+    }
+    .container { max-width: 800px; margin: 0 auto; padding: 2rem; }
+    .header {
+      text-align: center; margin-bottom: 3rem; padding: 2rem;
+      background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      border-radius: 20px; border: 1px solid #3A4D23;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    .logo { margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; }
+    h1 {
+      font-size: 2.5rem; font-weight: 800;
+      background: linear-gradient(135deg, #ffffff 0%, #8BAE5A 50%, #B6C948 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      margin-bottom: .5rem;
+    }
+    .subtitle { color: #8BAE5A; font-size: 1.1rem; font-weight: 500; }
+    .module-info {
+      background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1rem; border-radius: 10px; margin: 1rem 0; border-left: 4px solid #8BAE5A;
+    }
+    .section { background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      margin-bottom: 2rem; padding: 2rem; border-radius: 15px; border: 1px solid #3A4D23; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    .section h2 { color: #B6C948; font-size: 1.8rem; font-weight: 700; margin-bottom: 1.5rem; display: flex; align-items: center; gap: .5rem; }
+    .section h3 { color: #8BAE5A; font-size: 1.3rem; font-weight: 600; margin: 1.5rem 0 1rem; }
+    .section p { margin-bottom: 1rem; color: #e0e0e0; }
+    .section ul, .section ol { margin: 1rem 0; padding-left: 2rem; }
+    .section li { margin-bottom: .5rem; color: #e0e0e0; }
+    .highlight-box { background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1.5rem; border-radius: 10px; border-left: 4px solid #B6C948; margin: 1.5rem 0;
+    }
+    .exercise-box { background: linear-gradient(135deg, #232D1A 0%, #3A5D33 100%);
+      padding: 1.5rem; border-radius: 10px; border: 1px solid #8BAE5A; margin: 1rem 0;
+    }
+    .exercise-box h4 { color: #B6C948; font-size: 1.1rem; margin-bottom: 1rem; }
+    .checklist { background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      padding: 1.5rem; border-radius: 10px; border: 1px solid #3A4D23; margin: 1rem 0;
+    }
+    .checklist-item { display: flex; align-items: center; margin-bottom: .8rem; padding: .5rem; background: rgba(58,77,35,.3); border-radius: 8px; }
+    .checklist-item input[type="checkbox"] { margin-right: 1rem; width: 18px; height: 18px; accent-color: #8BAE5A; }
+    .reflection-question { background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1.5rem; border-radius: 10px; border-left: 4px solid #B6C948; margin: 1rem 0;
+    }
+    .reflection-question h4 { color: #B6C948; margin-bottom: 1rem; }
+    .action-plan { background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%);
+      padding: 2rem; border-radius: 15px; border: 2px solid #8BAE5A; margin: 2rem 0;
+    }
+    .action-step { background: rgba(139,174,90,.1); padding: 1rem; border-radius: 8px; margin: 1rem 0; border-left: 3px solid #8BAE5A; }
+    .footer { text-align: center; margin-top: 3rem; padding: 2rem; background: linear-gradient(135deg, #181F17 0%, #232D1A 100%); border-radius: 15px; border: 1px solid #3A4D23; }
+    .footer p { color: #8BAE5A; margin-bottom: 1rem; }
+    .ttm-brand { color: #B6C948; font-weight: 700; }
+    .sticky-back-btn { position: fixed; top: 50%; right: 20px; transform: translateY(-50%);
+      z-index: 1000; background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%);
+      color: #fff; border: none; border-radius: 50px; padding: 15px 20px; font-size: 14px; font-weight: 600; cursor: pointer;
+      box-shadow: 0 8px 25px rgba(139,174,90,.3); transition: all .3s ease; display: flex; align-items: center; gap: 8px; text-decoration: none; min-width: 120px; justify-content: center;
+    }
+    .sticky-back-btn:hover { background: linear-gradient(135deg, #B6C948 0%, #8BAE5A 100%); transform: translateY(-50%) scale(1.05); box-shadow: 0 12px 35px rgba(139,174,90,.4); }
+    .sticky-back-btn:active { transform: translateY(-50%) scale(.95); }
+    .sticky-back-btn svg { width: 16px; height: 16px; fill: currentColor; }
+    @media (max-width: 768px) {
+      .container { padding: 1rem; }
+      h1 { font-size: 2rem; }
+      .section { padding: 1.5rem; }
+      .sticky-back-btn { right: 10px; padding: 12px 16px; font-size: 12px; min-width: 100px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Sticky Back Button: VERPLICHT naar juiste les URL -->
+  <a href="/dashboard/academy/c66b25e3-869f-4c2c-8037-a552726c6b62/275dce47-df0d-4121-afdc-89a632b25a79" class="sticky-back-btn" title="Terug naar les">
+    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    Terug
+  </a>
+
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="logo">
+        <img src="/logo_white-full.svg" alt="Top Tier Men Logo" style="height:40px;width:auto" />
+      </div>
+      <h1>Een Onbreekbare Mindset</h1>
+      <p class="subtitle">De kunst van mentale weerbaarheid en doorzettingsvermogen</p>
+      <div class="module-info">
+        <strong>Module 04: Mentale Kracht/Weerbaarheid</strong> | <strong>Les 02: Een Onbreekbare Mindset</strong>
+      </div>
+    </div>
+
+    <!-- Uitgebreide Samenvatting van de Les -->
+    <div class="section" id="samenvatting">
+      <h2>📚 Uitgebreide Samenvatting van de Les</h2>
+      
+      <div class="highlight-box">
+        <h4>🎯 Les Overzicht</h4>
+        <p>Een onbreekbare mindset is de basis van alle succes en persoonlijke groei. Het is het vermogen om tegenslag te zien als uitdaging, mislukking als leermoment, en stress als brandstof voor groei. Deze mindset is niet iets waar je mee geboren wordt - het is iets dat je kunt ontwikkelen en versterken.</p>
+      </div>
+
+      <h3>Wat is Een Onbreekbare Mindset?</h3>
+      <p>Een onbreekbare mindset is de mentale kracht om te blijven doorgaan, zelfs wanneer alles tegenzit. Het is het vermogen om tegenslag te zien als een kans om te groeien, in plaats van als een reden om op te geven. Het is de innerlijke kracht die je helpt om overeind te blijven, zelfs in de zwaarste stormen van het leven.</p>
+      
+      <p>Denk aan een onbreekbare mindset als een mentale spier die je kunt trainen. Net zoals je fysieke spieren sterker worden door training, wordt je mentale weerbaarheid sterker door het regelmatig uitdagen van jezelf en het overwinnen van obstakels.</p>
+
+      <div class="highlight-box">
+        <h4>💡 Simpel Gezegd</h4>
+        <p>Een onbreekbare mindset betekent dat je weet dat je sterker bent dan je denkt, slimmer dan je gelooft, en capabeler dan je je voorstelt. Het is de overtuiging dat je elke uitdaging kunt overwinnen als je maar blijft doorgaan.</p>
+      </div>
+
+      <h3>De Vier Pilaren van Een Onbreekbare Mindset</h3>
+      <p>Een onbreekbare mindset bestaat uit vier belangrijke pilaren die samenwerken om je mentaal sterk te maken:</p>
+      
+      <h4>1. Eigenaarschap - Jij Bent Verantwoordelijk</h4>
+      <p>Eigenaarschap betekent dat je volledig verantwoordelijk neemt voor je eigen leven, keuzes en resultaten. Je stopt met het geven van excuses en het wijzen naar anderen. In plaats daarvan focus je op wat jij kunt doen om je situatie te verbeteren.</p>
+      
+      <p><strong>Wat Eigenaarschap Betekent:</strong></p>
+      <ul>
+        <li><strong>Verantwoordelijkheid nemen:</strong> Je erkent dat je de controle hebt over je reacties en keuzes</li>
+        <li><strong>Geen slachtofferschap:</strong> Je stopt met het zien van jezelf als slachtoffer van omstandigheden</li>
+        <li><strong>Proactief handelen:</strong> Je wacht niet tot anderen het voor je oplossen</li>
+        <li><strong>Leren van fouten:</strong> Je gebruikt mislukkingen als leermomenten</li>
+        <li><strong>Focus op oplossingen:</strong> Je concentreert je op wat je kunt doen, niet op wat er mis is</li>
+      </ul>
+
+      <h4>2. Ritme Boven Motivatie - Consistentie Wint Altijd</h4>
+      <p>Motivatie komt en gaat, maar ritme en consistentie zijn betrouwbaar. Een onbreekbare mindset bouwt op vaste gewoontes en routines, niet op momenten van inspiratie. Je doet wat je moet doen, ook als je er geen zin in hebt.</p>
+      
+      <p><strong>Waarom Ritme Belangrijker Is Dan Motivatie:</strong></p>
+      <ul>
+        <li><strong>Betrouwbaarheid:</strong> Ritme werkt altijd, motivatie niet</li>
+        <li><strong>Automatisering:</strong> Gewoontes worden automatisch na verloop van tijd</li>
+        <li><strong>Momentum:</strong> Kleine, consistente acties bouwen op tot grote resultaten</li>
+        <li><strong>Discipline:</strong> Ritme ontwikkelt discipline, motivatie ontwikkelt afhankelijkheid</li>
+        <li><strong>Langetermijnsucces:</strong> Succesvolle mensen hebben ritmes, niet motivatie</li>
+      </ul>
+
+      <h4>3. Kleine Stappen - Micro-Gedrag Elke Dag</h4>
+      <p>Grote veranderingen beginnen met kleine stappen. Een onbreekbare mindset begrijpt dat vooruitgang wordt geboekt door dagelijks kleine, consistente acties. Het is beter om elke dag 5 minuten te doen dan één keer per week 2 uur.</p>
+      
+      <p><strong>Waarom Kleine Stappen Zo Effectief Zijn:</strong></p>
+      <ul>
+        <li><strong>Overweldiging voorkomen:</strong> Kleine stappen voelen beheersbaar aan</li>
+        <li><strong>Gewoonte vorming:</strong> Kleine acties worden makkelijker gewoontes</li>
+        <li><strong>Momentum bouwen:</strong> Elke kleine overwinning geeft energie voor de volgende</li>
+        <li><strong>Falen voorkomen:</strong> Kleine stappen zijn moeilijker om te falen</li>
+        <li><strong>Compound effect:</strong> Kleine verbeteringen stapelen op tot grote resultaten</li>
+      </ul>
+
+      <h4>4. Omgeving Stuurt Gedrag - Frictie Verlagen en Verhogen</h4>
+      <p>Je omgeving heeft een enorme invloed op je gedrag en mindset. Een onbreekbare mindset gebruikt deze kennis om de omgeving zo in te richten dat goede keuzes makkelijker worden en slechte keuzes moeilijker.</p>
+      
+      <p><strong>Hoe Omgeving Je Gedrag Beïnvloedt:</strong></p>
+      <ul>
+        <li><strong>Frictie verlagen:</strong> Maak gewenste acties makkelijker door obstakels weg te nemen</li>
+        <li><strong>Frictie verhogen:</strong> Maak ongewenste acties moeilijker door obstakels toe te voegen</li>
+        <li><strong>Zichtbaarheid:</strong> Zet goede keuzes in het zicht, verberg slechte keuzes</li>
+        <li><strong>Toegankelijkheid:</strong> Maak gewenste gedrag toegankelijker</li>
+        <li><strong>Sociale omgeving:</strong> Omring jezelf met mensen die dezelfde doelen hebben</li>
+      </ul>
+
+      <h3>Het Stress en Tegenslag Protocol</h3>
+      <p>Een onbreekbare mindset heeft een systeem voor het omgaan met stress en tegenslag. Dit protocol helpt je om in moeilijke momenten gefocust en kalm te blijven:</p>
+      
+      <h4>Stap 1: Adem - Kalmeer Je Zenuwstelsel</h4>
+      <p>Wanneer je stress voelt, begin met ademhaling. Adem 6 keer langzaam uit, langer dan je inademt. Dit activeert je rust-systeem en kalmeert je zenuwstelsel. Het duurt slechts 1-2 minuten maar heeft een enorme impact.</p>
+      
+      <h4>Stap 2: Label - Benoem Je Emotie</h4>
+      <p>Benoem de emotie die je voelt en geef het een intensiteit van 1-10. Bijvoorbeeld: "Ik voel frustratie op niveau 7" of "Ik voel angst op niveau 5". Het benoemen van emoties helpt je om er controle over te krijgen.</p>
+      
+      <h4>Stap 3: Doel - Één Micro-Actie</h4>
+      <p>Kies één kleine actie (maximaal 2 minuten) die je dichter bij je prioriteit brengt. In plaats van overweldigd te raken door alles wat je moet doen, focus je op één kleine stap. Dit geeft je een gevoel van controle en vooruitgang.</p>
+      
+      <h4>Stap 4: Nota - Leer en Ga Verder</h4>
+      <p>Schrijf één regel op over wat je hebt geleerd van deze situatie. Dan ga je verder. Dit helpt je om tegenslag te zien als leermoment in plaats van als mislukking.</p>
+
+      <div class="highlight-box">
+        <h4>🔧 Stress Protocol Voorbeeld</h4>
+        <p><strong>Situatie:</strong> Je voelt je overweldigd door werk<br>
+        <strong>Adem:</strong> 6x langzaam uitademen<br>
+        <strong>Label:</strong> "Ik voel stress op niveau 8"<br>
+        <strong>Doel:</strong> "Ik ga 2 minuten mijn takenlijst ordenen"<br>
+        <strong>Nota:</strong> "Ik moet beter plannen om dit te voorkomen"</p>
+      </div>
+
+      <h3>Mentale Scripts Voor Lastige Momenten</h3>
+      <p>Een onbreekbare mindset heeft voorbereide scripts voor verschillende uitdagingen. Deze scripts helpen je om automatisch de juiste reactie te hebben:</p>
+      
+      <h4>Script Voor Stress</h4>
+      <p><strong>Script:</strong> "Adem - één kleine stap nu."<br>
+      <strong>Wanneer te gebruiken:</strong> Bij overweldiging, druk, of angst<br>
+      <strong>Waarom het werkt:</strong> Het herinnert je aan het protocol en focust op actie</p>
+      
+      <h4>Script Voor Mislukking</h4>
+      <p><strong>Script:</strong> "Leer - schrijf 1 verbetering - opnieuw."<br>
+      <strong>Wanneer te gebruiken:</strong> Na een fout, mislukking, of teleurstelling<br>
+      <strong>Waarom het werkt:</strong> Het verandert mislukking in een leermoment</p>
+      
+      <h4>Script Voor Verleiding</h4>
+      <p><strong>Script:</strong> "Niet nu - ik kies op het geplande moment."<br>
+      <strong>Wanneer te gebruiken:</strong> Bij verleidingen die je doelen ondermijnen<br>
+      <strong>Waarom het werkt:</strong> Het geeft je controle over timing</p>
+      
+      <h4>Script Voor Afwijzing</h4>
+      <p><strong>Script:</strong> "Optimaliseer en probeer weer."<br>
+      <strong>Wanneer te gebruiken:</strong> Bij afwijzing, kritiek, of teleurstelling<br>
+      <strong>Waarom het werkt:</strong> Het focust op verbetering in plaats van opgeven</p>
+
+      <h3>Omgevingsontwerp Voor Een Onbreekbare Mindset</h3>
+      <p>Je omgeving kan je helpen of tegenwerken. Hier zijn de belangrijkste principes voor het inrichten van je omgeving:</p>
+      
+      <h4>Werkplek Optimalisatie</h4>
+      <ul>
+        <li><strong>Schoon en opgeruimd:</strong> Een opgeruimde ruimte geeft een opgeruimde geest</li>
+        <li><strong>Checklist zichtbaar:</strong> Houd je doelen en taken in het zicht</li>
+        <li><strong>Telefoon buiten handbereik:</strong> Verwijder afleidingen tijdens focusblokken</li>
+        <li><strong>Inspirerende elementen:</strong> Foto's, quotes, of objecten die je motiveren</li>
+      </ul>
+      
+      <h4>Voeding en Hydratatie</h4>
+      <ul>
+        <li><strong>Water binnen handbereik:</strong> Zorg altijd voor voldoende hydratatie</li>
+        <li><strong>Gezonde snacks klaar:</strong> Voorkom slechte keuzes door goede voorbereiding</li>
+        <li><strong>Eiwitrijke maaltijden:</strong> Voeding die je energie en focus ondersteunt</li>
+        <li><strong>Mijden van energiedips:</strong> Vermijd suiker en cafeïne crashes</li>
+      </ul>
+      
+      <h4>Sociale Omgeving</h4>
+      <ul>
+        <li><strong>Accountability partner:</strong> Iemand die je helpt om verantwoordelijk te blijven</li>
+        <li><strong>Ondersteunende gemeenschap:</strong> Mensen die dezelfde doelen en waarden hebben</li>
+        <li><strong>Mentoren en coaches:</strong> Mensen die je kunnen begeleiden en adviseren</li>
+        <li><strong>Grenzen stellen:</strong> Bescherm jezelf tegen negatieve invloeden</li>
+      </ul>
+
+      <h3>Dagelijkse, Wekelijkse en Maandelijkse Ritmes</h3>
+      <p>Een onbreekbare mindset wordt ondersteund door consistente ritmes op verschillende niveaus:</p>
+      
+      <h4>Dagelijks Ritme</h4>
+      <p><strong>Ochtend:</strong></p>
+      <ul>
+        <li>3 minuten ademhalingsoefeningen</li>
+        <li>Intentiezin uitspreken voor de dag</li>
+        <li>Top-3 taken identificeren</li>
+        <li>Korte fysieke activatie (5-10 minuten)</li>
+      </ul>
+      
+      <p><strong>Middag:</strong></p>
+      <ul>
+        <li>1 focusblok van 60-90 minuten</li>
+        <li>1 schermloze pauze van 15 minuten</li>
+      </ul>
+      
+      <p><strong>Avond:</strong></p>
+      <ul>
+        <li>3-regel review van de dag</li>
+        <li>Planning voor morgen</li>
+        <li>Dankbaarheid oefening</li>
+      </ul>
+      
+      <h4>Wekelijks Ritme</h4>
+      <ul>
+        <li><strong>3 diepe werkblokken:</strong> Tijden voor je belangrijkste projecten</li>
+        <li><strong>2 fysieke prikkels:</strong> Krachttraining en conditie</li>
+        <li><strong>1 moeilijke taak:</strong> Iets wat je uitstelt maar belangrijk is</li>
+        <li><strong>1 sociale recharge:</strong> Tijd met broederschap of mentor</li>
+      </ul>
+      
+      <h4>Maandelijks Ritme</h4>
+      <ul>
+        <li><strong>Evaluatie:</strong> Beoordeel je doelen, gedrag en herstel</li>
+        <li><strong>Frictie aanpassen:</strong> Voeg nieuwe obstakels toe of verwijder oude</li>
+        <li><strong>Documenteren:</strong> Noteer wat werkte en verdubbel dat</li>
+        <li><strong>Planning:</strong> Stel nieuwe doelen en aanpassingen vast</li>
+      </ul>
+
+      <h3>De Wetenschap Achter Een Onbreekbare Mindset</h3>
+      <p>Wetenschappelijk onderzoek toont aan dat mentale weerbaarheid kan worden ontwikkeld en getraind. Hier zijn de belangrijkste bevindingen:</p>
+      
+      <h4>Neuroplasticiteit</h4>
+      <p>Je hersenen kunnen veranderen en zich aanpassen gedurende je hele leven. Door consistente mentale training kun je nieuwe neurale paden aanmaken die je helpen om beter om te gaan met stress en tegenslag.</p>
+      
+      <h4>Het Growth Mindset Effect</h4>
+      <p>Mensen met een growth mindset geloven dat hun capaciteiten kunnen worden ontwikkeld. Dit leidt tot meer doorzettingsvermogen, betere prestaties en grotere veerkracht bij tegenslag.</p>
+      
+      <h4>Stress Inoculatie</h4>
+      <p>Het regelmatig blootstellen aan gecontroleerde stress maakt je beter bestand tegen echte stress. Dit is vergelijkbaar met hoe een vaccin je immuunsysteem versterkt.</p>
+      
+      <h4>Het Optimisme Effect</h4>
+      <p>Optimistische mensen herstellen sneller van tegenslag, hebben betere gezondheid, en presteren beter op lange termijn. Optimisme is een vaardigheid die kan worden geleerd.</p>
+
+      <h3>Veelgemaakte Fouten Bij Het Ontwikkelen Van Een Onbreekbare Mindset</h3>
+      <p>De meeste mensen maken dezelfde fouten bij het proberen om mentaal sterker te worden. Hier zijn de belangrijkste valkuilen:</p>
+      
+      <h4>1. Alles Tegelijk Willen Veranderen</h4>
+      <p>Proberen om je hele mindset in één keer te veranderen is overweldigend en leidt tot opgeven. Begin met één aspect en bouw geleidelijk op.</p>
+      
+      <h4>2. Afhankelijk Zijn Van Externe Validatie</h4>
+      <p>Je zelfvertrouwen laten afhangen van wat anderen van je vinden maakt je kwetsbaar. Een onbreekbare mindset komt van binnenuit.</p>
+      
+      <h4>3. Negatieve Zelfpraat Negeren</h4>
+      <p>Je innerlijke criticus kan je onbreekbare mindset ondermijnen. Leer om negatieve gedachten te herkennen en te vervangen door constructieve gedachten.</p>
+      
+      <h4>4. Geen Systemen Bouwen</h4>
+      <p>Afhankelijk zijn van wilskracht alleen is onbetrouwbaar. Bouw systemen en gewoontes die je onbreekbare mindset ondersteunen.</p>
+      
+      <h4>5. Perfectionisme Streven</h4>
+      <p>Een onbreekbare mindset betekent niet dat je nooit faalt of zwak bent. Het betekent dat je weet hoe je moet opstaan en doorgaan.</p>
+
+      <h3>De Voordelen Van Een Onbreekbare Mindset</h3>
+      <p>Een onbreekbare mindset heeft voordelen in alle aspecten van je leven:</p>
+      
+      <h4>Persoonlijke Voordelen</h4>
+      <ul>
+        <li><strong>Hoger zelfvertrouwen:</strong> Je weet dat je uitdagingen kunt overwinnen</li>
+        <li><strong>Betere stress management:</strong> Je blijft kalm onder druk</li>
+        <li><strong>Meer doorzettingsvermogen:</strong> Je geeft niet op bij de eerste tegenslag</li>
+        <li><strong>Snellere herstel:</strong> Je komt sneller terug van mislukkingen</li>
+        <li><strong>Grotere levensvreugde:</strong> Je ziet uitdagingen als kansen</li>
+      </ul>
+      
+      <h4>Professionele Voordelen</h4>
+      <ul>
+        <li><strong>Betere prestaties:</strong> Je presteert consistent onder druk</li>
+        <li><strong>Leiderschapskwaliteiten:</strong> Anderen kijken naar je voor stabiliteit</li>
+        <li><strong>Innovatie:</strong> Je durft risico's te nemen en te experimenteren</li>
+        <li><strong>Netwerken:</strong> Mensen willen werken met mentaal sterke personen</li>
+        <li><strong>Carrière groei:</strong> Je wordt gezien als betrouwbaar en capabel</li>
+      </ul>
+      
+      <h4>Relatie Voordelen</h4>
+      <ul>
+        <li><strong>Stabielere relaties:</strong> Je bent een betrouwbare partner en vriend</li>
+        <li><strong>Betere communicatie:</strong> Je blijft kalm tijdens conflicten</li>
+        <li><strong>Emotionele steun:</strong> Je kunt anderen helpen in moeilijke tijden</li>
+        <li><strong>Respect:</strong> Anderen respecteren je voor je mentale kracht</li>
+        <li><strong>Inspiratie:</strong> Je inspireert anderen om ook sterker te worden</li>
+      </ul>
+
+      <div class="highlight-box">
+        <h4>🎯 Belangrijke Herinnering</h4>
+        <p>Een onbreekbare mindset is niet iets waar je mee geboren wordt - het is iets dat je kunt ontwikkelen. Het vereist oefening, geduld en consistentie, maar de voordelen zijn enorm. Door deze principes dagelijks toe te passen, bouw je aan de mentale kracht die je nodig hebt om je doelen te bereiken en je beste leven te leiden.</p>
+      </div>
+    </div>
+
+    <!-- Huiswerk Opdrachten -->
+    <div class="section" id="huiswerk">
+      <h2>📝 Huiswerk Opdrachten</h2>
+      
+      <div class="exercise-box">
+        <h4>Opdracht 1: Mindset Status Check</h4>
+        <p><strong>Doel:</strong> Inzicht krijgen in je huidige mentale weerbaarheid en zwakke punten identificeren.</p>
+        <p><strong>Actie:</strong> Beoordeel jezelf op alle vier pilaren (eigenaarschap, ritme, kleine stappen, omgevingsontwerp) en geef elke pijler een score van 1-10. Schrijf op waar je het meest op breekt en welke scripts je nodig hebt voor lastige momenten. Dit wordt je persoonlijke mindset ontwikkelingsplan.</p>
+      </div>
+      
+      <div class="exercise-box">
+        <h4>Opdracht 2: Stress Protocol Oefenen</h4>
+        <p><strong>Doel:</strong> Het stress en tegenslag protocol praktisch toepassen in je dagelijks leven.</p>
+        <p><strong>Actie:</strong> Oefen het 4-stappen protocol (adem, label, doel, nota) elke keer dat je stress of tegenslag ervaart. Houd een logboek bij van je ervaringen en noteer welke scripts het beste werken voor jou. Na 7 dagen evalueer je wat je hebt geleerd.</p>
+      </div>
+      
+      <div class="exercise-box">
+        <h4>Opdracht 3: Omgevingsontwerp Implementeren</h4>
+        <p><strong>Doel:</strong> Je omgeving zo inrichten dat het een onbreekbare mindset ondersteunt.</p>
+        <p><strong>Actie:</strong> Pas één aspect van je omgeving aan: werkplek optimalisatie, voeding voorbereiding, of sociale omgeving. Maak goede keuzes makkelijker en slechte keuzes moeilijker. Test dit 7 dagen en evalueer het effect op je mindset en gedrag.</p>
+      </div>
+    </div>
+
+    <!-- Checklists -->
+    <div class="section" id="checklists">
+      <h2>✅ Checklists</h2>
+      <h3>Dagelijkse Onbreekbare Mindset Check</h3>
+      <div class="checklist">
+        <div class="checklist-item"><input type="checkbox" id="chk-1"><label for="chk-1">Ochtendritueel gedaan (ademhaling, intentie, top-3, beweging)</label></div>
+        <div class="checklist-item"><input type="checkbox" id="chk-2"><label for="chk-2">Minstens 1 focusblok van 60-90 minuten voltooid</label></div>
+        <div class="checklist-item"><input type="checkbox" id="chk-3"><label for="chk-3">Stress protocol toegepast bij moeilijke momenten</label></div>
+        <div class="checklist-item"><input type="checkbox" id="chk-4"><label for="chk-4">1 kleine stap gezet richting belangrijk doel</label></div>
+        <div class="checklist-item"><input type="checkbox" id="chk-5"><label for="chk-5">Avondreflectie gedaan (3-regel review)</label></div>
+        <div class="checklist-item"><input type="checkbox" id="chk-6"><label for="chk-6">Grenzen gerespecteerd (nee gezegd tegen verleidingen)</label></div>
+        <div class="checklist-item"><input type="checkbox" id="chk-7"><label for="chk-7">Dankbaarheid oefening gedaan</label></div>
+      </div>
+    </div>
+
+    <!-- Reflectie Vragen -->
+    <div class="section" id="reflectie">
+      <h2>🤔 Reflectie Vragen</h2>
+      
+      <div class="reflection-question">
+        <h4>Reflectievraag 1: Huidige Mindset Status</h4>
+        <p>Welke van de vier pilaren (eigenaarschap, ritme, kleine stappen, omgevingsontwerp) heeft de meeste ontwikkeling nodig in jouw leven? Waarom denk je dat dit zo is en hoe beïnvloedt dit je dagelijkse prestaties?</p>
+      </div>
+      
+      <div class="reflection-question">
+        <h4>Reflectievraag 2: Stress en Tegenslag</h4>
+        <p>Wat is jouw meest voorkomende breekpunt - waar geef je het meest op of raak je overweldigd? Welk script en welke kleine actie kunnen je helpen om door deze momenten heen te komen?</p>
+      </div>
+      
+      <div class="reflection-question">
+        <h4>Reflectievraag 3: Toekomstvisie</h4>
+        <p>Hoe zou je leven eruit zien als je een volledig onbreekbare mindset had? Welke specifieke veranderingen zou je merken in hoe je omgaat met uitdagingen, stress en tegenslag?</p>
+      </div>
+    </div>
+
+    <!-- Actieplan -->
+    <div class="section action-plan" id="actieplan">
+      <h3>Actieplan</h3>
+      
+      <div class="action-step">
+        <h4>Stap 1: Mindset Status Beoordelen</h4>
+        <p>Beoordeel jezelf op alle vier pilaren van een onbreekbare mindset en identificeer je zwakste punt. Kies één pijler om mee te beginnen en maak een specifiek plan om deze te versterken.</p>
+      </div>
+      
+      <div class="action-step">
+        <h4>Stap 2: Stress Protocol Leren</h4>
+        <p>Leer het 4-stappen stress protocol uit je hoofd (adem, label, doel, nota) en oefen het dagelijks. Maak het een automatische reactie op stress en tegenslag door herhaalde oefening.</p>
+      </div>
+      
+      <div class="action-step">
+        <h4>Stap 3: Mentale Scripts Voorbereiden</h4>
+        <p>Bereid specifieke scripts voor voor je meest voorkomende uitdagingen. Schrijf ze op en oefen ze zodat ze automatisch komen wanneer je ze nodig hebt.</p>
+      </div>
+      
+      <div class="action-step">
+        <h4>Stap 4: Omgeving Optimaliseren</h4>
+        <p>Pas je omgeving aan om goede keuzes makkelijker en slechte keuzes moeilijker te maken. Begin met één ruimte (werkplek, slaapkamer, of keuken) en breid geleidelijk uit.</p>
+      </div>
+      
+      <div class="action-step">
+        <h4>Stap 5: Dagelijks Ritme Implementeren</h4>
+        <p>Implementeer een dagelijks ritme dat je onbreekbare mindset ondersteunt. Begin met het ochtendritueel en bouw geleidelijk uit naar een compleet dagelijks systeem.</p>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <p>Dit ebook is onderdeel van de <span class="ttm-brand">Top Tier Men</span> Academy</p>
+      <p>Module 04: Mentale Kracht/Weerbaarheid | Les 02: Een Onbreekbare Mindset</p>
+      <p>© 2025 Top Tier Men. Alle rechten voorbehouden.</p>
+    </div>
+  </div>
+
+  <script>
+    // Checklist persistentie via localStorage
+    document.addEventListener('DOMContentLoaded', function() {
+      const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+      checkboxes.forEach(cb => {
+        const saved = localStorage.getItem(cb.id);
+        if (saved === 'true') cb.checked = true;
+        cb.addEventListener('change', function(){ localStorage.setItem(this.id, this.checked); });
+      });
+    });
+  </script>
+</body>
+</html>

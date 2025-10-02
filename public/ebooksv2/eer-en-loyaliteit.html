@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Eer en Loyaliteit - Ebook | Top Tier Men</title>
+  <meta name="description" content="V2 ebook voor Eer en Loyaliteit binnen Top Tier Men Academy." />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.6; color: #ffffff;
+      background: linear-gradient(135deg, #0A0F0A 0%, #181F17 50%, #232D1A 100%);
+      min-height: 100vh;
+    }
+    .container { max-width: 800px; margin: 0 auto; padding: 2rem; }
+    .header {
+      text-align: center; margin-bottom: 3rem; padding: 2rem;
+      background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      border-radius: 20px; border: 1px solid #3A4D23;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    .logo { margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; }
+    h1 {
+      font-size: 2.5rem; font-weight: 800;
+      background: linear-gradient(135deg, #ffffff 0%, #8BAE5A 50%, #B6C948 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      margin-bottom: .5rem;
+    }
+    .subtitle { color: #8BAE5A; font-size: 1.1rem; font-weight: 500; }
+    .module-info {
+      background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1rem; border-radius: 10px; margin: 1rem 0; border-left: 4px solid #8BAE5A;
+    }
+    .section { background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      margin-bottom: 2rem; padding: 2rem; border-radius: 15px; border: 1px solid #3A4D23; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    .section h2 { color: #B6C948; font-size: 1.8rem; font-weight: 700; margin-bottom: 1.5rem; display: flex; align-items: center; gap: .5rem; }
+    .section h3 { color: #8BAE5A; font-size: 1.3rem; font-weight: 600; margin: 1.5rem 0 1rem; }
+    .section p { margin-bottom: 1rem; color: #e0e0e0; }
+    .section ul, .section ol { margin: 1rem 0; padding-left: 2rem; }
+    .section li { margin-bottom: .5rem; color: #e0e0e0; }
+    .highlight-box { background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1.5rem; border-radius: 10px; border-left: 4px solid #B6C948; margin: 1.5rem 0;
+    }
+    .exercise-box { background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%);
+      padding: 1.5rem; border-radius: 10px; border: 1px solid #8BAE5A; margin: 1rem 0;
+    }
+    .exercise-box h4 { color: #B6C948; font-size: 1.1rem; margin-bottom: 1rem; }
+    .checklist { background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      padding: 1.5rem; border-radius: 10px; border: 1px solid #3A4D23; margin: 1rem 0;
+    }
+    .checklist-item { display: flex; align-items: center; margin-bottom: .8rem; padding: .5rem; background: rgba(58,77,35,.3); border-radius: 8px; }
+    .checklist-item input[type="checkbox"] { margin-right: 1rem; width: 18px; height: 18px; accent-color: #8BAE5A; }
+    .reflection-question { background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1.5rem; border-radius: 10px; border-left: 4px solid #B6C948; margin: 1rem 0;
+    }
+    .reflection-question h4 { color: #B6C948; margin-bottom: 1rem; }
+    .action-plan { background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%);
+      padding: 2rem; border-radius: 15px; border: 2px solid #8BAE5A; margin: 2rem 0;
+    }
+    .action-step { background: rgba(139,174,90,.1); padding: 1rem; border-radius: 8px; margin: 1rem 0; border-left: 3px solid #8BAE5A; }
+    .footer { text-align: center; margin-top: 3rem; padding: 2rem; background: linear-gradient(135deg, #181F17 0%, #232D1A 100%); border-radius: 15px; border: 1px solid #3A4D23; }
+    .footer p { color: #8BAE5A; margin-bottom: 1rem; }
+    .ttm-brand { color: #B6C948; font-weight: 700; }
+    .sticky-back-btn { position: fixed; top: 50%; right: 20px; transform: translateY(-50%);
+      z-index: 1000; background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%);
+      color: #fff; border: none; border-radius: 50px; padding: 15px 20px; font-size: 14px; font-weight: 600; cursor: pointer;
+      box-shadow: 0 8px 25px rgba(139,174,90,.3); transition: all .3s ease; display: flex; align-items: center; gap: 8px; text-decoration: none; min-width: 120px; justify-content: center;
+    }
+    .sticky-back-btn:hover { background: linear-gradient(135deg, #B6C948 0%, #8BAE5A 100%); transform: translateY(-50%) scale(1.05); box-shadow: 0 12px 35px rgba(139,174,90,.4); }
+    .sticky-back-btn:active { transform: translateY(-50%) scale(.95); }
+    .sticky-back-btn svg { width: 16px; height: 16px; fill: currentColor; }
+    @media (max-width: 768px) {
+      .container { padding: 1rem; }
+      h1 { font-size: 2rem; }
+      .section { padding: 1.5rem; }
+      .sticky-back-btn { right: 10px; padding: 12px 16px; font-size: 12px; min-width: 100px; }
+    }
+  </style>
+</head>
+<body>
+  <a href="/dashboard/academy/6102f6c8-7f38-4501-ab94-e9a68622e46f/376405c4-33da-4c25-a83c-2cfd54e99b42" class="sticky-back-btn" title="Terug naar les">
+    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    Terug
+  </a>
+
+  <div class="container">
+    <div class="header">
+      <div class="logo">
+        <img src="/logo_white-full.svg" alt="Top Tier Men Logo" style="height:40px;width:auto" />
+      </div>
+      <h1>Eer en Loyaliteit</h1>
+      <p class="subtitle"></p>
+      <div class="module-info">
+        <strong>Module 06: Brotherhood</strong> | <strong>Les 02: Eer en Loyaliteit</strong>
+      </div>
+    </div>
+
+    <div class="section" id="samenvatting">
+      <h2>📚 Uitgebreide Samenvatting van de Les</h2>
+<div class="highlight-box"><h4>🎯 Les Overzicht</h4><p>Deze les gaat over eer en loyaliteit: twee pilaren die jouw karakter, relaties en reputatie dragen. Eer is je innerlijke standaard: doen wat juist is, ook als niemand kijkt. Loyaliteit is trouw zijn aan je woord, je waarden, je broeders en je missie. Samen vormen ze een kompas dat keuzes makkelijker maakt, rust brengt in je hoofd en richting geeft aan je leven. Met eer en loyaliteit hoef je minder te twijfelen: je weet wat je doet en wie je bent.</p></div><h3>Waarom eer en loyaliteit je leven simpeler maken</h3><p>Zonder eer wordt alles vaag: je zegt A en doet B, je schuift grenzen en je vertrouwt jezelf steeds minder. Zonder loyaliteit voelen relaties leeg: mensen kunnen niet op je bouwen en jij niet op hen. Met eer en loyaliteit bouw je rustig en gestaag. Je woord is betrouwbaarder dan papier. Mensen weten wat ze aan je hebben, jij weet wat je aan jezelf hebt. Je energie gaat niet meer op aan uitvluchten en gedoe, maar aan bouwen. Je leven wordt kleiner in drama en groter in resultaat.</p><h3>Definities die je kunt gebruiken</h3><ul><li><strong>Eer:</strong> handelen volgens je waarden, ook als niemand kijkt en ook als het iets kost.</li><li><strong>Loyaliteit:</strong> trouw blijven aan je woord en je missie, je broeders en je gezin beschermen, vooral wanneer het lastig wordt.</li></ul><h3>De 12 gedragsregels van eer (praktisch)</h3><ol><li><strong>Waarheid boven comfort:</strong> spreek eerlijk, of zwijg. Smeed vertrouwen met waarheid.</li><li><strong>Kleine beloftes, grote levering:</strong> beloof minder, lever meer. Je reputatie groeit.</li><li><strong>Wees op tijd:</strong> respecteer de tijd van anderen; dit is respect in actie.</li><li><strong>Maak af wat je begint:</strong> klein beginnen, consequent afmaken. Geen halve projecten.</li><li><strong>Bescherm de zwakke:</strong> gebruik kracht om te bouwen i.p.v. te breken.</li><li><strong>Geen roddel:</strong> praat met de betrokkene; houd je kring schoon.</li><li><strong>Betaal je prijs:</strong> kies verantwoordelijkheid boven excuses.</li><li><strong>Accepteer feedback:</strong> verdedigen is ego, luisteren is groei.</li><li><strong>Beheer je woorden:</strong> geen lege praat; kort, helder, nauwkeurig.</li><li><strong>Bewaar orde:</strong> kamer, financiën, lichaam en planning op niveau.</li><li><strong>Verdedig niet je imago:</strong> verdedig je waarden met daden.</li><li><strong>Blijf kalm in conflict:</strong> stevig en respectvol kan tegelijk.</li></ol><h3>De 12 gedragsregels van loyaliteit (werkbaar)</h3><ol><li><strong>Je woord is bindend:</strong> wijzig je iets, communiceer vroeg en eerlijk.</li><li><strong>Voorspelbaarheid:</strong> laat je gedrag stabiel zijn; geen verrassingen voor je kring.</li><li><strong>Privé blijft privé:</strong> binnen is binnen. Vertrouwen is heilig.</li><li><strong>Sta naast je broeder in storm:</strong> niet alleen bij winst, juist bij tegenslag.</li><li><strong>Geen ja-knikker:</strong> echte trouw spreekt waarheid, ook als het schuurt.</li><li><strong>Krediet publiek, feedback privé:</strong> bouw reputatie, herstel in beslotenheid.</li><li><strong>Missie boven ego:</strong> kies de uitkomst die de missie dient.</li><li><strong>Duidelijke afspraken:</strong> schrijf, bevestig, lever.</li><li><strong>Snelle conflict-oplossing:</strong> pak het binnen 48 uur op; laat het niet rotten.</li><li><strong>Grenzen respecteren:</strong> loyaliteit is geen blind volgen; respecteer elkaars grenzen.</li><li><strong>Kwaliteit boven kwantiteit:</strong> weinig maar sterk is beter dan veel en zwak.</li><li><strong>Bewaken van reputatie:</strong> loop niet mee in vuil spel; houd je naam schoon.</li></ol><h3>Dagelijkse praktijk (zo ziet het eruit)</h3><ul><li><strong>Ochtend:</strong> plan 3 prioriteiten; doe 1 moeilijke taak eerst.</li><li><strong>Werk:</strong> lever op, of meld tijdig wat er verandert met een nieuw plan.</li><li><strong>Broeders:</strong> 1 korte check-in per dag: voortgang, hulp, of eerlijke feedback.</li><li><strong>Gezin/partner:</strong> leg je telefoon weg, maak oogcontact, luister en vat samen.</li><li><strong>Training:</strong> houd het schema; no-show = bericht vooraf, geen excuus achteraf.</li></ul><h3>Grenzen stellen met eer (kort en kalm)</h3><p>Grenzen zijn duidelijkheid. Zeg wat je wel/niet doet, in korte zinnen. Gebruik geen verwijten, maar feiten en keuzes. Herhaal indien nodig. Als gedrag niet verandert, kies afstand zonder drama. Zelfrespect is onderdeel van eer.</p><h3>Conflict hanteren (stevig & respectvol)</h3><ol><li><strong>Feit → gevoel → verzoek:</strong> "Dit gebeurde… zo ervaar ik het… ik wil dat we X doen."</li><li><strong>Luister actief:</strong> herhaal kort wat de ander zegt; wees exact.</li><li><strong>Aanval gedrag, niet persoon:</strong> specifieke actie i.p.v. labels.</li><li><strong>Streef oplossing boven gelijk:</strong> missie eerst.</li></ol><h3>Wanneer loyaliteit stopt (rode lijnen)</h3><ul><li>Herhaalde leugen en misbruik van vertrouwen.</li><li>Grove grensoverschrijding of sabotage van missie/gezin.</li><li>Weigering om verantwoordelijkheid te nemen na duidelijke feedback.</li></ul><p>Loyaliteit is krachtig maar niet blind. Je beschermt het goede door het rotte te begrenzen.</p><h3>Rituelen die eer en loyaliteit voeden</h3><ul><li><strong>Maandag:</strong> deel je weekdoelen met je kring.</li><li><strong>Woensdag:</strong> tussentijdse check: wat blokkeert? Wie help je?</li><li><strong>Vrijdag:</strong> review: wat deed je eervol? Waar kun je scherper?</li><li><strong>Maandelijks:</strong> discomfort samen: hike, koude training, pitch, run.</li></ul><h3>Veelgemaakte fouten (en fixes)</h3><ul><li><strong>Te veel praten, te weinig doen:</strong> bewijs met daden, niet met woorden.</li><li><strong>Conflicten laten rotten:</strong> plan binnen 48 uur een gesprek.</li><li><strong>Vage beloftes:</strong> maak ze klein en meetbaar; lever vroeg.</li><li><strong>Roddelen "om lucht te geven":</strong> praat met de juiste persoon of zwijg.</li><li><strong>Grenzen onduidelijk:</strong> schrijf je 3 niet-onderhandelbare regels op en communiceer ze.</li></ul><h3>Weekopdracht (concreet en haalbaar)</h3><ol><li>Schrijf je 5 rollen (man, partner, vader, professional, broeder) en noteer per rol 1 eervolle actie.</li><li>Plan 2 loyaliteits-daden: help iemand zonder terugverwachting; bescherm 1 afspraak.</li><li>Los 1 sluimerend conflict op met het "feit-gevoel-verzoek"-model.</li><li>Vraag 1 broeder om eerlijke feedback over jouw betrouwbaarheid deze week.</li></ol><h3>Voorbeelden uit de praktijk</h3><ul><li><strong>Werk:</strong> project vertraagt. Eervol: direct melden, nieuwe planning, verantwoordelijkheid pakken.</li><li><strong>Vriendschap:</strong> je broeder maakt een fout. Loyaal: eerlijk 1-op-1, niet publiekelijk afvallen.</li><li><strong>Gezin:</strong> gepland moment met partner; hou je eraan en wees aanwezig.</li><li><strong>Training:</strong> je maat haakt af; jij traint alsnog en stuurt na afloop je "done".</li></ul><h3>Dagelijkse standaard (10 regels)</h3><ol><li>Op tijd. Afspraak = afspraak.</li><li>Kort, helder, eerlijk.</li><li>Geen roddel; bespreek direct.</li><li>1 taak af vóór je praat.</li><li>Train of wandel elke dag.</li><li>Lees/leer 20 min; groei bewust.</li><li>Check 1 broeder; bied waarde.</li><li>Hou je woord; communiceer bij wijziging.</li><li>Rustig in conflict; missie eerst.</li><li>Sluit af met een korte review: wat was eervol? wat beter?</li></ol><div class="highlight-box"><h4>Samenvatting in 12 regels</h4><ol><li>Eer = doen wat juist is, ook zonder publiek.</li><li>Loyaliteit = trouw aan woord, waarden en kring.</li><li>Waarheid boven comfort.</li><li>Beloof klein, lever groot.</li><li>Conflicten snel en respectvol.</li><li>Geen roddel; feedback privé.</li><li>Grenzen kalm en duidelijk.</li><li>Missie boven ego.</li><li>Kleine dagelijkse daden bouwen reputatie.</li><li>Kwaliteit van kring > kwantiteit.</li><li>Rituelen voeden trouw en eer.</li><li>Herhaal wekelijks; evalueer en verscherp.</li></ol></div><h3>Afsluiting</h3><p>Eer en loyaliteit zijn geen slogans; het zijn keuzes in je agenda, je woorden en je daden. Als je ze elke dag bevestigd, bouw je een leven dat stevig staat, relaties die houden en een reputatie die vooruitloopt op je naam. Je maakt jezelf en je kring sterker – en dat is leiderschap.</p>
+    </div>
+
+    <div class="section" id="huiswerk">
+      <h2>📝 Huiswerk Opdrachten</h2>
+      
+      <div class="exercise-box">
+        <h4>Opdracht 1: Rollen en Eervolle Acties</h4>
+        <p><strong>Doel:</strong> Je 5 belangrijkste rollen identificeren en per rol een eervolle actie uitvoeren.</p>
+        <p><strong>Actie:</strong> Schrijf je 5 rollen op (man, partner, vader, professional, broeder) en bedenk per rol 1 concrete eervolle actie die je deze week kunt uitvoeren. Voer deze acties uit en evalueer welke het meeste impact had.</p>
+      </div>
+
+      <div class="exercise-box">
+        <h4>Opdracht 2: Loyaliteits-Daden</h4>
+        <p><strong>Doel:</strong> Loyaliteit in praktijk brengen door anderen te helpen zonder terugverwachting.</p>
+        <p><strong>Actie:</strong> Plan 2 loyaliteits-daden deze week: help iemand zonder terugverwachting en bescherm 1 afspraak door je eraan te houden. Documenteer wat je deed en hoe het werd ontvangen.</p>
+      </div>
+
+      <div class="exercise-box">
+        <h4>Opdracht 3: Conflict Oplossen</h4>
+        <p><strong>Doel:</strong> Een sluimerend conflict oplossen met het "feit-gevoel-verzoek"-model.</p>
+        <p><strong>Actie:</strong> Identificeer 1 sluimerend conflict en los het op binnen 48 uur met het model: "Dit gebeurde… zo ervaar ik het… ik wil dat we X doen." Evalueer het resultaat.</p>
+      </div>
+    </div>
+
+    <div class="section" id="checklists">
+      <h2>✅ Checklists</h2>
+      
+      <h3>Weekchecklist "Eer en Loyaliteit"</h3>
+      <div class="checklist">
+        <div class="checklist-item">
+          <input type="checkbox" id="eer-1">
+          <label for="eer-1">5 rollen geïdentificeerd en per rol 1 eervolle actie uitgevoerd</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="eer-2">
+          <label for="eer-2">2 loyaliteits-daden uitgevoerd (helpen zonder terugverwachting)</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="eer-3">
+          <label for="eer-3">1 sluimerend conflict opgelost met feit-gevoel-verzoek model</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="eer-4">
+          <label for="eer-4">Eerlijke feedback gevraagd van 1 broeder over betrouwbaarheid</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="eer-5">
+          <label for="eer-5">Alle afspraken nagekomen of tijdig gecommuniceerd over wijzigingen</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="eer-6">
+          <label for="eer-6">Geen roddel; alle feedback direct en privé gegeven</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="section" id="reflectie">
+      <h2>🤔 Reflectie Vragen</h2>
+      
+      <div class="reflection-question">
+        <h4>Eervol Handelen</h4>
+        <p>In welke rol (man, partner, vader, professional, broeder) vind je het moeilijkst om eervol te handelen? Wat is de specifieke uitdaging en hoe kun je dit verbeteren?</p>
+      </div>
+
+      <div class="reflection-question">
+        <h4>Loyaliteit en Grenzen</h4>
+        <p>Waar trek jij de lijn tussen loyaliteit en blind volgen? Wanneer zou je loyaliteit moeten stoppen en waarom? Wat zijn jouw rode lijnen?</p>
+      </div>
+
+      <div class="reflection-question">
+        <h4>Reputatie en Vertrouwen</h4>
+        <p>Hoe zou je jouw huidige reputatie beschrijven in één zin? Welke 3 dingen zou je deze maand kunnen doen om je reputatie voor betrouwbaarheid en eer te versterken?</p>
+      </div>
+    </div>
+
+    <div class="section" id="actieplan">
+      <h2>🎯 Actieplan</h2>
+      
+      <div class="action-plan">
+        <div class="action-step">
+          <strong>Stap 1:</strong> Identificeer je 5 belangrijkste rollen en bedenk per rol 1 concrete eervolle actie. Voer deze acties deze week uit en evalueer de impact.
+        </div>
+        
+        <div class="action-step">
+          <strong>Stap 2:</strong> Plan 2 loyaliteits-daden: help iemand zonder terugverwachting en bescherm 1 afspraak door je eraan te houden. Documenteer het resultaat.
+        </div>
+        
+        <div class="action-step">
+          <strong>Stap 3:</strong> Los 1 sluimerend conflict op binnen 48 uur met het feit-gevoel-verzoek model. Evalueer hoe het conflict werd opgelost.
+        </div>
+        
+        <div class="action-step">
+          <strong>Stap 4:</strong> Vraag 1 broeder om eerlijke feedback over jouw betrouwbaarheid deze week. Luister zonder te verdedigen en noteer 3 verbeterpunten.
+        </div>
+        
+        <div class="action-step">
+          <strong>Stap 5:</strong> Implementeer de dagelijkse standaard van 10 regels voor een week. Evalueer welke regels het meeste impact hebben op je eer en loyaliteit.
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p>Dit ebook is onderdeel van de <span class="ttm-brand">Top Tier Men</span> Academy</p>
+      <p>Module 06: Brotherhood | Les 02: Eer en Loyaliteit</p>
+      <p>© 2025 Top Tier Men. Alle rechten voorbehouden.</p>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+      checkboxes.forEach(cb => {
+        const saved = localStorage.getItem(cb.id);
+        if (saved === 'true') cb.checked = true;
+        cb.addEventListener('change', function(){ localStorage.setItem(this.id, this.checked); });
+      });
+    });
+  </script>
+</body>
+</html>

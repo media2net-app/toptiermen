@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Van Werknemer naar eigen Verdienmodellen - Ebook | Top Tier Men</title>
+  <meta name="description" content="V2 ebook voor Van Werknemer naar eigen Verdienmodellen binnen Top Tier Men Academy." />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.6; color: #ffffff;
+      background: linear-gradient(135deg, #0A0F0A 0%, #181F17 50%, #232D1A 100%);
+      min-height: 100vh;
+    }
+    .container { max-width: 800px; margin: 0 auto; padding: 2rem; }
+    .header {
+      text-align: center; margin-bottom: 3rem; padding: 2rem;
+      background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      border-radius: 20px; border: 1px solid #3A4D23;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    .logo { margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; }
+    h1 {
+      font-size: 2.5rem; font-weight: 800;
+      background: linear-gradient(135deg, #ffffff 0%, #8BAE5A 50%, #B6C948 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      margin-bottom: .5rem;
+    }
+    .subtitle { color: #8BAE5A; font-size: 1.1rem; font-weight: 500; }
+    .module-info {
+      background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1rem; border-radius: 10px; margin: 1rem 0; border-left: 4px solid #8BAE5A;
+    }
+    .section { background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      margin-bottom: 2rem; padding: 2rem; border-radius: 15px; border: 1px solid #3A4D23; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    .section h2 { color: #B6C948; font-size: 1.8rem; font-weight: 700; margin-bottom: 1.5rem; display: flex; align-items: center; gap: .5rem; }
+    .section h3 { color: #8BAE5A; font-size: 1.3rem; font-weight: 600; margin: 1.5rem 0 1rem; }
+    .section p { margin-bottom: 1rem; color: #e0e0e0; }
+    .section ul, .section ol { margin: 1rem 0; padding-left: 2rem; }
+    .section li { margin-bottom: .5rem; color: #e0e0e0; }
+    .highlight-box { background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1.5rem; border-radius: 10px; border-left: 4px solid #B6C948; margin: 1.5rem 0;
+    }
+    .exercise-box { background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%);
+      padding: 1.5rem; border-radius: 10px; border: 1px solid #8BAE5A; margin: 1rem 0;
+    }
+    .exercise-box h4 { color: #B6C948; font-size: 1.1rem; margin-bottom: 1rem; }
+    .checklist { background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      padding: 1.5rem; border-radius: 10px; border: 1px solid #3A4D23; margin: 1rem 0;
+    }
+    .checklist-item { display: flex; align-items: center; margin-bottom: .8rem; padding: .5rem; background: rgba(58,77,35,.3); border-radius: 8px; }
+    .checklist-item input[type="checkbox"] { margin-right: 1rem; width: 18px; height: 18px; accent-color: #8BAE5A; }
+    .reflection-question { background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1.5rem; border-radius: 10px; border-left: 4px solid #B6C948; margin: 1rem 0;
+    }
+    .reflection-question h4 { color: #B6C948; margin-bottom: 1rem; }
+    .action-plan { background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%);
+      padding: 2rem; border-radius: 15px; border: 2px solid #8BAE5A; margin: 2rem 0;
+    }
+    .action-step { background: rgba(139,174,90,.1); padding: 1rem; border-radius: 8px; margin: 1rem 0; border-left: 3px solid #8BAE5A; }
+    .footer { text-align: center; margin-top: 3rem; padding: 2rem; background: linear-gradient(135deg, #181F17 0%, #232D1A 100%); border-radius: 15px; border: 1px solid #3A4D23; }
+    .footer p { color: #8BAE5A; margin-bottom: 1rem; }
+    .ttm-brand { color: #B6C948; font-weight: 700; }
+    .sticky-back-btn { position: fixed; top: 50%; right: 20px; transform: translateY(-50%);
+      z-index: 1000; background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%);
+      color: #fff; border: none; border-radius: 50px; padding: 15px 20px; font-size: 14px; font-weight: 600; cursor: pointer;
+      box-shadow: 0 8px 25px rgba(139,174,90,.3); transition: all .3s ease; display: flex; align-items: center; gap: 8px; text-decoration: none; min-width: 120px; justify-content: center;
+    }
+    .sticky-back-btn:hover { background: linear-gradient(135deg, #B6C948 0%, #8BAE5A 100%); transform: translateY(-50%) scale(1.05); box-shadow: 0 12px 35px rgba(139,174,90,.4); }
+    .sticky-back-btn:active { transform: translateY(-50%) scale(.95); }
+    .sticky-back-btn svg { width: 16px; height: 16px; fill: currentColor; }
+    @media (max-width: 768px) {
+      .container { padding: 1rem; }
+      h1 { font-size: 2rem; }
+      .section { padding: 1.5rem; }
+      .sticky-back-btn { right: 10px; padding: 12px 16px; font-size: 12px; min-width: 100px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Sticky Back Button: VERPLICHT naar juiste les URL -->
+  <a href="/dashboard/academy/309b7450-3c77-4aa5-bc14-f5514cafd886/83a68df6-52d7-4f64-9333-4e9811f5cd46" class="sticky-back-btn" title="Terug naar les">
+    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    Terug
+  </a>
+
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="logo">
+        <img src="/logo_white-full.svg" alt="Top Tier Men Logo" style="height:40px;width:auto" />
+      </div>
+      <h1>Van Werknemer naar eigen Verdienmodellen</h1>
+      <p class="subtitle"></p>
+      <div class="module-info">
+        <strong>Module 05: Business and Finance </strong> | <strong>Les 03: Van Werknemer naar eigen Verdienmodellen</strong>
+      </div>
+    </div>
+
+    <!-- Uitgebreide Samenvatting: 1:1 OVERNEMEN (NIET WIJZIGEN) -->
+    <!-- Markeer deze sectie exact en wijzig de tekst niet. -->
+    <!-- Financiële Disclaimer -->
+    <div class="highlight-box" style="background: linear-gradient(135deg, #ce6629 0%, #ffbe43 100%); border-left: 4px solid #FFD700; margin: 1.5rem 0;">
+      <h4 style="color: #fff; font-weight: bold; text-align: left;">⚠️ BELANGRIJKE FINANCIËLE WAARSCHUWING</h4>
+      <p style="color: #fff; font-weight: bold; text-align: left;">
+        De informatie in deze les is uitsluitend voor educatieve doeleinden en vormt geen financieel advies. 
+        Raadpleeg altijd een gekwalificeerde financieel adviseur voordat je beslissingen neemt over je financiën, investeringen of geld. 
+        Alle investeringen brengen risico's met zich mee en kunnen leiden tot verliezen. 
+        Top Tier Men is niet verantwoordelijk voor eventuele financiële gevolgen van het volgen van de informatie in deze les zonder professioneel advies.
+      </p>
+    </div>
+
+    <div class="section" id="samenvatting">
+      <h2>📚 Uitgebreide Samenvatting van de Les</h2>
+<div class="highlight-box">
+  <h4>🎯 Doel van deze les</h4>
+  <p>
+    Je gaat van afhankelijk van één salaris naar het bouwen van <strong>eigen verdienmodellen</strong> met meerdere inkomstenbronnen.
+    We werken met simpele stappen: vaardigheid → probleem → oplossing → aanbod → distributie → feedback → opschalen.
+    Doel: voorspelbare cashflow, meer opties en minder afhankelijkheid.
+  </p>
+</div>
+
+<h3>Mindset-schakel: van werknemer naar bouwer</h3>
+<ul>
+  <li><strong>Controle:</strong> geen enkel bedrijf is je eindbaas; jouw waardecreatie is dat wel.</li>
+  <li><strong>Kleine experimenten:</strong> elke week iets testen dat geld kan opleveren.</li>
+  <li><strong>Ritme > perfectie:</strong> 90 dagen consequent > 1 perfecte lancering.</li>
+  <li><strong>Value chain:</strong> probleem kiezen, oplossing bouwen, resultaat leveren, blijven verbeteren.</li>
+</ul>
+
+<h3>Stap 1 — Vaardigheden en assets inventariseren (30 min)</h3>
+<ol>
+  <li>Maak 3 lijsten: <em>skills</em> (wat kun je), <em>interesses</em> (wat vind je leuk), <em>resultaten</em> (waar heb je aantoonbaar resultaat).</li>
+  <li>Kruis de top-3 combinaties die <strong>waarde</strong> leveren voor een specifieke doelgroep.</li>
+  <li>Schrijf per combinatie 3 concrete problemen die mensen ervoor zouden betalen om opgelost te krijgen.</li>
+</ol>
+
+<h3>Stap 2 — Kies een doelgroep en één pijnlijk probleem</h3>
+<ul>
+  <li><strong>Doelgroep</strong>: zo specifiek mogelijk (bijv. ZZP-fotografen die vastlopen in acquisitie).</li>
+  <li><strong>Probleem</strong>: urgent, meetbaar, betaald al geld in de markt (search volume, bestaande aanbieders).</li>
+  <li><strong>Uitkomst</strong>: resultaat in heldere taal (bijv. 3 betalende klanten/maand binnen 60 dagen).</li>
+</ul>
+
+<h3>Stap 3 — Kies je initiatief (verdienmodel) voor 90 dagen</h3>
+<ul>
+  <li><strong>Service/Agency</strong> (laagste drempel): je doet het werk voor de klant (copy, ads, video, web, automation).</li>
+  <li><strong>Consulting/Coaching</strong>: je begeleidt naar resultaat met sessies + frameworks + accountability.</li>
+  <li><strong>Productized Service</strong>: vast pakket, vaste prijs, duidelijke scope (snel schaalbaar).</li>
+  <li><strong>Digital Product</strong>: templates, cursussen, e-books, checklists (front-end/upsell).</li>
+  <li><strong>Affiliate/Referrals</strong>: commissie op doorverwijzing (combineer met content).</li>
+</ul>
+
+<h3>Stap 4 — Bouw een Minimally Viable Offer (MVO)</h3>
+<ul>
+  <li><strong>Belofte</strong>: 1 zin, resultaatgericht. “Wij leveren X resultaat in Y tijd zonder Z frustratie.”</li>
+  <li><strong>Scope</strong>: 3–5 bullets wat je doet en 3–5 bullets wat je niet doet.</li>
+  <li><strong>Bewijs</strong>: mini-case, portfolio, demo, korte pilot met korting tegen testimonial.</li>
+  <li><strong>Risico-reductie</strong>: heldere milestones, geld-terug-voorwaarden, of prestatiecomponent.</li>
+  <li><strong>Prijs</strong>: begin simpel (tiers: starter/standard/premium) en <em>verkoop op waarde</em>, niet op uren.</li>
+</ul>
+
+<h3>Stap 5 — Distributie: 3 kanalen + 1 outbound ritueel</h3>
+<ul>
+  <li><strong>Organisch</strong>: 2–3 posts/week (resultaten, how-to’s, voor/na, klantverhalen).</li>
+  <li><strong>Direct outreach</strong>: dagelijks 10 DM/e-mails naar je niche met een <em>value-first</em> bericht.</li>
+  <li><strong>Netwerk</strong>: 1 call/week met iemand die je doelgroep al bedient (partners, referrals).</li>
+  <li><strong>Proof content</strong>: korte video’s/cases die aantonen dat je probleem snapt en oplost.</li>
+</ul>
+
+<h3>Stap 6 — Sales script (simpel en menselijk)</h3>
+<ol>
+  <li><strong>Probleem verhelderen</strong>: “Wat is nu het lastigste? Wat kost dat per maand/kwartaal?”</li>
+  <li><strong>Doel bepalen</strong>: “Wat wil je specifiek bereiken en wanneer is het geslaagd?”</li>
+  <li><strong>Obstakels</strong>: “Wat heb je al geprobeerd? Waarom werkte dat niet?”</li>
+  <li><strong>Plan schetsen</strong>: 3–5 stappen hoe jij helpt, met tijdlijn.</li>
+  <li><strong>Aanbod</strong>: 2 pakketten, heldere deliverables, prijs, voorwaarden.</li>
+  <li><strong>Call to action</strong>: “Zullen we starten op [datum]? Ik stuur de overeenkomst + onboarding.”</li>
+</ol>
+
+<h3>Stap 7 — Levering en klantresultaat</h3>
+<ul>
+  <li><strong>Onboarding</strong>: intake, doelen, data-toegang, deadlines, communicatiekanaal, deliverables-kalender.</li>
+  <li><strong>Werkcyclus</strong>: wekelijkse sprint, duidelijke output, korte update (max 10 min) per week.</li>
+  <li><strong>Resultaten</strong>: meetbare KPI’s per week, 1x per maand review en optimalisatie.</li>
+  <li><strong>Upsell</strong>: bij resultaat: onderhoudsretainer, uitbreiding, cross-sell.</li>
+</ul>
+
+<h3>Pricing frameworks</h3>
+<ul>
+  <li><strong>Tiered pricing</strong>: Starter (instap), Pro (meest gekozen), Elite (premium).</li>
+  <li><strong>Value-based</strong>: prijs t.o.v. business value (bijv. 10% van de gecreëerde extra omzet).</li>
+  <li><strong>Performance component</strong>: lagere vaste fee + bonus bij behalen van KPI.</li>
+  <li><strong>Productized</strong>: vaste prijs, fixed scope, snelle doorlooptijd.</li>
+</ul>
+
+<h3>Systemen die schalen</h3>
+<ul>
+  <li><strong>Checklists</strong> voor elke fase (sales, onboarding, delivery, review, upsell).</li>
+  <li><strong>Templates</strong> voor e-mails, voorstellen, rapportages, contracten.</li>
+  <li><strong>Automations</strong>: factuur/CRM/calendly/Slack/drive/kanban.</li>
+  <li><strong>Documentatie</strong>: SOP’s per taak. Doel: overdraagbaar maken.</li>
+</ul>
+
+<h3>90-dagen sprint (roadmap)</h3>
+<ol>
+  <li><strong>Week 1–2</strong>: doelgroep kiezen, MVO schrijven, 1 proof case bouwen, profielpagina’s opschonen.</li>
+  <li><strong>Week 3–4</strong>: dagelijks 10 outreach, 2 contentposts/week, 3 salescalls, 1 pilot sluiten.</li>
+  <li><strong>Week 5–8</strong>: leveren, meetbare resultaten halen, 1–2 testimonials verzamelen, prijs aanscherpen.</li>
+  <li><strong>Week 9–12</strong>: processen documenteren, retainer aanbieden, distributie verdubbelen, tweede aanbod testen.</li>
+</ol>
+
+<h3>Veelgemaakte fouten (met fixes)</h3>
+<ul>
+  <li><strong>Te breed willen zijn</strong> → kies 1 niche, 1 probleem, 1 aanbod voor 90 dagen.</li>
+  <li><strong>Te veel bouwen, te weinig verkopen</strong> → elke dag 10 outreach prioriteit 1.</li>
+  <li><strong>Uurtje-factuurtje</strong> → verkoop uitkomst, niet uren. Scope en waarde centraal.</li>
+  <li><strong>Geen follow-up</strong> → 5x follow-up in 14 dagen, altijd met extra waarde.</li>
+</ul>
+
+<h3>Legaal en financieel (kort)</h3>
+<ul>
+  <li>KvK inschrijving, zakelijke rekening, eenvoudige boekhouding (facturatie/BTW).</li>
+  <li>Duidelijke overeenkomst (scope, deadlines, IP, betaling, exit-voorwaarden).</li>
+  <li>Verzekeringen: beroepsaansprakelijkheid indien relevant.</li>
+</ul>
+
+<h3>KPI’s (wekelijks)</h3>
+<ul>
+  <li>Outreach verstuurd.</li>
+  <li>Replies en calls geboekt.</li>
+  <li>Deals gesloten en gemiddelde orderwaarde.</li>
+  <li>Doorlooptijd levering en NPS/tevredenheid.</li>
+  <li>Maandelijkse terugkerende omzet (MRR) indien retainer.</li>
+</ul>
+
+<h3>Scripts</h3>
+<ul>
+  <li><strong>Cold DM</strong>: “Hey [naam], ik help [doelgroep] om [resultaat] in [tijd]. Ik zag [observatie]. Zal ik 3 ideeën sturen die je direct kunt testen?”</li>
+  <li><strong>Follow-up</strong>: “Even checken of je m’n bericht zag. Hier alvast 1 concrete tip: [tip]. Zullen we 15 min sparren?”</li>
+  <li><strong>Referral</strong>: “Ken je 1 [doelgroep] die [probleem] heeft? Als ik mag helpen en resultaat lever, trakteer ik op [kleine beloning].”</li>
+</ul>
+
+
+<h3>Case mini’s</h3>
+<ul>
+  <li><strong>Designer → productized</strong>: Website refresh pakket €1.250, 2 weken, vaste scope → 3 per maand = €3.750.</li>
+  <li><strong>Fitness coach</strong>: 12-week traject, wekelijkse check-ins, macro’s, app + community → €250/maand × 20 = €5.000/m.</li>
+  <li><strong>Automation</strong>: E-mail funnels bouwen, starter €800, pro €1.800, retainer €350/m.</li>
+</ul>
+
+<h3>Risico’s mitigeren</h3>
+<ul>
+  <li>Piekbelasting → wachtlijst en startdata per cohort.</li>
+  <li>Scope creep → strakke scope + change request met meerprijs.</li>
+  <li>Cashflow → 50% aanbetaling, 50% bij oplevering/ milestone.</li>
+</ul>
+
+    </div>
+
+    <!-- Huiswerk Opdrachten -->
+    <div class="section">
+      <h2>📝 Huiswerk Opdrachten</h2>
+      
+      <div class="exercise-box">
+        <h4>Opdracht 1: Je Vaardigheden en Assets Inventariseren (30 minuten)</h4>
+        <p>Maak drie lijsten op papier of in een document:</p>
+        <ul>
+          <li><strong>Vaardigheden:</strong> Wat kun je goed? Schrijf minimaal 10 vaardigheden op</li>
+          <li><strong>Interesses:</strong> Waar ben je gepassioneerd over? Wat vind je leuk om te doen?</li>
+          <li><strong>Resultaten:</strong> Waar heb je aantoonbaar succes gehad? Welke prestaties kun je laten zien?</li>
+        </ul>
+        <p>Kruis de top-3 combinaties aan die waarde kunnen leveren voor een specifieke doelgroep. Schrijf per combinatie 3 concrete problemen op die mensen zouden betalen om opgelost te krijgen.</p>
+      </div>
+
+      <div class="exercise-box">
+        <h4>Opdracht 2: Je Minimally Viable Offer (MVO) Schrijven (45 minuten)</h4>
+        <p>Gebaseerd op je inventarisatie, schrijf je eerste aanbod:</p>
+        <ul>
+          <li><strong>Belofte:</strong> 1 zin die het resultaat beschrijft: "Wij leveren X resultaat in Y tijd zonder Z frustratie"</li>
+          <li><strong>Scope:</strong> 3-5 punten wat je wel doet en 3-5 punten wat je niet doet</li>
+          <li><strong>Prijs:</strong> 3 tiers: starter, standard, premium met duidelijke verschillen</li>
+          <li><strong>Bewijs:</strong> Bedenk hoe je je eerste proof case gaat maken</li>
+        </ul>
+        <p>Houd het simpel en focus op één specifieke doelgroep en één probleem.</p>
+      </div>
+
+      <div class="exercise-box">
+        <h4>Opdracht 3: Outreach Systeem Opzetten (30 minuten)</h4>
+        <p>Bouw je distributie-systeem:</p>
+        <ul>
+          <li><strong>Doelgroep lijst:</strong> Verzamel 50 namen van je ideale klanten (LinkedIn, Instagram, netwerk)</li>
+          <li><strong>Value-first bericht:</strong> Schrijf een korte DM/e-mail template die waarde biedt</li>
+          <li><strong>Content kalender:</strong> Plan 3 posts voor komende week (resultaten, tips, klantverhalen)</li>
+          <li><strong>Follow-up systeem:</strong> Bedenk hoe je 5x gaat follow-uppen in 14 dagen</li>
+        </ul>
+        <p>Start morgen met 10 outreach berichten per dag. Consistentie is belangrijker dan perfectie.</p>
+      </div>
+    </div>
+
+    <!-- Checklist -->
+    <div class="section">
+      <h2>✅ Checklist</h2>
+      <div class="checklist">
+        <div class="checklist-item">
+          <input type="checkbox" id="check1" />
+          <label for="check1">Doelgroep en specifiek probleem gekozen</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="check2" />
+          <label for="check2">MVO (Minimally Viable Offer) geschreven</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="check3" />
+          <label for="check3">Outreach systeem opgezet en gestart</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="check4" />
+          <label for="check4">Eerste pilot-klant binnen</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="check5" />
+          <label for="check5">Testimonial en case study verzameld</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="check6" />
+          <label for="check6">Processen gedocumenteerd voor opschaling</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reflectie Vragen -->
+    <div class="section">
+      <h2>🤔 Reflectie Vragen</h2>
+      
+      <div class="reflection-question">
+        <h4>Vraag 1: Probleem en Oplossing</h4>
+        <p>Wat is het ene probleem dat jij het best kunt oplossen en dat jouw doelgroep nu als pijnlijk ervaart? Wat is jouw simpelste aanbod om daar binnen 30 dagen resultaat op te leveren?</p>
+      </div>
+
+      <div class="reflection-question">
+        <h4>Vraag 2: Mindset Shift</h4>
+        <p>Hoe voelt het om van werknemer naar eigenaar te denken? Welke oude gewoontes moet je loslaten en welke nieuwe gewoontes ga je opbouwen om succesvol te zijn in je eigen verdienmodel?</p>
+      </div>
+
+      <div class="reflection-question">
+        <h4>Vraag 3: Risico en Beloning</h4>
+        <p>Wat is het grootste risico dat je neemt door je eigen verdienmodel te starten, en wat is de grootste beloning die je kunt behalen? Waarom weegt de beloning op tegen het risico?</p>
+      </div>
+    </div>
+
+    <!-- Actieplan -->
+    <div class="section">
+      <h2>🎯 Actieplan</h2>
+      <div class="action-plan">
+        <h3>Jouw 5 Stappen Actieplan</h3>
+        <div class="action-step">
+          <strong>Stap 1:</strong> Inventariseer je vaardigheden, interesses en resultaten. Kies de beste combinatie voor je eerste verdienmodel.
+        </div>
+        <div class="action-step">
+          <strong>Stap 2:</strong> Schrijf je Minimally Viable Offer (MVO) met duidelijke belofte, scope en prijzen.
+        </div>
+        <div class="action-step">
+          <strong>Stap 3:</strong> Bouw je outreach systeem en start met 10 waardevolle berichten per dag naar je doelgroep.
+        </div>
+        <div class="action-step">
+          <strong>Stap 4:</strong> Sluit je eerste pilot-klant en lever uitstekende resultaten voor een testimonial.
+        </div>
+        <div class="action-step">
+          <strong>Stap 5:</strong> Documenteer je processen en schaal op naar meer klanten met betere systemen.
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Footer -->
+    <div class="footer">
+      <p>Dit ebook is onderdeel van de <span class="ttm-brand">Top Tier Men</span> Academy</p>
+      <p>Module 05: Business and Finance  | Les 03: Van Werknemer naar eigen Verdienmodellen</p>
+      <p>© 2025 Top Tier Men. Alle rechten voorbehouden.</p>
+    </div>
+  </div>
+
+  <script>
+    // Checklist persistentie via localStorage
+    document.addEventListener('DOMContentLoaded', function() {
+      const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+      checkboxes.forEach(cb => {
+        const saved = localStorage.getItem(cb.id);
+        if (saved === 'true') cb.checked = true;
+        cb.addEventListener('change', function(){ localStorage.setItem(this.id, this.checked); });
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mentale Weerbaarheid in de Praktijk - Ebook | Top Tier Men</title>
+  <meta name="description" content="V2 ebook voor Mentale Weerbaarheid in de Praktijk binnen Top Tier Men Academy." />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.6; color: #ffffff;
+      background: linear-gradient(135deg, #0A0F0A 0%, #181F17 50%, #232D1A 100%);
+      min-height: 100vh;
+    }
+    .container { max-width: 800px; margin: 0 auto; padding: 2rem; }
+    .header {
+      text-align: center; margin-bottom: 3rem; padding: 2rem;
+      background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      border-radius: 20px; border: 1px solid #3A4D23;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    .logo { margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; }
+    h1 {
+      font-size: 2.5rem; font-weight: 800;
+      background: linear-gradient(135deg, #ffffff 0%, #8BAE5A 50%, #B6C948 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      margin-bottom: .5rem;
+    }
+    .subtitle { color: #8BAE5A; font-size: 1.1rem; font-weight: 500; }
+    .module-info {
+      background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1rem; border-radius: 10px; margin: 1rem 0; border-left: 4px solid #8BAE5A;
+    }
+    .section { background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      margin-bottom: 2rem; padding: 2rem; border-radius: 15px; border: 1px solid #3A4D23; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    .section h2 { color: #B6C948; font-size: 1.8rem; font-weight: 700; margin-bottom: 1.5rem; display: flex; align-items: center; gap: .5rem; }
+    .section h3 { color: #8BAE5A; font-size: 1.3rem; font-weight: 600; margin: 1.5rem 0 1rem; }
+    .section p { margin-bottom: 1rem; color: #e0e0e0; }
+    .section ul, .section ol { margin: 1rem 0; padding-left: 2rem; }
+    .section li { margin-bottom: .5rem; color: #e0e0e0; }
+    .highlight-box { background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1.5rem; border-radius: 10px; border-left: 4px solid #B6C948; margin: 1.5rem 0;
+    }
+    .exercise-box { background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%);
+      padding: 1.5rem; border-radius: 10px; border: 1px solid #8BAE5A; margin: 1rem 0;
+    }
+    .exercise-box h4 { color: #B6C948; font-size: 1.1rem; margin-bottom: 1rem; }
+    .checklist { background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      padding: 1.5rem; border-radius: 10px; border: 1px solid #3A4D23; margin: 1rem 0;
+    }
+    .checklist-item { display: flex; align-items: center; margin-bottom: .8rem; padding: .5rem; background: rgba(58,77,35,.3); border-radius: 8px; }
+    .checklist-item input[type="checkbox"] { margin-right: 1rem; width: 18px; height: 18px; accent-color: #8BAE5A; }
+    .reflection-question { background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1.5rem; border-radius: 10px; border-left: 4px solid #B6C948; margin: 1rem 0;
+    }
+    .reflection-question h4 { color: #B6C948; margin-bottom: 1rem; }
+    .action-plan { background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%);
+      padding: 2rem; border-radius: 15px; border: 2px solid #8BAE5A; margin: 2rem 0;
+    }
+    .action-step { background: rgba(139,174,90,.1); padding: 1rem; border-radius: 8px; margin: 1rem 0; border-left: 3px solid #8BAE5A; }
+    .footer { text-align: center; margin-top: 3rem; padding: 2rem; background: linear-gradient(135deg, #181F17 0%, #232D1A 100%); border-radius: 15px; border: 1px solid #3A4D23; }
+    .footer p { color: #8BAE5A; margin-bottom: 1rem; }
+    .ttm-brand { color: #B6C948; font-weight: 700; }
+    .sticky-back-btn { position: fixed; top: 50%; right: 20px; transform: translateY(-50%);
+      z-index: 1000; background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%);
+      color: #fff; border: none; border-radius: 50px; padding: 15px 20px; font-size: 14px; font-weight: 600; cursor: pointer;
+      box-shadow: 0 8px 25px rgba(139,174,90,.3); transition: all .3s ease; display: flex; align-items: center; gap: 8px; text-decoration: none; min-width: 120px; justify-content: center;
+    }
+    .sticky-back-btn:hover { background: linear-gradient(135deg, #B6C948 0%, #8BAE5A 100%); transform: translateY(-50%) scale(1.05); box-shadow: 0 12px 35px rgba(139,174,90,.4); }
+    .sticky-back-btn:active { transform: translateY(-50%) scale(.95); }
+    .sticky-back-btn svg { width: 16px; height: 16px; fill: currentColor; }
+    @media (max-width: 768px) {
+      .container { padding: 1rem; }
+      h1 { font-size: 2rem; }
+      .section { padding: 1.5rem; }
+      .sticky-back-btn { right: 10px; padding: 12px 16px; font-size: 12px; min-width: 100px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Sticky Back Button: VERPLICHT naar juiste les URL -->
+  <a href="/dashboard/academy/c66b25e3-869f-4c2c-8037-a552726c6b62/2b358488-7f45-43a9-aecc-3db899019471" class="sticky-back-btn" title="Terug naar les">
+    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    Terug
+  </a>
+
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="logo">
+        <img src="/logo_white-full.svg" alt="Top Tier Men Logo" style="height:40px;width:auto" />
+      </div>
+      <h1>Mentale Weerbaarheid in de Praktijk</h1>
+      <p class="subtitle">Van theorie naar dagelijkse toepassing</p>
+      <div class="module-info">
+        <strong>Module 04: Mentale Kracht/Weerbaarheid</strong> | <strong>Les 03: Mentale Weerbaarheid in de Praktijk</strong>
+      </div>
+    </div>
+
+    <!-- Uitgebreide Samenvatting -->
+    <div class="section" id="samenvatting">
+      <h2>📚 Uitgebreide Samenvatting van de Les</h2>
+      
+      <div class="highlight-box">
+        <h4>🎯 Doel van deze les</h4>
+        <p>Mentale weerbaarheid in de praktijk omgezet naar simpele regels, rituelen en checklists. Je krijgt scripts voor lastige momenten, dag/week/maand-cadans, en concrete stappen om vandaag te starten.</p>
+      </div>
+
+      <p>Mentale weerbaarheid is niet iets wat je alleen in theorie kunt leren. Het is een praktische vaardigheid die je elke dag moet oefenen. Deze les geeft je concrete tools en technieken die je direct kunt toepassen in je dagelijks leven.</p>
+
+      <h3>De Basis van Mentale Weerbaarheid</h3>
+      <p>Mentale weerbaarheid begint met het begrijpen dat jij controle hebt over je eigen reacties. Wanneer er iets misgaat, wanneer je stress ervaart, of wanneer dingen niet lopen zoals je wilt, dan is het jouw keuze hoe je daarop reageert. Deze controle is niet altijd makkelijk, maar wel altijd mogelijk.</p>
+
+      <p>Het eerste principe is eigenaarschap. Jij bent verantwoordelijk voor je eigen gedachten, gevoelens en acties. Niemand anders kan jouw mentale staat bepalen. Dit betekent niet dat je altijd positief moet zijn, maar wel dat je bewust kiest hoe je reageert op wat er gebeurt.</p>
+
+      <h3>Ritme Boven Motivatie</h3>
+      <p>Motivatie komt en gaat. Sommige dagen voel je je sterk en gemotiveerd, andere dagen niet. Daarom is het belangrijk om een vast ritme te hebben dat niet afhankelijk is van hoe je je voelt. Je ochtendritueel, je werkblokken, je beweging - dit alles moet een vast patroon zijn dat je volgt, ongeacht je stemming.</p>
+
+      <p>Een goed ritme helpt je om door moeilijke momenten heen te komen. Wanneer je weet wat je moet doen, hoef je niet na te denken over wat de volgende stap is. Dit bespaart mentale energie en voorkomt dat je vastloopt in twijfels en onzekerheid.</p>
+
+      <h3>Kleine Stappen, Grote Resultaten</h3>
+      <p>Mentale weerbaarheid bouw je op door kleine, dagelijkse acties. Het is niet de grote, heroïsche daden die je sterker maken, maar de consistente, kleine keuzes die je elke dag maakt. Een minuut ademhalingsoefening, het voltooien van een taak, het maken van een moeilijke telefoon - dit zijn de bouwstenen van mentale kracht.</p>
+
+      <p>Micro-gedrag is de sleutel. In plaats van te proberen je hele leven in één keer te veranderen, focus je op één kleine gewoonte. Doe dit elke dag, jarenlang. Na verloop van tijd wordt deze gewoonte automatisch en kun je de volgende toevoegen. Zo bouw je stap voor stap een solide fundament van mentale weerbaarheid.</p>
+
+      <h3>Je Omgeving Stuurt Je Gedrag</h3>
+      <p>Je omgeving heeft een enorme invloed op je gedrag. Daarom is het belangrijk om je omgeving zo in te richten dat het goede gedrag makkelijk maakt en slecht gedrag moeilijk. Dit heet omgevingsontwerp en het is een van de krachtigste tools voor mentale weerbaarheid.</p>
+
+      <p>Frictie verlagen betekent dat je barrières weghaalt voor het gedrag dat je wilt. Wil je meer lezen? Leg je boek op een zichtbare plek. Wil je minder op je telefoon zitten? Leg hem in een andere kamer tijdens je werk. Wil je gezond eten? Zorg dat gezonde snacks binnen handbereik staan.</p>
+
+      <p>Frictie verhogen betekent dat je barrières toevoegt voor gedrag dat je wilt vermijden. Wil je minder social media gebruiken? Verwijder de apps van je telefoon. Wil je minder snoepen? Zet ongezonde snacks uit het zicht. Door je omgeving slim in te richten, maak je het jezelf makkelijker om goede keuzes te maken.</p>
+
+      <h3>Dagelijks Ritueel</h3>
+      <p>Je ochtendritueel is de basis van je dag. Begin met drie minuten ademhalingsoefening. Adem langzaam in door je neus en langzaam uit door je mond. Dit kalmeert je zenuwstelsel en bereidt je voor op de dag. Schrijf dan één intentiezin op - een korte zin die uitdrukt wat je vandaag wilt bereiken of hoe je wilt zijn.</p>
+
+      <p>Bepaal je top-3 taken voor vandaag. Kies niet meer dan drie belangrijke taken. Dit helpt je om gefocust te blijven en voorkomt dat je overweldigd raakt door een te lange takenlijst. Doe daarna een korte fysieke activatie - tien push-ups, een korte wandeling, of wat stretching. Dit activeert je lichaam en geeft je energie.</p>
+
+      <p>Tijdens de dag plan je één focusblok. Dit is een periode van 60-90 minuten waarin je volledig gefocust werkt aan één taak, zonder afleidingen. Zet je telefoon uit, sluit je browser, en werk alleen aan wat je hebt gepland. Na elk focusblok neem je een schermloze pauze van 10-15 minuten.</p>
+
+      <p>Je avondritueel helpt je om de dag af te sluiten en voor te bereiden op morgen. Schrijf drie regels op over je dag: wat ging goed, wat kon beter, en wat heb je geleerd. Plan dan de volgende dag en schrijf drie dingen op waar je dankbaar voor bent. Dit helpt je om positief af te sluiten en met een goed gevoel naar bed te gaan.</p>
+
+      <h3>Wekelijks Ritueel</h3>
+      <p>Elke week plan je drie diepe werkblokken. Dit zijn langere periodes van 2-3 uur waarin je aan complexe, belangrijke taken werkt. Plan deze blokken in je agenda en bescherm ze alsof het belangrijke afspraken zijn. Tijdens deze blokken werk je aan projecten die echt belangrijk zijn voor je doelen.</p>
+
+      <p>Plan twee fysieke prikkels per week: één voor krachttraining en één voor conditie. Dit houdt je lichaam sterk en geeft je mentale energie. Fysieke kracht en mentale kracht gaan hand in hand. Wanneer je lichaam sterk is, voel je je ook mentaal sterker.</p>
+
+      <p>Kies één moeilijke taak per week. Dit kan een moeilijke telefoon zijn, een lastig gesprek, of een taak die je uitstelt. Door regelmatig moeilijke dingen te doen, bouw je mentale weerbaarheid op. Je leert dat je meer kunt dan je denkt en dat ongemak tijdelijk is.</p>
+
+      <p>Plan één sociale recharge per week. Dit kan een gesprek met een mentor zijn, tijd doorbrengen met vrienden, of deelname aan een broederschap. Sociale verbinding is belangrijk voor mentale gezondheid en geeft je energie en perspectief.</p>
+
+      <h3>Maandelijks Ritueel</h3>
+      <p>Aan het einde van elke maand evalueer je je doelen, gedrag en herstel. Kijk naar wat je hebt bereikt en wat je hebt geleerd. Welke gewoonten hebben gewerkt? Welke niet? Wat wil je de volgende maand anders doen?</p>
+
+      <p>Evalueer je omgeving. Zijn er nieuwe fricties die je wilt toevoegen of oude die je wilt weghalen? Misschien heb je nieuwe apps geïnstalleerd die je afleiden, of nieuwe gewoonten ontwikkeld die je wilt ondersteunen. Pas je omgeving aan zodat deze je doelen ondersteunt.</p>
+
+      <p>Documenteer wat werkte en dubbel dit. Als je merkt dat een bepaalde gewoonte of techniek goed voor je werkt, maak er dan meer tijd voor vrij. Als een ochtendritueel je helpt om gefocust te blijven, maak het dan langer of voeg elementen toe. Focus op wat werkt en bouw daarop voort.</p>
+
+      <h3>Scripts voor Lastige Momenten</h3>
+      <p>Wanneer je stress ervaart, gebruik je het stress-script: "Adem - één kleine stap nu." Stop met wat je doet, adem drie keer diep in en uit, en kies één kleine actie die je kunt doen om vooruit te komen. Dit helpt je om uit de paniek-modus te komen en weer controle te krijgen.</p>
+
+      <p>Bij mislukking gebruik je: "Leer - schrijf één verbetering - opnieuw." Mislukking is feedback, geen definitie van wie je bent. Schrijf één ding op dat je kunt verbeteren en probeer het opnieuw. Dit helpt je om te leren van fouten en door te gaan in plaats van vast te lopen.</p>
+
+      <p>Bij verleiding zeg je: "Niet nu - ik kies op het geplande moment." Verleidingen zijn vaak impulsief. Door jezelf te herinneren dat je bewust kunt kiezen wanneer je iets doet, krijg je controle terug. Plan een specifiek moment waarop je wel toegeeft aan de verleiding, als je dat wilt.</p>
+
+      <p>Bij afwijzing gebruik je: "Optimaliseer en probeer weer." Afwijzing is onderdeel van het leven. In plaats van het persoonlijk op te vatten, kijk je naar wat je kunt verbeteren en probeer je het opnieuw. Elke afwijzing brengt je dichter bij succes.</p>
+
+      <h3>Emotie-Regulatie Technieken</h3>
+      <p>Wanneer je overweldigd raakt door emoties, gebruik je de 4-stappen methode. Eerst adem je 6 keer langzaam uit, langer dan je inademt. Dit activeert je parasympathisch zenuwstelsel en kalmeert je lichaam. Dan label je je emotie en geef je de intensiteit aan op een schaal van 1-10.</p>
+
+      <p>Vervolgens kies je één micro-actie van maximaal 2 minuten die je kunt doen richting je prioriteit. Dit helpt je om uit de emotie te komen en weer in actie te gaan. Tot slot schrijf je één regel op over wat je hebt geleerd en ga je verder met je dag.</p>
+
+      <h3>Focus en Concentratie</h3>
+      <p>Focus is een vaardigheid die je kunt trainen. Begin met korte focusblokken van 25 minuten en bouw dit langzaam op naar 60-90 minuten. Tijdens deze blokken werk je alleen aan één taak, zonder afleidingen. Dit helpt je om dieper te werken en meer te bereiken in minder tijd.</p>
+
+      <p>Elimineer afleidingen door je telefoon uit te zetten, je browser te sluiten, en je werkplek op te ruimen. Zorg dat alles wat je nodig hebt binnen handbereik staat, zodat je niet hoeft op te staan. Dit verlaagt de frictie en maakt het makkelijker om gefocust te blijven.</p>
+
+      <p>Neem regelmatig pauzes. Na elk focusblok neem je 10-15 minuten pauze zonder schermen. Ga naar buiten, maak een korte wandeling, of doe wat stretching. Dit helpt je om je energie te herstellen en je focus te behouden voor de volgende blok.</p>
+
+      <h3>Omgaan met Onzekerheid</h3>
+      <p>Onzekerheid is normaal en hoort bij groei. Wanneer je iets nieuws probeert of buiten je comfortzone gaat, voel je je onzeker. Dit is een teken dat je aan het groeien bent, niet dat er iets mis is. Accepteer de onzekerheid en ga toch door.</p>
+
+      <p>Bereid je voor op onzekerheid door scripts en technieken te hebben voor lastige momenten. Wanneer je weet hoe je moet reageren op stress, mislukking of verleiding, voel je je zekerder over je vermogen om ermee om te gaan. Oefen deze technieken regelmatig, zodat ze automatisch worden.</p>
+
+      <p>Focus op wat je kunt controleren. Je kunt niet controleren wat er gebeurt, maar wel hoe je erop reageert. Wanneer je je onzeker voelt, richt je aandacht op de acties die je kunt ondernemen om je situatie te verbeteren. Dit geeft je een gevoel van controle en vermindert angst.</p>
+
+      <h3>Herstel en Energie Management</h3>
+      <p>Mentale weerbaarheid vereist energie. Daarom is het belangrijk om regelmatig te herstellen en je energie te beheren. Zorg voor voldoende slaap, gezonde voeding, en regelmatige beweging. Dit geeft je de fysieke energie die je nodig hebt voor mentale kracht.</p>
+
+      <p>Plan bewust hersteltijd in je dag. Dit kunnen korte pauzes zijn tussen taken, een lunchwandeling, of tijd voor hobby's. Herstel is niet luiheid, maar een noodzakelijke investering in je prestaties. Wanneer je regelmatig herstelt, kun je op de lange termijn meer bereiken.</p>
+
+      <p>Leer je energieniveau kennen. Sommige taken kosten meer energie dan andere. Plan energie-intensieve taken op momenten dat je het meest alert bent, en routine-taken op momenten dat je energie lager is. Dit helpt je om je energie optimaal te gebruiken.</p>
+
+      <h3>Lange Termijn Perspectief</h3>
+      <p>Mentale weerbaarheid is een lange termijn investering. Je zult niet van de ene op de andere dag onbreekbaar zijn. Het is een proces van jarenlang oefenen, leren en groeien. Wees geduldig met jezelf en vier kleine overwinningen.</p>
+
+      <p>Focus op progressie, niet op perfectie. Het doel is niet om nooit meer stress te ervaren of nooit meer te falen. Het doel is om beter te worden in het omgaan met uitdagingen. Elke keer dat je een moeilijke situatie overwint, word je sterker voor de volgende.</p>
+
+      <p>Bouw een ondersteunend netwerk om je heen. Mentale weerbaarheid betekent niet dat je alles alleen moet doen. Zoek mensen op die je inspireren, mentoren die je kunnen begeleiden, en vrienden die je kunnen steunen. Samen sta je sterker dan alleen.</p>
+
+      <p>Mentale weerbaarheid in de praktijk gaat over het dagelijks toepassen van deze principes. Het gaat niet om perfecte uitvoering, maar om consistente inspanning. Begin klein, wees geduldig, en blijf doorgaan. Met de tijd word je sterker, veerkrachtiger en beter in staat om met uitdagingen om te gaan.</p>
+    </div>
+
+    <!-- Huiswerk Opdrachten -->
+    <div class="section">
+      <h2>📝 Huiswerk Opdrachten</h2>
+      
+      <div class="exercise-box">
+        <h4>Opdracht 1: Je Eerste Week Ritueel</h4>
+        <p>Implementeer je ochtendritueel deze week. Begin elke dag met 3 minuten ademhalingsoefening, schrijf één intentiezin op, bepaal je top-3 taken, en doe een korte fysieke activatie. Houd bij hoe dit je dag beïnvloedt en wat je leert over jezelf.</p>
+      </div>
+
+      <div class="exercise-box">
+        <h4>Opdracht 2: Focusblok Experiment</h4>
+        <p>Plan deze week drie focusblokken van 60 minuten in. Kies voor elk blok één belangrijke taak en werk er volledig gefocust aan zonder afleidingen. Experimenteer met verschillende tijden van de dag om te ontdekken wanneer je het meest productief bent.</p>
+      </div>
+
+      <div class="exercise-box">
+        <h4>Opdracht 3: Emotie-Script Test</h4>
+        <p>Test de emotie-regulatie techniek deze week. Wanneer je stress, frustratie of andere sterke emoties ervaart, gebruik je de 4-stappen methode: adem, label, micro-actie, leer. Houd bij welke situaties het meest uitdagend zijn en hoe de techniek je helpt.</p>
+      </div>
+    </div>
+
+    <!-- Checklist -->
+    <div class="section">
+      <h2>✅ Checklist</h2>
+      <div class="checklist">
+        <div class="checklist-item">
+          <input type="checkbox" id="check1" />
+          <label for="check1">Ochtendritueel voltooid (ademhaling, intentie, top-3, activatie)</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="check2" />
+          <label for="check2">Minstens één focusblok van 60+ minuten voltooid</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="check3" />
+          <label for="check3">Emotie-regulatie techniek toegepast bij stress/uitdaging</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="check4" />
+          <label for="check4">Avondreflectie gedaan (3 regels, planning, dankbaarheid)</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="check5" />
+          <label for="check5">Fysieke activiteit voltooid (kracht of conditie)</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="check6" />
+          <label for="check6">Telefoon uit/weg tijdens focusblokken</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reflectie Vragen -->
+    <div class="section">
+      <h2>🤔 Reflectie Vragen</h2>
+      
+      <div class="reflection-question">
+        <h4>Vraag 1</h4>
+        <p>Welk moment van deze week was het meest uitdagend voor je mentale weerbaarheid? Hoe heb je erop gereageerd en wat zou je de volgende keer anders kunnen doen?</p>
+      </div>
+
+      <div class="reflection-question">
+        <h4>Vraag 2</h4>
+        <p>Welke van de nieuwe gewoonten (ochtendritueel, focusblokken, emotie-regulatie) voelde het meest natuurlijk aan? Welke was het moeilijkst om vol te houden en waarom?</p>
+      </div>
+
+      <div class="reflection-question">
+        <h4>Vraag 3</h4>
+        <p>Hoe heeft het toepassen van mentale weerbaarheid technieken je gevoel van controle over je dagelijks leven beïnvloed? Wat merk je aan je reacties op stress en uitdagingen?</p>
+      </div>
+    </div>
+
+    <!-- Actieplan -->
+    <div class="section">
+      <h2>🎯 Actieplan</h2>
+      <div class="action-plan">
+        <div class="action-step">
+          <strong>1.</strong> Stel je ochtendritueel samen met specifieke tijden en volgorde. Begin morgen met de eerste implementatie.
+        </div>
+        <div class="action-step">
+          <strong>2.</strong> Plan drie focusblokken in je agenda voor deze week. Kies belangrijke taken en elimineer alle afleidingen.
+        </div>
+        <div class="action-step">
+          <strong>3.</strong> Oefen de emotie-regulatie techniek dagelijks, ook op momenten dat je je goed voelt. Bouw de gewoonte op.
+        </div>
+        <div class="action-step">
+          <strong>4.</strong> Evalueer je omgeving en pas één frictie aan - verlaag barrières voor goed gedrag of verhoog ze voor slecht gedrag.
+        </div>
+        <div class="action-step">
+          <strong>5.</strong> Plan je eerste wekelijkse evaluatie in. Houd bij wat werkt en wat niet, en pas je aanpak aan.
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <p>Dit ebook is onderdeel van de <span class="ttm-brand">Top Tier Men Academy</span></p>
+      <p>Blijf groeien, blijf sterker worden.</p>
+    </div>
+  </div>
+
+  <script>
+    // Checklist persistentie via localStorage
+    document.addEventListener('DOMContentLoaded', function() {
+      const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+      checkboxes.forEach(cb => {
+        const saved = localStorage.getItem(cb.id);
+        if (saved === 'true') cb.checked = true;
+        cb.addEventListener('change', function(){ localStorage.setItem(this.id, this.checked ? 'true' : 'false'); });
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>De Financiële Mindset - Ebook | Top Tier Men</title>
+  <meta name="description" content="V2 ebook voor De Financiële Mindset binnen Top Tier Men Academy." />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.6; color: #ffffff;
+      background: linear-gradient(135deg, #0A0F0A 0%, #181F17 50%, #232D1A 100%);
+      min-height: 100vh;
+    }
+    .container { max-width: 800px; margin: 0 auto; padding: 2rem; }
+    .header {
+      text-align: center; margin-bottom: 3rem; padding: 2rem;
+      background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      border-radius: 20px; border: 1px solid #3A4D23;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    .logo { margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; }
+    h1 {
+      font-size: 2.5rem; font-weight: 800;
+      background: linear-gradient(135deg, #ffffff 0%, #8BAE5A 50%, #B6C948 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      margin-bottom: .5rem;
+    }
+    .subtitle { color: #8BAE5A; font-size: 1.1rem; font-weight: 500; }
+    .module-info {
+      background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1rem; border-radius: 10px; margin: 1rem 0; border-left: 4px solid #8BAE5A;
+    }
+    .section { background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      margin-bottom: 2rem; padding: 2rem; border-radius: 15px; border: 1px solid #3A4D23; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    .section h2 { color: #B6C948; font-size: 1.8rem; font-weight: 700; margin-bottom: 1.5rem; display: flex; align-items: center; gap: .5rem; }
+    .section h3 { color: #8BAE5A; font-size: 1.3rem; font-weight: 600; margin: 1.5rem 0 1rem; }
+    .section p { margin-bottom: 1rem; color: #e0e0e0; }
+    .section ul, .section ol { margin: 1rem 0; padding-left: 2rem; }
+    .section li { margin-bottom: .5rem; color: #e0e0e0; }
+    .highlight-box { background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1.5rem; border-radius: 10px; border-left: 4px solid #B6C948; margin: 1.5rem 0;
+    }
+    .exercise-box { background: linear-gradient(135deg, #232D1A 0%, #3A5D33 100%);
+      padding: 1.5rem; border-radius: 10px; border: 1px solid #8BAE5A; margin: 1rem 0;
+    }
+    .exercise-box h4 { color: #B6C948; font-size: 1.1rem; margin-bottom: 1rem; }
+    .checklist { background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      padding: 1.5rem; border-radius: 10px; border: 1px solid #3A4D23; margin: 1rem 0;
+    }
+    .checklist-item { display: flex; align-items: center; margin-bottom: .8rem; padding: .5rem; background: rgba(58,77,35,.3); border-radius: 8px; }
+    .checklist-item input[type="checkbox"] { margin-right: 1rem; width: 18px; height: 18px; accent-color: #8BAE5A; }
+    .reflection-question { background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1.5rem; border-radius: 10px; border-left: 4px solid #B6C948; margin: 1rem 0;
+    }
+    .reflection-question h4 { color: #B6C948; margin-bottom: 1rem; }
+    .action-plan { background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%);
+      padding: 2rem; border-radius: 15px; border: 2px solid #8BAE5A; margin: 2rem 0;
+    }
+    .action-step { background: rgba(139,174,90,.1); padding: 1rem; border-radius: 8px; margin: 1rem 0; border-left: 3px solid #8BAE5A; }
+    .footer { text-align: center; margin-top: 3rem; padding: 2rem; background: linear-gradient(135deg, #181F17 0%, #232D1A 100%); border-radius: 15px; border: 1px solid #3A4D23; }
+    .footer p { color: #8BAE5A; margin-bottom: 1rem; }
+    .ttm-brand { color: #B6C948; font-weight: 700; }
+    .sticky-back-btn { position: fixed; top: 50%; right: 20px; transform: translateY(-50%);
+      z-index: 1000; background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%);
+      color: #fff; border: none; border-radius: 50px; padding: 15px 20px; font-size: 14px; font-weight: 600; cursor: pointer;
+      box-shadow: 0 8px 25px rgba(139,174,90,.3); transition: all .3s ease; display: flex; align-items: center; gap: 8px; text-decoration: none; min-width: 120px; justify-content: center;
+    }
+    .sticky-back-btn:hover { background: linear-gradient(135deg, #B6C948 0%, #8BAE5A 100%); transform: translateY(-50%) scale(1.05); box-shadow: 0 12px 35px rgba(139,174,90,.4); }
+    .sticky-back-btn:active { transform: translateY(-50%) scale(.95); }
+    .sticky-back-btn svg { width: 16px; height: 16px; fill: currentColor; }
+    @media (max-width: 768px) {
+      .container { padding: 1rem; }
+      h1 { font-size: 2rem; }
+      .section { padding: 1.5rem; }
+      .sticky-back-btn { right: 10px; padding: 12px 16px; font-size: 12px; min-width: 100px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Sticky Back Button: VERPLICHT naar juiste les URL -->
+  <a href="/dashboard/academy/309b7450-3c77-4aa5-bc14-f5514cafd886/575b7d7c-1bad-4660-abf7-0507f6fca2e9" class="sticky-back-btn" title="Terug naar les">
+    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    Terug
+  </a>
+
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="logo">
+        <img src="/logo_white-full.svg" alt="Top Tier Men Logo" style="height:40px;width:auto" />
+      </div>
+      <h1>De Financiële Mindset</h1>
+      <p class="subtitle">De basis voor financiële vrijheid en welvaart</p>
+      <div class="module-info">
+        <strong>Module 05: Business and Finance</strong> | <strong>Les 01: De Financiële Mindset</strong>
+      </div>
+    </div>
+
+    <!-- Uitgebreide Samenvatting van de Les -->
+    <!-- Financiële Disclaimer -->
+    <div class="highlight-box" style="background: linear-gradient(135deg, #ce6629 0%, #ffbe43 100%); border-left: 4px solid #FFD700; margin: 1.5rem 0;">
+      <h4 style="color: #fff; font-weight: bold; text-align: left;">⚠️ BELANGRIJKE FINANCIËLE WAARSCHUWING</h4>
+      <p style="color: #fff; font-weight: bold; text-align: left;">
+        De informatie in deze les is uitsluitend voor educatieve doeleinden en vormt geen financieel advies. 
+        Raadpleeg altijd een gekwalificeerde financieel adviseur voordat je beslissingen neemt over je financiën, investeringen of geld. 
+        Alle investeringen brengen risico's met zich mee en kunnen leiden tot verliezen. 
+        Top Tier Men is niet verantwoordelijk voor eventuele financiële gevolgen van het volgen van de informatie in deze les zonder professioneel advies.
+      </p>
+    </div>
+
+    <div class="section" id="samenvatting">
+      <h2>📚 Uitgebreide Samenvatting van de Les</h2>
+      
+      <div class="highlight-box">
+        <h4>🎯 Les Overzicht</h4>
+        <p>Een financiële mindset is de manier waarop je denkt over geld, werk en kansen. Het is de basis voor financiële vrijheid en welvaart. Met een sterke financiële mindset zie je geld als gereedschap dat voor jou werkt, niet andersom. Je denkt in waarde leveren, buffers bouwen en lange termijn.</p>
+      </div>
+
+      <h3>Wat is een Financiële Mindset?</h3>
+      <p>Een financiële mindset is de manier waarop je kijkt naar geld, werk en kansen. Het is niet alleen over hoeveel geld je hebt, maar vooral over hoe je erover denkt en ermee omgaat. Met een sterke financiële mindset zie je geld als gereedschap: het werkt voor jou, niet andersom.</p>
+      
+      <p>Je denkt in waarde leveren, buffers bouwen en lange termijn. Je kiest structuur boven impuls. Je plant, volgt op en verbetert. Een financiële mindset betekent dat je begrijpt dat geld een middel is, geen doel. Het doel is vrijheid, keuze en de mogelijkheid om je dromen waar te maken.</p>
+
+      <div class="highlight-box">
+        <h4>💡 Simpel Gezegd</h4>
+        <p>Een financiële mindset betekent dat je geld ziet als een gereedschap om vrijheid te creëren. Je denkt niet in uitgaven, maar in investeringen. Je bouwt niet aan status, maar aan vermogen. Je leeft niet voor vandaag, maar voor morgen.</p>
+      </div>
+
+      <h3>De Zeven Simpele Principes van Een Financiële Mindset</h3>
+      <p>Een sterke financiële mindset is gebaseerd op zeven eenvoudige principes die je dagelijks kunt toepassen:</p>
+      
+      <h4>1. Betaal Eerst Jezelf</h4>
+      <p>Spaar en investeer aan het begin van de maand, niet wat er overblijft aan het einde. Dit principe zorgt ervoor dat je automatisch geld opzij zet voordat je het uitgeeft. Het is de basis van alle financiële welvaart.</p>
+      
+      <h4>2. Leef Onder Je Stand</h4>
+      <p>Houd je vaste lasten laag en kies vrijheid boven status. Mensen met een sterke financiële mindset leven altijd onder hun stand, zodat ze geld overhouden om te sparen en te investeren. Status is duur, vrijheid is waardevol.</p>
+      
+      <h4>3. Vergroot Je Inkomensmotor</h4>
+      <p>Focus op het vergroten van je inkomen door skills te ontwikkelen, prestaties te leveren en side income te creëren. Een sterke inkomensmotor is de hefboom voor alle andere financiële doelen.</p>
+      
+      <h4>4. Automatiseer Goede Keuzes</h4>
+      <p>Maak automatische overboekingen naar spaar- en investeringsrekeningen. Automatisering zorgt ervoor dat je goede keuzes maakt zonder erover na te denken. Het vermindert de kans op impulsieve uitgaven.</p>
+      
+      <h4>5. Vermijd Dure Schulden</h4>
+      <p>Bouw dure schulden af met een plan en neem geen nieuwe onnodige schulden. Dure schulden zijn de grootste vijand van financiële welvaart. Ze eten je geld op zonder waarde toe te voegen.</p>
+      
+      <h4>6. Lange Termijn Wint</h4>
+      <p>Compounding werkt alleen als jij geduld hebt. Een financiële mindset denkt in jaren en decennia, niet in maanden. Kleine, consistente acties leiden tot grote resultaten over tijd.</p>
+      
+      <h4>7. Meet en Stuur</h4>
+      <p>Doe maandelijks een review van je financiën en laat cijfers boven gevoel gaan. Wat je meet, kun je verbeteren. Cijfers liegen niet, gevoelens wel.</p>
+
+      <h3>Stap 1: Zicht Op Je Geld</h3>
+      <p>Voordat je je financiën kunt verbeteren, moet je weten waar je geld naartoe gaat. Dit is de eerste en belangrijkste stap naar een sterke financiële mindset.</p>
+      
+      <h4>Rekening-Export en Categorieën</h4>
+      <p>Download 3-6 maanden transacties van al je rekeningen en categoriseer ze:</p>
+      <ul>
+        <li><strong>Wonen:</strong> Huur/hypotheek, gas, water, licht, internet</li>
+        <li><strong>Vervoer:</strong> Auto, benzine, openbaar vervoer, onderhoud</li>
+        <li><strong>Boodschappen:</strong> Voeding, verzorging, huishouden</li>
+        <li><strong>Verzekeringen:</strong> Zorg, auto, inboedel, overlijden</li>
+        <li><strong>Abonnementen:</strong> Telefoon, streaming, sportschool</li>
+        <li><strong>Fun:</strong> Uit eten, entertainment, hobbies</li>
+        <li><strong>Zorg:</strong> Dokter, medicijnen, tandarts</li>
+        <li><strong>Sparen/Investeren:</strong> Emergency fund, pensioen, beleggingen</li>
+      </ul>
+      
+      <h4>Top 5 Lekken Identificeren</h4>
+      <p>Markeer de grootste verspillers in je uitgaven. Dit zijn meestal:</p>
+      <ul>
+        <li><strong>Impulsaankopen:</strong> Dingen die je niet nodig hebt</li>
+        <li><strong>Bezorging:</strong> Extra kosten voor gemak</li>
+        <li><strong>Appjes:</strong> Kleine uitgaven die optellen</li>
+        <li><strong>Onnodige abonnementen:</strong> Services die je niet gebruikt</li>
+        <li><strong>Dure gewoontes:</strong> Dagelijkse uitgaven die duur zijn</li>
+      </ul>
+      
+      <h4>Snij-Plan Maken</h4>
+      <p>Zeg 2-3 abonnementen op en stel maxima per categorie vast. Begin met de makkelijkste besparingen en werk toe naar de moeilijkere. Elke euro die je bespaart, kun je investeren in je toekomst.</p>
+
+      <h3>Stap 2: Buffers en Veiligheid</h3>
+      <p>Financiële veiligheid begint met het hebben van buffers. Dit geeft je rust en voorkomt dat je dure schulden moet aangaan bij onverwachte uitgaven.</p>
+      
+      <h4>Noodbuffer</h4>
+      <p>Bouw een noodbuffer van 3-6 maanden vaste lasten op een aparte spaarrekening. Dit is geld voor echte noodsituaties zoals werkloosheid, ziekte, of grote onverwachte uitgaven. Stort elke maand automatisch een bedrag naar deze rekening.</p>
+      
+      <h4>Kleine Buffer</h4>
+      <p>Houd €1.000 apart voor onverwachte uitgaven zoals een kapotte wasmachine of auto-onderhoud. Dit voorkomt dat je dure schulden moet aangaan voor kleine problemen.</p>
+      
+      <h4>Verzekeringen</h4>
+      <p>Controleer of je over- of onderverzekerd bent. Kies voor simpele en passende verzekeringen. Te veel verzekeren is duur, te weinig verzekeren is riskant.</p>
+
+      <h3>Stap 3: Uitgaven Temmen</h3>
+      <p>Het temmen van uitgaven betekent niet dat je arm moet leven. Het betekent dat je bewust kiest waar je je geld aan uitgeeft.</p>
+      
+      <h4>De 80/20 Regel</h4>
+      <p>20% van je uitgaven zijn 80% van het probleem. Focus op de grootste uitgavenposten eerst. Kleine besparingen op grote uitgaven hebben meer impact dan grote besparingen op kleine uitgaven.</p>
+      
+      <h4>Vaste Lasten Heronderhandelen</h4>
+      <p>Bel je internet-, energie- en telecomproviders en vraag om lagere tarieven of overweeg overstappen. Veel mensen betalen jarenlang te veel omdat ze niet onderhandelen of vergelijken.</p>
+      
+      <h4>Boodschappen Optimaliseren</h4>
+      <p>Maak een lijst, kies vaste gerechten, en focus op budgetvriendelijke, gezonde maaltijden met eiwit en groente. Minder verspilling betekent meer geld voor andere doelen.</p>
+      
+      <h4>Fun-Budget</h4>
+      <p>Hou iets leuks in je budget, maar zet een maximum bedrag. Grenzen geven rust en voorkomen dat je te veel uitgeeft aan entertainment.</p>
+
+      <h3>Stap 4: Inkomsten Vergroten</h3>
+      <p>Het vergroten van je inkomen is de hefboom voor alle andere financiële doelen. Hier zijn de belangrijkste strategieën:</p>
+      
+      <h4>Prestatie → Beloning</h4>
+      <p>Vraag om prestatiedoelen en koppel die aan bonussen of loonsverhoging. Toon aan hoe je waarde toevoegt aan het bedrijf en vraag om erkenning daarvan.</p>
+      
+      <h4>Nieuwe Skills</h4>
+      <p>Kies 1 skill met hoge marktwaarde zoals sales, copywriting, data-analyse, development, advertenties, of design. Investeer tijd en geld in het leren van deze skill.</p>
+      
+      <h4>Side Income</h4>
+      <p>Begin met freelancen, een kleine dienst, coaching, handel, of een online product. Begin klein, lever resultaat, en bouw geleidelijk uit.</p>
+      
+      <h4>Netwerken</h4>
+      <p>Vraag om 3 warme introducties per maand. Help eerst anderen, vraag later om hulp. Netwerken is de snelste manier om nieuwe kansen te vinden.</p>
+
+      <h3>Stap 5: Schulden Opruimen</h3>
+      <p>Dure schulden zijn de grootste vijand van financiële welvaart. Hier is een systematische aanpak:</p>
+      
+      <h4>Inventaris Maken</h4>
+      <p>Maak een lijst van alle schulden met rente, saldo, en minimale aflossing per schuld. Weet precies waar je staat.</p>
+      
+      <h4>Snowball Methode</h4>
+      <p>Betaal de kleinste schuld eerst voor momentum. Dit geeft je een psychologisch voordeel omdat je snel successen ziet.</p>
+      
+      <h4>Avalanche Methode</h4>
+      <p>Betaal de schuld met de hoogste rente eerst voor wiskundige winst. Dit is financieel gezien de beste methode.</p>
+      
+      <h4>Rollover Systeem</h4>
+      <p>Na het afbetalen van een schuld, rol het bedrag door naar de volgende schuld. Dit versnelt het afbetalingsproces.</p>
+      
+      <h4>Verbod Op Nieuwe Schulden</h4>
+      <p>Tijdens het afbetalen: geen nieuwe dure consumentenschulden. Dit voorkomt dat je achteruit gaat terwijl je vooruit probeert te gaan.</p>
+
+      <h3>Stap 6: Sparen en Investeren Automatiseren</h3>
+      <p>Automatisering zorgt ervoor dat je goede keuzes maakt zonder erover na te denken:</p>
+      
+      <h4>Automatische Overboekingen</h4>
+      <p>Zet direct na je salaris automatische overboekingen naar spaar- en investeringsrekeningen. Wat je niet ziet, geef je niet uit.</p>
+      
+      <h4>Doelen Prioriteren</h4>
+      <p>Bouw eerst je buffer, dan korte termijn doelen (studie, auto, reis), dan lange termijn doelen (pensioen, vermogen).</p>
+      
+      <h4>Beleggen Simpel</h4>
+      <p>Kies voor brede spreiding, lage kosten, en vaste inleg. Geen gokken, geen "snelle tips". Consistente inleg over lange tijd is de sleutel.</p>
+
+      <h3>Stap 7: Systeem en Gewoontes</h3>
+      <p>Een financiële mindset wordt ondersteund door dagelijkse, wekelijkse en maandelijkse gewoontes:</p>
+      
+      <h4>Dagelijks</h4>
+      <ul>
+        <li>10 minuten skills ontwikkelen of side income</li>
+        <li>2 minuten geld-check (saldo en alerts)</li>
+      </ul>
+      
+      <h4>Wekelijks</h4>
+      <ul>
+        <li>30 minuten cijfers bekijken</li>
+        <li>1 optimalisatie (opzeggen, overstappen, besparen, extra verkoop)</li>
+      </ul>
+      
+      <h4>Maandelijks</h4>
+      <ul>
+        <li>60 minuten review: spaarratio, inkomsten, uitgaven, schuldafbouw, investeringen</li>
+        <li>Planning voor de komende maand</li>
+      </ul>
+
+      <h3>Rekenregels en Vuistregels</h3>
+      <p>Deze regels helpen je om snel te beoordelen of je op de goede weg bent:</p>
+      
+      <ul>
+        <li><strong>Spaarratio:</strong> Streef naar 20%+ (begin met 5-10%, verhoog elk kwartaal)</li>
+        <li><strong>Huisvesting:</strong> 25-30% van netto inkomen als richtlijn</li>
+        <li><strong>Auto:</strong> Waardedaling kost geld; hou het nuchter, cash is beter dan lening</li>
+        <li><strong>Leefgeld:</strong> Vaste wekelijkse bedrag op aparte rekening; wanneer op = klaar</li>
+      </ul>
+
+      <h3>Psychologie: Valkuilen en Oplossingen</h3>
+      <p>Financiële welvaart is niet alleen een kwestie van kennis, maar ook van psychologie. Hier zijn de belangrijkste valkuilen en oplossingen:</p>
+      
+      <h4>Impulsaankopen</h4>
+      <p><strong>Valkuil:</strong> Spontane aankopen die je niet nodig hebt<br>
+      <strong>Oplossing:</strong> 48-uurs regel voor aankopen boven €100</p>
+      
+      <h4>FOMO (Fear Of Missing Out)</h4>
+      <p><strong>Valkuil:</strong> Angst om iets te missen, waardoor je te veel uitgeeft<br>
+      <strong>Oplossing:</strong> Je mist niets door verstandig te zijn; je wint rust en vrijheid</p>
+      
+      <h4>Vergelijking</h4>
+      <p><strong>Valkuil:</strong> Jezelf vergelijken met anderen op sociale media<br>
+      <strong>Oplossing:</strong> Bouw aan je eigen getallen; social media is geen realiteit</p>
+      
+      <h4>Discipline</h4>
+      <p><strong>Valkuil:</strong> Afhankelijk zijn van wilskracht voor financiële keuzes<br>
+      <strong>Oplossing:</strong> Maak het saai-goed. Automatisering + regels = minder wilskracht nodig</p>
+
+      <h3>Werk en Business</h3>
+      <p>Een financiële mindset beïnvloedt ook hoe je omgaat met werk en business:</p>
+      
+      <h4>Werk Meer Waard Maken</h4>
+      <p>Lever KPI-gebonden winst en leg vast hoe jouw werk waarde oplevert. Toon aan wat je bijdraagt aan het succes van het bedrijf.</p>
+      
+      <h4>Onderhandelen</h4>
+      <p>Bereid cases voor met resultaten en plannen. Vraag concreet en tijdgebonden om loonsverhoging of betere voorwaarden.</p>
+      
+      <h4>Eigen Verdienmodellen</h4>
+      <p>Kies een product of dienst, draai een pilot, haal feedback op, en schaal op. Begin klein en bouw geleidelijk uit.</p>
+
+      <h3>Minimale Opzet Side Income (6 Weken)</h3>
+      <p>Hier is een praktische 6-weken plan om side income te starten:</p>
+      
+      <ul>
+        <li><strong>Week 1:</strong> Kies probleem dat je oplost + doelgroep, formuleer aanbod</li>
+        <li><strong>Week 2:</strong> 10 gesprekken; luister en scherp je aanbod aan</li>
+        <li><strong>Week 3:</strong> Maak een simpele landingspagina of pitchdeck</li>
+        <li><strong>Week 4:</strong> 10 nieuwe gesprekken + 5 follow-ups; vraag om betaalde pilot</li>
+        <li><strong>Week 5:</strong> Lever pilot; vraag om testimonial/case</li>
+        <li><strong>Week 6:</strong> Herhaal met verbeteringen; prijs en proces aanscherpen</li>
+      </ul>
+
+      <h3>Checklist Maandelijkse Review</h3>
+      <p>Deze checklist helpt je om maandelijks je financiële voortgang te evalueren:</p>
+      
+      <ol>
+        <li><strong>Buffer-groei:</strong> Percentage en maanden vaste lasten</li>
+        <li><strong>Spaarratio & investeringsbedrag:</strong> Hoeveel spaar je en investeer je?</li>
+        <li><strong>Schuldafbouw:</strong> Saldi en rente van alle schulden</li>
+        <li><strong>Uitgaven per categorie:</strong> Top 3 snijpunten voor volgende maand</li>
+        <li><strong>Inkomensmotor:</strong> Skill/side income voortgang</li>
+      </ol>
+
+      <div class="highlight-box">
+        <h4>🎯 Financiële Mindset in 12 Regels</h4>
+        <ol>
+          <li>Betaal eerst jezelf (automatisch)</li>
+          <li>Leef onder je stand en hou vaste lasten laag</li>
+          <li>Bouw buffer (3-6 maanden)</li>
+          <li>Vergroot je inkomensmotor (skills/side)</li>
+          <li>Ruim dure schulden op met plan</li>
+          <li>Investeer simpel en consistent</li>
+          <li>Maak regels en automatiseer ze</li>
+          <li>Meet maandelijks; cijfers sturen</li>
+          <li>Bewaar rust: saai-goed is krachtig</li>
+          <li>Bescherm je tijd en aandacht</li>
+          <li>Vraag hulp/accountability</li>
+          <li>Herhaal dit jaren; compounding doet de rest</li>
+        </ol>
+      </div>
+
+      <h3>Waarom Een Financiële Mindset Zo Belangrijk Is</h3>
+      <p>Een financiële mindset is niet alleen over geld - het is over vrijheid, keuze en mogelijkheden. Het geeft je:</p>
+      
+      <ul>
+        <li><strong>Rust:</strong> Je hoeft je geen zorgen te maken over geld</li>
+        <li><strong>Keuze:</strong> Je kunt kiezen hoe je je tijd besteedt</li>
+        <li><strong>Mogelijkheden:</strong> Je kunt kansen grijpen wanneer ze zich voordoen</li>
+        <li><strong>Zekerheid:</strong> Je hebt buffers voor moeilijke tijden</li>
+        <li><strong>Toekomst:</strong> Je bouwt aan je lange termijn doelen</li>
+      </ul>
+
+      <div class="highlight-box">
+        <h4>🎯 Belangrijke Herinnering</h4>
+        <p>Een financiële mindset is geen talent, het is een keuze voor ritme en regels. Met kleine, consequente stappen bouw je vrijheid: minder stress, meer opties, betere kansen. Maak geld jouw gereedschap. Vandaag beginnen, deze week volhouden, elke maand verbeteren.</p>
+      </div>
+    </div>
+
+    <!-- Huiswerk Opdrachten -->
+    <div class="section" id="huiswerk">
+      <h2>📝 Huiswerk Opdrachten</h2>
+      
+      <div class="exercise-box">
+        <h4>Opdracht 1: Financiële Status Check</h4>
+        <p><strong>Doel:</strong> Inzicht krijgen in je huidige financiële situatie en zwakke punten identificeren.</p>
+        <p><strong>Actie:</strong> Download 3 maanden transacties van al je rekeningen en categoriseer alle uitgaven. Identificeer je top 5 geldlekken en maak een snij-plan. Bereken je huidige spaarratio en noteer waar je de meeste verbetering kunt maken.</p>
+      </div>
+      
+      <div class="exercise-box">
+        <h4>Opdracht 2: Buffer Bouwen</h4>
+        <p><strong>Doel:</strong> Een noodbuffer opbouwen voor financiële veiligheid.</p>
+        <p><strong>Actie:</strong> Bereken hoeveel je maandelijkse vaste lasten zijn en stel een doel in voor je noodbuffer (3-6 maanden). Zet een automatische overboeking op naar een aparte spaarrekening. Start met wat je kunt missen, ook al is het maar €50 per maand.</p>
+      </div>
+      
+      <div class="exercise-box">
+        <h4>Opdracht 3: Inkomensmotor Vergroten</h4>
+        <p><strong>Doel:</strong> Een concrete stap zetten om je inkomen te vergroten.</p>
+        <p><strong>Actie:</strong> Kies één skill met hoge marktwaarde die je deze maand gaat leren, of begin met een side income project. Maak een specifiek plan met deadlines en actiestappen. Start klein maar consistent.</p>
+      </div>
+    </div>
+
+    <!-- Checklists -->
+    <div class="section" id="checklists">
+      <h2>✅ Checklists</h2>
+      <h3>Maandelijkse Financiële Review</h3>
+      <div class="checklist">
+        <div class="checklist-item"><input type="checkbox" id="chk-1"><label for="chk-1">Automatische spaar/investerings overboekingen zijn ingesteld</label></div>
+        <div class="checklist-item"><input type="checkbox" id="chk-2"><label for="chk-2">Maandelijkse uitgaven gecategoriseerd en geanalyseerd</label></div>
+        <div class="checklist-item"><input type="checkbox" id="chk-3"><label for="chk-3">Top 3 geldlekken geïdentificeerd en aangepakt</label></div>
+        <div class="checklist-item"><input type="checkbox" id="chk-4"><label for="chk-4">Spaarratio berekend en verbeterd ten opzichte van vorige maand</label></div>
+        <div class="checklist-item"><input type="checkbox" id="chk-5"><label for="chk-5">Noodbuffer groei geëvalueerd</label></div>
+        <div class="checklist-item"><input type="checkbox" id="chk-6"><label for="chk-6">Schuldafbouw voortgang gecontroleerd</label></div>
+        <div class="checklist-item"><input type="checkbox" id="chk-7"><label for="chk-7">Inkomensmotor activiteiten uitgevoerd (skills/side income)</label></div>
+        <div class="checklist-item"><input type="checkbox" id="chk-8"><label for="chk-8">Onnodige abonnementen opgezegd of overgestapt</label></div>
+      </div>
+    </div>
+
+    <!-- Reflectie Vragen -->
+    <div class="section" id="reflectie">
+      <h2>🤔 Reflectie Vragen</h2>
+      
+      <div class="reflection-question">
+        <h4>Reflectievraag 1: Huidige Financiële Mindset</h4>
+        <p>Welke van de 7 financiële principes (betalen jezelf, leven onder stand, inkomensmotor, automatiseren, schulden vermijden, lange termijn, meten) heeft de meeste ontwikkeling nodig in jouw leven? Waarom denk je dat dit zo is?</p>
+      </div>
+      
+      <div class="reflection-question">
+        <h4>Reflectievraag 2: Geld Lekken</h4>
+        <p>Wat zijn je grootste geldlekken en welke psychologische factoren (FOMO, impulsiviteit, vergelijking) spelen hierbij een rol? Hoe kun je deze triggers herkennen en er anders mee omgaan?</p>
+      </div>
+      
+      <div class="reflection-question">
+        <h4>Reflectievraag 3: Toekomstvisie</h4>
+        <p>Hoe zou je leven eruit zien als je financiële vrijheid had? Welke specifieke veranderingen zou je merken in je stress, keuzes en mogelijkheden? Wat is je eerste concrete stap om daar te komen?</p>
+      </div>
+    </div>
+
+    <!-- Actieplan -->
+    <div class="section action-plan" id="actieplan">
+      <h3>Actieplan</h3>
+      
+      <div class="action-step">
+        <h4>Stap 1: Financiële Situatie In Kaart Brengen</h4>
+        <p>Download 3 maanden transacties, categoriseer alle uitgaven, en identificeer je top 5 geldlekken. Bereken je huidige spaarratio en maak een snij-plan voor onnodige uitgaven.</p>
+      </div>
+      
+      <div class="action-step">
+        <h4>Stap 2: Automatisering Instellen</h4>
+        <p>Zet automatische overboekingen op naar spaar- en investeringsrekeningen direct na je salaris. Begin met wat je kunt missen, ook al is het maar 5% van je inkomen.</p>
+      </div>
+      
+      <div class="action-step">
+        <h4>Stap 3: Noodbuffer Bouwen</h4>
+        <p>Bereken je maandelijkse vaste lasten en stel een doel in voor je noodbuffer (3-6 maanden). Open een aparte spaarrekening en stort daar automatisch geld naartoe.</p>
+      </div>
+      
+      <div class="action-step">
+        <h4>Stap 4: Inkomensmotor Vergroten</h4>
+        <p>Kies één skill met hoge marktwaarde die je gaat leren, of begin met een side income project. Maak een specifiek plan met deadlines en start klein maar consistent.</p>
+      </div>
+      
+      <div class="action-step">
+        <h4>Stap 5: Maandelijkse Review Systeem</h4>
+        <p>Implementeer een maandelijkse financiële review met de checklist uit deze les. Plan een vast moment in je agenda en houd je voortgang bij om consistent te blijven.</p>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <p>Dit ebook is onderdeel van de <span class="ttm-brand">Top Tier Men</span> Academy</p>
+      <p>Module 05: Business and Finance | Les 01: De Financiële Mindset</p>
+      <p>© 2025 Top Tier Men. Alle rechten voorbehouden.</p>
+    </div>
+  </div>
+
+  <script>
+    // Checklist persistentie via localStorage
+    document.addEventListener('DOMContentLoaded', function() {
+      const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+      checkboxes.forEach(cb => {
+        const saved = localStorage.getItem(cb.id);
+        if (saved === 'true') cb.checked = true;
+        cb.addEventListener('change', function(){ localStorage.setItem(this.id, this.checked); });
+      });
+    });
+  </script>
+</body>
+</html>

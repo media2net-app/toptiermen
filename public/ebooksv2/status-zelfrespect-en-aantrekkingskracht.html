@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Status, Zelfrespect en Aantrekkingskracht - Ebook | Top Tier Men</title>
+  <meta name="description" content="V2 ebook voor Status, Zelfrespect en Aantrekkingskracht binnen Top Tier Men Academy." />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.6; color: #ffffff;
+      background: linear-gradient(135deg, #0A0F0A 0%, #181F17 50%, #232D1A 100%);
+      min-height: 100vh;
+    }
+    .container { max-width: 800px; margin: 0 auto; padding: 2rem; }
+    .header {
+      text-align: center; margin-bottom: 3rem; padding: 2rem;
+      background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      border-radius: 20px; border: 1px solid #3A4D23;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    .logo { margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; }
+    h1 {
+      font-size: 2.5rem; font-weight: 800;
+      background: linear-gradient(135deg, #ffffff 0%, #8BAE5A 50%, #B6C948 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      margin-bottom: .5rem;
+    }
+    .subtitle { color: #8BAE5A; font-size: 1.1rem; font-weight: 500; }
+    .module-info {
+      background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1rem; border-radius: 10px; margin: 1rem 0; border-left: 4px solid #8BAE5A;
+    }
+    .section { background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      margin-bottom: 2rem; padding: 2rem; border-radius: 15px; border: 1px solid #3A4D23; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    .section h2 { color: #B6C948; font-size: 1.8rem; font-weight: 700; margin-bottom: 1.5rem; display: flex; align-items: center; gap: .5rem; }
+    .section h3 { color: #8BAE5A; font-size: 1.3rem; font-weight: 600; margin: 1.5rem 0 1rem; }
+    .section p { margin-bottom: 1rem; color: #e0e0e0; }
+    .section ul, .section ol { margin: 1rem 0; padding-left: 2rem; }
+    .section li { margin-bottom: .5rem; color: #e0e0e0; }
+    .highlight-box { background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1.5rem; border-radius: 10px; border-left: 4px solid #B6C948; margin: 1.5rem 0;
+    }
+    .exercise-box { background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%);
+      padding: 1.5rem; border-radius: 10px; border: 1px solid #8BAE5A; margin: 1rem 0;
+    }
+    .exercise-box h4 { color: #B6C948; font-size: 1.1rem; margin-bottom: 1rem; }
+    .checklist { background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      padding: 1.5rem; border-radius: 10px; border: 1px solid #3A4D23; margin: 1rem 0;
+    }
+    .checklist-item { display: flex; align-items: center; margin-bottom: .8rem; padding: .5rem; background: rgba(58,77,35,.3); border-radius: 8px; }
+    .checklist-item input[type="checkbox"] { margin-right: 1rem; width: 18px; height: 18px; accent-color: #8BAE5A; }
+    .reflection-question { background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1.5rem; border-radius: 10px; border-left: 4px solid #B6C948; margin: 1rem 0;
+    }
+    .reflection-question h4 { color: #B6C948; margin-bottom: 1rem; }
+    .action-plan { background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%);
+      padding: 2rem; border-radius: 15px; border: 2px solid #8BAE5A; margin: 2rem 0;
+    }
+    .action-step { background: rgba(139,174,90,.1); padding: 1rem; border-radius: 8px; margin: 1rem 0; border-left: 3px solid #8BAE5A; }
+    .footer { text-align: center; margin-top: 3rem; padding: 2rem; background: linear-gradient(135deg, #181F17 0%, #232D1A 100%); border-radius: 15px; border: 1px solid #3A4D23; }
+    .footer p { color: #8BAE5A; margin-bottom: 1rem; }
+    .ttm-brand { color: #B6C948; font-weight: 700; }
+    .sticky-back-btn { position: fixed; top: 50%; right: 20px; transform: translateY(-50%);
+      z-index: 1000; background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%);
+      color: #fff; border: none; border-radius: 50px; padding: 15px 20px; font-size: 14px; font-weight: 600; cursor: pointer;
+      box-shadow: 0 8px 25px rgba(139,174,90,.3); transition: all .3s ease; display: flex; align-items: center; gap: 8px; text-decoration: none; min-width: 120px; justify-content: center;
+    }
+    .sticky-back-btn:hover { background: linear-gradient(135deg, #B6C948 0%, #8BAE5A 100%); transform: translateY(-50%) scale(1.05); box-shadow: 0 12px 35px rgba(139,174,90,.4); }
+    .sticky-back-btn:active { transform: translateY(-50%) scale(.95); }
+    .sticky-back-btn svg { width: 16px; height: 16px; fill: currentColor; }
+    @media (max-width: 768px) {
+      .container { padding: 1rem; }
+      h1 { font-size: 2rem; }
+      .section { padding: 1.5rem; }
+      .sticky-back-btn { right: 10px; padding: 12px 16px; font-size: 12px; min-width: 100px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Sticky Back Button: VERPLICHT naar juiste les URL -->
+  <a href="/dashboard/academy/0d02e65a-c109-440d-9286-690b21fbdecb/b5ddffc2-e3ff-4ee2-b683-03db5e9e9367" class="sticky-back-btn" title="Terug naar les">
+    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    Terug
+  </a>
+
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="logo">
+        <img src="/logo_white-full.svg" alt="Top Tier Men Logo" style="height:40px;width:auto" />
+      </div>
+      <h1>Status, Zelfrespect en Aantrekkingskracht</h1>
+      <p class="subtitle">De drie pijlers van mannelijke kracht</p>
+      <div class="module-info">
+        <strong>Module 03: Fysieke Dominantie</strong> | <strong>Les 03: Status, Zelfrespect en Aantrekkingskracht</strong>
+      </div>
+    </div>
+
+    <!-- Uitgebreide Samenvatting -->
+    <div class="section" id="samenvatting">
+      <h2>📚 Uitgebreide Samenvatting van de Les</h2>
+      
+      <div class="highlight-box">
+        <h4>🎯 Doel van deze les</h4>
+        <p>Status, zelfrespect en aantrekkingskracht: simpele, praktische regels, rituelen, scripts en checklists om direct toe te passen. Geen jargon; duidelijke stappen voor vandaag.</p>
+      </div>
+
+      <p>Status, zelfrespect en aantrekkingskracht zijn de drie fundamenten van mannelijke kracht. Ze werken samen om jou te maken tot de man die je wilt zijn. Deze les geeft je praktische tools om alle drie te ontwikkelen en te versterken.</p>
+
+      <h3>Wat is Status?</h3>
+      <p>Status is jouw positie in de sociale hiërarchie. Het is niet alleen wat je doet, maar vooral hoe anderen jou zien en behandelen. Echte status komt niet van titels of bezittingen, maar van hoe je je gedraagt, hoe je spreekt, en hoe je jezelf presenteert.</p>
+
+      <p>Status wordt opgebouwd door consistentie. Wanneer mensen weten wat ze van je kunnen verwachten, wanneer je doet wat je zegt, en wanneer je je gedraagt volgens je waarden, dan krijg je respect. Respect is de basis van status. Zonder respect heb je geen echte status, alleen een lege titel.</p>
+
+      <p>Je kunt status opbouwen door te focussen op je prestaties, je expertise, en je karakter. Word goed in wat je doet. Help anderen. Wees betrouwbaar. Dit zijn de bouwstenen van echte status die lang meegaat.</p>
+
+      <h3>Zelfrespect: De Basis van Alles</h3>
+      <p>Zelfrespect is de basis van alles. Zonder zelfrespect kun je geen echte status opbouwen en geen echte aantrekkingskracht ontwikkelen. Zelfrespect betekent dat je jezelf waardeert, dat je voor jezelf opkomt, en dat je je gedraagt volgens je eigen waarden.</p>
+
+      <p>Zelfrespect wordt opgebouwd door kleine, dagelijkse keuzes. Elke keer dat je doet wat je zegt dat je gaat doen, bouw je zelfrespect op. Elke keer dat je voor jezelf opkomt, versterk je je zelfrespect. Elke keer dat je je waarden volgt, zelfs wanneer het moeilijk is, groei je in zelfrespect.</p>
+
+      <p>Het is belangrijk om te onderscheiden tussen zelfrespect en ego. Ego is kwetsbaar en reageert defensief op kritiek. Zelfrespect is solide en kan kritiek aanhoren zonder erdoor geraakt te worden. Ego probeert anderen te overtuigen van zijn waarde. Zelfrespect weet zijn eigen waarde en hoeft het niet te bewijzen.</p>
+
+      <h3>Aantrekkingskracht: Magnetisme</h3>
+      <p>Aantrekkingskracht gaat verder dan uiterlijk. Het is een combinatie van hoe je eruitziet, hoe je je gedraagt, hoe je spreekt, en hoe je je voelt. Mensen worden aangetrokken door zelfvertrouwen, passie, en authenticiteit. Deze kwaliteiten zijn aantrekkelijker dan perfecte uiterlijke kenmerken.</p>
+
+      <p>Echte aantrekkingskracht komt van binnenuit. Wanneer je comfortabel bent met jezelf, wanneer je je eigen waarde kent, en wanneer je je eigen pad volgt, dan straal je iets uit waar mensen zich tot aangetrokken voelen. Dit is magnetisme - een kracht die mensen naar je toe trekt zonder dat je er moeite voor hoeft te doen.</p>
+
+      <p>Fysieke aantrekkingskracht is belangrijk, maar het is niet alles. Zorg goed voor je lichaam, kleed je passend, en verzorg jezelf. Maar vergeet niet dat je houding, je oogcontact, en je manier van spreken net zo belangrijk zijn voor hoe aantrekkelijk anderen je vinden.</p>
+
+      <h3>De Verbinding Tussen de Drie</h3>
+      <p>Status, zelfrespect en aantrekkingskracht versterken elkaar. Wanneer je zelfrespect hebt, gedraag je je op een manier die respect afdwingt van anderen. Dit geeft je status. Wanneer je status hebt, voel je je zekerder over jezelf, wat je zelfrespect versterkt. En wanneer je beide hebt, straal je een aantrekkingskracht uit die magnetisch is.</p>
+
+      <p>Het omgekeerde is ook waar. Wanneer je geen zelfrespect hebt, gedraag je je op een manier die anderen niet respecteren. Dit verlaagt je status. Een lage status ondermijnt je zelfrespect. En zonder beide is het moeilijk om echte aantrekkingskracht te ontwikkelen.</p>
+
+      <h3>Praktische Stappen voor Status</h3>
+      <p>Begin met het ontwikkelen van expertise in je vakgebied. Word goed in wat je doet. Dit geeft je een solide basis voor status. Mensen respecteren competentie. Wanneer je goed bent in wat je doet, krijgen anderen vertrouwen in jou en je oordelen.</p>
+
+      <p>Wees consistent in je gedrag. Mensen moeten weten wat ze van je kunnen verwachten. Wanneer je onvoorspelbaar bent, ondermijn je het vertrouwen dat nodig is voor status. Wees betrouwbaar in kleine dingen, dan kunnen anderen je vertrouwen in grote dingen.</p>
+
+      <p>Help anderen zonder er iets voor terug te verwachten. Echte leiders dienen anderen. Wanneer je anderen helpt om beter te worden, bouw je loyaliteit en respect op. Dit zijn de fundamenten van duurzame status.</p>
+
+      <h3>Praktische Stappen voor Zelfrespect</h3>
+      <p>Doe wat je zegt dat je gaat doen. Dit is de snelste manier om zelfrespect op te bouwen. Elke keer dat je je woord houdt, ook tegen jezelf, versterk je het vertrouwen in jezelf. Begin klein en bouw dit op tot een gewoonte.</p>
+
+      <p>Stel grenzen en houd je eraan. Zelfrespect betekent dat je voor jezelf opkomt. Wanneer anderen je grenzen overschrijden, spreek je dit uit. Wanneer je jezelf toestaat om over je grenzen te gaan, ondermijn je je eigen zelfrespect.</p>
+
+      <p>Zorg goed voor jezelf. Eet gezond, beweeg regelmatig, slaap voldoende, en investeer in je persoonlijke ontwikkeling. Wanneer je goed voor jezelf zorgt, toon je jezelf dat je het waard bent om voor te zorgen. Dit is een vorm van zelfrespect.</p>
+
+      <h3>Praktische Stappen voor Aantrekkingskracht</h3>
+      <p>Ontwikkel je fysieke aantrekkingskracht. Zorg voor je lichaam door regelmatig te trainen, gezond te eten, en goed te slapen. Kleed je op een manier die je persoonlijkheid weerspiegelt en die je zelfvertrouwen geeft. Verzorg jezelf - goede hygiëne en grooming zijn essentieel.</p>
+
+      <p>Werk aan je sociale vaardigheden. Leer om comfortabel te zijn in gesprekken. Oefen oogcontact. Leer om te luisteren in plaats van alleen te praten. Wees geïnteresseerd in anderen in plaats van alleen bezig te zijn met jezelf interessant te maken.</p>
+
+      <p>Ontwikkel je passies en interesses. Mensen worden aangetrokken door passie. Wanneer je enthousiast bent over iets, wanneer je iets doet waar je om geeft, dan straal je energie uit die anderen aantrekt. Zoek naar dingen die je echt interesseren en investeer tijd in het ontwikkelen van je expertise hierin.</p>
+
+      <h3>De Rol van Lichaamstaal</h3>
+      <p>Je lichaamstaal communiceert meer dan je woorden. Een rechte houding, open gebaren, en direct oogcontact geven aan dat je zelfvertrouwen hebt. Dit trekt mensen aan en dwingt respect af. Oefen dagelijks met het aannemen van een zelfverzekerde houding.</p>
+
+      <p>Je stem is ook onderdeel van je lichaamstaal. Spreek duidelijk, met een rustige, diepe stem. Neem de tijd om te formuleren wat je wilt zeggen. Wanneer je aarzelt of onzeker klinkt, ondermijn je je eigen autoriteit. Oefen met spreken alsof je zeker bent van wat je zegt.</p>
+
+      <h3>Omgaan met Afwijzing</h3>
+      <p>Afwijzing hoort bij het leven. Wanneer je jezelf blootstelt aan anderen, wanneer je risico's neemt, dan zal je soms afgewezen worden. Dit is normaal en betekent niet dat er iets mis is met jou. Leer om afwijzing niet persoonlijk op te vatten.</p>
+
+      <p>Gebruik afwijzing als feedback. Wanneer iemand je afwijst, betekent dit niet dat je niet waardevol bent. Het betekent alleen dat die persoon op dat moment niet de juiste match is. Blijf jezelf zijn en blijf zoeken naar mensen die je wel waarderen voor wie je bent.</p>
+
+      <h3>Lange Termijn Ontwikkeling</h3>
+      <p>Status, zelfrespect en aantrekkingskracht ontwikkelen zich over jaren, niet over dagen. Wees geduldig met het proces. Focus op consistentie in plaats van perfectie. Kleine, dagelijkse verbeteringen leiden tot grote veranderingen over tijd.</p>
+
+      <p>Omring jezelf met mensen die je inspireren en uitdagen om beter te worden. Wanneer je jezelf omringt met mensen die hoge standaarden hebben, word je uitgedaagd om ook je best te doen. Dit helpt je om te groeien in alle drie de gebieden.</p>
+
+      <p>Blijf leren en ontwikkelen. Status, zelfrespect en aantrekkingskracht zijn niet statisch. Ze vereisen continue aandacht en ontwikkeling. Investeer in jezelf door te lezen, te leren, en nieuwe vaardigheden te ontwikkelen. Dit houdt je interessant en waardevol voor anderen.</p>
+
+      <h3>De Praktische Toepassing</h3>
+      <p>Begin vandaag met kleine veranderingen. Kies één aspect van status, zelfrespect of aantrekkingskracht om aan te werken. Maak het specifiek en meetbaar. Bijvoorbeeld: "Ik ga elke dag mijn woord houden tegen mezelf" of "Ik ga elke dag 10 minuten oefenen met zelfverzekerde lichaamstaal."</p>
+
+      <p>Wees consistent in je inspanningen. Het is beter om één ding elke dag te doen dan tien dingen één keer. Consistentie is de sleutel tot duurzame verandering. Wanneer je iets een gewoonte maakt, hoef je er niet meer over na te denken - het wordt automatisch.</p>
+
+      <p>Evalueer regelmatig je voortgang. Kijk naar wat werkt en wat niet. Pas je aanpak aan op basis van wat je leert. Wees niet bang om van richting te veranderen wanneer iets niet werkt. Flexibiliteit is een teken van intelligentie, niet van zwakte.</p>
+
+      <p>Status, zelfrespect en aantrekkingskracht zijn de fundamenten van een krachtig leven. Door aan alle drie te werken, bouw je een solide basis voor succes in alle gebieden van je leven. Begin klein, wees consistent, en wees geduldig met het proces. De resultaten zullen komen.</p>
+    </div>
+
+    <!-- Huiswerk Opdrachten -->
+    <div class="section">
+      <h2>📝 Huiswerk Opdrachten</h2>
+      
+      <div class="exercise-box">
+        <h4>Opdracht 1: Zelfrespect Dagboek</h4>
+        <p>Houd deze week een dagboek bij van momenten waarop je je zelfrespect voelde groeien of afnemen. Schrijf elke dag één situatie op waarin je een keuze maakte die je zelfrespect beïnvloedde. Analyseer aan het einde van de week welke patronen je ziet en hoe je je zelfrespect kunt versterken.</p>
+      </div>
+
+      <div class="exercise-box">
+        <h4>Opdracht 2: Status Audit</h4>
+        <p>Voer een status audit uit van je sociale omgeving. Maak een lijst van de 10 mensen met wie je het meest omgaat. Evalueer voor elke persoon: hoe zien zij jou? Welke status geven zij jou? Welke verbeteringen kun je maken in hoe je je presenteert aan deze mensen?</p>
+      </div>
+
+      <div class="exercise-box">
+        <h4>Opdracht 3: Aantrekkingskracht Experiment</h4>
+        <p>Experimenteer deze week met verschillende aspecten van je aantrekkingskracht. Test verschillende kledingstijlen, oefen met nieuwe lichaamstaal, of probeer nieuwe gespreksonderwerpen. Houd bij welke veranderingen positieve reacties opleveren en welke niet. Gebruik deze feedback om je aanpak te verfijnen.</p>
+      </div>
+    </div>
+
+    <!-- Checklist -->
+    <div class="section">
+      <h2>✅ Checklist</h2>
+      <div class="checklist">
+        <div class="checklist-item">
+          <input type="checkbox" id="check1" />
+          <label for="check1">Dagelijkse zelfrespect actie voltooid (grenzen stellen of woord houden)</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="check2" />
+          <label for="check2">Status versterkende actie uitgevoerd (iemand helpen of expertise tonen)</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="check3" />
+          <label for="check3">Fysieke zelfverzorging voltooid (training, grooming, kleding)</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="check4" />
+          <label for="check4">Sociale vaardigheden geoefend (gesprek, oogcontact, luisteren)</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="check5" />
+          <label for="check5">Zelfverzekerde lichaamstaal beoefend (rechte houding, open gebaren)</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="check6" />
+          <label for="check6">Passie/interesse gedeeld met anderen</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reflectie Vragen -->
+    <div class="section">
+      <h2>🤔 Reflectie Vragen</h2>
+      
+      <div class="reflection-question">
+        <h4>Vraag 1</h4>
+        <p>Op welke van de drie gebieden (status, zelfrespect, aantrekkingskracht) voel je je het meest onzeker? Welke specifieke acties kun je deze week ondernemen om dit te verbeteren?</p>
+      </div>
+
+      <div class="reflection-question">
+        <h4>Vraag 2</h4>
+        <p>Hoe reageer je momenteel op afwijzing of kritiek? Welke patronen zie je in je reacties en hoe zou je deze kunnen verbeteren om je zelfrespect te versterken?</p>
+      </div>
+
+      <div class="reflection-question">
+        <h4>Vraag 3</h4>
+        <p>Welke aspecten van je huidige gedrag of presentatie dragen bij aan je status en aantrekkingskracht? Welke aspecten ondermijnen deze juist?</p>
+      </div>
+    </div>
+
+    <!-- Actieplan -->
+    <div class="section">
+      <h2>🎯 Actieplan</h2>
+      <div class="action-plan">
+        <div class="action-step">
+          <strong>1.</strong> Kies één specifiek gebied (status, zelfrespect of aantrekkingskracht) om deze week te focussen. Maak een concrete, meetbare doelstelling.
+        </div>
+        <div class="action-step">
+          <strong>2.</strong> Implementeer één kleine verandering in je dagelijkse routine die dit gebied versterkt. Bijvoorbeeld: elke dag één zelfrespect versterkende actie.
+        </div>
+        <div class="action-step">
+          <strong>3.</strong> Oefen dagelijks met zelfverzekerde lichaamstaal en spraak. Oefen voor de spiegel of met een vriend.
+        </div>
+        <div class="action-step">
+          <strong>4.</strong> Zoek één nieuwe sociale situatie op deze week waarin je je nieuwe vaardigheden kunt testen en ontwikkelen.
+        </div>
+        <div class="action-step">
+          <strong>5.</strong> Evalueer aan het einde van de week je voortgang en plan de volgende verbeteringen voor de komende week.
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <p>Dit ebook is onderdeel van de <span class="ttm-brand">Top Tier Men Academy</span></p>
+      <p>Blijf groeien, blijf sterker worden.</p>
+    </div>
+  </div>
+
+  <script>
+    // Checklist persistentie via localStorage
+    document.addEventListener('DOMContentLoaded', function() {
+      const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+      checkboxes.forEach(cb => {
+        const saved = localStorage.getItem(cb.id);
+        if (saved === 'true') cb.checked = true;
+        cb.addEventListener('change', function(){ localStorage.setItem(this.id, this.checked ? 'true' : 'false'); });
+      });
+    });
+  </script>
+</body>
+</html>

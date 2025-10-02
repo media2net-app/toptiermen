@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vermogen Opbouwen Begin met Investeren - Ebook | Top Tier Men</title>
+  <meta name="description" content="V2 ebook voor Vermogen Opbouwen Begin met Investeren binnen Top Tier Men Academy." />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.6; color: #ffffff;
+      background: linear-gradient(135deg, #0A0F0A 0%, #181F17 50%, #232D1A 100%);
+      min-height: 100vh;
+    }
+    .container { max-width: 800px; margin: 0 auto; padding: 2rem; }
+    .header {
+      text-align: center; margin-bottom: 3rem; padding: 2rem;
+      background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      border-radius: 20px; border: 1px solid #3A4D23;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    .logo { margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; }
+    h1 {
+      font-size: 2.5rem; font-weight: 800;
+      background: linear-gradient(135deg, #ffffff 0%, #8BAE5A 50%, #B6C948 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      margin-bottom: .5rem;
+    }
+    .subtitle { color: #8BAE5A; font-size: 1.1rem; font-weight: 500; }
+    .module-info {
+      background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1rem; border-radius: 10px; margin: 1rem 0; border-left: 4px solid #8BAE5A;
+    }
+    .section { background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      margin-bottom: 2rem; padding: 2rem; border-radius: 15px; border: 1px solid #3A4D23; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    .section h2 { color: #B6C948; font-size: 1.8rem; font-weight: 700; margin-bottom: 1.5rem; display: flex; align-items: center; gap: .5rem; }
+    .section h3 { color: #8BAE5A; font-size: 1.3rem; font-weight: 600; margin: 1.5rem 0 1rem; }
+    .section p { margin-bottom: 1rem; color: #e0e0e0; }
+    .section ul, .section ol { margin: 1rem 0; padding-left: 2rem; }
+    .section li { margin-bottom: .5rem; color: #e0e0e0; }
+    .highlight-box { background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1.5rem; border-radius: 10px; border-left: 4px solid #B6C948; margin: 1.5rem 0;
+    }
+    .exercise-box { background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%);
+      padding: 1.5rem; border-radius: 10px; border: 1px solid #8BAE5A; margin: 1rem 0;
+    }
+    .exercise-box h4 { color: #B6C948; font-size: 1.1rem; margin-bottom: 1rem; }
+    .checklist { background: linear-gradient(135deg, #181F17 0%, #232D1A 100%);
+      padding: 1.5rem; border-radius: 10px; border: 1px solid #3A4D23; margin: 1rem 0;
+    }
+    .checklist-item { display: flex; align-items: center; margin-bottom: .8rem; padding: .5rem; background: rgba(58,77,35,.3); border-radius: 8px; }
+    .checklist-item input[type="checkbox"] { margin-right: 1rem; width: 18px; height: 18px; accent-color: #8BAE5A; }
+    .reflection-question { background: linear-gradient(135deg, #3A4D23 0%, #4A5D33 100%);
+      padding: 1.5rem; border-radius: 10px; border-left: 4px solid #B6C948; margin: 1rem 0;
+    }
+    .reflection-question h4 { color: #B6C948; margin-bottom: 1rem; }
+    .action-plan { background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%);
+      padding: 2rem; border-radius: 15px; border: 2px solid #8BAE5A; margin: 2rem 0;
+    }
+    .action-step { background: rgba(139,174,90,.1); padding: 1rem; border-radius: 8px; margin: 1rem 0; border-left: 3px solid #8BAE5A; }
+    .footer { text-align: center; margin-top: 3rem; padding: 2rem; background: linear-gradient(135deg, #181F17 0%, #232D1A 100%); border-radius: 15px; border: 1px solid #3A4D23; }
+    .footer p { color: #8BAE5A; margin-bottom: 1rem; }
+    .ttm-brand { color: #B6C948; font-weight: 700; }
+    .sticky-back-btn { position: fixed; top: 50%; right: 20px; transform: translateY(-50%);
+      z-index: 1000; background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%);
+      color: #fff; border: none; border-radius: 50px; padding: 15px 20px; font-size: 14px; font-weight: 600; cursor: pointer;
+      box-shadow: 0 8px 25px rgba(139,174,90,.3); transition: all .3s ease; display: flex; align-items: center; gap: 8px; text-decoration: none; min-width: 120px; justify-content: center;
+    }
+    .sticky-back-btn:hover { background: linear-gradient(135deg, #B6C948 0%, #8BAE5A 100%); transform: translateY(-50%) scale(1.05); box-shadow: 0 12px 35px rgba(139,174,90,.4); }
+    .sticky-back-btn:active { transform: translateY(-50%) scale(.95); }
+    .sticky-back-btn svg { width: 16px; height: 16px; fill: currentColor; }
+    @media (max-width: 768px) {
+      .container { padding: 1rem; }
+      h1 { font-size: 2rem; }
+      .section { padding: 1.5rem; }
+      .sticky-back-btn { right: 10px; padding: 12px 16px; font-size: 12px; min-width: 100px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Sticky Back Button: VERPLICHT naar juiste les URL -->
+  <a href="/dashboard/academy/309b7450-3c77-4aa5-bc14-f5514cafd886/02e056c2-db70-41c6-8fb5-fea3472b38e8" class="sticky-back-btn" title="Terug naar les">
+    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    Terug
+  </a>
+
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="logo">
+        <img src="/logo_white-full.svg" alt="Top Tier Men Logo" style="height:40px;width:auto" />
+      </div>
+      <h1>Vermogen Opbouwen Begin met Investeren</h1>
+      <p class="subtitle"></p>
+      <div class="module-info">
+        <strong>Module 05: Business and Finance </strong> | <strong>Les 04: Vermogen Opbouwen Begin met Investeren</strong>
+      </div>
+    </div>
+
+    <!-- Uitgebreide Samenvatting: 1:1 OVERNEMEN (NIET WIJZIGEN) -->
+    <!-- Markeer deze sectie exact en wijzig de tekst niet. -->
+    <!-- Financiële Disclaimer -->
+    <div class="highlight-box" style="background: linear-gradient(135deg, #ce6629 0%, #ffbe43 100%); border-left: 4px solid #FFD700; margin: 1.5rem 0;">
+      <h4 style="color: #fff; font-weight: bold; text-align: left;">⚠️ BELANGRIJKE FINANCIËLE WAARSCHUWING</h4>
+      <p style="color: #fff; font-weight: bold; text-align: left;">
+        De informatie in deze les is uitsluitend voor educatieve doeleinden en vormt geen financieel advies. 
+        Raadpleeg altijd een gekwalificeerde financieel adviseur voordat je beslissingen neemt over je financiën, investeringen of geld. 
+        Alle investeringen brengen risico's met zich mee en kunnen leiden tot verliezen. 
+        Top Tier Men is niet verantwoordelijk voor eventuele financiële gevolgen van het volgen van de informatie in deze les zonder professioneel advies.
+      </p>
+    </div>
+
+    <div class="section" id="samenvatting">
+      <h2>📚 Uitgebreide Samenvatting van de Les</h2>
+<div class="highlight-box">
+  <h4>🎯 Doel van deze les</h4>
+  <p>
+    Je leert een eenvoudig, betrouwbaar systeem om <strong>te beginnen met investeren</strong> en vermogen op te bouwen.
+    Geen speculeren, wel een plan met automatische inleg, brede spreiding, lage kosten en lange adem.
+    Doel: een portfolio dat je zonder stress kunt volhouden en stapsgewijs kunt opschalen.
+  </p>
+</div>
+
+<h3>Principes van gezond investeren</h3>
+<ul>
+  <li><strong>Lang termijn</strong>: 10+ jaar horizon. Tijd verslaat timing.</li>
+  <li><strong>Risico = gedrag</strong>: grootste risico is paniek of FOMO. Proces beschermt je.</li>
+  <li><strong>Kosten killen rendement</strong>: lage kosten fondsen/ETF’s, minimale belastinglekken.</li>
+  <li><strong>Spreiding</strong>: over markten/sectoren/landen; één aandeel = te veel risico.</li>
+  <li><strong>Automatiseren</strong>: vaste dag inleg, geen emotionele beslissingen.</li>
+</ul>
+
+<h3>Stap 1 — Fundering op orde</h3>
+<ul>
+  <li><strong>Noodbuffer</strong>: minimaal €1.000, streef 3–6 maanden vaste lasten.</li>
+  <li><strong>Schuldcheck</strong>: hoge-rente schulden eerst afbouwen.</li>
+  <li><strong>Inleg-begroting</strong>: start met een bedrag dat je 12 maanden gegarandeerd volhoudt.</li>
+</ul>
+
+<h3>Stap 2 — Kies je broker en rekeningen</h3>
+<ul>
+  <li>Broker met lage kosten, gebruiksvriendelijk, betrouwbaar.</li>
+  <li>Automatische periodieke inleg mogelijk.</li>
+  <li>Let op dividendbelasting/verrekening en valutakosten.</li>
+</ul>
+
+<h3>Stap 3 — Simpele kernportefeuille</h3>
+<ul>
+  <li><strong>Kern</strong>: wereldwijde aandelen-ETF (bijv. MSCI ACWI of FTSE All-World) + obligatie-ETF naar risicoprofiel.</li>
+  <li><strong>Verdeling voorbeeld</strong>:
+    <ul>
+      <li>Defensief: 60% obligaties, 40% aandelen</li>
+      <li>Neutraal: 40% obligaties, 60% aandelen</li>
+      <li>Offensief: 20% obligaties, 80% aandelen</li>
+    </ul>
+  </li>
+  <li><strong>Kosten</strong>: TER (Total Expense Ratio) zo laag mogelijk.</li>
+</ul>
+
+<h3>Stap 4 — Automatische inleg</h3>
+<ul>
+  <li>Vaste dag per maand (bijv. de 1e of salarismoment + 1 dag).</li>
+  <li>Altijd hetzelfde aankoopmandje, geen markt-timing.</li>
+  <li>Verhoog jaarlijks met inflatie of inkomensstijging (2–10%).</li>
+</ul>
+
+<h3>Stap 5 — Rebalancen (2x per jaar)</h3>
+<ul>
+  <li>Controleer je verdeling. Wijkt >5–10%-punt af? Breng terug naar doelverdeling.</li>
+  <li>Doe dit primair met nieuwe inleg. Alleen verkopen als nodig.</li>
+  <li>Hou transactiekosten en belasting in de gaten.</li>
+</ul>
+
+<h3>Stap 6 — Gedragsregels</h3>
+<ul>
+  <li><strong>Geen nieuws handelen</strong>: nieuwsstroom = ruis. Jouw plan is leidend.</li>
+  <li><strong>Crash protocol</strong>: niets verkopen onder stress; pauzeer apps, wandel, herlees plan.</li>
+  <li><strong>Geen “hete tips”</strong>: als het in het nieuws is, ben je te laat. Blijf bij je kern.</li>
+</ul>
+
+<h3>Stap 7 — Satellieten (optioneel, max 10–20%)</h3>
+<ul>
+  <li>Thema-ETF’s, small caps, emerging markets, factor-ETF’s.</li>
+  <li>Alleen als je kern consistent draait en je gedrag stabiel is.</li>
+  <li>Beoordeel elk kwartaal: voegt dit waarde toe t.o.v. de kern?</li>
+</ul>
+
+<h3>Belastingen en efficiëntie (NL)</h3>
+<ul>
+  <li>Let op box-3: vermogensrendementsheffing en vrijstellingen.</li>
+  <li>Kies accummulerende (thesaurerende) ETF’s om dividendlekkage te beperken indien passend.</li>
+  <li>Valutakosten minimaliseren (aankoopmomenten bundelen).</li>
+</ul>
+
+<h3>Dollar-Cost Averaging (DCA)</h3>
+<p>
+  Vast bedrag, vaste dag, market-agnostisch. Voordelen: eenvoud, emotiebeheersing, consistentie.
+  Combineer met <strong>no-lookup rule</strong>: maximaal 1x per maand kijken.
+</p>
+
+<h3>Backtesting vs. realiteit</h3>
+<ul>
+  <li>Backtests zijn geen garantie. Richt je op kosten, spreiding, gedrag.</li>
+  <li>Winnaars wisselen; jouw voordeel is volhouden van een solide plan.</li>
+</ul>
+
+<h3>Jaarplan investeer-rituelen</h3>
+<ul>
+  <li>Jan/Jul: rebalancen + kostencheck broker/ETF.</li>
+  <li>Maandelijks: automatische inleg controleren.</li>
+  <li>Kwartaal: voortgang t.o.v. doelen (inleg, waarde, ratio’s).</li>
+</ul>
+
+<h3>KPI’s</h3>
+<ul>
+  <li>Inleg per maand en % van inkomen.</li>
+  <li>Kostenratio (broker + ETF TER).</li>
+  <li>Afwijking van doelverdeling.</li>
+  <li>Volhoud-score (maanden achtereen ingelegd?).</li>
+</ul>
+
+<h3>Veelgemaakte fouten (en fixes)</h3>
+<ul>
+  <li><strong>Te snel wisselen</strong> → commit 12 maanden aan je plan.</li>
+  <li><strong>Overdiversificatie</strong> → te veel ETF’s die hetzelfde doen. Houd het simpel.</li>
+  <li><strong>Te hoge kosten</strong> → vergelijk brokers en ETF’s jaarlijks.</li>
+  <li><strong>Markttiming</strong> → automatische inleg en niet kijken helpt.</li>
+</ul>
+
+<h3>Portfolio-voorbeelden (indicatief)</h3>
+<ul>
+  <li><strong>Start</strong>: 100% wereld ETF (lage kosten), later obligaties toevoegen.</li>
+  <li><strong>Balans</strong>: 60/40 ACWI/Obligaties.</li>
+  <li><strong>Offensief</strong>: 80/20 All-World/Obligaties + 10% satelliet binnen aandelen.</li>
+</ul>
+
+
+<h3>Crash-protocol (kaartje)</h3>
+<ul>
+  <li>Niet verkopen. App sluiten. 24–48 uur geen koersen.</li>
+  <li>Wandelen/sporten. Herlees je plan en doelhorizon.</li>
+  <li>Alleen handelen op geplande rebalancing- of inlegmomenten.</li>
+</ul>
+
+<h3>Veelgestelde vragen</h3>
+<ol>
+  <li><strong>Kan ik met klein bedrag starten?</strong> Ja. Belangrijk is ritme, niet hoogte. Begin met €25–€100/m.</li>
+  <li><strong>Losse aandelen?</strong> Pas na 12 maanden consistente kerninleg en max 10–20% van je aandelenmandje.</li>
+  <li><strong>Wanneer verkopen?</strong> Zelden. Verkoop bij doelwijziging, nood of rebalancing/asset-allocatie wijziging.</li>
+  <li><strong>Is nu een goed moment?</strong> Altijd voor DCA. Markt-timing vermijden.</li>
+</ol>
+
+    </div>
+
+    <!-- Huiswerk Opdrachten -->
+    <div class="section">
+      <h2>📝 Huiswerk Opdrachten</h2>
+      
+      <div class="exercise-box">
+        <h4>Opdracht 1: Je Financiële Fundering Controleren (30 minuten)</h4>
+        <p>Voordat je begint met investeren, moet je fundament op orde zijn:</p>
+        <ul>
+          <li><strong>Noodbuffer:</strong> Bereken hoeveel geld je nodig hebt voor 3-6 maanden vaste lasten. Heb je dit al?</li>
+          <li><strong>Schulden check:</strong> Maak een lijst van alle schulden met rentepercentages. Welke kosten meer dan 5% rente?</li>
+          <li><strong>Inleg-begroting:</strong> Bereken hoeveel je maandelijks kunt missen voor investeren zonder stress</li>
+        </ul>
+        <p>Schrijf op: wat moet je eerst aanpakken voordat je begint met investeren? Plan concrete stappen.</p>
+      </div>
+
+      <div class="exercise-box">
+        <h4>Opdracht 2: Je Risicoprofiel en Portfolio Bepalen (45 minuten)</h4>
+        <p>Bepaal je investeringsstrategie:</p>
+        <ul>
+          <li><strong>Risicotolerantie:</strong> Hoe voel je je bij 20% verlies? Kun je dat volhouden zonder te verkopen?</li>
+          <li><strong>Doelverdeling:</strong> Kies je verdeling: Defensief (60% obligaties, 40% aandelen), Neutraal (40/60), of Offensief (20/80)</li>
+          <li><strong>ETF selectie:</strong> Zoek 1 wereldwijde aandelen-ETF en 1 obligatie-ETF met lage kosten (TER <0.3%)</li>
+          <li><strong>Broker keuze:</strong> Vergelijk 3 brokers op kosten, gebruiksvriendelijkheid en automatische inleg</li>
+        </ul>
+        <p>Maak een concreet plan met specifieke ETF's en bedragen per maand.</p>
+      </div>
+
+      <div class="exercise-box">
+        <h4>Opdracht 3: Je Gedragsregels en Systeem Opzetten (30 minuten)</h4>
+        <p>Bescherm jezelf tegen emotionele beslissingen:</p>
+        <ul>
+          <li><strong>Crash-protocol:</strong> Schrijf op wat je doet bij een beurscrash (app sluiten, wandelen, plan herlezen)</li>
+          <li><strong>No-lookup rule:</strong> Bepaal hoe vaak je je portfolio mag bekijken (max 1x per maand)</li>
+          <li><strong>Automatisering:</strong> Plan je automatische inleg op een vaste dag per maand</li>
+          <li><strong>Rebalancing:</strong> Zet in je agenda: januari en juli = rebalancing check</li>
+        </ul>
+        <p>Maak een kaartje met je gedragsregels die je altijd bij je hebt voor moeilijke momenten.</p>
+      </div>
+    </div>
+
+    <!-- Checklist -->
+    <div class="section">
+      <h2>✅ Checklist</h2>
+      <div class="checklist">
+        <div class="checklist-item">
+          <input type="checkbox" id="check1" />
+          <label for="check1">Noodbuffer van minimaal €1.000 aanwezig</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="check2" />
+          <label for="check2">Broker gekozen en account geopend</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="check3" />
+          <label for="check3">Kernportefeuille bepaald (verdeling en ETF's)</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="check4" />
+          <label for="check4">Automatische maandelijkse inleg ingesteld</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="check5" />
+          <label for="check5">Rebalance-data (januari en juli) in agenda gezet</label>
+        </div>
+        <div class="checklist-item">
+          <input type="checkbox" id="check6" />
+          <label for="check6">Crash-protocol en gedragsregels opgeschreven</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reflectie Vragen -->
+    <div class="section">
+      <h2>🤔 Reflectie Vragen</h2>
+      
+      <div class="reflection-question">
+        <h4>Vraag 1: Gedrag en Emoties</h4>
+        <p>Welke 3 gedragstriggers ondermijnen jouw plan (FOMO, paniek, nieuws)? Wat is jouw persoonlijke tegenmaatregel per trigger?</p>
+      </div>
+
+      <div class="reflection-question">
+        <h4>Vraag 2: Tijd en Geduld</h4>
+        <p>Hoe voelt het om geld weg te zetten voor 10+ jaar? Welke mindset heb je nodig om consistent te blijven investeren, ook als de markt daalt?</p>
+      </div>
+
+      <div class="reflection-question">
+        <h4>Vraag 3: Doelen en Motivatie</h4>
+        <p>Wat is jouw droom waar je voor investeert? Hoe houd je dit doel levend om gemotiveerd te blijven, ook in moeilijke periodes?</p>
+      </div>
+    </div>
+
+    <!-- Actieplan -->
+    <div class="section">
+      <h2>🎯 Actieplan</h2>
+      <div class="action-plan">
+        <h3>Jouw 5 Stappen Actieplan</h3>
+        <div class="action-step">
+          <strong>Stap 1:</strong> Controleer je financiële fundering: noodbuffer, schulden en maandelijks beschikbaar bedrag voor investeren.
+        </div>
+        <div class="action-step">
+          <strong>Stap 2:</strong> Bepaal je risicoprofiel en kies je kernportefeuille met 1-2 lage-kosten ETF's.
+        </div>
+        <div class="action-step">
+          <strong>Stap 3:</strong> Open een broker-account en stel automatische maandelijkse inleg in.
+        </div>
+        <div class="action-step">
+          <strong>Stap 4:</strong> Schrijf je gedragsregels op en plan rebalancing-momenten in je agenda.
+        </div>
+        <div class="action-step">
+          <strong>Stap 5:</strong> Start met investeren en houd je aan je plan, ongeacht marktbewegingen.
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Footer -->
+    <div class="footer">
+      <p>Dit ebook is onderdeel van de <span class="ttm-brand">Top Tier Men</span> Academy</p>
+      <p>Module 05: Business and Finance  | Les 04: Vermogen Opbouwen Begin met Investeren</p>
+      <p>© 2025 Top Tier Men. Alle rechten voorbehouden.</p>
+    </div>
+  </div>
+
+  <script>
+    // Checklist persistentie via localStorage
+    document.addEventListener('DOMContentLoaded', function() {
+      const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+      checkboxes.forEach(cb => {
+        const saved = localStorage.getItem(cb.id);
+        if (saved === 'true') cb.checked = true;
+        cb.addEventListener('change', function(){ localStorage.setItem(this.id, this.checked); });
+      });
+    });
+  </script>
+</body>
+</html>
