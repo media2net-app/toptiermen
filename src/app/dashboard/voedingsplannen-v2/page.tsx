@@ -604,70 +604,63 @@ export default function VoedingsplannenV2Page() {
   };
 
   // Function to calculate display targets for a plan
-  // IMPORTANT: Use admin DB targets exactly as configured (custom macros)
+  // IMPORTANT: Personalize calories by weight/activity/goal. Use DB targets only when no profile.
   const calculatePersonalizedTargets = (plan: NutritionPlan | any, profileOverride?: UserProfile) => {
     if (!plan) return null;
 
-    // 1) Prefer explicit targets from the plan (DB), including meals.* if present
     const planTargetCalories = plan?.target_calories ?? plan?.meals?.target_calories ?? 0;
     const planTargetProtein  = plan?.target_protein  ?? plan?.meals?.target_protein  ?? null;
     const planTargetCarbs    = plan?.target_carbs    ?? plan?.meals?.target_carbs    ?? null;
     const planTargetFat      = plan?.target_fat      ?? plan?.meals?.target_fat      ?? null;
 
-    const hasAllMacroGrams = [planTargetProtein, planTargetCarbs, planTargetFat].every(v => typeof v === 'number' && !Number.isNaN(v));
-
-    // 2) If grams are defined in DB, use them directly
-    if (planTargetCalories && hasAllMacroGrams) {
-      return {
-        targetCalories: Math.round(planTargetCalories),
-        targetProtein: Math.round(planTargetProtein as number),
-        targetCarbs: Math.round(planTargetCarbs as number),
-        targetFat: Math.round(planTargetFat as number),
-      };
-    }
-
-    // 3) Otherwise, compute grams from DB macro percentages if present
     const proteinPercentage = plan?.protein_percentage ?? plan?.meals?.protein_percentage ?? null;
     const carbsPercentage   = plan?.carbs_percentage   ?? plan?.meals?.carbs_percentage   ?? null;
     const fatPercentage     = plan?.fat_percentage     ?? plan?.meals?.fat_percentage     ?? null;
 
-    if (planTargetCalories && proteinPercentage && carbsPercentage && fatPercentage) {
-      const targetProtein = Math.round((planTargetCalories * proteinPercentage / 100) / 4);
-      const targetCarbs   = Math.round((planTargetCalories * carbsPercentage / 100) / 4);
-      const targetFat     = Math.round((planTargetCalories * fatPercentage / 100) / 9);
+    const profile = profileOverride || userProfile;
+    const activityMultipliers = { sedentary: 1.1, moderate: 1.3, very_active: 1.6 } as const;
+    let dynamicCalories: number | null = null;
+    if (profile) {
+      const baseCalories = profile.weight * 22 * activityMultipliers[profile.activity_level];
+      const goalAdjustments = { droogtrainen: -500, onderhoud: 0, spiermassa: 400 } as const;
+      const planGoal = (plan.goal?.toLowerCase?.() || 'onderhoud') as keyof typeof goalAdjustments;
+      dynamicCalories = Math.round(baseCalories + (goalAdjustments[planGoal] ?? 0));
+    }
+
+    // If we have dynamicCalories (e.g. 90kg != 100kg), use that; else fall back to DB plan target
+    const targetCalories = dynamicCalories ?? Math.round(planTargetCalories || 0);
+
+    // Derive grams: prefer explicit percentages; else if grams exist in DB, scale proportionally
+    if (proteinPercentage && carbsPercentage && fatPercentage) {
       return {
-        targetCalories: Math.round(planTargetCalories),
-        targetProtein,
-        targetCarbs,
-        targetFat,
+        targetCalories,
+        targetProtein: Math.round((targetCalories * proteinPercentage / 100) / 4),
+        targetCarbs:   Math.round((targetCalories * carbsPercentage   / 100) / 4),
+        targetFat:     Math.round((targetCalories * fatPercentage     / 100) / 9),
       };
     }
 
-    // 4) Final fallback: compute from user profile using simple formula + sensible defaults per plan type
-    const profile = profileOverride || userProfile;
-    if (!profile) return {
-      targetCalories: Math.round(planTargetCalories || 0),
-      targetProtein: Math.round(planTargetProtein || 0),
-      targetCarbs: Math.round(planTargetCarbs || 0),
-      targetFat: Math.round(planTargetFat || 0),
-    };
+    const hasAllMacroGrams = [planTargetProtein, planTargetCarbs, planTargetFat].every(v => typeof v === 'number' && !Number.isNaN(v));
+    if (hasAllMacroGrams && planTargetCalories) {
+      const scale = targetCalories / planTargetCalories;
+      return {
+        targetCalories,
+        targetProtein: Math.round((planTargetProtein as number) * scale),
+        targetCarbs:   Math.round((planTargetCarbs   as number) * scale),
+        targetFat:     Math.round((planTargetFat     as number) * scale),
+      };
+    }
 
-    const activityMultipliers = { sedentary: 1.1, moderate: 1.3, very_active: 1.6 } as const;
-    const baseCalories = profile.weight * 22 * activityMultipliers[profile.activity_level];
-    const goalAdjustments = { droogtrainen: -500, onderhoud: 0, spiermassa: 400 } as const;
-    const planGoal = (plan.goal?.toLowerCase?.() || 'onderhoud') as keyof typeof goalAdjustments;
-    const targetCalories = Math.round(baseCalories + (goalAdjustments[planGoal] ?? 0));
-
+    // Fallback defaults by plan type/name
     const isCarnivore = String(plan.name || '').toLowerCase().includes('carnivoor');
-    const pPct = isCarnivore ? 35 : 35;  // defaults aligned with onderhoud UI
+    const pPct = isCarnivore ? 35 : 35;
     const cPct = isCarnivore ? 5  : 40;
     const fPct = isCarnivore ? 60 : 25;
-
     return {
       targetCalories,
       targetProtein: Math.round((targetCalories * pPct) / 100 / 4),
-      targetCarbs: Math.round((targetCalories * cPct) / 100 / 4),
-      targetFat: Math.round((targetCalories * fPct) / 100 / 9),
+      targetCarbs:   Math.round((targetCalories * cPct) / 100 / 4),
+      targetFat:     Math.round((targetCalories * fPct) / 100 / 9),
     };
   };
 

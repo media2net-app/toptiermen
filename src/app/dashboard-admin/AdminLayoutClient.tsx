@@ -216,6 +216,7 @@ const SidebarContent = ({ pathname }: { pathname: string }) => {
       items: [
         { label: 'Instellingen', icon: Cog6ToothIcon, href: '/dashboard-admin/instellingen' },
         { label: 'Email Sjablonen', icon: EnvelopeIcon, href: '/dashboard-admin/email-sjablonen', badge: 'NEW' },
+        { label: 'E-mail Tool', icon: EnvelopeIcon, href: '/dashboard-admin/email-tool', badge: 'NEW' },
         { label: 'Aankondigingen', icon: MegaphoneIcon, href: '/dashboard-admin/aankondigingen' },
         { label: 'Push Notificatie Tests', icon: BellIcon, href: '/dashboard-admin/push-test' },
         { label: 'Email Logs', icon: EnvelopeIcon, href: '/dashboard-admin/email-logs', badge: 'NEW' },

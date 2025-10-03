@@ -3,7 +3,7 @@ import { EmailService } from '@/lib/email-service';
 
 export async function POST(request: NextRequest) {
   try {
-    const { templateId } = await request.json();
+    const { templateId, variables } = await request.json();
 
     console.log('📧 Generating email template preview:', templateId);
 
@@ -38,8 +38,9 @@ export async function POST(request: NextRequest) {
     let subject = '';
 
     try {
-      // Use the EmailService to generate the template
-      const template = (emailService as any).getTemplate(templateId, sampleData);
+      // Use the EmailService to generate the template (allow overriding sample data)
+      const inputData = variables && typeof variables === 'object' ? { ...sampleData, ...variables } : sampleData;
+      const template = (emailService as any).getTemplate(templateId, inputData);
       previewHtml = template.html;
       subject = template.subject;
     } catch (error) {

@@ -221,7 +221,7 @@ export class EmailService {
           <div style="background:linear-gradient(135deg,#0F1419 0%,#1F2D17 100%);padding:32px 0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#E5E7EB;">
             <div style="max-width:640px;margin:0 auto;background:#0F1419;border:1px solid #2A3A1A;border-radius:16px;overflow:hidden;box-shadow:0 20px 40px rgba(0,0,0,.35)">
               <div style="background:linear-gradient(135deg,#8BAE5A 0%,#B6C948 100%);padding:28px 24px;text-align:center">
-                <img src="http://localhost:3000/_next/image?url=%2Flogo_white-full.svg&w=128&q=75" alt="Top Tier Men" style="width:128px;height:auto;display:block;margin:0 auto 10px auto;border-radius:8px;" />
+                <img src="https://platform.toptiermen.eu/logo_white-full.svg" alt="Top Tier Men" style="width:128px;height:auto;display:block;margin:0 auto 10px auto;border-radius:8px;" />
                 <h1 style="margin:0;color:#0F1419;font-weight:800;font-size:22px;letter-spacing:.5px;">Top Tier Men</h1>
               </div>
               <div style="padding:28px 24px">
@@ -492,6 +492,60 @@ Contact: platform@toptiermen.eu
           </div>
         `,
         text: `Hoi \${name},\n\nJe wachtwoord is opnieuw ingesteld. Tijdelijk wachtwoord: \${tempPassword}\nInloggen: https://platform.toptiermen.eu/login\n\nWij raden aan om na het inloggen direct je wachtwoord te wijzigen.\n\n— Top Tier Men`
+      },
+      // Allow fully custom subject/html/text provided by variables
+      custom_html: {
+        subject: `${variables.subject || 'Custom Email'}`,
+        html: `${variables.html || '<div style="font-family:Arial,sans-serif;padding:16px">\n  <h2 style="color:#8BAE5A;margin:0 0 12px 0">Aangepaste e-mail</h2>\n  <p>Vervang deze content door je eigen HTML.</p>\n</div>'}`,
+        text: `${variables.text || 'Aangepaste tekstversie'}`
+      },
+      // New announcement: Relaunch 10 October 20:00
+      platform_relaunch_oct10: {
+        subject: 'Platform 100% – we gaan 10 oktober 20:00 live',
+        html: `
+          <style>@import url('https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700;800&display=swap');</style>
+          <div style="background: linear-gradient(135deg, #0F1419 0%, #1F2D17 100%); padding: 32px 0; font-family: 'Figtree', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; color: #E5EFE8;">
+            <div style="max-width:640px;margin:0 auto;background:#0F1419;border:1px solid #2A3A1A;border-radius:16px;overflow:hidden;box-shadow:0 20px 40px rgba(0,0,0,.35)">
+              <div style="background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%); padding:24px; text-align:center">
+                <img src="https://platform.toptiermen.eu/logo_white-full.svg" alt="Top Tier Men" style="height:32px;display:block;margin:0 auto 8px auto" />
+                <div style="font-weight:800;letter-spacing:.3px;color:#162013;font-size:18px">Top Tier Men</div>
+              </div>
+              <div style="padding:28px 24px;">
+                <h1 style="margin:0 0 8px 0;color:#B6C948;font-size:22px">We gaan live: 10 oktober 20:00</h1>
+                <p style="margin:6px 0 16px 0;color:#C7D7C0">Het platform is <strong>100%</strong> klaar. Dit is waar we hebben gestaan, wat we hebben gedaan, en wat je nu kunt verwachten.</p>
+
+                <div style="background:#162013;border:1px solid #2A3A1A;border-radius:10px;padding:16px;margin:16px 0">
+                  <p style="margin:0;color:#E5EFE8"><strong>Samenvatting sinds 10 september</strong></p>
+                  <p style="margin:8px 0 0 0;color:#C7D7C0">Op 10 september bij de livegang zijn er helaas problemen ontstaan waardoor het platform niet functioneerde zoals het moest functioneren.</p>
+                </div>
+
+                <p style="margin:12px 0;color:#C7D7C0">Het platform is een uitgebreid systeem met verschillende onderdelen en modules. Veel modules staan met elkaar in verbinding. Dat betekent dat wanneer één onderdeel hapert, andere modules ook (niet goed) werken.</p>
+
+                <p style="margin:12px 0;color:#C7D7C0">Sinds 10 september is het ontwikkelteam direct en onafgebroken aan de slag gegaan. We hebben dag en nacht gewerkt om alle problemen op te sporen en op te lossen.</p>
+
+                <p style="margin:12px 0;color:#C7D7C0">Na <strong>drie weken hard werk</strong> kunnen we officieel stellen: het platform is <strong>100% werkend</strong>.</p>
+
+                <div style="background:#1F2D17;border:1px solid #2A3A1A;border-radius:10px;padding:16px;margin:16px 0">
+                  <p style="margin:0;color:#E5EFE8"><strong>Kwaliteit waarborging</strong></p>
+                  <p style="margin:8px 0 0 0;color:#C7D7C0">Van <strong>3 t/m 9 oktober</strong> laten we een testteam uitgebreid alle functies nalopen, zodat we zeker weten dat dit in de toekomst niet nog eens gebeurt.</p>
+                </div>
+
+                <p style="margin:12px 0;color:#C7D7C0">We vinden het oprecht vervelend dat we je hebben moeten laten wachten. Ondanks deze tegenslag hopen we je <strong>10 oktober</strong> te verwelkomen in de broederschap.</p>
+
+                <p style="margin:12px 0;color:#C7D7C0">Binnen nu en twee weken staat onze eerste <strong>groepscall</strong> gepland. Meer informatie volgt spoedig.</p>
+
+                <div style="margin-top:20px;padding:14px;border-radius:10px;background:#162013;border:1px solid #2A3A1A;color:#E5EFE8;text-align:center">
+                  <strong>Live op 10 oktober om 20:00</strong><br/>
+                  <span style="color:#C7D7C0">Zorg dat je klaar zit — we sturen je tijdig de laatste details.</span>
+                </div>
+
+                <p style="margin:20px 0 0 0;color:#C7D7C0">Tot snel,<br/>Het Top Tier Men team</p>
+              </div>
+              <div style="background:#0B0F13;color:#6B7280;font-size:12px;padding:14px 20px;text-align:center;border-top:1px solid #2A3A1A">Deze e-mail is verstuurd door Top Tier Men</div>
+            </div>
+          </div>
+        `,
+        text: `We gaan live: 10 oktober 20:00\n\nHet platform is 100% klaar.\n\nSamenvatting sinds 10 september:\nOp 10 september bij de livegang zijn er problemen ontstaan waardoor het platform niet functioneerde zoals het moest functioneren.\n\nHet platform bestaat uit verschillende modules die met elkaar zijn verbonden. Als één onderdeel niet werkt, werkt de rest ook niet goed.\n\nSinds 10 september heeft het ontwikkelteam dag en nacht gewerkt om dit op te lossen.\n\nNa drie weken hard werk is het platform 100% werkend.\n\nKwaliteitswaarborging: van 3 t/m 9 oktober test een team alle functies, zodat dit in de toekomst niet nog eens gebeurt.\n\nWe vinden het oprecht vervelend dat we je hebben moeten laten wachten. We hopen je 10 oktober te verwelkomen in de broederschap.\n\nBinnen nu en twee weken volgt meer informatie over onze eerste groepscall.\n\nTot snel,\nTop Tier Men team`
       },
       sneak_preview: {
         subject: '🎬 EXCLUSIEVE VIDEO - Eerste kijk in het Top Tier Men Platform',

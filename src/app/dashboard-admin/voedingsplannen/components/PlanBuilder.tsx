@@ -396,6 +396,10 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
       case 'per_handful': return 'per handje';
       case 'per_plakje': return 'per plakje';
       case 'per_30g': return 'per 30g';
+      case 'per_sneedje': return 'per sneedje';
+      case 'per_100ml': return 'per 100ml';
+      case 'per_eetlepel_15g': return 'per eetlepel (15g)';
+      case 'per_blikje': return 'per blikje';
       case 'per_100g': return 'per 100g';
       default: return 'per 100g';
     }
@@ -1689,7 +1693,11 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
                     <option value="per_handful">per handje</option>
                     <option value="per_plakje">per plakje</option>
                     <option value="per_30g">per 30g</option>
-                    {availableUnitTypes.filter(type => !['per_100g', 'per_piece', 'per_handful', 'per_plakje', 'per_30g'].includes(type)).map(type => (
+                    <option value="per_sneedje">per sneedje</option>
+                    <option value="per_100ml">per 100ml</option>
+                    <option value="per_eetlepel_15g">per eetlepel (15g)</option>
+                    <option value="per_blikje">per blikje</option>
+                    {availableUnitTypes.filter(type => !['per_100g', 'per_piece', 'per_handful', 'per_plakje', 'per_30g', 'per_sneedje', 'per_100ml', 'per_eetlepel_15g', 'per_blikje'].includes(type)).map(type => (
                       <option key={type} value={type}>{getUnitTypeLabel(type)}</option>
                     ))}
                   </select>
