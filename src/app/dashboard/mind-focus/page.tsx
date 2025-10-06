@@ -296,6 +296,169 @@ export default function MindFocusPage() {
           </div>
         </div>
 
+        {/* Intake Results */}
+        {hasExistingProfile && (
+          <div className="bg-[#1A2A1A]/80 border border-[#2A3A1A] rounded-xl p-6 mb-6">
+            <h2 className="text-xl font-bold text-white mb-4">Je Intake Resultaten</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              
+              {/* Stress Assessment */}
+              <div className="bg-[#232D1A] rounded-lg p-4 border border-[#3A4D23]/40">
+                <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
+                  <span className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-white text-sm">📊</span>
+                  Stress Assessment
+                </h3>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-[#8BAE5A]">Werk stress:</span>
+                    <span className="text-white font-medium">{stressAssessment.workStress}/10</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-[#8BAE5A]">Persoonlijke stress:</span>
+                    <span className="text-white font-medium">{stressAssessment.personalStress}/10</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-[#8BAE5A]">Slaapkwaliteit:</span>
+                    <span className="text-white font-medium">{stressAssessment.sleepQuality}/10</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-[#8BAE5A]">Energie level:</span>
+                    <span className="text-white font-medium">{stressAssessment.energyLevel}/10</span>
+                  </div>
+                  {stressAssessment.focusProblems && (
+                    <div className="mt-2 p-2 bg-red-500/10 rounded border border-red-500/20">
+                      <span className="text-red-400 text-xs">⚠️ Concentratieproblemen gemeld</span>
+                    </div>
+                  )}
+                  {stressAssessment.irritability && (
+                    <div className="mt-2 p-2 bg-red-500/10 rounded border border-red-500/20">
+                      <span className="text-red-400 text-xs">⚠️ Snel geïrriteerd/agressief</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Personal Goals */}
+              <div className="bg-[#232D1A] rounded-lg p-4 border border-[#3A4D23]/40">
+                <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
+                  <span className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-white text-sm">🎯</span>
+                  Persoonlijke Doelen
+                </h3>
+                <div className="space-y-2">
+                  {[
+                    { key: 'improveFocus', label: 'Verbeter focus en concentratie' },
+                    { key: 'reduceStress', label: 'Verminder stress' },
+                    { key: 'betterSleep', label: 'Betere slaap' },
+                    { key: 'moreEnergy', label: 'Meer energie' },
+                    { key: 'workLifeBalance', label: 'Work-life balance' }
+                  ].map((goal) => (
+                    <div key={goal.key} className="flex items-center gap-2">
+                      <div className={`w-4 h-4 rounded-full border-2 ${
+                        personalGoals[goal.key as keyof typeof personalGoals] 
+                          ? 'bg-[#8BAE5A] border-[#8BAE5A]' 
+                          : 'border-[#3A4D23]'
+                      }`}>
+                        {personalGoals[goal.key as keyof typeof personalGoals] && (
+                          <div className="w-full h-full rounded-full bg-[#8BAE5A] animate-pulse" />
+                        )}
+                      </div>
+                      <span className={`text-sm ${
+                        personalGoals[goal.key as keyof typeof personalGoals] 
+                          ? 'text-white' 
+                          : 'text-[#8BAE5A]'
+                      }`}>
+                        {goal.label}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Lifestyle Info */}
+              <div className="bg-[#232D1A] rounded-lg p-4 border border-[#3A4D23]/40">
+                <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
+                  <span className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm">🏠</span>
+                  Lifestyle Info
+                </h3>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-[#8BAE5A]">Werkrooster:</span>
+                    <span className="text-white font-medium">{lifestyleInfo.workSchedule}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-[#8BAE5A]">Sport schema:</span>
+                    <span className="text-white font-medium">{lifestyleInfo.sportSchedule}</span>
+                  </div>
+                  {lifestyleInfo.freeTime.length > 0 && (
+                    <div className="mt-2">
+                      <span className="text-[#8BAE5A] text-xs">Vrije tijd:</span>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {lifestyleInfo.freeTime.map((time, index) => (
+                          <span key={index} className="px-2 py-1 bg-[#3A4D23]/40 rounded text-xs text-[#8BAE5A]">
+                            {time}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {lifestyleInfo.stressTriggers.length > 0 && (
+                    <div className="mt-2">
+                      <span className="text-[#8BAE5A] text-xs">Stress triggers:</span>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {lifestyleInfo.stressTriggers.map((trigger, index) => (
+                          <span key={index} className="px-2 py-1 bg-red-500/20 rounded text-xs text-red-400">
+                            {trigger}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Personalized Recommendations */}
+            <div className="mt-6 bg-gradient-to-r from-[#8BAE5A]/10 to-[#FFD700]/10 rounded-lg p-4 border border-[#8BAE5A]/20">
+              <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
+                <span className="w-6 h-6 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] rounded-full flex items-center justify-center text-[#1A2A1A] text-sm">💡</span>
+                Aanbevelingen op basis van je intake
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                {stressAssessment.workStress >= 7 && (
+                  <div className="flex items-start gap-2">
+                    <span className="text-[#8BAE5A] mt-1">•</span>
+                    <span className="text-white">Hoge werkstress gedetecteerd. Focus op stress release sessies en ademhalingsoefeningen.</span>
+                  </div>
+                )}
+                {stressAssessment.sleepQuality <= 6 && (
+                  <div className="flex items-start gap-2">
+                    <span className="text-[#8BAE5A] mt-1">•</span>
+                    <span className="text-white">Verbeter je slaapkwaliteit met sleep preparation sessies en een avondroutine.</span>
+                  </div>
+                )}
+                {stressAssessment.energyLevel <= 6 && (
+                  <div className="flex items-start gap-2">
+                    <span className="text-[#8BAE5A] mt-1">•</span>
+                    <span className="text-white">Laag energielevel. Recovery sessies en focus training kunnen helpen.</span>
+                  </div>
+                )}
+                {personalGoals.improveFocus && (
+                  <div className="flex items-start gap-2">
+                    <span className="text-[#8BAE5A] mt-1">•</span>
+                    <span className="text-white">Focus training sessies zijn ideaal voor jouw doelen.</span>
+                  </div>
+                )}
+                {personalGoals.reduceStress && (
+                  <div className="flex items-start gap-2">
+                    <span className="text-[#8BAE5A] mt-1">•</span>
+                    <span className="text-white">Stress release sessies en mindfulness oefeningen aanbevolen.</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Progress table */}
         <div className="bg-[#1A2A1A]/80 border border-[#2A3A1A] rounded-xl overflow-hidden">
           <div className="px-5 py-4 border-b border-[#2A3A1A]">
