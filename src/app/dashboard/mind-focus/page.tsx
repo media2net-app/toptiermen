@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
@@ -71,6 +71,7 @@ export default function MindFocusPage() {
   const [showResetModal, setShowResetModal] = useState(false);
   const [currentActiveWeek, setCurrentActiveWeek] = useState(1);
   const [completedWeeks, setCompletedWeeks] = useState<number[]>([]);
+  const resetModalRef = useRef<HTMLDivElement>(null);
   
   // Intake form state
   const [stressAssessment, setStressAssessment] = useState({
@@ -171,6 +172,17 @@ export default function MindFocusPage() {
 
     loadExistingProfile();
   }, [user]);
+
+  // Focus scroll to modal when opened
+  useEffect(() => {
+    if (showResetModal && resetModalRef.current) {
+      resetModalRef.current.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'center' 
+      });
+      resetModalRef.current.focus();
+    }
+  }, [showResetModal]);
 
   // Save intake data function
   const saveIntakeData = async () => {
@@ -826,7 +838,11 @@ export default function MindFocusPage() {
       {/* Reset Intake Modal */}
       {showResetModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-[#1A2A1A] rounded-xl border border-[#3A4D23]/40 max-w-md w-full p-6">
+          <div 
+            ref={resetModalRef}
+            tabIndex={-1}
+            className="bg-[#1A2A1A] rounded-xl border border-[#3A4D23]/40 max-w-md w-full p-6 focus:outline-none"
+          >
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center">
                 <span className="text-red-500 text-xl">⚠️</span>
