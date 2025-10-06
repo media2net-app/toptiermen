@@ -238,6 +238,12 @@ export default function Dashboard() {
         return;
       }
 
+      // Always set loading to false if no user, regardless of authLoading state
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+
       // Prevent loading dashboard data while user is gated in onboarding steps 1 or 2
       if (!onboarding?.isCompleted && (onboarding?.currentStep === 1 || onboarding?.currentStep === 2)) {
         setLoading(false);
@@ -334,7 +340,7 @@ export default function Dashboard() {
     }, 500); // 500ms debounce
 
     return () => clearTimeout(timeoutId);
-  }, [user?.id, authLoading]); // REMOVED isCompleted dependency to fix infinite loop
+  }, [user?.id, authLoading, onboarding?.isCompleted, onboarding?.currentStep]); // Added onboarding dependencies
 
   // Check for onboarding completion badge unlock
   const checkOnboardingCompletionBadge = async (userId: string) => {
