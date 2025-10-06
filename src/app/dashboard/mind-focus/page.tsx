@@ -668,6 +668,7 @@ export default function MindFocusPage() {
                     </div>
                   </div>
                   <button 
+                    onClick={() => router.push('/dashboard/mind-focus/week-2')}
                     disabled={!completedWeeks.includes(2) && currentActiveWeek !== 2}
                     className={`w-full mt-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                       completedWeeks.includes(2)
