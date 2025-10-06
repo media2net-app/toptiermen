@@ -897,7 +897,7 @@ function AdminDashboardContent() {
             </div>
           </div>
           
-          <MollieFinanceMetrics period={selectedPeriod} />
+          {/* <MollieFinanceMetrics period={selectedPeriod} /> */}
         </div>
       )}
 
