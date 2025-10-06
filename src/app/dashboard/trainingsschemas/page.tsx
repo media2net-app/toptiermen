@@ -3174,6 +3174,46 @@ function TrainingschemasContent() {
         type="training"
       />
     </PageLayout>
+    
+    {/* Test modal outside PageLayout */}
+    {showUpgradeModal && (
+      <div style={{ 
+        position: 'fixed', 
+        top: 0, 
+        left: 0, 
+        width: '100vw', 
+        height: '100vh', 
+        backgroundColor: 'rgba(255,0,0,0.8)', 
+        zIndex: 99999,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <div style={{ 
+          backgroundColor: 'yellow', 
+          padding: '20px', 
+          borderRadius: '10px',
+          color: 'black',
+          fontSize: '20px',
+          fontWeight: 'bold'
+        }}>
+          TEST MODAL OUTSIDE PAGELAYOUT - {showUpgradeModal ? 'OPEN' : 'CLOSED'}
+          <button 
+            onClick={() => setShowUpgradeModal(false)}
+            style={{ 
+              marginLeft: '10px', 
+              padding: '10px', 
+              backgroundColor: 'black', 
+              color: 'white',
+              border: 'none',
+              borderRadius: '5px'
+            }}
+          >
+            Sluiten
+          </button>
+        </div>
+      </div>
+    )}
   );
 }
 
