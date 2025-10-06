@@ -61,6 +61,7 @@ export default function Inbox() {
   const [showNewChat, setShowNewChat] = useState(false);
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
   const [isCreatingConversation, setIsCreatingConversation] = useState(false);
+  const [isLoadingUsers, setIsLoadingUsers] = useState(false);
   const [showNotificationSettings, setShowNotificationSettings] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -186,6 +187,7 @@ export default function Inbox() {
   const fetchAvailableUsers = async () => {
     try {
       if (!user?.id) return;
+      setIsLoadingUsers(true);
       console.log('Fetching available users via API...');
       const res = await fetch(`/api/chat/available-users?excludeUserId=${encodeURIComponent(user.id)}`, { cache: 'no-store' });
       const json = await res.json();
@@ -199,6 +201,8 @@ export default function Inbox() {
     } catch (error) {
       console.error('Error fetching available users:', error);
       setAvailableUsers([]);
+    } finally {
+      setIsLoadingUsers(false);
     }
   };
 
@@ -428,10 +432,15 @@ export default function Inbox() {
                     </button>
                   </div>
                   <div className="flex-1 overflow-y-auto p-4 max-h-96">
-                    {availableUsers.length === 0 ? (
+                    {isLoadingUsers ? (
                       <div className="text-center py-8">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
                         <p className="text-[#8BAE5A] text-lg">Ledenlijst laden...</p>
+                      </div>
+                    ) : availableUsers.length === 0 ? (
+                      <div className="text-center py-8">
+                        <p className="text-[#8BAE5A] text-lg">Geen leden gevonden</p>
+                        <p className="text-gray-400 text-sm mt-2">Er zijn momenteel geen andere leden beschikbaar</p>
                       </div>
                     ) : (
                       availableUsers.map((user) => (
