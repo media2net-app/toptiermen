@@ -68,6 +68,7 @@ export default function MindFocusPage() {
   const [hasExistingProfile, setHasExistingProfile] = useState(false);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [dashboardData, setDashboardData] = useState<any>(null);
+  const [showResetModal, setShowResetModal] = useState(false);
   
   // Intake form state
   const [stressAssessment, setStressAssessment] = useState({
@@ -277,7 +278,7 @@ export default function MindFocusPage() {
             <h1 className="text-3xl font-bold text-white">Mind & Focus Dashboard</h1>
             <p className="text-[#8BAE5A] mt-2">Overzicht van je tools en voortgang.</p>
           </div>
-          <button onClick={resetIntake} className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg text-sm">Reset intake</button>
+          <button onClick={() => setShowResetModal(true)} className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg text-sm">Reset intake</button>
         </div>
 
         {/* Quick actions row: 4 buttons */}
@@ -679,6 +680,63 @@ export default function MindFocusPage() {
           </div>
         </div>
       </div>
+
+      {/* Reset Intake Modal */}
+      {showResetModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-[#1A2A1A] rounded-xl border border-[#3A4D23]/40 max-w-md w-full p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center">
+                <span className="text-red-500 text-xl">⚠️</span>
+              </div>
+              <h3 className="text-xl font-bold text-white">Intake Resetten</h3>
+            </div>
+            
+            <div className="space-y-4 mb-6">
+              <p className="text-[#8BAE5A] leading-relaxed">
+                Weet je zeker dat je je intake wilt resetten?
+              </p>
+              
+              <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4">
+                <h4 className="font-semibold text-red-400 mb-2">Belangrijke waarschuwing:</h4>
+                <ul className="text-sm text-red-300 space-y-1">
+                  <li>• Mind & Focus is een 6-maanden programma op maat gemaakt</li>
+                  <li>• Je huidige plan is gebaseerd op jouw intake gegevens</li>
+                  <li>• Het is mogelijk om tussentijds meerdere modules te gebruiken</li>
+                  <li>• We raden het af om een reset intake te doen</li>
+                </ul>
+              </div>
+              
+              <div className="bg-[#8BAE5A]/10 border border-[#8BAE5A]/20 rounded-lg p-4">
+                <h4 className="font-semibold text-[#8BAE5A] mb-2">Alternatieven:</h4>
+                <ul className="text-sm text-[#8BAE5A] space-y-1">
+                  <li>• Gebruik alle modules zonder intake te resetten</li>
+                  <li>• Pas je doelen aan via de instellingen</li>
+                  <li>• Neem contact op met support voor hulp</li>
+                </ul>
+              </div>
+            </div>
+            
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowResetModal(false)}
+                className="flex-1 px-4 py-2 bg-[#3A4D23] hover:bg-[#4A5A33] text-[#8BAE5A] rounded-lg font-medium transition-colors"
+              >
+                Annuleren
+              </button>
+              <button
+                onClick={() => {
+                  setShowResetModal(false);
+                  resetIntake();
+                }}
+                className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg font-medium transition-colors"
+              >
+                Ja, Reset Intake
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 
