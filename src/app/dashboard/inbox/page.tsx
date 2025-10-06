@@ -153,11 +153,14 @@ export default function Inbox() {
       if (response.ok) {
         setConversations(data.conversations);
         
-        // Set first conversation as selected by default if no conversation is selected
+        // Set first conversation as selected by default if no conversation is selected (desktop only)
         if (data.conversations.length > 0 && !selectedConversation) {
           setSelectedConversation(data.conversations[0]);
-          fetchMessages(data.conversations[0].id);
-          setShowChat(true);
+          // Only auto-open chat on desktop (md and larger screens)
+          if (window.innerWidth >= 768) {
+            fetchMessages(data.conversations[0].id);
+            setShowChat(true);
+          }
         }
         // If we have a selected conversation, make sure it's still in the list
         else if (selectedConversation && data.conversations.length > 0) {
@@ -393,11 +396,15 @@ export default function Inbox() {
       <div className="bg-[#232D1A]/80 rounded-2xl shadow-xl border border-[#3A4D23]/40 overflow-hidden">
         <div className="flex h-[600px]">
           {/* Conversations List */}
-          <div className="w-full md:w-1/3 border-r border-[#3A4D23]/40">
+          <div className={`${showChat ? 'hidden md:block' : 'block'} w-full md:w-1/3 border-r border-[#3A4D23]/40`}>
             <div className="p-4 border-b border-[#3A4D23]/40 flex justify-between items-center">
               <h2 className="text-xl font-bold text-white">Gesprekken</h2>
               <button
-                onClick={() => setShowNewChat(true)}
+                onClick={() => {
+                  setShowNewChat(true);
+                  // Refresh available users when opening new chat
+                  fetchAvailableUsers();
+                }}
                 className="px-3 py-1 bg-[#8BAE5A] text-[#181F17] rounded-lg text-sm font-semibold hover:bg-[#A6C97B] transition-colors"
               >
                 + Nieuw
@@ -423,7 +430,8 @@ export default function Inbox() {
                   <div className="flex-1 overflow-y-auto p-4 max-h-96">
                     {availableUsers.length === 0 ? (
                       <div className="text-center py-8">
-                        <p className="text-[#8BAE5A] text-lg">Geen gebruikers beschikbaar</p>
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
+                        <p className="text-[#8BAE5A] text-lg">Ledenlijst laden...</p>
                       </div>
                     ) : (
                       availableUsers.map((user) => (
@@ -520,12 +528,22 @@ export default function Inbox() {
           </div>
 
           {/* Chat Area */}
-          <div className="hidden md:flex flex-col flex-1">
+          <div className={`${showChat ? 'flex' : 'hidden'} md:flex flex-col flex-1`}>
             {selectedConversation ? (
               <>
                 {/* Chat Header */}
                 <div className="p-4 border-b border-[#3A4D23]/40 bg-[#181F17]">
                   <div className="flex items-center gap-3">
+                    {/* Back button for mobile */}
+                    <button
+                      onClick={() => setShowChat(false)}
+                      className="md:hidden p-2 hover:bg-[#3A4D23]/40 rounded-lg transition-colors"
+                    >
+                      <svg className="w-5 h-5 text-[#8BAE5A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
+                    </button>
+                    
                     <div className="relative">
                       <img
                         src={selectedConversation.participant.avatar}
