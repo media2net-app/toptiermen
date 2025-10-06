@@ -37,62 +37,131 @@ export default function Week1Page() {
   const router = useRouter();
   
   const [activeTab, setActiveTab] = useState('overview');
-  const [dailyTasks, setDailyTasks] = useState<DailyTask[]>([
-    {
-      id: 'morning-focus',
-      title: 'Ochtend Focus Training',
-      description: 'Start je dag met 5 minuten focus training om je aandacht te trainen',
-      duration: 5,
-      completed: false,
-      category: 'morning',
-      type: 'focus'
-    },
-    {
-      id: 'breathing-exercise',
-      title: 'Ademhalingsoefening',
-      description: 'Doe 5 minuten ademhalingsoefeningen voor stress reductie',
-      duration: 5,
-      completed: false,
-      category: 'morning',
-      type: 'breathing'
-    },
-    {
-      id: 'stress-assessment',
-      title: 'Stress Assessment',
-      description: 'Vul je dagelijkse stress level in (1-10 schaal)',
-      duration: 2,
-      completed: false,
-      category: 'evening',
-      type: 'assessment'
-    }
-  ]);
+  const [dailyTasks, setDailyTasks] = useState<DailyTask[]>([]);
+  const [userIntensity, setUserIntensity] = useState(3); // Default to 3 days per week
   
   const [weekProgress, setWeekProgress] = useState<WeekProgress>({
     week: 1,
-    totalTasks: 21, // 3 taken x 7 dagen
+    totalTasks: 0, // Will be calculated based on intensity
     completedTasks: 0,
     streak: 0,
     lastCompleted: null
   });
 
   const [currentStreak, setCurrentStreak] = useState(0);
-  const [weeklyGoal, setWeeklyGoal] = useState(15); // Minimaal 15 van 21 taken
+  const [weeklyGoal, setWeeklyGoal] = useState(0); // Will be calculated based on intensity
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [isUpdatingProgress, setIsUpdatingProgress] = useState(false);
   const [isWeekCompleted, setIsWeekCompleted] = useState(false);
   const [isLoadingStatus, setIsLoadingStatus] = useState(true);
 
-  // Check if Week 1 is already completed
+  // Generate tasks based on intensity
+  const generateTasksForIntensity = (intensity: number): DailyTask[] => {
+    const baseTasks = [
+      {
+        id: 'morning-focus',
+        title: 'Ochtend Focus Training',
+        description: 'Start je dag met 5 minuten focus training om je aandacht te trainen',
+        duration: 5,
+        completed: false,
+        category: 'morning' as const,
+        type: 'focus' as const
+      },
+      {
+        id: 'breathing-exercise',
+        title: 'Ademhalingsoefening',
+        description: 'Doe 5 minuten ademhalingsoefeningen voor stress reductie',
+        duration: 5,
+        completed: false,
+        category: 'morning' as const,
+        type: 'breathing' as const
+      },
+      {
+        id: 'stress-assessment',
+        title: 'Stress Assessment',
+        description: 'Vul je dagelijkse stress level in (1-10 schaal)',
+        duration: 2,
+        completed: false,
+        category: 'evening' as const,
+        type: 'assessment' as const
+      }
+    ];
+
+    // For low intensity (1-2 days), only show essential tasks
+    if (intensity <= 2) {
+      return [baseTasks[0], baseTasks[2]]; // Focus training + Assessment
+    }
+    
+    // For medium intensity (3-4 days), show all base tasks
+    if (intensity <= 4) {
+      return baseTasks;
+    }
+    
+    // For high intensity (5-7 days), add additional tasks
+    return [
+      ...baseTasks,
+      {
+        id: 'afternoon-breathing',
+        title: 'Middag Ademhaling',
+        description: 'Korte ademhalingsoefening om de middag door te komen',
+        duration: 3,
+        completed: false,
+        category: 'afternoon' as const,
+        type: 'breathing' as const
+      },
+      {
+        id: 'evening-reflection',
+        title: 'Avond Reflectie',
+        description: 'Neem 3 minuten om de dag te evalueren en te reflecteren',
+        duration: 3,
+        completed: false,
+        category: 'evening' as const,
+        type: 'assessment' as const
+      }
+    ];
+  };
+
+  // Check if Week 1 is already completed and load user intensity
   useEffect(() => {
     const checkWeekStatus = async () => {
       if (!user) return;
       
       try {
-        const response = await fetch(`/api/mind-focus/user-progress?userId=${user.id}`);
-        const data = await response.json();
+        // Load both progress and intake data
+        const [progressResponse, intakeResponse] = await Promise.all([
+          fetch(`/api/mind-focus/user-progress?userId=${user.id}`),
+          fetch(`/api/mind-focus/intake?userId=${user.id}`)
+        ]);
         
-        if (data.success && data.progress) {
-          const { completed_weeks } = data.progress;
+        const [progressData, intakeData] = await Promise.all([
+          progressResponse.json(),
+          intakeResponse.json()
+        ]);
+        
+        // Set user intensity
+        if (intakeData.success && intakeData.profile?.lifestyle_info?.mindFocusIntensity) {
+          const intensity = intakeData.profile.lifestyle_info.mindFocusIntensity;
+          setUserIntensity(intensity);
+          const tasks = generateTasksForIntensity(intensity);
+          setDailyTasks(tasks);
+          setWeekProgress(prev => ({ 
+            ...prev, 
+            totalTasks: tasks.length * 7 // Daily tasks x 7 days
+          }));
+          setWeeklyGoal(Math.ceil((tasks.length * 7) * 0.7)); // 70% of total tasks as goal
+        } else {
+          // Default intensity if not found
+          const tasks = generateTasksForIntensity(3);
+          setDailyTasks(tasks);
+          setWeekProgress(prev => ({ 
+            ...prev, 
+            totalTasks: tasks.length * 7
+          }));
+          setWeeklyGoal(Math.ceil((tasks.length * 7) * 0.7));
+        }
+        
+        if (progressData.success && progressData.progress) {
+          const { completed_weeks } = progressData.progress;
           const week1Completed = completed_weeks && completed_weeks.includes(1);
           
           setIsWeekCompleted(week1Completed);
@@ -102,7 +171,7 @@ export default function Week1Page() {
             setDailyTasks(prev => prev.map(task => ({ ...task, completed: true })));
             setWeekProgress(prev => ({ 
               ...prev, 
-              completedTasks: 21,
+              completedTasks: prev.totalTasks,
               streak: 7 
             }));
             setCurrentStreak(7);
@@ -110,6 +179,14 @@ export default function Week1Page() {
         }
       } catch (error) {
         console.error('Error checking week status:', error);
+        // Fallback to default tasks
+        const tasks = generateTasksForIntensity(3);
+        setDailyTasks(tasks);
+        setWeekProgress(prev => ({ 
+          ...prev, 
+          totalTasks: tasks.length * 7
+        }));
+        setWeeklyGoal(Math.ceil((tasks.length * 7) * 0.7));
       } finally {
         setIsLoadingStatus(false);
       }

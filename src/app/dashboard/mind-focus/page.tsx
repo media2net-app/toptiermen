@@ -72,6 +72,35 @@ export default function MindFocusPage() {
   const [currentActiveWeek, setCurrentActiveWeek] = useState(1);
   const [completedWeeks, setCompletedWeeks] = useState<number[]>([]);
   const resetModalRef = useRef<HTMLDivElement>(null);
+
+  // Generate tasks for dashboard display based on intensity
+  const getTasksForWeek = (weekNumber: number, intensity: number = 3) => {
+    const weekTasks = {
+      1: {
+        low: ['Focus training - 2x per week', 'Stress assessment bijhouden'],
+        medium: ['Focus training - 3x per week', 'Ademhalingsoefeningen - dagelijks 5 min', 'Stress assessment bijhouden'],
+        high: ['Focus training - 4x per week', 'Ademhalingsoefeningen - 2x per dag', 'Stress assessment bijhouden', 'Avond reflectie']
+      },
+      2: {
+        low: ['Stress release - 1x per week', 'Progress tracking'],
+        medium: ['Stress release sessies - 2x per week', 'Focus training - 4x per week', 'Progress tracking'],
+        high: ['Stress release sessies - 3x per week', 'Focus training - 5x per week', 'Progress tracking', 'Energie management']
+      },
+      3: {
+        low: ['Sleep preparation - 2x per week', 'Recovery sessies - 1x per week'],
+        medium: ['Sleep preparation - avondroutine', 'Recovery sessies - 2x per week', 'Stress management technieken'],
+        high: ['Sleep preparation - avondroutine', 'Recovery sessies - 3x per week', 'Stress management technieken', 'Circadiane ritme training']
+      },
+      4: {
+        low: ['Integratie van technieken', 'Week 1-3 evaluatie'],
+        medium: ['Integratie van alle technieken', 'Week 1-3 evaluatie', 'Plan aanpassingen'],
+        high: ['Integratie van alle technieken', 'Week 1-3 evaluatie', 'Plan aanpassingen', 'Gewoonte consolidatie']
+      }
+    };
+
+    const intensityLevel = intensity <= 2 ? 'low' : intensity <= 4 ? 'medium' : 'high';
+    return weekTasks[weekNumber as keyof typeof weekTasks]?.[intensityLevel as keyof typeof weekTasks[1]] || weekTasks[weekNumber as keyof typeof weekTasks]?.medium || [];
+  };
   
   // Intake form state
   const [stressAssessment, setStressAssessment] = useState({
@@ -88,7 +117,8 @@ export default function MindFocusPage() {
     freeTime: [] as string[],
     familyObligations: [] as string[],
     sportSchedule: '3x per week',
-    stressTriggers: [] as string[]
+    stressTriggers: [] as string[],
+    mindFocusIntensity: 3 // Default to 3 days per week
   });
   
   const [personalGoals, setPersonalGoals] = useState({
@@ -114,7 +144,7 @@ export default function MindFocusPage() {
       // Reset local state
       setHasExistingProfile(false);
       setStressAssessment({ workStress: 5, personalStress: 5, sleepQuality: 5, energyLevel: 5, focusProblems: false, irritability: false });
-      setLifestyleInfo({ workSchedule: '9-17', freeTime: [], familyObligations: [], sportSchedule: '3x per week', stressTriggers: [] });
+      setLifestyleInfo({ workSchedule: '9-17', freeTime: [], familyObligations: [], sportSchedule: '3x per week', stressTriggers: [], mindFocusIntensity: 3 });
       setPersonalGoals({ improveFocus: false, reduceStress: false, betterSleep: false, moreEnergy: false, workLifeBalance: false });
       setCurrentView('intake');
     } catch (e) {
@@ -412,6 +442,10 @@ export default function MindFocusPage() {
                     <span className="text-[#8BAE5A]">Sport schema:</span>
                     <span className="text-white font-medium">{lifestyleInfo.sportSchedule}</span>
                   </div>
+                  <div className="flex justify-between">
+                    <span className="text-[#8BAE5A]">Mind & Focus intensiteit:</span>
+                    <span className="text-white font-medium">{lifestyleInfo.mindFocusIntensity} {lifestyleInfo.mindFocusIntensity === 1 ? 'dag' : 'dagen'} per week</span>
+                  </div>
                   {lifestyleInfo.freeTime.length > 0 && (
                     <div className="mt-2">
                       <span className="text-[#8BAE5A] text-xs">Vrije tijd:</span>
@@ -530,46 +564,29 @@ export default function MindFocusPage() {
                       <span className={`${
                         completedWeeks.includes(1) ? 'text-green-400' : 
                         currentActiveWeek === 1 ? 'text-white' : 'text-[#8BAE5A]'
-                      }`}>Focus training - 3x per week</span>
+                      }`}>{getTasksForWeek(1, lifestyleInfo.mindFocusIntensity)[0] || 'Focus training - 3x per week'}</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <div className={`w-4 h-4 rounded-full flex items-center justify-center ${
-                        completedWeeks.includes(1) 
-                          ? 'bg-green-500' 
-                          : currentActiveWeek === 1 
-                            ? 'bg-[#8BAE5A]' 
-                            : 'bg-[#3A4D23]'
-                      }`}>
-                        <span className={`text-xs ${
-                          completedWeeks.includes(1) || currentActiveWeek === 1
-                            ? 'text-white'
-                            : 'text-[#8BAE5A]'
-                        }`}>✓</span>
+                    {getTasksForWeek(1, lifestyleInfo.mindFocusIntensity).slice(1).map((task, index) => (
+                      <div key={index + 1} className="flex items-center gap-2">
+                        <div className={`w-4 h-4 rounded-full flex items-center justify-center ${
+                          completedWeeks.includes(1) 
+                            ? 'bg-green-500' 
+                            : currentActiveWeek === 1 
+                              ? 'bg-[#8BAE5A]' 
+                              : 'bg-[#3A4D23]'
+                        }`}>
+                          <span className={`text-xs ${
+                            completedWeeks.includes(1) || currentActiveWeek === 1
+                              ? 'text-white'
+                              : 'text-[#8BAE5A]'
+                          }`}>✓</span>
+                        </div>
+                        <span className={`${
+                          completedWeeks.includes(1) ? 'text-green-400' : 
+                          currentActiveWeek === 1 ? 'text-white' : 'text-[#8BAE5A]'
+                        }`}>{task}</span>
                       </div>
-                      <span className={`${
-                        completedWeeks.includes(1) ? 'text-green-400' : 
-                        currentActiveWeek === 1 ? 'text-white' : 'text-[#8BAE5A]'
-                      }`}>Ademhalingsoefeningen - dagelijks 5 min</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className={`w-4 h-4 rounded-full flex items-center justify-center ${
-                        completedWeeks.includes(1) 
-                          ? 'bg-green-500' 
-                          : currentActiveWeek === 1 
-                            ? 'bg-[#8BAE5A]' 
-                            : 'bg-[#3A4D23]'
-                      }`}>
-                        <span className={`text-xs ${
-                          completedWeeks.includes(1) || currentActiveWeek === 1
-                            ? 'text-white'
-                            : 'text-[#8BAE5A]'
-                        }`}>✓</span>
-                      </div>
-                      <span className={`${
-                        completedWeeks.includes(1) ? 'text-green-400' : 
-                        currentActiveWeek === 1 ? 'text-white' : 'text-[#8BAE5A]'
-                      }`}>Stress assessment bijhouden</span>
-                    </div>
+                    ))}
                   </div>
                   <button 
                     onClick={() => router.push('/dashboard/mind-focus/week-1')}
@@ -626,46 +643,29 @@ export default function MindFocusPage() {
                       <span className={`${
                         completedWeeks.includes(2) ? 'text-green-400' : 
                         currentActiveWeek === 2 ? 'text-white' : 'text-[#8BAE5A]'
-                      }`}>Stress release sessies - 2x per week</span>
+                      }`}>{getTasksForWeek(2, lifestyleInfo.mindFocusIntensity)[0] || 'Stress release sessies - 2x per week'}</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <div className={`w-4 h-4 rounded-full flex items-center justify-center ${
-                        completedWeeks.includes(2) 
-                          ? 'bg-green-500' 
-                          : currentActiveWeek === 2 
-                            ? 'bg-[#8BAE5A]' 
-                            : 'bg-[#3A4D23]'
-                      }`}>
-                        <span className={`text-xs ${
-                          completedWeeks.includes(2) || currentActiveWeek === 2
-                            ? 'text-white'
-                            : 'text-[#8BAE5A]'
-                        }`}>✓</span>
+                    {getTasksForWeek(2, lifestyleInfo.mindFocusIntensity).slice(1).map((task, index) => (
+                      <div key={index + 1} className="flex items-center gap-2">
+                        <div className={`w-4 h-4 rounded-full flex items-center justify-center ${
+                          completedWeeks.includes(2) 
+                            ? 'bg-green-500' 
+                            : currentActiveWeek === 2 
+                              ? 'bg-[#8BAE5A]' 
+                              : 'bg-[#3A4D23]'
+                        }`}>
+                          <span className={`text-xs ${
+                            completedWeeks.includes(2) || currentActiveWeek === 2
+                              ? 'text-white'
+                              : 'text-[#8BAE5A]'
+                          }`}>✓</span>
+                        </div>
+                        <span className={`${
+                          completedWeeks.includes(2) ? 'text-green-400' : 
+                          currentActiveWeek === 2 ? 'text-white' : 'text-[#8BAE5A]'
+                        }`}>{task}</span>
                       </div>
-                      <span className={`${
-                        completedWeeks.includes(2) ? 'text-green-400' : 
-                        currentActiveWeek === 2 ? 'text-white' : 'text-[#8BAE5A]'
-                      }`}>Focus training - 4x per week</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className={`w-4 h-4 rounded-full flex items-center justify-center ${
-                        completedWeeks.includes(2) 
-                          ? 'bg-green-500' 
-                          : currentActiveWeek === 2 
-                            ? 'bg-[#8BAE5A]' 
-                            : 'bg-[#3A4D23]'
-                      }`}>
-                        <span className={`text-xs ${
-                          completedWeeks.includes(2) || currentActiveWeek === 2
-                            ? 'text-white'
-                            : 'text-[#8BAE5A]'
-                        }`}>✓</span>
-                      </div>
-                      <span className={`${
-                        completedWeeks.includes(2) ? 'text-green-400' : 
-                        currentActiveWeek === 2 ? 'text-white' : 'text-[#8BAE5A]'
-                      }`}>Progress tracking</span>
-                    </div>
+                    ))}
                   </div>
                   <button 
                     onClick={() => router.push('/dashboard/mind-focus/week-2')}
@@ -1139,6 +1139,67 @@ export default function MindFocusPage() {
             )}
 
             {tfStep === 6 && (
+              <StepShell title="Lifestyle & Intensiteit">
+                <div className="space-y-6">
+                  <div>
+                    <label className="block text-white text-sm font-medium mb-3">Hoeveel dagen per week wil je met Mind & Focus bezig zijn?</label>
+                    <div className="grid grid-cols-2 gap-3">
+                      {[1, 2, 3, 4, 5, 6, 7].map((days) => (
+                        <button
+                          key={days}
+                          onClick={() => setLifestyleInfo(prev => ({ ...prev, mindFocusIntensity: days }))}
+                          className={`p-3 rounded-lg border-2 transition-all text-center ${
+                            lifestyleInfo.mindFocusIntensity === days
+                              ? 'border-[#8BAE5A] bg-[#8BAE5A]/20 text-[#8BAE5A]'
+                              : 'border-[#3A4D23] bg-[#232D1A] text-white hover:border-[#8BAE5A]/60'
+                          }`}
+                        >
+                          <div className="font-bold text-lg">{days}</div>
+                          <div className="text-xs opacity-75">
+                            {days === 1 ? 'dag' : 'dagen'} per week
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-white text-sm font-medium mb-3">Werkrooster</label>
+                    <select
+                      value={lifestyleInfo.workSchedule}
+                      onChange={(e) => setLifestyleInfo(prev => ({ ...prev, workSchedule: e.target.value }))}
+                      className="w-full p-3 bg-[#232D1A] border border-[#3A4D23] rounded-lg text-white"
+                    >
+                      <option value="9-17">9:00 - 17:00</option>
+                      <option value="shift_work">Ploegendienst</option>
+                      <option value="flexible">Flexibel</option>
+                      <option value="part_time">Part-time</option>
+                      <option value="unemployed">Geen werk</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-white text-sm font-medium mb-3">Sport schema</label>
+                    <select
+                      value={lifestyleInfo.sportSchedule}
+                      onChange={(e) => setLifestyleInfo(prev => ({ ...prev, sportSchedule: e.target.value }))}
+                      className="w-full p-3 bg-[#232D1A] border border-[#3A4D23] rounded-lg text-white"
+                    >
+                      <option value="none">Geen sport</option>
+                      <option value="1x per week">1x per week</option>
+                      <option value="2x per week">2x per week</option>
+                      <option value="3x per week">3x per week</option>
+                      <option value="4x per week">4x per week</option>
+                      <option value="5x per week">5x per week</option>
+                      <option value="6x per week">6x per week</option>
+                      <option value="daily">Dagelijks</option>
+                    </select>
+                  </div>
+                </div>
+              </StepShell>
+            )}
+
+            {tfStep === 7 && (
               <StepShell title="Controleer en bevestig" ctaText={isSaving ? 'Opslaan...' : 'Intake voltooien'} onNext={saveIntakeData} canNext={!isSaving}>
                 <div className="grid grid-cols-1 gap-4 text-white text-sm">
                   <div className="bg-[#232D1A] rounded-lg p-4 border border-[#2A3A1A]">
@@ -1163,6 +1224,16 @@ export default function MindFocusPage() {
                       {personalGoals.workLifeBalance && <li>Betere werk/privé balans</li>}
                       {!personalGoals.improveFocus && !personalGoals.reduceStress && !personalGoals.betterSleep && !personalGoals.moreEnergy && !personalGoals.workLifeBalance && <li>Geen doelen geselecteerd</li>}
                     </ul>
+                  </div>
+                  <div className="bg-[#232D1A] rounded-lg p-4 border border-[#2A3A1A]">
+                    <div className="font-semibold text-[#8BAE5A] mb-2">Lifestyle & Intensiteit</div>
+                    <div>Mind & Focus intensiteit: {lifestyleInfo.mindFocusIntensity} {lifestyleInfo.mindFocusIntensity === 1 ? 'dag' : 'dagen'} per week</div>
+                    <div>Werkrooster: {lifestyleInfo.workSchedule === '9-17' ? '9:00 - 17:00' : 
+                                     lifestyleInfo.workSchedule === 'shift_work' ? 'Ploegendienst' :
+                                     lifestyleInfo.workSchedule === 'flexible' ? 'Flexibel' :
+                                     lifestyleInfo.workSchedule === 'part_time' ? 'Part-time' :
+                                     lifestyleInfo.workSchedule === 'unemployed' ? 'Geen werk' : lifestyleInfo.workSchedule}</div>
+                    <div>Sport schema: {lifestyleInfo.sportSchedule}</div>
                   </div>
                 </div>
               </StepShell>
