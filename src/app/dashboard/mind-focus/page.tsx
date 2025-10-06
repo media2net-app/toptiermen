@@ -1029,7 +1029,7 @@ export default function MindFocusPage() {
   );
 
   const renderIntakeForm = () => {
-    const totalSteps = 7;
+    const totalSteps = 8;
     const nextStep = () => setTfStep((s) => Math.min(s + 1, totalSteps - 1));
     const prevStep = () => setTfStep((s) => Math.max(s - 1, 0));
 
