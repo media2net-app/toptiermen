@@ -143,7 +143,7 @@ export default function ZeroBasedBudget() {
                     </button>
                   )}
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
                   <input
                     type="number"
                     value={category.amount === 0 ? '' : category.amount}
@@ -154,7 +154,7 @@ export default function ZeroBasedBudget() {
                     className="flex-1 bg-[#232D1A] border border-[#3A4D23] rounded-lg px-3 py-2 text-white focus:outline-none focus:border-[#8BAE5A]"
                     placeholder="0"
                   />
-                  <span className="text-[#8BAE5A] font-mono text-sm min-w-[80px]">
+                  <span className="text-[#8BAE5A] font-mono text-sm sm:min-w-[80px]">
                     {formatCurrency(category.amount)}
                   </span>
                 </div>
