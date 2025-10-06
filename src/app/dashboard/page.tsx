@@ -177,7 +177,8 @@ export default function Dashboard() {
             target = '/dashboard/voedingsplannen-v2';
             break;
           case 6:
-            target = '/dashboard/brotherhood';
+            // Premium onboarding final step: direct to introductions thread in the forum
+            target = '/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden';
             break;
           default:
             return;
