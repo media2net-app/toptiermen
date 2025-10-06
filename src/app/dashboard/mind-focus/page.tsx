@@ -456,6 +456,176 @@ export default function MindFocusPage() {
                 )}
               </div>
             </div>
+
+            {/* Personalized 6-Month Plan */}
+            <div className="mt-6 bg-gradient-to-r from-[#1A2A1A] to-[#232D1A] rounded-lg p-6 border border-[#3A4D23]/40">
+              <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                <span className="w-8 h-8 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] rounded-full flex items-center justify-center text-[#1A2A1A] text-sm">📅</span>
+                Je Persoonlijke 6-Maanden Plan
+              </h3>
+              <p className="text-[#8BAE5A] text-sm mb-6">
+                Een op maat gemaakt traject gebaseerd op jouw intake resultaten. Elke week bouwt voort op de vorige.
+              </p>
+              
+              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+                {/* Week 1 */}
+                <div className="bg-[#232D1A] rounded-lg p-4 border border-[#8BAE5A]/30">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-semibold text-white">Week 1</h4>
+                    <span className="px-2 py-1 bg-[#8BAE5A] text-[#1A2A1A] text-xs rounded-full font-medium">Actief</span>
+                  </div>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-[#8BAE5A] rounded-full flex items-center justify-center">
+                        <span className="text-[#1A2A1A] text-xs">✓</span>
+                      </div>
+                      <span className="text-white">Focus training - 3x per week</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-[#8BAE5A] rounded-full flex items-center justify-center">
+                        <span className="text-[#1A2A1A] text-xs">✓</span>
+                      </div>
+                      <span className="text-white">Ademhalingsoefeningen - dagelijks 5 min</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-[#8BAE5A] rounded-full flex items-center justify-center">
+                        <span className="text-[#1A2A1A] text-xs">✓</span>
+                      </div>
+                      <span className="text-white">Stress assessment bijhouden</span>
+                    </div>
+                  </div>
+                  <button className="w-full mt-3 px-3 py-2 bg-[#8BAE5A] text-[#1A2A1A] rounded-lg text-sm font-medium hover:bg-[#A6C97B] transition-colors">
+                    Start Week 1
+                  </button>
+                </div>
+
+                {/* Week 2 */}
+                <div className="bg-[#232D1A] rounded-lg p-4 border border-[#3A4D23]/40 opacity-60">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-semibold text-white">Week 2</h4>
+                    <span className="px-2 py-1 bg-[#3A4D23] text-[#8BAE5A] text-xs rounded-full font-medium">Geblokkeerd</span>
+                  </div>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-[#3A4D23] rounded-full"></div>
+                      <span className="text-[#8BAE5A]">Stress release sessies - 2x per week</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-[#3A4D23] rounded-full"></div>
+                      <span className="text-[#8BAE5A]">Focus training - 4x per week</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-[#3A4D23] rounded-full"></div>
+                      <span className="text-[#8BAE5A]">Progress tracking</span>
+                    </div>
+                  </div>
+                  <button disabled className="w-full mt-3 px-3 py-2 bg-[#3A4D23] text-[#8BAE5A] rounded-lg text-sm font-medium cursor-not-allowed">
+                    Voltooi Week 1 eerst
+                  </button>
+                </div>
+
+                {/* Week 3 */}
+                <div className="bg-[#232D1A] rounded-lg p-4 border border-[#3A4D23]/40 opacity-60">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-semibold text-white">Week 3</h4>
+                    <span className="px-2 py-1 bg-[#3A4D23] text-[#8BAE5A] text-xs rounded-full font-medium">Geblokkeerd</span>
+                  </div>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-[#3A4D23] rounded-full"></div>
+                      <span className="text-[#8BAE5A]">Sleep preparation - avondroutine</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-[#3A4D23] rounded-full"></div>
+                      <span className="text-[#8BAE5A]">Recovery sessies - 2x per week</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-[#3A4D23] rounded-full"></div>
+                      <span className="text-[#8BAE5A]">Stress management technieken</span>
+                    </div>
+                  </div>
+                  <button disabled className="w-full mt-3 px-3 py-2 bg-[#3A4D23] text-[#8BAE5A] rounded-lg text-sm font-medium cursor-not-allowed">
+                    Voltooi Week 2 eerst
+                  </button>
+                </div>
+
+                {/* Week 4 */}
+                <div className="bg-[#232D1A] rounded-lg p-4 border border-[#3A4D23]/40 opacity-60">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-semibold text-white">Week 4</h4>
+                    <span className="px-2 py-1 bg-[#3A4D23] text-[#8BAE5A] text-xs rounded-full font-medium">Geblokkeerd</span>
+                  </div>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-[#3A4D23] rounded-full"></div>
+                      <span className="text-[#8BAE5A]">Integratie van alle technieken</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-[#3A4D23] rounded-full"></div>
+                      <span className="text-[#8BAE5A]">Week 1-3 evaluatie</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-[#3A4D23] rounded-full"></div>
+                      <span className="text-[#8BAE5A]">Plan aanpassingen</span>
+                    </div>
+                  </div>
+                  <button disabled className="w-full mt-3 px-3 py-2 bg-[#3A4D23] text-[#8BAE5A] rounded-lg text-sm font-medium cursor-not-allowed">
+                    Voltooi Week 3 eerst
+                  </button>
+                </div>
+
+                {/* Maanden 2-6 Preview */}
+                <div className="bg-[#232D1A] rounded-lg p-4 border border-[#3A4D23]/40 opacity-60 lg:col-span-2 xl:col-span-2">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-semibold text-white">Maanden 2-6</h4>
+                    <span className="px-2 py-1 bg-[#3A4D23] text-[#8BAE5A] text-xs rounded-full font-medium">Later beschikbaar</span>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <h5 className="text-[#8BAE5A] font-medium mb-2">Maand 2-3: Verdieping</h5>
+                      <ul className="space-y-1 text-[#8BAE5A]">
+                        <li>• Geavanceerde focus technieken</li>
+                        <li>• Stress management strategieën</li>
+                        <li>• Slaap optimalisatie</li>
+                      </ul>
+                    </div>
+                    <div>
+                      <h5 className="text-[#8BAE5A] font-medium mb-2">Maand 4-6: Meesterschap</h5>
+                      <ul className="space-y-1 text-[#8BAE5A]">
+                        <li>• Persoonlijke routine ontwikkeling</li>
+                        <li>• Advanced recovery technieken</li>
+                        <li>• Lange termijn behoud</li>
+                      </ul>
+                    </div>
+                  </div>
+                  <div className="mt-3 p-2 bg-[#3A4D23]/20 rounded border border-[#3A4D23]/40">
+                    <p className="text-[#8BAE5A] text-xs">
+                      📈 Voltooi de eerste maand om toegang te krijgen tot de volgende fase van je traject
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Progress Overview */}
+              <div className="mt-6 bg-[#232D1A] rounded-lg p-4 border border-[#3A4D23]/40">
+                <h4 className="font-semibold text-white mb-3">Traject Voortgang</h4>
+                <div className="flex items-center gap-4">
+                  <div className="flex-1">
+                    <div className="flex justify-between text-sm mb-1">
+                      <span className="text-[#8BAE5A]">Week 1 van 24</span>
+                      <span className="text-white">4%</span>
+                    </div>
+                    <div className="w-full bg-[#3A4D23] rounded-full h-2">
+                      <div className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] h-2 rounded-full" style={{ width: '4%' }}></div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-sm text-[#8BAE5A]">Volgende milestone</div>
+                    <div className="text-white font-medium">Week 4</div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
