@@ -27,19 +27,52 @@ const WelcomeVideoStep = ({ onComplete }: { onComplete: () => void }) => {
   const [videoWatched, setVideoWatched] = useState(false);
   const [showOverlay, setShowOverlay] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [videoProgress, setVideoProgress] = useState(0);
+  const [videoDuration, setVideoDuration] = useState(0);
+  const [videoError, setVideoError] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const progressCheckInterval = useRef<NodeJS.Timeout | null>(null);
 
   const handleVideoEnd = () => {
+    console.log('Video ended event triggered');
     setVideoWatched(true);
     setShowOverlay(false);
     setIsPlaying(false);
+    if (progressCheckInterval.current) {
+      clearInterval(progressCheckInterval.current);
+    }
+  };
+
+  const handleTimeUpdate = () => {
+    if (videoRef.current) {
+      const currentTime = videoRef.current.currentTime;
+      const duration = videoRef.current.duration;
+      
+      if (duration > 0) {
+        const progress = (currentTime / duration) * 100;
+        setVideoProgress(progress);
+        
+        // Mark as watched if video is 95% complete (fallback for browsers that don't fire onEnded)
+        if (progress >= 95 && !videoWatched) {
+          console.log('Video 95% complete, marking as watched');
+          setVideoWatched(true);
+          setShowOverlay(false);
+          setIsPlaying(false);
+          if (progressCheckInterval.current) {
+            clearInterval(progressCheckInterval.current);
+          }
+        }
+      }
+    }
   };
 
   const handlePlay = () => {
     setShowOverlay(false);
     setIsPlaying(true);
     if (videoRef.current) {
-      videoRef.current.play();
+      videoRef.current.play().catch(error => {
+        console.error('Video play failed:', error);
+      });
     }
   };
 
@@ -50,6 +83,44 @@ const WelcomeVideoStep = ({ onComplete }: { onComplete: () => void }) => {
   const handlePlayEvent = () => {
     setIsPlaying(true);
   };
+
+  const handleLoadedMetadata = () => {
+    if (videoRef.current) {
+      setVideoDuration(videoRef.current.duration);
+    }
+  };
+
+  // Start progress checking when video starts playing
+  useEffect(() => {
+    if (isPlaying && videoRef.current) {
+      progressCheckInterval.current = setInterval(() => {
+        if (videoRef.current) {
+          const currentTime = videoRef.current.currentTime;
+          const duration = videoRef.current.duration;
+          
+          if (duration > 0) {
+            const progress = (currentTime / duration) * 100;
+            setVideoProgress(progress);
+            
+            // Fallback: mark as watched if video is 95% complete
+            if (progress >= 95 && !videoWatched) {
+              console.log('Progress check: Video 95% complete, marking as watched');
+              setVideoWatched(true);
+              setShowOverlay(false);
+              setIsPlaying(false);
+              clearInterval(progressCheckInterval.current!);
+            }
+          }
+        }
+      }, 1000); // Check every second
+    }
+
+    return () => {
+      if (progressCheckInterval.current) {
+        clearInterval(progressCheckInterval.current);
+      }
+    };
+  }, [isPlaying, videoWatched]);
 
   return (
     <div className="text-center">
@@ -75,10 +146,13 @@ const WelcomeVideoStep = ({ onComplete }: { onComplete: () => void }) => {
           ref={videoRef}
           className="w-full h-48 sm:h-64 lg:h-80 object-cover"
           onEnded={handleVideoEnd}
+          onTimeUpdate={handleTimeUpdate}
           onPause={handlePause}
           onPlay={handlePlayEvent}
+          onLoadedMetadata={handleLoadedMetadata}
           onError={(e) => {
             console.log('Video error:', e);
+            setVideoError(true);
           }}
           controls
           preload="metadata"
@@ -107,10 +181,33 @@ const WelcomeVideoStep = ({ onComplete }: { onComplete: () => void }) => {
         <div className="flex items-center justify-center space-x-2 mb-2">
           <div className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full ${videoWatched ? 'bg-[#8BAE5A]' : 'bg-gray-600'}`}></div>
           <span className="text-gray-300 text-xs sm:text-sm">
-            {videoWatched ? 'Video bekeken ✓' : 'Video nog niet bekeken'}
+            {videoWatched ? 'Video bekeken ✓' : `Video bekeken: ${Math.round(videoProgress)}%`}
           </span>
         </div>
+        {!videoWatched && videoProgress > 0 && (
+          <div className="w-full bg-gray-700 rounded-full h-1 mb-2">
+            <div 
+              className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] h-1 rounded-full transition-all duration-300"
+              style={{ width: `${videoProgress}%` }}
+            ></div>
+          </div>
+        )}
       </div>
+
+      {/* Fallback for video error */}
+      {videoError && (
+        <div className="mb-4 sm:mb-6 p-4 bg-yellow-900 bg-opacity-20 border border-yellow-500 rounded-lg">
+          <p className="text-yellow-300 text-sm mb-3">
+            Video kan niet worden geladen. Je kunt doorgaan naar de volgende stap.
+          </p>
+          <button
+            onClick={onComplete}
+            className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] hover:from-[#7A9E4A] hover:to-[#E6C200] text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-300"
+          >
+            Doorgaan zonder video →
+          </button>
+        </div>
+      )}
 
       {/* Primary next button when video finished */}
       {videoWatched && (
