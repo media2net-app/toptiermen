@@ -56,7 +56,6 @@ const SocialFeedPage = () => {
   const [loading, setLoading] = useState(true);
   const [newPost, setNewPost] = useState('');
   const [posting, setPosting] = useState(false);
-  const [activeFilter, setActiveFilter] = useState('voor-jou');
   const [commentModalOpen, setCommentModalOpen] = useState(false);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
@@ -489,30 +488,6 @@ const SocialFeedPage = () => {
         </div>
       </section>
 
-      {/* Feed Filters */}
-      <section className="mb-4 sm:mb-6">
-        <div className="flex overflow-x-auto hide-scrollbar">
-          <div className="flex space-x-2 min-w-full">
-            {[
-              { id: 'voor-jou', label: 'Voor Jou' },
-              { id: 'connecties', label: 'Connecties' },
-              { id: 'mijn-groepen', label: 'Mijn Groepen' }
-            ].map((filter) => (
-              <button
-                key={filter.id}
-                onClick={() => setActiveFilter(filter.id)}
-                className={`px-6 py-3 rounded-t-xl font-semibold transition-colors whitespace-nowrap ${
-                  activeFilter === filter.id
-                    ? 'bg-[#232D1A] text-[#FFD700] border-b-2 border-[#FFD700]'
-                    : 'bg-[#232D1A]/60 text-[#8BAE5A] hover:text-white border-b-2 border-transparent'
-                }`}
-              >
-                {filter.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* Feed List */}
       <section className="space-y-4 sm:space-y-6">
