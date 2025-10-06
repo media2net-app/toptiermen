@@ -48,6 +48,11 @@ interface DashboardStats {
     stressLevel?: number;
     personalGoals?: string[];
     currentStreak?: number;
+    currentWeek?: number;
+    completedWeeks?: number[];
+    intensity?: number;
+    todaysTasks?: string[];
+    weeklyTasks?: string[];
   };
   boekenkamer: {
     total: number;
@@ -272,7 +277,7 @@ export default function Dashboard() {
             missions: { total: 0, completedToday: 0, completedThisWeek: 0, progress: 0 },
             challenges: { total: 0, completedToday: 0, completedThisWeek: 0, progress: 0 },
             training: { hasActiveSchema: false, currentDay: 0, totalDays: 0, weeklySessions: 0, progress: 0, schemaName: undefined, completedDaysThisWeek: 0, currentWeek: 0, totalWeeks: 8 },
-            mindFocus: { total: 0, completedToday: 0, progress: 0, hasProfile: false, stressLevel: 0, personalGoals: [], currentStreak: 0 },
+            mindFocus: { total: 0, completedToday: 0, progress: 0, hasProfile: false, stressLevel: 0, personalGoals: [], currentStreak: 0, currentWeek: 1, completedWeeks: [], intensity: 3, todaysTasks: [], weeklyTasks: [] },
             boekenkamer: { total: 0, completedToday: 0, progress: 0, totalBooks: 0, readBooks: 0 },
             finance: { netWorth: 0, monthlyIncome: 0, savings: 0, investments: 0, progress: 0, hasProfile: false },
             brotherhood: { totalMembers: 0, activeMembers: 0, communityScore: 0, progress: 0 },
@@ -299,7 +304,7 @@ export default function Dashboard() {
           missions: { total: 0, completedToday: 0, completedThisWeek: 0, progress: 0 },
           challenges: { total: 0, completedToday: 0, completedThisWeek: 0, progress: 0 },
           training: { hasActiveSchema: false, currentDay: 0, totalDays: 0, weeklySessions: 0, progress: 0, schemaName: undefined, completedDaysThisWeek: 0, currentWeek: 0, totalWeeks: 8 },
-          mindFocus: { total: 0, completedToday: 0, progress: 0, hasProfile: false, stressLevel: 0, personalGoals: [], currentStreak: 0 },
+          mindFocus: { total: 0, completedToday: 0, progress: 0, hasProfile: false, stressLevel: 0, personalGoals: [], currentStreak: 0, currentWeek: 1, completedWeeks: [], intensity: 3, todaysTasks: [], weeklyTasks: [] },
           boekenkamer: { total: 0, completedToday: 0, progress: 0, totalBooks: 0, readBooks: 0 },
           finance: { netWorth: 0, monthlyIncome: 0, savings: 0, investments: 0, progress: 0, hasProfile: false },
           brotherhood: { totalMembers: 0, activeMembers: 0, communityScore: 0, progress: 0 },
@@ -681,9 +686,22 @@ export default function Dashboard() {
                 </div>
               )}
               
-              {/* Wel profiel - Toon persoonlijke doelen en stress level */}
+              {/* Wel profiel - Toon actuele data */}
               {stats?.mindFocus.hasProfile && (
                 <div className="space-y-2 sm:space-y-3">
+                  {/* Huidige week */}
+                  {stats.mindFocus.currentWeek && (
+                    <div className="text-left">
+                      <div className="text-xs sm:text-sm text-[#8BAE5A] mb-1">Huidige week:</div>
+                      <div className="text-white font-semibold text-sm sm:text-base">
+                        Week {stats.mindFocus.currentWeek}
+                        {stats.mindFocus.completedWeeks && stats.mindFocus.completedWeeks.includes(stats.mindFocus.currentWeek) && (
+                          <span className="ml-2 text-green-400 text-xs">✅ Voltooid</span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  
                   {/* Stress level */}
                   {stats.mindFocus.stressLevel !== undefined && (
                     <div className="text-left">
@@ -694,12 +712,26 @@ export default function Dashboard() {
                     </div>
                   )}
                   
-                  {/* Persoonlijke doelen */}
-                  {stats.mindFocus.personalGoals && stats.mindFocus.personalGoals.length > 0 && (
+                  {/* Intensiteit */}
+                  {stats.mindFocus.intensity && (
                     <div className="text-left">
-                      <div className="text-xs sm:text-sm text-[#8BAE5A] mb-1">Doelen:</div>
+                      <div className="text-xs sm:text-sm text-[#8BAE5A] mb-1">Intensiteit:</div>
                       <div className="text-white font-semibold text-sm sm:text-base">
-                        {stats.mindFocus.personalGoals.length} actief
+                        {stats.mindFocus.intensity} {stats.mindFocus.intensity === 1 ? 'dag' : 'dagen'}/week
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Vandaag's taken */}
+                  {stats.mindFocus.todaysTasks && stats.mindFocus.todaysTasks.length > 0 && (
+                    <div className="text-left">
+                      <div className="text-xs sm:text-sm text-[#8BAE5A] mb-1">Vandaag:</div>
+                      <div className="text-white font-semibold text-sm sm:text-base">
+                        {stats.mindFocus.todaysTasks.length} {stats.mindFocus.todaysTasks.length === 1 ? 'taak' : 'taken'}
+                      </div>
+                      <div className="text-xs text-gray-400 mt-1">
+                        {stats.mindFocus.todaysTasks.slice(0, 2).join(', ')}
+                        {stats.mindFocus.todaysTasks.length > 2 && '...'}
                       </div>
                     </div>
                   )}
@@ -723,7 +755,10 @@ export default function Dashboard() {
                   </div>
                   
                   <div className="text-xs text-gray-400">
-                    Meditatie & Focus
+                    {stats.mindFocus.completedWeeks && stats.mindFocus.completedWeeks.length > 0 
+                      ? `${stats.mindFocus.completedWeeks.length} week${stats.mindFocus.completedWeeks.length === 1 ? '' : 's'} voltooid`
+                      : 'Meditatie & Focus'
+                    }
                   </div>
                 </div>
               )}
