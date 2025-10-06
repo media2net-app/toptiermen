@@ -10,6 +10,7 @@ import { useAuth } from '@/hooks/useAuth';
 import DashboardLoadingModal from '@/components/ui/DashboardLoadingModal';
 import { useRouter } from 'next/navigation';
 import InboxIcon from '@/components/InboxIcon';
+import OnboardingV2Modal from '@/components/OnboardingV2Modal';
 
 
 // Force dynamic rendering to prevent navigator errors
@@ -160,31 +161,11 @@ export default function Dashboard() {
     
     console.log(`🔍 Dashboard Redirect Check: user=${user.email}, onboarding=${JSON.stringify(onboarding)}, authLoading=${authLoading}`);
     
-    // If onboarding is not completed, redirect to the current step
-    if (!onboarding?.isCompleted && onboarding?.currentStep !== null && !dashboardRedirectExecuted.current) {
-      console.log(`🔄 Dashboard Redirect: User on step ${onboarding.currentStep}, isCompleted: ${onboarding.isCompleted}`);
-
-      // Hard-gate steps 1 and 2 to isolated pages (prevent dashboard rendering behind)
-      let redirectPath = '';
-      if (onboarding.currentStep === 1) {
-        redirectPath = '/onboarding/step-1';
-      } else if (onboarding.currentStep === 2) {
-        redirectPath = '/onboarding/step-2';
-      } else {
-        // Fallback to unified hook for steps >= 3
-        redirectPath = getRedirectPath();
-      }
-
-      // Mark redirect as executed to prevent multiple redirects
-      dashboardRedirectExecuted.current = true;
-
-      console.log(`🔄 Redirecting to: ${redirectPath}`);
-      // Use replace instead of push to prevent back button issues
-      // Add small delay to prevent race conditions with loading overlays
-      setTimeout(() => {
-        router.replace(redirectPath);
-      }, 50);
-      return;
+    // If onboarding is not completed, show onboarding modal instead of redirecting
+    if (!onboarding?.isCompleted && onboarding?.currentStep !== null) {
+      console.log(`🔄 Dashboard: User on step ${onboarding.currentStep}, isCompleted: ${onboarding.isCompleted}`);
+      console.log(`✅ Onboarding modal will be shown on dashboard`);
+      // No redirect needed - onboarding modal will handle the flow
     } else if (onboarding?.isCompleted) {
       console.log(`✅ Onboarding completed, staying on dashboard`);
     } else {
@@ -192,11 +173,11 @@ export default function Dashboard() {
     }
   }, [user, onboarding, router, authLoading, getRedirectPath]);
 
-  // ✅ PHASE 2.1: Simplified fallback redirect using unified auth hook (reduced delay)
+  // ✅ PHASE 2.1: Simplified fallback - no redirects needed, onboarding modal handles flow
   useEffect(() => {
-    if (!user || !user.email || authLoading || fallbackRedirectAttempted || dashboardRedirectExecuted.current) return;
+    if (!user || !user.email || authLoading || fallbackRedirectAttempted) return;
     
-    // If onboarding context hasn't loaded shortly, try direct API call fast
+    // If onboarding context hasn't loaded shortly, try direct API call for context
     const timeout = setTimeout(async () => {
       if (onboarding === undefined) {
         console.log('🔄 Fallback: Onboarding context not loaded, trying direct API call...');
@@ -207,25 +188,17 @@ export default function Dashboard() {
           const data = await response.json();
           
           if (data.success && !data.onboarding.isCompleted && data.onboarding.currentStep !== null) {
-            console.log(`🔄 Fallback redirect using unified auth hook`);
-            dashboardRedirectExecuted.current = true;
-            // Hard-gate UI step 1/2 to isolated pages
-            const uiStep = data.onboarding.currentStep;
-            const redirectPath = uiStep === 1
-              ? '/onboarding/step-1'
-              : uiStep === 2
-                ? '/onboarding/step-2'
-                : getRedirectPath();
-            router.replace(redirectPath);
+            console.log(`🔄 Fallback: Onboarding modal will handle step ${data.onboarding.currentStep}`);
+            // No redirect needed - onboarding modal will handle the flow
           }
         } catch (error) {
-          console.error('❌ Fallback redirect failed:', error);
+          console.error('❌ Fallback onboarding check failed:', error);
         }
       }
     }, 200);
     
     return () => clearTimeout(timeout);
-  }, [user, authLoading, onboarding, fallbackRedirectAttempted, router, getRedirectPath]);
+  }, [user, authLoading, onboarding, fallbackRedirectAttempted]);
 
   // 2.0.1: Fetch real dashboard data from database - FIXED INFINITE LOOP + DEBOUNCED
   useEffect(() => {
@@ -244,11 +217,7 @@ export default function Dashboard() {
         return;
       }
 
-      // Prevent loading dashboard data while user is gated in onboarding steps 1 or 2
-      if (!onboarding?.isCompleted && (onboarding?.currentStep === 1 || onboarding?.currentStep === 2)) {
-        setLoading(false);
-        return;
-      }
+      // Allow dashboard data loading during onboarding - modal will handle the flow
 
       try {
         setLoading(true); // RE-ENABLED WITH LOADING MODAL
@@ -458,10 +427,7 @@ export default function Dashboard() {
     return null;
   }
 
-  // While gated to onboarding step 1/2, do not render dashboard at all
-  if (!authLoading && !onboarding?.isCompleted && (onboarding?.currentStep === 1 || onboarding?.currentStep === 2)) {
-    return null;
-  }
+  // Allow dashboard rendering during onboarding - modal will handle the flow
 
   // Show loading modal while data is being fetched
   if (loading || authLoading) {
@@ -511,6 +477,8 @@ export default function Dashboard() {
   return (
     <div className={`min-h-screen bg-gradient-to-br from-[#0F1411] via-[#181F17] to-[#232D1A] transition-opacity duration-1000 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}>
       <ClientLayout>
+        {/* Onboarding Modal */}
+        <OnboardingV2Modal />
         <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
           {/* Header */}
           <div className="mb-6 sm:mb-8 flex items-start justify-between gap-4">
