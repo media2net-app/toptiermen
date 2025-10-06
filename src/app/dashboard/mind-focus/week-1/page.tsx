@@ -220,6 +220,25 @@ export default function Week1Page() {
     });
   };
 
+  const startSession = (taskId: string) => {
+    // Don't allow starting sessions if week is already completed
+    if (isWeekCompleted) return;
+    
+    // Find the task
+    const task = dailyTasks.find(t => t.id === taskId);
+    if (!task) return;
+
+    // Show a simple alert for now - in the future this could redirect to a session page
+    alert(`Starting ${task.title} session...\n\nDuration: ${task.duration} minutes\n\nAfter completing the session, this task will be marked as completed.`);
+    
+    // For now, we'll simulate completing the session after a short delay
+    // In a real implementation, this would be triggered when the user finishes the actual session
+    setTimeout(() => {
+      toggleTask(taskId);
+      alert(`${task.title} completed! Task marked as done.`);
+    }, 2000);
+  };
+
   const getTaskIcon = (type: string) => {
     switch (type) {
       case 'focus':
@@ -523,8 +542,16 @@ export default function Week1Page() {
                         </div>
                         
                         {task.type === 'focus' && (
-                          <button className="px-4 py-2 bg-[#8BAE5A] text-[#1A2A1A] rounded-lg text-sm font-medium hover:bg-[#A6C97B] transition-colors">
-                            Start Sessie
+                          <button 
+                            onClick={() => startSession(task.id)}
+                            disabled={task.completed}
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                              task.completed 
+                                ? 'bg-[#3A4D23] text-[#8BAE5A]/50 cursor-not-allowed' 
+                                : 'bg-[#8BAE5A] text-[#1A2A1A] hover:bg-[#A6C97B]'
+                            }`}
+                          >
+                            {task.completed ? 'Voltooid' : 'Start Sessie'}
                           </button>
                         )}
                       </div>
