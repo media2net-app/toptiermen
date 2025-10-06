@@ -55,6 +55,7 @@ export default function Week2Page() {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [isUpdatingProgress, setIsUpdatingProgress] = useState(false);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+  const [isWeekCompleted, setIsWeekCompleted] = useState(false);
 
   // Week 2 tasks - personalized based on intake
   const [dailyTasks, setDailyTasks] = useState<DailyTask[]>([
@@ -96,19 +97,37 @@ export default function Week2Page() {
     }
   ]);
 
-  // Load user profile for personalization
+  // Load user profile for personalization and check week status
   useEffect(() => {
     const loadUserProfile = async () => {
       if (!user) return;
       
       try {
-        const response = await fetch(`/api/mind-focus/intake?userId=${user.id}`);
-        const data = await response.json();
+        // Load profile and progress data
+        const [profileResponse, progressResponse] = await Promise.all([
+          fetch(`/api/mind-focus/intake?userId=${user.id}`),
+          fetch(`/api/mind-focus/user-progress?userId=${user.id}`)
+        ]);
         
-        if (data.success && data.profile) {
-          setUserProfile(data.profile);
-          // Personalize tasks based on intake data
-          personalizeTasks(data.profile);
+        const [profileData, progressData] = await Promise.all([
+          profileResponse.json(),
+          progressResponse.json()
+        ]);
+        
+        if (profileData.success && profileData.profile) {
+          setUserProfile(profileData.profile);
+          personalizeTasks(profileData.profile);
+        }
+        
+        if (progressData.success && progressData.progress) {
+          const { completed_weeks } = progressData.progress;
+          const week2Completed = completed_weeks && completed_weeks.includes(2);
+          setIsWeekCompleted(week2Completed);
+          
+          // If week is completed, mark all tasks as completed
+          if (week2Completed) {
+            setDailyTasks(prev => prev.map(task => ({ ...task, completed: true })));
+          }
         }
       } catch (error) {
         console.error('Error loading user profile:', error);
@@ -165,6 +184,9 @@ export default function Week2Page() {
   ];
 
   const toggleTask = (taskId: string) => {
+    // Don't allow toggling if week is already completed
+    if (isWeekCompleted) return;
+    
     setDailyTasks(prev => {
       const updatedTasks = prev.map(task => 
         task.id === taskId ? { ...task, completed: !task.completed } : task
@@ -270,17 +292,37 @@ export default function Week2Page() {
             <ArrowLeftIcon className="w-6 h-6 text-white" />
           </button>
           <div>
-            <h1 className="text-3xl font-bold text-white">Week 2 - Stress Release & Focus</h1>
-            <p className="text-[#8BAE5A] mt-1">Gebouwd op je Week 1 voortgang en intake resultaten</p>
+            <h1 className="text-3xl font-bold text-white">
+              Week 2 - Stress Release & Focus
+              {isWeekCompleted && (
+                <span className="ml-3 px-3 py-1 bg-green-500 text-white text-sm rounded-full">
+                  ✅ Voltooid
+                </span>
+              )}
+            </h1>
+            <p className="text-[#8BAE5A] mt-1">
+              {isWeekCompleted ? 'Je hebt deze week succesvol voltooid!' : 'Gebouwd op je Week 1 voortgang en intake resultaten'}
+            </p>
           </div>
         </div>
 
         {/* Progress Banner */}
-        <div className="bg-gradient-to-r from-[#8BAE5A]/20 to-[#FFD700]/20 rounded-xl p-6 mb-6 border border-[#8BAE5A]/30">
+        <div className={`rounded-xl p-6 mb-6 border ${
+          isWeekCompleted 
+            ? 'bg-gradient-to-r from-green-500/20 to-green-600/20 border-green-500/30' 
+            : 'bg-gradient-to-r from-[#8BAE5A]/20 to-[#FFD700]/20 border-[#8BAE5A]/30'
+        }`}>
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-xl font-bold text-white">Week 2 Voortgang</h2>
-              <p className="text-[#8BAE5A] text-sm">Verhoogde intensiteit gebaseerd op je intake</p>
+              <h2 className="text-xl font-bold text-white">
+                {isWeekCompleted ? 'Week 2 Voltooid!' : 'Week 2 Voortgang'}
+              </h2>
+              <p className="text-[#8BAE5A] text-sm">
+                {isWeekCompleted 
+                  ? 'Alle taken van deze week zijn succesvol voltooid' 
+                  : 'Verhoogde intensiteit gebaseerd op je intake'
+                }
+              </p>
             </div>
             <div className="text-right">
               <div className="text-2xl font-bold text-white">{completedToday}/{totalToday}</div>
@@ -289,13 +331,19 @@ export default function Week2Page() {
           </div>
           <div className="w-full bg-[#3A4D23] rounded-full h-3 mb-2">
             <div 
-              className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] h-3 rounded-full transition-all duration-500"
+              className={`h-3 rounded-full transition-all duration-500 ${
+                isWeekCompleted 
+                  ? 'bg-gradient-to-r from-green-500 to-green-600' 
+                  : 'bg-gradient-to-r from-[#8BAE5A] to-[#FFD700]'
+              }`}
               style={{ width: `${progressPercentage}%` }}
             ></div>
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-[#8BAE5A]">Week 2 van 24</span>
-            <span className="text-white">Voltooi alle taken om Week 3 te unlocken</span>
+            <span className="text-white">
+              {isWeekCompleted ? 'Week 3 is ontgrendeld!' : 'Voltooi alle taken om Week 3 te unlocken'}
+            </span>
           </div>
         </div>
 

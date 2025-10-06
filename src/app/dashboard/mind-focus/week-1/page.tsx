@@ -79,6 +79,44 @@ export default function Week1Page() {
   const [weeklyGoal, setWeeklyGoal] = useState(15); // Minimaal 15 van 21 taken
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [isUpdatingProgress, setIsUpdatingProgress] = useState(false);
+  const [isWeekCompleted, setIsWeekCompleted] = useState(false);
+  const [isLoadingStatus, setIsLoadingStatus] = useState(true);
+
+  // Check if Week 1 is already completed
+  useEffect(() => {
+    const checkWeekStatus = async () => {
+      if (!user) return;
+      
+      try {
+        const response = await fetch(`/api/mind-focus/user-progress?userId=${user.id}`);
+        const data = await response.json();
+        
+        if (data.success && data.progress) {
+          const { completed_weeks } = data.progress;
+          const week1Completed = completed_weeks && completed_weeks.includes(1);
+          
+          setIsWeekCompleted(week1Completed);
+          
+          // If week is completed, mark all tasks as completed
+          if (week1Completed) {
+            setDailyTasks(prev => prev.map(task => ({ ...task, completed: true })));
+            setWeekProgress(prev => ({ 
+              ...prev, 
+              completedTasks: 21,
+              streak: 7 
+            }));
+            setCurrentStreak(7);
+          }
+        }
+      } catch (error) {
+        console.error('Error checking week status:', error);
+      } finally {
+        setIsLoadingStatus(false);
+      }
+    };
+
+    checkWeekStatus();
+  }, [user]);
 
   const tabs = [
     { id: 'overview', label: 'Overzicht', icon: <ChartBarIcon className="w-5 h-5" /> },
@@ -87,6 +125,9 @@ export default function Week1Page() {
   ];
 
   const toggleTask = (taskId: string) => {
+    // Don't allow toggling if week is already completed
+    if (isWeekCompleted) return;
+    
     setDailyTasks(prev => {
       const updatedTasks = prev.map(task => 
         task.id === taskId ? { ...task, completed: !task.completed } : task
@@ -168,6 +209,17 @@ export default function Week1Page() {
     }
   };
 
+  if (isLoadingStatus) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#0A0F0A] to-[#1A2A1A] flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-2 border-[#8BAE5A] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-[#8BAE5A]">Week status laden...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0A0F0A] to-[#1A2A1A]">
       <div className="container mx-auto px-4 py-8">
@@ -180,17 +232,37 @@ export default function Week1Page() {
             <ArrowLeftIcon className="w-6 h-6 text-white" />
           </button>
           <div>
-            <h1 className="text-3xl font-bold text-white">Week 1 - Focus Training</h1>
-            <p className="text-[#8BAE5A] mt-1">Je eerste week van het Mind & Focus traject</p>
+            <h1 className="text-3xl font-bold text-white">
+              Week 1 - Focus Training
+              {isWeekCompleted && (
+                <span className="ml-3 px-3 py-1 bg-green-500 text-white text-sm rounded-full">
+                  ✅ Voltooid
+                </span>
+              )}
+            </h1>
+            <p className="text-[#8BAE5A] mt-1">
+              {isWeekCompleted ? 'Je hebt deze week succesvol voltooid!' : 'Je eerste week van het Mind & Focus traject'}
+            </p>
           </div>
         </div>
 
         {/* Progress Banner */}
-        <div className="bg-gradient-to-r from-[#8BAE5A]/20 to-[#FFD700]/20 rounded-xl p-6 mb-6 border border-[#8BAE5A]/30">
+        <div className={`rounded-xl p-6 mb-6 border ${
+          isWeekCompleted 
+            ? 'bg-gradient-to-r from-green-500/20 to-green-600/20 border-green-500/30' 
+            : 'bg-gradient-to-r from-[#8BAE5A]/20 to-[#FFD700]/20 border-[#8BAE5A]/30'
+        }`}>
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-xl font-bold text-white">Vandaag's Voortgang</h2>
-              <p className="text-[#8BAE5A] text-sm">Voltooi je dagelijkse taken om je streak te behouden</p>
+              <h2 className="text-xl font-bold text-white">
+                {isWeekCompleted ? 'Week 1 Voltooid!' : "Vandaag's Voortgang"}
+              </h2>
+              <p className="text-[#8BAE5A] text-sm">
+                {isWeekCompleted 
+                  ? 'Alle taken van deze week zijn succesvol voltooid' 
+                  : 'Voltooi je dagelijkse taken om je streak te behouden'
+                }
+              </p>
             </div>
             <div className="text-right">
               <div className="text-2xl font-bold text-white">{completedToday}/{totalToday}</div>
@@ -199,13 +271,21 @@ export default function Week1Page() {
           </div>
           <div className="w-full bg-[#3A4D23] rounded-full h-3 mb-2">
             <div 
-              className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] h-3 rounded-full transition-all duration-500"
+              className={`h-3 rounded-full transition-all duration-500 ${
+                isWeekCompleted 
+                  ? 'bg-gradient-to-r from-green-500 to-green-600' 
+                  : 'bg-gradient-to-r from-[#8BAE5A] to-[#FFD700]'
+              }`}
               style={{ width: `${progressPercentage}%` }}
             ></div>
           </div>
           <div className="flex justify-between text-sm">
-            <span className="text-[#8BAE5A]">Streak: {currentStreak} dagen</span>
-            <span className="text-white">Doel: {weeklyGoal}/21 taken deze week</span>
+            <span className="text-[#8BAE5A]">
+              {isWeekCompleted ? 'Streak: 7 dagen (Voltooid)' : `Streak: ${currentStreak} dagen`}
+            </span>
+            <span className="text-white">
+              {isWeekCompleted ? '21/21 taken voltooid' : `Doel: ${weeklyGoal}/21 taken deze week`}
+            </span>
           </div>
         </div>
 

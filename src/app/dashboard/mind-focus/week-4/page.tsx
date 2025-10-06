@@ -60,6 +60,7 @@ export default function Week4Page() {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [isUpdatingProgress, setIsUpdatingProgress] = useState(false);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+  const [isWeekCompleted, setIsWeekCompleted] = useState(false);
 
   // Week 4 tasks - Integration & Habit Consolidation
   const [dailyTasks, setDailyTasks] = useState<DailyTask[]>([
@@ -110,18 +111,37 @@ export default function Week4Page() {
     }
   ]);
 
-  // Load user profile for personalization
+  // Load user profile for personalization and check week status
   useEffect(() => {
     const loadUserProfile = async () => {
       if (!user) return;
       
       try {
-        const response = await fetch(`/api/mind-focus/intake?userId=${user.id}`);
-        const data = await response.json();
+        // Load profile and progress data
+        const [profileResponse, progressResponse] = await Promise.all([
+          fetch(`/api/mind-focus/intake?userId=${user.id}`),
+          fetch(`/api/mind-focus/user-progress?userId=${user.id}`)
+        ]);
         
-        if (data.success && data.profile) {
-          setUserProfile(data.profile);
-          personalizeTasks(data.profile);
+        const [profileData, progressData] = await Promise.all([
+          profileResponse.json(),
+          progressResponse.json()
+        ]);
+        
+        if (profileData.success && profileData.profile) {
+          setUserProfile(profileData.profile);
+          personalizeTasks(profileData.profile);
+        }
+        
+        if (progressData.success && progressData.progress) {
+          const { completed_weeks } = progressData.progress;
+          const week4Completed = completed_weeks && completed_weeks.includes(4);
+          setIsWeekCompleted(week4Completed);
+          
+          // If week is completed, mark all tasks as completed
+          if (week4Completed) {
+            setDailyTasks(prev => prev.map(task => ({ ...task, completed: true })));
+          }
         }
       } catch (error) {
         console.error('Error loading user profile:', error);
@@ -177,6 +197,9 @@ export default function Week4Page() {
   ];
 
   const toggleTask = (taskId: string) => {
+    // Don't allow toggling if week is already completed
+    if (isWeekCompleted) return;
+    
     setDailyTasks(prev => {
       const updatedTasks = prev.map(task => 
         task.id === taskId ? { ...task, completed: !task.completed } : task
@@ -290,8 +313,17 @@ export default function Week4Page() {
             <ArrowLeftIcon className="w-6 h-6 text-white" />
           </button>
           <div>
-            <h1 className="text-3xl font-bold text-white">Week 4 - Integratie & Gewoonten</h1>
-            <p className="text-[#8BAE5A] mt-1">Consolidatie van alle opgebouwde Mind & Focus gewoonten</p>
+            <h1 className="text-3xl font-bold text-white">
+              Week 4 - Integratie & Gewoonten
+              {isWeekCompleted && (
+                <span className="ml-3 px-3 py-1 bg-green-500 text-white text-sm rounded-full">
+                  ✅ Voltooid
+                </span>
+              )}
+            </h1>
+            <p className="text-[#8BAE5A] mt-1">
+              {isWeekCompleted ? 'Je hebt deze week succesvol voltooid!' : 'Consolidatie van alle opgebouwde Mind & Focus gewoonten'}
+            </p>
           </div>
         </div>
 
