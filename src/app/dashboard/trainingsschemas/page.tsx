@@ -3167,6 +3167,7 @@ function TrainingschemasContent() {
       />
 
       {/* Upgrade Modal */}
+      {console.log('🔧 DEBUG: Rendering UpgradeModal with showUpgradeModal:', showUpgradeModal)}
       <UpgradeModal 
         isOpen={showUpgradeModal}
         onClose={() => setShowUpgradeModal(false)}

@@ -23,7 +23,7 @@ export default function UpgradeModal({ isOpen, onClose, type }: UpgradeModalProp
 
   console.log('🔧 DEBUG: Modal is open, rendering modal');
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.8)' }}>
       {/* Backdrop */}
       <div
         className="fixed inset-0 bg-black bg-opacity-75 z-[9998]"
@@ -31,7 +31,7 @@ export default function UpgradeModal({ isOpen, onClose, type }: UpgradeModalProp
       />
       
       {/* Modal */}
-      <div className="relative z-[9999] bg-red-500 rounded-2xl shadow-2xl border border-[#3A4D23]/40 max-w-md w-full mx-4">
+      <div className="relative z-[9999] bg-red-500 rounded-2xl shadow-2xl border border-[#3A4D23]/40 max-w-md w-full mx-4" style={{ backgroundColor: 'red', minHeight: '200px' }}>
         <div className="p-6">
           <h2 className="text-white text-xl font-bold mb-4">TEST MODAL - {title}</h2>
           <p className="text-white mb-4">Dit is een test modal om te zien of het werkt.</p>
