@@ -142,32 +142,38 @@ export default function DebtSnowball() {
       <div className="font-bold text-base sm:text-lg mb-1 sm:mb-2 leading-tight">
         🏔️ Schulden-Sneeuwbal Calculator
       </div>
-      <div className="p-3 sm:p-4 max-w-full box-border">
+      <div className="p-3 sm:p-4 w-full max-w-full box-border overflow-hidden">
         {/* Strategy Selection */}
         <div className="bg-[#181F17] rounded-xl p-3 sm:p-4">
           <h3 className="text-[#8BAE5A] font-semibold mb-3 text-sm sm:text-base">Kies je Strategie</h3>
           
-          {/* Completely new responsive button implementation */}
-          <div className="flex flex-col sm:flex-row gap-3">
+          {/* iOS Safari compatible button implementation */}
+          <div className="space-y-3 w-full max-w-full overflow-hidden responsive-container">
             {/* Snowball Method */}
             <button
               onClick={() => setStrategy('snowball')}
               className={`
-                relative w-full sm:flex-1 p-4 rounded-xl transition-all duration-300 
-                border-2 text-left overflow-hidden group
+                relative w-full p-4 rounded-xl transition-all duration-300 
+                border-2 text-left group block responsive-button ios-button-fix
                 ${strategy === 'snowball'
                   ? 'border-[#8BAE5A] bg-gradient-to-br from-[#8BAE5A]/20 to-[#8BAE5A]/5 shadow-lg shadow-[#8BAE5A]/20'
                   : 'border-[#3A4D23] bg-[#232D1A] hover:border-[#8BAE5A]/60 hover:bg-[#2A3A1A] hover:shadow-md'
                 }
               `}
+              style={{ 
+                minHeight: '80px',
+                boxSizing: 'border-box',
+                width: '100%',
+                maxWidth: '100%'
+              }}
             >
-              <div className="relative z-10">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-bold text-white leading-tight">
+              <div className="relative z-10 flex flex-col h-full">
+                <div className="flex items-center justify-between mb-2 flex-shrink-0">
+                  <span className="text-sm font-bold text-white leading-tight flex-1 pr-2">
                     Sneeuwbal Methode
                   </span>
                   <div className={`
-                    w-4 h-4 rounded-full border-2 transition-all
+                    w-4 h-4 rounded-full border-2 transition-all flex-shrink-0
                     ${strategy === 'snowball' 
                       ? 'bg-[#8BAE5A] border-[#8BAE5A]' 
                       : 'border-[#3A4D23] group-hover:border-[#8BAE5A]'
@@ -178,7 +184,7 @@ export default function DebtSnowball() {
                     )}
                   </div>
                 </div>
-                <p className="text-xs text-[#A3AED6] leading-relaxed">
+                <p className="text-xs text-[#A3AED6] leading-relaxed flex-1 button-text-fix">
                   Los eerst de kleinste schuld af voor psychologische winst
                 </p>
               </div>
@@ -195,21 +201,27 @@ export default function DebtSnowball() {
             <button
               onClick={() => setStrategy('avalanche')}
               className={`
-                relative w-full sm:flex-1 p-4 rounded-xl transition-all duration-300 
-                border-2 text-left overflow-hidden group
+                relative w-full p-4 rounded-xl transition-all duration-300 
+                border-2 text-left group block responsive-button ios-button-fix
                 ${strategy === 'avalanche'
                   ? 'border-[#8BAE5A] bg-gradient-to-br from-[#8BAE5A]/20 to-[#8BAE5A]/5 shadow-lg shadow-[#8BAE5A]/20'
                   : 'border-[#3A4D23] bg-[#232D1A] hover:border-[#8BAE5A]/60 hover:bg-[#2A3A1A] hover:shadow-md'
                 }
               `}
+              style={{ 
+                minHeight: '80px',
+                boxSizing: 'border-box',
+                width: '100%',
+                maxWidth: '100%'
+              }}
             >
-              <div className="relative z-10">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-bold text-white leading-tight">
+              <div className="relative z-10 flex flex-col h-full">
+                <div className="flex items-center justify-between mb-2 flex-shrink-0">
+                  <span className="text-sm font-bold text-white leading-tight flex-1 pr-2">
                     Lawaai Methode
                   </span>
                   <div className={`
-                    w-4 h-4 rounded-full border-2 transition-all
+                    w-4 h-4 rounded-full border-2 transition-all flex-shrink-0
                     ${strategy === 'avalanche' 
                       ? 'bg-[#8BAE5A] border-[#8BAE5A]' 
                       : 'border-[#3A4D23] group-hover:border-[#8BAE5A]'
@@ -220,7 +232,7 @@ export default function DebtSnowball() {
                     )}
                   </div>
                 </div>
-                <p className="text-xs text-[#A3AED6] leading-relaxed">
+                <p className="text-xs text-[#A3AED6] leading-relaxed flex-1 button-text-fix">
                   Los eerst de schuld met hoogste rente af voor financiële winst
                 </p>
               </div>

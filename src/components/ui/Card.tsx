@@ -34,13 +34,18 @@ export default function Card({
   return (
     <div
       className={clsx(
-        'rounded-xl sm:rounded-2xl shadow-xl',
+        'rounded-xl sm:rounded-2xl shadow-xl w-full max-w-full box-border overflow-hidden',
         cardVariants[variant],
         cardPadding[padding],
         hover && 'hover:shadow-2xl hover:border-[#8BAE5A]/60 transition-all duration-200',
         interactive && 'cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 touch-manipulation',
         className
       )}
+      style={{ 
+        width: '100%',
+        maxWidth: '100%',
+        boxSizing: 'border-box'
+      }}
     >
       {children}
     </div>
