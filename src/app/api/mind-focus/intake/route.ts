@@ -6,29 +6,44 @@ export async function POST(request: NextRequest) {
   try {
     const { userId, stressAssessment, lifestyleInfo, personalGoals } = await request.json();
 
+    console.log('🧘 Mind Focus Intake API - POST request received');
+    console.log('User ID:', userId);
+    console.log('Stress Assessment:', stressAssessment);
+    console.log('Lifestyle Info:', lifestyleInfo);
+    console.log('Personal Goals:', personalGoals);
+
+    if (!userId) {
+      console.error('❌ No userId provided');
+      return NextResponse.json({ error: 'User ID required' }, { status: 400 });
+    }
+
+    const profileData = {
+      user_id: userId,
+      stress_assessment: stressAssessment,
+      lifestyle_info: lifestyleInfo,
+      personal_goals: personalGoals,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    console.log('📤 Saving profile data:', profileData);
+
     const { data, error } = await supabaseAdmin
       .from('user_mind_profiles')
-      .upsert(
-        {
-          user_id: userId,
-          stress_assessment: stressAssessment,
-          lifestyle_info: lifestyleInfo,
-          personal_goals: personalGoals,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: 'user_id' }
-      )
+      .upsert(profileData, { onConflict: 'user_id' })
       .select()
       .single();
 
     if (error) {
-      return NextResponse.json({ error: 'Failed to save profile' }, { status: 500 });
+      console.error('❌ Database error:', error);
+      return NextResponse.json({ error: 'Failed to save profile', details: error.message }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true, profileId: data.id });
+    console.log('✅ Profile saved successfully:', data);
+    return NextResponse.json({ success: true, profileId: data.id, profile: data });
   } catch (error) {
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error('❌ API error:', error);
+    return NextResponse.json({ error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
   }
 }
 

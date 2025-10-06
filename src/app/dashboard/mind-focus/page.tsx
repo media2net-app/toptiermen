@@ -163,25 +163,42 @@ export default function MindFocusPage() {
 
   // Save intake data function
   const saveIntakeData = async () => {
-    if (!user) return;
+    console.log('🔄 Starting saveIntakeData...');
+    console.log('User:', user?.id);
+    console.log('Stress Assessment:', stressAssessment);
+    console.log('Lifestyle Info:', lifestyleInfo);
+    console.log('Personal Goals:', personalGoals);
+    
+    if (!user) {
+      console.error('❌ No user found');
+      return;
+    }
     
     setIsSaving(true);
     
     try {
+      const requestData = {
+        userId: user.id,
+        stressAssessment,
+        lifestyleInfo,
+        personalGoals
+      };
+      
+      console.log('📤 Sending request data:', requestData);
+      
       const response = await fetch('/api/mind-focus/intake', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          userId: user.id,
-          stressAssessment,
-          lifestyleInfo,
-          personalGoals
-        }),
+        body: JSON.stringify(requestData),
       });
       
+      console.log('📥 Response status:', response.status);
+      console.log('📥 Response ok:', response.ok);
+      
       const data = await response.json();
+      console.log('📥 Response data:', data);
       
       if (data.success) {
         console.log('✅ Intake data saved successfully');
@@ -191,9 +208,11 @@ export default function MindFocusPage() {
         router.replace('/dashboard/mind-focus');
       } else {
         console.error('❌ Failed to save intake data:', data.error);
+        alert('Er is een fout opgetreden bij het opslaan. Probeer het opnieuw.');
       }
     } catch (error) {
-      console.error('Error saving intake data:', error);
+      console.error('❌ Error saving intake data:', error);
+      alert('Er is een fout opgetreden bij het opslaan. Probeer het opnieuw.');
     } finally {
       setIsSaving(false);
     }
@@ -263,7 +282,7 @@ export default function MindFocusPage() {
 
         {/* Quick actions row: 4 buttons */}
         <div className="bg-[#1A2A1A]/80 border border-[#2A3A1A] rounded-xl p-4 mb-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             {meditationTypes.map((type) => (
               <button
                 key={type.id}
