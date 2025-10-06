@@ -11,7 +11,7 @@ import {
   ChartBarIcon,
   FireIcon,
   HeartIcon,
-  BrainIcon
+  CpuChipIcon
 } from '@heroicons/react/24/outline';
 
 interface DailyTask {
@@ -93,7 +93,7 @@ export default function Week1Page() {
   const getTaskIcon = (type: string) => {
     switch (type) {
       case 'focus':
-        return <BrainIcon className="w-5 h-5 text-blue-500" />;
+        return <CpuChipIcon className="w-5 h-5 text-blue-500" />;
       case 'breathing':
         return <HeartIcon className="w-5 h-5 text-green-500" />;
       case 'assessment':
@@ -188,7 +188,7 @@ export default function Week1Page() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="bg-[#1A2A1A] rounded-lg p-4 border border-[#3A4D23]/40">
                   <div className="flex items-center gap-3 mb-2">
-                    <BrainIcon className="w-6 h-6 text-blue-500" />
+                    <CpuChipIcon className="w-6 h-6 text-blue-500" />
                     <h4 className="font-semibold text-white">Focus Training</h4>
                   </div>
                   <p className="text-[#8BAE5A] text-sm">3x per week basis concentratie training</p>
