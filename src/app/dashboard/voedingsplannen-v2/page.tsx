@@ -142,6 +142,11 @@ export default function VoedingsplannenV2Page() {
   const [showPlanUnavailableModal, setShowPlanUnavailableModal] = useState(false);
   // Upgrade modal state
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  
+  // Debug: Log modal state changes
+  useEffect(() => {
+    console.log('🔧 DEBUG: showUpgradeModal state changed:', showUpgradeModal);
+  }, [showUpgradeModal]);
   const nutritionNextBtnId = 'onb-nutrition-next-btn';
   const nextModalRef = useRef<HTMLDivElement | null>(null);
   // Ingredient lookup from DB (name -> macros/unit)
@@ -1828,6 +1833,7 @@ export default function VoedingsplannenV2Page() {
               <div className="flex flex-col sm:flex-row gap-4">
                 <button 
                   onClick={() => {
+                    console.log('🔧 DEBUG: Upgrade button clicked, setting modal to true');
                     setShowUpgradeModal(true);
                   }}
                   className="flex-1 bg-[#8BAE5A] text-[#181F17] px-6 py-3 rounded-lg font-semibold hover:bg-[#B6C948] transition-colors"
@@ -1836,6 +1842,7 @@ export default function VoedingsplannenV2Page() {
                 </button>
                 <button 
                   onClick={() => {
+                    console.log('🔧 DEBUG: Upgrade button clicked, setting modal to true');
                     setShowUpgradeModal(true);
                   }}
                   className="flex-1 bg-[#B6C948] text-[#181F17] px-6 py-3 rounded-lg font-semibold hover:bg-[#8BAE5A] transition-colors"

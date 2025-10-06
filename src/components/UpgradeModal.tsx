@@ -10,6 +10,8 @@ interface UpgradeModalProps {
 }
 
 export default function UpgradeModal({ isOpen, onClose, type }: UpgradeModalProps) {
+  console.log('🔧 DEBUG: UpgradeModal render', { isOpen, type });
+  
   const isNutrition = type === 'nutrition';
   const title = isNutrition ? 'Voedingsplannen' : 'Trainingsschemas';
   const icon = isNutrition ? RocketLaunchIcon : AcademicCapIcon;
