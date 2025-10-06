@@ -494,7 +494,10 @@ export default function MindFocusPage() {
                       <span className="text-white">Stress assessment bijhouden</span>
                     </div>
                   </div>
-                  <button className="w-full mt-3 px-3 py-2 bg-[#8BAE5A] text-[#1A2A1A] rounded-lg text-sm font-medium hover:bg-[#A6C97B] transition-colors">
+                  <button 
+                    onClick={() => router.push('/dashboard/mind-focus/week-1')}
+                    className="w-full mt-3 px-3 py-2 bg-[#8BAE5A] text-[#1A2A1A] rounded-lg text-sm font-medium hover:bg-[#A6C97B] transition-colors"
+                  >
                     Start Week 1
                   </button>
                 </div>
