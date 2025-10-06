@@ -11,7 +11,13 @@ export async function middleware(req: NextRequest) {
   // Publicly accessible routes (quick fix): skip middleware entirely
   // - Onboarding pages should always be accessible
   // - Ebook static pages should always be accessible
-  if (path.startsWith('/onboarding') || path.startsWith('/ebooksv2')) {
+  // - Onboarding API routes should be accessible for unauthenticated users
+  if (path.startsWith('/onboarding') || 
+      path.startsWith('/ebooksv2') || 
+      path.startsWith('/api/onboarding-v2') ||
+      path.startsWith('/api/mind-focus/intake-status') ||
+      path.startsWith('/api/activity-log') ||
+      path.startsWith('/api/nutrition-plan-active')) {
     return res;
   }
   
