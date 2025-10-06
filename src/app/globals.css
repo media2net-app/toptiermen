@@ -2,16 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Global overflow fix to prevent horizontal scrolling on mobile */
-html, body {
-  width: 100%;
-  max-width: 100%;
+/* Scoped utility to prevent horizontal scrolling when applied */
+.no-horizontal-scroll {
   overflow-x: hidden;
-}
-
-/* Ensure all elements respect box sizing and don't overflow unexpectedly */
-*, *::before, *::after {
-  box-sizing: border-box;
 }
 
 /* SwipeIndicator styles */
