@@ -77,6 +77,8 @@ export default function Week1Page() {
 
   const [currentStreak, setCurrentStreak] = useState(0);
   const [weeklyGoal, setWeeklyGoal] = useState(15); // Minimaal 15 van 21 taken
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [isUpdatingProgress, setIsUpdatingProgress] = useState(false);
 
   const tabs = [
     { id: 'overview', label: 'Overzicht', icon: <ChartBarIcon className="w-5 h-5" /> },
@@ -85,9 +87,19 @@ export default function Week1Page() {
   ];
 
   const toggleTask = (taskId: string) => {
-    setDailyTasks(prev => prev.map(task => 
-      task.id === taskId ? { ...task, completed: !task.completed } : task
-    ));
+    setDailyTasks(prev => {
+      const updatedTasks = prev.map(task => 
+        task.id === taskId ? { ...task, completed: !task.completed } : task
+      );
+      
+      // Check if all tasks are completed
+      const allCompleted = updatedTasks.every(task => task.completed);
+      if (allCompleted && !showSuccessModal) {
+        setShowSuccessModal(true);
+      }
+      
+      return updatedTasks;
+    });
   };
 
   const getTaskIcon = (type: string) => {
@@ -119,6 +131,42 @@ export default function Week1Page() {
   const completedToday = dailyTasks.filter(task => task.completed).length;
   const totalToday = dailyTasks.length;
   const progressPercentage = (completedToday / totalToday) * 100;
+
+  const handleCompleteWeek = async () => {
+    if (!user) return;
+    
+    setIsUpdatingProgress(true);
+    
+    try {
+      const response = await fetch('/api/mind-focus/user-progress', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user.id,
+          completedWeek: 1,
+          currentActiveWeek: 2
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        console.log('✅ Week 1 completed successfully:', result.data);
+        // Navigate back to dashboard
+        router.push('/dashboard/mind-focus');
+      } else {
+        console.error('❌ Failed to complete week 1:', result.error);
+        alert('Er is een fout opgetreden bij het voltooien van Week 1. Probeer het opnieuw.');
+      }
+    } catch (error) {
+      console.error('❌ Error completing week 1:', error);
+      alert('Er is een fout opgetreden. Probeer het opnieuw.');
+    } finally {
+      setIsUpdatingProgress(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0A0F0A] to-[#1A2A1A]">
@@ -362,6 +410,48 @@ export default function Week1Page() {
                   <ChartBarIcon className="w-12 h-12 text-[#8BAE5A] mx-auto mb-2" />
                   <p className="text-[#8BAE5A]">Voortgang grafiek komt binnenkort</p>
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Success Modal */}
+        {showSuccessModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-[#1A2A1A] rounded-xl border border-[#3A4D23]/40 max-w-md w-full p-6">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-green-500 text-3xl">🎉</span>
+                </div>
+                
+                <h3 className="text-2xl font-bold text-white mb-2">Gefeliciteerd!</h3>
+                <p className="text-[#8BAE5A] mb-4">
+                  Je hebt alle taken van Week 1 voltooid!
+                </p>
+                
+                <div className="bg-[#8BAE5A]/10 border border-[#8BAE5A]/20 rounded-lg p-4 mb-6">
+                  <h4 className="font-semibold text-[#8BAE5A] mb-2">Wat gebeurt er nu?</h4>
+                  <ul className="text-sm text-[#8BAE5A] space-y-1 text-left">
+                    <li>• Week 1 wordt gemarkeerd als voltooid</li>
+                    <li>• Week 2 wordt automatisch ontgrendeld</li>
+                    <li>• Je kunt nu verder met de volgende fase</li>
+                  </ul>
+                </div>
+                
+                <button
+                  onClick={handleCompleteWeek}
+                  disabled={isUpdatingProgress}
+                  className="w-full px-6 py-3 bg-[#8BAE5A] hover:bg-[#A6C97B] disabled:bg-[#3A4D23] disabled:text-[#8BAE5A] text-[#1A2A1A] rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
+                >
+                  {isUpdatingProgress ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-[#1A2A1A] border-t-transparent rounded-full animate-spin"></div>
+                      Bezig met opslaan...
+                    </>
+                  ) : (
+                    'Terug naar Dashboard'
+                  )}
+                </button>
               </div>
             </div>
           </div>
