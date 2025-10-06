@@ -684,52 +684,132 @@ export default function MindFocusPage() {
                 </div>
 
                 {/* Week 3 */}
-                <div className="bg-[#232D1A] rounded-lg p-4 border border-[#3A4D23]/40 opacity-60">
+                <div className={`rounded-lg p-4 border ${
+                  completedWeeks.includes(3) ? 'bg-[#232D1A] border-green-500/30' :
+                  currentActiveWeek === 3 ? 'bg-[#232D1A] border-[#8BAE5A]/30' :
+                  'bg-[#232D1A] border-[#3A4D23]/40 opacity-60'
+                }`}>
                   <div className="flex items-center justify-between mb-3">
                     <h4 className="font-semibold text-white">Week 3</h4>
-                    <span className="px-2 py-1 bg-[#3A4D23] text-[#8BAE5A] text-xs rounded-full font-medium">Geblokkeerd</span>
+                    <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                      completedWeeks.includes(3) ? 'text-green-400 bg-green-500/20' :
+                      currentActiveWeek === 3 ? 'text-[#8BAE5A] bg-[#8BAE5A]/20' :
+                      'text-[#8BAE5A] bg-[#3A4D23]'
+                    }`}>
+                      {completedWeeks.includes(3) ? 'Voltooid' :
+                       currentActiveWeek === 3 ? 'Actief' : 'Geblokkeerd'}
+                    </span>
                   </div>
                   <div className="space-y-2 text-sm">
                     <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 border-2 border-[#3A4D23] rounded-full"></div>
-                      <span className="text-[#8BAE5A]">Sleep preparation - avondroutine</span>
+                      <div className={`w-4 h-4 border-2 rounded-full ${
+                        completedWeeks.includes(3) ? 'bg-green-500 border-green-500' :
+                        currentActiveWeek === 3 ? 'bg-[#8BAE5A] border-[#8BAE5A]' : 'border-[#3A4D23]'
+                      }`}></div>
+                      <span className={`${
+                        completedWeeks.includes(3) ? 'text-green-400' : 
+                        currentActiveWeek === 3 ? 'text-white' : 'text-[#8BAE5A]'
+                      }`}>Sleep preparation - avondroutine</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 border-2 border-[#3A4D23] rounded-full"></div>
-                      <span className="text-[#8BAE5A]">Recovery sessies - 2x per week</span>
+                      <div className={`w-4 h-4 border-2 rounded-full ${
+                        completedWeeks.includes(3) ? 'bg-green-500 border-green-500' :
+                        currentActiveWeek === 3 ? 'bg-[#8BAE5A] border-[#8BAE5A]' : 'border-[#3A4D23]'
+                      }`}></div>
+                      <span className={`${
+                        completedWeeks.includes(3) ? 'text-green-400' : 
+                        currentActiveWeek === 3 ? 'text-white' : 'text-[#8BAE5A]'
+                      }`}>Recovery sessies - 2x per week</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 border-2 border-[#3A4D23] rounded-full"></div>
-                      <span className="text-[#8BAE5A]">Stress management technieken</span>
+                      <div className={`w-4 h-4 border-2 rounded-full ${
+                        completedWeeks.includes(3) ? 'bg-green-500 border-green-500' :
+                        currentActiveWeek === 3 ? 'bg-[#8BAE5A] border-[#8BAE5A]' : 'border-[#3A4D23]'
+                      }`}></div>
+                      <span className={`${
+                        completedWeeks.includes(3) ? 'text-green-400' : 
+                        currentActiveWeek === 3 ? 'text-white' : 'text-[#8BAE5A]'
+                      }`}>Stress management technieken</span>
                     </div>
                   </div>
-                  <button disabled className="w-full mt-3 px-3 py-2 bg-[#3A4D23] text-[#8BAE5A] rounded-lg text-sm font-medium cursor-not-allowed">
-                    Voltooi Week 2 eerst
+                  <button 
+                    onClick={() => router.push('/dashboard/mind-focus/week-3')}
+                    disabled={!completedWeeks.includes(3) && currentActiveWeek !== 3}
+                    className={`w-full mt-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      completedWeeks.includes(3)
+                        ? 'bg-green-500 text-white hover:bg-green-600'
+                        : currentActiveWeek === 3
+                          ? 'bg-[#8BAE5A] text-[#1A2A1A] hover:bg-[#A6C97B]'
+                          : 'bg-[#3A4D23] text-[#8BAE5A] cursor-not-allowed'
+                    }`}
+                  >
+                    {completedWeeks.includes(3) ? 'Bekijk Week 3' : 
+                     currentActiveWeek === 3 ? 'Start Week 3' : 'Voltooi Week 2 eerst'}
                   </button>
                 </div>
 
                 {/* Week 4 */}
-                <div className="bg-[#232D1A] rounded-lg p-4 border border-[#3A4D23]/40 opacity-60">
+                <div className={`rounded-lg p-4 border ${
+                  completedWeeks.includes(4) ? 'bg-[#232D1A] border-green-500/30' :
+                  currentActiveWeek === 4 ? 'bg-[#232D1A] border-[#8BAE5A]/30' :
+                  'bg-[#232D1A] border-[#3A4D23]/40 opacity-60'
+                }`}>
                   <div className="flex items-center justify-between mb-3">
                     <h4 className="font-semibold text-white">Week 4</h4>
-                    <span className="px-2 py-1 bg-[#3A4D23] text-[#8BAE5A] text-xs rounded-full font-medium">Geblokkeerd</span>
+                    <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                      completedWeeks.includes(4) ? 'text-green-400 bg-green-500/20' :
+                      currentActiveWeek === 4 ? 'text-[#8BAE5A] bg-[#8BAE5A]/20' :
+                      'text-[#8BAE5A] bg-[#3A4D23]'
+                    }`}>
+                      {completedWeeks.includes(4) ? 'Voltooid' :
+                       currentActiveWeek === 4 ? 'Actief' : 'Geblokkeerd'}
+                    </span>
                   </div>
                   <div className="space-y-2 text-sm">
                     <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 border-2 border-[#3A4D23] rounded-full"></div>
-                      <span className="text-[#8BAE5A]">Integratie van alle technieken</span>
+                      <div className={`w-4 h-4 border-2 rounded-full ${
+                        completedWeeks.includes(4) ? 'bg-green-500 border-green-500' :
+                        currentActiveWeek === 4 ? 'bg-[#8BAE5A] border-[#8BAE5A]' : 'border-[#3A4D23]'
+                      }`}></div>
+                      <span className={`${
+                        completedWeeks.includes(4) ? 'text-green-400' : 
+                        currentActiveWeek === 4 ? 'text-white' : 'text-[#8BAE5A]'
+                      }`}>Integratie van alle technieken</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 border-2 border-[#3A4D23] rounded-full"></div>
-                      <span className="text-[#8BAE5A]">Week 1-3 evaluatie</span>
+                      <div className={`w-4 h-4 border-2 rounded-full ${
+                        completedWeeks.includes(4) ? 'bg-green-500 border-green-500' :
+                        currentActiveWeek === 4 ? 'bg-[#8BAE5A] border-[#8BAE5A]' : 'border-[#3A4D23]'
+                      }`}></div>
+                      <span className={`${
+                        completedWeeks.includes(4) ? 'text-green-400' : 
+                        currentActiveWeek === 4 ? 'text-white' : 'text-[#8BAE5A]'
+                      }`}>Week 1-3 evaluatie</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 border-2 border-[#3A4D23] rounded-full"></div>
-                      <span className="text-[#8BAE5A]">Plan aanpassingen</span>
+                      <div className={`w-4 h-4 border-2 rounded-full ${
+                        completedWeeks.includes(4) ? 'bg-green-500 border-green-500' :
+                        currentActiveWeek === 4 ? 'bg-[#8BAE5A] border-[#8BAE5A]' : 'border-[#3A4D23]'
+                      }`}></div>
+                      <span className={`${
+                        completedWeeks.includes(4) ? 'text-green-400' : 
+                        currentActiveWeek === 4 ? 'text-white' : 'text-[#8BAE5A]'
+                      }`}>Plan aanpassingen</span>
                     </div>
                   </div>
-                  <button disabled className="w-full mt-3 px-3 py-2 bg-[#3A4D23] text-[#8BAE5A] rounded-lg text-sm font-medium cursor-not-allowed">
-                    Voltooi Week 3 eerst
+                  <button 
+                    onClick={() => router.push('/dashboard/mind-focus/week-4')}
+                    disabled={!completedWeeks.includes(4) && currentActiveWeek !== 4}
+                    className={`w-full mt-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      completedWeeks.includes(4)
+                        ? 'bg-green-500 text-white hover:bg-green-600'
+                        : currentActiveWeek === 4
+                          ? 'bg-[#8BAE5A] text-[#1A2A1A] hover:bg-[#A6C97B]'
+                          : 'bg-[#3A4D23] text-[#8BAE5A] cursor-not-allowed'
+                    }`}
+                  >
+                    {completedWeeks.includes(4) ? 'Bekijk Week 4' : 
+                     currentActiveWeek === 4 ? 'Start Week 4' : 'Voltooi Week 3 eerst'}
                   </button>
                 </div>
 
@@ -771,16 +851,22 @@ export default function MindFocusPage() {
                 <div className="flex items-center gap-4">
                   <div className="flex-1">
                     <div className="flex justify-between text-sm mb-1">
-                      <span className="text-[#8BAE5A]">Week 1 van 24</span>
-                      <span className="text-white">4%</span>
+                      <span className="text-[#8BAE5A]">Week {currentActiveWeek} van 24</span>
+                      <span className="text-white">{Math.round((currentActiveWeek / 24) * 100)}%</span>
                     </div>
                     <div className="w-full bg-[#3A4D23] rounded-full h-2">
-                      <div className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] h-2 rounded-full" style={{ width: '4%' }}></div>
+                      <div className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] h-2 rounded-full" style={{ width: `${(currentActiveWeek / 24) * 100}%` }}></div>
                     </div>
                   </div>
                   <div className="text-right">
                     <div className="text-sm text-[#8BAE5A]">Volgende milestone</div>
-                    <div className="text-white font-medium">Week 4</div>
+                    <div className="text-white font-medium">
+                      {currentActiveWeek < 4 ? 'Week 4' : 
+                       currentActiveWeek < 8 ? 'Week 8' :
+                       currentActiveWeek < 12 ? 'Week 12' :
+                       currentActiveWeek < 16 ? 'Week 16' :
+                       currentActiveWeek < 20 ? 'Week 20' : 'Week 24'}
+                    </div>
                   </div>
                 </div>
               </div>
