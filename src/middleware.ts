@@ -17,7 +17,8 @@ export async function middleware(req: NextRequest) {
       path.startsWith('/api/onboarding-v2') ||
       path.startsWith('/api/mind-focus/intake-status') ||
       path.startsWith('/api/activity-log') ||
-      path.startsWith('/api/nutrition-plan-active')) {
+      path.startsWith('/api/nutrition-plan-active') ||
+      path.startsWith('/api/forum-posts')) {
     return res;
   }
   
@@ -40,7 +41,8 @@ export async function middleware(req: NextRequest) {
   if (path.startsWith('/api/onboarding-v2') ||
       path.startsWith('/api/mind-focus/intake-status') ||
       path.startsWith('/api/activity-log') ||
-      path.startsWith('/api/nutrition-plan-active')) {
+      path.startsWith('/api/nutrition-plan-active') ||
+      path.startsWith('/api/forum-posts')) {
     return res;
   }
   

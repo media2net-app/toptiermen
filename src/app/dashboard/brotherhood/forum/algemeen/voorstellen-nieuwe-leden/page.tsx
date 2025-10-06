@@ -102,6 +102,8 @@ const VoorstellenTopicPage = () => {
       if (topicsError && topicsError.code !== 'PGRST116') {
         console.error('Error fetching topic:', topicsError);
         setTopic(null);
+        setLoading(false);
+        return;
       }
 
       if (topics) {
@@ -127,6 +129,7 @@ const VoorstellenTopicPage = () => {
       console.error('Error in fetchTopicAndPosts:', error);
       // Ensure UI renders even on error
       setPosts([]);
+      setTopic(null);
     } finally {
       clearTimeout(timeout);
       setLoading(false);
