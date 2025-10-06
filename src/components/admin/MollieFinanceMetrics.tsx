@@ -49,7 +49,7 @@ interface MollieFinanceMetricsProps {
 // Payment method SVG icons
 const PaymentMethodIcons = {
   ideal: () => (
-    <svg width="32" height="32" viewBox="-4.064073 -4.064073 164.952366 143.597246" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg width="24" height="24" viewBox="-4.064073 -4.064073 164.952366 143.597246" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-6 h-6">
       <polygon
         points="112.39258,7.5576172 87.466797,5.4667969 3.7255859,4.2070312 3.7255859,133.06152 93.114258,133.06152 122.90137,124.96094 143.17773,107.38379 153.0957,79.736328 153.0957,47.793945 138.26367,22.129883"
         fill="#ffffff" />
@@ -65,7 +65,7 @@ const PaymentMethodIcons = {
     </svg>
   ),
   creditcard: () => (
-    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg width="24" height="24" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-6 h-6">
       <rect width="32" height="32" rx="4" fill="#1a1a1a"/>
       <rect x="4" y="8" width="24" height="16" rx="2" fill="#333"/>
       <rect x="6" y="12" width="20" height="8" rx="1" fill="#666"/>
@@ -75,7 +75,7 @@ const PaymentMethodIcons = {
     </svg>
   ),
   paypal: () => (
-    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg width="24" height="24" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-6 h-6">
       <rect width="32" height="32" rx="4" fill="#003087"/>
       <path d="M8 12h16v8H8z" fill="white"/>
       <path d="M10 14h12v4H10z" fill="#003087"/>
@@ -83,7 +83,7 @@ const PaymentMethodIcons = {
     </svg>
   ),
   sofort: () => (
-    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg width="24" height="24" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-6 h-6">
       <rect width="32" height="32" rx="4" fill="#FF6600"/>
       <path d="M8 12h16v8H8z" fill="white"/>
       <path d="M10 14h12v4H10z" fill="#FF6600"/>
@@ -91,7 +91,7 @@ const PaymentMethodIcons = {
     </svg>
   ),
   bancontact: () => (
-    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg width="24" height="24" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-6 h-6">
       <rect width="32" height="32" rx="4" fill="#FF6600"/>
       <path d="M8 12h16v8H8z" fill="white"/>
       <path d="M10 14h12v4H10z" fill="#FF6600"/>
@@ -99,7 +99,7 @@ const PaymentMethodIcons = {
     </svg>
   ),
   banktransfer: () => (
-    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg width="24" height="24" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-6 h-6">
       <rect width="32" height="32" rx="4" fill="#2E7D32"/>
       <path d="M8 12h16v8H8z" fill="white"/>
       <path d="M10 14h12v4H10z" fill="#2E7D32"/>
@@ -107,7 +107,7 @@ const PaymentMethodIcons = {
     </svg>
   ),
   default: () => (
-    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg width="24" height="24" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-6 h-6">
       <rect width="32" height="32" rx="4" fill="#666"/>
       <path d="M8 12h16v8H8z" fill="white"/>
       <path d="M10 14h12v4H10z" fill="#666"/>
