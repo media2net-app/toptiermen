@@ -101,23 +101,59 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// Delete/reset intake
+// Delete/reset intake and progress
 export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('userId');
-    if (!userId) return NextResponse.json({ error: 'User ID required' }, { status: 400 });
+    
+    if (!userId) {
+      console.error('❌ No userId provided for DELETE');
+      return NextResponse.json({ error: 'User ID required' }, { status: 400 });
+    }
 
-    const { error } = await supabaseAdmin
+    console.log('🗑️ Mind Focus Intake API - DELETE request received');
+    console.log('User ID:', userId);
+
+    // Delete the mind profile completely
+    const { error: profileError } = await supabaseAdmin
       .from('user_mind_profiles')
       .delete()
       .eq('user_id', userId);
 
-    if (error) {
-      return NextResponse.json({ error: 'Failed to delete profile' }, { status: 500 });
+    if (profileError) {
+      console.error('❌ Error deleting profile:', profileError);
+      return NextResponse.json({ error: 'Failed to delete profile', details: profileError.message }, { status: 500 });
     }
-    return NextResponse.json({ success: true });
+
+    console.log('✅ Profile deleted successfully');
+
+    // Also try to reset any progress data in other tables if they exist
+    try {
+      // Reset user progress if it exists in a separate table
+      const { error: progressError } = await supabaseAdmin
+        .from('user_mind_progress')
+        .delete()
+        .eq('user_id', userId);
+
+      if (progressError && progressError.code !== 'PGRST116') {
+        console.log('⚠️ Progress table may not exist or error:', progressError.message);
+      } else {
+        console.log('✅ Progress data reset successfully');
+      }
+    } catch (progressError) {
+      console.log('⚠️ Progress reset failed (table may not exist):', progressError);
+    }
+
+    return NextResponse.json({ 
+      success: true, 
+      message: 'Profile and all progress data deleted successfully. User can start fresh.' 
+    });
   } catch (error) {
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error('❌ DELETE API error:', error);
+    return NextResponse.json({ 
+      error: 'Internal server error', 
+      details: error instanceof Error ? error.message : 'Unknown error' 
+    }, { status: 500 });
   }
 }

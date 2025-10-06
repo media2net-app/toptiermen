@@ -133,23 +133,66 @@ export default function MindFocusPage() {
   // Typeform-style step index (0..N)
   const [tfStep, setTfStep] = useState(0);
 
-  // Reset intake/profile
+  // Reset intake/profile and progress
   const resetIntake = async () => {
     if (!user) return;
-    const ok = window.confirm('Weet je zeker dat je je Mind & Focus intake wilt resetten?');
-    if (!ok) return;
+    
     try {
+      console.log('🗑️ Starting complete reset process...');
+      
+      // Delete the profile and progress data
       const res = await fetch(`/api/mind-focus/intake?userId=${user.id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('Failed to reset');
-      // Reset local state
+      const data = await res.json();
+      
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to reset');
+      }
+      
+      console.log('✅ Profile deleted:', data.message);
+      
+      // Reset all local state to initial values
       setHasExistingProfile(false);
-      setStressAssessment({ workStress: 5, personalStress: 5, sleepQuality: 5, energyLevel: 5, focusProblems: false, irritability: false });
-      setLifestyleInfo({ workSchedule: '9-17', freeTime: [], familyObligations: [], sportSchedule: '3x per week', stressTriggers: [], mindFocusIntensity: 3 });
-      setPersonalGoals({ improveFocus: false, reduceStress: false, betterSleep: false, moreEnergy: false, workLifeBalance: false });
+      setCurrentActiveWeek(1);
+      setCompletedWeeks([]);
+      setStressAssessment({ 
+        workStress: 5, 
+        personalStress: 5, 
+        sleepQuality: 5, 
+        energyLevel: 5, 
+        focusProblems: false, 
+        irritability: false 
+      });
+      setLifestyleInfo({ 
+        workSchedule: '9-17', 
+        freeTime: [], 
+        familyObligations: [], 
+        sportSchedule: '3x per week', 
+        stressTriggers: [], 
+        mindFocusIntensity: 3 
+      });
+      setPersonalGoals({ 
+        improveFocus: false, 
+        reduceStress: false, 
+        betterSleep: false, 
+        moreEnergy: false, 
+        workLifeBalance: false 
+      });
+      
+      // Reset form state
+      setTfStep(0);
+      setIsSaving(false);
+      
+      // Go to intake form
       setCurrentView('intake');
+      
+      // Show success message
+      alert('Intake succesvol gereset! Je kunt nu een nieuw profiel invullen en bij Week 1 beginnen.');
+      
+      console.log('✅ Complete reset successful - user can start fresh');
+      
     } catch (e) {
-      console.error(e);
-      alert('Reset mislukt. Probeer opnieuw.');
+      console.error('❌ Reset failed:', e);
+      alert('Reset mislukt. Probeer opnieuw of neem contact op met support.');
     }
   };
 
