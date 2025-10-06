@@ -155,28 +155,50 @@ export default function Dashboard() {
   // Ref to prevent multiple redirects
   const dashboardRedirectExecuted = useRef(false);
 
-  // ✅ PHASE 2.1: Simplified redirect logic using unified auth hook - optimized
   useEffect(() => {
     if (!user || !user.email || authLoading) return;
     
     console.log(`🔍 Dashboard Redirect Check: user=${user.email}, onboarding=${JSON.stringify(onboarding)}, authLoading=${authLoading}`);
     
-    // If onboarding is not completed, show onboarding modal instead of redirecting
-    if (!onboarding?.isCompleted && onboarding?.currentStep !== null) {
+    // If onboarding not completed, handle routing for steps >= 3 (modal only covers 1-2)
+    if (onboarding && !onboarding.isCompleted) {
+      const step = onboarding.currentStep;
+      if (step >= 3 && !dashboardRedirectExecuted.current) {
+        dashboardRedirectExecuted.current = true;
+        let target;
+        switch (step) {
+          case 3:
+            target = '/dashboard/mijn-challenges';
+            break;
+          case 4:
+            target = hasTrainingAccess ? '/dashboard/trainingsschemas' : '/dashboard/voedingsplannen-v2';
+            break;
+          case 5:
+            target = '/dashboard/voedingsplannen-v2';
+            break;
+          case 6:
+            target = '/dashboard/brotherhood';
+            break;
+          default:
+            return;
+        }
+        console.log(`➡️ Redirecting for step ${step} to`, target);
+        router.push(target);
+        return;
+      }
+      // For steps 1-2, modal will handle UI; avoid redirect here
       console.log(`🔄 Dashboard: User on step ${onboarding.currentStep}, isCompleted: ${onboarding.isCompleted}`);
-      console.log(`✅ Onboarding modal will be shown on dashboard`);
-      // No redirect needed - onboarding modal will handle the flow
-    } else if (onboarding?.isCompleted) {
-      console.log(`✅ Onboarding completed, staying on dashboard`);
-    } else {
-      console.log(`⚠️ No redirect needed: isCompleted=${onboarding?.isCompleted}, currentStep=${onboarding?.currentStep}`);
+      console.log(`✅ Onboarding modal will be shown on dashboard (if step <= 2)`);
+      return;
     }
-  }, [user, onboarding, router, authLoading, getRedirectPath]);
-
+    console.log(`✅ Onboarding completed or not active, staying on dashboard`);
+  }, [user, onboarding, router, authLoading, getRedirectPath, hasTrainingAccess]);
+  
   // ✅ PHASE 2.1: Simplified fallback - no redirects needed, onboarding modal handles flow
   useEffect(() => {
     if (!user || !user.email || authLoading || fallbackRedirectAttempted) return;
     
+    // Fallback onboarding status fetch if context is undefined
     // If onboarding context hasn't loaded shortly, try direct API call for context
     const timeout = setTimeout(async () => {
       if (onboarding === undefined) {
@@ -217,7 +239,11 @@ export default function Dashboard() {
         return;
       }
 
-      // Allow dashboard data loading during onboarding - modal will handle the flow
+      // If onboarding is in progress (any step while not completed), skip heavy dashboard load entirely
+      if (onboarding && !onboarding.isCompleted) {
+        setLoading(false);
+        return;
+      }
 
       try {
         setLoading(true); // RE-ENABLED WITH LOADING MODAL
@@ -429,8 +455,9 @@ export default function Dashboard() {
 
   // Allow dashboard rendering during onboarding - modal will handle the flow
 
-  // Show loading modal while data is being fetched
-  if (loading || authLoading) {
+  // Show loading modal while data is being fetched, but NEVER during onboarding flow
+  const isOnboardingActive = Boolean(onboarding && !onboarding.isCompleted);
+  if ((loading || authLoading) && !isOnboardingActive) {
     return (
       <DashboardLoadingModal 
         isOpen={loading || authLoading} 
@@ -475,10 +502,12 @@ export default function Dashboard() {
   }
 
   return (
-    <div className={`min-h-screen bg-gradient-to-br from-[#0F1411] via-[#181F17] to-[#232D1A] transition-opacity duration-1000 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}>
+    <div className={`min-h-screen bg-gradient-to-br from-[#0F1411] via-[#181F17] to-[#232D1A] transition-opacity duration-1000 ${fadeIn ? 'opacity-100' : 'opacity-0'} overflow-x-hidden`}>
       <ClientLayout>
         {/* Onboarding Modal */}
-        <OnboardingV2Modal />
+        <OnboardingV2Modal 
+          isOpen={Boolean(onboarding && !onboarding.isCompleted && onboarding.currentStep !== null && onboarding.currentStep <= 2)}
+        />
         <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
           {/* Header */}
           <div className="mb-6 sm:mb-8 flex items-start justify-between gap-4">
