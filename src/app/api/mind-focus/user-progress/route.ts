@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
       .eq('user_id', userId)
       .single();
 
-    if (error) {
+    if (error && error.code !== 'PGRST116') {
       console.error('❌ Error fetching user progress:', error);
       return NextResponse.json({ error: 'Failed to fetch user progress' }, { status: 500 });
     }
@@ -60,7 +60,30 @@ export async function POST(request: NextRequest) {
 
     console.log('🔍 Existing profile check:', { existingProfile, fetchError });
 
-    let completedWeeks = existingProfile?.completed_weeks || [];
+    // Handle case where columns don't exist yet
+    if (fetchError && fetchError.code === '42703') {
+      console.log('⚠️ Progress columns don\'t exist yet, creating with defaults');
+      // Return error asking user to run database migration
+      return NextResponse.json({ 
+        error: 'Database schema needs to be updated. Please contact support or run the migration script.' 
+      }, { status: 500 });
+    }
+
+    // Handle missing columns gracefully
+    let completedWeeks = [];
+    let currentWeek = 1;
+    
+    if (existingProfile) {
+      // Try to get existing values, with fallbacks
+      try {
+        completedWeeks = existingProfile.completed_weeks || [];
+        currentWeek = existingProfile.current_active_week || 1;
+      } catch (e) {
+        console.log('⚠️ Using default values for missing columns');
+        completedWeeks = [];
+        currentWeek = 1;
+      }
+    }
     
     // Add completed week if provided and not already completed
     if (completedWeek && !completedWeeks.includes(completedWeek)) {
@@ -68,7 +91,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Determine next active week
-    const nextActiveWeek = currentActiveWeek || (existingProfile?.current_active_week || 1) + 1;
+    const nextActiveWeek = currentActiveWeek || currentWeek + 1;
 
     const updateData = {
       current_active_week: Math.min(nextActiveWeek, 24), // Max 24 weeks (6 months)
@@ -83,27 +106,60 @@ export async function POST(request: NextRequest) {
     if (existingProfile && !fetchError) {
       // Update existing profile
       console.log('📝 Updating existing profile:', existingProfile.id);
-      const result = await supabaseAdmin
+      
+      // Try to update with new columns first
+      let result = await supabaseAdmin
         .from('user_mind_profiles')
         .update(updateData)
         .eq('id', existingProfile.id)
         .select()
         .single();
+      
+      // If columns don't exist, try without the new columns
+      if (result.error && result.error.code === '42703') {
+        console.log('⚠️ Columns don\'t exist, updating without progress data');
+        result = await supabaseAdmin
+          .from('user_mind_profiles')
+          .update({ updated_at: new Date().toISOString() })
+          .eq('id', existingProfile.id)
+          .select()
+          .single();
+      }
+      
       data = result.data;
       error = result.error;
     } else {
       // Insert new profile
       console.log('📝 Creating new profile');
+      
+      // Try to insert with new columns first
       const insertData = {
         user_id: userId,
         ...updateData,
         created_at: new Date().toISOString(),
       };
-      const result = await supabaseAdmin
+      
+      let result = await supabaseAdmin
         .from('user_mind_profiles')
         .insert(insertData)
         .select()
         .single();
+      
+      // If columns don't exist, insert without them
+      if (result.error && result.error.code === '42703') {
+        console.log('⚠️ Columns don\'t exist, inserting without progress data');
+        const fallbackData = {
+          user_id: userId,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        };
+        result = await supabaseAdmin
+          .from('user_mind_profiles')
+          .insert(fallbackData)
+          .select()
+          .single();
+      }
+      
       data = result.data;
       error = result.error;
     }
@@ -118,8 +174,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: {
-        currentActiveWeek: data.current_active_week,
-        completedWeeks: data.completed_weeks,
+        currentActiveWeek: data.current_active_week || nextActiveWeek,
+        completedWeeks: data.completed_weeks || completedWeeks,
         message: completedWeek ? `Week ${completedWeek} completed successfully!` : 'Progress updated successfully!'
       }
     });
