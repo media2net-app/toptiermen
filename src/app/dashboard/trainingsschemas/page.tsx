@@ -27,7 +27,6 @@ import { useSubscription } from '@/hooks/useSubscription';
 import { supabase } from '@/lib/supabase';
 import DynamicTrainingPlanView from './components/DynamicTrainingPlanView';
 import SchemaChangeWarningModal from '@/components/SchemaChangeWarningModal';
-import UpgradeModal from '@/components/UpgradeModal';
 
 interface TrainingSchema {
   id: string;
@@ -184,13 +183,6 @@ function TrainingschemasContent() {
   const [nextSchemaLabel, setNextSchemaLabel] = useState<string | undefined>(undefined);
   const [schemaToChange, setSchemaToChange] = useState<string | null>(null);
   const [showSchemaChangeWarningModal, setShowSchemaChangeWarningModal] = useState(false);
-  // Upgrade modal state
-  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-  
-  // Debug: Log modal state changes
-  useEffect(() => {
-    console.log('🔧 DEBUG: showUpgradeModal state changed:', showUpgradeModal);
-  }, [showUpgradeModal]);
   const [userTrainingProfile, setUserTrainingProfile] = useState<TrainingProfile | null>(null);
   const [showWarningModal, setShowWarningModal] = useState(false);
   const [showAllSchemas, setShowAllSchemas] = useState(false);
@@ -2153,8 +2145,7 @@ function TrainingschemasContent() {
               <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center">
                 <button
                   onClick={() => {
-                    console.log('🔧 DEBUG: Training upgrade button clicked, setting modal to true');
-                    setShowUpgradeModal(true);
+                    alert('Mocht je deze onderdelen willen neem dan contact op met Rick voor het upgraden van je pakket');
                   }}
                   className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#0A0F0A] font-bold px-6 md:px-8 py-3 rounded-lg hover:from-[#A6C97B] hover:to-[#FFE55C] transition-all duration-200 text-sm md:text-base"
                 >
@@ -2162,8 +2153,7 @@ function TrainingschemasContent() {
                 </button>
                 <button
                   onClick={() => {
-                    console.log('🔧 DEBUG: Training upgrade button clicked, setting modal to true');
-                    setShowUpgradeModal(true);
+                    alert('Mocht je deze onderdelen willen neem dan contact op met Rick voor het upgraden van je pakket');
                   }}
                   className="bg-gradient-to-r from-[#FFD700] to-[#8BAE5A] text-[#0A0F0A] font-bold px-6 md:px-8 py-3 rounded-lg hover:from-[#FFE55C] hover:to-[#A6C97B] transition-all duration-200 text-sm md:text-base"
                 >
@@ -3165,54 +3155,6 @@ function TrainingschemasContent() {
         mode={schemaChangeModalMode}
         nextSchemaLabel={nextSchemaLabel}
       />
-
-      {/* Upgrade Modal */}
-      {console.log('🔧 DEBUG: Rendering UpgradeModal with showUpgradeModal:', showUpgradeModal)}
-      <UpgradeModal 
-        isOpen={showUpgradeModal}
-        onClose={() => setShowUpgradeModal(false)}
-        type="training"
-      />
-      
-      {/* Test modal outside PageLayout */}
-      {showUpgradeModal && (
-        <div style={{ 
-          position: 'fixed', 
-          top: 0, 
-          left: 0, 
-          width: '100vw', 
-          height: '100vh', 
-          backgroundColor: 'rgba(255,0,0,0.8)', 
-          zIndex: 99999,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}>
-          <div style={{ 
-            backgroundColor: 'yellow', 
-            padding: '20px', 
-            borderRadius: '10px',
-            color: 'black',
-            fontSize: '20px',
-            fontWeight: 'bold'
-          }}>
-            TEST MODAL OUTSIDE PAGELAYOUT - {showUpgradeModal ? 'OPEN' : 'CLOSED'}
-            <button 
-              onClick={() => setShowUpgradeModal(false)}
-              style={{ 
-                marginLeft: '10px', 
-                padding: '10px', 
-                backgroundColor: 'black', 
-                color: 'white',
-                border: 'none',
-                borderRadius: '5px'
-              }}
-            >
-              Sluiten
-            </button>
-          </div>
-        </div>
-      )}
     </PageLayout>
   );
 }

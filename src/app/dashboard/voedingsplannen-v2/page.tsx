@@ -102,6 +102,7 @@ export default function VoedingsplannenV2Page() {
   const { user, isAdmin, loading: authLoading } = useSupabaseAuth();
   const { completeStep, currentStep, isCompleted, showLoadingOverlay, loadingText, loadingProgress } = useOnboardingV2();
   const { hasAccess, loading: subscriptionLoading } = useSubscription();
+  const canAccessNutrition = hasAccess('nutrition');
   const router = useRouter();
   
   // Check user access to nutrition plans
@@ -153,19 +154,23 @@ export default function VoedingsplannenV2Page() {
   const [ingredientLookup, setIngredientLookup] = useState<any | null>(null);
 
   useEffect(() => {
+    if (!canAccessNutrition) return; // Skip heavy ingredient load for Basic users
     const loadIngredients = async () => {
       try {
         const res = await fetch('/api/nutrition-ingredients', { cache: 'no-store' });
         const json = await res.json();
         if (json?.ingredients) {
           setIngredientLookup(json.ingredients);
-          const keys = Object.keys(json.ingredients || {});
-          console.log('🍽️ Ingredient lookup loaded:', keys.length, 'items. Sample:', keys.slice(0, 20));
+          const DEBUG = process.env.NEXT_PUBLIC_DEBUG === '1';
+          if (DEBUG) {
+            const keys = Object.keys(json.ingredients || {});
+            console.log('🍽️ Ingredient lookup loaded:', keys.length, 'items. Sample:', keys.slice(0, 20));
+          }
         }
       } catch (e) { console.warn('Could not fetch ingredient lookup', e); }
     };
     loadIngredients();
-  }, []);
+  }, [canAccessNutrition]);
 
   // Choose which plan to render: scaled if available and enabled, else original
   const planToRender = useMemo(() => {
@@ -210,6 +215,7 @@ export default function VoedingsplannenV2Page() {
 
   // Check for post-onboarding modal
   useEffect(() => {
+    if (!canAccessNutrition) return; // Basic users: no post-onboarding nutrition modal checks
     if (!user?.email || !isCompleted) return;
     
     const checkPostOnboardingModal = async () => {
@@ -239,10 +245,11 @@ export default function VoedingsplannenV2Page() {
     };
     
     checkPostOnboardingModal();
-  }, [user?.email, isCompleted, plans]);
+  }, [user?.email, isCompleted, plans, canAccessNutrition]);
 
   // Check user subscription on component mount
   useEffect(() => {
+    if (!canAccessNutrition) return; // Skip user preferences fetch for Basic users
     const checkUserSubscription = async () => {
       if (!user) return;
       
@@ -259,7 +266,7 @@ export default function VoedingsplannenV2Page() {
     };
     
     checkUserSubscription();
-  }, [user]);
+  }, [user, canAccessNutrition]);
 
   // Reset modal state when component mounts
   useEffect(() => {
@@ -290,6 +297,7 @@ export default function VoedingsplannenV2Page() {
 
   // Load active selection on mount so it persists after refresh
   useEffect(() => {
+    if (!canAccessNutrition) return; // Skip active selection preload for Basic users
     const loadActiveSelection = async () => {
       if (!user?.id) return;
       try {
@@ -304,7 +312,7 @@ export default function VoedingsplannenV2Page() {
       }
     };
     loadActiveSelection();
-  }, [user?.id]);
+  }, [user?.id, canAccessNutrition]);
 
   // Reset modal state when no plan is selected
   useEffect(() => {

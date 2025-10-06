@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { useAuth } from '@/hooks/useAuth';
 // import { useV2State } from '@/contexts/V2StateContext';
 // import { useV2Monitoring } from '@/lib/v2-monitoring';
 // import { useV2ErrorRecovery } from '@/lib/v2-error-recovery';
@@ -18,7 +18,7 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const { user, loading, signOut } = useSupabaseAuth();
+  const { user, isLoading } = useAuth();
   const router = useRouter();
   const [userProfile, setUserProfile] = useState<any>(null);
 
@@ -51,15 +51,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     if (typeof window === 'undefined') return;
     
     // Wait for auth to complete before making any decisions
-    if (loading) {
-      console.log('⏳ Auth still loading, waiting...');
+    if (isLoading) {
+      if (process.env.NEXT_PUBLIC_DEBUG === '1') {
+        console.log('⏳ Auth still loading, waiting...');
+      }
       return;
     }
     
     // Only redirect if we're absolutely sure the user is not authenticated
     // Add a small delay to prevent immediate redirects on refresh
     if (!user) {
-      console.log('🚫 User not authenticated after loading complete, redirecting to login');
+      if (process.env.NEXT_PUBLIC_DEBUG === '1') {
+        console.log('🚫 User not authenticated after loading complete, redirecting to login');
+      }
       
       // Prevent redirect loops by checking current path and adding delay
       if (window.location.pathname !== '/login') {
@@ -70,7 +74,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       return;
     }
     
-    console.log('✅ User authenticated:', user.email);
+    if (process.env.NEXT_PUBLIC_DEBUG === '1') {
+      console.log('✅ User authenticated:', user.email);
+    }
 
     // 2.0.1: Track successful session - DISABLED
     // trackSessionStart(user.id);
@@ -96,7 +102,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     // Simple user profile set
     setUserProfile(user);
 
-  }, [user, loading, router, setUserProfile]);
+  }, [user, isLoading, router, setUserProfile]);
 
   // 2.0.1: Handle authentication errors - DISABLED
   // useEffect(() => {

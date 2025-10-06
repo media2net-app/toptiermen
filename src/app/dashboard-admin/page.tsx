@@ -145,12 +145,12 @@ function AdminDashboardContent() {
     setIsClient(true);
   }, []);
 
-  // Redirect to Community Health (overview tab) as default page - DEPLOYMENT FORCE
+  // Redirect to Onboarding Overview as default admin landing
   useEffect(() => {
-    if (pathname === '/dashboard-admin' && !searchParams?.get('tab')) {
-      router.push('/dashboard-admin?tab=overview');
+    if (pathname === '/dashboard-admin') {
+      router.replace('/dashboard-admin/onboarding-overview');
     }
-  }, [pathname, searchParams, router]);
+  }, [pathname, router]);
   
   // State voor echte data - geoptimaliseerd voor performance
   const [dashboardStats, setDashboardStats] = useState<DashboardStats | null>(null);

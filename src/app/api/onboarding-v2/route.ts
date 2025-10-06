@@ -270,6 +270,19 @@ export async function POST(request: NextRequest) {
             break;
         }
         break;
+
+      case 'reset':
+        // Reset all onboarding flags to false to bring user back to step 1
+        updateData = {
+          welcome_video_shown: false,
+          goal_set: false,
+          missions_selected: false,
+          training_schema_selected: false,
+          nutrition_plan_selected: false,
+          challenge_started: false,
+          onboarding_completed: false,
+        };
+        break;
     }
 
     // Update or create onboarding status

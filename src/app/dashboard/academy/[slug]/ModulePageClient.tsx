@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { useAuth } from '@/hooks/useAuth';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -38,7 +38,7 @@ export default function ModulePageClient({
 }) {
   const params = useParams();
   const moduleId = (initialModuleId || (params?.slug as string));
-  const { user } = useSupabaseAuth();
+  const { user } = useAuth();
   
   const [module, setModule] = useState<Module | null>(null);
   const [lessons, setLessons] = useState<Lesson[]>([]);
@@ -190,6 +190,9 @@ export default function ModulePageClient({
     );
   }
 
+  // Determine if current module is fully completed (all lessons including exam)
+  const allLessonsCompleted = lessons.every(l => completedLessonIds.includes(l.id));
+
   return (
     <div className="min-h-screen bg-[#0F1411] text-white">
       <div className="container mx-auto px-4 py-8">
@@ -226,41 +229,69 @@ export default function ModulePageClient({
               {lessons.map((lesson, idx) => {
                 const done = completedLessonIds.includes(lesson.id);
                 const displayNumber = String(lesson.order_index ?? (idx + 1)).padStart(2, '0');
+                const isExam = lesson.type === 'exam' || idx === lessons.length - 1;
+                const allPrevDone = lessons.slice(0, idx).every(l => completedLessonIds.includes(l.id));
+                const unlocked = idx === 0 ? true : (isExam ? allPrevDone : completedLessonIds.includes(lessons[idx - 1].id));
+
                 return (
                   <li key={lesson.id}>
-                    <Link
-                      href={`/dashboard/academy/${module.id}/${lesson.id}`}
-                      prefetch
-                      className={`block rounded-lg border border-[#3A4D23] px-4 py-3 transition-colors ${
-                        done
-                          ? 'bg-[#1E2A18] hover:bg-[#232D1A]'
-                          : 'bg-[#181F17] hover:bg-[#1B2417]'
-                      }`}
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex items-start gap-2">
-                          <span className="inline-flex items-center justify-center w-6 h-6 rounded bg-[#3A4D23] text-[#8BAE5A] text-xs font-bold mt-0.5">
-                            {displayNumber}
-                          </span>
-                          <div>
-                            <div className="text-white font-medium">{lesson.title}</div>
-                          {lesson.description && (
-                            <div className="text-xs text-gray-400 mt-1 line-clamp-2">{lesson.description}</div>
-                          )}
+                    {unlocked ? (
+                      <Link
+                        href={`/dashboard/academy/${module.id}/${lesson.id}`}
+                        prefetch
+                        className={`block rounded-lg border border-[#3A4D23] px-4 py-3 transition-colors ${
+                          done
+                            ? 'bg-[#1E2A18] hover:bg-[#232D1A]'
+                            : 'bg-[#181F17] hover:bg-[#1B2417]'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex items-start gap-2">
+                            <span className="inline-flex items-center justify-center w-6 h-6 rounded bg-[#3A4D23] text-[#8BAE5A] text-xs font-bold mt-0.5">
+                              {displayNumber}
+                            </span>
+                            <div>
+                              <div className="text-white font-medium">{lesson.title}</div>
+                              {lesson.description && (
+                                <div className="text-xs text-gray-400 mt-1 line-clamp-2">{lesson.description}</div>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {lesson.duration && lesson.type !== 'exam' && (
+                              <span className="text-[11px] text-gray-400">{lesson.duration}</span>
+                            )}
+                            {done ? (
+                              <span className="text-[#8BAE5A] text-xs font-semibold">Voltooid</span>
+                            ) : (
+                              <span className="text-[#B6C948] text-xs font-semibold">Start</span>
+                            )}
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          {lesson.duration && lesson.type !== 'exam' && (
-                            <span className="text-[11px] text-gray-400">{lesson.duration}</span>
-                          )}
-                          {done ? (
-                            <span className="text-[#8BAE5A] text-xs font-semibold">Voltooid</span>
-                          ) : (
-                            <span className="text-[#B6C948] text-xs font-semibold">Start</span>
-                          )}
+                      </Link>
+                    ) : (
+                      <div
+                        className={`block rounded-lg border border-[#3A4D23] px-4 py-3 bg-[#141a12] opacity-60 cursor-not-allowed`}
+                        title="Deze les wordt ontgrendeld nadat je de vorige les voltooit"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex items-start gap-2">
+                            <span className="inline-flex items-center justify-center w-6 h-6 rounded bg-[#2A3720] text-gray-500 text-xs font-bold mt-0.5">
+                              {displayNumber}
+                            </span>
+                            <div>
+                              <div className="text-gray-400 font-medium flex items-center gap-2">{lesson.title} <span className="text-xs text-gray-500">(vergrendeld)</span></div>
+                              {lesson.description && (
+                                <div className="text-xs text-gray-500 mt-1 line-clamp-2">{lesson.description}</div>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-[11px] text-gray-500">🔒</span>
+                          </div>
                         </div>
                       </div>
-                    </Link>
+                    )}
                   </li>
                 );
               })}
@@ -279,13 +310,23 @@ export default function ModulePageClient({
             </Link>
           ) : <span />}
           {nextModule ? (
-            <Link
-              href={`/dashboard/academy/${nextModule.id}`}
-              prefetch
-              className="px-4 py-2 rounded-lg border border-[#3A4D23] bg-[#181F17] hover:bg-[#232D1A] text-sm"
-            >
-              Volgende module →
-            </Link>
+            allLessonsCompleted ? (
+              <Link
+                href={`/dashboard/academy/${nextModule.id}`}
+                prefetch
+                className="px-4 py-2 rounded-lg border border-[#3A4D23] bg-[#181F17] hover:bg-[#232D1A] text-sm"
+              >
+                Volgende module →
+              </Link>
+            ) : (
+              <div
+                className="px-4 py-2 rounded-lg border border-[#3A4D23] bg-[#141a12] opacity-60 cursor-not-allowed text-sm"
+                title="Deze knop wordt ontgrendeld nadat je alle lessen en het examen van deze module hebt voltooid"
+                aria-disabled
+              >
+                Volgende module →
+              </div>
+            )
           ) : <span />}
         </div>
       </div>

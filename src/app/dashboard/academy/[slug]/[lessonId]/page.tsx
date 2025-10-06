@@ -3,7 +3,7 @@
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import { supabase } from '@/lib/supabase';
-import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { useAuth } from '@/hooks/useAuth';
 import PageLayout from '@/components/PageLayout';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -201,17 +201,24 @@ function ExamComponent({
   questions, 
   lessonId, 
   userId,
+  moduleId,
   onCompletion 
 }: { 
   questions: ExamQuestion[];
   lessonId: string;
   userId?: string;
+  moduleId: string;
   onCompletion: (passed: boolean) => void;
 }) {
+  const router = useRouter();
   const [answers, setAnswers] = useState<(number | null)[]>(Array(questions.length).fill(null));
   const [submitted, setSubmitted] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showCongratsModal, setShowCongratsModal] = useState(false);
+  const modalRef = useRef<HTMLDivElement | null>(null);
+  const [existingResult, setExistingResult] = useState<null | { score: number; total_questions: number; passed: boolean; answers: number[] | null }>(null);
+  const [loadingPrevious, setLoadingPrevious] = useState<boolean>(true);
 
   const correctAnswers = answers.filter((answer, index) => 
     answer === questions[index].correct_answer
@@ -222,37 +229,105 @@ function ExamComponent({
   const passed = scorePercentage >= 70; // 7/10 requirement
   const allAnswered = !answers.includes(null);
 
+  // Load previous exam result on mount (if any)
+  useEffect(() => {
+    let active = true;
+    async function loadPrev() {
+      if (!userId) { setLoadingPrevious(false); return; }
+      try {
+        const res = await fetch(`/api/academy/get-exam-result?userId=${encodeURIComponent(userId)}&lessonId=${encodeURIComponent(lessonId)}`);
+        if (!res.ok) { setLoadingPrevious(false); return; }
+        const data = await res.json();
+        if (!active) return;
+        if (data?.result) {
+          const r = data.result as { score: number; total_questions: number; passed: boolean; answers: number[] | null };
+          setExistingResult(r);
+          if (Array.isArray(r.answers) && r.answers.length === questions.length) {
+            // Prefill answers and show results without opening modal
+            setAnswers(r.answers.map((v) => (typeof v === 'number' ? v : null)));
+            setSubmitted(true);
+            setShowResults(true);
+          }
+        }
+      } catch (e) {
+        // ignore
+      } finally {
+        if (active) setLoadingPrevious(false);
+      }
+    }
+    loadPrev();
+    return () => { active = false; };
+  }, [userId, lessonId, questions.length]);
+
   const handleSubmit = async () => {
     if (!allAnswered || !userId) return;
     
     setIsSubmitting(true);
     try {
-      // Save exam result (create table if needed)
-      const { error } = await supabase
-        .from('user_exam_results')
-        .upsert({
-          user_id: userId,
-          lesson_id: lessonId,
+      // Save exam result via server API (service role) to avoid RLS issues
+      const res = await fetch('/api/academy/save-exam-result', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          lessonId,
           answers: answers,
           score: correctAnswers,
-          total_questions: totalQuestions,
-          passed: passed,
-          submitted_at: new Date().toISOString()
-        });
-
-      if (error) {
-        console.error('Error saving exam result:', error);
+          totalQuestions,
+          passed
+        })
+      });
+      if (!res.ok) {
+        const txt = await res.text();
+        console.warn('Error saving exam result:', txt);
       }
 
       setSubmitted(true);
       setShowResults(true);
       onCompletion(passed);
+
+      // Always open modal and scroll focus to it (both passed and failed)
+      setShowCongratsModal(true);
+      setTimeout(() => {
+        modalRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
+
+      // Only when passed: mark lesson complete and try unlock next module
+      if (passed) {
+        if (userId) {
+          try {
+            await fetch('/api/academy/complete-lesson', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ userId, lessonId })
+            });
+          } catch (e) {
+            console.warn('⚠️ Failed to mark exam lesson complete');
+          }
+        }
+
+        if (userId && moduleId) {
+          try {
+            await fetch('/api/academy/unlock-next-module', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ userId, moduleId })
+            });
+          } catch (e) {
+            console.warn('⚠️ Failed to unlock next module (network)');
+          }
+        }
+      }
     } catch (error) {
       console.error('Error submitting exam:', error);
-      // Still show results even if saving fails
+      // Still show results and modal even if saving fails
       setSubmitted(true);
       setShowResults(true);
       onCompletion(passed);
+      setShowCongratsModal(true);
+      setTimeout(() => {
+        modalRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
     } finally {
       setIsSubmitting(false);
     }
@@ -266,6 +341,79 @@ function ExamComponent({
 
   return (
     <div className="mt-8 bg-[#181F17] rounded-xl p-6 border border-[#3A4D23]">
+      {/* Previous attempt notice */}
+      {existingResult && (
+        <div className={`mb-4 rounded-lg border px-3 py-3 text-sm ${existingResult.passed ? 'border-[#3A4D23] bg-[#13200f] text-[#b8e27a]' : 'border-yellow-600/40 bg-[#2a220f] text-yellow-200'}`}>
+          {existingResult.passed ? (
+            <div className="flex items-center gap-2">
+              <span>🎉</span>
+              <span>Vorige resultaat: geslaagd met {existingResult.score}/{existingResult.total_questions} ({Math.round((existingResult.score / Math.max(1, existingResult.total_questions)) * 100)}%). Je kunt het examen opnieuw maken als je wilt.</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <span>ℹ️</span>
+              <span>Vorige resultaat: niet geslaagd. Je had {Math.max(0, (existingResult.total_questions - existingResult.score))} fout van {existingResult.total_questions}. Je kunt nu opnieuw proberen.</span>
+            </div>
+          )}
+        </div>
+      )}
+      {/* Passed Modal */}
+      {showCongratsModal && (
+        <div
+          ref={modalRef}
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+        >
+          <div className="absolute inset-0 bg-black/60" onClick={() => setShowCongratsModal(false)} />
+          <div className="relative z-10 w-full max-w-md rounded-2xl border border-[#3A4D23] bg-[#0F1411] text-white shadow-xl">
+            <div className="p-6">
+              <div className="text-center mb-4">
+                <div className="text-4xl mb-2">{passed ? '🎉' : '📘'}</div>
+                <h3 className={`text-2xl font-bold ${passed ? 'text-[#8BAE5A]' : 'text-yellow-300'}`}>
+                  {passed ? 'Geslaagd!' : 'Niet geslaagd'}
+                </h3>
+                {passed ? (
+                  <>
+                    <p className="text-gray-300 mt-3">
+                      Score: <span className="font-semibold text-white">{correctAnswers}/{totalQuestions}</span> ({scorePercentage}%)
+                    </p>
+                    <p className="text-gray-300 mt-2">
+                      Je hebt het examen behaald. Ga terug naar het Academy overzicht om met Module 2 te starten.
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-gray-300 mt-3">
+                      Je had <span className="font-semibold text-white">{totalQuestions - correctAnswers}</span> fout van {totalQuestions} vragen.
+                    </p>
+                    <p className="text-gray-300 mt-2">
+                      Ga terug naar het module-overzicht om de stof opnieuw door te nemen. Je kunt het examen later nog eens maken.
+                    </p>
+                  </>
+                )}
+              </div>
+              <div className="flex flex-col sm:flex-row gap-3 mt-4">
+                <button
+                  onClick={() => {
+                    setShowCongratsModal(false);
+                    router.push('/dashboard/academy');
+                  }}
+                  className="w-full sm:flex-1 px-4 py-2 rounded-lg bg-[#8BAE5A] text-[#181F17] font-semibold hover:bg-[#B6C948] transition-colors"
+                >
+                  {passed ? 'Ga naar academy overzicht' : 'Terug naar module overzicht'}
+                </button>
+                <button
+                  onClick={() => setShowCongratsModal(false)}
+                  className="w-full sm:flex-1 px-4 py-2 rounded-lg border border-[#3A4D23] bg-[#181F17] hover:bg-[#232D1A] text-white transition-colors"
+                >
+                  Blijf op deze pagina
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-2xl font-bold text-[#8BAE5A]">Examen: Test je kennis</h3>
         <div className="text-sm text-gray-400">
@@ -312,7 +460,14 @@ function ExamComponent({
                       disabled={submitted}
                       className="mr-3 w-4 h-4 text-[#8BAE5A] bg-[#232D1A] border-[#3A4D23] focus:ring-[#8BAE5A] focus:ring-2"
                     />
-                    {option}
+                    <span className="flex-1">
+                      {option}
+                      {optionIndex === question.correct_answer && (
+                        <span className="ml-2 inline-flex items-center text-xs px-2 py-0.5 rounded bg-green-900/40 text-green-300 border border-green-700/40">
+                          (juiste antwoord)
+                        </span>
+                      )}
+                    </span>
                   </label>
                 ))}
               </div>
@@ -480,7 +635,7 @@ function ExamComponent({
 export default function LessonDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const { user } = useSupabaseAuth();
+  const { user } = useAuth();
   const moduleId = (params as any).slug as string;
   const lessonId = (params as any).lessonId as string;
   
@@ -1216,8 +1371,8 @@ export default function LessonDetailPage() {
             
             {nextLesson && (
               <button
-                onClick={() => {
-                  console.log('🔄 Navigating to next lesson...');
+                onClick={async () => {
+                  console.log('🔄 Next action triggered...');
                   // If already navigating, force reset and continue
                   if (navigating) {
                     console.log('⚠️ Already navigating, forcing reset...');
@@ -1226,24 +1381,34 @@ export default function LessonDetailPage() {
                     setIsDataLoaded(false);
                     setShowForceButton(false);
                   }
-                  
+
                   // Reset any stuck states before navigation
                   setIsVideoLoading(false);
                   setShowVideoOverlay(true);
+
+                  // If not completed and non-exam, complete first
+                  if (!completed && lesson.type !== 'exam') {
+                    try {
+                      // Fire-and-forget, do not block navigation
+                      void handleCompleteLesson();
+                    } catch (e) {
+                      console.warn('⚠️ Completing before navigate failed, proceeding to navigate');
+                    }
+                  }
+
                   setNavigating(true);
-                  
                   // Use a small delay to ensure state updates
                   setTimeout(() => {
                     router.push(`/dashboard/academy/${module.id}/${nextLesson.id}`);
                   }, 50);
                 }}
-                disabled={navigating}
+                disabled={navigating || (!completed && lesson.type !== 'exam' && saving)}
                 className="px-3 py-2 sm:px-4 sm:py-2 text-sm sm:text-base bg-[#8BAE5A] text-[#181F17] rounded-lg hover:bg-[#B6C948] transition-colors disabled:opacity-50 flex items-center gap-2"
               >
                 {navigating ? (
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#181F17]"></div>
                 ) : null}
-                <span className="sm:inline">Volgende les</span>
+                <span className="sm:inline">{!completed && lesson.type !== 'exam' ? 'Voltooi les, ga naar volgende les' : 'Volgende les'}</span>
               </button>
             )}
           </div>
@@ -1354,19 +1519,6 @@ export default function LessonDetailPage() {
 
 
 
-        {/* Complete button - Only show for non-exam lessons */}
-        {!completed && lesson.type !== 'exam' && (
-          <div className="flex justify-center">
-            <button
-              onClick={handleCompleteLesson}
-              disabled={saving}
-              className="px-8 py-3 bg-[#8BAE5A] text-[#181F17] rounded-lg hover:bg-[#B6C948] transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {saving ? 'Bezig...' : 'Les voltooien'}
-            </button>
-          </div>
-        )}
-
         {completed && (
           <div className="text-center">
             <div className="text-green-400 text-lg font-semibold mb-2">✓ Les voltooid!</div>
@@ -1375,11 +1527,12 @@ export default function LessonDetailPage() {
         )}
 
         {/* Exam Section */}
-        {lesson.type === 'exam' && lesson.exam_questions && (
+        {lesson.type === 'exam' && (
           <ExamComponent 
-            questions={lesson.exam_questions}
+            questions={lesson.exam_questions || []}
             lessonId={lesson.id}
             userId={user?.id}
+            moduleId={module.id}
             onCompletion={(passed) => {
               console.log('🎯 Exam completed:', passed);
               // Don't refresh page, just show results in ExamComponent
@@ -1536,11 +1689,22 @@ export default function LessonDetailPage() {
             
             {nextLesson ? (
               <button
-                onClick={() => {
-                  console.log('🔄 Navigating to next lesson...');
+                onClick={async () => {
+                  console.log('🔄 Next action (bottom) triggered...');
                   // Reset any stuck states before navigation
                   setIsVideoLoading(false);
                   setShowVideoOverlay(true);
+
+                  // If not completed and non-exam, complete first
+                  if (!completed && lesson.type !== 'exam') {
+                    try {
+                      // Fire-and-forget, do not block navigation
+                      void handleCompleteLesson();
+                    } catch (e) {
+                      console.warn('⚠️ Completing before navigate failed, proceeding to navigate');
+                    }
+                  }
+
                   setNavigating(true);
                   
                   // Use a small delay to ensure state updates
@@ -1548,10 +1712,17 @@ export default function LessonDetailPage() {
                     router.push(`/dashboard/academy/${module.id}/${nextLesson.id}`);
                   }, 50);
                 }}
-                disabled={navigating}
+                disabled={navigating || (!completed && lesson.type !== 'exam' && saving)}
                 className="px-3 py-2 sm:px-6 sm:py-3 text-sm sm:text-base bg-[#8BAE5A] text-[#181F17] rounded-lg hover:bg-[#B6C948] transition-colors font-semibold disabled:opacity-50 flex items-center gap-2 w-full sm:w-auto"
               >
-                <span className="truncate"><span className="sm:inline">Volgende les</span><span className="hidden sm:inline">: {nextLesson.title}</span></span>
+                <span className="truncate">
+                  {(!completed && lesson.type !== 'exam')
+                    ? 'Voltooi les, ga naar volgende les'
+                    : (<>
+                        <span className="sm:inline">Volgende les</span>
+                        <span className="hidden sm:inline">: {nextLesson.title}</span>
+                      </>)}
+                </span>
                 {navigating ? (
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#181F17]"></div>
                 ) : (
@@ -1580,6 +1751,30 @@ export default function LessonDetailPage() {
               const isActive = l.id === lessonId;
               const isDone = completedLessonIds.includes(l.id);
               const idx = String(index + 1).padStart(2, '0');
+              const isExam = l.type === 'exam' || index === lessons.length - 1;
+              const allPrevDone = lessons.slice(0, index).every(item => completedLessonIds.includes(item.id));
+              const unlocked = index === 0 ? true : (isExam ? allPrevDone : completedLessonIds.includes(lessons[index - 1].id));
+
+              if (!unlocked && !isActive) {
+                return (
+                  <div
+                    key={l.id}
+                    className={`w-full text-left px-3 py-3 sm:px-5 sm:py-4 rounded-lg border transition-all flex items-center justify-between bg-[#141a12] text-gray-400 border-[#3A4D23] opacity-60 cursor-not-allowed`}
+                    title="Deze les wordt ontgrendeld nadat je de vorige les voltooit"
+                  >
+                    <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+                      <span className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-black border border-[#2A3720] text-gray-500`}>
+                        {idx}
+                      </span>
+                      <span className={`block text-sm leading-snug sm:text-base sm:leading-normal whitespace-normal break-words max-w-[60%] sm:max-w-none`}>{l.title} <span className="text-xs text-gray-500">(vergrendeld)</span></span>
+                    </div>
+                    <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm flex-shrink-0">
+                      <span className="opacity-80 text-gray-500">🔒</span>
+                    </div>
+                  </div>
+                );
+              }
+
               return (
                 <button
                   key={l.id}

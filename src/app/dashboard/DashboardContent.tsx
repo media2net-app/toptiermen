@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 // import { useV2Monitoring } from '@/lib/v2-monitoring';
@@ -143,10 +143,10 @@ const baseMenu = [
 
 // Function to get menu - no longer shows onboarding button on mobile
 const getMenu = (isOnboardingCompleted: boolean, isLoading: boolean = false) => {
-  console.log('🔍 getMenu called with:', { isOnboardingCompleted, isLoading });
-  
+  const DEBUG = process.env.NEXT_PUBLIC_DEBUG === '1';
+  if (DEBUG) console.log('🔍 getMenu called with:', { isOnboardingCompleted, isLoading });
   // Always return base menu - no onboarding button on mobile
-  console.log('📱 Returning base menu (no onboarding button on mobile)');
+  if (DEBUG) console.log('📱 Returning base menu (no onboarding button on mobile)');
   return baseMenu;
 };
 
@@ -181,9 +181,9 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus, setIsMobileMenuOp
   // CRITICAL: During logout, always use loading state to prevent flash
   const isLoggingOut = !user; // Check if user is null (logged out)
   const effectiveLoading = isLoading || isLoggingOut;
-  const mobileMenu = getMenu(onboardingCompleted, effectiveLoading);
-  
-  console.log('🔍 MobileSidebarContent menu calculation:', {
+  const mobileMenu = useMemo(() => getMenu(onboardingCompleted, effectiveLoading), [onboardingCompleted, effectiveLoading]);
+  const DEBUG = process.env.NEXT_PUBLIC_DEBUG === '1';
+  if (DEBUG) console.log('🔍 MobileSidebarContent menu calculation:', {
     actualOnboardingStatus: actualOnboardingStatus?.onboarding_completed,
     isCompleted,
     onboardingCompleted,
@@ -587,8 +587,10 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
   // Use onboardingStatus from props if available, otherwise fallback to context
   const actualOnboardingStatus = onboardingStatus || { current_step: currentStep, onboarding_completed: isCompleted };
   
-  // Debug log to see onboarding status
+  // Debug log to see onboarding status (gated)
   useEffect(() => {
+    const DEBUG = process.env.NEXT_PUBLIC_DEBUG === '1';
+    if (!DEBUG) return;
     console.log('🔍 [SIDEBAR DEBUG] Onboarding Status:', {
       onboardingStatusFromProps: onboardingStatus,
       actualOnboardingStatus,
@@ -616,9 +618,9 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
   // CRITICAL: During logout, always use loading state to prevent flash
   const isLoggingOutDesktop = !user; // Check if user is null (logged out)
   const effectiveLoadingDesktop = isLoading || isLoggingOutDesktop;
-  const menu = getMenu(onboardingCompleted, effectiveLoadingDesktop);
-  
-  console.log('🔍 SidebarContent menu calculation:', {
+  const menu = useMemo(() => getMenu(onboardingCompleted, effectiveLoadingDesktop), [onboardingCompleted, effectiveLoadingDesktop]);
+  const DEBUG2 = process.env.NEXT_PUBLIC_DEBUG === '1';
+  if (DEBUG2) console.log('🔍 SidebarContent menu calculation:', {
     actualOnboardingStatus: actualOnboardingStatus?.onboarding_completed,
     isCompleted,
     onboardingCompleted,
@@ -1375,9 +1377,9 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
                 priority
                 alt="Top Tier Men Logo"
                 width={sidebarCollapsed ? 20 : 128}
-                height={32}
+                height={sidebarCollapsed ? 20 : 32}
                 style={{ height: 'auto' }}
-                className={`${sidebarCollapsed ? 'w-5 h-5' : 'w-32 h-8'} object-contain hover:opacity-80 transition-opacity`}
+                className={`object-contain hover:opacity-80 transition-opacity`}
               />
             </Link>
           </div>
@@ -1575,7 +1577,7 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
                           width={60}
                           height={15}
                           style={{ height: 'auto' }}
-                          className="h-3 w-auto object-contain"
+                          className="object-contain"
                         />
                       </Link>
                       <motion.button

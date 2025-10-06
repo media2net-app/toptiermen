@@ -26,6 +26,7 @@ export async function GET(request: NextRequest) {
       { data: moduleData, error: moduleError },
       { data: lessonsData, error: lessonsError },
       { data: progressData, error: progressError },
+      { data: completionsData, error: completionsError },
       { data: allModulesData, error: allModulesError }
     ] = await fetchWithTimeout(Promise.all([
       supabaseAdmin
@@ -45,6 +46,12 @@ export async function GET(request: NextRequest) {
         .select('lesson_id')
         .eq('user_id', userId)
         .eq('completed', true),
+
+      // Also include completions recorded via the completions table
+      supabaseAdmin
+        .from('academy_lesson_completions')
+        .select('lesson_id')
+        .eq('user_id', userId),
       
       supabaseAdmin
         .from('academy_modules')
@@ -73,6 +80,11 @@ export async function GET(request: NextRequest) {
       // Don't fail on all modules error, just use empty array
     }
 
+    if (completionsError) {
+      console.warn('⚠️ Completions fetch warning:', completionsError);
+      // Non-fatal; we can proceed with progressData only
+    }
+
     // Determine previous and next modules
     let previousModule = null;
     let nextModule = null;
@@ -87,7 +99,10 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const completedLessonIds = progressData?.map(p => p.lesson_id) || [];
+    // Merge completed lesson IDs from both sources and de-duplicate
+    const fromProgress = (progressData || []).map((p: any) => p.lesson_id);
+    const fromCompletions = (completionsData || []).map((c: any) => c.lesson_id);
+    const completedLessonIds = Array.from(new Set([...fromProgress, ...fromCompletions]));
 
     console.log('✅ Module data fetched successfully:', {
       module: moduleData.title,

@@ -1,18 +1,11 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabase';
 
 
 // Force dynamic rendering to prevent navigator errors
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
-
-interface UserProfile {
-  id: string;
-  full_name: string;
-  avatar_url?: string;
-}
 
 interface ForumCategory {
   id: number;
@@ -25,134 +18,43 @@ interface ForumCategory {
   last_post?: {
     title: string;
     author: string;
-    time: string;
+    time: string; // ISO string from API
   };
 }
 
 const ForumOverview = () => {
   const [categories, setCategories] = useState<ForumCategory[]>([]);
   const [loading, setLoading] = useState(true);
-  const [userProfiles, setUserProfiles] = useState<{ [key: string]: UserProfile }>({});
   const [isClient, setIsClient] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     setIsClient(true);
     fetchCategories();
   }, []);
 
-  const fetchUserProfiles = async (userIds: string[]) => {
-    try {
-      const { data: profiles, error } = await supabase
-        .from('profiles')
-        .select('id, full_name, avatar_url')
-        .in('id', userIds);
-
-      if (error) {
-        console.error('Error fetching profiles:', error);
-        return {};
-      }
-
-      const profilesMap: { [key: string]: UserProfile } = {};
-      profiles?.forEach(profile => {
-        profilesMap[profile.id] = profile;
-      });
-
-      return profilesMap;
-    } catch (error) {
-      console.error('Error fetching profiles:', error);
-      return {};
-    }
-  };
-
   const fetchCategories = async () => {
-    // Add a timeout so onboarding never gets stuck on this step
-    const abort = new AbortController();
-    const timeout = setTimeout(() => abort.abort(), 12000);
+    setError(null);
+    const controller = new AbortController();
+    const t = setTimeout(() => controller.abort(), 15000);
     try {
-      // Fetch categories with topic and post counts
-      const { data: categoriesData, error: categoriesError } = await supabase
-        .from('forum_categories')
-        .select(`
-          id,
-          name,
-          description,
-          emoji,
-          slug,
-          forum_topics(
-            id,
-            title,
-            created_at,
-            author_id,
-            reply_count
-          )
-        `)
-        .order('order_index');
-
-      if (categoriesError) {
-        console.error('Error fetching categories:', categoriesError);
-        setCategories([]);
-        return;
+      const res = await fetch('/api/forum/categories', { cache: 'no-cache', signal: controller.signal });
+      clearTimeout(t);
+      if (!res.ok) {
+        const txt = await res.text();
+        throw new Error(`HTTP ${res.status}: ${txt}`);
       }
-
-      // Collect all user IDs from topics
-      const userIds = new Set<string>();
-      categoriesData?.forEach(category => {
-        category.forum_topics?.forEach(topic => {
-          if (topic.author_id) userIds.add(topic.author_id);
-        });
-      });
-
-      // Fetch user profiles
-      const profiles = await fetchUserProfiles(Array.from(userIds));
-      setUserProfiles(profiles);
-
-      // Helper function to get author name
-      const getAuthorName = (authorId: string) => {
-        const profile = profiles[authorId];
-        return profile ? profile.full_name : 'User';
-      };
-
-      // Process categories to get counts and last post info
-      const processedCategories = categoriesData.map((category: any) => {
-        const topics = category.forum_topics || [];
-        const topicsCount = topics.length;
-        
-        // Get total posts count (topics + replies)
-        const postsCount = topics.reduce((total: number, topic: any) => {
-          // This is a simplified count - in a real app you'd fetch actual post counts
-          return total + (topic.reply_count || 0) + 1; // +1 for the original post
-        }, 0);
-
-        // Get last post info
-        const lastTopic = topics.length > 0 ? topics.sort((a: any, b: any) => 
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-        )[0] : null;
-
-        const lastPost = lastTopic ? {
-          title: lastTopic.title,
-          author: getAuthorName(lastTopic.author_id),
-          time: formatTimeAgo(lastTopic.created_at)
-        } : undefined;
-
-        return {
-          id: category.id,
-          name: category.name,
-          description: category.description,
-          emoji: category.emoji,
-          slug: category.slug,
-          topics_count: topicsCount,
-          posts_count: postsCount,
-          last_post: lastPost
-        };
-      });
-
-      setCategories(processedCategories);
-    } catch (error) {
-      console.error('Error fetching forum data:', error);
-      // Ensure we render the page even if fetch fails
+      const data = await res.json();
+      const list: ForumCategory[] = (data.categories || []).map((c: any) => ({
+        ...c,
+        last_post: c.last_post ? { ...c.last_post, time: formatTimeAgo(c.last_post.time) } : undefined,
+      }));
+      setCategories(list);
+    } catch (e: any) {
+      console.error('Error fetching forum categories:', e);
+      setError('Forum laden mislukt');
       setCategories([]);
     } finally {
-      clearTimeout(timeout);
       setLoading(false);
     }
   };
@@ -193,7 +95,7 @@ const ForumOverview = () => {
       <div className="w-full min-h-screen bg-[#0A0F0A]">
         <div className="max-w-7xl mx-auto w-full px-2 sm:px-4 md:px-6 lg:px-8 py-10">
           <div className="bg-[#232D1A]/90 rounded-2xl shadow-xl border border-[#3A4D23]/40 p-6 text-center">
-            <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">Forum laden mislukt</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">{error || 'Forum laden mislukt'}</h2>
             <p className="text-[#8BAE5A] mb-4">Probeer het opnieuw of ga direct naar het introductietopic om onboarding af te ronden.</p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <button onClick={fetchCategories} className="px-5 py-2 rounded-lg bg-[#3A4D23] text-white hover:bg-[#4A5D33]">Opnieuw laden</button>

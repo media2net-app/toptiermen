@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
-import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { useAuth } from '@/hooks/useAuth';
 
 export interface ChatNotification {
   id: string;
@@ -15,18 +15,28 @@ export function useChatNotifications(
   onNewMessage?: (notification: ChatNotification) => void,
   onConversationUpdate?: (conversationId: string) => void
 ) {
-  const { user } = useSupabaseAuth();
+  const { user } = useAuth();
   const subscriptionRef = useRef<{
     message: any;
     conversation: any;
   } | null>(null);
   const isOnlineRef = useRef<boolean>(true);
+  const lastUserIdRef = useRef<string | null>(null);
 
   // Set up real-time subscriptions
   useEffect(() => {
-    if (!user) return;
+    const DEBUG = process.env.NEXT_PUBLIC_DEBUG === '1';
+    const userId = user?.id || null;
+    if (!userId) return;
 
-    console.log('🔔 Setting up chat notifications for user:', user.id);
+    // Idempotent: skip if already subscribed for this user
+    if (lastUserIdRef.current === userId && subscriptionRef.current) {
+      if (DEBUG) console.log('🔔 Chat notifications already active for user:', userId);
+      return;
+    }
+
+    lastUserIdRef.current = userId;
+    if (DEBUG) console.log('🔔 Setting up chat notifications for user:', userId);
 
     // Subscribe to new messages for all conversations this user is part of
     const messageSubscription = supabase
@@ -39,7 +49,7 @@ export function useChatNotifications(
           table: 'chat_messages'
         },
         async (payload) => {
-          console.log('📨 New message received:', payload);
+          if (DEBUG) console.log('📨 New message received:', payload);
           
           const newMessage = payload.new;
           
@@ -83,7 +93,7 @@ export function useChatNotifications(
             timestamp: newMessage.created_at
           };
 
-          console.log('📨 Processing notification:', notification);
+          if (DEBUG) console.log('📨 Processing notification:', notification);
 
           // Call callback if provided
           if (onNewMessage) {
@@ -115,7 +125,7 @@ export function useChatNotifications(
           filter: `participant1_id=eq.${user.id} OR participant2_id=eq.${user.id}`
         },
         (payload) => {
-          console.log('💬 Conversation update:', payload);
+          if (DEBUG) console.log('💬 Conversation update:', payload);
           if (onConversationUpdate) {
             const conversationId = (payload.new as any)?.id || (payload.old as any)?.id;
             if (conversationId) {
@@ -155,7 +165,7 @@ export function useChatNotifications(
 
     // Cleanup function
     return () => {
-      console.log('🔕 Cleaning up chat notifications');
+      if (DEBUG) console.log('🔕 Cleaning up chat notifications');
       
       if (subscriptionRef.current) {
         subscriptionRef.current.message.unsubscribe();
