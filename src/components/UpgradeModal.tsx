@@ -17,26 +17,25 @@ export default function UpgradeModal({ isOpen, onClose, type }: UpgradeModalProp
   const icon = isNutrition ? RocketLaunchIcon : AcademicCapIcon;
   const IconComponent = icon;
 
+  if (!isOpen) {
+    return null;
+  }
+
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <>
-          {/* Backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-75 z-50"
-            onClick={onClose}
-          />
-          
-          {/* Modal */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          >
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+      {/* Backdrop */}
+      <div
+        className="fixed inset-0 bg-black bg-opacity-75 z-[9998]"
+        onClick={onClose}
+      />
+      
+      {/* Modal */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.9, y: 20 }}
+        className="relative z-[9999]"
+      >
             <div className="bg-[#232D1A] rounded-2xl shadow-2xl border border-[#3A4D23]/40 max-w-md w-full mx-4">
               {/* Header */}
               <div className="flex items-center justify-between p-6 border-b border-[#3A4D23]/40">
@@ -136,8 +135,6 @@ export default function UpgradeModal({ isOpen, onClose, type }: UpgradeModalProp
               </div>
             </div>
           </motion.div>
-        </>
-      )}
-    </AnimatePresence>
+    </div>
   );
 }

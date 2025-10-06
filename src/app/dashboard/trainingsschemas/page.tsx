@@ -186,6 +186,11 @@ function TrainingschemasContent() {
   const [showSchemaChangeWarningModal, setShowSchemaChangeWarningModal] = useState(false);
   // Upgrade modal state
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  
+  // Debug: Log modal state changes
+  useEffect(() => {
+    console.log('🔧 DEBUG: showUpgradeModal state changed:', showUpgradeModal);
+  }, [showUpgradeModal]);
   const [userTrainingProfile, setUserTrainingProfile] = useState<TrainingProfile | null>(null);
   const [showWarningModal, setShowWarningModal] = useState(false);
   const [showAllSchemas, setShowAllSchemas] = useState(false);
@@ -2148,6 +2153,7 @@ function TrainingschemasContent() {
               <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center">
                 <button
                   onClick={() => {
+                    console.log('🔧 DEBUG: Training upgrade button clicked, setting modal to true');
                     setShowUpgradeModal(true);
                   }}
                   className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#0A0F0A] font-bold px-6 md:px-8 py-3 rounded-lg hover:from-[#A6C97B] hover:to-[#FFE55C] transition-all duration-200 text-sm md:text-base"
@@ -2156,6 +2162,7 @@ function TrainingschemasContent() {
                 </button>
                 <button
                   onClick={() => {
+                    console.log('🔧 DEBUG: Training upgrade button clicked, setting modal to true');
                     setShowUpgradeModal(true);
                   }}
                   className="bg-gradient-to-r from-[#FFD700] to-[#8BAE5A] text-[#0A0F0A] font-bold px-6 md:px-8 py-3 rounded-lg hover:from-[#FFE55C] hover:to-[#A6C97B] transition-all duration-200 text-sm md:text-base"
