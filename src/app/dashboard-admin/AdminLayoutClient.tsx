@@ -16,7 +16,6 @@ import {
   CalendarIcon, 
   Cog6ToothIcon, 
   MegaphoneIcon,
-  ChevronDownIcon,
   ChartBarIcon,
   CurrencyDollarIcon,
   UsersIcon,
@@ -246,9 +245,6 @@ const SidebarContent = ({ pathname }: { pathname: string }) => {
                 className="flex items-center justify-between w-full px-4 py-3 rounded-xl text-[#8BAE5A] font-semibold hover:bg-[#181F17] transition-all duration-200"
               >
                 <span>{item.label}</span>
-                <ChevronDownIcon 
-                  className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} 
-                />
               </button>
               {isExpanded && (
                 <div className="mt-2 ml-4 space-y-1">
