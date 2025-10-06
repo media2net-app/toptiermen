@@ -17,22 +17,51 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'User ID required' }, { status: 400 });
     }
 
+    // First check if profile exists
+    const { data: existingProfile, error: fetchError } = await supabaseAdmin
+      .from('user_mind_profiles')
+      .select('id')
+      .eq('user_id', userId)
+      .single();
+
+    console.log('🔍 Existing profile check:', { existingProfile, fetchError });
+
     const profileData = {
       user_id: userId,
       stress_assessment: stressAssessment,
       lifestyle_info: lifestyleInfo,
       personal_goals: personalGoals,
-      created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
 
-    console.log('📤 Saving profile data:', profileData);
+    let data, error;
 
-    const { data, error } = await supabaseAdmin
-      .from('user_mind_profiles')
-      .upsert(profileData, { onConflict: 'user_id' })
-      .select()
-      .single();
+    if (existingProfile && !fetchError) {
+      // Update existing profile
+      console.log('📝 Updating existing profile:', existingProfile.id);
+      const result = await supabaseAdmin
+        .from('user_mind_profiles')
+        .update(profileData)
+        .eq('id', existingProfile.id)
+        .select()
+        .single();
+      data = result.data;
+      error = result.error;
+    } else {
+      // Insert new profile
+      console.log('📝 Creating new profile');
+      const insertData = {
+        ...profileData,
+        created_at: new Date().toISOString(),
+      };
+      const result = await supabaseAdmin
+        .from('user_mind_profiles')
+        .insert(insertData)
+        .select()
+        .single();
+      data = result.data;
+      error = result.error;
+    }
 
     if (error) {
       console.error('❌ Database error:', error);

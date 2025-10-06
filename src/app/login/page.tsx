@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Image from 'next/image';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/lib/supabase';
 import { EnvelopeIcon, LockClosedIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
@@ -394,9 +395,12 @@ function LoginPageContent() {
         <img src="/pattern.png" alt="pattern" className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none z-0" />
         <div className="w-full max-w-md p-6 sm:p-8 rounded-3xl shadow-2xl bg-[#232D1A]/95 border border-[#3A4D23] backdrop-blur-lg relative z-10">
           <div className="flex justify-center mb-4">
-            <img 
-              src="/logo_white-full.svg" 
-              alt="Top Tier Men Logo" 
+            <Image 
+              src="/logo_white-full.svg"
+              priority 
+              alt="Top Tier Men Logo"
+              width={200}
+              height={96} 
               className="h-16 sm:h-20 md:h-24 w-auto"
             />
           </div>
@@ -620,9 +624,12 @@ function LoginPageContent() {
           <div className="text-center">
             {/* Logo */}
             <div className="mb-8">
-              <img 
-                src="/logo_white-full.svg" 
+              <Image 
+                src="/logo_white-full.svg"
+                priority 
                 alt="Top Tier Men Logo" 
+                width={200}
+                height={96}
                 className="h-20 w-auto mx-auto opacity-90"
               />
             </div>
@@ -793,9 +800,12 @@ export default function LoginPage() {
         <img src="/pattern.png" alt="pattern" className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none z-0" />
         <div className="w-full max-w-md p-6 sm:p-8 rounded-3xl shadow-2xl bg-[#232D1A]/95 border border-[#3A4D23] backdrop-blur-lg relative z-10">
           <div className="flex justify-center mb-4">
-            <img 
-              src="/logo_white-full.svg" 
-              alt="Top Tier Men Logo" 
+            <Image 
+              src="/logo_white-full.svg"
+              priority 
+              alt="Top Tier Men Logo"
+              width={200}
+              height={96} 
               className="h-16 sm:h-20 md:h-24 w-auto"
             />
           </div>

@@ -1372,6 +1372,7 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
             <Link href="/dashboard" className="flex items-center justify-center">
               <Image
                 src="/logo_white-full.svg"
+                priority
                 alt="Top Tier Men Logo"
                 width={sidebarCollapsed ? 20 : 128}
                 height={32}
@@ -1569,12 +1570,12 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
                       >
                         <Image
                           src="/logo_white-full.svg"
+                          priority
                           alt="Top Tier Men Logo"
                           width={60}
                           height={15}
                           style={{ height: 'auto' }}
                           className="h-3 w-auto object-contain"
-                          priority
                         />
                       </Link>
                       <motion.button
