@@ -245,6 +245,89 @@ export default function DebtSnowball() {
               `} />
             </button>
           </div>
+          
+          {/* NEW TEST BUTTONS - Completely different CSS approach */}
+          <div className="mt-4">
+            <h4 className="text-[#8BAE5A] font-semibold mb-3 text-sm">Test Knoppen (Nieuwe CSS)</h4>
+            
+            {/* Test Button 1 - Modern Card Style */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+              <button
+                onClick={() => setStrategy('snowball')}
+                className={`
+                  group relative overflow-hidden rounded-2xl p-4 transition-all duration-300
+                  ${strategy === 'snowball' 
+                    ? 'bg-gradient-to-br from-[#8BAE5A] to-[#6B8E4A] text-white shadow-xl' 
+                    : 'bg-[#1A2A1A] border border-[#3A4D23] text-[#8BAE5A] hover:border-[#8BAE5A]/50'
+                  }
+                `}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <div className="font-bold text-sm mb-1">Test 1: Card Style</div>
+                    <div className="text-xs opacity-80">Modern card design</div>
+                  </div>
+                  <div className={`
+                    w-6 h-6 rounded-full border-2 transition-all
+                    ${strategy === 'snowball' 
+                      ? 'bg-white border-white' 
+                      : 'border-[#8BAE5A] group-hover:bg-[#8BAE5A]/20'
+                    }
+                  `}>
+                    {strategy === 'snowball' && (
+                      <div className="w-full h-full rounded-full bg-white flex items-center justify-center">
+                        <div className="w-2 h-2 bg-[#8BAE5A] rounded-full"></div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                
+                {/* Hover effect */}
+                <div className={`
+                  absolute inset-0 bg-gradient-to-r from-transparent to-white/10 
+                  translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-500
+                `} />
+              </button>
+              
+              {/* Test Button 2 - Minimalist Style */}
+              <button
+                onClick={() => setStrategy('avalanche')}
+                className={`
+                  group relative overflow-hidden rounded-lg p-4 transition-all duration-200
+                  ${strategy === 'avalanche' 
+                    ? 'bg-[#8BAE5A] text-white shadow-lg' 
+                    : 'bg-transparent border-2 border-[#8BAE5A]/30 text-[#8BAE5A] hover:bg-[#8BAE5A]/10'
+                  }
+                `}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <div className="font-semibold text-sm mb-1">Test 2: Minimalist</div>
+                    <div className="text-xs opacity-70">Clean minimal design</div>
+                  </div>
+                  <div className={`
+                    w-5 h-5 rounded-full transition-all
+                    ${strategy === 'avalanche' 
+                      ? 'bg-white' 
+                      : 'border-2 border-[#8BAE5A] group-hover:bg-[#8BAE5A]/20'
+                    }
+                  `}>
+                    {strategy === 'avalanche' && (
+                      <div className="w-full h-full rounded-full bg-white flex items-center justify-center">
+                        <div className="w-1.5 h-1.5 bg-[#8BAE5A] rounded-full"></div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                
+                {/* Subtle hover effect */}
+                <div className={`
+                  absolute inset-0 bg-[#8BAE5A]/5 
+                  opacity-0 group-hover:opacity-100 transition-opacity duration-200
+                `} />
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Monthly Payment Input */}
