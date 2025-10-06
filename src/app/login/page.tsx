@@ -69,8 +69,6 @@ function LoginPageContent() {
     loadingText: "",
     isRedirecting: false
   });
-  const [showDebugPanel, setShowDebugPanel] = useState(false);
-
   // ✅ FIX: Ensure client-side hydration consistency
   useEffect(() => {
     setLoginState(prev => ({ ...prev, isClient: true }));
@@ -82,6 +80,15 @@ function LoginPageContent() {
   const redirectExecuted = useRef(false);
   
   
+  // ✅ PHASE 1: Loading progress update function
+  const updateLoadingProgress = (progress: number, text?: string) => {
+    setLoginState(prev => ({
+      ...prev,
+      loadingProgress: progress,
+      loadingText: text || prev.loadingText
+    }));
+  };
+
   // ✅ PHASE 1: Simplified loading system - Progress-based instead of time-based
   const startLoadingSequence = () => {
     console.log('🎬 Starting loading sequence...');
@@ -114,13 +121,6 @@ function LoginPageContent() {
     setTimeout(() => clearInterval(interval), 5000);
   };
   
-  const updateLoadingProgress = (progress: number, text: string) => {
-    setLoginState(prev => ({
-      ...prev,
-      loadingProgress: progress,
-      loadingText: text
-    }));
-  };
   
   // ✅ PHASE 1: Simplified forgot password state
   const [forgotPasswordState, setForgotPasswordState] = useState({
@@ -293,12 +293,40 @@ function LoginPageContent() {
 
     setLoginState(prev => ({ ...prev, isLoading: true, error: "" }));
     
+    // Check environment variables before proceeding
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      console.error('❌ Missing Supabase environment variables');
+      setLoginState(prev => ({
+        ...prev,
+        error: "Configuratiefout: Supabase niet geconfigureerd",
+        isLoading: false,
+        showLoadingOverlay: false
+      }));
+      return;
+    }
+    
     // Show loading overlay immediately when login starts
     console.log('🎬 Starting login loading sequence...');
     startLoadingSequence();
     
     try {
       console.log('🔐 Calling signIn function...');
+      console.log('🌐 Environment check:');
+      console.log('- Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? 'Set' : 'Missing');
+      console.log('- Supabase Key:', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'Set' : 'Missing');
+      
+      // Check if login function exists
+      if (!login || typeof login !== 'function') {
+        console.error('❌ Login function not available');
+        setLoginState(prev => ({
+          ...prev,
+          error: "Login functie niet beschikbaar. Probeer de pagina te verversen.",
+          isLoading: false,
+          showLoadingOverlay: false
+        }));
+        return;
+      }
+      
       const result = await login(loginState.email, loginState.password, updateLoadingProgress);
       console.log('📋 SignIn result:', result);
 
@@ -334,9 +362,29 @@ function LoginPageContent() {
       
     } catch (error: any) {
       console.error('❌ Login exception:', error);
+      console.error('❌ Error stack:', error.stack);
+      console.error('❌ Error details:', {
+        name: error.name,
+        message: error.message,
+        cause: error.cause
+      });
+      
+      let errorMessage = "Er is een fout opgetreden bij het inloggen";
+      
+      // Provide more specific error messages
+      if (error.message?.includes('fetch')) {
+        errorMessage = "Netwerkfout: Controleer je internetverbinding";
+      } else if (error.message?.includes('timeout')) {
+        errorMessage = "Timeout: De server reageert niet";
+      } else if (error.message?.includes('Invalid login credentials')) {
+        errorMessage = "Ongeldige inloggegevens";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       setLoginState(prev => ({
         ...prev,
-        error: error.message || "Er is een fout opgetreden bij het inloggen",
+        error: errorMessage,
         isLoading: false,
         showLoadingOverlay: false
       }));
@@ -660,30 +708,6 @@ function LoginPageContent() {
         </div>
       )}
 
-      {/* Lightweight production debug panel for mobile issue investigation */}
-      {loginState.isClient && (
-        <div className="fixed left-3 bottom-3 z-50">
-          <button
-            type="button"
-            onClick={() => setShowDebugPanel(v => !v)}
-            className="px-2 py-1 text-xs rounded bg-[#3A4D23] text-[#8BAE5A] border border-[#8BAE5A]/30 shadow"
-          >
-            {showDebugPanel ? 'Hide Debug' : 'Show Debug'}
-          </button>
-          {showDebugPanel && (
-            <div className="mt-2 p-2 rounded bg-[#232D1A]/95 text-[10px] text-[#8BAE5A] border border-[#3A4D23] w-64 break-words">
-              <div>overlay: {String(loginState.showLoadingOverlay)}</div>
-              <div>redirecting: {String(loginState.isRedirecting)}</div>
-              <div>formLoading: {String(loginState.isLoading)}</div>
-              <div>progress: {loginState.loadingProgress}%</div>
-              <div>text: {loginState.loadingText || '-'}</div>
-              <div>user: {user?.email || '-'}</div>
-              <div>error: {loginState.error || '-'}</div>
-              <div>ts: {new Date().toLocaleTimeString()}</div>
-            </div>
-          )}
-        </div>
-      )}
 
       {/* ✅ FIXED: Simplified forgot password modal */}
       {loginState.isClient && forgotPasswordState.showForgotPassword && (
