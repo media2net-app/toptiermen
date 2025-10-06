@@ -8,6 +8,7 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const limit = parseInt(searchParams.get('limit') || '2000');
+    const debug = searchParams.get('debug') === '1';
 
     // 1) Fetch profiles (minimal fields for emailing)
     const { data: profiles, error: profilesError } = await supabaseAdmin
@@ -40,9 +41,11 @@ export async function GET(request: NextRequest) {
       return s1.includes('premium') || s1.includes('lifetime') || s2.includes('premium') || s2.includes('lifetime');
     };
 
+    // Consider users active if status is 'active' or empty/null (some rows may not have status yet)
     const filtered = (profiles || []).filter((u: any) => {
       if (!u?.email) return false;
-      const active = (u.status || '').toLowerCase() === 'active';
+      const st = (u.status || '').toLowerCase();
+      const active = st === 'active' || st === '' || st === 'paid';
       const paidFlag = isPaidTier(u.package_type, u.subscription_tier) || paidEmails.has((u.email || '').toLowerCase());
       return active && paidFlag;
     });
@@ -54,7 +57,18 @@ export async function GET(request: NextRequest) {
       name: u.full_name || (u.email ? u.email.split('@')[0] : 'Onbekend'),
     }));
 
-    return NextResponse.json({ success: true, members, total: members.length });
+    const payload: any = { success: true, members, total: members.length };
+    if (debug) {
+      payload.debug = {
+        profiles_total: (profiles || []).length,
+        payments_total: (payments || []).length,
+        paid_emails_matched: paidEmails.size,
+        matched_by_tier: (profiles || []).filter((u: any) => isPaidTier(u.package_type, u.subscription_tier)).length,
+        matched_active_paid: members.length,
+        sample_first5: members.slice(0, 5),
+      };
+    }
+    return NextResponse.json(payload);
   } catch (e) {
     console.error('❌ Error in active-paid-members API:', e);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

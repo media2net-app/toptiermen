@@ -146,30 +146,30 @@ export default function DebtSnowball() {
         {/* Strategy Selection */}
         <div className="bg-[#181F17] rounded-xl p-3 sm:p-4 max-w-full">
           <h3 className="text-[#8BAE5A] font-semibold mb-2 sm:mb-3 text-sm sm:text-base">Kies je Strategie</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-3 min-w-0">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-3 min-w-0 w-full">
             <button
               onClick={() => setStrategy('snowball')}
-              className={`p-3 sm:p-4 rounded-lg border-2 transition-all w-full text-left break-words whitespace-normal text-pretty hyphens-auto overflow-hidden max-w-full ${
+              className={`p-3 sm:p-4 rounded-lg border-2 transition-all w-full text-left break-words whitespace-normal text-pretty hyphens-auto overflow-hidden max-w-full min-w-0 ${
                 strategy === 'snowball'
                   ? 'border-[#8BAE5A] bg-[#8BAE5A]/10'
                   : 'border-[#3A4D23] bg-[#232D1A] hover:border-[#8BAE5A]/50'
               }`}
             >
               <div className="text-sm sm:text-lg font-bold text-white mb-0.5 sm:mb-1 break-words text-pretty hyphens-auto">Sneeuwbal Methode</div>
-              <div className="text-xs sm:text-sm text-[#A3AED6] leading-snug break-words text-pretty hyphens-auto">
+              <div className="text-xs sm:text-sm text-[#A3AED6] leading-relaxed break-words text-pretty hyphens-auto overflow-wrap-anywhere">
                 Los eerst de kleinste schuld af voor psychologische winst
               </div>
             </button>
             <button
               onClick={() => setStrategy('avalanche')}
-              className={`p-3 sm:p-4 rounded-lg border-2 transition-all w-full text-left break-words whitespace-normal text-pretty hyphens-auto overflow-hidden max-w-full ${
+              className={`p-3 sm:p-4 rounded-lg border-2 transition-all w-full text-left break-words whitespace-normal text-pretty hyphens-auto overflow-hidden max-w-full min-w-0 ${
                 strategy === 'avalanche'
                   ? 'border-[#8BAE5A] bg-[#8BAE5A]/10'
                   : 'border-[#3A4D23] bg-[#232D1A] hover:border-[#8BAE5A]/50'
               }`}
             >
               <div className="text-sm sm:text-lg font-bold text-white mb-0.5 sm:mb-1 break-words text-pretty hyphens-auto">Lawaai Methode</div>
-              <div className="text-xs sm:text-sm text-[#A3AED6] leading-snug break-words text-pretty hyphens-auto">
+              <div className="text-xs sm:text-sm text-[#A3AED6] leading-relaxed break-words text-pretty hyphens-auto overflow-wrap-anywhere">
                 Los eerst de schuld met hoogste rente af voor financiële winst
               </div>
             </button>

@@ -295,6 +295,9 @@ export default function MijnChallengesPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // New Challenge form state
+  const [showNewChallengeForm, setShowNewChallengeForm] = useState(false);
 
   // Onboarding status
   const [onboardingStatus, setOnboardingStatus] = useState<any>(null);
@@ -1083,39 +1086,51 @@ export default function MijnChallengesPage() {
 
         {/* Add New Challenge */}
         <div className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-6 mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-white">Nieuwe Challenge Toevoegen</h2>
-            <button
-              onClick={() => setShowChallengeLibrary(!showChallengeLibrary)}
-              className="bg-gradient-to-r from-[#f0a14f] to-[#e0903f] hover:from-[#e0903f] hover:to-[#d0802f] text-white font-semibold px-4 py-2 rounded-lg transition-all duration-200 flex items-center gap-2"
-            >
-              <span className="text-lg">📚</span>
-              {showChallengeLibrary ? 'Sluit Bibliotheek' : 'Challenge Bibliotheek'}
-            </button>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <h2 className="text-xl font-semibold text-white w-full sm:w-auto">Nieuwe Challenge Toevoegen</h2>
+            <div className="flex items-center gap-3 w-full sm:w-auto">
+              <button
+                onClick={() => setShowChallengeLibrary(!showChallengeLibrary)}
+                className="bg-gradient-to-r from-[#f0a14f] to-[#e0903f] hover:from-[#e0903f] hover:to-[#d0802f] text-white font-semibold px-4 py-2 rounded-lg transition-all duration-200 flex items-center gap-2 flex-1 sm:flex-none justify-center"
+              >
+                <span className="text-lg">📚</span>
+                <span className="hidden sm:inline">{showChallengeLibrary ? 'Sluit Bibliotheek' : 'Challenge Bibliotheek'}</span>
+                <span className="sm:hidden">Bibliotheek</span>
+              </button>
+              <button
+                onClick={() => setShowNewChallengeForm(!showNewChallengeForm)}
+                className="bg-gradient-to-r from-[#8BAE5A] to-[#6B8E3A] hover:from-[#7A9D4A] hover:to-[#5A7D2A] text-white font-semibold px-4 py-2 rounded-lg transition-all duration-200 flex items-center gap-2 flex-1 sm:flex-none justify-center"
+              >
+                <span className="text-lg">+</span>
+                {showNewChallengeForm ? 'Sluiten' : 'Toevoegen'}
+              </button>
+            </div>
           </div>
           
-          <form onSubmit={addChallenge} className="flex flex-col sm:flex-row gap-4">
-            <input
-              type="text"
-              value={newChallenge.title}
-              onChange={(e) => setNewChallenge(prev => ({ ...prev, title: e.target.value }))}
-              placeholder="Challenge titel..."
-              className="flex-1 bg-[#0F1419] border border-[#3A4D23]/30 rounded-lg px-4 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-[#8BAE5A]"
-            />
-            <select
-              value={newChallenge.type}
-              onChange={(e) => setNewChallenge(prev => ({ ...prev, type: e.target.value }))}
-              className="bg-[#0F1419] border border-[#3A4D23]/30 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#8BAE5A]"
-            >
-              <option value="Dagelijks">Dagelijks</option>
-            </select>
-            <button
-              type="submit"
-              className="bg-gradient-to-r from-[#8BAE5A] to-[#6B8E3A] hover:from-[#7A9D4A] hover:to-[#5A7D2A] text-white font-semibold px-6 py-2 rounded-lg transition-all duration-200"
-            >
-              Toevoegen
-            </button>
-          </form>
+          {showNewChallengeForm && (
+            <form onSubmit={addChallenge} className="flex flex-col sm:flex-row gap-4 mt-4">
+              <input
+                type="text"
+                value={newChallenge.title}
+                onChange={(e) => setNewChallenge(prev => ({ ...prev, title: e.target.value }))}
+                placeholder="Challenge titel..."
+                className="flex-1 bg-[#0F1419] border border-[#3A4D23]/30 rounded-lg px-4 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-[#8BAE5A]"
+              />
+              <select
+                value={newChallenge.type}
+                onChange={(e) => setNewChallenge(prev => ({ ...prev, type: e.target.value }))}
+                className="bg-[#0F1419] border border-[#3A4D23]/30 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#8BAE5A]"
+              >
+                <option value="Dagelijks">Dagelijks</option>
+              </select>
+              <button
+                type="submit"
+                className="bg-gradient-to-r from-[#8BAE5A] to-[#6B8E3A] hover:from-[#7A9D4A] hover:to-[#5A7D2A] text-white font-semibold px-6 py-2 rounded-lg transition-all duration-200"
+              >
+                Toevoegen
+              </button>
+            </form>
+          )}
         </div>
 
 

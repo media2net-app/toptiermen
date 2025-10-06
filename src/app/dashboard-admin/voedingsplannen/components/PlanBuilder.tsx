@@ -78,10 +78,11 @@ interface Ingredient {
 }
 
 interface PlanBuilderProps {
-  plan: NutritionPlan;
+  plan: NutritionPlan | null;
   onClose: () => void;
   onSave: (plan: NutritionPlan) => void;
   isPageMode?: boolean;
+  onChange?: (plan: NutritionPlan) => void;
 }
 
 const DAYS = [
@@ -103,8 +104,35 @@ const MEALS = [
   { key: 'avond_snack', label: 'Avond Snack', time: '21:00', icon: '🌙' }
 ];
 
-export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false }: PlanBuilderProps) {
-  const [formData, setFormData] = useState<NutritionPlan>(plan);
+export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false, onChange }: PlanBuilderProps) {
+  // Provide a default empty plan for creation flows
+  const defaultPlan: NutritionPlan = {
+    name: 'Nieuw plan',
+    description: '',
+    target_calories: 2200,
+    target_protein: 165,
+    target_carbs: 220,
+    target_fat: 73,
+    duration_weeks: 12,
+    difficulty: 'intermediate',
+    goal: 'onderhoud',
+    is_featured: false,
+    is_public: true,
+    meals: {
+      weekly_plan: {
+        maandag: {},
+        dinsdag: {},
+        woensdag: {},
+        donderdag: {},
+        vrijdag: {},
+        zaterdag: {},
+        zondag: {}
+      },
+      weekly_averages: { calories: 0, protein: 0, carbs: 0, fat: 0 }
+    }
+  };
+
+  const [formData, setFormData] = useState<NutritionPlan>(plan || defaultPlan);
   const [activeTab, setActiveTab] = useState<'overview' | 'daily_plans' | 'ingredients'>('overview');
   const [selectedDay, setSelectedDay] = useState<string>('maandag');
   const [selectedMeal, setSelectedMeal] = useState<string>('ontbijt');
@@ -112,6 +140,8 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [loading, setLoading] = useState(false);
   // AutoSaveStatus removed for better performance
+  // Debug modal state
+  const [showDebugModal, setShowDebugModal] = useState<boolean>(false);
   
   // Ingredients management state
   const [searchTerm, setSearchTerm] = useState('');
@@ -140,6 +170,9 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
   const [mealsData, setMealsData] = useState<any>(null);
   const [availableCategories, setAvailableCategories] = useState<string[]>([]);
   const [availableUnitTypes, setAvailableUnitTypes] = useState<string[]>([]);
+  // Delete confirmation modal state
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<boolean>(false);
+  const [deleteTargetDay, setDeleteTargetDay] = useState<string>('');
 
   // V2 display-only targets (UI only). If plan_id ends with -v2, show 90% kcal with original macro ratios.
   const isV2Plan = String((plan?.plan_id || formData?.plan_id || '')).endsWith('-v2');
@@ -167,8 +200,10 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
   }, []);
 
   // Initialize formData and mealsData when plan changes
+  const [lastPlanId, setLastPlanId] = useState<string | undefined>(plan?.id as any);
+
   useEffect(() => {
-    if (plan) {
+    if (plan && plan.id !== lastPlanId) {
       console.log('🔄 PlanBuilder: Plan changed, updating formData:', plan.name);
       
       // Always use plan properties for target values (not meals data which may be outdated)
@@ -222,8 +257,13 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
           fat: plan.fat_percentage
         }
       });
+      setLastPlanId(plan.id as any);
+    } else if (!plan) {
+      // When entering create mode ensure defaults are set
+      setFormData(defaultPlan);
+      setMealsData(defaultPlan.meals as any);
     }
-  }, [plan]);
+  }, [plan?.id]);
 
   // Initialize mealsData when formData changes
   useEffect(() => {
@@ -231,6 +271,18 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
       setMealsData(formData.meals);
     }
   }, [formData.meals]);
+
+  // Propagate form changes to parent (debounced) to prevent typing lag
+  const emitChange = useCallback(
+    debounce((data: NutritionPlan) => {
+      try { onChange && onChange(data); } catch {}
+    }, 300),
+    [onChange]
+  );
+
+  useEffect(() => {
+    emitChange(formData);
+  }, [formData, emitChange]);
 
   // Update available categories and unit types when ingredients change
   useEffect(() => {
@@ -256,38 +308,7 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
   };
 
 
-  const handleSave = async () => {
-    try {
-      console.log('💾 Manual save initiated...');
-      
-      // Clean payload - remove invalid columns and only include valid database fields
-      const { weekly_plan, created_at, updated_at, ...cleanFormData } = formData as any;
-      const requestBody = { ...cleanFormData, id: plan.id };
-      
-      const response = await fetch('/api/admin/nutrition-plans', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody)
-      });
-      
-      if (response.ok) {
-        console.log('✅ Plan saved successfully via manual save button');
-        onSave(formData);
-        alert('Plan succesvol opgeslagen!');
-      } else {
-        const errorText = await response.text();
-        console.error('❌ Save failed:', {
-          status: response.status,
-          statusText: response.statusText,
-          errorText: errorText
-        });
-        alert('Fout bij opslaan van plan: ' + errorText);
-      }
-    } catch (error) {
-      console.error('💥 Save error:', error);
-      alert('Fout bij opslaan van plan: ' + error.message);
-    }
-  };
+  // Manual save removed; saving occurs when leaving editor or via specific actions
 
   const handleMealEdit = (day: string, meal: string) => {
     setSelectedDay(day);
@@ -297,12 +318,16 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
 
   const handleMealSave = async (ingredients: any[]) => {
     console.log('🍽️ PlanBuilder handleMealSave called with ingredients:', ingredients);
+    if (!formData?.id) {
+      alert('Sla het plan eerst op voordat je maaltijden kunt bewerken.');
+      return;
+    }
     try {
       const response = await fetch('/api/admin/plan-meals', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          planId: plan.id,
+          planId: formData.id,
           day: selectedDay,
           meal: selectedMeal,
           ingredients: ingredients
@@ -623,11 +648,12 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
   };
 
   // Delete all data for a specific day
-  const handleDeleteDayData = async (dayKey: string) => {
+  const handleDeleteDayData = async (dayKey: string, suppressConfirm: boolean = false) => {
     const dayName = DAYS.find(d => d.key === dayKey)?.label || dayKey;
-    
-    if (!confirm(`Weet je zeker dat je alle maaltijddata van ${dayName} wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.`)) {
-      return;
+    if (!suppressConfirm) {
+      if (!confirm(`Weet je zeker dat je alle maaltijddata van ${dayName} wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.`)) {
+        return;
+      }
     }
 
     try {
@@ -667,6 +693,12 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
     }
   };
 
+  const confirmDeleteDayNow = async () => {
+    const target = deleteTargetDay || selectedDay;
+    setShowDeleteConfirm(false);
+    await handleDeleteDayData(target, true);
+  };
+
   return (
     <div className={isPageMode ? "flex flex-col" : "fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"}>
       <div className={`${isPageMode ? "" : "bg-[#0F150E] rounded-xl border border-[#3A4D23] w-full max-w-7xl h-[90vh]"} flex flex-col`}>
@@ -676,19 +708,14 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
             <h2 className="text-2xl font-bold text-[#8BAE5A]">{formData.name}</h2>
             <p className="text-gray-300 mt-1">{formData.description}</p>
           </div>
-            <div className="flex items-center space-x-4">
-              {/* Manual Save Button */}
-              <button
-                onClick={handleSave}
-                className="px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2 bg-[#8BAE5A] text-[#232D1A] hover:bg-[#B6C948]"
-                title="Opslaan naar database"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
-                </svg>
-                <span>Opslaan</span>
-              </button>
-            
+          <div className="flex items-center space-x-3">
+            <button
+              onClick={() => setShowDebugModal(v => !v)}
+              className="px-3 py-2 rounded-lg text-white bg-blue-600 hover:bg-blue-500 border border-blue-500 text-sm"
+              title="Toon/verberg ingrediënten debug"
+            >
+              Ingrediënten Debug
+            </button>
             {!isPageMode && (
               <button
                 onClick={onClose}
@@ -697,6 +724,33 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
                 <XMarkIcon className="w-6 h-6" />
               </button>
             )}
+
+        {/* Confirm Delete Day Modal */}
+        {showDeleteConfirm && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+            <div className="w-full max-w-md bg-[#0F150E] border border-[#3A4D23] rounded-xl shadow-xl p-5 text-white">
+              <div className="text-lg font-semibold mb-2">Bevestig verwijderen</div>
+              <p className="text-sm text-gray-300 mb-4">
+                Weet je zeker dat je alle maaltijddata van <span className="font-semibold text-[#B6C948]">{DAYS.find(d => d.key === (deleteTargetDay || selectedDay))?.label}</span> wilt verwijderen?
+                Deze actie kan niet ongedaan worden gemaakt.
+              </p>
+              <div className="flex justify-end gap-2">
+                <button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="px-4 py-2 rounded-lg text-sm border border-[#3A4D23] bg-[#232D1A] hover:bg-[#2A2A2A]"
+                >
+                  Annuleren
+                </button>
+                <button
+                  onClick={confirmDeleteDayNow}
+                  className="px-4 py-2 rounded-lg text-sm bg-red-600 hover:bg-red-700"
+                >
+                  Ja, verwijder
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
           </div>
         </div>
 
@@ -1104,7 +1158,7 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
                       Plan kopieren van andere dag
                     </button>
                     <button
-                      onClick={() => handleDeleteDayData(selectedDay)}
+                      onClick={() => { setDeleteTargetDay(selectedDay); setShowDeleteConfirm(true); }}
                       className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium flex items-center gap-2"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1377,19 +1431,50 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
                                     <div className="flex-1">
                                       <div className="text-sm font-medium text-white">{ingredient.name}</div>
                                       <div className="text-xs text-gray-400">
-                                        {ingredient.amount} {ingredient.unit === 'per_piece' ? 'stuk' : 
-                                                         ingredient.unit === 'per_handful' ? 'handje' : 
-                                                         ingredient.unit === 'per_plakje' ? 'plakje' : 
-                                                         ingredient.unit === 'per_30g' ? 'g' : 
-                                                         ingredient.unit === 'per_100g' ? 'g' : ingredient.unit}
+                                        {(() => {
+                                          const found = ingredients.find(fi => String((fi as any).id) === String((ingredient as any).id));
+                                          const u = found?.unit_type || ingredient.unit;
+                                          return `${ingredient.amount} ${
+                                            u === 'per_piece' ? 'stuk' :
+                                            u === 'per_handful' ? 'handje' :
+                                            u === 'per_plakje' ? 'plakje' :
+                                            u === 'per_sneedje' ? 'sneedje' :
+                                            u === 'per_blikje' ? 'blikje' :
+                                            u === 'per_30g' ? 'x 30g' :
+                                            u === 'per_100ml' ? 'ml' :
+                                            u === 'per_100g' ? 'g' :
+                                            u === 'per_eetlepel_15g' ? 'eetlepel' :
+                                            u || ''
+                                          }`;
+                                        })()}
                                       </div>
                                     </div>
                                     <div className="text-right">
                                       <div className="text-sm font-medium text-[#8BAE5A]">
-                                        {ingredient.unit === 'per_100g' 
-                                          ? Math.round((ingredient.calories_per_100g * ingredient.amount) / 100)
-                                          : Math.round(ingredient.calories_per_100g * ingredient.amount)
-                                        } kcal
+                                        {(() => {
+                                          const amt = Number(ingredient.amount) || 0;
+                                          const found = ingredients.find(fi => String((fi as any).id) === String((ingredient as any).id));
+                                          const u = (found?.unit_type) || ingredient.unit || 'per_100g';
+                                          let factor = 1;
+                                          if (u === 'per_100g' || u === 'gram') {
+                                            factor = amt / 100;
+                                          } else if (u === 'per_piece' || u === 'stuks' || u === 'stuk' || u === 'per_blikje' || u === 'per_sneedje') {
+                                            factor = amt;
+                                          } else if (u === 'per_handful' || u === 'handje' || u === 'handjes') {
+                                            factor = amt;
+                                          } else if (u === 'per_plakje' || u === 'plakje' || u === 'plakjes') {
+                                            factor = amt;
+                                          } else if (u === 'per_30g') {
+                                            factor = amt * 0.3;
+                                          } else if (u === 'per_100ml') {
+                                            factor = amt / 100;
+                                          } else if (u === 'per_eetlepel_15g') {
+                                            factor = amt * 0.15;
+                                          } else {
+                                            factor = amt / 100;
+                                          }
+                                          return Math.round((ingredient.calories_per_100g || 0) * factor);
+                                        })()} kcal
                                       </div>
                                     </div>
                                   </div>
@@ -1596,6 +1681,148 @@ export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false 
             </div>
           )}
         </div>
+
+        {/* Debug Modal: Ingrediënten per maaltijd voor geselecteerde dag */}
+        {showDebugModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+            <div className="w-full max-w-5xl bg-[#0F150E] border border-[#3A4D23] rounded-xl shadow-xl p-5">
+              <div className="flex items-center justify-between mb-3">
+                <div>
+                  <div className="text-lg font-semibold text-white">Ingrediënten Debug – {DAYS.find(d => d.key === selectedDay)?.label}</div>
+                  <div className="text-xs text-gray-400">Plan: {formData.name}</div>
+                </div>
+                <button
+                  onClick={() => setShowDebugModal(false)}
+                  className="px-3 py-1 rounded-lg text-sm border bg-[#232D1A] text-white border-[#3A4D23] hover:bg-[#2A2A2A]"
+                >
+                  Sluiten
+                </button>
+              </div>
+              {/* Targets + Dag totalen met progress bars */}
+              {(() => {
+                const t = getDayTotal(selectedDay);
+                return (
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                    <div className="bg-[#0F130F] rounded p-3 border border-[#3A4D23]">
+                      <div className="text-xs text-gray-400">Calorieën</div>
+                      <div className="text-lg font-bold text-[#8BAE5A]">{t.calories} / {targetCaloriesForUI || 0} kcal</div>
+                      {targetCaloriesForUI && (
+                        <div className="mt-1">
+                          <div className="w-full bg-[#0F150E] rounded-full h-1.5">
+                            <div
+                              className={`h-1.5 rounded-full ${getProgressBarColor(t.calories, targetCaloriesForUI)}`}
+                              style={{ width: `${Math.min((t.calories / targetCaloriesForUI) * 100, 100)}%` }}
+                            />
+                          </div>
+                          <div className="text-[10px] text-[#B6C948] mt-1">{Math.round((t.calories / targetCaloriesForUI) * 100)}% van doel</div>
+                        </div>
+                      )}
+                    </div>
+                    <div className="bg-[#0F130F] rounded p-3 border border-[#3A4D23]">
+                      <div className="text-xs text-gray-400">Eiwit</div>
+                      <div className="text-lg font-bold text-blue-400">{Math.round(t.protein*10)/10}g / {targetProteinForUI || 0}g</div>
+                      {targetProteinForUI && (
+                        <div className="mt-1">
+                          <div className="w-full bg-[#0F150E] rounded-full h-1.5">
+                            <div
+                              className={`h-1.5 rounded-full ${getProgressBarColor(t.protein, targetProteinForUI)}`}
+                              style={{ width: `${Math.min((t.protein / targetProteinForUI) * 100, 100)}%` }}
+                            />
+                          </div>
+                          <div className="text-[10px] text-[#B6C948] mt-1">{Math.round((t.protein / targetProteinForUI) * 100)}% van doel</div>
+                        </div>
+                      )}
+                    </div>
+                    <div className="bg-[#0F130F] rounded p-3 border border-[#3A4D23]">
+                      <div className="text-xs text-gray-400">Koolhydraten</div>
+                      <div className="text-lg font-bold text-orange-400">{Math.round(t.carbs*10)/10}g / {targetCarbsForUI || 0}g</div>
+                      {targetCarbsForUI && (
+                        <div className="mt-1">
+                          <div className="w-full bg-[#0F150E] rounded-full h-1.5">
+                            <div
+                              className={`h-1.5 rounded-full ${getProgressBarColor(t.carbs, targetCarbsForUI)}`}
+                              style={{ width: `${Math.min((t.carbs / targetCarbsForUI) * 100, 100)}%` }}
+                            />
+                          </div>
+                          <div className="text-[10px] text-[#B6C948] mt-1">{Math.round((t.carbs / targetCarbsForUI) * 100)}% van doel</div>
+                        </div>
+                      )}
+                    </div>
+                    <div className="bg-[#0F130F] rounded p-3 border border-[#3A4D23]">
+                      <div className="text-xs text-gray-400">Vet</div>
+                      <div className="text-lg font-bold text-yellow-400">{Math.round(t.fat*10)/10}g / {targetFatForUI || 0}g</div>
+                      {targetFatForUI && (
+                        <div className="mt-1">
+                          <div className="w-full bg-[#0F150E] rounded-full h-1.5">
+                            <div
+                              className={`h-1.5 rounded-full ${getProgressBarColor(t.fat, targetFatForUI)}`}
+                              style={{ width: `${Math.min((t.fat / targetFatForUI) * 100, 100)}%` }}
+                            />
+                          </div>
+                          <div className="text-[10px] text-[#B6C948] mt-1">{Math.round((t.fat / targetFatForUI) * 100)}% van doel</div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
+              <div className="max-h-[70vh] overflow-y-auto space-y-4 pr-1">
+                {(() => {
+                  const dayData: any = (mealsData || formData.meals)?.weekly_plan?.[selectedDay] || {};
+                  const mealOrder = ['ontbijt','ochtend_snack','lunch','lunch_snack','diner','avond_snack'];
+                  const present = Object.keys(dayData || {});
+                  const ordered = mealOrder.filter(k => present.includes(k)).concat(present.filter(k => !mealOrder.includes(k)));
+                  if (ordered.length === 0) {
+                    return <div className="text-gray-400">Geen maaltijden voor deze dag.</div>;
+                  }
+                  return ordered.map((mealKey: string) => {
+                    const meal = dayData[mealKey];
+                    const ings = Array.isArray(meal?.ingredients) ? meal.ingredients : [];
+                    const stored = meal?.nutrition || { calories: 0, protein: 0, carbs: 0, fat: 0 };
+                    return (
+                      <div key={mealKey} className="border border-[#3A4D23] rounded-md p-3 bg-[#0F130F]">
+                        <div className="font-semibold text-[#B6C948] mb-2">{MEALS.find(m=>m.key===mealKey)?.label || mealKey}</div>
+                        <div className="text-xs text-gray-400 mb-2">Opgeslagen voeding: {stored.calories} kcal • P {stored.protein}g • C {stored.carbs}g • F {stored.fat}g</div>
+                        {ings.length === 0 ? (
+                          <div className="text-gray-400 text-sm">Geen ingrediënten</div>
+                        ) : (
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-left text-xs">
+                              <thead className="text-gray-400">
+                                <tr>
+                                  <th className="py-1 pr-2">Ingrediënt</th>
+                                  <th className="py-1 pr-2">Hoeveelheid</th>
+                                  <th className="py-1 pr-2">Unit</th>
+                                  <th className="py-1 pr-2">kcal/100g</th>
+                                  <th className="py-1 pr-2">P/100g</th>
+                                  <th className="py-1 pr-2">C/100g</th>
+                                  <th className="py-1 pr-2">F/100g</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {ings.map((it: any, idx: number) => (
+                                  <tr key={idx} className="border-t border-[#3A4D23]">
+                                    <td className="py-1 pr-2 whitespace-nowrap">{it?.name}</td>
+                                    <td className="py-1 pr-2">{it?.amount}</td>
+                                    <td className="py-1 pr-2">{String(it?.unit || 'per_100g')}</td>
+                                    <td className="py-1 pr-2">{it?.calories_per_100g ?? 0}</td>
+                                    <td className="py-1 pr-2">{it?.protein_per_100g ?? 0}</td>
+                                    <td className="py-1 pr-2">{it?.carbs_per_100g ?? 0}</td>
+                                    <td className="py-1 pr-2">{it?.fat_per_100g ?? 0}</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  });
+                })()}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Footer */}
         <div className="flex items-center justify-between p-6 border-t border-[#3A4D23]">

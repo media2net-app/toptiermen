@@ -560,7 +560,7 @@ function FinanceDashboardContent() {
             title="Instellingen bewerken"
           >
             <Cog6ToothIcon className="w-5 h-5" />
-            <span className="hidden sm:inline">Instellingen</span>
+            <span className="text-sm">Instellingen</span>
           </button>
           <button
             onClick={() => {
@@ -568,10 +568,11 @@ function FinanceDashboardContent() {
                 router.push('/dashboard/finance-en-business/intake');
               }
             }}
-            className="px-4 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-[#8BAE5A] hover:bg-[#3A4D23] hover:text-[#B6C948] transition-colors"
+            className="flex items-center space-x-2 px-4 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-[#8BAE5A] hover:bg-[#3A4D23] hover:text-[#B6C948] transition-colors"
             title="Profiel resetten"
           >
-            <span className="hidden sm:inline">Reset</span>
+            <TrashIcon className="w-5 h-5" />
+            <span className="text-sm">Reset</span>
           </button>
         </div>
       }

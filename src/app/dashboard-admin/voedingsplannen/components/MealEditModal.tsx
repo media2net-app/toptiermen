@@ -73,6 +73,37 @@ export default function MealEditModal({
   const [showAmountModal, setShowAmountModal] = useState(false);
   const [editingIngredientIndex, setEditingIngredientIndex] = useState<number | null>(null);
 
+  // Normalize existing ingredient units to the latest unit_type from availableIngredients
+  useEffect(() => {
+    if (!availableIngredients || availableIngredients.length === 0) return;
+    let changed = false;
+    const normalized = currentIngredients.map((ing) => {
+      const avail = availableIngredients.find(ai => String(ai.id) === String(ing.id));
+      if (!avail) return ing;
+      // Map legacy aliases
+      const legacy = ing.unit === 'gram' ? 'per_100g' : ing.unit;
+      let next = { ...ing } as any;
+      if (avail.unit_type && legacy !== avail.unit_type) {
+        changed = true;
+        next.unit = avail.unit_type;
+      }
+      // Sanitize absurd per-100 values (e.g., 4200 instead of 42)
+      const clamp = (v: number) => {
+        if (!isFinite(v)) return 0;
+        // Most per-100 values are < 1000 kcal and < 100 g macros
+        if (v > 1000) return Math.round(v / 100); // scaled by 100
+        if (v > 100) return Math.round(v / 10);   // scaled by 10
+        return v;
+      };
+      next.calories_per_100g = clamp(Number(next.calories_per_100g || 0));
+      next.protein_per_100g = clamp(Number(next.protein_per_100g || 0));
+      next.carbs_per_100g = clamp(Number(next.carbs_per_100g || 0));
+      next.fat_per_100g = clamp(Number(next.fat_per_100g || 0));
+      return next;
+    });
+    if (changed) setCurrentIngredients(normalized);
+  }, []);
+
   // Set unit and default amount based on selected ingredient's unit_type
   useEffect(() => {
     if (selectedIngredient && editingIngredientIndex === null) {
@@ -80,7 +111,7 @@ export default function MealEditModal({
       if (selectedIngredient.unit_type) {
         setUnit(selectedIngredient.unit_type);
         // Set default amount based on unit type
-        if (selectedIngredient.unit_type === 'per_piece' || selectedIngredient.unit_type === 'per_plakje') {
+        if (selectedIngredient.unit_type === 'per_piece' || selectedIngredient.unit_type === 'per_plakje' || selectedIngredient.unit_type === 'per_blikje' || selectedIngredient.unit_type === 'per_sneedje') {
           setAmount('1'); // 1 stuk/plakje
         } else if (selectedIngredient.unit_type === 'per_handful') {
           setAmount('1'); // 1 handje
@@ -88,6 +119,10 @@ export default function MealEditModal({
           setAmount('100'); // 100 gram
         } else if (selectedIngredient.unit_type === 'per_30g') {
           setAmount('30'); // 30 gram
+        } else if (selectedIngredient.unit_type === 'per_100ml') {
+          setAmount('100'); // 100 ml
+        } else if (selectedIngredient.unit_type === 'per_eetlepel_15g') {
+          setAmount('1'); // 1 eetlepel
         } else {
           setAmount('100'); // Default to 100g
         }
@@ -160,18 +195,26 @@ export default function MealEditModal({
 
     currentIngredients.forEach(ingredient => {
       const amount = typeof ingredient.amount === 'string' ? parseFloat(ingredient.amount) || 0 : ingredient.amount || 0;
-      const unit = ingredient.unit || 'per_100g';
+      // Use normalized unit or fall back to available unit_type if mismatched
+      const avail = availableIngredients.find(ai => String(ai.id) === String(ingredient.id));
+      const unit = (avail?.unit_type) || ingredient.unit || 'per_100g';
       let factor = 1;
       
       // Use the same calculation logic as the API
       if (unit === 'per_100g' || unit === 'gram') {
         factor = amount / 100;
-      } else if (unit === 'per_piece' || unit === 'stuks' || unit === 'stuk') {
+      } else if (unit === 'per_piece' || unit === 'stuks' || unit === 'stuk' || unit === 'per_blikje' || unit === 'per_sneedje') {
         factor = amount; // Use amount directly for pieces
       } else if (unit === 'per_handful' || unit === 'handje' || unit === 'handjes') {
         factor = amount;
       } else if (unit === 'per_plakje' || unit === 'plakje' || unit === 'plakjes') {
         factor = amount;
+      } else if (unit === 'per_30g') {
+        factor = amount * 0.3; // 30g per unit
+      } else if (unit === 'per_100ml') {
+        factor = amount / 100; // 100ml base
+      } else if (unit === 'per_eetlepel_15g') {
+        factor = amount * 0.15; // 15g per tablespoon
       } else {
         factor = amount / 100; // Default to per_100g calculation
       }
@@ -273,7 +316,17 @@ export default function MealEditModal({
                   <div className="font-medium">{ingredient.name}</div>
                   <div className="text-sm opacity-75">{ingredient.category}</div>
                   <div className="text-xs opacity-60">
-                    {ingredient.calories_per_100g} kcal per {ingredient.unit_type === 'per_piece' ? 'stuk' : ingredient.unit_type === 'per_handful' ? 'handje' : ingredient.unit_type === 'per_plakje' ? 'plakje' : ingredient.unit_type === 'per_30g' ? '30g' : ingredient.unit_type === 'per_100g' ? '100g' : '100g'}
+                    {ingredient.calories_per_100g} kcal per {
+                      ingredient.unit_type === 'per_piece' ? 'stuk' :
+                      ingredient.unit_type === 'per_handful' ? 'handje' :
+                      ingredient.unit_type === 'per_plakje' ? 'plakje' :
+                      ingredient.unit_type === 'per_sneedje' ? 'sneedje' :
+                      ingredient.unit_type === 'per_blikje' ? 'blikje' :
+                      ingredient.unit_type === 'per_30g' ? '30g' :
+                      ingredient.unit_type === 'per_100ml' ? '100ml' :
+                      ingredient.unit_type === 'per_eetlepel_15g' ? 'eetlepel (15g)' :
+                      ingredient.unit_type === 'per_100g' ? '100g' : '100g'
+                    }
                   </div>
                   {ingredient.is_carnivore && (
                     <div className="text-xs text-orange-400">🥩 Carnivoor</div>
@@ -321,20 +374,33 @@ export default function MealEditModal({
                 </div>
               ) : (
                 currentIngredients.map((ingredient, index) => {
-                  // Correcte berekening afhankelijk van unit type
-                  let calories, protein, carbs, fat;
-                  
-                  if (ingredient.unit === 'per_100g') {
-                    calories = Math.round((ingredient.calories_per_100g * ingredient.amount) / 100);
-                    protein = Math.round((ingredient.protein_per_100g * ingredient.amount) / 100 * 10) / 10;
-                    carbs = Math.round((ingredient.carbs_per_100g * ingredient.amount) / 100 * 10) / 10;
-                    fat = Math.round((ingredient.fat_per_100g * ingredient.amount) / 100 * 10) / 10;
+                  // Correcte berekening afhankelijk van unit type (incl. per_100ml, per_30g, etc.)
+                  const avail = availableIngredients.find(ai => String(ai.id) === String(ingredient.id));
+                  const unit = (avail?.unit_type) || ingredient.unit || 'per_100g';
+                  const amt = typeof ingredient.amount === 'string' ? parseFloat(ingredient.amount) || 0 : ingredient.amount || 0;
+                  let factor = 1;
+                  if (unit === 'per_100g' || unit === 'gram') {
+                    factor = amt / 100;
+                  } else if (unit === 'per_piece' || unit === 'stuks' || unit === 'stuk' || unit === 'per_blikje' || unit === 'per_sneedje') {
+                    factor = amt;
+                  } else if (unit === 'per_handful' || unit === 'handje' || unit === 'handjes') {
+                    factor = amt;
+                  } else if (unit === 'per_plakje' || unit === 'plakje' || unit === 'plakjes') {
+                    factor = amt;
+                  } else if (unit === 'per_30g') {
+                    factor = amt * 0.3;
+                  } else if (unit === 'per_100ml') {
+                    factor = amt / 100;
+                  } else if (unit === 'per_eetlepel_15g') {
+                    factor = amt * 0.15;
                   } else {
-                    calories = Math.round(ingredient.calories_per_100g * ingredient.amount);
-                    protein = Math.round(ingredient.protein_per_100g * ingredient.amount * 10) / 10;
-                    carbs = Math.round(ingredient.carbs_per_100g * ingredient.amount * 10) / 10;
-                    fat = Math.round(ingredient.fat_per_100g * ingredient.amount * 10) / 10;
+                    factor = amt / 100;
                   }
+
+                  const calories = Math.round((ingredient.calories_per_100g || 0) * factor);
+                  const protein = Math.round(((ingredient.protein_per_100g || 0) * factor) * 10) / 10;
+                  const carbs = Math.round(((ingredient.carbs_per_100g || 0) * factor) * 10) / 10;
+                  const fat = Math.round(((ingredient.fat_per_100g || 0) * factor) * 10) / 10;
 
                   return (
                     <div
@@ -345,12 +411,22 @@ export default function MealEditModal({
                         <div className="flex-1">
                           <div className="font-medium text-white">{ingredient.name}</div>
                           <div className="text-sm text-gray-400">
-                            {ingredient.amount} {ingredient.unit === 'per_piece' ? 'stuk' : 
-                             ingredient.unit === 'per_handful' ? 'handje' : 
-                             ingredient.unit === 'per_plakje' ? 'plakje' : 
-                             ingredient.unit === 'per_30g' ? 'g' : 
-                             ingredient.unit === 'per_100g' ? 'g' : 
-                             ingredient.unit}
+                            {(() => {
+                              const avail = availableIngredients.find(ai => String(ai.id) === String(ingredient.id));
+                              const u = (avail?.unit_type) || ingredient.unit;
+                              return `${ingredient.amount} ${
+                                u === 'per_piece' ? 'stuk' :
+                                u === 'per_handful' ? 'handje' :
+                                u === 'per_plakje' ? 'plakje' :
+                                u === 'per_sneedje' ? 'sneedje' :
+                                u === 'per_blikje' ? 'blikje' :
+                                u === 'per_30g' ? 'x 30g' :
+                                u === 'per_100ml' ? 'ml' :
+                                u === 'per_100g' ? 'g' :
+                                u === 'per_eetlepel_15g' ? 'eetlepel' :
+                                u || ''
+                              }`;
+                            })()}
                           </div>
                           <div className="text-xs text-[#B6C948] mt-1">
                             {calories} kcal | Eiwit: {protein}g | Koolhydraten: {carbs}g | Vet: {fat}g
@@ -439,7 +515,11 @@ export default function MealEditModal({
                     <option value="per_piece">Per stuk</option>
                     <option value="per_handful">Per handje</option>
                     <option value="per_plakje">Per plakje</option>
+                    <option value="per_sneedje">Per sneedje</option>
+                    <option value="per_blikje">Per blikje</option>
                     <option value="per_30g">Per 30g</option>
+                    <option value="per_100ml">Per 100ml</option>
+                    <option value="per_eetlepel_15g">Per eetlepel (15g)</option>
                     <option value="per_100g">Per 100g</option>
                   </select>
                 </div>

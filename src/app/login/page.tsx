@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/lib/supabase';
 import { EnvelopeIcon, LockClosedIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import ModalBase from '@/components/ui/ModalBase';
 
 // Simplified configuration
 const LOGIN_CONFIG = {
@@ -18,6 +19,8 @@ function LoginPageContent() {
   const searchParams = useSearchParams();
   const { user, profile, isLoading: authLoading, login, isAdmin, getRedirectPath } = useAuth();
   const loading = authLoading; // Use actual auth loading state
+  // Announcement modal visibility
+  const [showAnnouncement, setShowAnnouncement] = useState(false);
   
   // Helper: Aggressive client cleanup (storage + cookies) to fix Safari re-login issues
   const clearClientAuth = () => {
@@ -70,6 +73,8 @@ function LoginPageContent() {
   // ✅ FIX: Ensure client-side hydration consistency
   useEffect(() => {
     setLoginState(prev => ({ ...prev, isClient: true }));
+    // Show the announcement modal on first mount of the login page
+    setShowAnnouncement(true);
   }, []);
   
   // Ref to prevent multiple redirects
@@ -771,6 +776,38 @@ function LoginPageContent() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Announcement Modal: Platform in testing, live on 10 October */}
+      {loginState.isClient && (
+        <ModalBase
+          isOpen={showAnnouncement}
+          onClose={() => setShowAnnouncement(false)}
+          zIndexClassName="z-50"
+          className="bg-[#232D1A] rounded-2xl p-6 sm:p-8 border border-[#3A4D23] shadow-2xl"
+        >
+          <div className="text-center">
+            <div className="w-16 h-16 bg-[#8BAE5A]/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-[#8BAE5A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">Belangrijk bericht</h3>
+            <p className="text-[#8BAE5A] text-sm sm:text-base">
+              Het platform wordt momenteel getest. We gaan <span className="font-semibold text-[#B6C948]">10 oktober</span> live.
+            </p>
+            <p className="text-[#8BAE5A] text-xs sm:text-sm mt-2">Bedankt voor je begrip!</p>
+            <div className="mt-6">
+              <button
+                type="button"
+                onClick={() => setShowAnnouncement(false)}
+                className="px-5 py-2 rounded-lg bg-[#8BAE5A] text-[#181F17] font-semibold hover:bg-[#A6C97B] transition-colors border border-[#8BAE5A]/40"
+              >
+                Begrepen
+              </button>
+            </div>
+          </div>
+        </ModalBase>
       )}
     </div>
   );

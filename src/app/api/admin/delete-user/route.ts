@@ -47,20 +47,8 @@ async function handleDelete(req: NextRequest) {
       if (!profErr && prof?.id) userId = prof.id;
     }
 
-    // First: delete the auth user (primary source of truth)
-    let authDeleted = false;
-    if (userId) {
-      const { error: authErr } = await supabaseAdmin.auth.admin.deleteUser(userId);
-      if (authErr) {
-        // Continue if user does not exist in auth; otherwise report but proceed with DB cleanup
-        console.warn('⚠️ Auth delete warning:', authErr.message);
-      } else {
-        authDeleted = true;
-      }
-    }
-
-    // Then best-effort: delete related data in DB (ignore failures per table)
-    // Keep child tables first, profiles last among DB tables
+    // First: best-effort delete related data in DB (ignore failures per table)
+    // Keep child tables first, profiles (and legacy users) last among DB tables
     const relatedDeletes: Array<[string, string]> = [
       // Core
       // Activity/logs/features possibly referencing user
@@ -100,9 +88,12 @@ async function handleDelete(req: NextRequest) {
       ['mind_focus_intake', 'user_id'],
       ['mind_focus_sessions', 'user_id'],
 
-      // Finally remove profile record (often the parent row referenced elsewhere)
+      // Finally remove profile/legacy records (often the parent row referenced elsewhere)
       ['profiles', 'id'],
       ['onboarding_status', 'user_id'],
+      // Legacy table safety: some older deployments kept a `public.users` table with FK to auth.users
+      // Try to delete by id if it exists; if the table doesn't exist, this will just warn and continue
+      ['users', 'id'],
     ];
 
     const perTableErrors: { table: string; error: string }[] = [];
@@ -119,6 +110,17 @@ async function handleDelete(req: NextRequest) {
         const message = e?.message || String(e);
         console.warn(`⚠️ Delete exception on ${table}:`, message);
         perTableErrors.push({ table, error: message });
+      }
+    }
+
+    // Then: delete the auth user (now that dependent rows are gone)
+    let authDeleted = false;
+    if (userId) {
+      const { error: authErr } = await supabaseAdmin.auth.admin.deleteUser(userId);
+      if (authErr) {
+        console.warn('⚠️ Auth delete warning (post-DB cleanup):', authErr.message);
+      } else {
+        authDeleted = true;
       }
     }
 

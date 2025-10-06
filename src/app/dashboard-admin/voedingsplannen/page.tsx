@@ -138,7 +138,7 @@ interface NutritionPlan {
 }
 
 export default function AdminVoedingsplannenPage() {
-  const [activeTab, setActiveTab] = useState<'voeding' | 'voeding_v2' | 'custom'>('voeding');
+  const [activeTab, setActiveTab] = useState<'voeding' | 'custom'>('voeding');
   const [editMode, setEditMode] = useState(false);
   const [showFoodItemModal, setShowFoodItemModal] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<NutritionPlan | null>(null);
@@ -530,6 +530,32 @@ export default function AdminVoedingsplannenPage() {
     }
   };
 
+  // Create a new empty plan immediately, then open editor (in-component scope)
+  const handleCreateNewPlan = async () => {
+    try {
+      const stamp = new Date().toISOString().replace(/[-:.TZ]/g, '').slice(0, 14);
+      const name = `Nieuw plan ${stamp}`;
+      const response = await fetch('/api/admin/nutrition-plans', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, description: '' })
+      });
+      const result = await response.json();
+      if (!response.ok || !result?.plan) {
+        alert('Fout bij aanmaken nieuw plan: ' + (result?.error || response.statusText));
+        return;
+      }
+      await fetchPlans();
+      setSelectedPlan(result.plan);
+      setEditMode(true);
+      setActiveTab('voeding');
+      console.log('✅ Nieuw plan aangemaakt:', result.plan.name);
+    } catch (e: any) {
+      console.error('❌ Fout bij aanmaken nieuw plan', e);
+      alert('Fout bij aanmaken nieuw plan');
+    }
+  };
+
   useEffect(() => {
     fetchAllData();
   }, []);
@@ -561,30 +587,7 @@ export default function AdminVoedingsplannenPage() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Ensure V2 clones exist when navigating to Voedingsplannen V2 tab
-  useEffect(() => {
-    const ensureV2Clones = async () => {
-      try {
-        const hasV2 = plans.some((p: any) => String(p.plan_id || '').endsWith('-v2'));
-        if (!hasV2) {
-          console.log('🧬 No V2 plans found. Cloning base plans to V2...');
-          const res = await fetch('/api/admin/clone-nutrition-plans-v2', { method: 'POST' });
-          if (!res.ok) {
-            const err = await res.json().catch(() => ({}));
-            console.error('❌ Clone V2 failed:', err.error || res.statusText);
-          } else {
-            console.log('✅ V2 clone complete. Refreshing plans...');
-            await fetchPlans();
-          }
-        }
-      } catch (e) {
-        console.error('❌ Error ensuring V2 clones:', e);
-      }
-    };
-    if (activeTab === 'voeding_v2') {
-      ensureV2Clones();
-    }
-  }, [activeTab, plans]);
+  // Removed V2 cloning logic and tab
 
   // Emergency fallback - if after 3 seconds we still have no data, try direct API calls
   useEffect(() => {
@@ -668,26 +671,6 @@ export default function AdminVoedingsplannenPage() {
 
       console.log('✅ Plan saved successfully:', result);
 
-      // If we created a new plan from the V2 tab, enforce -v2 suffix on plan_id
-      try {
-        if (!selectedPlan && activeTab === 'voeding_v2' && result?.plan?.id && String(result?.plan?.plan_id || '').endsWith('-v2') === false) {
-          const v2PlanId = `${result.plan.plan_id}-v2`;
-          console.log('🧬 Enforcing V2 suffix on new plan:', v2PlanId);
-          const updRes = await fetch('/api/admin/nutrition-plans', {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id: result.plan.id, plan_id: v2PlanId }),
-          });
-          const updJson = await updRes.json().catch(() => ({}));
-          if (!updRes.ok) {
-            console.error('❌ Failed to set -v2 suffix on new plan:', updJson.error || updRes.statusText);
-          } else {
-            console.log('✅ V2 suffix applied to new plan');
-          }
-        }
-      } catch (e) {
-        console.error('❌ Error enforcing V2 suffix:', e);
-      }
 
       await fetchAllData();
       
@@ -746,14 +729,63 @@ export default function AdminVoedingsplannenPage() {
     console.log('🔄 Opening plan for editing:', plan.name);
     // Ensure correct tab context is active based on plan_id
     try {
-      const pid = String((plan as any).plan_id || '');
-      if (pid.endsWith('-v2')) {
-        setActiveTab('voeding_v2');
-      } else {
-        setActiveTab('voeding');
-      }
+      // Always use the main 'voeding' tab; V2 is removed
+      setActiveTab('voeding');
     } catch {}
     
+    // Helper to recompute meal nutrition using ingredient list
+    const computeMealNutritionLocal = (ings: Array<{ amount: number; unit?: string; calories_per_100g: number; protein_per_100g: number; carbs_per_100g: number; fat_per_100g: number; }>) => {
+      let c = 0, p = 0, cb = 0, f = 0;
+      for (const ing of (ings || [])) {
+        const amt = Number(ing.amount) || 0;
+        const unit = ing.unit || 'per_100g';
+        let factor = 1;
+        if (unit === 'per_100g' || unit === 'gram') factor = amt / 100;
+        else if (unit === 'per_piece' || unit === 'stuks' || unit === 'stuk' || unit === 'per_blikje' || unit === 'per_sneedje') factor = amt;
+        else if (unit === 'per_handful' || unit === 'handje' || unit === 'handjes') factor = amt;
+        else if (unit === 'per_plakje' || unit === 'plakje' || unit === 'plakjes') factor = amt;
+        else if (unit === 'per_30g') factor = amt * 0.3;
+        else if (unit === 'per_100ml') factor = amt / 100;
+        else if (unit === 'per_eetlepel_15g') factor = amt * 0.15;
+        else factor = amt / 100;
+        c += (ing.calories_per_100g || 0) * factor;
+        p += (ing.protein_per_100g || 0) * factor;
+        cb += (ing.carbs_per_100g || 0) * factor;
+        f += (ing.fat_per_100g || 0) * factor;
+      }
+      return { calories: Math.round(c), protein: Math.round(p * 10) / 10, carbs: Math.round(cb * 10) / 10, fat: Math.round(f * 10) / 10 };
+    };
+
+    // Normalize plan ingredient units against current foodItems list
+    const normalizePlanUnits = (pl: any) => {
+      if (!pl?.meals?.weekly_plan) return pl;
+      const days = ['maandag','dinsdag','woensdag','donderdag','vrijdag','zaterdag','zondag'];
+      const getOrderedMealKeys = (dayObj: any) => {
+        const present = Object.keys(dayObj || {});
+        const ordered = MEAL_KEYS_ORDER.filter(k => present.includes(k));
+        const extras = present.filter(k => !MEAL_KEYS_ORDER.includes(k));
+        return [...ordered, ...extras];
+      };
+      const clone = JSON.parse(JSON.stringify(pl));
+      for (const d of days) {
+        const dayObj: any = clone.meals.weekly_plan[d] || {};
+        for (const mk of getOrderedMealKeys(dayObj)) {
+          const mealObj: any = dayObj[mk];
+          if (!mealObj || !Array.isArray(mealObj.ingredients)) continue;
+          mealObj.ingredients = mealObj.ingredients.map((ing: any) => {
+            const found = foodItems.find(fi => String(fi.id) === String(ing.id));
+            if (found && found.unit_type && ing.unit !== found.unit_type) {
+              ing.unit = found.unit_type; // normalize unit
+            }
+            return ing;
+          });
+          // Recompute nutrition after normalization
+          mealObj.nutrition = computeMealNutritionLocal(mealObj.ingredients);
+        }
+      }
+      return clone;
+    };
+
     // Load fresh data from the new API to ensure we have the latest
     try {
       const response = await fetch(`/api/admin/plan-meals?planId=${plan.id}`);
@@ -761,15 +793,26 @@ export default function AdminVoedingsplannenPage() {
       
       if (result.success && result.plan) {
         console.log('✅ Fresh plan data loaded:', result.plan.name);
-        setSelectedPlan(result.plan);
+        const normalized = normalizePlanUnits(result.plan);
+        setSelectedPlan(normalized);
+        // Persist normalized meals silently
+        try {
+          await fetch('/api/admin/nutrition-plans', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: normalized.id, meals: normalized.meals })
+          });
+        } catch {}
       } else {
         console.log('⚠️ Using cached plan data:', plan.name);
-        setSelectedPlan(plan);
+        const normalized = normalizePlanUnits(plan);
+        setSelectedPlan(normalized);
       }
     } catch (error) {
       console.error('❌ Error loading fresh plan data:', error);
       console.log('⚠️ Using cached plan data as fallback:', plan.name);
-      setSelectedPlan(plan);
+      const normalized = normalizePlanUnits(plan);
+      setSelectedPlan(normalized);
     }
     
     setEditMode(true);
@@ -778,23 +821,39 @@ export default function AdminVoedingsplannenPage() {
   const handleBackToOverview = async () => {
     console.log('🔄 handleBackToOverview called');
     
-    // If we have a selected plan, save it before going back
     if (selectedPlan) {
       setSavingBeforeBack(true);
-      console.log('💾 Saving plan before going back to overview...');
+      console.log('💾 Persisting plan changes before going back...');
       try {
-        // Use the new plan-meals API to ensure correct data
-        const response = await fetch(`/api/admin/plan-meals?planId=${selectedPlan.id}`);
-        const result = await response.json();
-        
-        if (result.success) {
-          console.log('✅ Plan data verified before going back');
+        // Only send updatable fields; backend merges correctly
+        const { id, name, description, target_calories, target_protein, target_carbs, target_fat, protein_percentage, carbs_percentage, fat_percentage, goal, is_featured, is_public } = selectedPlan as any;
+        const response = await fetch('/api/admin/nutrition-plans', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id,
+            name,
+            description,
+            target_calories,
+            target_protein,
+            target_carbs,
+            target_fat,
+            protein_percentage,
+            carbs_percentage,
+            fat_percentage,
+            goal,
+            is_featured,
+            is_public,
+          })
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          console.error('❌ Failed to save plan on back:', result.error || response.statusText);
         } else {
-          console.log('⚠️ Could not verify plan data:', result.error);
+          console.log('✅ Plan saved on back');
         }
       } catch (error) {
-        console.error('❌ Error verifying plan before going back:', error);
-        // Still go back even if verification fails
+        console.error('❌ Error saving plan on back:', error);
       } finally {
         setSavingBeforeBack(false);
       }
@@ -802,6 +861,7 @@ export default function AdminVoedingsplannenPage() {
     
     setEditMode(false);
     setSelectedPlan(null);
+    await fetchPlans();
   };
 
 
@@ -985,16 +1045,6 @@ export default function AdminVoedingsplannenPage() {
             Voedingsplannen
           </button>
           <button
-            onClick={() => setActiveTab('voeding_v2')}
-            className={`px-4 py-2 rounded-lg transition-colors ${
-              activeTab === 'voeding_v2'
-                ? 'bg-[#8BAE5A] text-[#181F17] font-semibold'
-                : 'bg-[#232D1A] text-gray-300 hover:bg-[#2A3420]'
-            }`}
-          >
-            Voedingsplannen V2
-          </button>
-          <button
             onClick={() => setActiveTab('custom')}
             className={`px-4 py-2 rounded-lg transition-colors ${
               activeTab === 'custom'
@@ -1071,6 +1121,7 @@ export default function AdminVoedingsplannenPage() {
                     plan={selectedPlan}
                     onSave={handleSavePlan}
                     onClose={handleBackToOverview}
+                    onChange={(p:any)=> setSelectedPlan(p)}
                     isPageMode={true}
                   />
                 </div>
@@ -1081,10 +1132,7 @@ export default function AdminVoedingsplannenPage() {
                 <div className="flex justify-between items-center mb-6">
                   <h2 className="text-xl font-semibold">Voedingsplannen</h2>
                   <AdminButton
-                    onClick={() => {
-                      setSelectedPlan(null);
-                      setEditMode(true);
-                    }}
+                    onClick={handleCreateNewPlan}
                     icon={<PlusIcon className="w-4 h-4" />}
                     variant="primary"
                   >
@@ -1201,182 +1249,7 @@ export default function AdminVoedingsplannenPage() {
           </div>
         )}
 
-        {activeTab === 'voeding_v2' && (
-          <div>
-            {editMode && selectedPlan ? (
-              // Edit Mode - Show PlanBuilder integrated in content (for V2 plan as well)
-              <div>
-                {/* Back Button */}
-                <div className="mb-6">
-                  <button
-                    onClick={handleBackToOverview}
-                    disabled={savingBeforeBack}
-                    className="flex items-center space-x-2 text-[#8BAE5A] hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {savingBeforeBack ? (
-                      <div className="w-5 h-5 border-2 border-[#8BAE5A] border-t-transparent rounded-full animate-spin"></div>
-                    ) : (
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                      </svg>
-                    )}
-                    <span>{savingBeforeBack ? 'Opslaan...' : 'Terug naar overzicht'}</span>
-                  </button>
-                </div>
-
-                {/* PlanBuilder integrated in content */}
-                <div className="bg-[#0F150E] rounded-xl border border-[#3A4D23]">
-                  <PlanBuilder
-                    plan={selectedPlan}
-                    onSave={handleSavePlan}
-                    onClose={handleBackToOverview}
-                    isPageMode={true}
-                  />
-                </div>
-              </div>
-            ) : (
-              // Overview Mode - Show V2 plans list
-              <div>
-                <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-xl font-semibold">Voedingsplannen V2</h2>
-                  <AdminButton
-                    onClick={() => {
-                      setSelectedPlan(null);
-                      setEditMode(true);
-                    }}
-                    icon={<PlusIcon className="w-4 h-4" />}
-                    variant="primary"
-                  >
-                    + Nieuw Plan
-                  </AdminButton>
-                </div>
-
-                {filteredPlansV2.length === 0 ? (
-                  <div className="text-center py-12">
-                    <ChartBarIcon className="mx-auto h-12 w-12 text-gray-400" />
-                    <h3 className="mt-2 text-sm font-medium text-gray-300">Geen V2 voedingsplannen</h3>
-                    <p className="mt-1 text-sm text-gray-400">
-                      De V2 varianten worden automatisch aangemaakt wanneer je deze tab opent. Ververs de pagina indien nodig.
-                    </p>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredPlansV2.map((plan) => {
-                      const planStatus = getPlanStatus(plan);
-                      // Compute display-only values for a 90kg profile by scaling calories to 90%
-                      // and keeping the ORIGINAL macro percentages intact.
-                      const baseKcal = Number(plan.target_calories) || Math.max(1,
-                        Math.round((Number(plan.target_protein||0)*4) + (Number(plan.target_carbs||0)*4) + (Number(plan.target_fat||0)*9))
-                      );
-                      const v2Kcal = Math.round(baseKcal * 0.90); // 90kg vs 100kg
-                      const pShare = Math.max(0, Math.min(1, (Number(plan.target_protein||0)*4) / baseKcal));
-                      const cShare = Math.max(0, Math.min(1, (Number(plan.target_carbs||0)*4) / baseKcal));
-                      const fShare = Math.max(0, Math.min(1, (Number(plan.target_fat||0)*9) / baseKcal));
-                      const displayTargets = {
-                        kcal: v2Kcal,
-                        protein: Math.round((v2Kcal * pShare) / 4),
-                        carbs: Math.round((v2Kcal * cShare) / 4),
-                        fat: Math.round((v2Kcal * fShare) / 9),
-                        pPct: Math.round(pShare * 100),
-                        cPct: Math.round(cShare * 100),
-                        fPct: Math.round(fShare * 100),
-                      };
-                      return (
-                        <div key={plan.id} className="bg-[#181F17] rounded-xl border border-[#3A4D23] overflow-hidden hover:border-[#8BAE5A]/50 transition-all duration-200 group">
-                          {/* Header */}
-                          <div className="bg-gradient-to-r from-[#8BAE5A]/10 to-[#B6C948]/10 p-4 border-b border-[#3A4D23]">
-                            <div className="flex items-start justify-between">
-                              <div className="flex-1">
-                                <h3 className="text-lg font-bold text-[#8BAE5A] mb-1">{plan.name}</h3>
-                                <p className="text-gray-300 text-sm leading-relaxed">{plan.description}</p>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Profile Data */}
-                          <div className="p-4 border-b border-[#3A4D23]">
-                            <div className="bg-[#0F150E] rounded-lg p-3 border border-[#2A3520]">
-                              <div className="flex items-center justify-center space-x-2">
-                                <div className="w-2 h-2 bg-[#8BAE5A] rounded-full"></div>
-                                <span className="text-xs text-[#8BAE5A] font-medium">Gebaseerd op profieldata</span>
-                              </div>
-                              <div className="text-xs text-[#B6C948] text-center mt-1">90kg - Staand (Matig actief)</div>
-                            </div>
-                          </div>
-
-                          {/* Nutrition Overview (scaled to 90% kcal, original macro ratios) */}
-                          {true && (
-                            <div className="p-4">
-                              <div className="space-y-3">
-                                {/* Calories */}
-                                <div className="text-center">
-                                  <div className="text-2xl font-bold text-white">{displayTargets.kcal}</div>
-                                  <div className="text-sm text-gray-400">kcal per dag</div>
-                                </div>
-
-                                {/* Macros Grid */}
-                                <div className="grid grid-cols-3 gap-3">
-                                  {true && (
-                                    <div className="text-center">
-                                      <div className="text-lg font-semibold text-white">{displayTargets.protein}g</div>
-                                      <div className="text-xs text-[#8BAE5A] font-medium">
-                                        {displayTargets.pPct}%
-                                      </div>
-                                      <div className="text-xs text-gray-400">Eiwit</div>
-                                    </div>
-                                  )}
-                                  {true && (
-                                    <div className="text-center">
-                                      <div className="text-lg font-semibold text-white">{displayTargets.carbs}g</div>
-                                      <div className="text-xs text-[#8BAE5A] font-medium">
-                                        {displayTargets.cPct}%
-                                      </div>
-                                      <div className="text-xs text-gray-400">Koolhydraten</div>
-                                    </div>
-                                  )}
-                                  {true && (
-                                    <div className="text-center">
-                                      <div className="text-lg font-semibold text-white">{displayTargets.fat}g</div>
-                                      <div className="text-xs text-[#8BAE5A] font-medium">
-                                        {displayTargets.fPct}%
-                                      </div>
-                                      <div className="text-xs text-gray-400">Vet</div>
-                                    </div>
-                                  )}
-                                </div>
-
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Actions */}
-                          <div className="p-4 bg-[#0F150E] border-t border-[#3A4D23]">
-                            <div className="flex space-x-2">
-                              <button
-                                onClick={() => handleEditPlan(plan)}
-                                className="flex-1 bg-[#8BAE5A] hover:bg-[#8BAE5A]/80 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center justify-center space-x-2"
-                              >
-                                <PencilIcon className="w-4 h-4" />
-                                <span>Bewerken</span>
-                              </button>
-                              <button
-                                onClick={() => plan.id && handleDeletePlan(plan.id)}
-                                className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center justify-center space-x-2"
-                              >
-                                <TrashIcon className="w-4 h-4" />
-                                <span>Verwijderen</span>
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        )}
+        {/* V2 tab and section removed */}
 
         {/* Custom Plans Tab */}
         {activeTab === 'custom' && (

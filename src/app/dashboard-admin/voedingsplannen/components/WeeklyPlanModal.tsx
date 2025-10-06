@@ -581,7 +581,7 @@ export default function WeeklyPlanModal({ isOpen, onClose, plan }: WeeklyPlanMod
           <div className="flex items-center space-x-3">
             <CalendarIcon className="h-8 w-8 text-[#8BAE5A]" />
             <div>
-              <h2 className="text-2xl font-bold text-white">{plan?.name}</h2>
+              <h2 className="text-2xl font-bold text-white">{plan?.name} <span className="text-yellow-400 text-sm font-semibold align-middle">[Test Chiel]</span></h2>
               <p className="text-gray-400">{plan?.description}</p>
             </div>
           </div>

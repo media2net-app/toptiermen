@@ -94,6 +94,8 @@ export default function NutritionPlanDetailPage() {
   const [showSimpleModal, setShowSimpleModal] = useState(false);
   // Debug panel
   const [showDebug, setShowDebug] = useState<boolean>(true);
+  // Debug modal to inspect loaded ingredients per meal
+  const [showIngredientsModal, setShowIngredientsModal] = useState<boolean>(false);
   // DB ingredient lookup to mirror backend macros
   const [ingredientLookup, setIngredientLookup] = useState<Record<string, any> | null>(null);
   // Scaling factor derived from weight (baseline 100kg)
@@ -397,34 +399,7 @@ export default function NutritionPlanDetailPage() {
     if (tgt.c>0)   { const r = currNoFinal.c/tgt.c;     if (r>1.05) overW.c  =r-1; else if (r<0.95) underW.c  =1-r; }
     if (tgt.f>0)   { const r = currNoFinal.f/tgt.f;     if (r>1.05) overW.f  =r-1; else if (r<0.95) underW.f  =1-r; }
     const localBiasedAdjust = (dens: {cal:number,p:number,c:number,f:number}) => {
-      if (mode === 'reduce') {
-        const base = finalAdjustFactor;
-        const score = (dens.p*overW.p)+(dens.c*overW.c)+(dens.f*overW.f)+(dens.cal*overW.cal);
-        if (!isFinite(score) || score<=0) return base;
-        const norm = Math.min(1, score/10);
-        const beta = 0.2;
-        return Math.max(0.6, Math.min(1, base - beta*norm));
-      }
-      if (mode === 'increase') {
-        const score = (dens.p*underW.p)+(dens.c*underW.c)+(dens.f*underW.f)+(dens.cal*underW.cal);
-        if (!isFinite(score) || score<=0) return 1 + (incFactor - 1) * 0.5; // neutral split
-        const norm = Math.min(1, score/10);
-        // Distribute within [1, incFactor] so totaal niet boven target komt
-        return 1 + (incFactor - 1) * norm;
-      }
-      // mixed or neutral: adjust around base 1, reduce for overscore and increase for underscore
-      const overScore = (dens.p*overW.p)+(dens.c*overW.c)+(dens.f*overW.f)+(dens.cal*overW.cal);
-      const underScore = (dens.p*underW.p)+(dens.c*underW.c)+(dens.f*underW.f)+(dens.cal*underW.cal);
-      if (isFinite(overScore) && overScore>0 && (!underScore || overScore>=underScore)) {
-        const norm = Math.min(1, overScore/10);
-        const beta = 0.2;
-        return Math.max(0.6, 1 - beta*norm);
-      }
-      if (isFinite(underScore) && underScore>0) {
-        const norm = Math.min(1, underScore/10);
-        const cap = incFactor>1 ? incFactor : 1.45; // allow modest increase when neutral
-        return Math.min(cap, 1 + (cap-1)*norm);
-      }
+      // Admin editor: geen automatische macro-bijsturing. Toon exacte waarden.
       return 1;
     };
     
@@ -636,66 +611,8 @@ export default function NutritionPlanDetailPage() {
 
   // Final adjust factor: proportionally scale only non-piece units to move totals toward personalized targets
   const finalAdjustFactor = useMemo(() => {
-    const dayData: any = originalPlanData?.meals?.weekly_plan?.[selectedDay];
-    if (!dayData) return 1;
-
-    let fixed = { cal: 0, p: 0, c: 0, f: 0 };
-    let adj   = { cal: 0, p: 0, c: 0, f: 0 };
-
-    Object.entries(dayData).forEach(([mealType, meal]: any) => {
-      if (!meal?.ingredients) return;
-      meal.ingredients.forEach((ingredient: any) => {
-        const key = `${selectedDay}_${mealType}_${ingredient.name}`;
-        const customAmount = (customAmounts as any)[key];
-        const base = customAmount !== undefined ? customAmount : (ingredient.amount || 0);
-        const unit = String(ingredient.unit || '').toLowerCase();
-
-        let amount = base * scalingFactor;
-        let mult = 1;
-        if (isPieceUnit(unit)) {
-          amount = scalePiecesAmount(base, scalingFactor);
-          mult = amount;
-          fixed.cal += (Number(ingredient.calories_per_100g)||0) * mult;
-          fixed.p   += (Number(ingredient.protein_per_100g)||0)  * mult;
-          fixed.c   += (Number(ingredient.carbs_per_100g)||0)    * mult;
-          fixed.f   += (Number(ingredient.fat_per_100g)||0)      * mult;
-        } else {
-          if (['per_100g','g','gram'].includes(unit)) mult = amount / 100;
-          else if (['per_ml','ml'].includes(unit)) mult = amount / 100;
-          else if (['per_tbsp','tbsp','eetlepel','el','per_eetlepel'].includes(unit)) mult = (amount * 15) / 100;
-          else if (['per_tsp','tsp','theelepel','tl','per_theelepel'].includes(unit)) mult = (amount * 5) / 100;
-          else if (['per_cup','cup','kop'].includes(unit)) mult = (amount * 240) / 100;
-          else if (['per_30g'].includes(unit)) mult = (amount * 30) / 100;
-          else mult = amount / 100;
-          adj.cal += (Number(ingredient.calories_per_100g)||0) * mult;
-          adj.p   += (Number(ingredient.protein_per_100g)||0)  * mult;
-          adj.c   += (Number(ingredient.carbs_per_100g)||0)    * mult;
-          adj.f   += (Number(ingredient.fat_per_100g)||0)      * mult;
-        }
-      });
-    });
-
-    // If we're already under or exactly at targets, do nothing
-    const tgt = { cal: personalizedMacros.calories, p: personalizedMacros.protein, c: personalizedMacros.carbs, f: personalizedMacros.fat };
-    const needCal = tgt.cal - fixed.cal;
-    const needP = tgt.p - fixed.p;
-    const needC = tgt.c - fixed.c;
-    const needF = tgt.f - fixed.f;
-
-    // If adjustable part is zero (e.g. all pieces), return 1
-    if (adj.cal <= 0.0001) return 1;
-
-    // Ratios to hit target using only adjustable portion
-    const rCal = needCal / adj.cal;
-    const rP   = adj.p > 0.0001 ? (needP / adj.p) : 1;
-    const rC   = adj.c > 0.0001 ? (needC / adj.c) : 1;
-    const rF   = adj.f > 0.0001 ? (needF / adj.f) : 1;
-
-    // We only want to reduce when we're over; take the smallest ratio below 1, clamp to [0.7, 1]
-    const candidates = [rCal, rP, rC, rF].filter(v => isFinite(v) && v > 0 && v < 1);
-    if (candidates.length === 0) return 1;
-    const s = Math.max(0.7, Math.min(1, Math.min(...candidates)));
-    return s;
+    // Admin editor: geen eind-opschaling/afschaling toepassen.
+    return 1;
   }, [originalPlanData, selectedDay, customAmounts, scalingFactor, personalizedMacros]);
 
   // moved early return blocks below (after all hooks)
@@ -1081,6 +998,13 @@ export default function NutritionPlanDetailPage() {
                 title="Debug panel"
               >
                 Debug
+              </button>
+              <button
+                onClick={() => setShowIngredientsModal(true)}
+                className="px-3 py-1 rounded text-sm border bg-[#232D1A] text-white border-[#3A4D23] hover:bg-[#2A2A2A]"
+                title="Toon ingrediënten per maaltijd (debug)"
+              >
+                Ingrediënten Debug
               </button>
             </div>
           </div>
@@ -1601,6 +1525,382 @@ export default function NutritionPlanDetailPage() {
                 <p>meals: {originalPlanData?.meals ? '✅' : '❌'}</p>
                 <p>weekly_plan: {originalPlanData?.meals?.weekly_plan ? '✅' : '❌'}</p>
                 <p>selectedDay ({selectedDay}): {originalPlanData?.meals?.weekly_plan?.[selectedDay] ? '✅' : '❌'}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Ingredients Debug Modal */}
+        {showIngredientsModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+            <div className="w-full max-w-4xl max-h-[85vh] overflow-y-auto bg-[#111511] border border-[#2F3E22] rounded-lg shadow-xl p-4 text-sm text-white">
+              <div className="flex items-center justify-between mb-3">
+                <div>
+                  <div className="text-lg font-semibold">Ingrediënten Debug – {selectedDay} [Test Chiel]</div>
+                  <div className="text-xs text-gray-400">Plan: {selectedPlan?.name} • Dagtotalen (berekend): {dayTotals.calories} kcal, P {dayTotals.protein}g, C {dayTotals.carbs}g, F {dayTotals.fat}g</div>
+                  {(() => {
+                    const tgtP = Number(personalizedMacros?.protein)||0;
+                    const tgtC = Number(personalizedMacros?.carbs)||0;
+                    const tgtF = Number(personalizedMacros?.fat)||0;
+                    const tgtK_fromMacros = Math.round(tgtP*4 + tgtC*4 + tgtF*9);
+                    const tgtK = Number(personalizedMacros?.calories)||0;
+                    const delta = tgtK - tgtK_fromMacros;
+                    return (
+                      <div className="mt-1 text-[11px]">
+                        <span className={`px-2 py-1 rounded-md ${delta===0?'bg-green-900 text-green-300':'bg-yellow-900 text-yellow-300'}`}>
+                          Doel-consistentie: {tgtK} kcal vs 4P+4C+9F = {tgtK_fromMacros} → {delta>0?`+${delta}`:delta} kcal {delta===0?'op doel':'verschil'}
+                        </span>
+                      </div>
+                    );
+                  })()}
+                </div>
+                <button
+                  onClick={() => setShowIngredientsModal(false)}
+                  className="px-3 py-1 rounded text-sm border bg-[#232D1A] border-[#3A4D23] hover:bg-[#2A2A2A]"
+                >
+                  Sluiten
+                </button>
+              </div>
+
+              {/* Targets vs totals summary with colored progress bars */}
+              {(() => {
+                const cal = getProgressInfo(dayTotals.calories, personalizedMacros.calories);
+                const pr  = getProgressInfo(dayTotals.protein,  personalizedMacros.protein);
+                const cb  = getProgressInfo(dayTotals.carbs,    personalizedMacros.carbs);
+                const ft  = getProgressInfo(dayTotals.fat,      personalizedMacros.fat);
+                const delta = (v:number, t:number) => v - t;
+                const fmt = (n:number) => (Math.round(n * 10) / 10);
+                const overUnderText = (v:number, t:number, unit:string) => {
+                  const d = v - t;
+                  if (Math.abs(d) < 0.05) return `op doel (100%)`;
+                  return d > 0 ? `+${unit === 'kcal' ? Math.round(d) : fmt(d)} ${unit} te veel (${Math.round((v/Math.max(1,t))*100)}%)`
+                                : `${fmt(Math.abs(d))} ${unit} te weinig (${Math.round((v/Math.max(1,t))*100)}%)`;
+                };
+                return (
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                    <div className="bg-[#0F130F] rounded p-3 border border-[#3A4D23]">
+                      <div className="text-xs text-gray-400">Calorieën</div>
+                      <div className="text-lg font-bold text-[#8BAE5A]">{dayTotals.calories} / {personalizedMacros.calories} kcal</div>
+                      <div className={`text-[11px] ${dayTotals.calories - personalizedMacros.calories === 0 ? 'text-green-400' : 'text-yellow-400'}`}>
+                        {dayTotals.calories - personalizedMacros.calories > 0 ? `+${Math.round(dayTotals.calories - personalizedMacros.calories)} kcal te veel` : `${Math.round(Math.abs(dayTotals.calories - personalizedMacros.calories))} kcal te weinig`}
+                      </div>
+                      <div className="w-full bg-[#0F150E] rounded-full h-1.5 mt-1">
+                        <div className={`h-1.5 rounded-full ${cal.color}`} style={{ width: `${Math.min(cal.percentage, 100)}%` }} />
+                      </div>
+                      <div className="text-[10px] text-[#B6C948] mt-1">{overUnderText(dayTotals.calories, personalizedMacros.calories, 'kcal')}</div>
+                    </div>
+                    <div className="bg-[#0F130F] rounded p-3 border border-[#3A4D23]">
+                      <div className="text-xs text-gray-400">Eiwit</div>
+                      <div className="text-lg font-bold text-blue-400">{dayTotals.protein}g / {personalizedMacros.protein}g</div>
+                      <div className={`text-[11px] ${(dayTotals.protein - personalizedMacros.protein) === 0 ? 'text-green-400' : 'text-yellow-400'}`}>
+                        {dayTotals.protein - personalizedMacros.protein > 0 ? `+${(Math.round((dayTotals.protein - personalizedMacros.protein)*10)/10)} g te veel` : `${(Math.round((personalizedMacros.protein - dayTotals.protein)*10)/10)} g te weinig`}
+                      </div>
+                      <div className="w-full bg-[#0F150E] rounded-full h-1.5 mt-1">
+                        <div className={`h-1.5 rounded-full ${pr.color}`} style={{ width: `${Math.min(pr.percentage, 100)}%` }} />
+                      </div>
+                      <div className="text-[10px] text-[#B6C948] mt-1">{overUnderText(dayTotals.protein, personalizedMacros.protein, 'g')}</div>
+                    </div>
+                    <div className="bg-[#0F130F] rounded p-3 border border-[#3A4D23]">
+                      <div className="text-xs text-gray-400">Koolhydraten</div>
+                      <div className="text-lg font-bold text-orange-400">{dayTotals.carbs}g / {personalizedMacros.carbs}g</div>
+                      <div className={`text-[11px] ${(dayTotals.carbs - personalizedMacros.carbs) === 0 ? 'text-green-400' : 'text-yellow-400'}`}>
+                        {dayTotals.carbs - personalizedMacros.carbs > 0 ? `+${(Math.round((dayTotals.carbs - personalizedMacros.carbs)*10)/10)} g te veel` : `${(Math.round((personalizedMacros.carbs - dayTotals.carbs)*10)/10)} g te weinig`}
+                      </div>
+                      <div className="w-full bg-[#0F150E] rounded-full h-1.5 mt-1">
+                        <div className={`h-1.5 rounded-full ${cb.color}`} style={{ width: `${Math.min(cb.percentage, 100)}%` }} />
+                      </div>
+                      <div className="text-[10px] text-[#B6C948] mt-1">{overUnderText(dayTotals.carbs, personalizedMacros.carbs, 'g')}</div>
+                    </div>
+                    <div className="bg-[#0F130F] rounded p-3 border border-[#3A4D23]">
+                      <div className="text-xs text-gray-400">Vet</div>
+                      <div className="text-lg font-bold text-yellow-400">{dayTotals.fat}g / {personalizedMacros.fat}g</div>
+                      <div className={`text-[11px] ${(dayTotals.fat - personalizedMacros.fat) === 0 ? 'text-green-400' : 'text-yellow-400'}`}>
+                        {dayTotals.fat - personalizedMacros.fat > 0 ? `+${(Math.round((dayTotals.fat - personalizedMacros.fat)*10)/10)} g te veel` : `${(Math.round((personalizedMacros.fat - dayTotals.fat)*10)/10)} g te weinig`}
+                      </div>
+                      <div className="w-full bg-[#0F150E] rounded-full h-1.5 mt-1">
+                        <div className={`h-1.5 rounded-full ${ft.color}`} style={{ width: `${Math.min(ft.percentage, 100)}%` }} />
+                      </div>
+                      <div className="text-[10px] text-[#B6C948] mt-1">{overUnderText(dayTotals.fat, personalizedMacros.fat, 'g')}</div>
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* Compact delta summary vs doelen (badges) */}
+              {(() => {
+                const fmt = (n:number) => Math.round(n * 10) / 10;
+                const dCal = dayTotals.calories - personalizedMacros.calories;
+                const dP   = fmt(dayTotals.protein - personalizedMacros.protein);
+                const dC   = fmt(dayTotals.carbs   - personalizedMacros.carbs);
+                const dF   = fmt(dayTotals.fat     - personalizedMacros.fat);
+                const Badge = ({label, val, unit}:{label:string; val:number; unit:'kcal'|'g'}) => (
+                  <span className={`px-2 py-1 rounded-md text-[11px] mr-2 mb-2 inline-block ${val===0?'bg-green-900 text-green-300':'bg-yellow-900 text-yellow-300'}`}>
+                    {label}: {val>0?'+':''}{unit==='kcal'?Math.round(val):fmt(val)} {unit} {val>0?'te veel':'te weinig'}
+                  </span>
+                );
+                return (
+                  <div className="mb-3">
+                    <Badge label="Calorieën" val={dCal} unit="kcal" />
+                    <Badge label="Eiwit" val={dP} unit="g" />
+                    <Badge label="Koolhydraten" val={dC} unit="g" />
+                    <Badge label="Vet" val={dF} unit="g" />
+                  </div>
+                );
+              })()}
+
+              <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
+                {(() => {
+                  const dayData: any = originalPlanData?.meals?.weekly_plan?.[selectedDay] || {};
+                  const mealOrder = ['ontbijt','ochtend_snack','lunch','lunch_snack','diner','avond_snack'];
+                  const present = Object.keys(dayData);
+                  const ordered = mealOrder.filter(k => present.includes(k)).concat(present.filter(k => !mealOrder.includes(k)));
+                  if (ordered.length === 0) {
+                    return (<div className="text-gray-400">Geen maaltijden gevonden voor deze dag.</div>);
+                  }
+                  // Consistency check (day): stored kcal vs derived from day macros
+                  let storedDayKcal = 0;
+                  ordered.forEach((key: string) => {
+                    const m = dayData[key];
+                    if (m?.nutrition?.calories) storedDayKcal += Number(m.nutrition.calories) || 0;
+                  });
+                  const dayKcalFromMacros = Math.round((dayTotals.protein || 0) * 4 + (dayTotals.carbs || 0) * 4 + (dayTotals.fat || 0) * 9);
+                  const dayDelta = storedDayKcal - dayKcalFromMacros;
+                  const pctVsDerived = Math.round((storedDayKcal / Math.max(1, dayKcalFromMacros)) * 100);
+                  
+                  const DaySummary = (
+                    <div className="border border-[#2F3E22] rounded-md p-3 bg-[#0F130F]">
+                      <div className="font-semibold text-[#B6C948] mb-1">Consistentiecheck (dag)</div>
+                      <div className="text-xs text-gray-300">
+                        Opgeslagen kcal: <span className="text-white font-semibold">{storedDayKcal}</span> • Afgeleid uit macro's: <span className="text-white font-semibold">{dayKcalFromMacros}</span>
+                        {' '}• Delta: <span className={dayDelta === 0 ? 'text-green-400' : 'text-yellow-400'}>{dayDelta > 0 ? `+${dayDelta}` : dayDelta} kcal</span>
+                        {' '}({pctVsDerived}% t.o.v. afgeleid)
+                      </div>
+                    </div>
+                  );
+                  
+                  return (
+                    <>
+                      {DaySummary}
+
+                      {/* Dagtotalen vs Doel (op basis van ingrediënten) */}
+                      {(() => {
+                        const rows = [
+                          { label: 'Calorieën', cur: Math.round(dayTotals.calories), tgt: Math.round(personalizedMacros.calories), unit: 'kcal' as const },
+                          { label: 'Eiwit',      cur: Math.round(dayTotals.protein*10)/10,  tgt: Math.round(personalizedMacros.protein*10)/10,  unit: 'g' as const },
+                          { label: 'Koolhydraten',cur: Math.round(dayTotals.carbs*10)/10,    tgt: Math.round(personalizedMacros.carbs*10)/10,    unit: 'g' as const },
+                          { label: 'Vet',        cur: Math.round(dayTotals.fat*10)/10,      tgt: Math.round(personalizedMacros.fat*10)/10,      unit: 'g' as const },
+                        ].map(r => ({ ...r, delta: Number((r.cur - r.tgt).toFixed(r.unit==='kcal'?0:1)) }));
+                        return (
+                          <div className="border border-[#2F3E22] rounded-md p-3 bg-[#0F130F] mb-2">
+                            <div className="font-semibold text-[#B6C948] mb-2">Dagtotalen vs Doel (op basis van ingrediënten)</div>
+                            <div className="overflow-x-auto">
+                              <table className="w-full text-left text-xs">
+                                <thead className="text-gray-400">
+                                  <tr>
+                                    <th className="py-1 pr-2">Macro</th>
+                                    <th className="py-1 pr-2">Huidig</th>
+                                    <th className="py-1 pr-2">Doel</th>
+                                    <th className="py-1 pr-2">Δ</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {rows.map((r, i) => (
+                                    <tr key={i} className="border-t border-[#2F3E22]">
+                                      <td className="py-1 pr-2">{r.label}</td>
+                                      <td className="py-1 pr-2">{r.cur} {r.unit}</td>
+                                      <td className="py-1 pr-2">{r.tgt} {r.unit}</td>
+                                      <td className={`py-1 pr-2 ${r.delta===0?'text-green-400':'text-yellow-400'}`}>{r.delta>0?`+${r.delta}`:r.delta} {r.unit} {r.delta>0?'te veel':'te weinig'}</td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        );
+                      })()}
+
+                      {/* Cumulatieve stapeltotalen per maaltijd (in volgorde) */}
+                      {(() => {
+                        let runP = 0, runC = 0, runF = 0, runStoredKcal = 0;
+                        const rows = ordered.map((key: string) => {
+                          const m = dayData[key];
+                          const n = m?.nutrition || { calories: 0, protein: 0, carbs: 0, fat: 0 };
+                          runP += Number(n.protein)  || 0;
+                          runC += Number(n.carbs)    || 0;
+                          runF += Number(n.fat)      || 0;
+                          runStoredKcal += Number(n.calories) || 0;
+                          const km = Math.round((runP*4) + (runC*4) + (runF*9));
+                          return {
+                            label: key.replace('_',' ').replace('_',' '),
+                            storedKcal: runStoredKcal,
+                            kcalFromMacros: km,
+                            protein: Math.round(runP*10)/10,
+                            carbs: Math.round(runC*10)/10,
+                            fat: Math.round(runF*10)/10,
+                            deltaKcal: runStoredKcal - km,
+                          };
+                        });
+                        return (
+                          <div className="border border-[#2F3E22] rounded-md p-3 bg-[#0F130F] mb-2">
+                            <div className="font-semibold text-[#B6C948] mb-2">Cumulatieve totalen per maaltijd</div>
+                            <div className="overflow-x-auto">
+                              <table className="w-full text-left text-xs">
+                                <thead className="text-gray-400">
+                                  <tr>
+                                    <th className="py-1 pr-2">Tot en met</th>
+                                    <th className="py-1 pr-2">Kcal (opgeslagen)</th>
+                                    <th className="py-1 pr-2">Kcal (afgeleid)</th>
+                                    <th className="py-1 pr-2">Δ kcal</th>
+                                    <th className="py-1 pr-2">Eiwit (g)</th>
+                                    <th className="py-1 pr-2">Koolhydraten (g)</th>
+                                    <th className="py-1 pr-2">Vet (g)</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {rows.map((r, i) => (
+                                    <tr key={i} className="border-t border-[#2F3E22]">
+                                      <td className="py-1 pr-2">{r.label}</td>
+                                      <td className="py-1 pr-2">{r.storedKcal}</td>
+                                      <td className="py-1 pr-2">{r.kcalFromMacros}</td>
+                                      <td className={`py-1 pr-2 ${r.deltaKcal===0 ? 'text-green-400' : 'text-yellow-400'}`}>{r.deltaKcal>0?`+${r.deltaKcal}`:r.deltaKcal}</td>
+                                      <td className="py-1 pr-2">{r.protein}</td>
+                                      <td className="py-1 pr-2">{r.carbs}</td>
+                                      <td className="py-1 pr-2">{r.fat}</td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        );
+                      })()}
+
+                      {ordered.map((mealKey: string) => {
+                        const meal = dayData[mealKey];
+                        const ing = Array.isArray(meal?.ingredients) ? meal.ingredients : [];
+                        const stored = meal?.nutrition || { calories: 0, protein: 0, carbs: 0, fat: 0 };
+                        const derivedMealKcal = Math.round((Number(stored.protein)||0)*4 + (Number(stored.carbs)||0)*4 + (Number(stored.fat)||0)*9);
+                        const deltaMeal = (Number(stored.calories)||0) - derivedMealKcal;
+                        // Ingredient-based recalculation
+                        let sumG = 0, sumP = 0, sumC = 0, sumF = 0, sumK = 0;
+                        const rows = (ing||[]).map((it: any) => {
+                          const unit = String(it?.unit||'per_100g');
+                          const amount = Number(it?.amount)||0;
+                          const perCal = Number(it?.calories_per_100g ?? it?.calories_per_piece ?? it?.kcal_per_100g ?? it?.kcal) || 0;
+                          const perP = Number(it?.protein_per_100g ?? it?.protein_per_piece ?? it?.protein) || 0;
+                          const perC = Number(it?.carbs_per_100g ?? it?.carbs_per_piece ?? it?.carbs) || 0;
+                          const perF = Number(it?.fat_per_100g ?? it?.fat_per_piece ?? it?.fat) || 0;
+                          const unitW = Number(it?.unit_weight_g ?? it?.grams_per_unit ?? it?.weight_per_unit ?? it?.per_piece_grams ?? it?.slice_weight_g ?? it?.plakje_gram ?? it?.unit_weight) || 0;
+                          let basis: 'per100'|'per_piece'|'unknown' = 'unknown';
+                          let grams = 0, k=0, p=0, c=0, f=0;
+                          if (unit === 'per_100g' || unit === 'per_100ml' || unit === 'gram' || unit === 'g') {
+                            basis = 'per100';
+                            grams = (unit==='per_100g' || unit==='per_100ml') ? amount : amount; // treat as grams
+                            k = perCal * (grams/100);
+                            p = perP * (grams/100);
+                            c = perC * (grams/100);
+                            f = perF * (grams/100);
+                          } else if (unit.startsWith('per_piece') || unit === 'piece' || unit === 'stuk') {
+                            if (unitW > 0) {
+                              basis = 'per100';
+                              grams = amount * unitW;
+                              k = perCal * (grams/100);
+                              p = perP * (grams/100);
+                              c = perC * (grams/100);
+                              f = perF * (grams/100);
+                            } else {
+                              basis = 'per_piece';
+                              grams = 0;
+                              k = perCal * amount;
+                              p = perP * amount;
+                              c = perC * amount;
+                              f = perF * amount;
+                            }
+                          } else {
+                            // Fallback assume per100
+                            basis = 'per100';
+                            grams = amount;
+                            k = perCal * (grams/100);
+                            p = perP * (grams/100);
+                            c = perC * (grams/100);
+                            f = perF * (grams/100);
+                          }
+                          sumG += grams;
+                          sumK += k; sumP += p; sumC += c; sumF += f;
+                          return { name: it?.name, amount, unit, unitW, basis, grams: Math.round(grams), k: Math.round(k), p: Math.round(p*10)/10, c: Math.round(c*10)/10, f: Math.round(f*10)/10,
+                            perCal, perP, perC, perF };
+                        });
+                        const tot = { k: Math.round(sumK), p: Math.round(sumP*10)/10, c: Math.round(sumC*10)/10, f: Math.round(sumF*10)/10 };
+                        const dVsStored = {
+                          k: Math.round((Number(stored.calories)||0) - tot.k),
+                          p: Math.round(((Number(stored.protein)||0) - tot.p)*10)/10,
+                          c: Math.round(((Number(stored.carbs)||0) - tot.c)*10)/10,
+                          f: Math.round(((Number(stored.fat)||0) - tot.f)*10)/10,
+                        };
+                        return (
+                          <div key={mealKey} className="border border-[#2F3E22] rounded-md p-3 bg-[#0F130F]">
+                            <div className="font-semibold text-[#B6C948] mb-2">{mealKey.replace('_',' ').replace('_',' ')}</div>
+                            <div className="text-xs text-gray-400 mb-1">Opgeslagen voeding (backend): {stored.calories} kcal • P {stored.protein}g • C {stored.carbs}g • F {stored.fat}g</div>
+                            <div className="text-xs text-gray-300 mb-1">Afgeleid uit macro's: <span className="text-white font-semibold">{derivedMealKcal} kcal</span> • Δ kcal: <span className={deltaMeal === 0 ? 'text-green-400' : 'text-yellow-400'}>{deltaMeal > 0 ? `+${deltaMeal}` : deltaMeal}</span></div>
+                            <div className="text-xs text-gray-300 mb-2">
+                              Ingrediënten-berekening totaal: <span className="text-white font-semibold">{tot.k} kcal</span> • P {tot.p}g • C {tot.c}g • F {tot.f}g
+                              {' '}| Δ vs opgeslagen: kcal <span className={`${dVsStored.k===0?'text-green-400':'text-yellow-400'}`}>{dVsStored.k>0?`+${dVsStored.k}`:dVsStored.k}</span>,
+                              P <span className={`${dVsStored.p===0?'text-green-400':'text-yellow-400'}`}>{dVsStored.p>0?`+${dVsStored.p}`:dVsStored.p}</span>,
+                              C <span className={`${dVsStored.c===0?'text-green-400':'text-yellow-400'}`}>{dVsStored.c>0?`+${dVsStored.c}`:dVsStored.c}</span>,
+                              F <span className={`${dVsStored.f===0?'text-green-400':'text-yellow-400'}`}>{dVsStored.f>0?`+${dVsStored.f}`:dVsStored.f}</span>
+                            </div>
+                            {rows.length === 0 ? (
+                              <div className="text-gray-400 text-sm">Geen ingrediënten</div>
+                            ) : (
+                              <div className="overflow-x-auto">
+                                <table className="w-full text-left text-xs">
+                                  <thead className="text-gray-400">
+                                    <tr>
+                                      <th className="py-1 pr-2">Ingrediënt</th>
+                                      <th className="py-1 pr-2">Hoeveelheid</th>
+                                      <th className="py-1 pr-2">Unit</th>
+                                      <th className="py-1 pr-2">kcal/100g</th>
+                                      <th className="py-1 pr-2">P/100g</th>
+                                      <th className="py-1 pr-2">C/100g</th>
+                                      <th className="py-1 pr-2">F/100g</th>
+                                      <th className="py-1 pr-2">unit_gewicht(g)</th>
+                                      <th className="py-1 pr-2">basis</th>
+                                      <th className="py-1 pr-2">eff. gram</th>
+                                      <th className="py-1 pr-2">kcal (calc)</th>
+                                      <th className="py-1 pr-2">P (calc)</th>
+                                      <th className="py-1 pr-2">C (calc)</th>
+                                      <th className="py-1 pr-2">F (calc)</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {rows.map((r: any, idx: number) => (
+                                      <tr key={idx} className="border-t border-[#2F3E22]">
+                                        <td className="py-1 pr-2 whitespace-nowrap">{r.name}</td>
+                                        <td className="py-1 pr-2">{r.amount}</td>
+                                        <td className="py-1 pr-2">{r.unit}</td>
+                                        <td className="py-1 pr-2">{r.perCal}</td>
+                                        <td className="py-1 pr-2">{r.perP}</td>
+                                        <td className="py-1 pr-2">{r.perC}</td>
+                                        <td className="py-1 pr-2">{r.perF}</td>
+                                        <td className="py-1 pr-2">{r.unitW || '-'}</td>
+                                        <td className="py-1 pr-2">{r.basis}</td>
+                                        <td className="py-1 pr-2">{r.grams || '-'}</td>
+                                        <td className="py-1 pr-2">{r.k}</td>
+                                        <td className="py-1 pr-2">{r.p}</td>
+                                        <td className="py-1 pr-2">{r.c}</td>
+                                        <td className="py-1 pr-2">{r.f}</td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </>
+                  );
+                })()}
               </div>
             </div>
           </div>

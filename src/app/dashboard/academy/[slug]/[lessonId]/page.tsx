@@ -1617,7 +1617,9 @@ export default function LessonDetailPage() {
                         <span>Voltooid</span>
                       </span>
                     )}
-                    <span className={`opacity-80 ${isActive ? 'text-[#181F17]' : 'text-gray-300'}`}>{l.duration}</span>
+                    {l.duration && l.type !== 'exam' && (
+                      <span className={`opacity-80 ${isActive ? 'text-[#181F17]' : 'text-gray-300'}`}>{l.duration}</span>
+                    )}
                   </div>
                 </button>
               );

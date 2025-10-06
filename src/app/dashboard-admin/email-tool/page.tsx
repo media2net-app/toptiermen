@@ -76,10 +76,13 @@ export default function AdminEmailToolPage() {
   );
   // Members state
   const [loadingMembers, setLoadingMembers] = useState<boolean>(false);
-  const [members, setMembers] = useState<Array<{ id: string; email: string; name: string }>>([]);
+  const [members, setMembers] = useState<Array<{ id: string; email: string; name: string; payment_status?: string; package_type?: string; subscription_tier?: string }>>([]);
   const [selectedMemberIds, setSelectedMemberIds] = useState<Set<string>>(new Set());
   const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
   const [sendingMembers, setSendingMembers] = useState<boolean>(false);
+  const [membersDebug, setMembersDebug] = useState<any | null>(null);
+  const [showMembersDebug, setShowMembersDebug] = useState<boolean>(false);
+  const [paidOnly, setPaidOnly] = useState<boolean>(true);
 
   // Edit mode state
   const [editMode, setEditMode] = useState<boolean>(false);
@@ -342,13 +345,36 @@ export default function AdminEmailToolPage() {
   const loadMembers = async () => {
     try {
       setLoadingMembers(true);
-      const res = await fetch(`/api/admin/active-paid-members`);
+      const res = await fetch(`/api/admin/list-members`);
       const data = await res.json();
       if (!res.ok || data?.error) throw new Error(data?.error || "Kon leden niet laden");
-      setMembers(data.members || []);
+      const list = (data.members || []) as Array<any>;
+      const filtered = paidOnly
+        ? list.filter((m) => (m.payment_status || '').toLowerCase() === 'paid' ||
+            (String(m.package_type||'').toLowerCase().includes('premium') || String(m.subscription_tier||'').toLowerCase().includes('premium') ||
+             String(m.package_type||'').toLowerCase().includes('lifetime') || String(m.subscription_tier||'').toLowerCase().includes('lifetime')))
+        : list;
+      setMembers(filtered.map((m) => ({ id: m.id, email: m.email, name: m.full_name || m.email?.split('@')[0] || 'Onbekend', payment_status: m.payment_status, package_type: m.package_type, subscription_tier: m.subscription_tier })));
     } catch (e: any) {
       console.error(e);
       setToast({ type: "error", msg: e?.message || "Leden laden mislukt" });
+    } finally {
+      setLoadingMembers(false);
+    }
+  };
+
+  const loadMembersDebug = async () => {
+    try {
+      setLoadingMembers(true);
+      const res = await fetch(`/api/admin/active-paid-members?debug=1`);
+      const data = await res.json();
+      if (!res.ok || data?.error) throw new Error(data?.error || "Kon debug-info niet laden");
+      setMembers(data.members || []);
+      setMembersDebug(data.debug || null);
+      setShowMembersDebug(true);
+    } catch (e: any) {
+      console.error(e);
+      setToast({ type: 'error', msg: e?.message || 'Debug laden mislukt' });
     } finally {
       setLoadingMembers(false);
     }
@@ -501,19 +527,35 @@ export default function AdminEmailToolPage() {
 
             <div className="bg-[#141A15] rounded-xl border border-[#2A3A1A] p-4">
               <div className="flex items-center justify-between mb-3">
-                <h2 className="font-semibold">Leden (actief & betaald)</h2>
-                <button
-                  onClick={loadMembers}
-                  disabled={loadingMembers}
-                  className={clsx(
-                    "text-xs px-2 py-1 rounded-md border",
-                    loadingMembers
-                      ? "bg-gray-700 cursor-not-allowed"
-                      : "bg-[#23311B] hover:bg-[#2C3E21] border-[#2A3A1A]"
-                  )}
-                >
-                  {loadingMembers ? "Laden..." : "Vernieuw"}
-                </button>
+                <div className="flex items-center gap-3">
+                  <h2 className="font-semibold">Ledenlijst</h2>
+                  <div className="text-xs text-gray-400">Totaal: {members.length}</div>
+                  <label className="flex items-center gap-1 text-xs text-gray-300">
+                    <input type="checkbox" className="h-3 w-3" checked={paidOnly} onChange={(e)=>{ setPaidOnly(e.target.checked); setTimeout(loadMembers, 0); }} />
+                    Alleen betaald
+                  </label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={loadMembers}
+                    disabled={loadingMembers}
+                    className={clsx(
+                      "text-xs px-2 py-1 rounded-md border",
+                      loadingMembers
+                        ? "bg-gray-700 cursor-not-allowed"
+                        : "bg-[#23311B] hover:bg-[#2C3E21] border-[#2A3A1A]"
+                    )}
+                  >
+                    {loadingMembers ? "Laden..." : "Vernieuw"}
+                  </button>
+                  <button
+                    onClick={loadMembersDebug}
+                    className="text-xs px-2 py-1 rounded-md border bg-[#332b11] hover:bg-[#3d3415] border-[#4b3b12]"
+                    title="Toon debug-overzicht (matching stats)"
+                  >
+                    Debug
+                  </button>
+                </div>
               </div>
               <div className="max-h-64 overflow-auto border border-[#2A3A1A] rounded-lg">
                 {members.length === 0 ? (
@@ -530,13 +572,39 @@ export default function AdminEmailToolPage() {
                         />
                         <div className="flex-1 min-w-0">
                           <div className="text-sm truncate">{m.name}</div>
-                          <div className="text-xs text-gray-400 truncate">{m.email}</div>
+                          <div className="text-xs text-gray-400 truncate">{m.email} {m.payment_status ? (<span className={clsx('ml-2', (m.payment_status||'').toLowerCase()==='paid' ? 'text-green-400' : 'text-gray-500')}>[{m.payment_status}]</span>) : null}</div>
                         </div>
                       </li>
                     ))}
                   </ul>
                 )}
               </div>
+              {showMembersDebug && membersDebug && (
+                <div className="mt-3 text-xs text-gray-300 bg-[#0F1419] border border-[#2A3A1A] rounded-lg p-3">
+                  <div className="font-semibold text-[#8BAE5A] mb-1">Debug-overzicht</div>
+                  <div>Profiles totaal: {membersDebug.profiles_total}</div>
+                  <div>Betaalde payments (prelaunch_packages): {membersDebug.payments_total}</div>
+                  <div>Unieke betaalde e-mails gematcht: {membersDebug.paid_emails_matched}</div>
+                  <div>Gematcht op Premium/Lifetime tier: {membersDebug.matched_by_tier}</div>
+                  <div>Actief & betaald resultaat: {membersDebug.matched_active_paid}</div>
+                  {membersDebug.sample_first5?.length > 0 && (
+                    <div className="mt-2">
+                      <div className="text-gray-400 mb-1">Voorbeeld (eerste 5):</div>
+                      <ul className="list-disc list-inside">
+                        {membersDebug.sample_first5.map((u: any) => (
+                          <li key={u.id}>{u.name} — {u.email}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  <button
+                    onClick={() => setShowMembersDebug(false)}
+                    className="mt-2 text-xs px-2 py-1 rounded-md border bg-[#23311B] hover:bg-[#2C3E21] border-[#2A3A1A]"
+                  >
+                    Verberg debug
+                  </button>
+                </div>
+              )}
               <div className="flex items-center justify-between mt-3 text-sm text-gray-300">
                 <span>Geselecteerd: {selectedMemberIds.size}</span>
                 <button

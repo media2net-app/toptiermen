@@ -97,6 +97,13 @@ export default function Ledenbeheer() {
   const [deleteConfirmation, setDeleteConfirmation] = useState('');
   const [deletingUser, setDeletingUser] = useState(false);
 
+  // Multi-select delete state
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
+  const [bulkDeleteConfirmation, setBulkDeleteConfirmation] = useState('');
+  const [bulkDeleting, setBulkDeleting] = useState(false);
+  const [bulkLogs, setBulkLogs] = useState<Array<{ message: string; type: 'info' | 'success' | 'error'; ts: string }>>([]);
+
   // Handle login as user function
   const handleLoginAsUser = async (member: any) => {
     if (!member.id) {
@@ -117,6 +124,43 @@ export default function Ledenbeheer() {
         window.location.href = '/dashboard';
       }
     }
+  };
+
+  // UI: Selected overview and bulk actions
+  const SelectedOverview = () => {
+    if (selectedMembers.length === 0) return null;
+    return (
+      <div className="mt-4 border border-gray-700 rounded-lg p-4 bg-black/30">
+        <div className="flex items-center justify-between mb-3">
+          <div className="text-sm text-gray-300">
+            <strong>{selectedMembers.length}</strong> geselecteerd
+          </div>
+          <div className="flex gap-2">
+            <button
+              className="px-3 py-1.5 rounded-md bg-gray-700 hover:bg-gray-600 text-sm"
+              onClick={() => setSelectedIds(new Set())}
+            >
+              Clear selectie
+            </button>
+            <button
+              className="px-3 py-1.5 rounded-md bg-red-600 hover:bg-red-500 text-white text-sm"
+              onClick={openBulkDeleteModal}
+            >
+              Verwijder geselecteerden
+            </button>
+          </div>
+        </div>
+        <div className="max-h-40 overflow-auto text-xs text-gray-400 space-y-1">
+          {selectedMembers.map(m => (
+            <div key={`selrow-${m.id}`} className="flex items-center gap-2">
+              <span>•</span>
+              <span className="text-gray-200">{m.full_name || 'Onbekend'}</span>
+              <span className="text-gray-500">({m.email})</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   };
 
   // Handle password reset function
@@ -293,110 +337,23 @@ export default function Ledenbeheer() {
     }
   };
 
-  // Fetch members function
+  // Fetch members function (via server API to bypass RLS)
   const fetchMembers = async () => {
     setLoadingMembers(true);
     try {
-      console.log('🔄 Fetching members from database...');
-      
-      // Fetch users, profiles, and payment data
-      const [usersResult, profilesResult, paymentsResult] = await Promise.all([
-        supabase.from('profiles').select('*').order('created_at', { ascending: false }),
-        supabase.from('profiles').select('*'),
-        supabase.from('prelaunch_packages').select('*').eq('payment_status', 'paid')
-      ]);
-      
-      if (usersResult.error) {
-        console.error('Error fetching users:', usersResult.error);
-        toast.error('Fout bij het laden van leden', {
-          position: "top-right",
-          duration: 3000,
-        });
-        return;
+      console.log('🔄 Fetching members via /api/admin/list-members ...');
+      const res = await fetch('/api/admin/list-members');
+      const data = await res.json();
+      if (!res.ok || data?.error) {
+        throw new Error(data?.error || 'Kon leden niet laden');
       }
-      
-      if (profilesResult.error) {
-        console.error('Error fetching profiles:', profilesResult.error);
-        // Continue with just users data
-      }
-      
-      const users = usersResult.data || [];
-      const profiles = profilesResult.data || [];
-      const payments = paymentsResult.data || [];
-      
-      console.log('📊 Fetched users:', users.length, 'profiles:', profiles.length, 'payments:', payments.length);
-      
-      // Create a map of profiles by user ID for quick lookup
-      const profilesMap = new Map();
-      profiles.forEach(profile => {
-        profilesMap.set(profile.id, profile);
-      });
-      
-      // Create a map of payments by email for quick lookup
-      const paymentsMap = new Map();
-      payments.forEach(payment => {
-        paymentsMap.set(payment.email, payment);
-      });
-      
-      // Combine user, profile, and payment data
-      const combinedData = users.map(user => {
-        const profile = profilesMap.get(user.id);
-        const payment = paymentsMap.get(user.email);
-        const combined = {
-          ...user,
-          ...(profile || {}),
-          // Use profile data as primary, fallback to user data
-          full_name: profile?.full_name || user.full_name,
-          username: profile?.display_name || user.username, // Use display_name from profile as username
-          rank: profile?.rank || user.rank || 'Rookie',
-          avatar_url: profile?.avatar_url,
-          bio: profile?.bio,
-          main_goal: profile?.main_goal,
-          points: profile?.points || 0,
-          missions_completed: profile?.missions_completed || 0,
-          posts: profile?.posts || 0,
-          badges: profile?.badges || 0,
-          // Payment data
-          payment_status: payment ? 'paid' : 'unpaid',
-          payment_data: payment ? {
-            amount: payment.discounted_price,
-            package_name: payment.package_name,
-            payment_period: payment.payment_period,
-            payment_date: payment.created_at,
-            mollie_payment_id: payment.mollie_payment_id
-          } : null
-        };
-        
-        // Debug log for specific users
-        if (user.email === 'henk@media2net.nl' || user.email === 'jeroen@media2net.nl') {
-          console.log(`🔍 ${user.email} data in fetchMembers:`, {
-            user: { full_name: user.full_name, username: user.username },
-            profile: { full_name: profile?.full_name, display_name: profile?.display_name },
-            combined: { full_name: combined.full_name, username: combined.username }
-          });
-        }
-        
-        return combined;
-      });
-      
-      console.log('Combined member details:', combinedData.map(m => ({
-        id: m.id,
-        email: m.email,
-        full_name: m.full_name,
-        username: m.username,
-        rank: m.rank,
-        status: m.status,
-        created_at: m.created_at,
-        avatar_url: m.avatar_url
-      })));
-      
-      console.log('📊 Setting allMembers with', combinedData.length, 'members');
-      
-      setAllMembers(combinedData);
+      const members = data.members || [];
+      console.log('📊 Received members:', members.length);
+      setAllMembers(members);
     } catch (err) {
-      console.error('Exception fetching members:', err);
+      console.error('Exception fetching members (API):', err);
       toast.error('Fout bij het laden van leden', {
-        position: "top-right",
+        position: 'top-right',
         duration: 3000,
       });
     } finally {
@@ -955,7 +912,24 @@ export default function Ledenbeheer() {
       const packageInfo = getPackageDisplay(member);
       const paymentInfo = getPaymentStatusDisplay(member);
       const canQuickDelete = userType.type !== 'Admin';
+      const checked = selectedIds.has(member.id);
       return [
+        // Select checkbox
+        <input
+          key={`sel-${member.id}`}
+          type="checkbox"
+          className="h-4 w-4 cursor-pointer"
+          checked={checked}
+          onChange={(e) => {
+            setSelectedIds(prev => {
+              const next = new Set(prev);
+              if (e.target.checked) next.add(member.id);
+              else next.delete(member.id);
+              return next;
+            });
+          }}
+          aria-label={`Selecteer ${member.email}`}
+        />,
         member.full_name || 'Onbekend',
         member.email || 'Geen e-mail',
         // Quick delete cell: icon-only button, hidden for Admin users
@@ -989,9 +963,62 @@ export default function Ledenbeheer() {
         member.last_login ? new Date(member.last_login).toLocaleDateString('nl-NL') : 'Niet beschikbaar'
       ];
     });
-  }, [currentMembers]);
+  }, [currentMembers, selectedIds]);
 
-  const tableHeaders = ['Lid', 'Email', 'Verwijder', 'Type', 'Rang', 'Status', 'Punten', 'Missies', 'Pakket', 'Betalingsstatus', 'Lid sinds', 'Laatste activiteit'];
+  // Bulk delete helpers
+  const selectedMembers = useMemo(() => {
+    if (selectedIds.size === 0) return [] as any[];
+    const idSet = new Set(selectedIds);
+    return allMembers.filter(m => idSet.has(m.id));
+  }, [selectedIds, allMembers]);
+
+  const openBulkDeleteModal = () => {
+    if (selectedIds.size === 0) return;
+    setBulkDeleteConfirmation('');
+    setBulkLogs([]);
+    setShowBulkDeleteModal(true);
+  };
+
+  const runBulkDelete = async () => {
+    if (bulkDeleteConfirmation !== 'VERWIJDER') {
+      toast.error('Typ exact "VERWIJDER" om te bevestigen');
+      return;
+    }
+    setBulkDeleting(true);
+    setBulkLogs(prev => [...prev, { message: `Start bulk verwijdering van ${selectedMembers.length} gebruikers`, type: 'info', ts: new Date().toISOString() }]);
+    try {
+      for (const m of selectedMembers) {
+        setBulkLogs(prev => [...prev, { message: `Verwijderen: ${m.full_name || m.email} (${m.id})`, type: 'info', ts: new Date().toISOString() }]);
+        try {
+          const endpoint = `/api/admin/delete-user?userId=${encodeURIComponent(m.id)}`;
+          const res = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: m.id })
+          });
+          const raw = await res.text();
+          let data: any = {};
+          try { data = raw ? JSON.parse(raw) : {}; } catch {}
+          if (res.ok && data?.success) {
+            setBulkLogs(prev => [...prev, { message: `✅ Verwijderd: ${m.full_name || m.email}`, type: 'success', ts: new Date().toISOString() }]);
+          } else {
+            setBulkLogs(prev => [...prev, { message: `❌ Mislukt: ${m.full_name || m.email} -> ${data?.error || res.status}`, type: 'error', ts: new Date().toISOString() }]);
+          }
+        } catch (e: any) {
+          setBulkLogs(prev => [...prev, { message: `❌ Fout: ${m.full_name || m.email} -> ${e?.message || String(e)}`, type: 'error', ts: new Date().toISOString() }]);
+        }
+      }
+      // Refresh and reset
+      await fetchMembers();
+      setSelectedIds(new Set());
+      setBulkLogs(prev => [...prev, { message: `Bulk verwijdering afgerond`, type: 'success', ts: new Date().toISOString() }]);
+      toast.success('Bulk verwijdering afgerond');
+    } finally {
+      setBulkDeleting(false);
+    }
+  };
+
+  const tableHeaders = ['Selecteer', 'Lid', 'Email', 'Verwijder', 'Type', 'Rang', 'Status', 'Punten', 'Missies', 'Pakket', 'Betalingsstatus', 'Lid sinds', 'Laatste activiteit'];
 
   const renderActions = (item: any) => {
     // Find member by email (item[1] is the email)
@@ -1086,6 +1113,81 @@ export default function Ledenbeheer() {
           {loadingMembers && (
             <span className="text-[#B6C948] text-sm">Laden...</span>
           )}
+
+      {/* Bulk Delete Modal with terminal-like logs */}
+      {showBulkDeleteModal && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+          <div className="bg-[#1A1F14] border border-[#3A4D23] rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="p-4 border-b border-[#3A4D23] flex items-center justify-between">
+              <h3 className="text-[#8BAE5A] font-semibold">Bulk verwijderen ({selectedMembers.length} gebruikers)</h3>
+              <button
+                className="text-gray-400 hover:text-white"
+                onClick={() => (!bulkDeleting ? setShowBulkDeleteModal(false) : null)}
+                aria-label="Sluiten"
+              >
+                <XMarkIcon className="w-6 h-6" />
+              </button>
+            </div>
+            <div className="p-4 space-y-4 overflow-auto">
+              {/* Selected list */}
+              <div>
+                <div className="text-sm text-gray-300 mb-2">Te verwijderen leden:</div>
+                <div className="max-h-32 overflow-auto bg-black/30 border border-[#2A3820] rounded-md p-2 text-xs text-gray-300">
+                  {selectedMembers.map(m => (
+                    <div key={`bulk-${m.id}`} className="flex items-center gap-2">
+                      <span>•</span>
+                      <span className="text-gray-200">{m.full_name || 'Onbekend'}</span>
+                      <span className="text-gray-500">({m.email})</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              {/* Terminal logs */}
+              <div>
+                <div className="text-sm text-gray-300 mb-2">Logs</div>
+                <div className="max-h-64 overflow-auto bg-black border border-[#2A3820] rounded-md p-3 font-mono text-xs text-gray-200 space-y-1">
+                  {bulkLogs.length === 0 && (
+                    <div className="text-gray-500">Gereed. Klik op "Start verwijderen" om te beginnen.</div>
+                  )}
+                  {bulkLogs.map((l, idx) => (
+                    <div key={`log-${idx}`} className={l.type === 'error' ? 'text-red-400' : l.type === 'success' ? 'text-green-400' : 'text-gray-300'}>
+                      [{new Date(l.ts).toLocaleTimeString('nl-NL')}] {l.message}
+                    </div>
+                  ))}
+                </div>
+              </div>
+              {/* Confirmation */}
+              <div className="text-sm text-gray-300">
+                Typ <span className="text-red-400 font-mono">VERWIJDER</span> om te bevestigen:
+                <input
+                  value={bulkDeleteConfirmation}
+                  onChange={(e) => setBulkDeleteConfirmation(e.target.value)}
+                  className="ml-3 px-3 py-1.5 rounded-md bg-[#181F17] border border-[#3A4D23] text-white"
+                  placeholder="VERWIJDER"
+                />
+              </div>
+            </div>
+            <div className="p-4 border-t border-[#3A4D23] flex items-center justify-between">
+              <button
+                className="px-3 py-2 rounded-md bg-gray-700 hover:bg-gray-600 text-white"
+                onClick={() => setShowBulkDeleteModal(false)}
+                disabled={bulkDeleting}
+              >
+                Annuleren
+              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  className={`px-3 py-2 rounded-md ${bulkDeleting ? 'bg-red-800' : 'bg-red-600 hover:bg-red-500'} text-white`}
+                  onClick={runBulkDelete}
+                  disabled={bulkDeleting || selectedMembers.length === 0}
+                >
+                  {bulkDeleting ? 'Bezig met verwijderen...' : 'Start verwijderen'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
           <div className="flex gap-2 sm:gap-4">
             <AdminButton 
               variant="secondary" 
@@ -1267,6 +1369,50 @@ export default function Ledenbeheer() {
 
       {/* Members Table */}
       <AdminCard title="Leden Overzicht" icon={<UserGroupIcon className="w-6 h-6" />}>
+        {/* Bulk selection toolbar */}
+        <div className="mb-3 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <label className="inline-flex items-center gap-2 text-sm text-gray-300">
+              <input
+                type="checkbox"
+                className="h-4 w-4 cursor-pointer"
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    const next = new Set<string>(selectedIds);
+                    currentMembers.forEach(m => next.add(m.id));
+                    setSelectedIds(next);
+                  } else {
+                    const next = new Set<string>(selectedIds);
+                    currentMembers.forEach(m => next.delete(m.id));
+                    setSelectedIds(next);
+                  }
+                }}
+              />
+              Selecteer alle zichtbare ({currentMembers.length})
+            </label>
+            {selectedIds.size > 0 && (
+              <span className="text-xs text-gray-400">{selectedIds.size} geselecteerd</span>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <AdminButton
+              variant="secondary"
+              size="sm"
+              onClick={() => setSelectedIds(new Set())}
+              disabled={selectedIds.size === 0}
+            >
+              Clear selectie
+            </AdminButton>
+            <AdminButton
+              variant="danger"
+              size="sm"
+              onClick={openBulkDeleteModal}
+              disabled={selectedIds.size === 0}
+            >
+              Verwijder geselecteerden
+            </AdminButton>
+          </div>
+        </div>
         <AdminTable
           headers={tableHeaders}
           data={tableData}
@@ -1275,6 +1421,9 @@ export default function Ledenbeheer() {
           actions={renderActions}
         />
       </AdminCard>
+
+      {/* Selected users overview */}
+      <SelectedOverview />
 
       {/* Pagination */}
       {allMembers.length > 0 && (

@@ -370,36 +370,52 @@ function calculateMealNutrition(ingredients: any[]): any {
     const unit = ingredient.unit || 'per_100g';
     
     let factor = 1;
-    
-    // Calculate factor based on unit type
-    if (unit === 'per_100g' || unit === 'gram') {
-      // For per_100g or gram, calculate per 100g
+    const u = String(unit).toLowerCase();
+
+    // Calculate factor based on unit type (aligned with frontend logic)
+    if (u === 'per_100g' || u === 'gram' || u === 'g') {
       factor = amount / 100;
-    } else if (unit === 'per_piece' || unit === 'stuks' || unit === 'stuk') {
-      // For pieces, use the amount directly (calories_per_100g is actually calories per piece)
+    } else if (u === 'per_piece' || u === 'stuks' || u === 'stuk' || u === 'piece' || u === 'pieces') {
+      // Treat per-piece style items as already normalized to per piece in *_per_100g fields
       factor = amount;
-    } else if (unit === 'per_handful' || unit === 'handje' || unit === 'handjes') {
-      // For handfuls, use the amount directly
+    } else if (u === 'per_handful' || u === 'handje' || u === 'handjes') {
       factor = amount;
-    } else if (unit === 'per_plakje' || unit === 'plakje' || unit === 'plakjes') {
-      // For slices, use the amount directly
+    } else if (u === 'per_plakje' || u === 'plakje' || u === 'plakjes' || u === 'per_sneedje' || u === 'sneedje') {
       factor = amount;
+    } else if (u === 'per_30g') {
+      factor = (amount * 30) / 100; // 30g portions
+    } else if (u === 'per_100ml' || u === 'ml' || u === 'per_ml') {
+      factor = amount / 100; // assume 1ml ≈ 1g for density
+    } else if (u === 'per_eetlepel_15g' || u === 'per_tbsp' || u === 'tbsp' || u === 'eetlepel' || u === 'el' || u === 'per_eetlepel') {
+      factor = (amount * 15) / 100; // 1 tbsp = 15g/ml
+    } else if (u === 'per_tsp' || u === 'tsp' || u === 'theelepel' || u === 'tl' || u === 'per_theelepel') {
+      factor = (amount * 5) / 100; // 1 tsp = 5g/ml
+    } else if (u === 'per_cup' || u === 'cup' || u === 'kop') {
+      factor = (amount * 240) / 100; // 1 cup ≈ 240ml
+    } else if (u === 'per_blikje') {
+      factor = amount; // treat as per unit
     } else {
       // Default to per 100g calculation
       factor = amount / 100;
     }
-    
-    totalCalories += (ingredient.calories_per_100g || 0) * factor;
+
+    // Sum macros first
     totalProtein += (ingredient.protein_per_100g || 0) * factor;
     totalCarbs += (ingredient.carbs_per_100g || 0) * factor;
     totalFat += (ingredient.fat_per_100g || 0) * factor;
   });
 
+  // Derive calories from macros to keep consistency: kcal = 4P + 4C + 9F
+  const proteinRounded = Math.round(totalProtein * 10) / 10;
+  const carbsRounded = Math.round(totalCarbs * 10) / 10;
+  const fatRounded = Math.round(totalFat * 10) / 10;
+  const caloriesFromMacros = Math.round(proteinRounded * 4 + carbsRounded * 4 + fatRounded * 9);
+
   return {
-    calories: Math.round(totalCalories),
-    protein: Math.round(totalProtein * 10) / 10,
-    carbs: Math.round(totalCarbs * 10) / 10,
-    fat: Math.round(totalFat * 10) / 10
+    calories: caloriesFromMacros,
+    protein: proteinRounded,
+    carbs: carbsRounded,
+    fat: fatRounded
   };
 }
 
