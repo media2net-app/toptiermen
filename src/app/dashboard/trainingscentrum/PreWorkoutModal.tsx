@@ -208,39 +208,51 @@ export default function PreWorkoutModal({
         {/* Training Mode Selection */}
         <div className="mb-6">
           <h3 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4">Kies je training mode:</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 min-w-0">
+          
+          {/* Mobile-first responsive buttons */}
+          <div className="space-y-3 sm:space-y-0 sm:grid sm:grid-cols-2 sm:gap-3">
+            {/* Interactive Training */}
             <button
               onClick={() => setSelectedMode('interactive')}
-              className={`w-full p-3 sm:p-4 rounded-xl border-2 transition-all overflow-hidden min-w-0 ${
+              className={`w-full p-4 rounded-lg border-2 transition-all duration-200 text-left ${
                 selectedMode === 'interactive'
-                  ? 'border-[#8BAE5A] bg-[#232D1A]'
-                  : 'border-[#3A4D23] bg-[#181F17] hover:border-[#5A6D43]'
+                  ? 'border-[#8BAE5A] bg-[#8BAE5A]/10 shadow-lg'
+                  : 'border-[#3A4D23] bg-[#232D1A] hover:border-[#8BAE5A]/50 hover:bg-[#2A3A1A]'
               }`}
             >
-              <div className="flex items-start mb-1 sm:mb-2 min-w-0">
-                <PlayIcon className="w-5 h-5 sm:w-6 sm:h-6 text-[#8BAE5A] mr-2 flex-shrink-0" />
-                <span className="font-semibold text-white text-left leading-snug break-words text-pretty hyphens-auto text-sm sm:text-base min-w-0">Interactive Training</span>
+              <div className="flex flex-col h-full">
+                <div className="flex items-center mb-2">
+                  <PlayIcon className="w-5 h-5 text-[#8BAE5A] mr-2 flex-shrink-0" />
+                  <div className="text-base font-bold text-white leading-tight">
+                    Interactive Training
+                  </div>
+                </div>
+                <div className="text-xs text-[#A3AED6] leading-relaxed flex-grow">
+                  Timer-based training met oefening tracking en real-time feedback
+                </div>
               </div>
-              <p className="text-xs sm:text-sm text-gray-400 break-words text-pretty hyphens-auto leading-snug">
-                Timer-based training met oefening tracking en real-time feedback
-              </p>
             </button>
 
+            {/* Training Al Gedaan */}
             <button
               onClick={() => setSelectedMode('quick')}
-              className={`w-full p-3 sm:p-4 rounded-xl border-2 transition-all overflow-hidden min-w-0 ${
+              className={`w-full p-4 rounded-lg border-2 transition-all duration-200 text-left ${
                 selectedMode === 'quick'
-                  ? 'border-[#8BAE5A] bg-[#232D1A]'
-                  : 'border-[#3A4D23] bg-[#181F17] hover:border-[#5A6D43]'
+                  ? 'border-[#8BAE5A] bg-[#8BAE5A]/10 shadow-lg'
+                  : 'border-[#3A4D23] bg-[#232D1A] hover:border-[#8BAE5A]/50 hover:bg-[#2A3A1A]'
               }`}
             >
-              <div className="flex items-start mb-1 sm:mb-2 min-w-0">
-                <CheckIcon className="w-5 h-5 sm:w-6 sm:h-6 text-[#8BAE5A] mr-2 flex-shrink-0" />
-                <span className="font-semibold text-white text-left leading-snug break-words text-pretty hyphens-auto text-sm sm:text-base min-w-0">Training Al Gedaan</span>
+              <div className="flex flex-col h-full">
+                <div className="flex items-center mb-2">
+                  <CheckIcon className="w-5 h-5 text-[#8BAE5A] mr-2 flex-shrink-0" />
+                  <div className="text-base font-bold text-white leading-tight">
+                    Training Al Gedaan
+                  </div>
+                </div>
+                <div className="text-xs text-[#A3AED6] leading-relaxed flex-grow">
+                  Heb je vandaag al getraind? Registreer deze training als voltooid
+                </div>
               </div>
-              <p className="text-xs sm:text-sm text-gray-400 break-words text-pretty hyphens-auto leading-snug">
-                Heb je vandaag al getraind? Registreer deze training als voltooid
-              </p>
             </button>
           </div>
         </div>

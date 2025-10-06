@@ -601,35 +601,8 @@ function LoginPageContent() {
             </a>
           </p>
           
-          {/* ✅ FIXED: Simplified cache busting - no aggressive clearing */}
+          {/* Version badge */}
           <div className="mt-4 pt-2 border-t border-[#3A4D23]/30">
-            <div className="mb-3 p-3 bg-[#181F17] rounded-lg border border-[#3A4D23]">
-              <p className="text-[#8BAE5A] text-xs mb-2 text-center">Problemen met inloggen?</p>
-              <button
-                onClick={() => {
-                  console.log('🔄 Manual refresh');
-                  window.location.reload();
-                }}
-                className={`w-full px-3 py-2 bg-[#3A4D23] text-[#8BAE5A] rounded text-sm font-medium hover:bg-[#4A5D33] transition-colors ${loginState.isLoading ? 'cursor-wait opacity-75' : 'cursor-pointer'}`}
-                disabled={loginState.isLoading}
-              >
-                🔄 Pagina Verversen
-              </button>
-              <button
-                onClick={() => {
-                  console.log('🧹 Forceer schoonmaken + herladen');
-                  clearClientAuth();
-                  try { supabase.auth.signOut(); } catch {}
-                  setTimeout(() => window.location.reload(), 150);
-                }}
-                className={`mt-2 w-full px-3 py-2 bg-[#8BAE5A]/20 text-[#B6C948] rounded text-sm font-medium hover:bg-[#8BAE5A]/30 transition-colors border border-[#8BAE5A]/30 ${loginState.isLoading ? 'cursor-wait opacity-75' : 'cursor-pointer'}`}
-                disabled={loginState.isLoading}
-              >
-                🧹 Forceer Schoonmaken
-              </button>
-            </div>
-            
-            {/* Version badge */}
             <div className="flex items-center justify-center gap-2">
               <span className="text-[#B6C948] text-xs">Platform</span>
               <span className="px-2 py-1 bg-[#B6C948]/20 text-[#B6C948] text-xs font-semibold rounded-full border border-[#B6C948]/30">
