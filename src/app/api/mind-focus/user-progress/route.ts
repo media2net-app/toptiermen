@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Handle missing columns gracefully
-    let completedWeeks = [];
+    let completedWeeks: number[] = [];
     let currentWeek = 1;
     
     if (existingProfile) {
