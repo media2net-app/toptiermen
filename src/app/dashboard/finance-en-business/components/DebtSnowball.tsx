@@ -147,44 +147,90 @@ export default function DebtSnowball() {
         <div className="bg-[#181F17] rounded-xl p-3 sm:p-4">
           <h3 className="text-[#8BAE5A] font-semibold mb-3 text-sm sm:text-base">Kies je Strategie</h3>
           
-          {/* Mobile-first responsive buttons */}
-          <div className="space-y-3 sm:space-y-0 sm:grid sm:grid-cols-2 sm:gap-3">
+          {/* Completely new responsive button implementation */}
+          <div className="flex flex-col sm:flex-row gap-3">
             {/* Snowball Method */}
             <button
               onClick={() => setStrategy('snowball')}
-              className={`w-full p-4 rounded-lg border-2 transition-all duration-200 text-left ${
-                strategy === 'snowball'
-                  ? 'border-[#8BAE5A] bg-[#8BAE5A]/10 shadow-lg'
-                  : 'border-[#3A4D23] bg-[#232D1A] hover:border-[#8BAE5A]/50 hover:bg-[#2A3A1A]'
-              }`}
+              className={`
+                relative w-full sm:flex-1 p-4 rounded-xl transition-all duration-300 
+                border-2 text-left overflow-hidden group
+                ${strategy === 'snowball'
+                  ? 'border-[#8BAE5A] bg-gradient-to-br from-[#8BAE5A]/20 to-[#8BAE5A]/5 shadow-lg shadow-[#8BAE5A]/20'
+                  : 'border-[#3A4D23] bg-[#232D1A] hover:border-[#8BAE5A]/60 hover:bg-[#2A3A1A] hover:shadow-md'
+                }
+              `}
             >
-              <div className="flex flex-col h-full">
-                <div className="text-base font-bold text-white mb-2 leading-tight">
-                  Sneeuwbal Methode
+              <div className="relative z-10">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-bold text-white leading-tight">
+                    Sneeuwbal Methode
+                  </span>
+                  <div className={`
+                    w-4 h-4 rounded-full border-2 transition-all
+                    ${strategy === 'snowball' 
+                      ? 'bg-[#8BAE5A] border-[#8BAE5A]' 
+                      : 'border-[#3A4D23] group-hover:border-[#8BAE5A]'
+                    }
+                  `}>
+                    {strategy === 'snowball' && (
+                      <div className="w-full h-full rounded-full bg-[#8BAE5A] animate-pulse" />
+                    )}
+                  </div>
                 </div>
-                <div className="text-xs text-[#A3AED6] leading-relaxed flex-grow">
+                <p className="text-xs text-[#A3AED6] leading-relaxed">
                   Los eerst de kleinste schuld af voor psychologische winst
-                </div>
+                </p>
               </div>
+              
+              {/* Hover effect overlay */}
+              <div className={`
+                absolute inset-0 bg-gradient-to-r from-[#8BAE5A]/5 to-transparent 
+                opacity-0 group-hover:opacity-100 transition-opacity duration-300
+                ${strategy === 'snowball' ? 'opacity-20' : ''}
+              `} />
             </button>
 
             {/* Avalanche Method */}
             <button
               onClick={() => setStrategy('avalanche')}
-              className={`w-full p-4 rounded-lg border-2 transition-all duration-200 text-left ${
-                strategy === 'avalanche'
-                  ? 'border-[#8BAE5A] bg-[#8BAE5A]/10 shadow-lg'
-                  : 'border-[#3A4D23] bg-[#232D1A] hover:border-[#8BAE5A]/50 hover:bg-[#2A3A1A]'
-              }`}
+              className={`
+                relative w-full sm:flex-1 p-4 rounded-xl transition-all duration-300 
+                border-2 text-left overflow-hidden group
+                ${strategy === 'avalanche'
+                  ? 'border-[#8BAE5A] bg-gradient-to-br from-[#8BAE5A]/20 to-[#8BAE5A]/5 shadow-lg shadow-[#8BAE5A]/20'
+                  : 'border-[#3A4D23] bg-[#232D1A] hover:border-[#8BAE5A]/60 hover:bg-[#2A3A1A] hover:shadow-md'
+                }
+              `}
             >
-              <div className="flex flex-col h-full">
-                <div className="text-base font-bold text-white mb-2 leading-tight">
-                  Lawaai Methode
+              <div className="relative z-10">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-bold text-white leading-tight">
+                    Lawaai Methode
+                  </span>
+                  <div className={`
+                    w-4 h-4 rounded-full border-2 transition-all
+                    ${strategy === 'avalanche' 
+                      ? 'bg-[#8BAE5A] border-[#8BAE5A]' 
+                      : 'border-[#3A4D23] group-hover:border-[#8BAE5A]'
+                    }
+                  `}>
+                    {strategy === 'avalanche' && (
+                      <div className="w-full h-full rounded-full bg-[#8BAE5A] animate-pulse" />
+                    )}
+                  </div>
                 </div>
-                <div className="text-xs text-[#A3AED6] leading-relaxed flex-grow">
+                <p className="text-xs text-[#A3AED6] leading-relaxed">
                   Los eerst de schuld met hoogste rente af voor financiële winst
-                </div>
+                </p>
               </div>
+              
+              {/* Hover effect overlay */}
+              <div className={`
+                absolute inset-0 bg-gradient-to-r from-[#8BAE5A]/5 to-transparent 
+                opacity-0 group-hover:opacity-100 transition-opacity duration-300
+                ${strategy === 'avalanche' ? 'opacity-20' : ''}
+              `} />
             </button>
           </div>
         </div>
