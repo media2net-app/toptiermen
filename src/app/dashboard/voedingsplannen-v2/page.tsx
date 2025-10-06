@@ -26,6 +26,7 @@ import {
 import { PencilIcon } from '@heroicons/react/24/outline';
 import IngredientEditModal from '@/components/IngredientEditModal';
 import PostOnboardingNutritionModal from '@/components/PostOnboardingNutritionModal';
+import UpgradeModal from '@/components/UpgradeModal';
 import { toast } from 'react-hot-toast';
 import { useSubscription } from '@/hooks/useSubscription';
 
@@ -139,6 +140,8 @@ export default function VoedingsplannenV2Page() {
   const [showOnboardingNextModal, setShowOnboardingNextModal] = useState(false);
   // Unavailable notice modal for 'Bekijk Plan'
   const [showPlanUnavailableModal, setShowPlanUnavailableModal] = useState(false);
+  // Upgrade modal state
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const nutritionNextBtnId = 'onb-nutrition-next-btn';
   const nextModalRef = useRef<HTMLDivElement | null>(null);
   // Ingredient lookup from DB (name -> macros/unit)
@@ -1825,7 +1828,7 @@ export default function VoedingsplannenV2Page() {
               <div className="flex flex-col sm:flex-row gap-4">
                 <button 
                   onClick={() => {
-                    alert('Mocht je deze onderdelen willen neem dan contact op met Rick voor het upgraden van je pakket');
+                    setShowUpgradeModal(true);
                   }}
                   className="flex-1 bg-[#8BAE5A] text-[#181F17] px-6 py-3 rounded-lg font-semibold hover:bg-[#B6C948] transition-colors"
                 >
@@ -1833,7 +1836,7 @@ export default function VoedingsplannenV2Page() {
                 </button>
                 <button 
                   onClick={() => {
-                    alert('Mocht je deze onderdelen willen neem dan contact op met Rick voor het upgraden van je pakket');
+                    setShowUpgradeModal(true);
                   }}
                   className="flex-1 bg-[#B6C948] text-[#181F17] px-6 py-3 rounded-lg font-semibold hover:bg-[#8BAE5A] transition-colors"
                 >
@@ -3076,6 +3079,13 @@ export default function VoedingsplannenV2Page() {
           </div>
         </div>
       </ModalBase>
+
+      {/* Upgrade Modal */}
+      <UpgradeModal 
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        type="nutrition"
+      />
     </div>
   );
 }

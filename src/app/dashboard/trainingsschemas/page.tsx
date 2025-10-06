@@ -27,6 +27,7 @@ import { useSubscription } from '@/hooks/useSubscription';
 import { supabase } from '@/lib/supabase';
 import DynamicTrainingPlanView from './components/DynamicTrainingPlanView';
 import SchemaChangeWarningModal from '@/components/SchemaChangeWarningModal';
+import UpgradeModal from '@/components/UpgradeModal';
 
 interface TrainingSchema {
   id: string;
@@ -183,6 +184,8 @@ function TrainingschemasContent() {
   const [nextSchemaLabel, setNextSchemaLabel] = useState<string | undefined>(undefined);
   const [schemaToChange, setSchemaToChange] = useState<string | null>(null);
   const [showSchemaChangeWarningModal, setShowSchemaChangeWarningModal] = useState(false);
+  // Upgrade modal state
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [userTrainingProfile, setUserTrainingProfile] = useState<TrainingProfile | null>(null);
   const [showWarningModal, setShowWarningModal] = useState(false);
   const [showAllSchemas, setShowAllSchemas] = useState(false);
@@ -2145,7 +2148,7 @@ function TrainingschemasContent() {
               <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center">
                 <button
                   onClick={() => {
-                    alert('Mocht je deze onderdelen willen neem dan contact op met Rick voor het upgraden van je pakket');
+                    setShowUpgradeModal(true);
                   }}
                   className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#0A0F0A] font-bold px-6 md:px-8 py-3 rounded-lg hover:from-[#A6C97B] hover:to-[#FFE55C] transition-all duration-200 text-sm md:text-base"
                 >
@@ -2153,7 +2156,7 @@ function TrainingschemasContent() {
                 </button>
                 <button
                   onClick={() => {
-                    alert('Mocht je deze onderdelen willen neem dan contact op met Rick voor het upgraden van je pakket');
+                    setShowUpgradeModal(true);
                   }}
                   className="bg-gradient-to-r from-[#FFD700] to-[#8BAE5A] text-[#0A0F0A] font-bold px-6 md:px-8 py-3 rounded-lg hover:from-[#FFE55C] hover:to-[#A6C97B] transition-all duration-200 text-sm md:text-base"
                 >
@@ -3154,6 +3157,13 @@ function TrainingschemasContent() {
         currentSchemaName={currentSchemaPeriod?.training_schemas?.name || 'Huidige Schema'}
         mode={schemaChangeModalMode}
         nextSchemaLabel={nextSchemaLabel}
+      />
+
+      {/* Upgrade Modal */}
+      <UpgradeModal 
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        type="training"
       />
     </PageLayout>
   );
