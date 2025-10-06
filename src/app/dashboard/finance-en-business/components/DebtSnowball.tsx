@@ -2,7 +2,8 @@
 import { useState, useEffect } from 'react';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
-import { PlusIcon, TrashIcon, CalculatorIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, TrashIcon, CalculatorIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import ModalBase from '@/components/ui/ModalBase';
 
 interface Debt {
   id: string;
@@ -29,6 +30,13 @@ export default function DebtSnowball() {
   const [strategy, setStrategy] = useState<'snowball' | 'avalanche'>('snowball');
   const [paymentPlan, setPaymentPlan] = useState<PaymentPlan[]>([]);
   const [showResults, setShowResults] = useState(false);
+  const [showAddDebtModal, setShowAddDebtModal] = useState(false);
+  const [newDebt, setNewDebt] = useState<Omit<Debt, 'id'>>({
+    name: '',
+    balance: 0,
+    interestRate: 0,
+    minimumPayment: 0
+  });
 
   const calculatePaymentPlan = () => {
     const plan: PaymentPlan[] = [];
@@ -105,15 +113,35 @@ export default function DebtSnowball() {
     setShowResults(true);
   };
 
-  const addDebt = () => {
-    const newDebt: Debt = {
-      id: Date.now().toString(),
-      name: 'Nieuwe Schuld',
+  const openAddDebtModal = () => {
+    setNewDebt({
+      name: '',
       balance: 0,
       interestRate: 0,
       minimumPayment: 0
+    });
+    setShowAddDebtModal(true);
+  };
+
+  const addDebt = () => {
+    if (newDebt.name.trim() === '') return;
+    
+    const debtToAdd: Debt = {
+      id: Date.now().toString(),
+      ...newDebt
     };
-    setDebts(prev => [...prev, newDebt]);
+    setDebts(prev => [...prev, debtToAdd]);
+    setShowAddDebtModal(false);
+  };
+
+  const closeAddDebtModal = () => {
+    setShowAddDebtModal(false);
+    setNewDebt({
+      name: '',
+      balance: 0,
+      interestRate: 0,
+      minimumPayment: 0
+    });
   };
 
   const removeDebt = (id: string) => {
@@ -278,7 +306,7 @@ export default function DebtSnowball() {
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold text-white">Je Schulden</h3>
             <Button 
-              onClick={addDebt}
+              onClick={openAddDebtModal}
               variant="outline"
               size="sm"
               className="flex items-center gap-1"
@@ -406,6 +434,85 @@ export default function DebtSnowball() {
           </div>
         )}
       </div>
+
+      {/* Add Debt Modal */}
+      <ModalBase isOpen={showAddDebtModal} onClose={closeAddDebtModal}>
+        <div className="bg-[#232D1A] border border-[#3A4D23] rounded-xl p-6 w-full max-w-md">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-bold text-white">Nieuwe Schuld Toevoegen</h3>
+            <button
+              onClick={closeAddDebtModal}
+              className="text-gray-400 hover:text-white transition-colors"
+            >
+              <XMarkIcon className="h-6 w-6" />
+            </button>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-[#8BAE5A] text-sm mb-1">Naam van de schuld</label>
+              <input
+                type="text"
+                value={newDebt.name}
+                onChange={(e) => setNewDebt(prev => ({ ...prev, name: e.target.value }))}
+                className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-3 py-2 text-white focus:outline-none focus:border-[#8BAE5A]"
+                placeholder="Bijv. Creditcard"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[#8BAE5A] text-sm mb-1">Openstaand bedrag (€)</label>
+              <input
+                type="number"
+                value={newDebt.balance === 0 ? '' : newDebt.balance}
+                onChange={(e) => setNewDebt(prev => ({ ...prev, balance: e.target.value === '' ? 0 : Number(e.target.value) }))}
+                className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-3 py-2 text-white focus:outline-none focus:border-[#8BAE5A]"
+                placeholder="0"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[#8BAE5A] text-sm mb-1">Rente percentage (%)</label>
+              <input
+                type="number"
+                step="0.1"
+                value={newDebt.interestRate === 0 ? '' : newDebt.interestRate}
+                onChange={(e) => setNewDebt(prev => ({ ...prev, interestRate: e.target.value === '' ? 0 : Number(e.target.value) }))}
+                className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-3 py-2 text-white focus:outline-none focus:border-[#8BAE5A]"
+                placeholder="0"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[#8BAE5A] text-sm mb-1">Minimum betaling per maand (€)</label>
+              <input
+                type="number"
+                value={newDebt.minimumPayment === 0 ? '' : newDebt.minimumPayment}
+                onChange={(e) => setNewDebt(prev => ({ ...prev, minimumPayment: e.target.value === '' ? 0 : Number(e.target.value) }))}
+                className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-3 py-2 text-white focus:outline-none focus:border-[#8BAE5A]"
+                placeholder="0"
+              />
+            </div>
+
+            <div className="flex gap-3 pt-4">
+              <Button
+                onClick={closeAddDebtModal}
+                variant="outline"
+                className="flex-1"
+              >
+                Annuleren
+              </Button>
+              <Button
+                onClick={addDebt}
+                disabled={newDebt.name.trim() === ''}
+                className="flex-1"
+              >
+                Toevoegen
+              </Button>
+            </div>
+          </div>
+        </div>
+      </ModalBase>
     </Card>
   );
 } 
