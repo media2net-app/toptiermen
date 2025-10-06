@@ -66,12 +66,12 @@ export default function SwipeIndicator({
         <>
           {showLeftIndicator && (
             <div className="swipe-indicator left">
-              <ChevronLeftIcon className="swipe-hint" />
+              <ChevronLeftIcon className="w-6 h-6 text-[#8BAE5A]" />
             </div>
           )}
           {showRightIndicator && (
             <div className="swipe-indicator right">
-              <ChevronRightIcon className="swipe-hint" />
+              <ChevronRightIcon className="w-6 h-6 text-[#8BAE5A]" />
             </div>
           )}
         </>

@@ -2,6 +2,23 @@
 @tailwind components;
 @tailwind utilities;
 
+/* SwipeIndicator styles */
+.swipe-indicator {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  pointer-events: none;
+}
+
+.swipe-indicator.left {
+  left: 8px;
+}
+
+.swipe-indicator.right {
+  right: 8px;
+}
+
 /* iOS Safari specific fixes for button overflow */
 @supports (-webkit-touch-callout: none) {
   /* iOS Safari specific styles */
