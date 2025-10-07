@@ -9,11 +9,12 @@ const supabase = createClient(
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { full_name, display_name, main_goal, bio, location, website, interests } = body;
+    const { full_name, display_name, main_goal, bio, location, website, interests, userId } = body;
 
-    // Get user from session (this would need to be implemented with proper auth)
-    // For now, we'll use a test user ID
-    const testUserId = '35ca4f47-4b9d-4b68-98d8-acbbc0428cad'; // chieltest user
+    // Expect userId from the client (sent securely from authenticated client)
+    if (!userId) {
+      return NextResponse.json({ error: 'Missing userId' }, { status: 400 });
+    }
 
     const { data: profile, error } = await supabase
       .from('profiles')
@@ -27,7 +28,7 @@ export async function POST(request: NextRequest) {
         interests,
         updated_at: new Date().toISOString()
       })
-      .eq('id', testUserId)
+      .eq('id', userId)
       .select()
       .single();
 

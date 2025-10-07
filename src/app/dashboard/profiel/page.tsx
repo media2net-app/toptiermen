@@ -71,11 +71,14 @@ export default function ProfielPage() {
     setError(null);
 
     try {
+      if (!user?.id) {
+        throw new Error('Geen geldige gebruiker gevonden. Log opnieuw in.');
+      }
       // Update profile
       const response = await fetch('/api/profile/update', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({ ...formData, userId: user.id })
       });
 
       if (!response.ok) {
