@@ -353,9 +353,19 @@ export default function VoedingsplannenV2Page() {
   }, [selectedPlanId, plans, selectedPlan, isCompleted, currentStep]);
 
   // If there is an active plan and this page is the base URL (no slug), redirect to slug URL
+  // EXCEPT during onboarding step 5-6: stay on the page (5) or avoid re-opening detail (6)
+  // Also respect a one-shot suppression flag set when proceeding to step 6
   useEffect(() => {
     try {
       if (!selectedPlanId || plans.length === 0) return;
+      // Onboarding guard: do not redirect in step 5 and 6
+      if (!isCompleted && (currentStep === 5 || currentStep === 6)) return;
+      // One-shot suppression after clicking 'Doorgaan' from modal
+      const suppress = typeof window !== 'undefined' && localStorage.getItem('ttm_onb_go_step6') === '1';
+      if (suppress) {
+        try { localStorage.removeItem('ttm_onb_go_step6'); } catch {}
+        return;
+      }
       const plan = plans.find(p => (p.plan_id || p.id) === selectedPlanId);
       if (!plan?.name) return;
       const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
@@ -370,7 +380,7 @@ export default function VoedingsplannenV2Page() {
       const slug = slugify(plan.name);
       router.replace(`/dashboard/voedingsplannen-v2/${slug}`);
     } catch { /* ignore */ }
-  }, [selectedPlanId, plans]);
+  }, [selectedPlanId, plans, isCompleted, currentStep]);
 
   // Debug: Log modal state changes
   useEffect(() => {
@@ -3278,19 +3288,20 @@ export default function VoedingsplannenV2Page() {
                   // Complete DB step 4 (SELECT_NUTRITION)
                   await completeStep(4);
                 } catch {}
+                // Prevent immediate redirect back to nutrition detail
+                try { localStorage.setItem('ttm_onb_go_step6', '1'); } catch {}
+                setSelectedPlanId(null);
                 setShowOnboardingNextModal(false);
-                // Route to dashboard; dashboard redirect logic will send user to step 6
-                router.replace('/dashboard');
+                // Route direct naar forum introductie (stap 6)
+                router.replace('/dashboard/brotherhood/forum/algemeen/voorstellen-nieuwe-leden');
               }}
               className="px-5 py-2 rounded-lg bg-gradient-to-r from-[#B6C948] to-[#8BAE5A] text-[#181F17] font-semibold hover:from-[#8BAE5A] hover:to-[#B6C948] transition-colors text-sm"
             >
-              Ga verder naar stap 6 →
+              Doorgaan
             </button>
           </div>
         </div>
       </ModalBase>
-
-      {/* Plan Unavailable Notice Modal */}
       <ModalBase isOpen={showPlanUnavailableModal} onClose={() => setShowPlanUnavailableModal(false)}>
         <div className="relative bg-[#181F17] border border-[#3A4D23] rounded-xl p-6 text-white">
           <h3 className="text-xl font-bold mb-3">Voedingsplan tijdelijk niet beschikbaar</h3>

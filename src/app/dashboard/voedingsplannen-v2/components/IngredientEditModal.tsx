@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import ModalBase from '@/components/ui/ModalBase';
 import { XMarkIcon } from '@heroicons/react/24/solid';
 
 interface IngredientEditModalProps {
@@ -107,11 +108,9 @@ export default function IngredientEditModal({
     return labels[unit] || unit;
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-[#232D1A] rounded-2xl shadow-2xl border border-[#3A4D23] w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+    <ModalBase isOpen={isOpen} onClose={onClose} className="bg-[#232D1A] rounded-2xl shadow-2xl border border-[#3A4D23]">
+      <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="p-6">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-bold text-[#B6C948]">
@@ -280,6 +279,6 @@ export default function IngredientEditModal({
           </div>
         </div>
       </div>
-    </div>
+    </ModalBase>
   );
 }

@@ -75,6 +75,40 @@ async function addTestData() {
           stock_quantity: 25,
           sku: 'BANDS-001',
           status: 'active'
+        },
+        {
+          id: 4,
+          name: 'Omega 3 Visolie',
+          description: 'Hooggedoseerde omega-3 visolie met EPA/DHA voor hart en brein',
+          short_description: 'Zuivere visolie | 1000mg | EPA/DHA',
+          price: 19.95,
+          original_price: 24.95,
+          category_id: 1,
+          featured: true,
+          stock_quantity: 100,
+          sku: 'OMG3-001',
+          brand: 'TopTier Health',
+          image_url: 'https://images.unsplash.com/photo-1611077856336-b3a8e2aa6285?q=80&w=1200&auto=format&fit=crop',
+          rating: 4.7,
+          review_count: 128,
+          status: 'active'
+        },
+        {
+          id: 5,
+          name: 'Testosteron Kit',
+          description: 'Complete kit ter ondersteuning van testosteron: zink, magnesium en vitamine D3/K2',
+          short_description: 'Zink | Magnesium | D3/K2',
+          price: 49.95,
+          original_price: 59.95,
+          category_id: 1,
+          featured: true,
+          stock_quantity: 60,
+          sku: 'TST-KIT-001',
+          brand: 'TopTier Performance',
+          image_url: 'https://images.unsplash.com/photo-1600112441529-4076f94844ff?q=80&w=1200&auto=format&fit=crop',
+          rating: 4.6,
+          review_count: 87,
+          status: 'active'
         }
       ])
       .select();
@@ -85,6 +119,38 @@ async function addTestData() {
       console.log('✅ Products added:', products?.length || 0);
     }
     
+    // Add affiliate links for products
+    console.log('Adding product affiliate links...');
+    const { data: aff, error: affError } = await supabase
+      .from('product_affiliate_links')
+      .upsert([
+        {
+          product_id: 4,
+          platform: 'Bol.com',
+          affiliate_url: 'https://partner.bol.com/click/cam-omega3',
+          is_primary: true
+        },
+        {
+          product_id: 4,
+          platform: 'Amazon',
+          affiliate_url: 'https://amzn.to/omega3-top-tier',
+          is_primary: false
+        },
+        {
+          product_id: 5,
+          platform: 'Bol.com',
+          affiliate_url: 'https://partner.bol.com/click/cam-testkit',
+          is_primary: true
+        }
+      ])
+      .select();
+
+    if (affError) {
+      console.log('❌ Affiliate links error:', affError.message);
+    } else {
+      console.log('✅ Affiliate links added:', aff?.length || 0);
+    }
+
     // Add brotherhood events
     console.log('Adding brotherhood events...');
     const { data: events, error: eventError } = await supabase

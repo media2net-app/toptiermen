@@ -9,6 +9,7 @@ import {
   BanknotesIcon
 } from '@heroicons/react/24/outline';
 import { SUBSCRIPTION_PLANS } from '@/lib/mollie';
+import ModalBase from '@/components/ui/ModalBase';
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -71,14 +72,8 @@ export default function PaymentModal({ isOpen, planId, onSuccess, onClose, user 
     }
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex min-h-full items-center justify-center p-4">
-        <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" onClick={onClose} />
-        
-        <div className="relative bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+    <ModalBase isOpen={isOpen} onClose={onClose} className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center space-x-3">
@@ -192,8 +187,6 @@ export default function PaymentModal({ isOpen, planId, onSuccess, onClose, user 
           <p className="text-xs text-gray-500 text-center mt-4">
             Je wordt doorgestuurd naar een beveiligde betalingspagina van Mollie
           </p>
-        </div>
-      </div>
-    </div>
+    </ModalBase>
   );
 }

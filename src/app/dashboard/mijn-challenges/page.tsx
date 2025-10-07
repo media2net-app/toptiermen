@@ -58,6 +58,7 @@ export default function MijnChallengesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [newChallenge, setNewChallenge] = useState({ title: '', type: 'Dagelijks' });
+  const [isAddingNew, setIsAddingNew] = useState(false);
   const [showDailyCompletion, setShowDailyCompletion] = useState(false);
   const [showAlmostCompleted, setShowAlmostCompleted] = useState(false);
   const [hasDismissedDaily, setHasDismissedDaily] = useState(false);
@@ -143,63 +144,53 @@ export default function MijnChallengesPage() {
       // Prevent double submit
       if (addingLibraryIds.has(suggestedChallenge.id) || addedLibraryIds.has(suggestedChallenge.id)) return;
       setAddingLibraryIds(prev => new Set(prev).add(suggestedChallenge.id));
-      // First, create a new challenge in the challenges table
-      const createChallengeResponse = await fetch('/api/challenges', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: suggestedChallenge.title,
-          description: suggestedChallenge.description,
-          category_slug: suggestedChallenge.category.toLowerCase(),
-          difficulty_level: suggestedChallenge.difficulty,
-          duration_days: 30,
-          xp_reward: suggestedChallenge.xp_reward,
-          status: 'active'
-        })
-      });
-
-      if (!createChallengeResponse.ok) {
-        throw new Error('Failed to create challenge');
-      }
-
-      const challengeData = await createChallengeResponse.json();
-      const challengeId = challengeData.challenge.id;
-
-      // Then add it to user challenges
-      const addToUserResponse = await fetch('/api/user-challenges/add', {
+      // New combined endpoint
+      const response = await fetch('/api/user-challenges/create-and-add', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           userId: user.id,
-          challengeId: challengeId
+          challenge: {
+            title: suggestedChallenge.title,
+            description: suggestedChallenge.description,
+            category_slug: suggestedChallenge.category.toLowerCase(),
+            difficulty_level: suggestedChallenge.difficulty,
+            duration_days: 30,
+            xp_reward: suggestedChallenge.xp_reward,
+            status: 'active'
+          }
         })
       });
 
-      if (!addToUserResponse.ok) {
-        throw new Error('Failed to add challenge to user');
+      if (!response.ok) {
+        throw new Error('Failed to create & add suggested challenge');
       }
 
-      const data = await addToUserResponse.json();
+      const data = await response.json();
 
       if (data.success) {
-        // Reload challenges to show the new one
-        const updatedResponse = await fetch(`/api/user-challenges?userId=${user.id}`);
-        if (updatedResponse.ok) {
-          const updatedData = await updatedResponse.json();
-          const updatedChallenges = updatedData.challenges.map((challenge: any) => ({
-            ...challenge,
-            done: challenge.done || isChallengeCompletedToday(challenge.last_completion_date)
-          }));
-          setChallenges(updatedChallenges);
-          setSummary(updatedData.summary);
-        }
-        
+        // Optimistic append
+        setChallenges(prev => [{
+          id: data.challenge.id,
+          title: data.challenge.title,
+          type: suggestedChallenge.type || 'Dagelijks',
+          done: false,
+          category: data.challenge.category,
+          icon: suggestedChallenge.icon || '🎯',
+          badge: 'Challenge Master',
+          progress: 0,
+          shared: false,
+          accountabilityPartner: null,
+          xp_reward: data.challenge.xp_reward,
+          last_completion_date: null,
+          created_at: data.challenge.created_at,
+        }, ...prev]);
+
+        setSummary(prev => ({ ...prev, totalToday: prev.totalToday + 1 }));
+
         toast.success(`Challenge "${suggestedChallenge.title}" toegevoegd!`);
-        // Mark as added in UI
         setAddedLibraryIds(prev => new Set(prev).add(suggestedChallenge.id));
-        // Keep challenge library open so users can add more challenges
-        
-        // Check if user is in onboarding step 2 or 3 and has enough challenges
+
         if ((currentStep === 2 || currentStep === 3) && !isCompleted && challenges.length >= 2) { 
           setShowContinueButton(true);
           toast.success('Top! Je hebt 3 challenges toegevoegd. Scroll naar beneden om door te gaan.');
@@ -461,57 +452,56 @@ export default function MijnChallengesPage() {
     if (!user?.id || !newChallenge.title.trim()) return;
 
     try {
-      // First, create a new challenge in the challenges table
-      const createChallengeResponse = await fetch('/api/challenges', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: newChallenge.title,
-          description: `Persoonlijke challenge: ${newChallenge.title}`,
-          category_slug: 'personal',
-          difficulty_level: 'medium',
-          duration_days: 30,
-          xp_reward: 50,
-          status: 'active'
-        })
-      });
+      setIsAddingNew(true);
+      console.time('create-and-add');
 
-      if (!createChallengeResponse.ok) {
-        throw new Error('Failed to create challenge');
-      }
-
-      const challengeData = await createChallengeResponse.json();
-      const challengeId = challengeData.challenge.id;
-
-      // Then add it to user challenges
-      const addToUserResponse = await fetch('/api/user-challenges/add', {
+      // New combined endpoint for faster UX
+      const response = await fetch('/api/user-challenges/create-and-add', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           userId: user.id,
-          challengeId: challengeId
+          challenge: {
+            title: newChallenge.title,
+            description: `Persoonlijke challenge: ${newChallenge.title}`,
+            category_slug: 'personal',
+            difficulty_level: 'medium',
+            duration_days: 30,
+            xp_reward: 50,
+            status: 'active'
+          }
         })
       });
 
-      if (!addToUserResponse.ok) {
-        throw new Error('Failed to add challenge to user');
+      console.timeEnd('create-and-add');
+
+      if (!response.ok) {
+        throw new Error('Failed to create & add challenge');
       }
 
-      const data = await addToUserResponse.json();
+      const data = await response.json();
 
       if (data.success) {
-        // Reload challenges to get updated summary
-        const updatedResponse = await fetch(`/api/user-challenges?userId=${user.id}`);
-        if (updatedResponse.ok) {
-          const updatedData = await updatedResponse.json();
-          const updatedChallenges = updatedData.challenges.map((challenge: any) => ({
-            ...challenge,
-            done: challenge.done || isChallengeCompletedToday(challenge.last_completion_date)
-          }));
-          setChallenges(updatedChallenges);
-          setSummary(updatedData.summary);
-        }
-        
+        // Optimistic append to UI without full reload
+        setChallenges(prev => [{
+          id: data.challenge.id,
+          title: data.challenge.title,
+          type: 'Dagelijks',
+          done: false,
+          category: data.challenge.category,
+          icon: '🎯',
+          badge: 'Challenge Master',
+          progress: 0,
+          shared: false,
+          accountabilityPartner: null,
+          xp_reward: data.challenge.xp_reward,
+          last_completion_date: null,
+          created_at: data.challenge.created_at,
+        }, ...prev]);
+
+        // Light summary bump
+        setSummary(prev => ({ ...prev, totalToday: prev.totalToday + 1 }));
+
         setNewChallenge({ title: '', type: 'Dagelijks' });
         toast.success(data.message || 'Challenge toegevoegd!');
 
@@ -527,6 +517,8 @@ export default function MijnChallengesPage() {
     } catch (err) {
       console.error('Error creating challenge:', err);
       toast.error('Fout bij het toevoegen van de challenge');
+    } finally {
+      setIsAddingNew(false);
     }
   };
 

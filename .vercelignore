@@ -20,6 +20,11 @@ scripts/
 ONBOARDING/
 OUDE_PAGINAS/
 
+# Heavy static assets (serve via CDN/storage if needed)
+public/books/
+public/ebooks/
+tmp/
+
 # Root artifacts and datasets not needed for build/runtime
 *.md
 *.log

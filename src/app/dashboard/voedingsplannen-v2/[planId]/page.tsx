@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { useRouter, useParams } from 'next/navigation';
 import { useSubscription } from '@/hooks/useSubscription';
@@ -100,6 +100,7 @@ export default function NutritionPlanDetailPage() {
   const [ingredientLookup, setIngredientLookup] = useState<Record<string, any> | null>(null);
   // Compact reset modal for locked plan
   const [showResetModal, setShowResetModal] = useState<boolean>(false);
+  const resetModalRef = useRef<HTMLDivElement | null>(null);
   // Scaling factor derived from weight (baseline 100kg)
   const scalingFactor = useMemo(() => {
     const w = Number(userProfile?.weight || 100);
@@ -147,6 +148,19 @@ export default function NutritionPlanDetailPage() {
       setEditingDay('');
     }
   }, [selectedPlan]);
+
+  // Auto-scroll and focus the reset modal when it opens (mobile-friendly)
+  useEffect(() => {
+    if (showResetModal) {
+      const t = setTimeout(() => {
+        try {
+          resetModalRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+          resetModalRef.current?.focus({ preventScroll: true } as any);
+        } catch {}
+      }, 50);
+      return () => clearTimeout(t);
+    }
+  }, [showResetModal]);
 
   // Debug: Log modal state changes
   useEffect(() => {
@@ -331,7 +345,7 @@ export default function NutritionPlanDetailPage() {
         body: JSON.stringify({ userId: user?.id })
       });
     } catch {}
-    router.push('/dashboard/voedingsplannen');
+    router.push('/dashboard/voedingsplannen-v2');
   }, [router, user?.id]);
 
   // Calculate day totals using V3 simple scaling + surplus reduction
@@ -955,42 +969,29 @@ export default function NutritionPlanDetailPage() {
       {/* Header */}
       <div className="bg-[#181F17] border-b border-[#2A2A2A] p-6">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center gap-4 mb-4">
-            <button
-              onClick={() => router.push('/dashboard/voedingsplannen-v2')}
-              className="p-2 hover:bg-[#2A2A2A] rounded-lg transition-colors"
-            >
-              <ArrowLeftIcon className="h-5 w-5" />
-            </button>
-            <RocketLaunchIcon className="h-8 w-8 text-[#8BAE5A]" />
-            <h1 className="text-2xl font-bold">{selectedPlan?.name ?? 'Voedingsplan'}</h1>
-            <div className="ml-auto flex items-center gap-2">
-              <button
-                onClick={() => setShowDebug(d => !d)}
-                className="px-3 py-1 rounded text-sm border bg-[#232D1A] text-white border-[#3A4D23] hover:bg-[#2A2A2A]"
-                title="Debug panel"
-              >
-                Debug
-              </button>
-              <button
-                onClick={() => setShowIngredientsModal(true)}
-                className="px-3 py-1 rounded text-sm border bg-[#232D1A] text-white border-[#3A4D23] hover:bg-[#2A2A2A]"
-                title="Toon ingrediënten per maaltijd (debug)"
-              >
-                Ingrediënten Debug
-              </button>
+          <div className="flex flex-col md:flex-row items-start md:items-center gap-3 md:gap-4 mb-4">
+            {/* Locked banner first on mobile, right side on desktop */}
+            <div className="order-1 md:order-2 w-full md:w-auto md:ml-auto">
+              <div className="flex items-center justify-between bg-[#111511] border border-[#2F3E22] rounded-lg p-3 text-sm">
+                <div className="pr-3">
+                  <div className="text-white font-semibold">Je plan is vergrendeld</div>
+                  <div className="text-gray-300">Volg je plan minimaal 8 weken. Wisselen? Reset hieronder.</div>
+                </div>
+                <button onClick={handleResetClick} className="px-3 py-1.5 bg-red-600/20 border border-red-500/30 text-red-400 rounded hover:bg-red-600/30">Reset plan</button>
+              </div>
             </div>
 
-      {/* Locked banner: compact */}
-      <div className="px-4 pt-4">
-        <div className="flex items-center justify-between bg-[#111511] border border-[#2F3E22] rounded-lg p-3 text-sm">
-          <div>
-            <div className="text-white font-semibold">Je plan is vergrendeld</div>
-            <div className="text-gray-300">Volg je plan minimaal 8 weken. Wisselen? Reset hieronder.</div>
-          </div>
-          <button onClick={handleResetClick} className="px-3 py-1.5 bg-red-600/20 border border-red-500/30 text-red-400 rounded hover:bg-red-600/30">Reset plan</button>
-        </div>
-      </div>
+            {/* Title row (second on mobile) */}
+            <div className="order-2 md:order-1 flex items-center gap-3 md:gap-4 w-full">
+              <button
+                onClick={() => router.push('/dashboard/voedingsplannen-v2')}
+                className="p-2 hover:bg-[#2A2A2A] rounded-lg transition-colors"
+              >
+                <ArrowLeftIcon className="h-5 w-5" />
+              </button>
+              <RocketLaunchIcon className="h-8 w-8 text-[#8BAE5A]" />
+              <h1 className="text-2xl font-bold whitespace-nowrap overflow-hidden text-ellipsis md:whitespace-normal md:overflow-visible">{selectedPlan?.name ?? 'Voedingsplan'}</h1>
+            </div>
           </div>
           <p className="text-gray-400">{selectedPlan?.description ?? ''}</p>
         </div>
@@ -1513,7 +1514,13 @@ export default function NutritionPlanDetailPage() {
         {showResetModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center">
             <div className="absolute inset-0 bg-black/60" onClick={() => setShowResetModal(false)} />
-            <div className="relative bg-[#181F17] border border-[#3A4D23] rounded-xl p-5 w-[90%] max-w-md">
+            <div
+              ref={resetModalRef}
+              tabIndex={-1}
+              aria-modal="true"
+              role="dialog"
+              className="relative bg-[#181F17] border border-[#3A4D23] rounded-xl p-5 w-[90%] max-w-md outline-none"
+            >
               <div className="text-white text-lg font-semibold mb-2">Plan resetten?</div>
               <div className="text-gray-300 text-sm mb-4">Je kunt daarna een nieuw plan kiezen.</div>
               <div className="flex justify-end gap-2">

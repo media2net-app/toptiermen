@@ -1460,14 +1460,14 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
         </div>
 
         {/* Main Content */}
-        <div className={`flex-1 transition-all duration-300 ease-in-out ${
+        <div className={`flex-1 w-full max-w-[100vw] overflow-x-hidden transition-all duration-300 ease-in-out ${
           sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64 lg:ml-72'
         }`}>
           {/* Top Bar */}
-          <div className="bg-[#232D1A] border-b border-[#3A4D23] p-3 sm:p-4">
-            <div className="flex items-center justify-between w-full">
+          <div className="bg-[#232D1A] border-b border-[#3A4D23] p-3 sm:p-4 w-full max-w-[100vw]">
+            <div className="flex items-center justify-between w-full min-w-0">
               {/* Left Side - Mobile Menu Only */}
-              <div className="flex items-center">
+              <div className="flex items-center min-w-0">
                 {/* Mobile Menu Button */}
                 <button
                   onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -1479,7 +1479,7 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
               </div>
 
               {/* Right Side - Inbox + Admin + Logout */}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap min-w-0">
                 {/* Inbox */}
                 <Link
                   href="/dashboard/inbox"
@@ -1510,7 +1510,7 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
                   onClick={handleLogout}
                   disabled={isLoggingOut}
                   data-logout-button
-                  className="px-2 sm:px-3 py-1.5 sm:py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center gap-1 text-xs sm:text-sm whitespace-nowrap"
+                  className="px-2 sm:px-3 py-1.5 sm:py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center gap-1 text-xs sm:text-sm whitespace-normal break-words"
                 >
                   {isLoggingOut ? (
                     <>
@@ -1607,8 +1607,8 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
           </AnimatePresence>
 
           {/* Page Content */}
-          <div className="dashboard-content p-3 sm:p-4 md:p-6 lg:p-8">
-            <div className={`transition-all duration-300 ${onboardingLoading && contextCurrentStep !== 5 ? 'opacity-50 scale-95' : 'opacity-100 scale-100'}`}>
+          <div className="dashboard-content p-3 sm:p-4 md:p-6 lg:p-8 w-full max-w-[100vw] overflow-x-hidden">
+            <div className={`transition-all duration-300 w-full max-w-full ${onboardingLoading && contextCurrentStep !== 5 ? 'opacity-50 scale-95' : 'opacity-100 scale-100'}`}>
               {children}
             </div>
           </div>
@@ -1617,8 +1617,8 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
         {/* Onboarding Banner - Removed */}
 
         {/* Modals and Components */}
-        {/* OnboardingV2Modal - Global modal for onboarding steps */}
-        {typeof window !== 'undefined' && !onboardingLoading && (
+        {/* OnboardingV2Modal - Only show on dashboard root to avoid overlay on other pages */}
+        {typeof window !== 'undefined' && !onboardingLoading && (window.location.pathname === '/dashboard') && (
           <OnboardingV2Modal isOpen={!isCompleted && (contextCurrentStep === 1 || contextCurrentStep === 2)} />
         )}
 

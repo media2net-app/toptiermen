@@ -971,8 +971,8 @@ export default function MijnTrainingen() {
               </div>
             </div>
             
-            <div className="overflow-x-auto -mx-3 sm:mx-0">
-              <table className="w-full min-w-[500px] sm:min-w-[600px]">
+            <div className="overflow-x-auto mx-0 w-full max-w-full">
+              <table className="w-full min-w-[420px] sm:min-w-[560px]">
                 <thead>
                   <tr className="border-b border-[#3A4D23]">
                     <th className="text-left py-2 sm:py-3 px-1 sm:px-2 md:px-4 text-[#8BAE5A] font-semibold text-xs sm:text-sm">Week</th>

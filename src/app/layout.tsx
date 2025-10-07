@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
+import dynamic from 'next/dynamic';
 import './globals.css';
 import { SupabaseAuthProvider } from '@/contexts/SupabaseAuthContext';
 import { OnboardingV2Provider } from '@/contexts/OnboardingV2Context';
@@ -10,6 +11,10 @@ import { Analytics } from '@vercel/analytics/next';
 // import { CacheBuster } from '@/components/CacheBuster'; - DISABLED TO PREVENT LOGOUT
 
 const inter = Inter({ subsets: ['latin'] });
+
+// Client-only responsive debugger overlay (visible platform-wide)
+const ResponsiveDebugger = dynamic(() => import('@/components/ResponsiveDebugger'), { ssr: false });
+const OnboardingDebugger = dynamic(() => import('@/components/OnboardingDebugger'), { ssr: false });
 
 export const metadata: Metadata = {
   title: {
@@ -98,9 +103,15 @@ export default function RootLayout({
           {/* <V2StateProvider> */}
           <SupabaseAuthProvider>
         <OnboardingV2Provider>
-          {children}
+          <div className="w-full max-w-[100vw] overflow-x-hidden">
+            {children}
+          </div>
+          {/* Onboarding debugger must be inside providers */}
+          <OnboardingDebugger />
         </OnboardingV2Provider>
           </SupabaseAuthProvider>
+          {/* Global debug overlay */}
+          <ResponsiveDebugger />
           {/* </V2StateProvider> */}
           <SpeedInsights />
           <Analytics />

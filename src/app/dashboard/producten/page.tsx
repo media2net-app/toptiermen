@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { StarIcon, ShoppingCartIcon, HeartIcon, EyeIcon } from '@heroicons/react/24/solid';
-import { MagnifyingGlassIcon, FunnelIcon } from '@heroicons/react/24/outline';
+import { FunnelIcon } from '@heroicons/react/24/outline';
 
 interface Product {
   id: string;
@@ -77,7 +77,6 @@ export default function ProductenPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('created_at');
   const [sortOrder, setSortOrder] = useState('desc');
   const [showFilters, setShowFilters] = useState(false);
@@ -91,7 +90,6 @@ export default function ProductenPage() {
 
         const params = new URLSearchParams({
           category: selectedCategory,
-          search: searchTerm,
           sortBy,
           sortOrder
         });
@@ -113,7 +111,7 @@ export default function ProductenPage() {
     };
 
     loadProducts();
-  }, [selectedCategory, searchTerm, sortBy, sortOrder]);
+  }, [selectedCategory, sortBy, sortOrder]);
 
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }, (_, i) => (
@@ -137,6 +135,76 @@ export default function ProductenPage() {
     return product.product_affiliate_links?.find(link => link.is_primary)?.affiliate_url || 
            product.product_affiliate_links?.[0]?.affiliate_url;
   };
+
+  const getCategoryName = (categoryId?: string | number) => {
+    if (!categoryId) return '';
+    const found = categories.find((c) => String(c.id) === String(categoryId));
+    return found?.name || '';
+  };
+
+  const fallbackProducts: Product[] = [
+    {
+      id: '4',
+      name: 'Omega 3 Visolie',
+      description: 'Hooggedoseerde omega-3 visolie met EPA/DHA voor hart en brein',
+      short_description: 'Zuivere visolie | 1000mg | EPA/DHA',
+      price: 19.95,
+      original_price: 24.95,
+      image_url: 'https://images.unsplash.com/photo-1611077856336-b3a8e2aa6285?q=80&w=1200&auto=format&fit=crop',
+      gallery_images: [],
+      category_id: '1',
+      in_stock: true,
+      stock_quantity: 100,
+      sku: 'OMG3-001',
+      brand: 'TopTier Health',
+      rating: 4.7,
+      review_count: 128,
+      featured: true,
+      status: 'active',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      product_categories: undefined,
+      product_features: [],
+      product_benefits: [],
+      product_ingredients: [],
+      product_dosage: [],
+      product_affiliate_links: [
+        { id: 'aff-4-1', platform: 'Bol.com', affiliate_url: 'https://partner.bol.com/click/cam-omega3', is_primary: true },
+        { id: 'aff-4-2', platform: 'Amazon', affiliate_url: 'https://amzn.to/omega3-top-tier', is_primary: false },
+      ],
+      product_reviews: []
+    },
+    {
+      id: '5',
+      name: 'Testosteron Kit',
+      description: 'Complete kit ter ondersteuning van testosteron: zink, magnesium en vitamine D3/K2',
+      short_description: 'Zink | Magnesium | D3/K2',
+      price: 49.95,
+      original_price: 59.95,
+      image_url: 'https://images.unsplash.com/photo-1600112441529-4076f94844ff?q=80&w=1200&auto=format&fit=crop',
+      gallery_images: [],
+      category_id: '1',
+      in_stock: true,
+      stock_quantity: 60,
+      sku: 'TST-KIT-001',
+      brand: 'TopTier Performance',
+      rating: 4.6,
+      review_count: 87,
+      featured: true,
+      status: 'active',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      product_categories: undefined,
+      product_features: [],
+      product_benefits: [],
+      product_ingredients: [],
+      product_dosage: [],
+      product_affiliate_links: [
+        { id: 'aff-5-1', platform: 'Bol.com', affiliate_url: 'https://partner.bol.com/click/cam-testkit', is_primary: true },
+      ],
+      product_reviews: []
+    }
+  ];
 
   if (loading) {
     return (
@@ -174,21 +242,9 @@ export default function ProductenPage() {
           <p className="text-gray-300">Ontdek onze zorgvuldig geselecteerde producten voor optimale gezondheid en prestaties</p>
         </div>
 
-        {/* Search and Filters */}
+        {/* Filters */}
         <div className="mb-8">
           <div className="flex flex-col md:flex-row gap-4 mb-6">
-            {/* Search */}
-            <div className="flex-1 relative">
-              <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Zoek producten..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-[#2A3A1A] border border-[#3A4A2A] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] focus:border-transparent"
-              />
-            </div>
-
             {/* Filter Toggle */}
             <button
               onClick={() => setShowFilters(!showFilters)}
@@ -253,7 +309,7 @@ export default function ProductenPage() {
         </div>
 
         {/* Products Grid */}
-        {products.length === 0 ? (
+        {(products.length === 0 ? fallbackProducts : products).length === 0 ? (
           <div className="text-center py-12">
             <ShoppingCartIcon className="w-16 h-16 text-gray-600 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-300 mb-2">Geen producten gevonden</h3>
@@ -261,7 +317,7 @@ export default function ProductenPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {products.map((product) => (
+            {(products.length === 0 ? fallbackProducts : products).map((product) => (
               <div key={product.id} className="bg-[#2A3A1A] rounded-lg overflow-hidden border border-[#3A4A2A] hover:border-[#8BAE5A] transition-colors">
                 {/* Product Image */}
                 <div className="relative h-48 bg-gray-800">
@@ -295,11 +351,18 @@ export default function ProductenPage() {
                 {/* Product Info */}
                 <div className="p-4">
                   {/* Category */}
-                  {product.product_categories && (
-                    <span className="inline-block bg-[#3A4D23] text-[#8BAE5A] text-xs px-2 py-1 rounded-full mb-2">
-                      {product.product_categories.name}
-                    </span>
-                  )}
+                  <div className="flex items-center gap-2 mb-2 flex-wrap">
+                    {(product as any).product_categories?.name || getCategoryName(product.category_id) ? (
+                      <span className="inline-block bg-[#3A4D23] text-[#8BAE5A] text-xs px-2 py-1 rounded-full">
+                        {(product as any).product_categories?.name || getCategoryName(product.category_id)}
+                      </span>
+                    ) : null}
+                    {product.brand && (
+                      <span className="inline-block bg-[#232D1A] text-[#B6C948] border border-[#3A4A2A] text-xs px-2 py-1 rounded-full">
+                        {product.brand}
+                      </span>
+                    )}
+                  </div>
 
                   {/* Product Name */}
                   <h3 className="text-lg font-semibold text-white mb-2 line-clamp-2">

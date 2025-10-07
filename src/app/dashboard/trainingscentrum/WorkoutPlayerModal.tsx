@@ -1,6 +1,6 @@
 "use client";
-import { Fragment, useState, useEffect } from "react";
-import { Dialog, Transition } from "@headlessui/react";
+import { useState, useEffect } from "react";
+import ModalBase from "@/components/ui/ModalBase";
 import { ArrowPathIcon, LightBulbIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
 import WorkoutCompletionModal from "@/components/WorkoutCompletionModal";
 import { useRouter } from "next/navigation";
@@ -212,31 +212,12 @@ export default function WorkoutPlayerModal({ isOpen, onClose, onComplete, traini
   const activeExercise = exercises[activeIdx];
 
   return (
-    <Transition.Root show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-50" onClose={onClose}>
-        <Transition.Child
-          as={Fragment}
-          enter="ease-out duration-300"
-          enterFrom="opacity-0"
-          enterTo="opacity-100"
-          leave="ease-in duration-200"
-          leaveFrom="opacity-100"
-          leaveTo="opacity-0"
-        >
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity" />
-        </Transition.Child>
-        <div className="fixed inset-0 z-10 overflow-y-auto">
-          <div className="flex min-h-full items-start sm:items-center justify-center p-0 sm:p-4 text-center">
-            <Transition.Child
-              as={Fragment}
-              enter="ease-out duration-300"
-              enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-              enterTo="opacity-100 translate-y-0 sm:scale-100"
-              leave="ease-in duration-200"
-              leaveFrom="opacity-100 translate-y-0 sm:scale-100"
-              leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-            >
-              <Dialog.Panel className="relative w-full h-full sm:max-w-4xl sm:h-auto transform overflow-hidden rounded-none sm:rounded-2xl bg-[#232D1A] p-0 text-left shadow-xl transition-all border-0 sm:border border-[#8BAE5A]/40 flex flex-col md:flex-row min-h-screen sm:min-h-[80vh]">
+    <>
+      <ModalBase
+        isOpen={isOpen}
+        onClose={onClose}
+        className="relative w-full h-full sm:max-w-4xl sm:h-auto overflow-hidden rounded-none sm:rounded-2xl bg-[#232D1A] p-0 text-left border-0 sm:border border-[#8BAE5A]/40 flex flex-col md:flex-row min-h-screen sm:min-h-[80vh]"
+      >
                 {/* Oefeningenlijst */}
                 <div className="w-full md:w-1/4 bg-[#1B2214] p-2 sm:p-4 flex flex-col gap-1 sm:gap-2 border-r border-[#3A4D23]/40 max-h-[30vh] sm:max-h-none overflow-y-auto">
                   {exercises.map((ex, i) => (
@@ -373,76 +354,64 @@ export default function WorkoutPlayerModal({ isOpen, onClose, onComplete, traini
                     </div>
                   </div>
                 </div>
-              </Dialog.Panel>
-            </Transition.Child>
-          </div>
+      </ModalBase>
+
+      {/* Feedback Modal */}
+      <ModalBase isOpen={showFeedback} onClose={() => setShowFeedback(false)} className="bg-[#232D1A] rounded-2xl p-6 border border-[#8BAE5A]/40 max-w-md w-full">
+        <div className="flex items-center gap-3 mb-4">
+          <LightBulbIcon className="h-6 w-6 text-[#FFD700]" />
+          <h3 className="text-lg font-bold text-[#FFD700]">Prestatie Feedback</h3>
         </div>
+        <p className="text-[#8BAE5A] mb-6">{currentFeedback}</p>
+        <button
+          onClick={() => setShowFeedback(false)}
+          className="w-full px-4 py-2 rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-semibold"
+        >
+          Begrepen
+        </button>
+      </ModalBase>
 
-        {/* Feedback Modal */}
-        {showFeedback && (
-          <div className="fixed inset-0 z-60 flex items-center justify-center p-4">
-            <div className="bg-[#232D1A] rounded-2xl p-6 border border-[#8BAE5A]/40 max-w-md w-full">
-              <div className="flex items-center gap-3 mb-4">
-                <LightBulbIcon className="h-6 w-6 text-[#FFD700]" />
-                <h3 className="text-lg font-bold text-[#FFD700]">Prestatie Feedback</h3>
-              </div>
-              <p className="text-[#8BAE5A] mb-6">{currentFeedback}</p>
-              <button
-                onClick={() => setShowFeedback(false)}
-                className="w-full px-4 py-2 rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-semibold"
-              >
-                Begrepen
-              </button>
+      {/* Alternatives Modal */}
+      <ModalBase isOpen={showAlternatives} onClose={() => setShowAlternatives(false)} className="bg-[#232D1A] rounded-2xl p-6 border border-[#8BAE5A]/40 max-w-md w-full">
+        <h3 className="text-lg font-bold text-[#FFD700] mb-4">
+          {activeExercise.name} vervangen?
+        </h3>
+        <p className="text-[#8BAE5A] mb-4">
+          Probeer een van deze alternatieven die dezelfde spiergroep traint:
+        </p>
+        <div className="space-y-3 mb-6">
+          {activeExercise.alternatives.map((alt, index) => (
+            <div key={index} className="bg-[#181F17] rounded-lg p-3">
+              <div className="font-semibold text-[#8BAE5A]">{alt.name}</div>
+              <div className="text-sm text-[#8BAE5A]/70">{alt.reason}</div>
             </div>
-          </div>
-        )}
+          ))}
+        </div>
+        <div className="flex gap-3">
+          <button
+            onClick={() => setShowAlternatives(false)}
+            className="flex-1 px-4 py-2 rounded-xl bg-[#3A4D23] text-[#8BAE5A] font-semibold"
+          >
+            Blijf bij origineel
+          </button>
+          <button
+            onClick={() => setShowAlternatives(false)}
+            className="flex-1 px-4 py-2 rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-semibold"
+          >
+            Kies alternatief
+          </button>
+        </div>
+      </ModalBase>
 
-        {/* Alternatives Modal */}
-        {showAlternatives && (
-          <div className="fixed inset-0 z-60 flex items-center justify-center p-4">
-            <div className="bg-[#232D1A] rounded-2xl p-6 border border-[#8BAE5A]/40 max-w-md w-full">
-              <h3 className="text-lg font-bold text-[#FFD700] mb-4">
-                {activeExercise.name} vervangen?
-              </h3>
-              <p className="text-[#8BAE5A] mb-4">
-                Probeer een van deze alternatieven die dezelfde spiergroep traint:
-              </p>
-              <div className="space-y-3 mb-6">
-                {activeExercise.alternatives.map((alt, index) => (
-                  <div key={index} className="bg-[#181F17] rounded-lg p-3">
-                    <div className="font-semibold text-[#8BAE5A]">{alt.name}</div>
-                    <div className="text-sm text-[#8BAE5A]/70">{alt.reason}</div>
-                  </div>
-                ))}
-              </div>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setShowAlternatives(false)}
-                  className="flex-1 px-4 py-2 rounded-xl bg-[#3A4D23] text-[#8BAE5A] font-semibold"
-                >
-                  Blijf bij origineel
-                </button>
-                <button
-                  onClick={() => setShowAlternatives(false)}
-                  className="flex-1 px-4 py-2 rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-semibold"
-                >
-                  Kies alternatief
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Workout Completion Modal */}
-        <WorkoutCompletionModal
-          isOpen={showCompletionModal}
-          onClose={() => setShowCompletionModal(false)}
-          onComplete={handleWorkoutCompletion}
-          workoutTime={workoutStats.workoutTime}
-          totalExercises={workoutStats.totalExercises}
-          completedExercises={workoutStats.completedExercises}
-        />
-      </Dialog>
-    </Transition.Root>
+      {/* Workout Completion Modal */}
+      <WorkoutCompletionModal
+        isOpen={showCompletionModal}
+        onClose={() => setShowCompletionModal(false)}
+        onComplete={handleWorkoutCompletion}
+        workoutTime={workoutStats.workoutTime}
+        totalExercises={workoutStats.totalExercises}
+        completedExercises={workoutStats.completedExercises}
+      />
+    </>
   );
 } 

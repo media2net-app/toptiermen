@@ -1,7 +1,8 @@
 
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
+import ModalBase from '@/components/ui/ModalBase';
 import { 
   XMarkIcon, 
   PlayIcon, 
@@ -45,29 +46,6 @@ export default function PreWorkoutModal({
   const [selectedMode, setSelectedMode] = useState<'interactive' | 'quick'>('interactive');
   // Checklist removed per UX request
   const [isStarting, setIsStarting] = useState(false);
-  const modalRef = useRef<HTMLDivElement>(null);
-  const overlayRef = useRef<HTMLDivElement>(null);
-
-  // Lock page scroll on open and auto-center overlay on all devices
-  useEffect(() => {
-    if (!isOpen) {
-      if (typeof document !== 'undefined') document.body.style.overflow = '';
-      return;
-    }
-    if (typeof document !== 'undefined') document.body.style.overflow = 'hidden';
-
-    const center = () => {
-      try {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        setTimeout(() => {
-          try { overlayRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch {}
-        }, 60);
-        modalRef.current?.focus();
-      } catch {}
-    };
-    const id = window.setTimeout(center, 50);
-    return () => window.clearTimeout(id);
-  }, [isOpen]);
 
   const startWorkout = async () => {
     if (!user?.id) return;
@@ -164,19 +142,9 @@ export default function PreWorkoutModal({
 
   console.log('🎭 Modal render state:', { isOpen, schemaId, dayNumber, schemaName });
   
-  if (!isOpen) return null;
-
   return (
-    <div ref={overlayRef} className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
-      {/* Modal */}
-      <div
-        ref={modalRef}
-        tabIndex={-1}
-        className="w-full max-w-[92vw] sm:max-w-xl md:max-w-2xl max-h-[90vh] bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-2xl p-4 sm:p-6 md:p-8 shadow-2xl overflow-y-auto focus:outline-none text-pretty"
-        aria-modal="true"
-        role="dialog"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <ModalBase isOpen={isOpen} onClose={onClose} className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-2xl p-4 sm:p-6 md:p-8 shadow-2xl">
+      <div className="w-full max-w-[92vw] sm:max-w-xl md:max-w-2xl max-h-[90vh] overflow-y-auto focus:outline-none text-pretty">
         {/* Close Button */}
         <button
           onClick={onClose}
@@ -301,6 +269,6 @@ export default function PreWorkoutModal({
           </button>
         </div>
       </div>
-    </div>
+    </ModalBase>
   );
 }
