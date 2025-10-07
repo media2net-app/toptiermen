@@ -181,7 +181,7 @@ export default function ProductenPage() {
       short_description: 'Zink | Magnesium | D3/K2',
       price: 49.95,
       original_price: 59.95,
-      image_url: 'https://images.unsplash.com/photo-1600112441529-4076f94844ff?q=80&w=1200&auto=format&fit=crop',
+      image_url: '/testosteron_packshot.png',
       gallery_images: [],
       category_id: '1',
       in_stock: true,
