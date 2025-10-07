@@ -315,7 +315,7 @@ export default function MindFocusPage() {
   };
 
   const renderIntro = () => (
-    <div className="min-h-screen bg-gradient-to-br from-[#0A0F0A] to-[#1A2A1A]">
+    <div className="min-h-screen bg-gradient-to-br from-[#0A0F0A] to-[#1A2A1A] overflow-x-hidden">
       <div className="container mx-auto px-4 py-8 md:py-12">
         <div className="text-center mb-8 md:mb-10">
           <h1 className="text-3xl md:text-5xl font-bold text-white mb-3 md:mb-4 leading-tight">
@@ -336,18 +336,18 @@ export default function MindFocusPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8 md:mb-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8 md:mb-10">
           {meditationTypes.map((type) => (
             <div
               key={type.id}
-              className="bg-[#1A2A1A]/80 rounded-lg md:rounded-xl p-4 md:p-6 text-center hover:bg-[#1A2A1A] transition-all duration-300 cursor-pointer border border-[#2A3A1A] hover:border-[#3A4A2A]"
+              className="bg-[#1A2A1A]/80 rounded-lg md:rounded-xl p-4 md:p-6 text-center hover:bg-[#1A2A1A] transition-all duration-300 cursor-pointer border border-[#2A3A1A] hover:border-[#3A4A2A] w-full min-w-0"
               onClick={() => setCurrentView('intake')}
             >
               <div className={`w-12 h-12 md:w-14 md:h-14 ${type.color} rounded-full flex items-center justify-center text-white mx-auto mb-3 md:mb-4`}>
                 {type.iconComponent}
               </div>
               <h3 className="text-lg md:text-xl font-bold text-white mb-1 md:mb-2">{type.name}</h3>
-              <p className="text-[#8BAE5A] text-xs sm:text-sm">{type.description}</p>
+              <p className="text-[#8BAE5A] text-xs sm:text-sm break-words whitespace-normal">{type.description}</p>
             </div>
           ))}
         </div>
@@ -365,10 +365,10 @@ export default function MindFocusPage() {
   );
 
   const renderDashboard = () => (
-    <div className="min-h-screen bg-gradient-to-br from-[#0A0F0A] to-[#1A2A1A]">
+    <div className="min-h-screen bg-gradient-to-br from-[#0A0F0A] to-[#1A2A1A] overflow-x-hidden">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
           <div>
             <h1 className="text-3xl font-bold text-white">Mind & Focus Dashboard</h1>
             <p className="text-[#8BAE5A] mt-2">Overzicht van je tools en voortgang.</p>
@@ -378,7 +378,7 @@ export default function MindFocusPage() {
 
         {/* Quick actions row: 4 buttons */}
         <div className="bg-[#1A2A1A]/80 border border-[#2A3A1A] rounded-xl p-4 mb-6">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {meditationTypes.map((type) => (
               <button
                 key={type.id}
@@ -386,7 +386,7 @@ export default function MindFocusPage() {
                 className="flex items-center justify-center gap-2 bg-[#232D1A] hover:bg-[#2A3A1A] text-white rounded-lg py-3 px-3 border border-[#2A3A1A]"
               >
                 <span className={`w-6 h-6 ${type.color} rounded-full flex items-center justify-center text-white`}>{type.iconComponent}</span>
-                <span className="text-sm font-semibold">{type.name}</span>
+                <span className="text-sm font-semibold break-words whitespace-normal">{type.name}</span>
               </button>
             ))}
           </div>

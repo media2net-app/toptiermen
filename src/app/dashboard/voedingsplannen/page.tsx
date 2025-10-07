@@ -358,9 +358,20 @@ export default function VoedingsplannenPage() {
 
       if (response.ok) {
         toast.success('Voedingsplan geselecteerd!');
-        // Toon direct de vergrendelde planweergave zonder race met API-herlaad
-        setSelectedNutritionPlan(planId); // Houd lokaal vast
-        setViewingDynamicPlan(null); // Niet nodig; we renderen locked view via early return
+        // Navigeer naar slug-URL voor consistente layout
+        setSelectedNutritionPlan(planId); // lokaal vast
+        const plan = allNutritionPlans.find(p => p.plan_id === planId || String(p.id) === String(planId));
+        const slugify = (s: string) => s
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/\p{Diacritic}/gu, '')
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-+|-+$/g, '');
+        if (plan?.name) {
+          const slug = slugify(plan.name);
+          router.push(`/dashboard/voedingsplannen-v2/${slug}`);
+        }
+        setViewingDynamicPlan(null);
       } else {
         toast.error('Er is een fout opgetreden bij het selecteren van het plan');
       }
@@ -708,87 +719,26 @@ export default function VoedingsplannenPage() {
     );
   }
 
-  // If user has an active selected plan, lock view to the plan page
-  if (user && selectedNutritionPlan) {
-    const activePlan = allNutritionPlans.find(p => p.plan_id === selectedNutritionPlan);
-    const planName = activePlan?.name || 'Geselecteerd voedingsplan';
-    return (
-      <PageLayout 
-        title="Voedingsplannen" 
-        subtitle="Je geselecteerde plan (vergrendeld)"
-      >
-        <div className="w-full p-3 sm:p-4 md:p-6">
-          {/* Reset bar */}
-          <div className="mb-4 sm:mb-6">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-[#181F17]/80 border border-[#3A4D23] rounded-xl p-4">
-              <div className="text-gray-300 text-sm">
-                <div className="text-white font-semibold mb-1">Je plan is vergrendeld</div>
-                <div>
-                  Voor optimale resultaten adviseren we om een plan minimaal 8 weken te volgen. Wil je toch wisselen? Reset dan je plan hieronder.
-                </div>
-              </div>
-              <button
-                onClick={handleResetClick}
-                className="px-4 py-2 bg-red-600/20 border border-red-500/30 text-red-400 rounded-lg hover:bg-red-600/30 transition-colors font-semibold"
-              >
-                Reset plan
-              </button>
-            </div>
-          </div>
+  // Feature flag: lock selected plan view (auto-forward). Set to true to enable.
+  const FORCE_LOCKED_PLAN_VIEW = true;
 
-          {/* Locked plan view */}
-          <DynamicPlanViewNew 
-            planId={selectedNutritionPlan}
-            planName={planName}
-            userId={user.id}
-            // Intercept back to enforce lock: show reset modal instead
-            onBack={handleResetClick}
-          />
-
-          {/* Confirmation Modal */}
-          <AnimatePresence>
-            {showResetModal && (
-              <motion.div 
-                className="fixed inset-0 z-[1000] flex items-center justify-center"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-              >
-                <div className="absolute inset-0 bg-black/60" onClick={() => setShowResetModal(false)} />
-                <motion.div 
-                  id="reset-confirm-modal"
-                  className="relative bg-[#181F17] border border-[#3A4D23] rounded-xl p-6 w-[90%] max-w-md text-white"
-                  initial={{ scale: 0.95, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0.95, opacity: 0 }}
-                >
-                  <h3 className="text-xl font-bold mb-2">Plan resetten?</h3>
-                  <p className="text-gray-300 mb-4">
-                    We adviseren je om je plan <span className="text-[#8BAE5A] font-semibold">minimaal 8 weken</span> te volgen voor zichtbaar resultaat.
-                    Weet je zeker dat je je huidige plan wilt wijzigen?
-                  </p>
-                  <div className="flex justify-end gap-3">
-                    <button 
-                      onClick={() => setShowResetModal(false)}
-                      className="px-4 py-2 bg-[#3A4D23] hover:bg-[#4A5D33] rounded-lg"
-                    >
-                      Annuleren
-                    </button>
-                    <button 
-                      onClick={handleDeselectPlan}
-                      className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg"
-                    >
-                      Ja, reset plan
-                    </button>
-                  </div>
-                </motion.div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      </PageLayout>
-    );
-  }
+  // If user has an active selected plan, redirect to slug URL
+  useEffect(() => {
+    if (!FORCE_LOCKED_PLAN_VIEW) return;
+    if (user && selectedNutritionPlan) {
+      const activePlan = allNutritionPlans.find(p => p.plan_id === selectedNutritionPlan);
+      if (activePlan?.name) {
+        const slugify = (s: string) => s
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/\p{Diacritic}/gu, '')
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-+|-+$/g, '');
+        const slug = slugify(activePlan.name);
+        router.push(`/dashboard/voedingsplannen-v2/${slug}`);
+      }
+    }
+  }, [user?.id, selectedNutritionPlan, FORCE_LOCKED_PLAN_VIEW, allNutritionPlans]);
 
   // Check access permissions for nutrition plans
   if (!hasAccess('nutrition')) {

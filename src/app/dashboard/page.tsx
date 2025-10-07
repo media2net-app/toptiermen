@@ -545,7 +545,7 @@ export default function Dashboard() {
                 ? 'bg-[#3A4D23] border-[#8BAE5A] shadow-2xl shadow-[#8BAE5A]/20 hover:scale-105 hover:shadow-[#8BAE5A]/40'
                 : 'bg-gradient-to-br from-[#181F17] to-[#232D1A] border-[#3A4D23]/30 hover:scale-105 hover:shadow-2xl hover:border-[#8BAE5A]/50'
             }`}>
-              <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <div className="flex items-center justify-between mb-3 sm:mb-4 min-w-0">
                 <h3 className="text-lg sm:text-xl font-bold text-white">Mijn Challenges</h3>
                 <span className={`text-xl sm:text-2xl ${
                   stats?.challenges.completedToday === stats?.challenges.total && (stats?.challenges.total || 0) > 0
@@ -593,7 +593,7 @@ export default function Dashboard() {
 
             {/* Voedingsplan */}
             <Link href={activeNutritionPlan ? `/dashboard/voedingsplannen-v2/${activeNutritionPlan.id}` : "/dashboard/voedingsplannen-v2"} className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-4 sm:p-6 text-left transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#8BAE5A]/50 cursor-pointer block">
-              <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <div className="flex items-center justify-between mb-3 sm:mb-4 min-w-0">
                 <h3 className="text-lg sm:text-xl font-bold text-white">Voedingsplan</h3>
                 <span className="text-[#8BAE5A] text-sm sm:text-base">{activeNutritionPlan ? 'Geselecteerd' : 'Geen selectie'}</span>
               </div>
@@ -616,7 +616,7 @@ export default function Dashboard() {
 
             {/* Mijn Trainingen */}
             <Link href="/dashboard/mijn-trainingen" className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-4 sm:p-6 text-left transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#8BAE5A]/50 cursor-pointer block">
-              <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <div className="flex items-center justify-between mb-3 sm:mb-4 min-w-0">
                 <h3 className="text-lg sm:text-xl font-bold text-white">Mijn Trainingen</h3>
                 <DumbbellIcon className="w-6 h-6 text-[#8BAE5A]" />
               </div>
@@ -672,7 +672,7 @@ export default function Dashboard() {
 
             {/* Mind & Focus */}
             <Link href="/dashboard/mind-focus" className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-4 sm:p-6 text-left transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#8BAE5A]/50 cursor-pointer block">
-              <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <div className="flex items-center justify-between mb-3 sm:mb-4 min-w-0">
                 <h3 className="text-lg sm:text-xl font-bold text-white">Mind & Focus</h3>
                 <BrainIcon className="w-6 h-6 text-[#8BAE5A]" />
               </div>
@@ -770,7 +770,7 @@ export default function Dashboard() {
 
             {/* Boekenkamer */}
             <Link href="/dashboard/boekenkamer" className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-4 sm:p-6 text-left transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#8BAE5A]/50 cursor-pointer block">
-              <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <div className="flex items-center justify-between mb-3 sm:mb-4 min-w-0">
                 <h3 className="text-lg sm:text-xl font-bold text-white">Boekenkamer</h3>
                 <BookOpenIcon className="w-6 h-6 text-[#8BAE5A]" />
               </div>
@@ -810,7 +810,7 @@ export default function Dashboard() {
 
             {/* Finance & Business */}
             <Link href="/dashboard/finance-en-business" className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-4 sm:p-6 text-left transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#8BAE5A]/50 cursor-pointer block">
-              <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <div className="flex items-center justify-between mb-3 sm:mb-4 min-w-0">
                 <h3 className="text-lg sm:text-xl font-bold text-white">Finance & Business</h3>
                 <CurrencyDollarIcon className="w-6 h-6 text-[#8BAE5A]" />
               </div>
@@ -842,7 +842,7 @@ export default function Dashboard() {
 
             {/* Brotherhood */}
             <Link href="/dashboard/brotherhood" className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-4 sm:p-6 text-left transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#8BAE5A]/50 cursor-pointer block">
-              <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <div className="flex items-center justify-between mb-3 sm:mb-4 min-w-0">
                 <h3 className="text-lg sm:text-xl font-bold text-white">Brotherhood</h3>
                 <div className="w-6 h-6 bg-[#8BAE5A] rounded-full flex items-center justify-center">
                   <span className="text-white text-xs font-bold">B</span>
@@ -869,7 +869,7 @@ export default function Dashboard() {
                 ? 'bg-[#3A4D23] border-[#8BAE5A] shadow-2xl shadow-[#8BAE5A]/20 hover:scale-105 hover:shadow-[#8BAE5A]/40'
                 : 'bg-gradient-to-br from-[#181F17] to-[#232D1A] border-[#3A4D23]/30 hover:scale-105 hover:shadow-2xl hover:border-[#8BAE5A]/50'
             }`}>
-              <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <div className="flex items-center justify-between mb-3 sm:mb-4 min-w-0">
                 <h3 className="text-lg sm:text-xl font-bold text-white">Academy</h3>
                 <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
                   stats?.academy?.completedCourses === stats?.academy?.totalCourses && (stats?.academy?.totalCourses || 0) > 0

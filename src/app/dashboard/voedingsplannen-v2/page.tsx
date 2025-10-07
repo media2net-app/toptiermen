@@ -178,6 +178,17 @@ export default function VoedingsplannenV2Page() {
     return originalPlanData;
   }, [smartScalingOn, scaledPlanData, originalPlanData]);
 
+  // Debug: expose current plans to window for inspection (admin/dev only)
+  useEffect(() => {
+    try {
+      if (typeof window !== 'undefined') {
+        (window as any).__ttmOriginalPlan = originalPlanData;
+        (window as any).__ttmRenderedPlan = planToRender;
+        (window as any).__ttmSelectedPlan = selectedPlan;
+      }
+    } catch {}
+  }, [originalPlanData, planToRender, selectedPlan]);
+
   // Auto-enable smart scaling for weights different from 100kg
   useEffect(() => {
     if (!userProfile) return;
@@ -341,6 +352,26 @@ export default function VoedingsplannenV2Page() {
     }
   }, [selectedPlanId, plans, selectedPlan, isCompleted, currentStep]);
 
+  // If there is an active plan and this page is the base URL (no slug), redirect to slug URL
+  useEffect(() => {
+    try {
+      if (!selectedPlanId || plans.length === 0) return;
+      const plan = plans.find(p => (p.plan_id || p.id) === selectedPlanId);
+      if (!plan?.name) return;
+      const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
+      // Only redirect when we're on the base index: /dashboard/voedingsplannen-v2
+      if (!pathname.endsWith('/dashboard/voedingsplannen-v2')) return;
+      const slugify = (s: string) => s
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/\p{Diacritic}/gu, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+      const slug = slugify(plan.name);
+      router.replace(`/dashboard/voedingsplannen-v2/${slug}`);
+    } catch { /* ignore */ }
+  }, [selectedPlanId, plans]);
+
   // Debug: Log modal state changes
   useEffect(() => {
     console.log('🔧 DEBUG: Modal state changed:', { showIngredientModal, editingMealType, editingDay });
@@ -362,6 +393,12 @@ export default function VoedingsplannenV2Page() {
     if (unit === 'per_ml') return grams;        // approx ml ~ g
     // piece-based or unknown: return as-is (no safe conversion)
     return grams;
+  };
+
+  // Treat these units as piece-based and immutable under scaling
+  const isPieceUnit = (u?: string) => {
+    const x = (u || '').toLowerCase();
+    return x === 'per_piece' || x === 'stuk' || x === 'per_plakje' || x === 'per_slice' || x === 'piece' || x === 'plakje';
   };
 
   // Function to update custom amounts
@@ -422,7 +459,9 @@ export default function VoedingsplannenV2Page() {
       }
 
       // 6) Auto-add up to 2 helper ingredients from DB if still off by >1% or >5g
-      if (ingredientLookup) {
+      // Baseline guard: do NOT auto-add when baseline (100kg, moderate) and scaling is OFF.
+      const baselineProfile = userProfile && Number(userProfile.weight) === 100 && userProfile.activity_level === 'moderate';
+      if (ingredientLookup && !(baselineProfile && !smartScalingOn)) {
         const personalized = calculatePersonalizedTargets(planToRender || selectedPlan || ({} as any));
         if (!personalized) {
           console.log('ℹ️ Skip helper ingredients; no personalized targets available');
@@ -634,17 +673,47 @@ export default function VoedingsplannenV2Page() {
     const fatPercentage     = plan?.fat_percentage     ?? plan?.meals?.fat_percentage     ?? null;
 
     const profile = profileOverride || userProfile;
-    const activityMultipliers = { sedentary: 1.1, moderate: 1.3, very_active: 1.6 } as const;
-    let dynamicCalories: number | null = null;
-    if (profile) {
-      const baseCalories = profile.weight * 22 * activityMultipliers[profile.activity_level];
-      const goalAdjustments = { droogtrainen: -500, onderhoud: 0, spiermassa: 400 } as const;
-      const planGoal = (plan.goal?.toLowerCase?.() || 'onderhoud') as keyof typeof goalAdjustments;
-      dynamicCalories = Math.round(baseCalories + (goalAdjustments[planGoal] ?? 0));
+    // Baseline guard: if user is exactly baseline (100kg, moderate) and scaling is OFF,
+    // then use backend DB targets EXACTLY to mirror admin plan 1:1.
+    const isBaseline = profile && Number(profile.weight) === 100 && profile.activity_level === 'moderate';
+    if (isBaseline && !smartScalingOn) {
+      const targetCaloriesExact = Math.round(planTargetCalories || 0);
+      const hasExactMacros = [planTargetProtein, planTargetCarbs, planTargetFat].every(v => typeof v === 'number' && !Number.isNaN(v));
+      if (hasExactMacros) {
+        return {
+          targetCalories: targetCaloriesExact,
+          targetProtein: Math.round(planTargetProtein as number),
+          targetCarbs: Math.round(planTargetCarbs as number),
+          targetFat: Math.round(planTargetFat as number),
+        };
+      }
+      // If percentages are defined in DB, derive grams from exact plan calories for consistency
+      if (proteinPercentage && carbsPercentage && fatPercentage) {
+        return {
+          targetCalories: targetCaloriesExact,
+          targetProtein: Math.round((targetCaloriesExact * proteinPercentage / 100) / 4),
+          targetCarbs:   Math.round((targetCaloriesExact * carbsPercentage   / 100) / 4),
+          targetFat:     Math.round((targetCaloriesExact * fatPercentage     / 100) / 9),
+        };
+      }
+      // Fallback to DB calories with carnivore-aware default split
+      const isCarnivore = String(plan.name || '').toLowerCase().includes('carnivoor');
+      const pPct0 = isCarnivore ? 35 : 35;
+      const cPct0 = isCarnivore ? 5  : 40;
+      const fPct0 = isCarnivore ? 60 : 25;
+      return {
+        targetCalories: targetCaloriesExact,
+        targetProtein: Math.round((targetCaloriesExact * pPct0) / 100 / 4),
+        targetCarbs:   Math.round((targetCaloriesExact * cPct0) / 100 / 4),
+        targetFat:     Math.round((targetCaloriesExact * fPct0) / 100 / 9),
+      };
     }
-
-    // If we have dynamicCalories (e.g. 90kg != 100kg), use that; else fall back to DB plan target
-    const targetCalories = dynamicCalories ?? Math.round(planTargetCalories || 0);
+    // SIMPLE SCALING: scale DB targets by weight factor (100kg => 1.0; 90kg => 0.9)
+    let targetCalories = Math.round(planTargetCalories || 0);
+    if (profile && planTargetCalories) {
+      const scaleW = Math.max(0.5, Math.min(1.5, (Number(profile.weight) || 100) / 100));
+      targetCalories = Math.round((planTargetCalories as number) * scaleW);
+    }
 
     // Derive grams: prefer explicit percentages; else if grams exist in DB, scale proportionally
     if (proteinPercentage && carbsPercentage && fatPercentage) {
@@ -1006,6 +1075,77 @@ export default function VoedingsplannenV2Page() {
     if (!planData || !userProfile) return planData;
     const scaledPlan = JSON.parse(JSON.stringify(planData));
 
+    // SIMPLE SCALING MODE: scale grams/ml by weight factor; keep piece-based items fixed;
+    // if kcal > target, reduce surplus evenly across meals using only adjustable (non-piece) items.
+    try {
+      const weight = Number(userProfile.weight) || 100;
+      const weightFactor = Math.max(0.5, Math.min(1.5, weight / 100)); // 100kg=>1.0; 90kg=>0.9
+
+      const daysList = Object.keys(scaledPlan?.meals?.weekly_plan || {});
+      daysList.forEach((day:string) => {
+        // 1) Scale only gram/ml based ingredients
+        ['ontbijt','ochtend_snack','lunch','lunch_snack','diner','avond_snack'].forEach(mealType => {
+          const meal = scaledPlan.meals.weekly_plan[day]?.[mealType];
+          if (!meal?.ingredients) return;
+          meal.ingredients.forEach((ing:any) => {
+            if (typeof ing.amount !== 'number') return;
+            if (isPieceUnit(ing.unit)) return; // do not change piece-based items
+            let next = ing.amount * weightFactor;
+            next = roundByCategory(ing, next);
+            next = clampByCategory(ing, next);
+            ing.amount = next;
+          });
+          meal.totals = calculateMealTotals(meal, mealType, day);
+        });
+
+        // 2) Evenly reduce surplus kcal across meals (only adjustable items)
+        const targets = calculatePersonalizedTargets(scaledPlan, userProfile);
+        if (!targets) return;
+        const totals = calculateDayTotals(day, scaledPlan);
+        let surplus = (totals.calories || 0) - (targets.targetCalories || 0);
+        if (surplus > 5) {
+          const mealTypes = ['ontbijt','ochtend_snack','lunch','lunch_snack','diner','avond_snack'];
+          const adjustableMeals = mealTypes.filter(mt => {
+            const meal = scaledPlan.meals.weekly_plan[day]?.[mt];
+            return !!meal?.ingredients?.some((ing:any)=> !isPieceUnit(ing.unit));
+          });
+          if (adjustableMeals.length > 0) {
+            const share = surplus / adjustableMeals.length;
+            adjustableMeals.forEach(mt => {
+              const meal = scaledPlan.meals.weekly_plan[day]?.[mt];
+              if (!meal?.ingredients) return;
+              let remaining = share;
+              const adjustableIngs = meal.ingredients.filter((ing:any)=> !isPieceUnit(ing.unit));
+              const perUnitK = adjustableIngs.map((ing:any)=>{
+                const m = macroPerUnit(ing);
+                return (m.p*4)+(m.c*4)+(m.f*9);
+              });
+              const sumPerUnit = perUnitK.reduce((a:number,b:number)=>a+b,0);
+              adjustableIngs.forEach((ing:any, idx:number) => {
+                if (remaining <= 0) return;
+                const kcalPerUnit = perUnitK[idx] || 0;
+                if (kcalPerUnit <= 0) return;
+                const portion = sumPerUnit > 0 ? (kcalPerUnit / sumPerUnit) : 0;
+                const reduceKcal = remaining * portion;
+                const deltaUnits = reduceKcal / kcalPerUnit;
+                let next = Math.max(0, (ing.amount||0) - deltaUnits);
+                next = roundByCategory(ing, next);
+                next = clampByCategory(ing, next);
+                remaining -= Math.max(0, ((ing.amount||0) - next)) * kcalPerUnit;
+                ing.amount = next;
+              });
+              meal.totals = calculateMealTotals(meal, mt as any, day);
+            });
+          }
+        }
+      });
+
+      return scaledPlan; // early return; skip legacy complex scaling below
+    } catch (e) {
+      console.warn('Simple scaling failed, falling back to original plan', e);
+      return scaledPlan;
+    }
+
     // Preserve baseline amounts on each ingredient for logical constraints later
     Object.keys(scaledPlan?.meals?.weekly_plan || {}).forEach((day:string) => {
       ['ontbijt','ochtend_snack','lunch','lunch_snack','diner','avond_snack'].forEach(mealType => {
@@ -1027,7 +1167,11 @@ export default function VoedingsplannenV2Page() {
           const meal = scaledPlan.meals.weekly_plan[day]?.[mealType];
           if (meal?.ingredients) {
             meal.ingredients.forEach((ing: any) => {
-              if (typeof ing.amount === 'number') ing.amount = roundUnitAmount(ing, ing.amount * fCal);
+              if (typeof ing.amount === 'number') {
+                // Do NOT scale piece-based items
+                if (isPieceUnit(ing.unit)) return;
+                ing.amount = roundUnitAmount(ing, ing.amount * fCal);
+              }
             });
             meal.totals = calculateMealTotals(meal, mealType, day);
           }
@@ -1054,6 +1198,8 @@ export default function VoedingsplannenV2Page() {
         ['ontbijt','ochtend_snack','lunch','lunch_snack','diner','avond_snack'].forEach(mealType => {
           const meal = scaledPlan.meals.weekly_plan[day]?.[mealType];
           meal?.ingredients?.forEach((ing:any) => {
+            // Skip piece-based items entirely from macro balancing candidates
+            if (isPieceUnit(ing.unit)) return;
             const m = macroPerUnit(ing);
             const cat = getIngredientCategory(ing.name || '');
             // Protein: prioritise lean sources (low fat) such as kwark/whey/kip/tonijn, then others
@@ -1095,6 +1241,8 @@ export default function VoedingsplannenV2Page() {
             else if (unit === 'per_ml') stepLimit = 100; // ≤100 ml per iter
             const limitedChange = Math.max(-stepLimit, Math.min(stepLimit, unitsChange));
 
+            // Never change piece-based items
+            if (isPieceUnit(s.ing.unit)) return;
             let proposed = baseAmount + limitedChange;
             proposed = roundByCategory(s.ing, proposed);
             proposed = clampByCategory(s.ing, proposed);
@@ -1132,6 +1280,8 @@ export default function VoedingsplannenV2Page() {
             if (meal?.ingredients) {
               meal.ingredients.forEach((ing:any) => {
                 if (typeof ing.amount === 'number') {
+                  // Do NOT normalize piece-based items
+                  if (isPieceUnit(ing.unit)) return;
                   let next = ing.amount * f2;
                   next = roundByCategory(ing, next);
                   next = clampByCategory(ing, next);
@@ -1157,6 +1307,7 @@ export default function VoedingsplannenV2Page() {
         ['ontbijt','ochtend_snack','lunch','lunch_snack','diner','avond_snack'].forEach(mealType => {
           const meal = scaledPlan.meals.weekly_plan[day]?.[mealType];
           meal?.ingredients?.forEach((ing:any) => {
+            if (isPieceUnit(ing.unit)) return;
             const m = macroPerUnit(ing);
             if (m.p > 0.03) proteinSources2.push({ ing, m });
             if (m.c > 0.03) carbSources2.push({ ing, m });
@@ -1333,6 +1484,68 @@ export default function VoedingsplannenV2Page() {
         }
       } catch (e) {
         console.warn('Dummy add step failed', e);
+      }
+      
+      // 7) Even surplus reduction across meals (piece-based items untouched)
+      try {
+        let guard = 0;
+        while (guard < 3) { // up to 3 short passes to converge
+          guard++;
+          const totalsNow = calculateDayTotals(day, scaledPlan);
+          const surplus = (totalsNow.calories || 0) - (personalized.targetCalories || 0);
+          if (surplus <= 5) break; // within 5 kcal
+
+          // Compute adjustable kcal per meal from non-piece items
+          const mealTypes = ['ontbijt','ochtend_snack','lunch','lunch_snack','diner','avond_snack'];
+          const mealAdjustable = mealTypes.map(mt => {
+            const meal = scaledPlan.meals.weekly_plan[day]?.[mt];
+            if (!meal?.ingredients) return { mt, kcal: 0 };
+            let kcal = 0;
+            meal.ingredients.forEach((ing:any) => {
+              if (isPieceUnit(ing.unit)) return;
+              const m = macroPerUnit(ing); // grams per 1 unit
+              const kcalPerUnit = (m.p*4) + (m.c*4) + (m.f*9);
+              kcal += Math.max(0, (ing.amount||0) * Math.max(0, kcalPerUnit));
+            });
+            return { mt, kcal };
+          });
+          const totalAdj = mealAdjustable.reduce((a,b)=>a + (b.kcal||0), 0);
+          if (totalAdj <= 0) break;
+
+          // Distribute reduction proportional to each meal's adjustable kcal
+          mealAdjustable.forEach(entry => {
+            if (!entry.kcal || entry.kcal <= 0) return;
+            const meal = scaledPlan.meals.weekly_plan[day]?.[entry.mt];
+            if (!meal?.ingredients) return;
+            const shareKcal = surplus * (entry.kcal / totalAdj);
+            let remaining = shareKcal;
+            // Reduce each adjustable ingredient proportionally to its kcal contribution
+            const adjustableIngs = meal.ingredients.filter((ing:any)=> !isPieceUnit(ing.unit));
+            const ingKcals = adjustableIngs.map((ing:any)=>{
+              const m = macroPerUnit(ing);
+              const kcalPerUnit = (m.p*4)+(m.c*4)+(m.f*9);
+              return Math.max(0, (ing.amount||0) * Math.max(0, kcalPerUnit));
+            });
+            const sumIngK = ingKcals.reduce((a:number,b:number)=>a+b,0);
+            adjustableIngs.forEach((ing:any, idx:number) => {
+              if (remaining <= 0) return;
+              const m = macroPerUnit(ing);
+              const kcalPerUnit = (m.p*4)+(m.c*4)+(m.f*9);
+              if (kcalPerUnit <= 0) return;
+              const portion = sumIngK > 0 ? (ingKcals[idx] / sumIngK) : 0;
+              const reduceKcal = remaining * portion;
+              const deltaUnits = reduceKcal / kcalPerUnit;
+              let next = Math.max(0, (ing.amount||0) - deltaUnits);
+              next = roundByCategory(ing, next);
+              next = clampByCategory(ing, next);
+              remaining -= Math.max(0, ((ing.amount||0) - next)) * kcalPerUnit;
+              ing.amount = next;
+            });
+            meal.totals = calculateMealTotals(meal, entry.mt as any, day);
+          });
+        }
+      } catch (e) {
+        console.warn('Even surplus reduction failed', e);
       }
     });
 
