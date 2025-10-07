@@ -505,6 +505,9 @@ export default function Dashboard() {
   return (
     <div className={`min-h-screen bg-gradient-to-br from-[#0F1411] via-[#181F17] to-[#232D1A] transition-opacity duration-1000 ${fadeIn ? 'opacity-100' : 'opacity-0'} overflow-x-hidden`}>
       <ClientLayout>
+        {/* ===== CSS CHECK: TEMPORARY RED BAR (remove after verification) ===== */}
+        <div className="fixed top-0 left-0 right-0 h-1.5 bg-red-600 z-[1000]"></div>
+        {/* ===== END CSS CHECK ===== */}
         {/* Onboarding Modal */}
         <OnboardingV2Modal 
           isOpen={Boolean(onboarding && !onboarding.isCompleted && onboarding.currentStep !== null && onboarding.currentStep <= 2)}
