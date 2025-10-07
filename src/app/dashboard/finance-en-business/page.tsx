@@ -650,7 +650,7 @@ function FinanceDashboardContent() {
               {/* Financiële Doelen Sectie */}
         {activeTab === 'overview' && (
           <div className="mt-8">
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex justify-between items-center mb-6 min-w-0">
               <h2 className="text-2xl font-bold text-[#B6C948]">Jouw Financiële Doelen</h2>
               <button
                 onClick={() => setShowAddGoalModal(true)}
@@ -824,7 +824,7 @@ function FinanceDashboardContent() {
           onClose={() => { setShowSettingsModal(false); setEditingProfile(null); }}
           className="bg-[#232D1A] border border-[#3A4D23] rounded-xl p-4 sm:p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto"
         >
-            <div className="flex justify-between items-center mb-4 sm:mb-6">
+            <div className="flex justify-between items-center mb-4 sm:mb-6 min-w-0">
               <h3 className="text-lg sm:text-xl font-bold text-white">
                 Financiële Profiel Bewerken
               </h3>

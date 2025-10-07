@@ -88,6 +88,7 @@ export default function MijnChallengesPage() {
   const [showContinueButton, setShowContinueButton] = useState(false);
   const continueRef = useRef<HTMLDivElement | null>(null);
   const continueBtnId = 'onb-challenges-continue-btn';
+  const onboardingPopupRef = useRef<HTMLDivElement | null>(null);
 
   // Helper function to check if mission was completed today
   const isChallengeCompletedToday = (completionDate: string | null | undefined): boolean => {
@@ -271,6 +272,17 @@ export default function MijnChallengesPage() {
       }, 300);
     }
   }, [currentStep, isCompleted, challenges.length]);
+
+  // Focus-scroll the onboarding popup (step 3) on mobile when it appears
+  useEffect(() => {
+    if (showOnboardingPopup) {
+      setTimeout(() => {
+        try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch {}
+        try { onboardingPopupRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch {}
+        try { document.getElementById('onboarding-popup-primary')?.focus(); } catch {}
+      }, 100);
+    }
+  }, [showOnboardingPopup]);
 
   // Load challenges
   useEffect(() => {
@@ -749,7 +761,7 @@ export default function MijnChallengesPage() {
         {/* Onboarding Popup - Positioned at top for challenges page */}
         {showOnboardingPopup && (
           <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-start justify-center p-4 pt-8">
-            <div className="bg-[#181F17] border border-[#3A4D23] rounded-xl p-6 max-w-md w-full shadow-2xl">
+            <div ref={onboardingPopupRef} className="bg-[#181F17] border border-[#3A4D23] rounded-xl p-6 max-w-md w/full shadow-2xl">
               <div className="text-center">
                 <div className="w-16 h-16 bg-[#8BAE5A] rounded-full flex items-center justify-center mx-auto mb-4">
                   <span className="text-2xl">🏆</span>
@@ -759,6 +771,7 @@ export default function MijnChallengesPage() {
                   Je kunt challenges kiezen uit onze bestaande bibliotheek en/of je kunt handmatig eigen challenges aanmaken.
                 </p>
                 <button
+                  id="onboarding-popup-primary"
                   onClick={() => {
                     setShowOnboardingPopup(false);
                     // Mark popup as seen in localStorage

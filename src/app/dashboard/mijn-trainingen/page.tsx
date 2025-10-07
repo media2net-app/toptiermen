@@ -741,7 +741,7 @@ export default function MijnTrainingen() {
 
   return (
     <PageLayout title="Mijn Trainingen">
-      <div className="min-h-screen bg-gradient-to-br from-[#0F1419] to-[#1A1F2E] p-3 sm:p-6">
+      <div className="min-h-screen bg-gradient-to-br from-[#0F1419] to-[#1A1F2E] p-3 sm:p-6 overflow-x-hidden">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="mb-4 sm:mb-6 md:mb-8">
@@ -754,9 +754,9 @@ export default function MijnTrainingen() {
             animate={{ opacity: 1, y: 0 }}
             className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-6 lg:p-8 mb-4 sm:mb-6 md:mb-8 shadow-xl"
           >
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 sm:gap-6 md:gap-8">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 sm:gap-6 md:gap-8 min-w-0">
             <div className="flex-1">
-                <div className="flex items-start justify-between mb-3 sm:mb-4">
+                <div className="flex items-start justify-between mb-3 sm:mb-4 min-w-0">
                   <div className="flex-1 min-w-0 pr-2">
                     <div className="flex items-center gap-2 flex-wrap">
                       <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-white leading-tight">{schema?.name}</h2>

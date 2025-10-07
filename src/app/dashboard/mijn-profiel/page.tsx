@@ -30,6 +30,7 @@ interface UserProfile {
   date_of_birth?: string;
   gender?: string;
   interests?: string[];
+  main_goal?: string;
   rank?: string;
   points?: number;
   missions_completed?: number;
@@ -231,6 +232,7 @@ export default function MijnProfiel() {
         cover_url: data.cover_url ?? undefined,
         bio: data.bio ?? undefined,
         location: data.location ?? undefined,
+        main_goal: data.main_goal ?? undefined,
         is_public: data.is_public ?? undefined,
         show_email: data.show_email ?? undefined,
         created_at: data.created_at,
@@ -1284,6 +1286,28 @@ export default function MijnProfiel() {
                   rows={3}
                   placeholder="Vertel iets over jezelf..."
                 />
+              </div>
+              
+              {/* Mijn doel - Readonly from onboarding step 2 */}
+              <div className="space-y-2 sm:space-y-3">
+                <h3 className="text-base sm:text-lg font-semibold text-white">Mijn doel</h3>
+                <div className="w-full bg-[#181F17] text-white px-3 sm:px-4 py-2 sm:py-3 rounded-lg border border-[#3A4D23] text-sm sm:text-base">
+                  {(() => {
+                    const map: Record<string, string> = {
+                      fitness: 'Fitness & Kracht',
+                      weight_loss: 'Gewichtsverlies',
+                      muscle_gain: 'Spiermassa',
+                      endurance: 'Conditie & Uithoudingsvermogen',
+                      mental_health: 'Mentale Gezondheid',
+                      productivity: 'Productiviteit',
+                      business: 'Business & Carrière',
+                      relationships: 'Relaties & Sociale Vaardigheden',
+                      other: 'Anders'
+                    };
+                    const key = (profile.main_goal || '').toLowerCase();
+                    return map[key] || profile.main_goal || 'Niet ingesteld';
+                  })()}
+                </div>
               </div>
               
               {/* Location - Enhanced Responsive */}
