@@ -200,7 +200,13 @@ export default function ProductenPage() {
       product_ingredients: [],
       product_dosage: [],
       product_affiliate_links: [
-        { id: 'aff-5-1', platform: 'Bol.com', affiliate_url: 'https://partner.bol.com/click/cam-testkit', is_primary: true },
+        {
+          id: 'aff-5-1',
+          platform: 'MijnLabtest',
+          affiliate_url:
+            'https://mijnlabtest.nl/testosteron-test.html?aw_affiliate=eyJjYW1wYWlnbl9pZCI6IjU3IiwidHJhZmZpY19zb3VyY2UiOiJub19zb3VyY2UiLCJhY2NvdW50X2lkIjo3NTF9',
+          is_primary: true
+        },
       ],
       product_reviews: []
     }
