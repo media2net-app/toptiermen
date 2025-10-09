@@ -75,36 +75,30 @@ export default function HLSVideoPlayer({
           const effectiveType = (navigator as any)?.connection?.effectiveType as string | undefined;
           const isMobileViewport = typeof window !== 'undefined' ? window.matchMedia('(max-width: 640px)').matches : false;
           
-          // 🔧 MOBIEL OPTIMALISATIE: Grotere buffer en conservatieve start
-          const maxBufferLength = isMobileViewport ? 20 : 15; // ↑ Verhoogd van 10 naar 20 voor mobiel
-          const maxMaxBufferLength = isMobileViewport ? 90 : 60; // ↑ Extra buffer capaciteit
-          const startAtAutoLevel = -1; // we'll override after manifest with chosen start level if needed
+          // 🔧 MOBIEL OPTIMALISATIE: KLEINERE buffer voor directe start (net zoals PC)
+          const maxBufferLength = isMobileViewport ? 8 : 15; // Minder vooruit bufferen op mobiel
+          const maxMaxBufferLength = isMobileViewport ? 30 : 60; // Beperkte buffer capaciteit
 
           const hls = new Hls({
             // VOD tuning for responsive seeks
             lowLatencyMode: false,
             enableWorker: true,
             capLevelToPlayerSize: true,
-            backBufferLength: 30,
+            backBufferLength: 20,
             maxBufferLength,
             maxMaxBufferLength,
             maxBufferHole: 0.5,
-            maxStarvationDelay: isMobileViewport ? 3 : 2, // ↑ Meer tijd op mobiel
+            maxStarvationDelay: 2,
             nudgeMaxRetry: 3,
             startPosition: -1,
-            startLevel: startAtAutoLevel,
-            // ABR smoothing - conservatiever op mobiel
-            abrEwmaFastVoD: isMobileViewport ? 3.0 : 2.0, // ↑ Langzamer op mobiel
-            abrEwmaSlowVoD: isMobileViewport ? 12.0 : 9.0, // ↑ Meer smoothing
+            startLevel: -1, // Auto kwaliteit vanaf start
+            // ABR smoothing - zelfde als PC voor snelle keuze
+            abrEwmaFastVoD: 2.0,
+            abrEwmaSlowVoD: 9.0,
             // Retry/timeout tuning
             fragLoadingTimeOut: 8000,
             fragLoadingRetryDelay: 500,
             appendErrorMaxRetry: 2,
-            // 🔧 MOBIEL: Start met meer vooraf geladen segments
-            ...(isMobileViewport && {
-              maxBufferSize: 60 * 1000 * 1000, // 60MB buffer limiet
-              maxBufferLength: 20, // 20 seconden vooraf laden
-            }),
           });
           hlsRef.current = hls;
 
@@ -153,51 +147,25 @@ export default function HLSVideoPlayer({
               const ls = (hls.levels || []).map((l: any, idx: number) => ({ index: idx, height: l.height, bitrate: l.bitrate }));
               setLevels(ls);
               setCurrentLevel(hls.currentLevel ?? -1);
-              // Choose conservative start level on constrained networks
-              if (effectiveType && ['slow-2g','2g','3g'].includes(effectiveType)) {
+              // Choose conservative start level ONLY on very slow networks
+              if (effectiveType && ['slow-2g','2g'].includes(effectiveType)) {
                 // pick lowest available level >= 360p
                 const idx = ls.findIndex(l => (l.height || 0) >= 360);
                 const target = idx !== -1 ? idx : 0;
                 hls.autoLevelEnabled = false;
                 hls.currentLevel = target;
                 setCurrentLevel(target);
-              } else if (isMobileViewport) {
-                // 🔧 MOBIEL: Start met LAGE kwaliteit om snel buffer op te bouwen
-                const sorted = [...ls].sort((a,b) => (a.height||0)-(b.height||0));
-                // Start met 480p of lager op mobiel voor snelle initiële buffer
-                const target = sorted.find(l => (l.height||0) >= 480)?.index ?? 0;
-                if (target !== -1) {
-                  hls.autoLevelEnabled = false;
-                  hls.currentLevel = target as number;
-                  setCurrentLevel(target as number);
-                  
-                  // 🔧 Na 5 seconden upgraden naar auto (smooth)
-                  setTimeout(() => {
-                    if (hlsRef.current && !video.paused) {
-                      hlsRef.current.autoLevelEnabled = true;
-                      setCurrentLevel(-1);
-                    }
-                  }, 5000);
-                }
               }
+              // 🔧 MOBIEL: Laat HLS.js auto kwaliteit kiezen, geen forcering
             } catch {}
             
-            // 🔧 MOBIEL: Wacht tot er voldoende buffer is voordat we starten
+            // 🔧 DIRECT STARTEN: Geen wachten op buffer, net zoals PC
             if (autoPlay) {
-              if (isMobileViewport) {
-                // Wacht tot er 3 seconden gebufferd is voor smooth start
-                const waitForBuffer = () => {
-                  const buffered = video.buffered;
-                  if (buffered.length > 0 && buffered.end(0) - video.currentTime >= 3) {
-                    setIsBuffering(false);
-                    video.play().catch(() => {});
-                  } else {
-                    setTimeout(waitForBuffer, 200);
-                  }
-                };
-                waitForBuffer();
-              } else {
-                try { await video.play(); } catch {}
+              try { 
+                await video.play(); 
+                setIsBuffering(false);
+              } catch (e) {
+                console.log('Autoplay prevented:', e);
                 setIsBuffering(false);
               }
             } else {
@@ -227,7 +195,7 @@ export default function HLSVideoPlayer({
 
     const onWaiting = () => {
       setIsBuffering(true);
-      // Stall watchdog: after 1500ms, auto downshift and nudge
+      // Stall watchdog: after 2500ms (meer geduld), auto downshift and nudge
       if (stallTimerRef.current) clearTimeout(stallTimerRef.current);
       stallTimerRef.current = setTimeout(() => {
         const hls = hlsRef.current;
@@ -248,7 +216,7 @@ export default function HLSVideoPlayer({
           // Restart loading if it was paused
           hls?.startLoad?.();
         } catch {}
-      }, 1500);
+      }, 2500);
     };
     const onCanPlay = () => {
       setIsBuffering(false);
@@ -325,7 +293,7 @@ export default function HLSVideoPlayer({
         autoPlay={autoPlay}
         muted={muted}
         playsInline
-        preload={isMobile ? "auto" : "metadata"} // 🔧 MOBIEL: Meer preload
+        preload="metadata"
         crossOrigin="anonymous"
       />
 

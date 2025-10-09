@@ -505,9 +505,6 @@ export default function Dashboard() {
   return (
     <div className={`min-h-screen bg-gradient-to-br from-[#0F1411] via-[#181F17] to-[#232D1A] transition-opacity duration-1000 ${fadeIn ? 'opacity-100' : 'opacity-0'} overflow-x-hidden`}>
       <ClientLayout>
-        {/* ===== CSS CHECK: TEMPORARY RED BAR (remove after verification) ===== */}
-        <div className="fixed top-0 left-0 right-0 h-1.5 bg-red-600 z-[1000]"></div>
-        {/* ===== END CSS CHECK ===== */}
         {/* Onboarding Modal */}
         <OnboardingV2Modal 
           isOpen={Boolean(onboarding && !onboarding.isCompleted && onboarding.currentStep !== null && onboarding.currentStep <= 2)}
@@ -985,40 +982,52 @@ export default function Dashboard() {
           )}
 
           {/* Activity Log Section */}
-          <div className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-6 mb-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-bold text-white">📊 Recente Activiteiten</h3>
-              <div className="text-sm text-[#8BAE5A]">
-                {activityLog.length} activiteiten
+          <div className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-3 sm:p-6 mb-6">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <h3 className="text-lg sm:text-xl font-bold text-white">📊 Recente Activiteiten</h3>
+              <div className="text-xs sm:text-sm text-[#8BAE5A]">
+                {activityLog.length} {activityLog.length === 1 ? 'activiteit' : 'activiteiten'}
               </div>
             </div>
             
             {activityLog.length > 0 ? (
-              <div className="space-y-3">
+              <div className="space-y-2 sm:space-y-3">
                 {activityLog.map((activity) => (
-                  <div key={activity.id} className="flex items-center gap-4 p-4 bg-[#2A3317]/50 rounded-lg border border-[#3A4D23]/20 hover:bg-[#2A3317]/70 transition-colors">
-                    <div className="text-2xl">{activity.icon}</div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h4 className="font-semibold text-white text-sm">{activity.title}</h4>
-                        <span className="px-2 py-1 bg-[#3A4D23] text-[#8BAE5A] text-xs rounded-full">
+                  <div key={activity.id} className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 md:p-4 bg-[#2A3317]/50 rounded-lg border border-[#3A4D23]/20 hover:bg-[#2A3317]/70 transition-colors">
+                    <div className="text-lg sm:text-xl md:text-2xl flex-shrink-0">{activity.icon}</div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1 sm:gap-2 mb-0.5 sm:mb-1 flex-wrap">
+                        <h4 className="font-semibold text-white text-xs sm:text-sm truncate">{activity.title}</h4>
+                        <span className="px-1.5 py-0.5 sm:px-2 sm:py-1 bg-[#3A4D23] text-[#8BAE5A] text-[10px] sm:text-xs rounded-full whitespace-nowrap">
                           {activity.category}
                         </span>
                       </div>
-                      <p className="text-[#8BAE5A] text-xs mb-1">{activity.description}</p>
-                      <div className="text-xs text-gray-400">
-                        {new Date(activity.date).toLocaleDateString('nl-NL', {
-                          day: 'numeric',
-                          month: 'short',
-                          year: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })}
+                      <p className="text-[#8BAE5A] text-[10px] sm:text-xs mb-0.5 sm:mb-1 line-clamp-1 sm:line-clamp-2">{activity.description}</p>
+                      <div className="text-[10px] sm:text-xs text-gray-400">
+                        {/* Mobile: Show date without year */}
+                        <span className="sm:hidden">
+                          {new Date(activity.date).toLocaleDateString('nl-NL', {
+                            day: 'numeric',
+                            month: 'short',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </span>
+                        {/* Desktop: Show full date with year */}
+                        <span className="hidden sm:inline">
+                          {new Date(activity.date).toLocaleDateString('nl-NL', {
+                            day: 'numeric',
+                            month: 'short',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </span>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <div className="text-lg font-bold text-[#FFD700]">+{activity.xp_reward}</div>
-                      <div className="text-xs text-[#8BAE5A]">XP</div>
+                    <div className="text-right flex-shrink-0">
+                      <div className="text-sm sm:text-base md:text-lg font-bold text-[#FFD700]">+{activity.xp_reward}</div>
+                      <div className="text-[10px] sm:text-xs text-[#8BAE5A]">XP</div>
                     </div>
                   </div>
                 ))}

@@ -856,59 +856,342 @@ export default function MindFocusPage() {
                   </button>
                 </div>
 
-                {/* Maanden 2-6 Preview */}
-                <div className="bg-[#232D1A] rounded-lg p-4 border border-[#3A4D23]/40 opacity-60 lg:col-span-2 xl:col-span-2">
+                {/* Week 5 */}
+                <div className={`rounded-lg p-4 border ${
+                  completedWeeks.includes(5) 
+                    ? 'bg-[#8BAE5A]/10 border-[#8BAE5A]/30' 
+                    : currentActiveWeek === 5 
+                      ? 'bg-[#232D1A] border-[#8BAE5A]/30' 
+                      : 'bg-[#232D1A] border-[#3A4D23]/40 opacity-60'
+                }`}>
                   <div className="flex items-center justify-between mb-3">
-                    <h4 className="font-semibold text-white">Maanden 2-6</h4>
-                    <span className="px-2 py-1 bg-[#3A4D23] text-[#8BAE5A] text-xs rounded-full font-medium">Later beschikbaar</span>
+                    <h4 className="font-semibold text-white">Week 5</h4>
+                    <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                      completedWeeks.includes(5)
+                        ? 'bg-green-500 text-white'
+                        : currentActiveWeek === 5
+                          ? 'bg-[#8BAE5A] text-[#1A2A1A]'
+                          : 'bg-[#3A4D23] text-[#8BAE5A]'
+                    }`}>
+                      {completedWeeks.includes(5) ? 'Voltooid' : 
+                       currentActiveWeek === 5 ? 'Actief' : 'Geblokkeerd'}
+                    </span>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <h5 className="text-[#8BAE5A] font-medium mb-2">Maand 2-3: Verdieping</h5>
-                      <ul className="space-y-1 text-[#8BAE5A]">
-                        <li>• Geavanceerde focus technieken</li>
-                        <li>• Stress management strategieën</li>
-                        <li>• Slaap optimalisatie</li>
-                      </ul>
-                    </div>
-                    <div>
-                      <h5 className="text-[#8BAE5A] font-medium mb-2">Maand 4-6: Meesterschap</h5>
-                      <ul className="space-y-1 text-[#8BAE5A]">
-                        <li>• Persoonlijke routine ontwikkeling</li>
-                        <li>• Advanced recovery technieken</li>
-                        <li>• Lange termijn behoud</li>
-                      </ul>
-                    </div>
+                  <div className="space-y-2 text-sm">
+                    {getTasksForWeek(1, lifestyleInfo.mindFocusIntensity).map((task, index) => (
+                      <div key={index} className="flex items-center gap-2">
+                        <div className={`w-4 h-4 rounded-full flex items-center justify-center ${
+                          completedWeeks.includes(5) 
+                            ? 'bg-green-500' 
+                            : currentActiveWeek === 5 
+                              ? 'bg-[#8BAE5A]' 
+                              : 'bg-[#3A4D23]'
+                        }`}>
+                          <span className={`text-xs ${
+                            completedWeeks.includes(5) || currentActiveWeek === 5
+                              ? 'text-white'
+                              : 'text-[#8BAE5A]'
+                          }`}>✓</span>
+                        </div>
+                        <span className={`${
+                          completedWeeks.includes(5) ? 'text-green-400' : 
+                          currentActiveWeek === 5 ? 'text-white' : 'text-[#8BAE5A]'
+                        }`}>{task}</span>
+                      </div>
+                    ))}
                   </div>
-                  <div className="mt-3 p-2 bg-[#3A4D23]/20 rounded border border-[#3A4D23]/40">
-                    <p className="text-[#8BAE5A] text-xs">
-                      📈 Voltooi de eerste maand om toegang te krijgen tot de volgende fase van je traject
-                    </p>
-                  </div>
+                  <button 
+                    onClick={() => router.push('/dashboard/mind-focus/week-5')}
+                    disabled={!completedWeeks.includes(5) && currentActiveWeek !== 5}
+                    className={`w-full mt-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      completedWeeks.includes(5)
+                        ? 'bg-green-500 text-white hover:bg-green-600'
+                        : currentActiveWeek === 5
+                          ? 'bg-[#8BAE5A] text-[#1A2A1A] hover:bg-[#A6C97B]'
+                          : 'bg-[#3A4D23] text-[#8BAE5A] cursor-not-allowed'
+                    }`}
+                  >
+                    {completedWeeks.includes(5) ? 'Bekijk Week 5' : 
+                     currentActiveWeek === 5 ? 'Start Week 5' : 'Voltooi Week 4 eerst'}
+                  </button>
                 </div>
+
+                {/* Week 6 */}
+                <div className={`rounded-lg p-4 border ${
+                  completedWeeks.includes(6) 
+                    ? 'bg-[#8BAE5A]/10 border-[#8BAE5A]/30' 
+                    : currentActiveWeek === 6 
+                      ? 'bg-[#232D1A] border-[#8BAE5A]/30' 
+                      : 'bg-[#232D1A] border-[#3A4D23]/40 opacity-60'
+                }`}>
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-semibold text-white">Week 6</h4>
+                    <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                      completedWeeks.includes(6)
+                        ? 'bg-green-500 text-white'
+                        : currentActiveWeek === 6
+                          ? 'bg-[#8BAE5A] text-[#1A2A1A]'
+                          : 'bg-[#3A4D23] text-[#8BAE5A]'
+                    }`}>
+                      {completedWeeks.includes(6) ? 'Voltooid' : 
+                       currentActiveWeek === 6 ? 'Actief' : 'Geblokkeerd'}
+                    </span>
+                  </div>
+                  <div className="space-y-2 text-sm">
+                    {getTasksForWeek(2, lifestyleInfo.mindFocusIntensity).map((task, index) => (
+                      <div key={index} className="flex items-center gap-2">
+                        <div className={`w-4 h-4 rounded-full flex items-center justify-center ${
+                          completedWeeks.includes(6) 
+                            ? 'bg-green-500' 
+                            : currentActiveWeek === 6 
+                              ? 'bg-[#8BAE5A]' 
+                              : 'bg-[#3A4D23]'
+                        }`}>
+                          <span className={`text-xs ${
+                            completedWeeks.includes(6) || currentActiveWeek === 6
+                              ? 'text-white'
+                              : 'text-[#8BAE5A]'
+                          }`}>✓</span>
+                        </div>
+                        <span className={`${
+                          completedWeeks.includes(6) ? 'text-green-400' : 
+                          currentActiveWeek === 6 ? 'text-white' : 'text-[#8BAE5A]'
+                        }`}>{task}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <button 
+                    onClick={() => router.push('/dashboard/mind-focus/week-6')}
+                    disabled={!completedWeeks.includes(6) && currentActiveWeek !== 6}
+                    className={`w-full mt-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      completedWeeks.includes(6)
+                        ? 'bg-green-500 text-white hover:bg-green-600'
+                        : currentActiveWeek === 6
+                          ? 'bg-[#8BAE5A] text-[#1A2A1A] hover:bg-[#A6C97B]'
+                          : 'bg-[#3A4D23] text-[#8BAE5A] cursor-not-allowed'
+                    }`}
+                  >
+                    {completedWeeks.includes(6) ? 'Bekijk Week 6' : 
+                     currentActiveWeek === 6 ? 'Start Week 6' : 'Voltooi Week 5 eerst'}
+                  </button>
+                </div>
+
+                {/* Week 7 */}
+                <div className={`rounded-lg p-4 border ${
+                  completedWeeks.includes(7) 
+                    ? 'bg-[#8BAE5A]/10 border-[#8BAE5A]/30' 
+                    : currentActiveWeek === 7 
+                      ? 'bg-[#232D1A] border-[#8BAE5A]/30' 
+                      : 'bg-[#232D1A] border-[#3A4D23]/40 opacity-60'
+                }`}>
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-semibold text-white">Week 7</h4>
+                    <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                      completedWeeks.includes(7)
+                        ? 'bg-green-500 text-white'
+                        : currentActiveWeek === 7
+                          ? 'bg-[#8BAE5A] text-[#1A2A1A]'
+                          : 'bg-[#3A4D23] text-[#8BAE5A]'
+                    }`}>
+                      {completedWeeks.includes(7) ? 'Voltooid' : 
+                       currentActiveWeek === 7 ? 'Actief' : 'Geblokkeerd'}
+                    </span>
+                  </div>
+                  <div className="space-y-2 text-sm">
+                    {getTasksForWeek(3, lifestyleInfo.mindFocusIntensity).map((task, index) => (
+                      <div key={index} className="flex items-center gap-2">
+                        <div className={`w-4 h-4 rounded-full flex items-center justify-center ${
+                          completedWeeks.includes(7) 
+                            ? 'bg-green-500' 
+                            : currentActiveWeek === 7 
+                              ? 'bg-[#8BAE5A]' 
+                              : 'bg-[#3A4D23]'
+                        }`}>
+                          <span className={`text-xs ${
+                            completedWeeks.includes(7) || currentActiveWeek === 7
+                              ? 'text-white'
+                              : 'text-[#8BAE5A]'
+                          }`}>✓</span>
+                        </div>
+                        <span className={`${
+                          completedWeeks.includes(7) ? 'text-green-400' : 
+                          currentActiveWeek === 7 ? 'text-white' : 'text-[#8BAE5A]'
+                        }`}>{task}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <button 
+                    onClick={() => router.push('/dashboard/mind-focus/week-7')}
+                    disabled={!completedWeeks.includes(7) && currentActiveWeek !== 7}
+                    className={`w-full mt-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      completedWeeks.includes(7)
+                        ? 'bg-green-500 text-white hover:bg-green-600'
+                        : currentActiveWeek === 7
+                          ? 'bg-[#8BAE5A] text-[#1A2A1A] hover:bg-[#A6C97B]'
+                          : 'bg-[#3A4D23] text-[#8BAE5A] cursor-not-allowed'
+                    }`}
+                  >
+                    {completedWeeks.includes(7) ? 'Bekijk Week 7' : 
+                     currentActiveWeek === 7 ? 'Start Week 7' : 'Voltooi Week 6 eerst'}
+                  </button>
+                </div>
+
+                {/* Week 8 */}
+                <div className={`rounded-lg p-4 border ${
+                  completedWeeks.includes(8) 
+                    ? 'bg-[#8BAE5A]/10 border-[#8BAE5A]/30' 
+                    : currentActiveWeek === 8 
+                      ? 'bg-[#232D1A] border-[#8BAE5A]/30' 
+                      : 'bg-[#232D1A] border-[#3A4D23]/40 opacity-60'
+                }`}>
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-semibold text-white">Week 8</h4>
+                    <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                      completedWeeks.includes(8)
+                        ? 'bg-green-500 text-white'
+                        : currentActiveWeek === 8
+                          ? 'bg-[#8BAE5A] text-[#1A2A1A]'
+                          : 'bg-[#3A4D23] text-[#8BAE5A]'
+                    }`}>
+                      {completedWeeks.includes(8) ? 'Voltooid' : 
+                       currentActiveWeek === 8 ? 'Actief' : 'Geblokkeerd'}
+                    </span>
+                  </div>
+                  <div className="space-y-2 text-sm">
+                    {getTasksForWeek(4, lifestyleInfo.mindFocusIntensity).map((task, index) => (
+                      <div key={index} className="flex items-center gap-2">
+                        <div className={`w-4 h-4 rounded-full flex items-center justify-center ${
+                          completedWeeks.includes(8) 
+                            ? 'bg-green-500' 
+                            : currentActiveWeek === 8 
+                              ? 'bg-[#8BAE5A]' 
+                              : 'bg-[#3A4D23]'
+                        }`}>
+                          <span className={`text-xs ${
+                            completedWeeks.includes(8) || currentActiveWeek === 8
+                              ? 'text-white'
+                              : 'text-[#8BAE5A]'
+                          }`}>✓</span>
+                        </div>
+                        <span className={`${
+                          completedWeeks.includes(8) ? 'text-green-400' : 
+                          currentActiveWeek === 8 ? 'text-white' : 'text-[#8BAE5A]'
+                        }`}>{task}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <button 
+                    onClick={() => router.push('/dashboard/mind-focus/week-8')}
+                    disabled={!completedWeeks.includes(8) && currentActiveWeek !== 8}
+                    className={`w-full mt-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      completedWeeks.includes(8)
+                        ? 'bg-green-500 text-white hover:bg-green-600'
+                        : currentActiveWeek === 8
+                          ? 'bg-[#8BAE5A] text-[#1A2A1A] hover:bg-[#A6C97B]'
+                          : 'bg-[#3A4D23] text-[#8BAE5A] cursor-not-allowed'
+                    }`}
+                  >
+                    {completedWeeks.includes(8) ? 'Bekijk Week 8' : 
+                     currentActiveWeek === 8 ? 'Start Week 8' : 'Voltooi Week 7 eerst'}
+                  </button>
+                </div>
+
+                {/* Weken 9-24 worden dynamisch gegenereerd */}
+                {Array.from({ length: 16 }, (_, i) => i + 9).map((weekNum) => {
+                  const taskCycle = ((weekNum - 1) % 4) + 1; // Repeat tasks in 4-week cycle
+                  return (
+                    <div key={weekNum} className={`rounded-lg p-4 border ${
+                      completedWeeks.includes(weekNum) 
+                        ? 'bg-[#8BAE5A]/10 border-[#8BAE5A]/30' 
+                        : currentActiveWeek === weekNum 
+                          ? 'bg-[#232D1A] border-[#8BAE5A]/30' 
+                          : 'bg-[#232D1A] border-[#3A4D23]/40 opacity-60'
+                    }`}>
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-semibold text-white">Week {weekNum}</h4>
+                        <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                          completedWeeks.includes(weekNum)
+                            ? 'bg-green-500 text-white'
+                            : currentActiveWeek === weekNum
+                              ? 'bg-[#8BAE5A] text-[#1A2A1A]'
+                              : 'bg-[#3A4D23] text-[#8BAE5A]'
+                        }`}>
+                          {completedWeeks.includes(weekNum) ? 'Voltooid' : 
+                           currentActiveWeek === weekNum ? 'Actief' : 'Geblokkeerd'}
+                        </span>
+                      </div>
+                      <div className="space-y-2 text-sm">
+                        {getTasksForWeek(taskCycle, lifestyleInfo.mindFocusIntensity).map((task, index) => (
+                          <div key={index} className="flex items-center gap-2">
+                            <div className={`w-4 h-4 rounded-full flex items-center justify-center ${
+                              completedWeeks.includes(weekNum) 
+                                ? 'bg-green-500' 
+                                : currentActiveWeek === weekNum 
+                                  ? 'bg-[#8BAE5A]' 
+                                  : 'bg-[#3A4D23]'
+                            }`}>
+                              <span className={`text-xs ${
+                                completedWeeks.includes(weekNum) || currentActiveWeek === weekNum
+                                  ? 'text-white'
+                                  : 'text-[#8BAE5A]'
+                              }`}>✓</span>
+                            </div>
+                            <span className={`${
+                              completedWeeks.includes(weekNum) ? 'text-green-400' : 
+                              currentActiveWeek === weekNum ? 'text-white' : 'text-[#8BAE5A]'
+                            }`}>{task}</span>
+                          </div>
+                        ))}
+                      </div>
+                      <button 
+                        onClick={() => router.push(`/dashboard/mind-focus/week-${weekNum}`)}
+                        disabled={!completedWeeks.includes(weekNum) && currentActiveWeek !== weekNum}
+                        className={`w-full mt-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                          completedWeeks.includes(weekNum)
+                            ? 'bg-green-500 text-white hover:bg-green-600'
+                            : currentActiveWeek === weekNum
+                              ? 'bg-[#8BAE5A] text-[#1A2A1A] hover:bg-[#A6C97B]'
+                              : 'bg-[#3A4D23] text-[#8BAE5A] cursor-not-allowed'
+                        }`}
+                      >
+                        {completedWeeks.includes(weekNum) ? `Bekijk Week ${weekNum}` : 
+                         currentActiveWeek === weekNum ? `Start Week ${weekNum}` : `Voltooi Week ${weekNum - 1} eerst`}
+                      </button>
+                    </div>
+                  );
+                })}
               </div>
 
               {/* Progress Overview */}
               <div className="mt-6 bg-[#232D1A] rounded-lg p-4 border border-[#3A4D23]/40">
-                <h4 className="font-semibold text-white mb-3">Traject Voortgang</h4>
+                <h4 className="font-semibold text-white mb-3">Traject Voortgang - 6 Maanden Programma</h4>
                 <div className="flex items-center gap-4">
                   <div className="flex-1">
                     <div className="flex justify-between text-sm mb-1">
                       <span className="text-[#8BAE5A]">Week {currentActiveWeek} van 24</span>
                       <span className="text-white">{Math.round((currentActiveWeek / 24) * 100)}%</span>
                     </div>
-                    <div className="w-full bg-[#3A4D23] rounded-full h-2">
-                      <div className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] h-2 rounded-full" style={{ width: `${(currentActiveWeek / 24) * 100}%` }}></div>
+                    <div className="w-full bg-[#3A4D23] rounded-full h-2 mb-2">
+                      <div className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] h-2 rounded-full transition-all duration-500" style={{ width: `${(currentActiveWeek / 24) * 100}%` }}></div>
+                    </div>
+                    <div className="grid grid-cols-6 gap-1 text-xs text-center text-[#8BAE5A]/60">
+                      <span className={currentActiveWeek >= 1 ? 'text-green-400 font-medium' : ''}>M1 {currentActiveWeek >= 5 ? '✓' : ''}</span>
+                      <span className={currentActiveWeek >= 5 ? 'text-green-400 font-medium' : ''}>M2 {currentActiveWeek >= 9 ? '✓' : ''}</span>
+                      <span className={currentActiveWeek >= 9 ? 'text-green-400 font-medium' : ''}>M3 {currentActiveWeek >= 13 ? '✓' : ''}</span>
+                      <span className={currentActiveWeek >= 13 ? 'text-green-400 font-medium' : ''}>M4 {currentActiveWeek >= 17 ? '✓' : ''}</span>
+                      <span className={currentActiveWeek >= 17 ? 'text-green-400 font-medium' : ''}>M5 {currentActiveWeek >= 21 ? '✓' : ''}</span>
+                      <span className={currentActiveWeek >= 21 ? 'text-green-400 font-medium' : ''}>M6 {currentActiveWeek >= 25 ? '✓' : ''}</span>
                     </div>
                   </div>
                   <div className="text-right">
                     <div className="text-sm text-[#8BAE5A]">Volgende milestone</div>
                     <div className="text-white font-medium">
-                      {currentActiveWeek < 4 ? 'Week 4' : 
-                       currentActiveWeek < 8 ? 'Week 8' :
-                       currentActiveWeek < 12 ? 'Week 12' :
-                       currentActiveWeek < 16 ? 'Week 16' :
-                       currentActiveWeek < 20 ? 'Week 20' : 'Week 24'}
+                      {currentActiveWeek <= 4 ? 'Week 4' : 
+                       currentActiveWeek <= 8 ? 'Week 8' :
+                       currentActiveWeek <= 12 ? 'Week 12' :
+                       currentActiveWeek <= 16 ? 'Week 16' :
+                       currentActiveWeek <= 20 ? 'Week 20' : 
+                       currentActiveWeek <= 24 ? 'Week 24' : 'Programma Voltooid!'}
                     </div>
                   </div>
                 </div>

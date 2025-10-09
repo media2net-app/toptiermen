@@ -1,8 +1,14 @@
-"use client";
-import WeekTemplate from "../WeekTemplate";
-import { weeksConfig } from "../weeks.config";
+'use client';
+
+import WeekTemplate from '../WeekTemplate';
+import { weeksConfig } from '../weeks.config';
 
 export default function Week20Page() {
-  const config = weeksConfig.find(w => w.week === 20)!;
-  return <WeekTemplate config={config} />;
+  const weekConfig = weeksConfig.find(w => w.week === 20);
+  
+  if (!weekConfig) {
+    return <div>Week configuratie niet gevonden</div>;
+  }
+
+  return <WeekTemplate config={weekConfig} />;
 }

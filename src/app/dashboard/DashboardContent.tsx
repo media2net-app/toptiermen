@@ -27,7 +27,6 @@ import {
   CalendarDaysIcon, ShoppingBagIcon, ChevronLeftIcon, ChevronRightIcon,
   RocketLaunchIcon, TagIcon, ClockIcon, CpuChipIcon, EnvelopeIcon
 } from '@heroicons/react/24/solid';
-import { useChatNotifications } from '@/hooks/useChatNotifications';
 import DebugPanel from '@/components/DebugPanel';
 import TestUserVideoModal from '@/components/TestUserVideoModal';
 import PWAInstallPrompt from '@/components/PWAInstallPrompt';
@@ -134,7 +133,6 @@ const baseMenu = [
   { label: 'Brotherhood', icon: UsersIcon, href: '/dashboard/brotherhood', onboardingStep: 6 },
   { label: 'Social Feed', icon: ChatBubbleLeftRightIcon, parent: 'Brotherhood', href: '/dashboard/brotherhood/social-feed', isSub: true, onboardingStep: 7 },
   { label: 'Forum', icon: FireIcon, parent: 'Brotherhood', href: '/dashboard/brotherhood/forum', isSub: true, onboardingStep: 4, isBasicTierStep: true },
-  { label: 'Inbox', icon: ChatBubbleLeftRightIcon, parent: 'Dashboard', href: '/dashboard/inbox', isSub: true, onboardingStep: 1 },
   { label: 'Leden', icon: UsersIcon, parent: 'Brotherhood', href: '/dashboard/brotherhood/leden', isSub: true, onboardingStep: 7 },
   { label: 'Boekenkamer', icon: BookOpenIcon, href: '/dashboard/boekenkamer', onboardingStep: 7, adminOnly: false },
   { label: 'Badges & Rangen', icon: StarIcon, href: '/dashboard/badges-en-rangen', onboardingStep: 7 },
@@ -1008,12 +1006,6 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, profile, isAdmin, logoutAndRedirect } = useSupabaseAuth();
-  const [unreadCount, setUnreadCount] = useState(0);
-  // Realtime inbox badge: increment on new message, reset via click handler in link
-  useChatNotifications(
-    () => setUnreadCount((c) => c + 1),
-    undefined
-  );
   const { session, stopWorkout } = useWorkoutSession();
   const { showDebug, toggleDebug } = useDebug();
   const { isCompleted, isLoading: onboardingLoading } = useOnboardingV2();
@@ -1029,6 +1021,7 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
   const [showForcedOnboarding, setShowForcedOnboarding] = useState(false);
   const [showTestUserVideo, setShowTestUserVideo] = useState(false);
   const [isLoadingLocal, setIsLoadingLocal] = useState(false); // DISABLED TO FIX FLICKERING
+  const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
   
   // Get onboarding status from context
   const { isCompleted: contextIsCompleted, currentStep: contextCurrentStep, refreshStatus } = useOnboardingV2();
@@ -1067,6 +1060,31 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
       setShowForcedOnboarding(false);
     }
   }, [user]);
+
+  // Fetch unread messages count
+  useEffect(() => {
+    if (!user?.id) return;
+    
+    const fetchUnreadCount = async () => {
+      try {
+        const response = await fetch(`/api/chat/conversations?userId=${user.id}`);
+        const data = await response.json();
+        
+        if (response.ok && data.conversations) {
+          const totalUnread = data.conversations.reduce((sum: number, conv: any) => sum + conv.unreadCount, 0);
+          setUnreadMessagesCount(totalUnread);
+        }
+      } catch (error) {
+        console.error('Error fetching unread count:', error);
+      }
+    };
+
+    fetchUnreadCount();
+    
+    // Refresh unread count every 30 seconds
+    const intervalId = setInterval(fetchUnreadCount, 30000);
+    return () => clearInterval(intervalId);
+  }, [user?.id]);
 
   // 2.0.1: Cache busting for existing users
   useEffect(() => {
@@ -1479,22 +1497,8 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
                 </button>
               </div>
 
-              {/* Right Side - Inbox + Admin + Logout */}
+              {/* Right Side - Admin + Inbox + Logout */}
               <div className="flex items-center gap-2 flex-wrap min-w-0">
-                {/* Inbox */}
-                <Link
-                  href="/dashboard/inbox"
-                  onClick={() => setUnreadCount(0)}
-                  className="relative inline-flex items-center justify-center px-3 py-1.5 sm:px-3 sm:py-2 bg-[#181F17] text-[#8BAE5A] rounded-lg border border-[#3A4D23] hover:bg-[#3A4D23] transition-colors"
-                  title="Inbox"
-                >
-                  <EnvelopeIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                  {unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 rounded-full bg-red-600 text-white text-[10px] leading-[16px] text-center font-bold">
-                      {unreadCount}
-                    </span>
-                  )}
-                </Link>
                 {/* Admin Dashboard Button */}
                 {isAdmin && (
                   <Link
@@ -1505,6 +1509,20 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
                     <span>Admin</span>
                   </Link>
                 )}
+
+                {/* Inbox Button */}
+                <Link
+                  href="/dashboard/inbox"
+                  className="relative p-2 bg-[#8BAE5A] text-[#0A0F0A] rounded-lg hover:bg-[#7A9D4A] transition-colors"
+                  title="Inbox"
+                >
+                  <EnvelopeIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                  {unreadMessagesCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                      {unreadMessagesCount > 9 ? '9+' : unreadMessagesCount}
+                    </span>
+                  )}
+                </Link>
 
                 {/* Logout */}
                 <button

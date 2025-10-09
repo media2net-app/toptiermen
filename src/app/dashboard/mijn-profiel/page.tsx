@@ -1288,10 +1288,22 @@ export default function MijnProfiel() {
                 />
               </div>
               
+              {/* Location - Enhanced Responsive */}
+              <div className="space-y-2 sm:space-y-3">
+                <h3 className="text-base sm:text-lg font-semibold text-white">Locatie</h3>
+                <input
+                  type="text"
+                  value={profile.location || ''}
+                  onChange={(e) => handleFieldChange('location', e.target.value)}
+                  className="w-full bg-[#181F17] text-white px-3 sm:px-4 py-2 sm:py-3 rounded-lg border border-[#3A4D23] focus:outline-none focus:border-[#8BAE5A] focus:ring-1 focus:ring-[#8BAE5A] text-sm sm:text-base"
+                  placeholder="Stad, Land"
+                />
+              </div>
+              
               {/* Mijn doel - Readonly from onboarding step 2 */}
               <div className="space-y-2 sm:space-y-3">
                 <h3 className="text-base sm:text-lg font-semibold text-white">Mijn doel</h3>
-                <div className="w-full bg-[#181F17] text-white px-3 sm:px-4 py-2 sm:py-3 rounded-lg border border-[#3A4D23] text-sm sm:text-base">
+                <div className="w-full bg-[#181F17]/50 text-gray-300 px-3 sm:px-4 py-2 sm:py-3 rounded-lg border border-[#3A4D23] text-sm sm:text-base cursor-not-allowed opacity-75">
                   {(() => {
                     const map: Record<string, string> = {
                       fitness: 'Fitness & Kracht',
@@ -1308,18 +1320,9 @@ export default function MijnProfiel() {
                     return map[key] || profile.main_goal || 'Niet ingesteld';
                   })()}
                 </div>
-              </div>
-              
-              {/* Location - Enhanced Responsive */}
-              <div className="space-y-2 sm:space-y-3">
-                <h3 className="text-base sm:text-lg font-semibold text-white">Locatie</h3>
-                <input
-                  type="text"
-                  value={profile.location || ''}
-                  onChange={(e) => handleFieldChange('location', e.target.value)}
-                  className="w-full bg-[#181F17] text-white px-3 sm:px-4 py-2 sm:py-3 rounded-lg border border-[#3A4D23] focus:outline-none focus:border-[#8BAE5A] focus:ring-1 focus:ring-[#8BAE5A] text-sm sm:text-base"
-                  placeholder="Stad, Land"
-                />
+                <p className="text-[#8BAE5A]/70 text-xs sm:text-sm italic">
+                  Dit is je doel voor de komende 6 maanden (ingesteld bij je intake)
+                </p>
               </div>
               
               {/* Interests - Enhanced Responsive */}

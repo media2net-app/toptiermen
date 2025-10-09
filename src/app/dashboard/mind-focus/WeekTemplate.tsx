@@ -11,11 +11,13 @@ import {
   FireIcon,
   HeartIcon,
   CpuChipIcon,
+  MoonIcon,
+  BoltIcon,
 } from '@heroicons/react/24/outline';
 import type { WeekConfig as BaseWeekConfig } from './weeks.config';
 
 type WeekConfig = BaseWeekConfig & {
-  milestone?: 2 | 4 | 6;
+  milestone?: number;
   badgeTitle?: string;
   tasks?: {
     low?: Partial<DailyTask>[];
@@ -31,14 +33,14 @@ interface DailyTask {
   duration: number;
   completed: boolean;
   category: 'morning' | 'afternoon' | 'evening';
-  type: 'focus' | 'breathing' | 'assessment';
+  type: 'focus' | 'breathing' | 'assessment' | 'stress' | 'recovery' | 'sleep';
 }
 
 export default function WeekTemplate({ config }: { config: WeekConfig }) {
   const { user } = useSupabaseAuth();
   const router = useRouter();
 
-  const [activeTab, setActiveTab] = useState<'overview' | 'tasks' | 'progress'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'tasks'>('overview');
   const [dailyTasks, setDailyTasks] = useState<DailyTask[]>([]);
   const [userIntensity, setUserIntensity] = useState(3);
   const [isUpdatingProgress, setIsUpdatingProgress] = useState(false);
@@ -147,6 +149,12 @@ export default function WeekTemplate({ config }: { config: WeekConfig }) {
         return <CpuChipIcon className="w-5 h-5 text-blue-500" />;
       case 'breathing':
         return <HeartIcon className="w-5 h-5 text-green-500" />;
+      case 'stress':
+        return <BoltIcon className="w-5 h-5 text-orange-500" />;
+      case 'recovery':
+        return <HeartIcon className="w-5 h-5 text-pink-500" />;
+      case 'sleep':
+        return <MoonIcon className="w-5 h-5 text-indigo-500" />;
       case 'assessment':
         return <ChartBarIcon className="w-5 h-5 text-purple-500" />;
       default:
@@ -282,7 +290,6 @@ export default function WeekTemplate({ config }: { config: WeekConfig }) {
           {[
             { id: 'overview', label: 'Overzicht' },
             { id: 'tasks', label: 'Dagelijkse Taken' },
-            { id: 'progress', label: 'Voortgang' },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -298,7 +305,91 @@ export default function WeekTemplate({ config }: { config: WeekConfig }) {
 
         {/* Tab Content */}
         {activeTab === 'overview' && (
-          <div className="space-y-4">
+          <div className="space-y-6">
+            {/* Progress Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="bg-[#232D1A]/80 rounded-xl p-6 border border-[#3A4D23]/40 text-center">
+                <FireIcon className="w-8 h-8 text-orange-500 mx-auto mb-2" />
+                <div className="text-2xl font-bold text-white">{Math.round(progressPercentage)}%</div>
+                <div className="text-[#8BAE5A] text-sm">Dagelijkse voortgang</div>
+              </div>
+              <div className="bg-[#232D1A]/80 rounded-xl p-6 border border-[#3A4D23]/40 text-center">
+                <CheckCircleIcon className="w-8 h-8 text-green-500 mx-auto mb-2" />
+                <div className="text-2xl font-bold text-white">{completedToday}</div>
+                <div className="text-[#8BAE5A] text-sm">Taken voltooid vandaag</div>
+              </div>
+              <div className="bg-[#232D1A]/80 rounded-xl p-6 border border-[#3A4D23]/40 text-center">
+                <ChartBarIcon className="w-8 h-8 text-blue-500 mx-auto mb-2" />
+                <div className="text-2xl font-bold text-white">Week {config.week}</div>
+                <div className="text-[#8BAE5A] text-sm">Actieve week</div>
+              </div>
+            </div>
+
+            {/* Dagelijkse Taken - Compact */}
+            <div className="bg-[#232D1A]/80 rounded-xl p-6 border border-[#3A4D23]/40">
+              <h3 className="text-xl font-bold text-white mb-4">Vandaag's Taken</h3>
+              <div className="space-y-2">
+                {dailyTasks.map((task) => {
+                  // Determine tool link based on task type
+                  const getToolLink = (type: string) => {
+                    switch(type) {
+                      case 'focus': return '/dashboard/mind-focus/focus-training';
+                      case 'breathing': return '/dashboard/mind-focus/stress-release';
+                      case 'stress': return '/dashboard/mind-focus/stress-release';
+                      case 'recovery': return '/dashboard/mind-focus/recovery';
+                      case 'sleep': return '/dashboard/mind-focus/sleep-preparation';
+                      case 'assessment': return null; // No tool for assessment
+                      default: return null;
+                    }
+                  };
+
+                  const toolLink = getToolLink(task.type);
+
+                  return (
+                    <div key={task.id} className={`flex items-center gap-3 p-3 rounded-lg border transition-all ${
+                      task.completed ? 'bg-[#8BAE5A]/10 border-[#8BAE5A]/30' : 'bg-[#1A2A1A] border-[#3A4D23]/40'
+                    }`}>
+                      <button
+                        onClick={() => toggleTask(task.id)}
+                        className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
+                          task.completed ? 'bg-[#8BAE5A] border-[#8BAE5A]' : 'border-[#3A4D23] hover:border-[#8BAE5A]'
+                        }`}
+                      >
+                        {task.completed && <CheckCircleIcon className="w-4 h-4 text-[#1A2A1A]" />}
+                      </button>
+                      
+                      {getTaskIcon(task.type)}
+                      
+                      <div className="flex-1 min-w-0">
+                        <h4 className={`font-medium text-sm ${task.completed ? 'text-[#8BAE5A]' : 'text-white'}`}>
+                          {task.title}
+                        </h4>
+                        <div className="flex items-center gap-2 mt-1">
+                          <div className="flex items-center gap-1 text-[#8BAE5A] text-xs">
+                            <ClockIcon className="w-3 h-3" />
+                            {task.duration}m
+                          </div>
+                          <span className={`px-2 py-0.5 rounded-full text-xs border ${getCategoryColor(task.category)}`}>
+                            {task.category === 'morning' ? 'Ochtend' : task.category === 'afternoon' ? 'Middag' : 'Avond'}
+                          </span>
+                        </div>
+                      </div>
+
+                      {toolLink && (
+                        <button
+                          onClick={() => router.push(toolLink)}
+                          className="px-3 py-1.5 bg-[#8BAE5A] text-[#1A2A1A] rounded-lg text-xs font-medium hover:bg-[#A6C97B] transition-colors flex-shrink-0"
+                        >
+                          Start Tool
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Doelen */}
             <div className="bg-[#232D1A]/80 rounded-xl p-6 border border-[#3A4D23]/40">
               <h3 className="text-xl font-bold text-white mb-4">Doelen</h3>
               <ul className="list-disc pl-5 space-y-1 text-[#8BAE5A]">
@@ -358,28 +449,6 @@ export default function WeekTemplate({ config }: { config: WeekConfig }) {
                 </div>
               );
             })}
-          </div>
-        )}
-
-        {activeTab === 'progress' && (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-[#232D1A]/80 rounded-xl p-6 border border-[#3A4D23]/40 text-center">
-                <FireIcon className="w-8 h-8 text-orange-500 mx-auto mb-2" />
-                <div className="text-2xl font-bold text-white">{Math.round(progressPercentage)}%</div>
-                <div className="text-[#8BAE5A] text-sm">Dagelijkse voortgang</div>
-              </div>
-              <div className="bg-[#232D1A]/80 rounded-xl p-6 border border-[#3A4D23]/40 text-center">
-                <CheckCircleIcon className="w-8 h-8 text-green-500 mx-auto mb-2" />
-                <div className="text-2xl font-bold text-white">{completedToday}</div>
-                <div className="text-[#8BAE5A] text-sm">Taken voltooid vandaag</div>
-              </div>
-              <div className="bg-[#232D1A]/80 rounded-xl p-6 border border-[#3A4D23]/40 text-center">
-                <ChartBarIcon className="w-8 h-8 text-blue-500 mx-auto mb-2" />
-                <div className="text-2xl font-bold text-white">Week {config.week}</div>
-                <div className="text-[#8BAE5A] text-sm">Actieve week</div>
-              </div>
-            </div>
           </div>
         )}
 

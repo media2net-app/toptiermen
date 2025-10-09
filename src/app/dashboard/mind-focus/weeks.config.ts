@@ -12,7 +12,7 @@ export interface WeekConfig {
   title: string;
   subtitle?: string;
   goals: string[];
-  milestone?: 2 | 4 | 6; // months milestones to surface banner
+  milestone?: number; // milestone week number to surface banner and badge
   badgeTitle?: string;
   tasks?: {
     low?: TaskOverride[];
@@ -22,6 +22,24 @@ export interface WeekConfig {
 }
 
 export const weeksConfig: WeekConfig[] = [
+  // Month 1: Foundation (Weeks 1–4)
+  { week: 1, title: 'Focus Training Fundamentals', subtitle: 'Leer de basis van focus training', goals: [
+    'Introductie tot focus training',
+    'Ademhalingsoefeningen - dagelijks 5 min',
+    'Stress assessment bijhouden' ] },
+  { week: 2, title: 'Stress Release Protocols', subtitle: 'Leer stress management technieken', goals: [
+    'Stress release sessies - 2x per week',
+    'Focus training - 4x per week',
+    'Progress tracking opzetten' ] },
+  { week: 3, title: 'Sleep & Recovery', subtitle: 'Optimaliseer je slaap en herstel', goals: [
+    'Sleep preparation - avondroutine opzetten',
+    'Recovery sessies - 2x per week',
+    'Stress management technieken toepassen' ] },
+  { week: 4, title: 'Integration & Habit Building', subtitle: 'Integreer alle technieken', goals: [
+    'Integratie van alle technieken',
+    'Week 1-3 evaluatie uitvoeren',
+    'Plan aanpassingen maken' ], milestone: 1, badgeTitle: 'Foundation Complete' },
+
   // Month 2: Deep Focus Foundations (Weeks 5–8)
   { week: 5, title: 'Context Switching Control', subtitle: 'Minimaliseer afleiding en wisselmomenten', goals: [
     'Maak een afleidingen-audit en verwijder 3 grootste prikkels',

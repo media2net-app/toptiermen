@@ -94,6 +94,7 @@ export default function MijnTrainingen() {
   const [showWeekCompletionModal, setShowWeekCompletionModal] = useState(false);
   const [weekCompletionData, setWeekCompletionData] = useState<any>(null);
   const weekCompletionRef = useRef<HTMLDivElement | null>(null);
+  const [isStartingNewWeek, setIsStartingNewWeek] = useState(false);
 
   // Debug function to log current state
   const debugWeekState = () => {
@@ -209,11 +210,17 @@ export default function MijnTrainingen() {
     try {
       setLoading(true);
       console.log('🔄 Loading training data for user:', user.id);
+      console.log('📊 Current completedWeeks before load:', completedWeeks.length);
       
       const response = await fetch(`/api/user-training-schema?userId=${user.id}`);
       const data = await response.json();
       
       console.log('📊 Training data received:', data);
+      console.log('📊 Days from API:', data.days?.map((d: any) => ({ 
+        day: d.day_number, 
+        name: d.name, 
+        completed: d.isCompleted 
+      })));
       setTrainingData(data);
       
       if (data.hasActiveSchema && data.progress) {
@@ -329,9 +336,21 @@ export default function MijnTrainingen() {
         console.log('⚠️ Could not sync DB progress with completed weeks:', syncErr);
       }
 
-      // Check if all days are completed and handle week progression (only if modal is not open)
-      if (data.hasActiveSchema && data.days && !showWeekCompletionModal) {
+      // Check if all days are completed and handle week progression (only if modal is not open and not starting new week)
+      if (data.hasActiveSchema && data.days && !showWeekCompletionModal && !isStartingNewWeek) {
+        console.log('📊 Checking week completion with:', {
+          daysCount: data.days.length,
+          completedDaysCount: data.days.filter((d: any) => d.isCompleted).length,
+          effectiveCompletedWeeksLength: (effectiveCompletedWeeks || completedWeeks).length
+        });
         checkWeekCompletion(data.days, effectiveCompletedWeeks || completedWeeks);
+      } else {
+        console.log('⏸️ Skipping week completion check:', {
+          hasActiveSchema: data.hasActiveSchema,
+          hasDays: !!data.days,
+          modalOpen: showWeekCompletionModal,
+          isStartingNewWeek: isStartingNewWeek
+        });
       }
     } catch (error) {
       console.error('❌ Error loading training data:', error);
@@ -343,6 +362,12 @@ export default function MijnTrainingen() {
 
   // Function to check if all days are completed and handle week progression
   const checkWeekCompletion = async (days: any[], overrideCompletedWeeks?: any[]) => {
+    console.log('🔍 checkWeekCompletion called with:', {
+      daysCount: days.length,
+      overrideCompletedWeeksLength: overrideCompletedWeeks?.length,
+      modalOpen: showWeekCompletionModal
+    });
+    
     // Don't check if modal is already open
     if (showWeekCompletionModal) {
       console.log('⏸️ Week completion modal already open, skipping check');
@@ -350,6 +375,7 @@ export default function MijnTrainingen() {
     }
     
     const allDaysCompleted = days.every(day => day.isCompleted);
+    console.log('📊 All days completed?', allDaysCompleted);
     
     if (allDaysCompleted) {
       // Ensure any running workout session is stopped to avoid dangling timers
@@ -425,6 +451,18 @@ export default function MijnTrainingen() {
     
     try {
       console.log('🔄 Starting new week...');
+      console.log('📊 Current state:', {
+        schemaId: trainingData.schema.id,
+        schemaNummer: trainingData.schema.schema_nummer,
+        completedWeeksLength: completedWeeks.length,
+        completedWeeks: completedWeeks,
+        currentWeek: currentWeek,
+        daysCount: days?.length
+      });
+      
+      // Set flag to prevent checkWeekCompletion from running during reload
+      setIsStartingNewWeek(true);
+      
       // Also make sure any lingering workout session is stopped when starting a new week
       try { stopWorkout(); } catch {}
       
@@ -435,6 +473,8 @@ export default function MijnTrainingen() {
         const maxWeekNumber = Math.max(...completedWeeks.map((week: any) => week.week || week.weekNumber || 0));
         currentWeekNumber = maxWeekNumber + 1;
       }
+      console.log('📊 Calculated currentWeekNumber:', currentWeekNumber);
+      
       const weekCompletionData = {
         week: currentWeekNumber,
         completedAt: new Date().toISOString(),
@@ -444,6 +484,7 @@ export default function MijnTrainingen() {
           completedAt: day.completedAt
         }))
       };
+      console.log('📊 Week completion data to save:', weekCompletionData);
       
       // Record modal close and save week completion to database (with fallback for missing tables)
       try {
@@ -508,23 +549,27 @@ export default function MijnTrainingen() {
         console.log('⚠️ Could not log training day to admin endpoint:', logErr);
       }
       
-      // Add completed week to the list
-      setCompletedWeeks(prev => {
-        // Dedupe: remove any existing same week number, then add
-        const base = (prev || []).filter((w: any) => (w.week || w.weekNumber) !== weekCompletionData.week);
-        const newCompletedWeeks = [...base, weekCompletionData].sort((a: any, b: any) => a.week - b.week);
-        
-        // Save to localStorage as backup
-        try {
-          if (trainingData?.schema?.id) {
-            localStorage.setItem(`completedWeeks_${user.id}_${trainingData.schema.id}`, JSON.stringify(newCompletedWeeks));
-            console.log('✅ Week completions saved to localStorage');
+      // Add completed week to the list - IMPORTANT: Do this BEFORE reloading data
+      const newCompletedWeeks = await new Promise<any[]>((resolve) => {
+        setCompletedWeeks(prev => {
+          // Dedupe: remove any existing same week number, then add
+          const base = (prev || []).filter((w: any) => (w.week || w.weekNumber) !== weekCompletionData.week);
+          const updated = [...base, weekCompletionData].sort((a: any, b: any) => a.week - b.week);
+          
+          // Save to localStorage as backup
+          try {
+            if (trainingData?.schema?.id) {
+              localStorage.setItem(`completedWeeks_${user.id}_${trainingData.schema.id}`, JSON.stringify(updated));
+              console.log('✅ Week completions saved to localStorage');
+            }
+          } catch (storageError) {
+            console.log('⚠️ Could not save to localStorage:', storageError);
           }
-        } catch (storageError) {
-          console.log('⚠️ Could not save to localStorage:', storageError);
-        }
-        
-        return newCompletedWeeks;
+          
+          console.log('📊 Updated completedWeeks:', updated.map(w => w.week));
+          resolve(updated);
+          return updated;
+        });
       });
       
       // Update current week first
@@ -589,14 +634,28 @@ export default function MijnTrainingen() {
       
       if (response.ok) {
         console.log('✅ Days reset for new week');
+        console.log('📊 State before reload:', {
+          currentWeek: currentWeek,
+          completedWeeksLength: completedWeeks.length,
+          nextWeekNumber: weekCompletionData.week + 1
+        });
         
         // Reload data after a short delay to ensure API call is processed
-        setTimeout(() => {
-        loadTrainingData();
+        setTimeout(async () => {
+          console.log('🔄 Reloading training data after week reset...');
+          await loadTrainingData();
+          
+          // Reset the flag after data has been reloaded and a bit more time for UI to settle
+          setTimeout(() => {
+            console.log('✅ Resetting isStartingNewWeek flag');
+            setIsStartingNewWeek(false);
+          }, 500);
         }, 500);
         
         toast.success(`Week ${weekCompletionData.week} voltooid! Nieuwe week gestart.`);
       } else {
+        // Reset flag on error
+        setIsStartingNewWeek(false);
         const errorData = await response.json();
         console.error('❌ Failed to reset days for new week:', {
           status: response.status,
@@ -608,6 +667,8 @@ export default function MijnTrainingen() {
     } catch (error) {
       console.error('❌ Error starting new week:', error);
       toast.error('Fout bij het starten van nieuwe week');
+      // Reset flag on error
+      setIsStartingNewWeek(false);
     }
   };
 

@@ -213,6 +213,14 @@ export default function Inbox() {
       
       if (response.ok) {
         setChatMessages(data.messages);
+        
+        // Mark all unread messages in this conversation as read
+        await markMessagesAsRead(conversationId);
+        
+        // Update local unread count to 0 for this conversation
+        setConversations(prev => prev.map(conv => 
+          conv.id === conversationId ? { ...conv, unreadCount: 0 } : conv
+        ));
       } else {
         console.error('Error fetching messages:', data.error);
         // Fallback to empty messages if API fails
@@ -222,6 +230,22 @@ export default function Inbox() {
       console.error('Error fetching messages:', error);
       // Fallback to empty messages if API fails
       setChatMessages([]);
+    }
+  };
+
+  const markMessagesAsRead = async (conversationId: string) => {
+    try {
+      const response = await fetch('/api/chat/mark-read', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ conversationId, userId: user?.id })
+      });
+      
+      if (!response.ok) {
+        console.error('Error marking messages as read');
+      }
+    } catch (error) {
+      console.error('Error marking messages as read:', error);
     }
   };
 
@@ -444,37 +468,55 @@ export default function Inbox() {
                       </div>
                     ) : availableUsers.length === 0 ? (
                       <div className="text-center py-8">
-                        <p className="text-[#8BAE5A] text-lg">Geen leden gevonden</p>
-                        <p className="text-gray-400 text-sm mt-2">Er zijn momenteel geen andere leden beschikbaar</p>
+                        <p className="text-[#8BAE5A] text-lg mb-2">Geen leden gevonden</p>
+                        <p className="text-gray-400 text-sm">Er zijn momenteel geen andere leden beschikbaar</p>
+                        <button
+                          onClick={() => {
+                            console.log('🔄 Refreshing available users...');
+                            fetchAvailableUsers();
+                          }}
+                          className="mt-4 px-4 py-2 bg-[#3A4D23] text-[#8BAE5A] rounded-lg text-sm hover:bg-[#4A5D2E] transition-colors"
+                        >
+                          🔄 Opnieuw laden
+                        </button>
                       </div>
                     ) : (
-                      availableUsers.map((user) => (
-                        <div
-                          key={user.id}
-                          onClick={() => startNewConversation(user.id)}
-                          className={`flex items-center gap-3 p-3 rounded-lg hover:bg-[#3A4D23]/40 cursor-pointer transition-colors ${
-                            isCreatingConversation ? 'opacity-50 cursor-not-allowed' : ''
-                          }`}
-                        >
-                          <img
-                            src={user.avatar_url || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'}
-                            alt={user.display_name || user.full_name}
-                            className="w-10 h-10 rounded-full"
-                          />
-                          <div className="flex-1">
-                            <h4 className="font-semibold text-white">
-                              {user.display_name || user.full_name || 'Onbekende gebruiker'}
-                            </h4>
-                            {isCreatingConversation && (
-                              <div className="flex items-center gap-2 mt-1">
-                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#8BAE5A]"></div>
-                                <span className="text-sm text-[#8BAE5A]">Gesprek starten...</span>
-                              </div>
+                      <>
+                        <p className="text-sm text-[#8BAE5A] mb-3 px-1">Klik op een naam om een gesprek te starten</p>
+                        {availableUsers.map((user) => (
+                          <div
+                            key={user.id}
+                            onClick={() => !isCreatingConversation && startNewConversation(user.id)}
+                            className={`flex items-center gap-3 p-3 rounded-lg border border-transparent hover:border-[#8BAE5A] hover:bg-[#3A4D23]/40 cursor-pointer transition-all ${
+                              isCreatingConversation ? 'opacity-50 cursor-not-allowed' : ''
+                            }`}
+                          >
+                            <img
+                              src={user.avatar_url || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'}
+                              alt={user.display_name || user.full_name}
+                              className="w-12 h-12 rounded-full border-2 border-[#3A4D23]"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <h4 className="font-semibold text-white truncate">
+                                {user.display_name || user.full_name || 'Onbekende gebruiker'}
+                              </h4>
+                              {isCreatingConversation ? (
+                                <div className="flex items-center gap-2 mt-1">
+                                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#8BAE5A]"></div>
+                                  <span className="text-sm text-[#8BAE5A]">Gesprek starten...</span>
+                                </div>
+                              ) : (
+                                <p className="text-[#8BAE5A] text-sm">{user.rank || 'Member'}</p>
+                              )}
+                            </div>
+                            {!isCreatingConversation && (
+                              <svg className="w-5 h-5 text-[#8BAE5A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                              </svg>
                             )}
-                            <p className="text-[#8BAE5A] text-sm">{user.rank || 'Member'}</p>
                           </div>
-                        </div>
-                      ))
+                        ))}
+                      </>
                     )}
                   </div>
                 </div>

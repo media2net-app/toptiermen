@@ -101,6 +101,8 @@ export default function NutritionPlanDetailPage() {
   // Compact reset modal for locked plan
   const [showResetModal, setShowResetModal] = useState<boolean>(false);
   const resetModalRef = useRef<HTMLDivElement | null>(null);
+  // Check if this plan is the active/locked plan
+  const [isPlanLocked, setIsPlanLocked] = useState<boolean>(false);
   // Scaling factor derived from weight (baseline 100kg)
   // TABEL FORMULE: clamp(0.5, 1.5, gewicht/100)
   const scalingFactor = useMemo(() => {
@@ -281,6 +283,34 @@ export default function NutritionPlanDetailPage() {
     }
   };
 
+  // Check if this plan is the active/locked plan
+  useEffect(() => {
+    if (!user?.id || !planId) return;
+    
+    const checkActivePlan = async () => {
+      try {
+        const res = await fetch(`/api/nutrition-plan-active?userId=${user.id}`, { cache: 'no-cache' });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data?.success && data?.hasActivePlan && data?.activePlanId) {
+          // Check if current plan matches active plan (by ID or plan_id)
+          const currentPlan = plans.find(p => p.plan_id === planId || String(p.id) === String(planId));
+          const isThisPlanActive = data.activePlanId === planId || 
+                                   data.activePlanId === String(currentPlan?.id) ||
+                                   data.activePlanId === currentPlan?.plan_id;
+          setIsPlanLocked(isThisPlanActive);
+        } else {
+          setIsPlanLocked(false);
+        }
+      } catch (e) {
+        console.warn('Failed to check if plan is locked', e);
+        setIsPlanLocked(false);
+      }
+    };
+    
+    checkActivePlan();
+  }, [user?.id, planId, plans]);
+
   // Find the selected plan based on planId (supports friendly slugs like 'carnivoor-onderhoud')
   useEffect(() => {
     if (plans.length > 0 && planId) {
@@ -377,7 +407,7 @@ export default function NutritionPlanDetailPage() {
     // 🔧 V3 LOGICA: Helper functies voor clean berekening
     const gramsPerUnit = (ing: any) => {
       const u = String(ing?.unit || '').toLowerCase();
-      if (u === 'g') return 1;
+      if (u === 'g' || u === 'gram') return 100; // FIX: "g" means grams, not 1 gram per unit
       if (u === 'per_100g') return 100;
       if (u === 'ml' || u === 'per_ml') return 1;
       if (['per_tbsp','tbsp','eetlepel','el','per_eetlepel'].includes(u)) return 15;
@@ -951,29 +981,33 @@ export default function NutritionPlanDetailPage() {
       {/* Header */}
       <div className="bg-[#181F17] border-b border-[#2A2A2A] p-6">
         <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row items-start md:items-center gap-3 md:gap-4 mb-4">
-            {/* Locked banner first on mobile, right side on desktop */}
-            <div className="order-1 md:order-2 w-full md:w-auto md:ml-auto">
-              <div className="flex items-center justify-between bg-[#111511] border border-[#2F3E22] rounded-lg p-3 text-sm">
-                <div className="pr-3">
-                  <div className="text-white font-semibold">Je plan is vergrendeld</div>
-                  <div className="text-gray-300">Volg je plan minimaal 8 weken. Wisselen? Reset hieronder.</div>
-                </div>
-                <button onClick={handleResetClick} className="px-3 py-1.5 bg-red-600/20 border border-red-500/30 text-red-400 rounded hover:bg-red-600/30">Reset plan</button>
-              </div>
-            </div>
-
-            {/* Title row (second on mobile) */}
-            <div className="order-2 md:order-1 flex items-center gap-3 md:gap-4 w-full">
-              <button
-                onClick={() => router.push('/dashboard/voedingsplannen-v2')}
-                className="p-2 hover:bg-[#2A2A2A] rounded-lg transition-colors"
-              >
-                <ArrowLeftIcon className="h-5 w-5" />
-              </button>
-              <RocketLaunchIcon className="h-8 w-8 text-[#8BAE5A]" />
+          <div className="flex flex-col md:flex-row items-start md:items-stretch gap-3 md:gap-4 mb-4">
+            {/* Title row - 50% width on desktop */}
+            <div className="order-2 md:order-1 flex items-center gap-3 md:gap-4 w-full md:w-1/2">
+              {!isPlanLocked && (
+                <button
+                  onClick={() => router.push('/dashboard/voedingsplannen-v2')}
+                  className="px-4 py-2 bg-[#232D1A] hover:bg-[#2A2A2A] rounded-lg transition-colors text-sm text-gray-300 hover:text-white whitespace-nowrap"
+                >
+                  ← Terug naar overzicht
+                </button>
+              )}
+              <RocketLaunchIcon className="h-8 w-8 text-[#8BAE5A] flex-shrink-0" />
               <h1 className="text-2xl font-bold whitespace-nowrap overflow-hidden text-ellipsis md:whitespace-normal md:overflow-visible">{selectedPlan?.name ?? 'Voedingsplan'}</h1>
             </div>
+
+            {/* Locked banner - 50% width on desktop */}
+            {isPlanLocked && (
+              <div className="order-1 md:order-2 w-full md:w-1/2">
+                <div className="flex items-center justify-between bg-[#111511] border border-[#2F3E22] rounded-lg p-3 text-sm h-full">
+                  <div className="pr-3">
+                    <div className="text-white font-semibold">Je plan is vergrendeld</div>
+                    <div className="text-gray-300">Volg je plan minimaal 4 weken. Wisselen? Reset hieronder.</div>
+                  </div>
+                  <button onClick={handleResetClick} className="px-3 py-1.5 bg-red-600/20 border border-red-500/30 text-red-400 rounded hover:bg-red-600/30 whitespace-nowrap">Reset plan</button>
+                </div>
+              </div>
+            )}
           </div>
           <p className="text-gray-400">{selectedPlan?.description ?? ''}</p>
         </div>
@@ -982,63 +1016,74 @@ export default function NutritionPlanDetailPage() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto p-6">
         {/* User Profile Section */}
-        <div className="bg-[#181F17] rounded-xl p-6 mb-6">
-          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-            <UserIcon className="h-5 w-5 text-[#8BAE5A]" />
+        <div className="bg-[#181F17] rounded-xl p-3 sm:p-4 md:p-6 mb-4 sm:mb-6">
+          <h2 className="text-base sm:text-lg md:text-xl font-bold mb-3 sm:mb-4 flex items-center gap-2">
+            <UserIcon className="h-4 w-4 sm:h-5 sm:w-5 text-[#8BAE5A]" />
             Jouw Profiel
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-[#232D1A] rounded-lg p-4">
-              <h3 className="text-sm text-gray-400 mb-1">Gewicht</h3>
-              <p className="text-lg font-semibold">{userProfile.weight} kg</p>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-2 sm:gap-3 md:gap-4">
+            <div className="bg-[#232D1A] rounded-lg p-2 sm:p-3 md:p-4">
+              <h3 className="text-xs sm:text-sm text-gray-400 mb-0.5 sm:mb-1">Gewicht</h3>
+              <p className="text-sm sm:text-base md:text-lg font-semibold">{userProfile.weight} kg</p>
             </div>
-            <div className="bg-[#232D1A] rounded-lg p-4">
-              <h3 className="text-sm text-gray-400 mb-1">Activiteitsniveau</h3>
-              <p className="text-lg font-semibold">
-                {userProfile.activity_level === 'sedentary' ? 'Zittend (Licht actief)' :
-                 userProfile.activity_level === 'moderate' ? 'Staand (Matig actief)' :
-                 userProfile.activity_level === 'very_active' ? 'Lopend (Zeer actief)' :
-                 'Staand (Matig actief)'}
+            <div className="bg-[#232D1A] rounded-lg p-2 sm:p-3 md:p-4">
+              <h3 className="text-xs sm:text-sm text-gray-400 mb-0.5 sm:mb-1">Activiteitsniveau</h3>
+              <p className="text-sm sm:text-base md:text-lg font-semibold">
+                <span className="sm:hidden">
+                  {userProfile.activity_level === 'sedentary' ? 'Zittend' :
+                   userProfile.activity_level === 'moderate' ? 'Staand' :
+                   userProfile.activity_level === 'very_active' ? 'Lopend' :
+                   'Staand'}
+                </span>
+                <span className="hidden sm:inline">
+                  {userProfile.activity_level === 'sedentary' ? 'Zittend (Licht actief)' :
+                   userProfile.activity_level === 'moderate' ? 'Staand (Matig actief)' :
+                   userProfile.activity_level === 'very_active' ? 'Lopend (Zeer actief)' :
+                   'Staand (Matig actief)'}
+                </span>
               </p>
             </div>
-            <div className="bg-[#232D1A] rounded-lg p-4">
-              <h3 className="text-sm text-gray-400 mb-1">Fitness Doel</h3>
-              <p className="text-lg font-semibold">
-                {userProfile.fitness_goal === 'droogtrainen' ? 'Droogtrainen (-500 kcal)' : 
-                 userProfile.fitness_goal === 'spiermassa' ? 'Spiermassa (+500 kcal)' : 'Onderhoud'}
+            <div className="bg-[#232D1A] rounded-lg p-2 sm:p-3 md:p-4 col-span-2 md:col-span-1">
+              <h3 className="text-xs sm:text-sm text-gray-400 mb-0.5 sm:mb-1">Fitness Doel</h3>
+              <p className="text-sm sm:text-base md:text-lg font-semibold">
+                <span className="sm:hidden">
+                  {userProfile.fitness_goal === 'droogtrainen' ? 'Droogtrainen' : 
+                   userProfile.fitness_goal === 'spiermassa' ? 'Spiermassa' : 'Onderhoud'}
+                </span>
+                <span className="hidden sm:inline">
+                  {userProfile.fitness_goal === 'droogtrainen' ? 'Droogtrainen (-500 kcal)' : 
+                   userProfile.fitness_goal === 'spiermassa' ? 'Spiermassa (+500 kcal)' : 'Onderhoud'}
+                </span>
               </p>
             </div>
           </div>
-          <button className="mt-4 px-4 py-2 bg-[#8BAE5A] text-[#181F17] rounded-lg hover:bg-[#B6C948] transition-colors">
-            Bewerk Profiel
-          </button>
         </div>
 
         {/* Plan Details */}
-        <div className="bg-[#181F17] rounded-xl p-6 mb-6">
-          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-            <ChartBarIcon className="h-5 w-5 text-[#8BAE5A]" />
+        <div className="bg-[#181F17] rounded-xl p-3 sm:p-4 md:p-6 mb-4 sm:mb-6">
+          <h2 className="text-base sm:text-lg md:text-xl font-bold mb-3 sm:mb-4 flex items-center gap-2">
+            <ChartBarIcon className="h-4 w-4 sm:h-5 sm:w-5 text-[#8BAE5A]" />
             Jouw Calorieën & Macro's
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-[#232D1A] rounded-lg p-4">
-              <h3 className="text-sm text-gray-400 mb-1">Jouw Calorieën</h3>
-              <p className="text-2xl font-bold text-[#8BAE5A]">{personalizedMacros.calories} kcal</p>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
+            <div className="bg-[#232D1A] rounded-lg p-2 sm:p-3 md:p-4">
+              <h3 className="text-xs sm:text-sm text-gray-400 mb-0.5 sm:mb-1">Jouw Calorieën</h3>
+              <p className="text-base sm:text-lg md:text-2xl font-bold text-[#8BAE5A]">{Math.round(personalizedMacros.calories)} kcal</p>
             </div>
-            <div className="bg-[#232D1A] rounded-lg p-4">
-              <h3 className="text-sm text-gray-400 mb-1">Eiwit</h3>
-              <p className="text-lg font-semibold">{personalizedMacros.protein}g</p>
-              <p className="text-xs text-[#8BAE5A]">{macroPercentages.protein}% van calorieën</p>
+            <div className="bg-[#232D1A] rounded-lg p-2 sm:p-3 md:p-4">
+              <h3 className="text-xs sm:text-sm text-gray-400 mb-0.5 sm:mb-1">Eiwit</h3>
+              <p className="text-sm sm:text-base md:text-lg font-semibold">{Math.round(personalizedMacros.protein)}g</p>
+              <p className="text-[10px] sm:text-xs text-[#8BAE5A]">{macroPercentages.protein}% van calorieën</p>
             </div>
-            <div className="bg-[#232D1A] rounded-lg p-4">
-              <h3 className="text-sm text-gray-400 mb-1">Koolhydraten</h3>
-              <p className="text-lg font-semibold">{personalizedMacros.carbs}g</p>
-              <p className="text-xs text-[#8BAE5A]">{macroPercentages.carbs}% van calorieën</p>
+            <div className="bg-[#232D1A] rounded-lg p-2 sm:p-3 md:p-4">
+              <h3 className="text-xs sm:text-sm text-gray-400 mb-0.5 sm:mb-1">Koolhydraten</h3>
+              <p className="text-sm sm:text-base md:text-lg font-semibold">{Math.round(personalizedMacros.carbs)}g</p>
+              <p className="text-[10px] sm:text-xs text-[#8BAE5A]">{macroPercentages.carbs}% van calorieën</p>
             </div>
-            <div className="bg-[#232D1A] rounded-lg p-4">
-              <h3 className="text-sm text-gray-400 mb-1">Vet</h3>
-              <p className="text-lg font-semibold">{personalizedMacros.fat}g</p>
-              <p className="text-xs text-[#8BAE5A]">{macroPercentages.fat}% van calorieën</p>
+            <div className="bg-[#232D1A] rounded-lg p-2 sm:p-3 md:p-4">
+              <h3 className="text-xs sm:text-sm text-gray-400 mb-0.5 sm:mb-1">Vet</h3>
+              <p className="text-sm sm:text-base md:text-lg font-semibold">{Math.round(personalizedMacros.fat)}g</p>
+              <p className="text-[10px] sm:text-xs text-[#8BAE5A]">{macroPercentages.fat}% van calorieën</p>
             </div>
           </div>
         </div>
@@ -1067,113 +1112,113 @@ export default function NutritionPlanDetailPage() {
         </div>
 
         {/* Daily Totals with Colored Progress Bars */}
-        <div className="bg-[#181F17] rounded-xl p-6 mb-6">
+        <div className="bg-[#181F17] rounded-xl p-3 sm:p-4 md:p-6 mb-4 sm:mb-6">
           {/* Safe Range Information */}
-          <div className="bg-[#1A2A1A] border border-[#3A4D23] rounded-lg p-4 mb-6">
-            <div className="flex items-start space-x-3">
+          <div className="bg-[#1A2A1A] border border-[#3A4D23] rounded-lg p-2 sm:p-3 md:p-4 mb-3 sm:mb-4 md:mb-6">
+            <div className="flex items-start gap-2 sm:gap-3">
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-[#8BAE5A] rounded-full flex items-center justify-center">
-                  <span className="text-[#181F17] text-sm font-bold">ℹ️</span>
+                <div className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 bg-[#8BAE5A] rounded-full flex items-center justify-center">
+                  <span className="text-[#181F17] text-xs sm:text-sm font-bold">ℹ️</span>
                 </div>
               </div>
-              <div className="flex-1">
-                <h5 className="text-[#B6C948] font-semibold text-sm mb-2">Veilige Range</h5>
-                <p className="text-gray-300 text-sm leading-relaxed">
-                  We begrijpen dat het lastig is om exact alle waardes op 100% te krijgen. 
-                  <span className="text-[#8BAE5A] font-medium"> Zolang je binnen de veilige range van -100kcal en +100kcal zit, zit je goed.</span> 
-                  Je hoeft niet naar perfectie te streven - consistentie is belangrijker dan perfectie.
+              <div className="flex-1 min-w-0">
+                <h5 className="text-[#B6C948] font-semibold text-xs sm:text-sm mb-1 sm:mb-2">Veilige Range</h5>
+                <p className="text-gray-300 text-xs sm:text-sm leading-relaxed">
+                  <span className="hidden sm:inline">We begrijpen dat het lastig is om exact alle waardes op 100% te krijgen. </span>
+                  <span className="text-[#8BAE5A] font-medium">Zolang je binnen -100 en +100 kcal zit, zit je goed.</span>
+                  <span className="hidden md:inline"> Je hoeft niet naar perfectie te streven - consistentie is belangrijker.</span>
                 </p>
               </div>
             </div>
           </div>
           
-          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-            <FireIcon className="h-5 w-5 text-[#8BAE5A]" />
-            Dagelijkse Totalen - {selectedDay.charAt(0).toUpperCase() + selectedDay.slice(1)}
+          <h2 className="text-base sm:text-lg md:text-xl font-bold mb-3 sm:mb-4 flex items-center gap-2">
+            <FireIcon className="h-4 w-4 sm:h-5 sm:w-5 text-[#8BAE5A]" />
+            <span className="truncate">Dagtotalen - {selectedDay.charAt(0).toUpperCase() + selectedDay.slice(1)}</span>
           </h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
             {/* Calories */}
-            <div className="bg-[#232D1A] rounded-lg p-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-white font-semibold">Calorieën</span>
-                <span className={`text-sm ${caloriesProgress.textColor}`}>{caloriesProgress.percentage.toFixed(1)}%</span>
+            <div className="bg-[#232D1A] rounded-lg p-2 sm:p-3 md:p-4">
+              <div className="flex items-center justify-between mb-1 sm:mb-2">
+                <span className="text-white font-semibold text-xs sm:text-sm md:text-base">Calorieën</span>
+                <span className={`text-xs sm:text-sm ${caloriesProgress.textColor}`}>{caloriesProgress.percentage.toFixed(0)}%</span>
               </div>
-              <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
+              <div className="w-full bg-gray-700 rounded-full h-1.5 sm:h-2 mb-1 sm:mb-2">
                 <div 
-                  className={`h-2 rounded-full ${caloriesProgress.color}`}
+                  className={`h-1.5 sm:h-2 rounded-full ${caloriesProgress.color}`}
                   style={{ width: `${caloriesProgress.percentage}%` }}
                 ></div>
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-400">{dayTotals.calories.toFixed(1)} kcal</span>
-                <span className="text-white">{personalizedMacros.calories.toFixed(1)} kcal</span>
+              <div className="flex justify-between text-[10px] sm:text-xs md:text-sm">
+                <span className="text-gray-400">{Math.round(dayTotals.calories)} kcal</span>
+                <span className="text-white">{Math.round(personalizedMacros.calories)} kcal</span>
             </div>
-              <div className={`text-xs mt-1 ${caloriesProgress.textColor}`}>
-                {caloriesProgress.difference > 0 ? '+' : ''}{caloriesProgress.difference.toFixed(1)} kcal
+              <div className={`text-[10px] sm:text-xs mt-0.5 sm:mt-1 ${caloriesProgress.textColor}`}>
+                {caloriesProgress.difference > 0 ? '+' : ''}{Math.round(caloriesProgress.difference)} kcal
               </div>
             </div>
 
             {/* Protein */}
-            <div className="bg-[#232D1A] rounded-lg p-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-white font-semibold">Eiwit</span>
-                <span className={`text-sm ${proteinProgress.textColor}`}>{proteinProgress.percentage.toFixed(1)}%</span>
+            <div className="bg-[#232D1A] rounded-lg p-2 sm:p-3 md:p-4">
+              <div className="flex items-center justify-between mb-1 sm:mb-2">
+                <span className="text-white font-semibold text-xs sm:text-sm md:text-base">Eiwit</span>
+                <span className={`text-xs sm:text-sm ${proteinProgress.textColor}`}>{proteinProgress.percentage.toFixed(0)}%</span>
               </div>
-              <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
+              <div className="w-full bg-gray-700 rounded-full h-1.5 sm:h-2 mb-1 sm:mb-2">
                 <div 
-                  className={`h-2 rounded-full ${proteinProgress.color}`}
+                  className={`h-1.5 sm:h-2 rounded-full ${proteinProgress.color}`}
                   style={{ width: `${proteinProgress.percentage}%` }}
                 ></div>
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-400">{dayTotals.protein.toFixed(1)}g</span>
-                <span className="text-white">{personalizedMacros.protein.toFixed(1)}g</span>
+              <div className="flex justify-between text-[10px] sm:text-xs md:text-sm">
+                <span className="text-gray-400">{dayTotals.protein.toFixed(0)}g</span>
+                <span className="text-white">{personalizedMacros.protein.toFixed(0)}g</span>
             </div>
-              <div className={`text-xs mt-1 ${proteinProgress.textColor}`}>
-                {proteinProgress.difference > 0 ? '+' : ''}{proteinProgress.difference.toFixed(1)}g
+              <div className={`text-[10px] sm:text-xs mt-0.5 sm:mt-1 ${proteinProgress.textColor}`}>
+                {proteinProgress.difference > 0 ? '+' : ''}{proteinProgress.difference.toFixed(0)}g
               </div>
             </div>
 
             {/* Carbs */}
-            <div className="bg-[#232D1A] rounded-lg p-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-white font-semibold">Koolhydraten</span>
-                <span className={`text-sm ${carbsProgress.textColor}`}>{carbsProgress.percentage.toFixed(1)}%</span>
+            <div className="bg-[#232D1A] rounded-lg p-2 sm:p-3 md:p-4">
+              <div className="flex items-center justify-between mb-1 sm:mb-2">
+                <span className="text-white font-semibold text-xs sm:text-sm md:text-base">Koolhydr.</span>
+                <span className={`text-xs sm:text-sm ${carbsProgress.textColor}`}>{carbsProgress.percentage.toFixed(0)}%</span>
               </div>
-              <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
+              <div className="w-full bg-gray-700 rounded-full h-1.5 sm:h-2 mb-1 sm:mb-2">
                 <div 
-                  className={`h-2 rounded-full ${carbsProgress.color}`}
+                  className={`h-1.5 sm:h-2 rounded-full ${carbsProgress.color}`}
                   style={{ width: `${carbsProgress.percentage}%` }}
                 ></div>
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-400">{dayTotals.carbs.toFixed(1)}g</span>
-                <span className="text-white">{personalizedMacros.carbs.toFixed(1)}g</span>
+              <div className="flex justify-between text-[10px] sm:text-xs md:text-sm">
+                <span className="text-gray-400">{dayTotals.carbs.toFixed(0)}g</span>
+                <span className="text-white">{personalizedMacros.carbs.toFixed(0)}g</span>
             </div>
-              <div className={`text-xs mt-1 ${carbsProgress.textColor}`}>
-                {carbsProgress.difference > 0 ? '+' : ''}{carbsProgress.difference.toFixed(1)}g
+              <div className={`text-[10px] sm:text-xs mt-0.5 sm:mt-1 ${carbsProgress.textColor}`}>
+                {carbsProgress.difference > 0 ? '+' : ''}{carbsProgress.difference.toFixed(0)}g
               </div>
             </div>
 
             {/* Fat */}
-            <div className="bg-[#232D1A] rounded-lg p-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-white font-semibold">Vet</span>
-                <span className={`text-sm ${fatProgress.textColor}`}>{fatProgress.percentage.toFixed(1)}%</span>
+            <div className="bg-[#232D1A] rounded-lg p-2 sm:p-3 md:p-4">
+              <div className="flex items-center justify-between mb-1 sm:mb-2">
+                <span className="text-white font-semibold text-xs sm:text-sm md:text-base">Vet</span>
+                <span className={`text-xs sm:text-sm ${fatProgress.textColor}`}>{fatProgress.percentage.toFixed(0)}%</span>
               </div>
-              <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
+              <div className="w-full bg-gray-700 rounded-full h-1.5 sm:h-2 mb-1 sm:mb-2">
                 <div 
-                  className={`h-2 rounded-full ${fatProgress.color}`}
+                  className={`h-1.5 sm:h-2 rounded-full ${fatProgress.color}`}
                   style={{ width: `${fatProgress.percentage}%` }}
                 ></div>
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-400">{dayTotals.fat.toFixed(1)}g</span>
-                <span className="text-white">{personalizedMacros.fat.toFixed(1)}g</span>
+              <div className="flex justify-between text-[10px] sm:text-xs md:text-sm">
+                <span className="text-gray-400">{dayTotals.fat.toFixed(0)}g</span>
+                <span className="text-white">{personalizedMacros.fat.toFixed(0)}g</span>
               </div>
-              <div className={`text-xs mt-1 ${fatProgress.textColor}`}>
-                {fatProgress.difference > 0 ? '+' : ''}{fatProgress.difference.toFixed(1)}g
+              <div className={`text-[10px] sm:text-xs mt-0.5 sm:mt-1 ${fatProgress.textColor}`}>
+                {fatProgress.difference > 0 ? '+' : ''}{fatProgress.difference.toFixed(0)}g
               </div>
             </div>
           </div>
@@ -1274,8 +1319,36 @@ export default function NutritionPlanDetailPage() {
                 return (
                   <div key={mealType} className="bg-[#232D1A] rounded-lg border border-[#3A4D23] overflow-hidden">
                     {/* Meal Header with Totals */}
-                    <div className="bg-[#2A3A1A] px-6 py-4 border-b border-[#3A4D23]">
-                      <div className="flex items-center justify-between">
+                    <div className="bg-[#2A3A1A] px-3 sm:px-4 md:px-6 py-2 sm:py-3 md:py-4 border-b border-[#3A4D23]">
+                      {/* Mobile Layout */}
+                      <div className="md:hidden">
+                        <div className="flex items-center justify-between mb-2">
+                          <h5 className="text-white font-semibold flex items-center gap-1.5 text-sm">
+                            <ClockIcon className="w-3.5 h-3.5 text-[#8BAE5A]" />
+                            {mealTypeLabel}
+                          </h5>
+                          <div className="text-[#B6C948] font-medium text-sm">
+                            {Math.round(mealTotals.calories)} kcal
+                          </div>
+                        </div>
+                        <div className="flex gap-3 text-xs text-white">
+                          <div className="flex items-center gap-1">
+                            <span className="text-gray-400">E:</span>
+                            <span>{Math.round(mealTotals.protein)}g</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <span className="text-gray-400">K:</span>
+                            <span>{Math.round(mealTotals.carbs)}g</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <span className="text-gray-400">V:</span>
+                            <span>{Math.round(mealTotals.fat)}g</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Desktop Layout */}
+                      <div className="hidden md:flex items-center justify-between">
                         <h5 className="text-white font-semibold flex items-center gap-2">
                           <ClockIcon className="w-4 h-4 text-[#8BAE5A]" />
                           {mealTypeLabel}
@@ -1299,8 +1372,8 @@ export default function NutritionPlanDetailPage() {
                         </div>
                     </div>
 
-                    {/* Ingredients Table */}
-                    <div className="p-6">
+                    {/* Ingredients Table - Desktop */}
+                    <div className="p-6 hidden md:block">
                       <div className="overflow-x-auto">
                         <table className="w-full text-sm">
                           <thead>
@@ -1464,6 +1537,116 @@ export default function NutritionPlanDetailPage() {
                           </tbody>
                         </table>
                       </div>
+                    </div>
+
+                    {/* Ingredients List - Mobile (Compact Cards) */}
+                    <div className="p-4 md:hidden space-y-3">
+                      {mealData.ingredients.map((ingredient: any, index: number) => {
+                        // Same calculation logic as desktop
+                        const ingredientKey = getIngredientKey(mealType, ingredient.name, selectedDay);
+                        const customAmount = customAmounts[ingredientKey];
+                        let amountBase = customAmount !== undefined ? customAmount : (ingredient.amount || 0);
+                        let amount = amountBase * scalingFactor;
+                        
+                        let multiplier = 1;
+                        const unit = String(ingredient.unit || '').toLowerCase();
+                        if (['per_piece','piece','pieces','per_stuk','stuk','stuks','per_plakje','plakje','plakjes','plak','per_plak','sneetje','per_sneetje','handje','per_handful'].includes(unit)) {
+                          amount = scalePiecesAmount(amountBase, scalingFactor);
+                          const unitWeight = Number(
+                            ingredient.unit_weight_g ?? ingredient.grams_per_unit ?? ingredient.weight_per_unit ?? ingredient.per_piece_grams ?? ingredient.slice_weight_g ?? ingredient.plakje_gram ?? ingredient.unit_weight
+                          ) || 0;
+                          multiplier = unitWeight > 0 ? (amount * unitWeight) / 100 : amount;
+                        } else if (['per_100g','g','gram'].includes(unit)) {
+                          const f = getFields(ingredient); const dens = { cal: f.calories_per_100g, p: f.protein_per_100g, c: f.carbs_per_100g, f: f.fat_per_100g };
+                          const perAdj = computeBiasedAdjust(dens);
+                          amount = Math.round(amount * perAdj);
+                          multiplier = amount / 100;
+                        } else if (['per_ml','ml'].includes(unit)) {
+                          const f = getFields(ingredient); const dens = { cal: f.calories_per_100g, p: f.protein_per_100g, c: f.carbs_per_100g, f: f.fat_per_100g };
+                          const perAdj = computeBiasedAdjust(dens);
+                          amount = Math.round(amount * perAdj);
+                          multiplier = amount / 100;
+                        } else if (['per_tbsp','tbsp','eetlepel','el','per_eetlepel'].includes(unit)) {
+                          const f = getFields(ingredient); const dens = { cal: f.calories_per_100g, p: f.protein_per_100g, c: f.carbs_per_100g, f: f.fat_per_100g };
+                          const perAdj = computeBiasedAdjust(dens);
+                          amount = Math.round((amount * perAdj) * 2) / 2;
+                          multiplier = (amount * 15) / 100;
+                        } else if (['per_tsp','tsp','theelepel','tl','per_theelepel'].includes(unit)) {
+                          const f = getFields(ingredient); const dens = { cal: f.calories_per_100g, p: f.protein_per_100g, c: f.carbs_per_100g, f: f.fat_per_100g };
+                          const perAdj = computeBiasedAdjust(dens);
+                          amount = Math.round((amount * perAdj) * 2) / 2;
+                          multiplier = (amount * 5) / 100;
+                        } else if (['per_cup','cup','kop'].includes(unit)) {
+                          const f = getFields(ingredient); const dens = { cal: f.calories_per_100g, p: f.protein_per_100g, c: f.carbs_per_100g, f: f.fat_per_100g };
+                          const perAdj = computeBiasedAdjust(dens);
+                          amount = Math.round((amount * perAdj) * 10) / 10;
+                          multiplier = (amount * 240) / 100;
+                        } else if (['per_30g'].includes(unit)) {
+                          const f = getFields(ingredient); const dens = { cal: f.calories_per_100g, p: f.protein_per_100g, c: f.carbs_per_100g, f: f.fat_per_100g };
+                          const perAdj = computeBiasedAdjust(dens);
+                          amount = Math.round(amount * perAdj);
+                          multiplier = (amount * 30) / 100;
+                        } else {
+                          const f = getFields(ingredient); const dens = { cal: f.calories_per_100g, p: f.protein_per_100g, c: f.carbs_per_100g, f: f.fat_per_100g };
+                          const perAdj = computeBiasedAdjust(dens);
+                          amount = Math.round(amount * perAdj);
+                          multiplier = amount / 100;
+                        }
+
+                        const ingredientCalories = (Number(ingredient.calories_per_100g) || 0) * multiplier;
+                        const ingredientProtein  = (Number(ingredient.protein_per_100g)  || 0) * multiplier;
+                        const ingredientCarbs    = (Number(ingredient.carbs_per_100g)    || 0) * multiplier;
+                        const ingredientFat      = (Number(ingredient.fat_per_100g)      || 0) * multiplier;
+
+                        const getUnitLabel = (unit: string) => {
+                          switch (unit) {
+                            case 'g': return 'gram';
+                            case 'plakje': return 'plakjes';
+                            case 'piece': return 'stuk';
+                            case 'per_100g': return 'gram';
+                            case 'per_plakje': return 'plakjes';
+                            case 'per_piece': return 'stuk';
+                            case 'per_ml': return 'ml';
+                            case 'handje': return 'handjes';
+                            default: return unit;
+                          }
+                        };
+
+                        return (
+                          <div key={index} className="bg-[#232D1A] border border-[#3A4D23] rounded-lg p-3">
+                            {/* Ingredient Name & Amount */}
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-white font-medium text-sm">{ingredient.name}</span>
+                              <div className="flex items-center gap-2">
+                                <span className="px-2 py-1 bg-[#181F17] border border-[#3A4D23] rounded text-white text-sm font-medium">
+                                  {amount}
+                                </span>
+                                <span className="text-gray-400 text-xs">{getUnitLabel(ingredient.unit)}</span>
+                              </div>
+                            </div>
+                            
+                            {/* Nutritional Values */}
+                            <div className="grid grid-cols-2 gap-2 text-xs">
+                              <div className="flex items-center justify-between bg-[#181F17] rounded px-2 py-1">
+                                <span className="text-gray-400">Kcal:</span>
+                                <span className="text-[#8BAE5A] font-medium">{ingredientCalories.toFixed(0)}</span>
+                              </div>
+                              <div className="flex items-center justify-between bg-[#181F17] rounded px-2 py-1">
+                                <span className="text-gray-400">Eiwit:</span>
+                                <span className="text-white font-medium">{ingredientProtein.toFixed(1)}g</span>
+                              </div>
+                              <div className="flex items-center justify-between bg-[#181F17] rounded px-2 py-1">
+                                <span className="text-gray-400">Koolhydr:</span>
+                                <span className="text-white font-medium">{ingredientCarbs.toFixed(1)}g</span>
+                              </div>
+                              <div className="flex items-center justify-between bg-[#181F17] rounded px-2 py-1">
+                                <span className="text-gray-400">Vet:</span>
+                                <span className="text-white font-medium">{ingredientFat.toFixed(1)}g</span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 );

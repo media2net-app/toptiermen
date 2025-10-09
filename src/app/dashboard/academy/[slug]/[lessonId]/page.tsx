@@ -865,20 +865,34 @@ export default function LessonDetailPage() {
   // CRITICAL: Safety mechanism to prevent stuck loading states
   useEffect(() => {
     if (loading) {
+      // Show "try again" button after 10 seconds on mobile
+      const forceButtonTimeout = setTimeout(() => {
+        console.log('⚠️ Showing force reload button after 10s');
+        setShowForceButton(true);
+      }, 10000);
+      
       // Increased timeout for better reliability after ebook navigation
       const timeoutId = setTimeout(() => {
-        console.log('⚠️ Loading timeout reached (15s), forcing reset');
+        console.log('⚠️ Loading timeout reached (35s), forcing reset');
         if (lesson && lesson.id === lessonId) {
           console.log('🔄 FORCE: We have correct data, resetting loading state');
           setLoading(false);
           setIsDataLoaded(true);
+          setShowForceButton(false);
         } else {
           console.log('🔄 FORCE: No correct data, retrying fetch');
+          setShowForceButton(false);
           fetchData();
         }
-      }, 15000); // Increased to 15s for better reliability
+      }, 35000); // Increased to 35s to account for 30s API timeout
 
-      return () => clearTimeout(timeoutId);
+      return () => {
+        clearTimeout(timeoutId);
+        clearTimeout(forceButtonTimeout);
+      };
+    } else {
+      // Reset force button when loading completes
+      setShowForceButton(false);
     }
   }, [loading, lesson, lessonId]);
 
@@ -1094,9 +1108,13 @@ export default function LessonDetailPage() {
 
     try {
       // Fetch via server API (bypasses RLS) with timeout protection
+      // Increased timeout to 30s for mobile connections
       console.log('🔍 Fetching module+lessons via API for:', { moduleId, lessonId, userId: user.id });
       const controller = new AbortController();
-      const t = setTimeout(() => controller.abort(), 15000);
+      const t = setTimeout(() => {
+        console.error('⏱️ Request timeout after 30s');
+        controller.abort();
+      }, 30000);
       const res = await fetch(`/api/academy/module-data?userId=${encodeURIComponent(user.id)}&moduleId=${encodeURIComponent(moduleId)}`, {
         method: 'GET',
         cache: 'no-cache',
@@ -1105,6 +1123,7 @@ export default function LessonDetailPage() {
       clearTimeout(t);
       if (!res.ok) {
         const txt = await res.text();
+        console.error('❌ API error:', res.status, txt);
         throw new Error(`API ${res.status}: ${txt}`);
       }
       const payload = await res.json();
@@ -1131,15 +1150,18 @@ export default function LessonDetailPage() {
       const uniqueCompletedLessons: string[] = payload.completedLessonIds || [];
       console.log('📈 Progress data (from API):', uniqueCompletedLessons.length);
 
-      // Fetch ebook data
+      // Fetch ebook data - use maybeSingle() to avoid error when no ebook exists
       console.log('🔍 Fetching ebook for lesson:', lessonId);
-      const { data: ebookData } = await supabase
+      const { data: ebookData, error: ebookError } = await supabase
         .from('academy_ebooks')
         .select('id, title, file_url, status')
         .eq('lesson_id', lessonId)
         .eq('status', 'published')
-        .single();
+        .maybeSingle();
 
+      if (ebookError) {
+        console.warn('⚠️ Error fetching ebook (non-critical):', ebookError);
+      }
       console.log('📖 Ebook data:', ebookData ? 'Found' : 'Not found');
 
       // Update all state
@@ -1161,15 +1183,32 @@ export default function LessonDetailPage() {
 
       console.log('🎯 All state updated, fetch complete!');
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Fetch error:', error);
-      console.error('❌ Error details:', error?.message, error?.code, error?.hint);
-      setError('Er is een fout opgetreden bij het laden van de les');
+      console.error('❌ Error details:', {
+        message: error?.message,
+        code: error?.code,
+        hint: error?.hint,
+        name: error?.name,
+        stack: error?.stack
+      });
+      
+      // Provide more specific error messages
+      let errorMessage = 'Er is een fout opgetreden bij het laden van de les';
+      if (error?.name === 'AbortError') {
+        errorMessage = 'Laden duurde te lang. Probeer het opnieuw.';
+      } else if (error?.message?.includes('API')) {
+        errorMessage = `API fout: ${error.message}`;
+      } else if (!navigator.onLine) {
+        errorMessage = 'Geen internetverbinding. Controleer je verbinding en probeer opnieuw.';
+      }
+      
+      setError(errorMessage);
       setIsDataLoaded(false); // Reset on error
     } finally {
       console.log('🏁 Fetch finally block - setting loading to false');
       setLoading(false);
-      isFetchingRef.current = false;
+      isFetchingRef.current = false; // CRITICAL: Always reset this flag
     }
   };
 
@@ -1351,9 +1390,26 @@ export default function LessonDetailPage() {
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
-            <p className="text-gray-300">
+            <p className="text-gray-300 mb-4">
               Les laden...
             </p>
+            {showForceButton && (
+              <div className="mt-6">
+                <p className="text-gray-400 text-sm mb-3">Duurt het te lang?</p>
+                <button
+                  onClick={() => {
+                    console.log('🔄 Force reload requested by user');
+                    setError(null);
+                    setLoading(false);
+                    isFetchingRef.current = false;
+                    fetchData();
+                  }}
+                  className="px-6 py-3 bg-[#8BAE5A] text-[#181F17] rounded-lg hover:bg-[#B6C948] transition-colors font-semibold"
+                >
+                  Opnieuw proberen
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </PageLayout>
@@ -1763,80 +1819,92 @@ export default function LessonDetailPage() {
 
         {/* Navigation buttons - Only show for non-exam lessons */}
         {lesson.type !== 'exam' && (
-          <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 mt-8">
-            {prevLesson ? (
-              <button
-                onClick={() => {
-                  console.log('🔄 Navigating to previous lesson...');
-                  // Reset any stuck states before navigation
-                  setIsVideoLoading(false);
-                  setShowVideoOverlay(true);
-                  setNavigating(true);
-                  
-                  // Use a small delay to ensure state updates
-                  setTimeout(() => {
-                    router.push(`/dashboard/academy/${module.id}/${prevLesson.id}`);
-                  }, 50);
-                }}
-                disabled={navigating}
-                className="px-3 py-2 sm:px-6 sm:py-3 text-sm sm:text-base bg-[#232D1A] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors font-semibold disabled:opacity-50 flex items-center gap-2 w-full sm:w-auto"
-              >
-                {navigating ? (
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#8BAE5A]"></div>
-                ) : (
-                  "←"
-                )}
-                <span className="truncate"><span className="sm:inline">Vorige les</span><span className="hidden sm:inline">: {prevLesson.title}</span></span>
-              </button>
-            ) : (
-              <div></div>
-            )}
-            
-            {nextLesson ? (
-              <button
-                onClick={async () => {
-                  console.log('🔄 Next action (bottom) triggered...');
-                  // Reset any stuck states before navigation
-                  setIsVideoLoading(false);
-                  setShowVideoOverlay(true);
+          <div className="mt-8 space-y-3">
+            {/* Terug naar overzicht - Full width op mobiel, normale breedte op desktop */}
+            <button
+              onClick={() => {
+                console.log('🔄 Navigating to module overview...');
+                setNavigating(true);
+                router.push(`/dashboard/academy/${module.id}`);
+              }}
+              disabled={navigating}
+              className="w-full sm:w-auto px-6 py-3 text-sm sm:text-base bg-[#232D1A] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {navigating ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#8BAE5A]"></div>
+              ) : (
+                "←"
+              )}
+              Terug naar overzicht
+            </button>
 
-                  // If not completed and non-exam, complete first
-                  if (!completed && lesson.type !== 'exam') {
-                    try {
-                      // Fire-and-forget, do not block navigation
-                      void handleCompleteLesson();
-                    } catch (e) {
-                      console.warn('⚠️ Completing before navigate failed, proceeding to navigate');
+            {/* Vorige/Volgende les - 2 kolommen op mobiel, ruimte tussen op desktop */}
+            <div className="grid grid-cols-2 gap-3 sm:flex sm:justify-between">
+              {prevLesson ? (
+                <button
+                  onClick={() => {
+                    console.log('🔄 Navigating to previous lesson...');
+                    setIsVideoLoading(false);
+                    setShowVideoOverlay(true);
+                    setNavigating(true);
+                    
+                    setTimeout(() => {
+                      router.push(`/dashboard/academy/${module.id}/${prevLesson.id}`);
+                    }, 50);
+                  }}
+                  disabled={navigating}
+                  className="px-3 py-2 sm:px-6 sm:py-3 text-sm sm:text-base bg-[#232D1A] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {navigating ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#8BAE5A]"></div>
+                  ) : (
+                    "←"
+                  )}
+                  <span className="truncate">Vorige les</span>
+                </button>
+              ) : (
+                <div className="hidden sm:block"></div>
+              )}
+              
+              {nextLesson ? (
+                <button
+                  onClick={async () => {
+                    console.log('🔄 Next action (bottom) triggered...');
+                    setIsVideoLoading(false);
+                    setShowVideoOverlay(true);
+
+                    if (!completed && lesson.type !== 'exam') {
+                      try {
+                        void handleCompleteLesson();
+                      } catch (e) {
+                        console.warn('⚠️ Completing before navigate failed, proceeding to navigate');
+                      }
                     }
-                  }
 
-                  setNavigating(true);
-                  
-                  // Use a small delay to ensure state updates
-                  setTimeout(() => {
-                    router.push(`/dashboard/academy/${module.id}/${nextLesson.id}`);
-                  }, 50);
-                }}
-                disabled={navigating || (!completed && lesson.type !== 'exam' && saving)}
-                className="px-3 py-2 sm:px-6 sm:py-3 text-sm sm:text-base bg-[#8BAE5A] text-[#181F17] rounded-lg hover:bg-[#B6C948] transition-colors font-semibold disabled:opacity-50 flex items-center gap-2 w-full sm:w-auto"
-              >
-                <span className="truncate">
-                  {(!completed && lesson.type !== 'exam')
-                    ? 'Voltooi les, ga naar volgende les'
-                    : (<>
-                        <span className="sm:inline">Volgende les</span>
-                        <span className="hidden sm:inline">: {nextLesson.title}</span>
-                      </>)}
-                </span>
-                {navigating ? (
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#181F17]"></div>
-                ) : (
-                  "→"
-                )}
-              </button>
-            ) : (
-              <div></div>
-            )}
+                    setNavigating(true);
+                    
+                    setTimeout(() => {
+                      router.push(`/dashboard/academy/${module.id}/${nextLesson.id}`);
+                    }, 50);
+                  }}
+                  disabled={navigating || (!completed && lesson.type !== 'exam' && saving)}
+                  className="px-3 py-2 sm:px-6 sm:py-3 text-sm sm:text-base bg-[#8BAE5A] text-[#181F17] rounded-lg hover:bg-[#B6C948] transition-colors font-semibold disabled:opacity-50 flex items-center justify-center gap-2 col-span-2 sm:col-span-1"
+                >
+                  <span className="truncate">
+                    {(!completed && lesson.type !== 'exam')
+                      ? 'Voltooi & volgende'
+                      : 'Volgende les'}
+                  </span>
+                  {navigating ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#181F17]"></div>
+                  ) : (
+                    "→"
+                  )}
+                </button>
+              ) : (
+                <div className="hidden sm:block"></div>
+              )}
+            </div>
           </div>
         )}
       </div>
