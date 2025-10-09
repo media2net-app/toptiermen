@@ -46,7 +46,9 @@ export default function OnboardingCompletion() {
       const data = await response.json();
 
       if (response.ok) {
-        setOnboardingStatus(data);
+        // API returns { success, onboarding: { ...fields } }
+        const status = (data && data.onboarding) ? data.onboarding : data;
+        setOnboardingStatus(status);
       }
     } catch (error) {
       console.error('Error fetching onboarding status:', error);
@@ -70,9 +72,9 @@ export default function OnboardingCompletion() {
     );
   }
 
-  // If onboarding is not completed, redirect to onboarding
-  if (!onboardingStatus?.onboarding_completed) {
-    router.push('/dashboard/onboarding');
+  // If onboarding is not completed, redirect to main dashboard where modal flow takes over
+  if (onboardingStatus && !onboardingStatus.onboarding_completed) {
+    router.push('/dashboard');
     return null;
   }
 

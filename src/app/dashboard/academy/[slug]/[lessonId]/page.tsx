@@ -7,6 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 import PageLayout from '@/components/PageLayout';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import HLSVideoPlayer from '@/components/HLSVideoPlayer';
 // Enhanced video player with better buffering and performance
 const SimpleVideoPlayer = ({ src, onEnded, onPlay, onPause, className }: any) => {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -656,6 +657,10 @@ export default function LessonDetailPage() {
   // Guard to prevent concurrent fetches
   const isFetchingRef = useRef(false);
 
+  // Resolved video URL (auto-switch to HLS if available)
+  const [resolvedVideoUrl, setResolvedVideoUrl] = useState<string | null>(null);
+  const [resolvedIsHls, setResolvedIsHls] = useState<boolean>(false);
+
   // Disable video preloading - only load current lesson video
   const isPreloading = false;
   const preloadProgress = 0;
@@ -674,6 +679,106 @@ export default function LessonDetailPage() {
       videoRef.current.currentTime = 0;
     }
   }, [lessonId]);
+
+  // Try to resolve HLS variant for MP4 URLs
+  useEffect(() => {
+    const run = async () => {
+      const raw = String((lesson as any)?.video_url || '');
+      if (!raw) { setResolvedVideoUrl(null); setResolvedIsHls(false); return; }
+      // If already HLS, keep as-is
+      if (/\.m3u8(\?.*)?$/i.test(raw) || raw.toLowerCase().includes('m3u8')) {
+        setResolvedVideoUrl(raw);
+        setResolvedIsHls(true);
+        return;
+      }
+      // Build candidate HLS URLs based on common patterns
+      const u = new URL(raw, typeof window !== 'undefined' ? window.location.origin : 'http://localhost');
+      const pathname = u.pathname;
+      const idx = pathname.lastIndexOf('/');
+      const dir = idx >= 0 ? pathname.slice(0, idx + 1) : '/';
+      const file = idx >= 0 ? pathname.slice(idx + 1) : pathname;
+      // IMPORTANT: handle spaces correctly. Supabase paths often contain spaces URL-encoded as %20.
+      // We need both decoded and encoded variants to avoid double-encoding like %2520.
+      const fileDecoded = (() => { try { return decodeURIComponent(file); } catch { return file; } })();
+      const baseNoExtRaw = file.replace(/\.[^.]+$/, '');
+      const baseNoExtDecoded = fileDecoded.replace(/\.[^.]+$/, '');
+      const baseNoExtEncoded = encodeURIComponent(baseNoExtDecoded);
+      const candidates: string[] = [];
+      // 0) LOCAL TEST OVERRIDE (only if it actually exists)
+      //    Preferred new structure: /public/hls/<moduleId>/<lessonId>/master.m3u8
+      //    Backward-compatible structure: /public/hls/<lessonId>/master.m3u8
+      try {
+        const lid = String(lessonId || '').trim();
+        const mid = String(moduleId || '').trim();
+        if (lid) {
+          const tryHead = async (url: string, timeoutMs = 800) => {
+            const controller = new AbortController();
+            const t = setTimeout(() => controller.abort(), timeoutMs);
+            try {
+              const res = await fetch(url, { method: 'HEAD', signal: controller.signal });
+              return res.ok;
+            } catch {
+              return false;
+            } finally {
+              clearTimeout(t);
+            }
+          };
+
+          // Preferred path with moduleId/lessonId
+          if (mid) {
+            const localUrlModule = `${window.location.origin}/hls/${mid}/${lid}/master.m3u8`;
+            if (await tryHead(localUrlModule)) {
+              setResolvedVideoUrl(localUrlModule);
+              setResolvedIsHls(true);
+              try { console.log('[Academy Lesson] Using LOCAL HLS override (module/lesson):', localUrlModule); } catch {}
+              return;
+            }
+          }
+
+          // Backward-compatible path with only lessonId
+          const localUrlLegacy = `${window.location.origin}/hls/${lid}/master.m3u8`;
+          if (await tryHead(localUrlLegacy)) {
+            setResolvedVideoUrl(localUrlLegacy);
+            setResolvedIsHls(true);
+            try { console.log('[Academy Lesson] Using LOCAL HLS override (legacy):', localUrlLegacy); } catch {}
+            return;
+          }
+        }
+      } catch {}
+      // Same path, .mp4 -> .m3u8
+      if (/\.mp4$/i.test(file)) candidates.push(u.href.replace(/\.mp4(\?.*)?$/i, '.m3u8'));
+      // master.m3u8 in same dir
+      candidates.push(`${u.origin}${dir}master.m3u8`);
+      // <basename>.m3u8 in same dir (try both decoded->encoded and raw filename without re-encoding)
+      candidates.push(`${u.origin}${dir}${baseNoExtEncoded}.m3u8`);
+      candidates.push(`${u.origin}${dir}${baseNoExtRaw}.m3u8`);
+      // Subdirectory patterns: <dir>/<basename>/master.m3u8 and <dir>/<basename>/<basename>.m3u8
+      const subDirDecoded = `${u.origin}${dir}${baseNoExtEncoded}/`;
+      candidates.push(`${subDirDecoded}master.m3u8`);
+      candidates.push(`${subDirDecoded}${baseNoExtEncoded}.m3u8`);
+      // Deduplicate
+      const seen = new Set<string>();
+      const unique = candidates.filter(c => { if (seen.has(c)) return false; seen.add(c); return true; });
+      // Probe with HEAD (1.5s timeout)
+      for (const c of unique) {
+        try {
+          const controller = new AbortController();
+          const t = setTimeout(() => controller.abort(), 1500);
+          const res = await fetch(c, { method: 'HEAD', signal: controller.signal });
+          clearTimeout(t);
+          if (res.ok) {
+            setResolvedVideoUrl(c);
+            setResolvedIsHls(true);
+            return;
+          }
+        } catch {}
+      }
+      // Fallback to original MP4
+      setResolvedVideoUrl(raw);
+      setResolvedIsHls(false);
+    };
+    run();
+  }, [lesson?.video_url]);
 
   // Handle page visibility changes to prevent loading issues when returning from other tabs
   useEffect(() => {
@@ -1456,26 +1561,26 @@ export default function LessonDetailPage() {
           </div>
 
           {/* Video content */}
-          {lesson.video_url && (
+          {(resolvedVideoUrl || lesson.video_url) && (
             <div className="mb-6">
-              <SimpleVideoPlayer
-                key={lesson.id}
-                src={lesson.video_url}
-                onEnded={() => {
-                  setShowVideoOverlay(true);
-                }}
-                onPlay={() => {
-                  setShowVideoOverlay(false);
-                  setIsVideoLoading(false);
-                }}
-                onPause={() => {
-                  setShowVideoOverlay(true);
-                }}
-                className="w-full h-full rounded-lg bg-black"
-              />
+              {(() => {
+                const url = String(resolvedVideoUrl || lesson.video_url || '');
+                const isHls = resolvedIsHls || /\.m3u8(\?.*)?$/i.test(url) || url.toLowerCase().includes('m3u8');
+                // Debug log which player is used
+                try { console.log('[Academy Lesson] Video URL:', url, '| HLS:', isHls); } catch {}
+                return (
+                  <div className="relative">
+                    {/* Player type badge removed */}
+                    {isHls ? (
+                      <HLSVideoPlayer src={url} autoPlay={false} controls />
+                    ) : (
+                      <SimpleVideoPlayer key={lesson.id} src={url} onEnded={() => {}} />
+                    )}
+                  </div>
+                );
+              })()}
             </div>
           )}
-         
 
           {/* Text content */}
           {lesson.content && (

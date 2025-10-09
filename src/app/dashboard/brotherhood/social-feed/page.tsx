@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { supabase } from '@/lib/supabase';
@@ -64,6 +64,9 @@ const SocialFeedPage = () => {
   const [loadingComments, setLoadingComments] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showPostEmojiPicker, setShowPostEmojiPicker] = useState(false);
+  // Auto-focus/scroll for comment modal
+  const commentModalRef = useRef<HTMLDivElement | null>(null);
+  const commentTextareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   // Popular emojis for quick access
   const popularEmojis = [
@@ -200,6 +203,18 @@ const SocialFeedPage = () => {
     setNewComment('');
     await fetchComments(post.id);
   };
+
+  // Auto-scroll and focus when comment modal opens (mobile-friendly)
+  useEffect(() => {
+    if (commentModalOpen) {
+      const id = window.setTimeout(() => {
+        try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch {}
+        try { commentModalRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch {}
+        try { commentTextareaRef.current?.focus(); } catch {}
+      }, 120);
+      return () => window.clearTimeout(id);
+    }
+  }, [commentModalOpen]);
 
   // Fetch comments for a post
   const fetchComments = async (postId: string) => {
@@ -638,7 +653,11 @@ const SocialFeedPage = () => {
       {/* Comment Modal */}
       {commentModalOpen && selectedPost && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-opacity duration-300">
-          <div className="bg-[#232D1A] rounded-2xl shadow-2xl border border-[#3A4D23] max-w-2xl w-full max-h-[90vh] flex flex-col transition-all duration-300 transform scale-100">
+          <div
+            ref={commentModalRef}
+            tabIndex={-1}
+            className="bg-[#232D1A] rounded-2xl shadow-2xl border border-[#3A4D23] max-w-2xl w-full max-h-[90vh] flex flex-col transition-all duration-300 transform scale-100 outline-none"
+          >
             {/* Modal Header */}
             <div className="flex items-center justify-between p-6 border-b border-[#3A4D23]">
               <h2 className="text-xl font-bold text-white">Reacties</h2>
@@ -744,6 +763,7 @@ const SocialFeedPage = () => {
                 <div className="flex-1">
                   <div className="relative">
                     <textarea
+                      ref={commentTextareaRef}
                       value={newComment}
                       onChange={(e) => setNewComment(e.target.value)}
                       placeholder="Schrijf een reactie..."

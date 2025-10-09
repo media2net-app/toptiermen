@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { createClient } from '@supabase/supabase-js';
+import { supabaseBrowser } from '@/lib/supabase-browser';
 
 interface LoginDebuggerProps {
   isVisible: boolean;
@@ -60,22 +60,8 @@ export default function LoginDebugger({ isVisible, onToggle }: LoginDebuggerProp
         // Set status to checking immediately
         setDebugInfo(prev => ({ ...prev, supabaseStatus: 'checking' }));
         
-        // Check environment variables first
-        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-        const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-        
-        if (!supabaseUrl || !supabaseKey) {
-          setDebugInfo(prev => ({
-            ...prev,
-            supabaseStatus: 'error',
-            errors: [...prev.errors, `Missing env vars: URL=${!!supabaseUrl}, KEY=${!!supabaseKey}`]
-          }));
-          return;
-        }
-        
-        console.log('🔍 Checking Supabase connection with URL:', supabaseUrl);
-        
-        const supabase = createClient(supabaseUrl, supabaseKey);
+        // Use singleton browser client
+        const supabase = supabaseBrowser;
         
         // Try multiple connection methods
         let connectionSuccessful = false;
@@ -124,11 +110,11 @@ export default function LoginDebugger({ isVisible, onToggle }: LoginDebuggerProp
         // Method 3: If both fail, try direct fetch to Supabase URL
         if (!connectionSuccessful) {
           try {
-            const response = await fetch(`${supabaseUrl}/rest/v1/`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/`, {
               method: 'GET',
               headers: {
-                'apikey': supabaseKey,
-                'Authorization': `Bearer ${supabaseKey}`
+                'apikey': process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
+                'Authorization': `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''}`
               }
             });
             
@@ -156,7 +142,7 @@ export default function LoginDebugger({ isVisible, onToggle }: LoginDebuggerProp
           }
         } else {
           // Fallback: If all methods fail, assume connected if we have env vars
-          if (supabaseUrl && supabaseKey) {
+          if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
             console.log('⚠️ Connection methods failed, but assuming connected due to env vars');
             setDebugInfo(prev => ({
               ...prev,

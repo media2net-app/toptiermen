@@ -2,19 +2,12 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { 
-  HomeIcon, 
   ChatBubbleLeftRightIcon, 
   UsersIcon, 
   FireIcon
 } from "@heroicons/react/24/outline";
 
 const tabs = [
-  { 
-    label: "Dashboard", 
-    href: "/dashboard/brotherhood", 
-    icon: HomeIcon,
-    description: "Overzicht"
-  },
   { 
     label: "Social Feed", 
     href: "/dashboard/brotherhood/social-feed", 
@@ -49,7 +42,7 @@ export default function BrotherhoodSubNav() {
         <div className="relative overflow-x-auto scrollbar-hide">
           <ul className="flex space-x-1 p-2 min-w-max">
             {tabs.map((tab) => {
-              const active = pathname === tab.href || (tab.href !== "/dashboard/brotherhood" && pathname.startsWith(tab.href));
+              const active = pathname.startsWith(tab.href);
               const IconComponent = tab.icon;
               
               return (

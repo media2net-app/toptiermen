@@ -2,7 +2,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { LockClosedIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/solid';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase';
 
 function ResetPasswordContent() {
   const router = useRouter();
@@ -33,10 +33,7 @@ function ResetPasswordContent() {
       // We have valid reset tokens, set up the session
       const setupSession = async () => {
         try {
-          const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-          const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-          const supabase = createClient(supabaseUrl, supabaseKey);
-          
+          // Use singleton client
           // Set the session with the tokens from the URL
           const { data, error } = await supabase.auth.setSession({
             access_token: accessToken,
@@ -101,11 +98,7 @@ function ResetPasswordContent() {
     setIsLoading(true);
 
     try {
-      // Initialize Supabase client
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-      const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-      const supabase = createClient(supabaseUrl, supabaseKey);
-
+      // Use singleton client
       // Update the user's password
       const { data, error } = await supabase.auth.updateUser({
         password: newPassword

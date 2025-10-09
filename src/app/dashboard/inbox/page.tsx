@@ -304,14 +304,19 @@ export default function Inbox() {
       
       if (response.ok) {
         console.log('Conversation created successfully:', data);
-        
+        // Normalize API response { conversationId } or { conversation: { id } }
+        const newConversationId: string | undefined = data?.conversationId || data?.conversation?.id;
+        if (!newConversationId) {
+          throw new Error('Geen conversatie ID ontvangen van de server');
+        }
+
         // Get the user profile for the new conversation
         const selectedUserProfile = availableUsers.find(u => u.id === userId);
         const userName = selectedUserProfile?.display_name || selectedUserProfile?.full_name || 'Gebruiker';
         
         // Create the new conversation object
         const newConversation: Conversation = {
-          id: data.conversation.id,
+          id: newConversationId,
           participant: {
             id: userId,
             name: userName,
@@ -342,7 +347,7 @@ export default function Inbox() {
       }
     } catch (error) {
       console.error('Error creating conversation:', error);
-      alert('Fout bij het starten van het gesprek: ' + error.message);
+      alert('Fout bij het starten van het gesprek: ' + (error instanceof Error ? error.message : 'Onbekende fout'));
     } finally {
       setIsCreatingConversation(false);
     }

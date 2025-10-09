@@ -102,10 +102,14 @@ export default function NutritionPlanDetailPage() {
   const [showResetModal, setShowResetModal] = useState<boolean>(false);
   const resetModalRef = useRef<HTMLDivElement | null>(null);
   // Scaling factor derived from weight (baseline 100kg)
+  // TABEL FORMULE: clamp(0.5, 1.5, gewicht/100)
   const scalingFactor = useMemo(() => {
     const w = Number(userProfile?.weight || 100);
     if (!Number.isFinite(w) || w <= 0) return 1;
-    return w / 100;
+    
+    // Clamp tussen 0.5x en 1.5x voor veilige range
+    const rawFactor = w / 100;
+    return Math.max(0.5, Math.min(1.5, rawFactor));
   }, [userProfile?.weight]);
 
   // Reset modal state when component mounts
@@ -370,31 +374,55 @@ export default function NutritionPlanDetailPage() {
         ing.amount = next;
       });
     });
-    // helper to compute totals
+    // 🔧 V3 LOGICA: Helper functies voor clean berekening
+    const gramsPerUnit = (ing: any) => {
+      const u = String(ing?.unit || '').toLowerCase();
+      if (u === 'g') return 1;
+      if (u === 'per_100g') return 100;
+      if (u === 'ml' || u === 'per_ml') return 1;
+      if (['per_tbsp','tbsp','eetlepel','el','per_eetlepel'].includes(u)) return 15;
+      if (['per_tsp','tsp','theelepel','tl','per_theelepel'].includes(u)) return 5;
+      if (['per_cup','cup','kop'].includes(u)) return 240;
+      if (u === 'per_30g') return 30;
+      const w = Number(ing.unit_weight_g ?? ing.grams_per_unit ?? ing.weight_per_unit ?? ing.per_piece_grams ?? ing.slice_weight_g ?? ing.plakje_gram ?? ing.unit_weight);
+      return Number.isFinite(w) && w > 0 ? w : 100;
+    };
+    
+    const macroPerUnit = (ing: any) => {
+      const g100 = {
+        cal: Number(ing.calories_per_100g || 0),
+        p: Number(ing.protein_per_100g || 0),
+        c: Number(ing.carbs_per_100g || 0),
+        f: Number(ing.fat_per_100g || 0),
+      };
+      const gPerUnit = gramsPerUnit(ing);
+      const factor = gPerUnit / 100;
+      return {
+        cal: g100.cal * factor,
+        p: g100.p * factor,
+        c: g100.c * factor,
+        f: g100.f * factor,
+      };
+    };
+    
+    // helper to compute totals - EXACT V3 LOGICA
     const computeTotals = (data:any) => {
       let t = { cal:0,p:0,c:0,f:0 } as any;
       ['ontbijt','ochtend_snack','lunch','lunch_snack','diner','avond_snack'].forEach(mt => {
         const meal = data?.[mt];
         if (!meal?.ingredients) return;
         meal.ingredients.forEach((ing:any)=>{
-          const u = String(ing.unit||'').toLowerCase();
-          const amount = Number(ing.amount||0);
-          const per100 = { cal: Number(ing.calories_per_100g)||0, p: Number(ing.protein_per_100g)||0, c: Number(ing.carbs_per_100g)||0, f: Number(ing.fat_per_100g)||0 };
-          const gPerUnit = (()=>{
-            if (['per_100g','g','gram'].includes(u)) return 100;
-            if (['per_ml','ml'].includes(u)) return 100;
-            if (['per_tbsp','tbsp','eetlepel','el','per_eetlepel'].includes(u)) return 15;
-            if (['per_tsp','tsp','theelepel','tl','per_theelepel'].includes(u)) return 5;
-            if (['per_cup','cup','kop'].includes(u)) return 240;
-            if (['per_30g'].includes(u)) return 30;
-            const w = Number(ing.unit_weight_g ?? ing.grams_per_unit ?? ing.weight_per_unit ?? ing.per_piece_grams ?? ing.slice_weight_g ?? ing.plakje_gram ?? ing.unit_weight) || 0;
-            return w>0 ? w : 100;
-          })();
-          const units = ['per_100g','g','gram','per_ml','ml','per_tbsp','tbsp','eetlepel','el','per_eetlepel','per_tsp','tsp','theelepel','tl','per_theelepel','per_cup','cup','kop','per_30g'].includes(u) ? (amount / gPerUnit) : amount;
-          t.cal += per100.cal * units;
-          t.p   += per100.p   * units;
-          t.c   += per100.c   * units;
-          t.f   += per100.f   * units;
+          const per = macroPerUnit(ing);
+          const amount = Number(ing.amount || 0);
+          const u = String(ing.unit || '').toLowerCase();
+          
+          // 🔧 V3 FORMULE: Voor pieces direct amount, voor rest amount/gramsPerUnit
+          const multiplier = isPieceUnit(u) ? amount : amount / gramsPerUnit(ing);
+          
+          t.cal += per.cal * multiplier;
+          t.p   += per.p   * multiplier;
+          t.c   += per.c   * multiplier;
+          t.f   += per.f   * multiplier;
         });
       });
       return t;
@@ -409,21 +437,10 @@ export default function NutritionPlanDetailPage() {
         if (!meal?.ingredients) return { mt, kcal: 0 };
         let kcal = 0;
         meal.ingredients.forEach((ing:any)=>{
-          const u = String(ing.unit||'').toLowerCase();
-          if (['per_piece','piece','pieces','per_stuk','stuk','stuks','per_plakje','plakje','plakjes','plak','per_plak','sneetje','per_sneetje','handje','per_handful'].includes(u)) return;
-          const per100 = { cal: Number(ing.calories_per_100g)||0, p: Number(ing.protein_per_100g)||0, c: Number(ing.carbs_per_100g)||0, f: Number(ing.fat_per_100g)||0 };
-          const perUnitK = (per100.p*4)+(per100.c*4)+(per100.f*9);
-          const gPerUnit = (()=>{
-            if (['per_100g','g','gram'].includes(u)) return 100;
-            if (['per_ml','ml'].includes(u)) return 100;
-            if (['per_tbsp','tbsp','eetlepel','el','per_eetlepel'].includes(u)) return 15;
-            if (['per_tsp','tsp','theelepel','tl','per_theelepel'].includes(u)) return 5;
-            if (['per_cup','cup','kop'].includes(u)) return 240;
-            if (['per_30g'].includes(u)) return 30;
-            const w = Number(ing.unit_weight_g ?? ing.grams_per_unit ?? ing.weight_per_unit ?? ing.per_piece_grams ?? ing.slice_weight_g ?? ing.plakje_gram ?? ing.unit_weight) || 0;
-            return w>0 ? w : 100;
-          })();
-          kcal += perUnitK * (Number(ing.amount||0) / Math.max(1, gPerUnit));
+          if (isPieceUnit(ing.unit)) return;
+          const dens = macroPerUnit(ing);
+          const perUnitK = dens.p * 4 + dens.c * 4 + dens.f * 9;
+          kcal += perUnitK * (Number(ing.amount||0) / Math.max(1, gramsPerUnit(ing)));
         });
         return { mt, kcal };
       });
@@ -434,13 +451,10 @@ export default function NutritionPlanDetailPage() {
           const meal = copy?.[entry.mt];
           if (!meal?.ingredients) return;
           let remaining = surplus * (entry.kcal / totalAdj);
-          const adjustable = meal.ingredients.filter((ing:any)=>{
-            const u = String(ing.unit||'').toLowerCase();
-            return !['per_piece','piece','pieces','per_stuk','stuk','stuks','per_plakje','plakje','plakjes','plak','per_plak','sneetje','per_sneetje','handje','per_handful'].includes(u);
-          });
+          const adjustable = meal.ingredients.filter((ing:any)=> !isPieceUnit(ing.unit));
           const perUnitKs = adjustable.map((ing:any)=>{
-            const per100 = { cal: Number(ing.calories_per_100g)||0, p: Number(ing.protein_per_100g)||0, c: Number(ing.carbs_per_100g)||0, f: Number(ing.fat_per_100g)||0 };
-            return (per100.p*4)+(per100.c*4)+(per100.f*9);
+            const dens = macroPerUnit(ing);
+            return dens.p * 4 + dens.c * 4 + dens.f * 9;
           });
           const sumPerUnitK = perUnitKs.reduce((a:number,b:number)=>a+b,0);
           adjustable.forEach((ing:any, idx:number)=>{
@@ -449,24 +463,15 @@ export default function NutritionPlanDetailPage() {
             if (perK <= 0) return;
             const portion = sumPerUnitK > 0 ? perK/sumPerUnitK : 0;
             const reduceK = remaining * portion;
-            const u = String(ing.unit||'').toLowerCase();
-            const gPerUnit = (()=>{
-              if (['per_100g','g','gram'].includes(u)) return 100;
-              if (['per_ml','ml'].includes(u)) return 100;
-              if (['per_tbsp','tbsp','eetlepel','el','per_eetlepel'].includes(u)) return 15;
-              if (['per_tsp','tsp','theelepel','tl','per_theelepel'].includes(u)) return 5;
-              if (['per_cup','cup','kop'].includes(u)) return 240;
-              if (['per_30g'].includes(u)) return 30;
-              const w = Number(ing.unit_weight_g ?? ing.grams_per_unit ?? ing.weight_per_unit ?? ing.per_piece_grams ?? ing.slice_weight_g ?? ing.plakje_gram ?? ing.unit_weight) || 0;
-              return w>0 ? w : 100;
-            })();
+            const gPer = gramsPerUnit(ing);
             const deltaUnits = reduceK / perK;
-            let next = Math.max(0, (Number(ing.amount||0) - deltaUnits * gPerUnit));
+            let next = Math.max(0, (Number(ing.amount||0) - deltaUnits * gPer));
+            const u = String(ing.unit||'').toLowerCase();
             // rounding
             if (['per_100g','g','gram','per_ml','ml'].includes(u)) next = Math.round(next);
             else if (['per_tbsp','tbsp','eetlepel','el','per_eetlepel','per_tsp','tsp','theelepel','tl','per_theelepel'].includes(u)) next = Math.round(next*2)/2;
             else if (['per_cup','cup','kop'].includes(u)) next = Math.round(next*10)/10;
-            remaining -= Math.max(0, (Number(ing.amount||0) - next)) / Math.max(1, gPerUnit) * perK;
+            remaining -= Math.max(0, (Number(ing.amount||0) - next)) / Math.max(1, gPer) * perK;
             ing.amount = next;
           });
         });
@@ -483,21 +488,10 @@ export default function NutritionPlanDetailPage() {
         if (!meal?.ingredients) return { mt, kcal: 0 } as any;
         let kcal = 0;
         meal.ingredients.forEach((ing:any)=>{
-          const u = String(ing.unit||'').toLowerCase();
-          if (['per_piece','piece','pieces','per_stuk','stuk','stuks','per_plakje','plakje','plakjes','plak','per_plak','sneetje','per_sneetje','handje','per_handful'].includes(u)) return;
-          const per100 = { cal: Number(ing.calories_per_100g)||0, p: Number(ing.protein_per_100g)||0, c: Number(ing.carbs_per_100g)||0, f: Number(ing.fat_per_100g)||0 };
-          const perUnitK = (per100.p*4)+(per100.c*4)+(per100.f*9);
-          const gPerUnit = (()=>{
-            if (['per_100g','g','gram'].includes(u)) return 100;
-            if (['per_ml','ml'].includes(u)) return 100;
-            if (['per_tbsp','tbsp','eetlepel','el','per_eetlepel'].includes(u)) return 15;
-            if (['per_tsp','tsp','theelepel','tl','per_theelepel'].includes(u)) return 5;
-            if (['per_cup','cup','kop'].includes(u)) return 240;
-            if (['per_30g'].includes(u)) return 30;
-            const w = Number(ing.unit_weight_g ?? ing.grams_per_unit ?? ing.weight_per_unit ?? ing.per_piece_grams ?? ing.slice_weight_g ?? ing.plakje_gram ?? ing.unit_weight) || 0;
-            return w>0 ? w : 100;
-          })();
-          kcal += perUnitK * (Number(ing.amount||0) / Math.max(1, gPerUnit));
+          if (isPieceUnit(ing.unit)) return;
+          const dens = macroPerUnit(ing);
+          const perUnitK = dens.p * 4 + dens.c * 4 + dens.f * 9;
+          kcal += perUnitK * (Number(ing.amount||0) / Math.max(1, gramsPerUnit(ing)));
         });
         return { mt, kcal };
       });
@@ -508,13 +502,10 @@ export default function NutritionPlanDetailPage() {
           const meal = copy?.[entry.mt];
           if (!meal?.ingredients) return;
           let remaining = deficit * (entry.kcal / totalAdj2);
-          const adjustable = meal.ingredients.filter((ing:any)=>{
-            const u = String(ing.unit||'').toLowerCase();
-            return !['per_piece','piece','pieces','per_stuk','stuk','stuks','per_plakje','plakje','plakjes','plak','per_plak','sneetje','per_sneetje','handje','per_handful'].includes(u);
-          });
+          const adjustable = meal.ingredients.filter((ing:any)=> !isPieceUnit(ing.unit));
           const perUnitKs = adjustable.map((ing:any)=>{
-            const per100 = { cal: Number(ing.calories_per_100g)||0, p: Number(ing.protein_per_100g)||0, c: Number(ing.carbs_per_100g)||0, f: Number(ing.fat_per_100g)||0 };
-            return (per100.p*4)+(per100.c*4)+(per100.f*9);
+            const dens = macroPerUnit(ing);
+            return dens.p * 4 + dens.c * 4 + dens.f * 9;
           });
           const sumPerUnitK = perUnitKs.reduce((a:number,b:number)=>a+b,0);
           adjustable.forEach((ing:any, idx:number)=>{
@@ -523,23 +514,14 @@ export default function NutritionPlanDetailPage() {
             if (perK <= 0) return;
             const portion = sumPerUnitK > 0 ? perK/sumPerUnitK : 0;
             const addK = remaining * portion;
-            const u = String(ing.unit||'').toLowerCase();
-            const gPerUnit = (():number=>{
-              if (['per_100g','g','gram'].includes(u)) return 100;
-              if (['per_ml','ml'].includes(u)) return 100;
-              if (['per_tbsp','tbsp','eetlepel','el','per_eetlepel'].includes(u)) return 15;
-              if (['per_tsp','tsp','theelepel','tl','per_theelepel'].includes(u)) return 5;
-              if (['per_cup','cup','kop'].includes(u)) return 240;
-              if (['per_30g'].includes(u)) return 30;
-              const w = Number(ing.unit_weight_g ?? ing.grams_per_unit ?? ing.weight_per_unit ?? ing.per_piece_grams ?? ing.slice_weight_g ?? ing.plakje_gram ?? ing.unit_weight) || 0;
-              return w>0 ? w : 100;
-            })();
+            const gPer = gramsPerUnit(ing);
             const deltaUnits = addK / perK;
-            let next = Number(ing.amount||0) + deltaUnits * gPerUnit;
+            let next = Number(ing.amount||0) + deltaUnits * gPer;
+            const u = String(ing.unit||'').toLowerCase();
             if (['per_100g','g','gram','per_ml','ml'].includes(u)) next = Math.round(next);
             else if (['per_tbsp','tbsp','eetlepel','el','per_eetlepel','per_tsp','tsp','theelepel','tl','per_theelepel'].includes(u)) next = Math.round(next*2)/2;
             else if (['per_cup','cup','kop'].includes(u)) next = Math.round(next*10)/10;
-            remaining -= Math.max(0, (next - Number(ing.amount||0))) / Math.max(1, gPerUnit) * perK;
+            remaining -= Math.max(0, (next - Number(ing.amount||0))) / Math.max(1, gPer) * perK;
             ing.amount = next;
           });
         });

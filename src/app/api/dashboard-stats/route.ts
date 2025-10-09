@@ -647,18 +647,6 @@ async function fetchXPStats(userId: string) {
     }, 0) || 0;
 
     const totalXP = missionsXP + challengesXP;
-    const level = Math.floor(totalXP / 100) + 1; // Simple level calculation
-    
-    // Determine rank based on XP
-    let rank = 'Beginner';
-    if (totalXP >= 500) rank = 'Expert';
-    else if (totalXP >= 200) rank = 'Advanced';
-    else if (totalXP >= 50) rank = 'Intermediate';
-
-    // Calculate next level requirements
-    const currentLevelXP = (level - 1) * 100;
-    const nextLevelXP = level * 100;
-    const xpNeeded = nextLevelXP - totalXP;
 
     // Get user's current badges count
     const { data: badges, error: badgesError } = await supabaseAdmin
@@ -667,7 +655,46 @@ async function fetchXPStats(userId: string) {
       .eq('user_id', userId);
 
     const currentBadges = badges?.length || 0;
-    const badgesNeeded = Math.max(0, level - currentBadges);
+
+    // Fetch ranks table to determine level thresholds (xp_needed, badges_needed)
+    const { data: ranks, error: ranksError } = await supabaseAdmin
+      .from('ranks')
+      .select('id, name, rank_order, xp_needed, badges_needed')
+      .order('rank_order', { ascending: true });
+
+    // Default rank/level when ranks table not available
+    let level = 1;
+    let rank = 'Beginner';
+    let nextRankXpNeeded = 0;
+    let nextRankBadgesNeeded = 0;
+
+    if (!ranksError && Array.isArray(ranks) && ranks.length > 0) {
+      // Determine highest rank the user satisfies
+      let achieved = ranks.filter(r => (totalXP >= (r.xp_needed || 0)) && (currentBadges >= (r.badges_needed || 0)));
+      if (achieved.length > 0) {
+        const top = achieved[achieved.length - 1];
+        level = top.rank_order || 1;
+        rank = top.name || 'Member';
+      } else {
+        level = 1;
+        rank = ranks[0]?.name || 'Member';
+      }
+      // Find next rank requirements
+      const next = ranks.find(r => r.rank_order && r.rank_order > level);
+      if (next) {
+        nextRankXpNeeded = Math.max(0, (next.xp_needed || 0) - totalXP);
+        nextRankBadgesNeeded = Math.max(0, (next.badges_needed || 0) - currentBadges);
+      } else {
+        nextRankXpNeeded = 0;
+        nextRankBadgesNeeded = 0;
+      }
+    } else {
+      // Fallback: keep a simple but high threshold to avoid over-leveling
+      level = Math.max(1, Math.floor(totalXP / 1000) + 1);
+      rank = level === 1 ? 'Beginner' : `Level ${level}`;
+      nextRankXpNeeded = Math.max(0, (level * 1000) - totalXP);
+      nextRankBadgesNeeded = Math.max(0, 3 - currentBadges);
+    }
 
     // Get user's completed academy modules
     const { data: academyProgress, error: academyError } = await supabaseAdmin
@@ -683,8 +710,8 @@ async function fetchXPStats(userId: string) {
     const totalMissionsAndChallenges = (missions?.length || 0) + (challenges?.length || 0);
 
     const nextLevelRequirements = {
-      xpNeeded: Math.max(0, xpNeeded),
-      badgesNeeded: Math.max(0, badgesNeeded),
+      xpNeeded: Math.max(0, nextRankXpNeeded),
+      badgesNeeded: Math.max(0, nextRankBadgesNeeded),
       challengesNeeded: Math.max(0, level * 2 - totalMissionsAndChallenges),
       academyModulesNeeded: Math.max(0, academyModulesNeeded)
     };

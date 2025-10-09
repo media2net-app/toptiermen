@@ -1304,13 +1304,26 @@ function TrainingschemasContent() {
       if (currentSchemaPeriod && 
           currentSchemaPeriod.status === 'active' && 
           currentSchemaPeriod.training_schema_id !== schemaId) {
-        // If the current schema is completed (8/8), show completed confirmation modal
+        // If the current schema is completed (8/8), consider next-step flow
         const isCurrentCompleted = !!schemaCompletionStatus[currentSchemaPeriod.training_schema_id];
         if (isCurrentCompleted) {
-          console.log('✅ Current schema completed; proceeding directly to next schema without warning');
-          await selectTrainingSchemaDirect(schemaId);
+          // Determine target schema number label and unlocked state
+          const target = allTrainingSchemas.find(s => s.id === schemaId);
+          const targetNum = target?.schema_nummer || undefined;
+          const isUnlocked = typeof targetNum === 'number' ? !!unlockedSchemas[targetNum] : true;
+          if (!isUnlocked) {
+            console.log('🔒 Target schema appears locked; preventing completed modal');
+            toast.error('Dit schema is nog vergrendeld. Rond je huidige schema volledig af.');
+            return;
+          }
+          // Show completed confirmation modal (explicit)
+          setSchemaToChange(schemaId);
+          setSchemaChangeModalMode('completed');
+          setNextSchemaLabel(targetNum ? `Schema ${targetNum}` : undefined);
+          setShowSchemaChangeWarningModal(true);
           return;
         }
+        // Otherwise show warning modal for mid-period change
         setSchemaToChange(schemaId);
         console.log('⚠️ User trying to change active schema mid-period, showing warning');
         setSchemaChangeModalMode('warning');

@@ -7,6 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/lib/supabase';
 import { EnvelopeIcon, LockClosedIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import ModalBase from '@/components/ui/ModalBase';
+import LoginDebugger from '@/components/LoginDebugger';
 
 // Simplified configuration
 const LOGIN_CONFIG = {
@@ -22,6 +23,8 @@ function LoginPageContent() {
   const loading = authLoading; // Use actual auth loading state
   // Announcement modal visibility
   const [showAnnouncement, setShowAnnouncement] = useState(false);
+  // Login debugger visibility
+  const [showLoginDebugger, setShowLoginDebugger] = useState(false);
   
   // Helper: Aggressive client cleanup (storage + cookies) to fix Safari re-login issues
   const clearClientAuth = () => {
@@ -74,6 +77,12 @@ function LoginPageContent() {
     setLoginState(prev => ({ ...prev, isClient: true }));
     // Show the announcement modal on first mount of the login page
     setShowAnnouncement(true);
+    // Enable Login Debugger based on query or localStorage
+    try {
+      const q = searchParams?.get('login_debug');
+      const ls = typeof window !== 'undefined' ? localStorage.getItem('ttm:login_debug') : null;
+      if (q === '1' || ls === '1') setShowLoginDebugger(true);
+    } catch {}
   }, []);
   
   // Ref to prevent multiple redirects
@@ -329,6 +338,26 @@ function LoginPageContent() {
       
       const result = await login(loginState.email, loginState.password, updateLoadingProgress);
       console.log('📋 SignIn result:', result);
+
+      // Immediate session verification after login attempt
+      try {
+        const { data: sessionRes, error: sessionErr } = await supabase.auth.getSession();
+        if (sessionErr) {
+          console.warn('🧪 Session check error after login:', sessionErr.message);
+        } else {
+          console.log('🧪 Session after login:', sessionRes?.session ? 'Active' : 'None');
+          if (sessionRes?.session && !redirectExecuted.current) {
+            const targetPath = getRedirectPath(searchParams?.get('redirect') || undefined);
+            console.log('🚀 Session present, SPA redirecting to:', targetPath);
+            redirectExecuted.current = true;
+            router.replace(targetPath);
+            // Stop further handling; SPA redirect initiated
+            return;
+          }
+        }
+      } catch (sessCheckErr) {
+        console.warn('🧪 Session post-login verification failed:', sessCheckErr);
+      }
 
       if (!result.success) {
         console.error('❌ Login failed:', result.error);
@@ -665,6 +694,26 @@ function LoginPageContent() {
           </div>
         </div>
       </div>
+
+      {/* Login Debugger toggle button */}
+      <button
+        type="button"
+        onClick={() => {
+          const next = !showLoginDebugger;
+          setShowLoginDebugger(next);
+          try { localStorage.setItem('ttm:login_debug', next ? '1' : '0'); } catch {}
+        }}
+        className="fixed bottom-4 right-4 z-40 px-3 py-2 rounded bg-red-700 text-white text-xs hover:bg-red-600 border border-red-400 shadow-lg"
+        aria-label="Toggle Login Debugger"
+      >
+        {showLoginDebugger ? 'Hide Login Debugger' : 'Show Login Debugger'}
+      </button>
+
+      {/* Login Debugger overlay */}
+      <LoginDebugger isVisible={showLoginDebugger} onToggle={() => {
+        setShowLoginDebugger(false);
+        try { localStorage.setItem('ttm:login_debug', '0'); } catch {}
+      }} />
 
       {/* Loading Overlay */}
       {loginState.isClient && loginState.showLoadingOverlay && (

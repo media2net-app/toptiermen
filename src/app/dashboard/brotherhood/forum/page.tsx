@@ -1,6 +1,8 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { toast } from 'react-hot-toast';
 
 
 // Force dynamic rendering to prevent navigator errors
@@ -23,15 +25,71 @@ interface ForumCategory {
 }
 
 const ForumOverview = () => {
+  const { user } = useSupabaseAuth();
   const [categories, setCategories] = useState<ForumCategory[]>([]);
+  const createTopic = async () => {
+    if (!user?.id) { toast.error('Log in om een topic te plaatsen'); return; }
+    if (!topicCategoryId || !topicTitle.trim() || !topicContent.trim()) {
+      toast.error('Kies een categorie en vul titel en bericht in');
+      return;
+    }
+    try {
+      setSubmitting(true);
+      const res = await fetch('/api/forum/create-topic', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          category_id: topicCategoryId,
+          title: topicTitle.trim(),
+          content: topicContent.trim(),
+          author_id: user.id
+        })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data?.error || 'Aanmaken mislukt');
+      }
+      toast.success('Topic geplaatst');
+      setShowNewTopic(false);
+      setTopicCategoryId('');
+      setTopicTitle('');
+      setTopicContent('');
+      // Refresh categories to reflect counts
+      fetchCategories();
+    } catch (e: any) {
+      toast.error(e.message || 'Er ging iets mis');
+    } finally {
+      setSubmitting(false);
+    }
+  };
   const [loading, setLoading] = useState(true);
   const [isClient, setIsClient] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // New Topic modal state
+  const [showNewTopic, setShowNewTopic] = useState(false);
+  const [topicCategoryId, setTopicCategoryId] = useState<number | ''>('');
+  const [topicTitle, setTopicTitle] = useState('');
+  const [topicContent, setTopicContent] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const modalRef = useRef<HTMLDivElement | null>(null);
+  const titleRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     setIsClient(true);
     fetchCategories();
   }, []);
+
+  // Auto-focus when modal opens
+  useEffect(() => {
+    if (showNewTopic) {
+      const id = window.setTimeout(() => {
+        try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch {}
+        try { modalRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch {}
+        try { titleRef.current?.focus(); } catch {}
+      }, 120);
+      return () => window.clearTimeout(id);
+    }
+  }, [showNewTopic]);
 
   const fetchCategories = async () => {
     setError(null);
@@ -114,7 +172,12 @@ const ForumOverview = () => {
       <div className="flex-1 grid grid-cols-1 gap-3 sm:gap-4 lg:gap-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 sm:mb-4 lg:mb-6 gap-3 sm:gap-4">
           <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white tracking-tight">Forum</h2>
-          <button className="w-full sm:w-auto px-3 sm:px-4 lg:px-6 py-2 sm:py-2 lg:py-3 rounded-lg lg:rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-bold text-sm lg:text-lg shadow hover:from-[#B6C948] hover:to-[#8BAE5A] transition-all">+ Start Nieuwe Discussie</button>
+          <button
+            onClick={() => setShowNewTopic(true)}
+            className="w-full sm:w-auto px-3 sm:px-4 lg:px-6 py-2 sm:py-2 lg:py-3 rounded-lg lg:rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-bold text-sm lg:text-lg shadow hover:from-[#B6C948] hover:to-[#8BAE5A] transition-all"
+          >
+            + Start Nieuwe Discussie
+          </button>
         </div>
         {categories.map((cat, idx) => (
           <Link key={cat.id} href={`/dashboard/brotherhood/forum/${cat.slug}`} className="group bg-[#232D1A]/90 rounded-xl lg:rounded-2xl shadow-lg lg:shadow-xl border border-[#3A4D23]/40 p-3 sm:p-4 lg:p-6 flex flex-col gap-2 sm:gap-3 lg:gap-4 hover:shadow-2xl hover:-translate-y-1 hover:border-[#FFD700] transition-all cursor-pointer no-underline">
@@ -176,6 +239,64 @@ const ForumOverview = () => {
         </div>
       </aside>
       </div>
+
+      {/* New Topic Modal */}
+      {showNewTopic && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div
+            ref={modalRef}
+            tabIndex={-1}
+            className="bg-[#232D1A] border border-[#3A4D23] rounded-2xl w-full max-w-2xl text-white overflow-hidden"
+          >
+            <div className="flex items-center justify-between p-4 border-b border-[#3A4D23]">
+              <h3 className="text-lg font-bold">Nieuwe discussie</h3>
+              <button onClick={() => setShowNewTopic(false)} className="px-2 py-1 rounded hover:bg-[#3A4D23]">✕</button>
+            </div>
+            <div className="p-4 space-y-4">
+              <div>
+                <label className="block text-sm text-gray-300 mb-1">Categorie</label>
+                <select
+                  value={topicCategoryId}
+                  onChange={(e) => setTopicCategoryId(Number(e.target.value) as any)}
+                  className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg p-2"
+                >
+                  <option value="">Kies een onderwerp</option>
+                  {categories.map(c => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm text-gray-300 mb-1">Titel</label>
+                <input
+                  ref={titleRef}
+                  value={topicTitle}
+                  onChange={(e) => setTopicTitle(e.target.value)}
+                  className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg p-2"
+                  placeholder="Korte, duidelijke titel"
+                  maxLength={120}
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-300 mb-1">Bericht</label>
+                <textarea
+                  value={topicContent}
+                  onChange={(e) => setTopicContent(e.target.value)}
+                  className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg p-3 min-h-[160px]"
+                  placeholder="Schrijf je bericht..."
+                  maxLength={5000}
+                />
+              </div>
+            </div>
+            <div className="p-4 border-t border-[#3A4D23] flex justify-end gap-2">
+              <button onClick={() => setShowNewTopic(false)} className="px-4 py-2 bg-[#3A4D23] rounded-lg hover:bg-[#4A5D33]">Annuleren</button>
+              <button onClick={() => createTopic()} disabled={submitting} className="px-5 py-2 rounded-lg bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-semibold hover:from-[#B6C948] hover:to-[#8BAE5A] disabled:opacity-60">
+                {submitting ? 'Plaatsen...' : 'Plaatsen'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
