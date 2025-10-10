@@ -41,14 +41,17 @@ export default function HLSVideoPlayer({
   const restoreAutoTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [qoe, setQoe] = useState<{effective?: string; bitrateKbps?: number; height?: number}>({});
   const [isMobile, setIsMobile] = useState(false);
+  const [isAndroid, setIsAndroid] = useState(false);
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
-    // Detect mobile viewport
+    // Detect mobile viewport and Android
     const checkMobile = () => typeof window !== 'undefined' && window.matchMedia('(max-width: 640px)').matches;
+    const checkAndroid = () => typeof window !== 'undefined' && /Android/i.test(navigator.userAgent);
     setIsMobile(checkMobile());
+    setIsAndroid(checkAndroid());
 
     let destroyed = false;
 
@@ -76,13 +79,14 @@ export default function HLSVideoPlayer({
           const isMobileViewport = typeof window !== 'undefined' ? window.matchMedia('(max-width: 640px)').matches : false;
           
           // 🚀 MOBILE OPTIMALISATIE: Balans tussen snelle start en smooth playback
-          // Verhoog buffer voor smooth playback, maar hou initiële load laag
-          const maxBufferLength = isMobileViewport ? 20 : 30; // Genoeg buffer voor smooth playback
-          const maxMaxBufferLength = isMobileViewport ? 40 : 60; // Ruime max buffer voor stabiliteit
-          const backBufferLength = isMobileViewport ? 10 : 20; // Behoud back-buffer voor terugzoeken
+          // 🤖 ANDROID FIX: Conservatievere buffer strategie om video freeze te voorkomen
+          const isAndroidDevice = /Android/i.test(navigator.userAgent);
+          const maxBufferLength = isAndroidDevice ? 15 : (isMobileViewport ? 20 : 30);
+          const maxMaxBufferLength = isAndroidDevice ? 30 : (isMobileViewport ? 40 : 60);
+          const backBufferLength = isAndroidDevice ? 5 : (isMobileViewport ? 10 : 20);
           
           // Progressieve buffer strategy: start met weinig, bouw op tijdens playback
-          const initialMaxBufferLength = isMobileViewport ? 5 : 10; // Snelle start
+          const initialMaxBufferLength = isAndroidDevice ? 3 : (isMobileViewport ? 5 : 10);
 
           const hls = new Hls({
             // VOD tuning for responsive seeks
@@ -287,6 +291,30 @@ export default function HLSVideoPlayer({
       setTimeout(() => {
         stallCountRef.current = 0;
       }, 10000);
+      
+      // 🤖 ANDROID FIX: Watchdog om frozen frames te detecteren
+      // Android kan soms audio blijven afspelen terwijl video frames bevriezen
+      if (isAndroid && video && !video.paused) {
+        let lastTime = video.currentTime;
+        const frameCheckInterval = setInterval(() => {
+          if (video.paused) {
+            clearInterval(frameCheckInterval);
+            return;
+          }
+          const currentTime = video.currentTime;
+          // Als tijd niet vooruit gaat maar video niet gepauzeerd is = frozen frames
+          if (Math.abs(currentTime - lastTime) < 0.01) {
+            console.log('[Android Fix] Frozen frames detected, restarting playback...');
+            // Force refresh door tiny seek
+            video.currentTime = currentTime + 0.01;
+            try { hlsRef.current?.startLoad?.(); } catch {}
+          }
+          lastTime = currentTime;
+        }, 2000); // Check elke 2 seconden
+        
+        // Cleanup na 30 seconden (als video smooth loopt)
+        setTimeout(() => clearInterval(frameCheckInterval), 30000);
+      }
     };
     const onSeeking = () => {
       setIsBuffering(true);
@@ -353,9 +381,16 @@ export default function HLSVideoPlayer({
         autoPlay={autoPlay}
         muted={muted}
         playsInline
-        preload={isMobile ? "metadata" : "auto"}
+        preload={isAndroid ? "none" : (isMobile ? "metadata" : "auto")}
         crossOrigin="anonymous"
         webkit-playsinline="true"
+        // 🤖 ANDROID FIX: Force software decoding hint om hardware decoder freeze te voorkomen
+        {...(isAndroid ? {
+          'x5-video-player-type': 'h5',
+          'x5-video-player-fullscreen': 'true',
+          'x5-video-orientation': 'portraint',
+          'controlsList': 'nodownload'
+        } : {})}
       />
 
       {/* QoE overlay (debug) removed */}
