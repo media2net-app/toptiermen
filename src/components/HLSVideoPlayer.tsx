@@ -136,7 +136,7 @@ export default function HLSVideoPlayer({
           hls.on(Hls.Events.MANIFEST_PARSED, async () => {
             setIsBuffering(false);
             // Alleen autoplay op desktop
-            if (autoPlay && !isMobileViewport) {
+            if (autoPlay && !checkMobile()) {
               try {
                 await video.play();
               } catch (e) {
@@ -148,7 +148,7 @@ export default function HLSVideoPlayer({
         } else {
           // Fallback
           video.src = src;
-          if (autoPlay && !isMobileViewport) {
+          if (autoPlay && !checkMobile()) {
             await video.play().catch(() => {});
           }
           setIsBuffering(false);
