@@ -6,6 +6,9 @@ import { getCacheInfo, checkForCacheIssues, clearAppSpecificCache, globalLoading
 import { supabase } from '@/lib/supabase';
 
 export default function DebugPanel() {
+  // Debug panel is permanently disabled for security reasons
+  return null;
+  
   const { showDebug, toggleDebug } = useDebug();
   const { user, profile, loading, isAdmin } = useSupabaseAuth();
   const [cacheInfo, setCacheInfo] = useState<any>({});

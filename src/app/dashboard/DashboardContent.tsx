@@ -1443,23 +1443,6 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
                 </div>
               )}
             </div>
-            
-            {/* Debug Toggle for Test Users */}
-            {(isTestUser || isAdmin || user?.email?.toLowerCase().includes('test')) && (
-              <div className="mt-3 pt-3 border-t border-[#3A4D23]">
-                <button
-                  onClick={toggleDebug}
-                  className={`w-full px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
-                    showDebug 
-                      ? 'bg-[#8BAE5A] text-black' 
-                      : 'bg-[#3A4D23] text-[#8BAE5A] hover:bg-[#4A5D33]'
-                  }`}
-                >
-                  {!sidebarCollapsed ? 'Debug Mode' : 'D'}
-                  {showDebug && !sidebarCollapsed && ' ✓'}
-                </button>
-              </div>
-            )}
           </div>
 
           {/* Collapse Button */}
@@ -1653,7 +1636,6 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
           />
         )}
 
-        {typeof window !== 'undefined' && showDebug && <DebugPanel />}
 
         {/* TestUserFeedback - Removed */}
 

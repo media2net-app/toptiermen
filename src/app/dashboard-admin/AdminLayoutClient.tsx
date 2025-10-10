@@ -575,19 +575,6 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
             
 
             
-            {/* Debug Toggle */}
-            <div className="hidden sm:flex items-center gap-2">
-              <BugAntIcon className="w-4 h-4 text-[#B6C948]" />
-              <select
-                value={showDebug ? 'true' : 'false'}
-                onChange={(e) => setShowDebug(e.target.value === 'true')}
-                className="px-2 py-1 rounded-lg bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-1 focus:ring-[#8BAE5A] text-xs"
-              >
-                <option value="false">Debug OFF</option>
-                <option value="true">Debug ON</option>
-              </select>
-            </div>
-            
 
             
             <Link 
