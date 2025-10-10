@@ -16,7 +16,8 @@ interface OnlineUser {
   email: string;
   full_name: string | null;
   role: string;
-  last_active: string;
+  last_active: string | null;
+  last_login: string | null;
   onboarding_completed: boolean;
   current_step: number | null;
   welcome_video_watched: boolean;
@@ -43,11 +44,11 @@ export default function LiveTrackingPage() {
     try {
       setLoading(true);
 
-      // Fetch alle gebruikers met hun laatste activiteit en onboarding status
+      // Fetch alle gebruikers met hun laatste activiteit, login en onboarding status
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
-        .select('id, email, full_name, role, last_active, subscription_status, created_at')
-        .order('last_active', { ascending: false });
+        .select('id, email, full_name, role, last_active, last_login, subscription_status, created_at')
+        .order('last_login', { ascending: false, nullsFirst: false });
 
       if (profilesError) throw profilesError;
 
@@ -115,15 +116,31 @@ export default function LiveTrackingPage() {
     return `Stap ${step}: ${steps[step - 1] || 'Onbekend'}`;
   };
 
-  const getTimeSince = (lastActive: string) => {
-    const lastActiveDate = new Date(lastActive);
+  const getTimeSince = (timestamp: string) => {
+    const date = new Date(timestamp);
     const now = new Date();
-    const diffSeconds = Math.floor((now.getTime() - lastActiveDate.getTime()) / 1000);
+    const diffSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
     
     if (diffSeconds < 60) return `${diffSeconds}s geleden`;
     if (diffSeconds < 3600) return `${Math.floor(diffSeconds / 60)}m geleden`;
     if (diffSeconds < 86400) return `${Math.floor(diffSeconds / 3600)}u geleden`;
     return `${Math.floor(diffSeconds / 86400)}d geleden`;
+  };
+
+  const formatDateTime = (timestamp: string | null) => {
+    if (!timestamp) return 'Nooit ingelogd';
+    const date = new Date(timestamp);
+    const dateStr = date.toLocaleDateString('nl-NL', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+    const timeStr = date.toLocaleTimeString('nl-NL', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+    return `${dateStr} om ${timeStr}`;
   };
 
   return (
@@ -269,6 +286,7 @@ export default function LiveTrackingPage() {
                   <th className="px-6 py-4 text-left text-sm font-semibold text-[#8BAE5A]">Rol</th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-[#8BAE5A]">Onboarding</th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-[#8BAE5A]">Abonnement</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-[#8BAE5A]">Laatste Login</th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-[#8BAE5A]">Laatst Actief</th>
                 </tr>
               </thead>
@@ -340,6 +358,18 @@ export default function LiveTrackingPage() {
                         </span>
                       </td>
                       <td className="px-6 py-4">
+                        <div className="text-white">
+                          <div className="font-semibold text-sm">
+                            {formatDateTime(user.last_login)}
+                          </div>
+                          {user.last_login && (
+                            <div className="text-[#8BAE5A] text-xs mt-1">
+                              {getTimeSince(user.last_login)}
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
                         <div className="flex items-center gap-2 text-[#8BAE5A]">
                           <ClockIcon className="w-4 h-4" />
                           <span className="text-sm">
@@ -365,8 +395,9 @@ export default function LiveTrackingPage() {
         <ul className="text-[#8BAE5A] text-sm space-y-2">
           <li>• Gebruikers worden als "online" gemarkeerd als ze actief waren in de laatste 5 minuten</li>
           <li>• De data wordt automatisch elke 10 seconden ververst</li>
+          <li>• <strong>Laatste Login</strong>: Tijdstip wanneer gebruiker voor het laatst is ingelogd (last_login)</li>
+          <li>• <strong>Laatst Actief</strong>: Meest recente activiteit op het platform (last_active)</li>
           <li>• Onboarding stappen: 1=Welkom video, 2=Basis info, 3=Training, 4=Voeding, 5=Afronding</li>
-          <li>• Laatste activiteit wordt bijgehouden in de database (last_active kolom)</li>
         </ul>
       </div>
     </div>
