@@ -38,7 +38,8 @@ import {
   SparklesIcon,
   StarIcon as CrownIcon,
   CheckCircleIcon,
-  KeyIcon
+  KeyIcon,
+  SignalIcon
 } from '@heroicons/react/24/outline';
 import { SwipeIndicator } from '@/components/ui';
 import SessionMonitor from '@/components/SessionMonitor';
@@ -136,6 +137,7 @@ const SidebarContent = ({ pathname }: { pathname: string }) => {
       label: 'ANALYTICS', 
       type: 'section',
       items: [
+        { label: 'Live Platform Tracking', icon: SignalIcon, href: '/dashboard-admin/live-tracking', badge: 'LIVE' },
         { label: 'Community Health', icon: ChartBarIcon, href: '/dashboard-admin?tab=overview' },
         { label: 'Content Performance', icon: AcademicCapIcon, href: '/dashboard-admin?tab=content' },
         { label: 'Actiegerichte Inzichten', icon: StarIcon, href: '/dashboard-admin?tab=actions' },
