@@ -63,7 +63,10 @@ export default function HLSVideoPlayer({
       const canPlayNative = video.canPlayType('application/vnd.apple.mpegurl');
       if (canPlayNative) {
         video.src = src;
-        await video.play().catch(() => {});
+        // Only autoplay if explicitly requested AND not on mobile
+        if (autoPlay && !checkMobile()) {
+          await video.play().catch(() => {});
+        }
         setIsBuffering(false);
         return;
       }
@@ -210,8 +213,8 @@ export default function HLSVideoPlayer({
               }
             }, 5000);
             
-            // Direct starten bij autoPlay
-            if (autoPlay) {
+            // Direct starten bij autoPlay (maar niet op mobiel)
+            if (autoPlay && !isMobile) {
               try { 
                 await video.play(); 
                 setIsBuffering(false);
@@ -234,7 +237,10 @@ export default function HLSVideoPlayer({
         } else {
           // Fallback: try setting src directly
           video.src = src;
-          await video.play().catch(() => {});
+          // Only autoplay if explicitly requested AND not on mobile
+          if (autoPlay && !isMobile) {
+            await video.play().catch(() => {});
+          }
           setIsBuffering(false);
         }
       } catch (err: any) {
@@ -378,7 +384,7 @@ export default function HLSVideoPlayer({
         className={className}
         controls={controls}
         poster={poster}
-        autoPlay={autoPlay}
+        autoPlay={false}
         muted={muted}
         playsInline
         preload={isAndroid ? "none" : (isMobile ? "metadata" : "auto")}
