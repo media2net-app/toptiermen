@@ -43,11 +43,11 @@ interface UserProfile {
 }
 
 const tabs = [
-  { key: 'publiek', label: 'Mijn Publieke Profiel', icon: UserGroupIcon },
-  { key: 'voortgang', label: 'Mijn Voortgang', icon: TrophyIcon },
-  { key: 'affiliate', label: 'Affiliate Marketing', icon: FireIcon },
-  { key: 'instellingen', label: 'Account & Instellingen', icon: ShieldCheckIcon },
-  { key: 'privacy', label: 'Privacy & Beveiliging', icon: BellIcon },
+  { key: 'publiek', label: 'Mijn Publieke Profiel', mobileLabel: 'Profiel', icon: UserGroupIcon },
+  { key: 'voortgang', label: 'Mijn Voortgang', mobileLabel: 'Voortgang', icon: TrophyIcon },
+  { key: 'affiliate', label: 'Affiliate Marketing', mobileLabel: 'Affiliate', icon: FireIcon },
+  { key: 'instellingen', label: 'Account & Instellingen', mobileLabel: 'Account', icon: ShieldCheckIcon },
+  { key: 'privacy', label: 'Privacy & Beveiliging', mobileLabel: 'Privacy', icon: BellIcon },
 ];
 
 const interestOptions = [
@@ -1151,7 +1151,7 @@ export default function MijnProfiel() {
                 >
                   <Icon className="w-4 h-4 sm:w-4.5 sm:h-4.5 md:w-5 md:h-5 flex-shrink-0" />
                   {/* Short label on mobile, full label on md+ */}
-                  <span className="inline md:hidden truncate">{tab.label.split(' ')[0]}</span>
+                  <span className="inline md:hidden truncate">{tab.mobileLabel}</span>
                   <span className="hidden md:inline truncate">{tab.label}</span>
                 </button>
               );

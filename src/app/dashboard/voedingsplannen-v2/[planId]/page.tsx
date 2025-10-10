@@ -7,7 +7,6 @@ import { useSubscription } from '@/hooks/useSubscription';
 import { motion } from 'framer-motion';
 import { 
   BookOpenIcon, 
-  RocketLaunchIcon, 
   ChartBarIcon,
   UserIcon,
   ClockIcon,
@@ -77,6 +76,7 @@ export default function NutritionPlanDetailPage() {
   const [originalPlanData, setOriginalPlanData] = useState<OriginalPlanData | null>(null);
   const [loading, setLoading] = useState(false);
   const [loadingOriginal, setLoadingOriginal] = useState(false);
+  const [loadingStep, setLoadingStep] = useState(0); // 0: generating, 1: kcal, 2: protein, 3: carbs, 4: fat
   const [error, setError] = useState<string | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile>({
     weight: 100,
@@ -103,16 +103,35 @@ export default function NutritionPlanDetailPage() {
   const resetModalRef = useRef<HTMLDivElement | null>(null);
   // Check if this plan is the active/locked plan
   const [isPlanLocked, setIsPlanLocked] = useState<boolean>(false);
-  // Scaling factor derived from weight (baseline 100kg)
-  // TABEL FORMULE: clamp(0.5, 1.5, gewicht/100)
+  // Scaling factor based on FULL TTM formula (weight, activity, goal)
+  // This ensures the plan scales correctly for ALL combinations
   const scalingFactor = useMemo(() => {
     const w = Number(userProfile?.weight || 100);
     if (!Number.isFinite(w) || w <= 0) return 1;
     
+    // Calculate baseline TTM (100kg, moderate activity, maintenance)
+    const baselineTTM = 100 * 22 * 1.3; // 2860 kcal
+    
+    // Calculate user's TTM (same factors as detail page)
+    let userActivityFactor = 1.3; // Staand (Matig actief) - default
+    if (userProfile?.activity_level === 'sedentary') userActivityFactor = 1.1; // Zittend (Licht actief)
+    else if (userProfile?.activity_level === 'very_active') userActivityFactor = 1.6; // Lopend (Zeer actief)
+    
+    let goalAdjustment = 0;
+    if (userProfile?.fitness_goal === 'droogtrainen') {
+      goalAdjustment = -500;
+    } else if (userProfile?.fitness_goal === 'spiermassa') {
+      goalAdjustment = 400;
+    }
+    
+    const userTTM = (w * 22 * userActivityFactor) + goalAdjustment;
+    
+    // Calculate scaling factor as ratio of TTMs
+    const rawFactor = userTTM / baselineTTM;
+    
     // Clamp tussen 0.5x en 1.5x voor veilige range
-    const rawFactor = w / 100;
     return Math.max(0.5, Math.min(1.5, rawFactor));
-  }, [userProfile?.weight]);
+  }, [userProfile?.weight, userProfile?.activity_level, userProfile?.fitness_goal]);
 
   // Reset modal state when component mounts
   useEffect(() => {
@@ -120,6 +139,29 @@ export default function NutritionPlanDetailPage() {
     setEditingMealType('');
     setEditingDay('');
   }, []);
+
+  // Animate loading steps
+  useEffect(() => {
+    // Only animate when actually loading data
+    if (!loadingOriginal && originalPlanData) {
+      setLoadingStep(0);
+      return;
+    }
+    
+    const steps = [0, 1, 2, 3, 4]; // generating, kcal, protein, carbs, fat
+    let currentIndex = 0;
+    
+    const interval = setInterval(() => {
+      currentIndex++;
+      if (currentIndex < steps.length) {
+        setLoadingStep(steps[currentIndex]);
+      } else {
+        clearInterval(interval);
+      }
+    }, 400); // Change step every 400ms
+    
+    return () => clearInterval(interval);
+  }, [loadingOriginal, originalPlanData]);
 
   // Load ingredient lookup from API to ensure we use the same macros as backend
   useEffect(() => {
@@ -231,6 +273,8 @@ export default function NutritionPlanDetailPage() {
     try {
       console.log('🔧 DEBUG: loadOriginalPlanData called with planId:', planId);
       setLoadingOriginal(true);
+      setLoadingStep(0); // Reset to generating step
+      
       // Prefer admin meals endpoint to ensure we mirror exact backend meals + nutrition
       const response = await fetch(`/api/admin/plan-meals?planId=${planId}`);
       
@@ -241,12 +285,18 @@ export default function NutritionPlanDetailPage() {
       const data = await response.json();
       console.log('🔧 DEBUG: Plan meals data received:', data);
       const plan = data?.plan || data;
+      console.log('🔧 DEBUG: Plan ID:', plan?.id, 'Plan name:', plan?.name);
+      console.log('🔧 DEBUG: Plan target_calories:', plan?.target_calories);
+      console.log('🔧 DEBUG: Monday data:', plan?.meals?.weekly_plan?.maandag);
+      console.log('🔧 DEBUG: Monday ontbijt:', plan?.meals?.weekly_plan?.maandag?.ontbijt);
+      console.log('🔧 DEBUG: Monday ontbijt ingredients:', plan?.meals?.weekly_plan?.maandag?.ontbijt?.ingredients);
       setOriginalPlanData(plan);
     } catch (err) {
       console.error('🔧 DEBUG: Error loading original plan data:', err);
       setError(err instanceof Error ? err.message : 'Failed to load plan data');
     } finally {
       setLoadingOriginal(false);
+      setLoadingStep(0);
     }
   }, []);
 
@@ -269,13 +319,26 @@ export default function NutritionPlanDetailPage() {
       console.log('✅ User profile fetched:', data);
       
       if (data.profile) {
+        // Map database goal values (cut, maintain, bulk) to Dutch terms (droogtrainen, onderhoud, spiermassa)
+        const goalMapping: Record<string, 'droogtrainen' | 'onderhoud' | 'spiermassa'> = {
+          'cut': 'droogtrainen',
+          'maintain': 'onderhoud',
+          'maintenance': 'onderhoud',
+          'bulk': 'spiermassa'
+        };
+        
+        const dbGoal = data.profile.goal || data.profile.fitness_goal || 'maintain';
+        const mappedGoal = goalMapping[dbGoal] || 'onderhoud';
+        
+        console.log('🎯 Goal mapping:', { dbGoal, mappedGoal });
+        
         setUserProfile({
           weight: data.profile.weight || 100,
           height: data.profile.height || 180,
           age: data.profile.age || 30,
           gender: data.profile.gender || 'male',
           activity_level: data.profile.activity_level || 'moderate',
-          fitness_goal: data.profile.fitness_goal || 'onderhoud'
+          fitness_goal: mappedGoal
         });
       }
     } catch (error) {
@@ -656,6 +719,48 @@ export default function NutritionPlanDetailPage() {
     return base >= 1 ? Math.max(1, v) : v;
   };
 
+  // TTM-based calories calculation (same formula as overview page)
+  const userTTMCalories = useMemo(() => {
+    if (!userProfile) return 2574; // Default fallback
+    
+    const weight = Number(userProfile.weight) || 100;
+    
+    // Activity factor based on activity level
+    let activityFactor = 1.3; // Staand (Matig actief) - default
+    if (userProfile.activity_level === 'sedentary') {
+      activityFactor = 1.1; // Zittend (Licht actief)
+    } else if (userProfile.activity_level === 'very_active') {
+      activityFactor = 1.6; // Lopend (Zeer actief)
+    }
+    
+    // TTM Formula: weight × 22 × activity factor (= onderhoud calorieën)
+    const maintenanceCalories = Math.round(weight * 22 * activityFactor);
+    
+    // Goal adjustment - Use database values (Dutch terms)
+    let goalAdjustment = 0;
+    if (userProfile.fitness_goal === 'droogtrainen') {
+      goalAdjustment = -500; // Droogtrainen: -500 kcal
+    } else if (userProfile.fitness_goal === 'spiermassa') {
+      goalAdjustment = 400; // Spiermassa: +400 kcal
+    }
+    // 'maintenance'/'onderhoud' blijft 0 (geen aanpassing)
+    
+    const targetCalories = maintenanceCalories + goalAdjustment;
+    
+    console.log('🎯 Detail Page TTM Calculation:', {
+      weight,
+      activityLevel: userProfile.activity_level,
+      activityFactor,
+      fitnessGoal: userProfile.fitness_goal,
+      maintenanceCalories,
+      goalAdjustment,
+      calculation: `${weight} × 22 × ${activityFactor} ${goalAdjustment >= 0 ? '+' : ''}${goalAdjustment}`,
+      result: targetCalories
+    });
+    
+    return targetCalories;
+  }, [userProfile?.weight, userProfile?.activity_level, userProfile?.fitness_goal]);
+
   // V3 targets: derive from selected day's backend values, then scale by weight factor
   const personalizedMacros = useMemo(() => {
     const factor = scalingFactor || 1;
@@ -707,13 +812,55 @@ export default function NutritionPlanDetailPage() {
         baseCal = Math.round(t.cal); baseP = Math.round(t.p); baseC = Math.round(t.c); baseF = Math.round(t.f);
       }
     }
+    // Use TTM calories instead of scaled base calories
+    const targetCalories = userTTMCalories;
+    
+    // Get plan percentages from selectedPlan or originalPlanData
+    const planData: any = selectedPlan || originalPlanData;
+    const proteinPercentage = planData?.protein_percentage ?? planData?.meals?.protein_percentage ?? null;
+    const carbsPercentage   = planData?.carbs_percentage   ?? planData?.meals?.carbs_percentage   ?? null;
+    const fatPercentage     = planData?.fat_percentage     ?? planData?.meals?.fat_percentage     ?? null;
+    
+    // If percentages are available, use them
+    if (proteinPercentage && carbsPercentage && fatPercentage) {
     return {
-      calories: Math.round(baseCal * factor),
-      protein: Math.round(baseP * factor),
-      carbs: Math.round(baseC * factor),
-      fat: Math.round(baseF * factor),
+        calories: targetCalories,
+        protein: Math.round((targetCalories * proteinPercentage / 100) / 4),
+        carbs: Math.round((targetCalories * carbsPercentage / 100) / 4),
+        fat: Math.round((targetCalories * fatPercentage / 100) / 9),
+      };
+    }
+    
+    // If percentages not available, use plan target macros and scale them
+    const planTargetProtein = planData?.target_protein ?? planData?.meals?.target_protein ?? null;
+    const planTargetCarbs   = planData?.target_carbs   ?? planData?.meals?.target_carbs   ?? null;
+    const planTargetFat     = planData?.target_fat     ?? planData?.meals?.target_fat     ?? null;
+    const planTargetCalories = planData?.target_calories ?? planData?.meals?.target_calories ?? baseCal;
+    
+    const hasAllMacroGrams = [planTargetProtein, planTargetCarbs, planTargetFat].every(v => typeof v === 'number' && !Number.isNaN(v));
+    if (hasAllMacroGrams && planTargetCalories) {
+      const scale = targetCalories / planTargetCalories;
+      return {
+        calories: targetCalories,
+        protein: Math.round((planTargetProtein as number) * scale),
+        carbs: Math.round((planTargetCarbs as number) * scale),
+        fat: Math.round((planTargetFat as number) * scale),
+      };
+    }
+    
+    // Fallback: use carnivore-aware defaults
+    const isCarnivore = String(planData?.name || '').toLowerCase().includes('carnivoor');
+    const pPct = isCarnivore ? 35 : 35;
+    const cPct = isCarnivore ? 5  : 40;
+    const fPct = isCarnivore ? 60 : 25;
+    
+    return {
+      calories: targetCalories,
+      protein: Math.round((targetCalories * pPct) / 100 / 4),
+      carbs: Math.round((targetCalories * cPct) / 100 / 4),
+      fat: Math.round((targetCalories * fPct) / 100 / 9),
     };
-  }, [scalingFactor, originalPlanData, selectedDay]);
+  }, [scalingFactor, originalPlanData, selectedDay, selectedPlan, userTTMCalories]);
 
   const isPieceUnit = (unit: string) =>
     ['per_piece','piece','pieces','per_stuk','stuk','stuks','per_plakje','plakje','plakjes','plak','per_plak','sneetje','per_sneetje','handje','per_handful']
@@ -727,15 +874,101 @@ export default function NutritionPlanDetailPage() {
   // moved early return blocks below (after all hooks)
 
   
-  // Get current day totals - recalculate when customAmounts change
+  // Get current day totals - USE BACKEND DATA DIRECTLY (already correct in DB)
   const dayTotals = useMemo(() => {
-    if (!originalPlanData) {
+    if (!originalPlanData?.meals?.weekly_plan?.[selectedDay]) {
       console.log('🔄 No originalPlanData available, returning zeros');
       return { calories: 0, protein: 0, carbs: 0, fat: 0 };
     }
-    console.log('🔄 Recalculating day totals due to customAmounts change');
-    return calculateDayTotals(selectedDay);
-  }, [selectedDay, customAmounts, originalPlanData, scalingFactor, finalAdjustFactor, personalizedMacros]);
+    
+    console.log('🔄 Calculating day totals from backend nutrition data');
+    const dayData: any = originalPlanData.meals.weekly_plan[selectedDay];
+    let t = { calories: 0, protein: 0, carbs: 0, fat: 0 } as any;
+    
+    // Sum up all meal nutrition values from backend
+    Object.values(dayData).forEach((meal: any) => {
+      if (meal?.nutrition) {
+        t.calories += Number(meal.nutrition.calories) || 0;
+        t.protein += Number(meal.nutrition.protein) || 0;
+        t.carbs += Number(meal.nutrition.carbs) || 0;
+        t.fat += Number(meal.nutrition.fat) || 0;
+      }
+    });
+    
+    // STEP 1: Apply simple proportional scaling
+    let scaledCalories = Math.round(t.calories * scalingFactor);
+    let scaledProtein = Math.round(t.protein * scalingFactor * 10) / 10;
+    let scaledCarbs = Math.round(t.carbs * scalingFactor * 10) / 10;
+    let scaledFat = Math.round(t.fat * scalingFactor * 10) / 10;
+    
+    console.log('🔧 Backend totals (100kg baseline):', t);
+    console.log('🔧 Scaled totals (simple scaling):', {
+      calories: scaledCalories,
+      protein: scaledProtein,
+      carbs: scaledCarbs,
+      fat: scaledFat
+    });
+    
+    // STEP 2: Check if we need intelligent macro-optimization
+    // Get target macros from personalizedMacros (calculated based on TTM + plan percentages)
+    const targetCalories = userTTMCalories;
+    const planData: any = selectedPlan || originalPlanData;
+    const proteinPct = planData?.protein_percentage ?? planData?.meals?.protein_percentage ?? 35;
+    const carbsPct = planData?.carbs_percentage ?? planData?.meals?.carbs_percentage ?? 5;
+    const fatPct = planData?.fat_percentage ?? planData?.meals?.fat_percentage ?? 60;
+    
+    const targetProtein = Math.round((targetCalories * proteinPct / 100) / 4);
+    const targetCarbs = Math.round((targetCalories * carbsPct / 100) / 4);
+    const targetFat = Math.round((targetCalories * fatPct / 100) / 9);
+    
+    // Calculate percentages
+    const proteinPercentage = targetProtein > 0 ? Math.round((scaledProtein / targetProtein) * 100) : 100;
+    const carbsPercentage = targetCarbs > 0 ? Math.round((scaledCarbs / targetCarbs) * 100) : 100;
+    const fatPercentage = targetFat > 0 ? Math.round((scaledFat / targetFat) * 100) : 100;
+    const caloriesPercentage = targetCalories > 0 ? Math.round((scaledCalories / targetCalories) * 100) : 100;
+    
+    // Check if all macros are within green range (95-105%)
+    const allGreen = [caloriesPercentage, proteinPercentage, carbsPercentage, fatPercentage].every(
+      pct => pct >= 95 && pct <= 105
+    );
+    
+    // STEP 3: INTELLIGENT MACRO-TARGETED SCALING
+    // Only apply if simple scaling didn't achieve 4x green
+    if (!allGreen) {
+      console.log('⚠️ Simple scaling not optimal, applying intelligent macro-optimization');
+      console.log('📊 Target macros:', { targetProtein, targetCarbs, targetFat, targetCalories });
+      console.log('📊 Current percentages:', { proteinPercentage, carbsPercentage, fatPercentage, caloriesPercentage });
+      
+      // Calculate individual scaling factors per macro to reach 100%
+      const proteinAdjustment = targetProtein / scaledProtein;
+      const carbsAdjustment = targetCarbs / scaledCarbs;
+      const fatAdjustment = targetFat / scaledFat;
+      
+      // Apply macro-specific scaling
+      scaledProtein = Math.round((scaledProtein * proteinAdjustment) * 10) / 10;
+      scaledCarbs = Math.round((scaledCarbs * carbsAdjustment) * 10) / 10;
+      scaledFat = Math.round((scaledFat * fatAdjustment) * 10) / 10;
+      
+      // Recalculate calories based on optimized macros
+      scaledCalories = Math.round((scaledProtein * 4) + (scaledCarbs * 4) + (scaledFat * 9));
+      
+      console.log('✅ Optimized totals:', {
+        calories: scaledCalories,
+        protein: scaledProtein,
+        carbs: scaledCarbs,
+        fat: scaledFat
+      });
+    } else {
+      console.log('✅ Simple scaling already optimal (4x green)');
+    }
+    
+    return {
+      calories: scaledCalories,
+      protein: scaledProtein,
+      carbs: scaledCarbs,
+      fat: scaledFat
+    };
+  }, [selectedDay, originalPlanData, scalingFactor, userTTMCalories, selectedPlan]);
 
   // Debug helpers inside component
   const backendTotals = useMemo(() => {
@@ -918,7 +1151,7 @@ export default function NutritionPlanDetailPage() {
 
   // Debug: per-meal comparison between backend nutrition and recomputed ingredients
   const mealComparisons = useMemo(() => {
-    const out: Array<{ mealType: string; label: string; backend: DayTotals; computed: DayTotals; delta: DayTotals } > = [];
+    const out: Array<{ mealType: string; label: string; backend: DayTotals; computed: DayTotals; delta: DayTotals }> = [];
     const dayData: any = originalPlanData?.meals?.weekly_plan?.[selectedDay];
     if (!dayData) return out;
     const mealOrder = ['ontbijt','ochtend_snack','lunch','lunch_snack','diner','avond_snack'];
@@ -976,45 +1209,220 @@ export default function NutritionPlanDetailPage() {
     return out;
   }, [originalPlanData, selectedDay, customAmounts]);
 
+  // Show loading modal if we're loading OR if we don't have data yet
+  const showLoadingModal = loadingOriginal || (!originalPlanData && !error);
+
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white">
-      {/* Header */}
-      <div className="bg-[#181F17] border-b border-[#2A2A2A] p-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row items-start md:items-stretch gap-3 md:gap-4 mb-4">
-            {/* Title row - 50% width on desktop */}
-            <div className="order-2 md:order-1 flex items-center gap-3 md:gap-4 w-full md:w-1/2">
-              {!isPlanLocked && (
-                <button
-                  onClick={() => router.push('/dashboard/voedingsplannen-v2')}
-                  className="px-4 py-2 bg-[#232D1A] hover:bg-[#2A2A2A] rounded-lg transition-colors text-sm text-gray-300 hover:text-white whitespace-nowrap"
-                >
-                  ← Terug naar overzicht
-                </button>
-              )}
-              <RocketLaunchIcon className="h-8 w-8 text-[#8BAE5A] flex-shrink-0" />
-              <h1 className="text-2xl font-bold whitespace-nowrap overflow-hidden text-ellipsis md:whitespace-normal md:overflow-visible">{selectedPlan?.name ?? 'Voedingsplan'}</h1>
+      {/* Loading Modal - Render first so it shows immediately */}
+      {showLoadingModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-[#181F17] border-2 border-[#8BAE5A] rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl"
+          >
+            {/* Main Title */}
+            <div className="text-center mb-8">
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                className="inline-block mb-4"
+              >
+                <FireIcon className="w-16 h-16 text-[#8BAE5A]" />
+              </motion.div>
+              <h2 className="text-2xl font-bold text-white mb-2">
+                Persoonlijk voedingsplan wordt gegenereerd...
+              </h2>
+              <p className="text-gray-400 text-sm">
+                Even geduld, we berekenen jouw macronutriënten
+              </p>
             </div>
 
-            {/* Locked banner - 50% width on desktop */}
-            {isPlanLocked && (
-              <div className="order-1 md:order-2 w-full md:w-1/2">
-                <div className="flex items-center justify-between bg-[#111511] border border-[#2F3E22] rounded-lg p-3 text-sm h-full">
-                  <div className="pr-3">
-                    <div className="text-white font-semibold">Je plan is vergrendeld</div>
-                    <div className="text-gray-300">Volg je plan minimaal 4 weken. Wisselen? Reset hieronder.</div>
-                  </div>
-                  <button onClick={handleResetClick} className="px-3 py-1.5 bg-red-600/20 border border-red-500/30 text-red-400 rounded hover:bg-red-600/30 whitespace-nowrap">Reset plan</button>
-                </div>
-              </div>
-            )}
-          </div>
-          <p className="text-gray-400">{selectedPlan?.description ?? ''}</p>
-        </div>
-      </div>
+            {/* Loading Steps */}
+            <div className="space-y-4">
+              {/* Step 1: Kcal */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ 
+                  opacity: loadingStep >= 1 ? 1 : 0.3,
+                  x: 0
+                }}
+                className={`flex items-center gap-3 p-3 rounded-lg border ${
+                  loadingStep >= 1 
+                    ? 'bg-[#8BAE5A]/20 border-[#8BAE5A]' 
+                    : 'bg-[#232D1A] border-[#3A4D23]'
+                }`}
+              >
+                {loadingStep >= 1 ? (
+                  <CheckCircleIcon className="w-6 h-6 text-[#8BAE5A]" />
+                ) : (
+                  <div className="w-6 h-6 rounded-full border-2 border-gray-600" />
+                )}
+                <span className={`font-semibold ${loadingStep >= 1 ? 'text-[#8BAE5A]' : 'text-gray-500'}`}>
+                  Calorieën berekenen
+                </span>
+              </motion.div>
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto p-6">
+              {/* Step 2: Protein */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ 
+                  opacity: loadingStep >= 2 ? 1 : 0.3,
+                  x: 0
+                }}
+                transition={{ delay: 0.1 }}
+                className={`flex items-center gap-3 p-3 rounded-lg border ${
+                  loadingStep >= 2 
+                    ? 'bg-[#8BAE5A]/20 border-[#8BAE5A]' 
+                    : 'bg-[#232D1A] border-[#3A4D23]'
+                }`}
+              >
+                {loadingStep >= 2 ? (
+                  <CheckCircleIcon className="w-6 h-6 text-[#8BAE5A]" />
+                ) : (
+                  <div className="w-6 h-6 rounded-full border-2 border-gray-600" />
+                )}
+                <span className={`font-semibold ${loadingStep >= 2 ? 'text-[#8BAE5A]' : 'text-gray-500'}`}>
+                  Eiwitten optimaliseren
+                </span>
+              </motion.div>
+
+              {/* Step 3: Carbs */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ 
+                  opacity: loadingStep >= 3 ? 1 : 0.3,
+                  x: 0
+                }}
+                transition={{ delay: 0.2 }}
+                className={`flex items-center gap-3 p-3 rounded-lg border ${
+                  loadingStep >= 3 
+                    ? 'bg-[#8BAE5A]/20 border-[#8BAE5A]' 
+                    : 'bg-[#232D1A] border-[#3A4D23]'
+                }`}
+              >
+                {loadingStep >= 3 ? (
+                  <CheckCircleIcon className="w-6 h-6 text-[#8BAE5A]" />
+                ) : (
+                  <div className="w-6 h-6 rounded-full border-2 border-gray-600" />
+                )}
+                <span className={`font-semibold ${loadingStep >= 3 ? 'text-[#8BAE5A]' : 'text-gray-500'}`}>
+                  Koolhydraten aanpassen
+                </span>
+              </motion.div>
+
+              {/* Step 4: Fat */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ 
+                  opacity: loadingStep >= 4 ? 1 : 0.3,
+                  x: 0
+                }}
+                transition={{ delay: 0.3 }}
+                className={`flex items-center gap-3 p-3 rounded-lg border ${
+                  loadingStep >= 4 
+                    ? 'bg-[#8BAE5A]/20 border-[#8BAE5A]' 
+                    : 'bg-[#232D1A] border-[#3A4D23]'
+                }`}
+              >
+                {loadingStep >= 4 ? (
+                  <CheckCircleIcon className="w-6 h-6 text-[#8BAE5A]" />
+                ) : (
+                  <div className="w-6 h-6 rounded-full border-2 border-gray-600" />
+                )}
+                <span className={`font-semibold ${loadingStep >= 4 ? 'text-[#8BAE5A]' : 'text-gray-500'}`}>
+                  Vetten balanceren
+                </span>
+              </motion.div>
+            </div>
+
+            {/* Progress Bar */}
+            <div className="mt-6">
+              <div className="h-2 bg-[#232D1A] rounded-full overflow-hidden">
+                <motion.div
+                  className="h-full bg-gradient-to-r from-[#8BAE5A] to-[#B6C948]"
+                  initial={{ width: "0%" }}
+                  animate={{ width: `${(loadingStep / 4) * 100}%` }}
+                  transition={{ duration: 0.3 }}
+                />
+              </div>
+              <p className="text-center text-gray-400 text-xs mt-2">
+                {Math.round((loadingStep / 4) * 100)}% voltooid
+              </p>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Main Content - Only render when data is loaded */}
+      {!showLoadingModal && (
+        <>
+          {/* Header */}
+          <div className="bg-[#181F17] border-b border-[#2A2A2A] p-6">
+            <div className="max-w-7xl mx-auto">
+              {/* Mobile Layout */}
+              <div className="md:hidden space-y-3 mb-4">
+                {/* Back button - full width */}
+                {!isPlanLocked && (
+                  <button
+                    onClick={() => router.push('/dashboard/voedingsplannen-v2')}
+                    className="w-full px-4 py-2 bg-[#232D1A] hover:bg-[#2A2A2A] rounded-lg transition-colors text-sm text-gray-300 hover:text-white text-left"
+                  >
+                    ← Terug naar overzicht
+                  </button>
+                )}
+                
+                {/* Title - full width */}
+                <h1 className="text-2xl font-bold">{selectedPlan?.name ?? 'Voedingsplan'}</h1>
+                
+                {/* Locked banner */}
+                {isPlanLocked && (
+                  <div className="bg-[#111511] border border-[#2F3E22] rounded-lg p-3 text-sm">
+                    <div className="mb-2">
+                      <div className="text-white font-semibold">Je plan is vergrendeld</div>
+                      <div className="text-gray-300">Volg je plan minimaal 4 weken. Wisselen? Reset hieronder.</div>
+                    </div>
+                    <button onClick={handleResetClick} className="w-full px-3 py-1.5 bg-red-600/20 border border-red-500/30 text-red-400 rounded hover:bg-red-600/30">Reset plan</button>
+                  </div>
+                )}
+              </div>
+
+              {/* Desktop Layout */}
+              <div className="hidden md:flex flex-row items-start md:items-stretch gap-3 md:gap-4 mb-4">
+                {/* Title row - 50% width on desktop */}
+                <div className="order-2 md:order-1 flex items-center gap-3 md:gap-4 w-full md:w-1/2">
+                  {!isPlanLocked && (
+                    <button
+                      onClick={() => router.push('/dashboard/voedingsplannen-v2')}
+                      className="px-4 py-2 bg-[#232D1A] hover:bg-[#2A2A2A] rounded-lg transition-colors text-sm text-gray-300 hover:text-white whitespace-nowrap"
+                    >
+                      ← Terug naar overzicht
+                    </button>
+                  )}
+                  <h1 className="text-2xl font-bold whitespace-nowrap overflow-hidden text-ellipsis md:whitespace-normal md:overflow-visible">{selectedPlan?.name ?? 'Voedingsplan'}</h1>
+                </div>
+
+                {/* Locked banner - 50% width on desktop */}
+                {isPlanLocked && (
+                  <div className="order-1 md:order-2 w-full md:w-1/2">
+                    <div className="flex items-center justify-between bg-[#111511] border border-[#2F3E22] rounded-lg p-3 text-sm h-full">
+                      <div className="pr-3">
+                        <div className="text-white font-semibold">Je plan is vergrendeld</div>
+                        <div className="text-gray-300">Volg je plan minimaal 4 weken. Wisselen? Reset hieronder.</div>
+                      </div>
+                      <button onClick={handleResetClick} className="px-3 py-1.5 bg-red-600/20 border border-red-500/30 text-red-400 rounded hover:bg-red-600/30 whitespace-nowrap">Reset plan</button>
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              <p className="text-gray-400">{selectedPlan?.description ?? ''}</p>
+            </div>
+          </div>
+
+          {/* Main Content */}
+          <div className="max-w-7xl mx-auto p-6">
         {/* User Profile Section */}
         <div className="bg-[#181F17] rounded-xl p-3 sm:p-4 md:p-6 mb-4 sm:mb-6">
           <h2 className="text-base sm:text-lg md:text-xl font-bold mb-3 sm:mb-4 flex items-center gap-2">
@@ -1036,10 +1444,10 @@ export default function NutritionPlanDetailPage() {
                    'Staand'}
                 </span>
                 <span className="hidden sm:inline">
-                  {userProfile.activity_level === 'sedentary' ? 'Zittend (Licht actief)' :
-                   userProfile.activity_level === 'moderate' ? 'Staand (Matig actief)' :
-                   userProfile.activity_level === 'very_active' ? 'Lopend (Zeer actief)' :
-                   'Staand (Matig actief)'}
+                {userProfile.activity_level === 'sedentary' ? 'Zittend (Licht actief)' :
+                 userProfile.activity_level === 'moderate' ? 'Staand (Matig actief)' :
+                 userProfile.activity_level === 'very_active' ? 'Lopend (Zeer actief)' :
+                 'Staand (Matig actief)'}
                 </span>
               </p>
             </div>
@@ -1051,8 +1459,8 @@ export default function NutritionPlanDetailPage() {
                    userProfile.fitness_goal === 'spiermassa' ? 'Spiermassa' : 'Onderhoud'}
                 </span>
                 <span className="hidden sm:inline">
-                  {userProfile.fitness_goal === 'droogtrainen' ? 'Droogtrainen (-500 kcal)' : 
-                   userProfile.fitness_goal === 'spiermassa' ? 'Spiermassa (+500 kcal)' : 'Onderhoud'}
+                {userProfile.fitness_goal === 'droogtrainen' ? 'Droogtrainen (-500 kcal)' : 
+                 userProfile.fitness_goal === 'spiermassa' ? 'Spiermassa (+500 kcal)' : 'Onderhoud'}
                 </span>
               </p>
             </div>
@@ -1172,8 +1580,8 @@ export default function NutritionPlanDetailPage() {
                 ></div>
               </div>
               <div className="flex justify-between text-[10px] sm:text-xs md:text-sm">
-                <span className="text-gray-400">{dayTotals.protein.toFixed(0)}g</span>
-                <span className="text-white">{personalizedMacros.protein.toFixed(0)}g</span>
+                <span className="text-gray-400">{dayTotals.protein.toFixed(1)}g</span>
+                <span className="text-white">{personalizedMacros.protein.toFixed(1)}g</span>
             </div>
               <div className={`text-[10px] sm:text-xs mt-0.5 sm:mt-1 ${proteinProgress.textColor}`}>
                 {proteinProgress.difference > 0 ? '+' : ''}{proteinProgress.difference.toFixed(0)}g
@@ -1193,8 +1601,8 @@ export default function NutritionPlanDetailPage() {
                 ></div>
               </div>
               <div className="flex justify-between text-[10px] sm:text-xs md:text-sm">
-                <span className="text-gray-400">{dayTotals.carbs.toFixed(0)}g</span>
-                <span className="text-white">{personalizedMacros.carbs.toFixed(0)}g</span>
+                <span className="text-gray-400">{dayTotals.carbs.toFixed(1)}g</span>
+                <span className="text-white">{personalizedMacros.carbs.toFixed(1)}g</span>
             </div>
               <div className={`text-[10px] sm:text-xs mt-0.5 sm:mt-1 ${carbsProgress.textColor}`}>
                 {carbsProgress.difference > 0 ? '+' : ''}{carbsProgress.difference.toFixed(0)}g
@@ -1214,8 +1622,8 @@ export default function NutritionPlanDetailPage() {
                 ></div>
               </div>
               <div className="flex justify-between text-[10px] sm:text-xs md:text-sm">
-                <span className="text-gray-400">{dayTotals.fat.toFixed(0)}g</span>
-                <span className="text-white">{personalizedMacros.fat.toFixed(0)}g</span>
+                <span className="text-gray-400">{dayTotals.fat.toFixed(1)}g</span>
+                <span className="text-white">{personalizedMacros.fat.toFixed(1)}g</span>
               </div>
               <div className={`text-[10px] sm:text-xs mt-0.5 sm:mt-1 ${fatProgress.textColor}`}>
                 {fatProgress.difference > 0 ? '+' : ''}{fatProgress.difference.toFixed(0)}g
@@ -1232,6 +1640,25 @@ export default function NutritionPlanDetailPage() {
               <BookOpenIcon className="h-5 w-5 text-[#8BAE5A]" />
               Maaltijden - {selectedDay.charAt(0).toUpperCase() + selectedDay.slice(1)}
             </h2>
+
+            {/* Food Waste Prevention Notice */}
+            <div className="mb-6 bg-gradient-to-r from-[#8BAE5A]/10 to-[#B6C948]/5 border-l-4 border-[#8BAE5A] rounded-lg p-4">
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0 mt-0.5">
+                  <svg className="w-5 h-5 text-[#8BAE5A]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-sm font-semibold text-[#B6C948] mb-1">
+                    💡 Tip: Geen voedselverspilling
+                  </h3>
+                  <p className="text-sm text-gray-300 leading-relaxed">
+                    Heb je een verpakking van 100g maar staat er 90g in je plan? <strong className="text-white">Gebruik gerust de hele verpakking!</strong> Zolang je dagelijks binnen <strong className="text-[#8BAE5A]">±100 kcal</strong> van je doel blijft, zit je in de veilige zone. Kleine verschillen in porties zijn prima en helpen voedselverspilling te voorkomen.
+                  </p>
+                </div>
+              </div>
+            </div>
             <div className="space-y-6">
               {['ontbijt', 'ochtend_snack', 'lunch', 'lunch_snack', 'diner', 'avond_snack'].map((mealType) => {
                 const mealData = originalPlanData.meals.weekly_plan[selectedDay][mealType];
@@ -1301,19 +1728,63 @@ export default function NutritionPlanDetailPage() {
                   return totals;
                 }, { calories: 0, protein: 0, carbs: 0, fat: 0 });
 
-                const useBackend = !!mealData.nutrition && (scalingFactor === 1 && finalAdjustFactor === 1);
-                const mealTotals = useBackend
-                  ? {
-                      calories: Math.round(Number(mealData.nutrition.calories) || 0),
-                      protein: Math.round((Number(mealData.nutrition.protein) || 0) * 10) / 10,
-                      carbs: Math.round((Number(mealData.nutrition.carbs) || 0) * 10) / 10,
-                      fat: Math.round((Number(mealData.nutrition.fat) || 0) * 10) / 10,
-                    }
-                  : {
+                // Calculate meal totals proportionally from day totals (ensures exact sum)
+                // This prevents rounding errors from accumulating
+                const mealTotals = (() => {
+                  if (!mealData.nutrition) {
+                    // Fallback: use computed totals if no backend nutrition data
+                    return {
                       calories: Math.round(computedTotals.calories),
                       protein: Math.round(computedTotals.protein * 10) / 10,
                       carbs: Math.round(computedTotals.carbs * 10) / 10,
                       fat: Math.round(computedTotals.fat * 10) / 10,
+                    };
+                  }
+                  
+                  // Calculate this meal's percentage of the 100kg baseline day total
+                  const dayData = originalPlanData.meals.weekly_plan[selectedDay];
+                  const baselineDayTotal = {
+                    calories: 0,
+                    protein: 0,
+                    carbs: 0,
+                    fat: 0,
+                  };
+                  
+                  ['ontbijt', 'ochtend_snack', 'lunch', 'lunch_snack', 'diner', 'avond_snack'].forEach(mt => {
+                    const meal = dayData?.[mt];
+                    if (meal?.nutrition) {
+                      baselineDayTotal.calories += Number(meal.nutrition.calories) || 0;
+                      baselineDayTotal.protein += Number(meal.nutrition.protein) || 0;
+                      baselineDayTotal.carbs += Number(meal.nutrition.carbs) || 0;
+                      baselineDayTotal.fat += Number(meal.nutrition.fat) || 0;
+                    }
+                  });
+                  
+                  // Calculate percentage this meal contributes
+                  const mealPercentage = {
+                    calories: baselineDayTotal.calories > 0 ? Number(mealData.nutrition.calories) / baselineDayTotal.calories : 0,
+                    protein: baselineDayTotal.protein > 0 ? Number(mealData.nutrition.protein) / baselineDayTotal.protein : 0,
+                    carbs: baselineDayTotal.carbs > 0 ? Number(mealData.nutrition.carbs) / baselineDayTotal.carbs : 0,
+                    fat: baselineDayTotal.fat > 0 ? Number(mealData.nutrition.fat) / baselineDayTotal.fat : 0,
+                  };
+                  
+                  // Apply percentage to scaled day totals (which may be optimized)
+                  return {
+                    calories: Math.round(dayTotals.calories * mealPercentage.calories),
+                    protein: Math.round((dayTotals.protein * mealPercentage.protein) * 10) / 10,
+                    carbs: Math.round((dayTotals.carbs * mealPercentage.carbs) * 10) / 10,
+                    fat: Math.round((dayTotals.fat * mealPercentage.fat) * 10) / 10,
+                  };
+                })();
+                
+                // Calculate ingredient adjustment factors
+                // If dayTotals were optimized, we need to adjust individual ingredients proportionally
+                // so their sum matches the optimized mealTotals
+                const ingredientAdjustmentFactors = {
+                  protein: computedTotals.protein > 0 ? mealTotals.protein / computedTotals.protein : 1,
+                  carbs: computedTotals.carbs > 0 ? mealTotals.carbs / computedTotals.carbs : 1,
+                  fat: computedTotals.fat > 0 ? mealTotals.fat / computedTotals.fat : 1,
+                  calories: computedTotals.calories > 0 ? mealTotals.calories / computedTotals.calories : 1,
                     };
 
                 return (
@@ -1445,10 +1916,11 @@ export default function NutritionPlanDetailPage() {
                                 }
                               }
 
-                              const ingredientCalories = (Number(ingredient.calories_per_100g) || 0) * multiplier;
-                              const ingredientProtein  = (Number(ingredient.protein_per_100g)  || 0) * multiplier;
-                              const ingredientCarbs    = (Number(ingredient.carbs_per_100g)    || 0) * multiplier;
-                              const ingredientFat      = (Number(ingredient.fat_per_100g)      || 0) * multiplier;
+                              // Apply adjustment factors to match optimized meal totals
+                              const ingredientCalories = ((Number(ingredient.calories_per_100g) || 0) * multiplier) * ingredientAdjustmentFactors.calories;
+                              const ingredientProtein  = ((Number(ingredient.protein_per_100g)  || 0) * multiplier) * ingredientAdjustmentFactors.protein;
+                              const ingredientCarbs    = ((Number(ingredient.carbs_per_100g)    || 0) * multiplier) * ingredientAdjustmentFactors.carbs;
+                              const ingredientFat      = ((Number(ingredient.fat_per_100g)      || 0) * multiplier) * ingredientAdjustmentFactors.fat;
 
                               // Original 100kg (no scaling, no custom) for green debug display
                               const unitLower = String(ingredient.unit || '').toLowerCase();
@@ -1503,7 +1975,7 @@ export default function NutritionPlanDetailPage() {
                                   </td>
                                   <td className="py-3 text-center">
                                     <div className="flex flex-col items-center justify-center gap-1">
-                                      <span className="w-16 px-2 py-1 bg-[#232D1A] border border-[#3A4D23] rounded text-white text-center text-sm">
+                                      <span className="w-16 px-2 py-1 bg-[#232D1A] border border-[#3A4D43] rounded text-white text-center text-sm">
                                         {amount}
                                       </span>
                                     </div>
@@ -1512,24 +1984,16 @@ export default function NutritionPlanDetailPage() {
                                     {getUnitLabel(ingredient.unit)}
                                   </td>
                                   <td className="py-3 text-right text-white font-medium">
-                                    <div className="flex flex-col items-end">
-                                      <span>{ingredientCalories.toFixed(0)}</span>
-                                    </div>
+                                    {ingredientCalories.toFixed(0)}
                                   </td>
                                   <td className="py-3 text-right text-white">
-                                    <div className="flex flex-col items-end">
-                                      <span>{ingredientProtein.toFixed(1)}g</span>
-                                    </div>
+                                    {ingredientProtein.toFixed(1)}g
                                   </td>
                                   <td className="py-3 text-right text-white">
-                                    <div className="flex flex-col items-end">
-                                      <span>{ingredientCarbs.toFixed(1)}g</span>
-                                    </div>
+                                    {ingredientCarbs.toFixed(1)}g
                                   </td>
                                   <td className="py-3 text-right text-white">
-                                    <div className="flex flex-col items-end">
-                                      <span>{ingredientFat.toFixed(1)}g</span>
-                                    </div>
+                                    {ingredientFat.toFixed(1)}g
                                   </td>
                                 </tr>
                               );
@@ -1593,10 +2057,41 @@ export default function NutritionPlanDetailPage() {
                           multiplier = amount / 100;
                         }
 
-                        const ingredientCalories = (Number(ingredient.calories_per_100g) || 0) * multiplier;
-                        const ingredientProtein  = (Number(ingredient.protein_per_100g)  || 0) * multiplier;
-                        const ingredientCarbs    = (Number(ingredient.carbs_per_100g)    || 0) * multiplier;
-                        const ingredientFat      = (Number(ingredient.fat_per_100g)      || 0) * multiplier;
+                        // Apply adjustment factors to match optimized meal totals
+                        const ingredientCalories = ((Number(ingredient.calories_per_100g) || 0) * multiplier) * ingredientAdjustmentFactors.calories;
+                        const ingredientProtein  = ((Number(ingredient.protein_per_100g)  || 0) * multiplier) * ingredientAdjustmentFactors.protein;
+                        const ingredientCarbs    = ((Number(ingredient.carbs_per_100g)    || 0) * multiplier) * ingredientAdjustmentFactors.carbs;
+                        const ingredientFat      = ((Number(ingredient.fat_per_100g)      || 0) * multiplier) * ingredientAdjustmentFactors.fat;
+
+                        // Original 100kg (no scaling, no custom) for green debug display
+                        const baseAmt = Number(ingredient.amount || 0);
+                        let origAmt = baseAmt;
+                        let origMult = 1;
+                        if (['per_piece','piece','pieces','per_stuk','stuk','stuks','per_plakje','plakje','plakjes','plak','per_plak','sneetje','per_sneetje','handje','per_handful'].includes(unit)) {
+                          const unitWeight = Number(
+                            ingredient.unit_weight_g ?? ingredient.grams_per_unit ?? ingredient.weight_per_unit ?? ingredient.per_piece_grams ?? ingredient.slice_weight_g ?? ingredient.plakje_gram ?? ingredient.unit_weight
+                          ) || 0;
+                          origAmt = Math.max(1, Math.round(baseAmt));
+                          origMult = unitWeight > 0 ? (origAmt * unitWeight) / 100 : origAmt;
+                        } else if (['per_100g','g','gram'].includes(unit)) {
+                          origMult = baseAmt / 100;
+                        } else if (['per_ml','ml'].includes(unit)) {
+                          origMult = baseAmt / 100;
+                        } else if (['per_tbsp','tbsp','eetlepel','el','per_eetlepel'].includes(unit)) {
+                          origMult = (baseAmt * 15) / 100;
+                        } else if (['per_tsp','tsp','theelepel','tl','per_theelepel'].includes(unit)) {
+                          origMult = (baseAmt * 5) / 100;
+                        } else if (['per_cup','cup','kop'].includes(unit)) {
+                          origMult = (baseAmt * 240) / 100;
+                        } else if (['per_30g'].includes(unit)) {
+                          origMult = (baseAmt * 30) / 100;
+                        } else {
+                          origMult = baseAmt / 100;
+                        }
+                        const okc = (Number(ingredient.calories_per_100g) || 0) * origMult;
+                        const opr = (Number(ingredient.protein_per_100g)  || 0) * origMult;
+                        const och = (Number(ingredient.carbs_per_100g)    || 0) * origMult;
+                        const oft = (Number(ingredient.fat_per_100g)      || 0) * origMult;
 
                         const getUnitLabel = (unit: string) => {
                           switch (unit) {
@@ -1615,7 +2110,7 @@ export default function NutritionPlanDetailPage() {
                         return (
                           <div key={index} className="bg-[#232D1A] border border-[#3A4D23] rounded-lg p-3">
                             {/* Ingredient Name & Amount */}
-                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center justify-between mb-2">
                               <span className="text-white font-medium text-sm">{ingredient.name}</span>
                               <div className="flex items-center gap-2">
                                 <span className="px-2 py-1 bg-[#181F17] border border-[#3A4D23] rounded text-white text-sm font-medium">
@@ -1627,21 +2122,29 @@ export default function NutritionPlanDetailPage() {
                             
                             {/* Nutritional Values */}
                             <div className="grid grid-cols-2 gap-2 text-xs">
-                              <div className="flex items-center justify-between bg-[#181F17] rounded px-2 py-1">
-                                <span className="text-gray-400">Kcal:</span>
-                                <span className="text-[#8BAE5A] font-medium">{ingredientCalories.toFixed(0)}</span>
+                              <div className="bg-[#181F17] rounded px-2 py-1">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-gray-400">Kcal:</span>
+                                  <span className="text-[#8BAE5A] font-medium">{ingredientCalories.toFixed(0)}</span>
+                                </div>
                               </div>
-                              <div className="flex items-center justify-between bg-[#181F17] rounded px-2 py-1">
-                                <span className="text-gray-400">Eiwit:</span>
-                                <span className="text-white font-medium">{ingredientProtein.toFixed(1)}g</span>
+                              <div className="bg-[#181F17] rounded px-2 py-1">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-gray-400">Eiwit:</span>
+                                  <span className="text-white font-medium">{ingredientProtein.toFixed(1)}g</span>
+                                </div>
                               </div>
-                              <div className="flex items-center justify-between bg-[#181F17] rounded px-2 py-1">
-                                <span className="text-gray-400">Koolhydr:</span>
-                                <span className="text-white font-medium">{ingredientCarbs.toFixed(1)}g</span>
+                              <div className="bg-[#181F17] rounded px-2 py-1">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-gray-400">Koolhydr:</span>
+                                  <span className="text-white font-medium">{ingredientCarbs.toFixed(1)}g</span>
+                                </div>
                               </div>
-                              <div className="flex items-center justify-between bg-[#181F17] rounded px-2 py-1">
-                                <span className="text-gray-400">Vet:</span>
-                                <span className="text-white font-medium">{ingredientFat.toFixed(1)}g</span>
+                              <div className="bg-[#181F17] rounded px-2 py-1">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-gray-400">Vet:</span>
+                                  <span className="text-white font-medium">{ingredientFat.toFixed(1)}g</span>
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -1674,6 +2177,7 @@ export default function NutritionPlanDetailPage() {
             </div>
           </div>
         )}
+          </div>
 
         {/* Compact Reset Confirm Modal */}
         {showResetModal && (
@@ -2120,106 +2624,6 @@ export default function NutritionPlanDetailPage() {
               </table>
             </div>
 
-            {/* Extra: Lunch Snack ingredient breakdown */}
-            {originalPlanData?.meals?.weekly_plan?.[selectedDay]?.['lunch_snack']?.ingredients && (
-              <div className="mt-6">
-                <h3 className="text-lg font-semibold mb-2">Lunch Snack – Ingredient breakdown</h3>
-                <div className="overflow-x-auto">
-                  <table className="min-w-full text-xs">
-                    <thead className="text-[#8BAE5A]">
-                      <tr className="border-b border-[#3A4D23]">
-                        <th className="text-left py-2">Ingrediënt</th>
-                        <th className="text-right py-2">Amount</th>
-                        <th className="text-right py-2">Unit</th>
-                        <th className="text-right py-2">Multiplier</th>
-                        <th className="text-right py-2">kcal</th>
-                        <th className="text-right py-2">Eiwit</th>
-                        <th className="text-right py-2">KH</th>
-                        <th className="text-right py-2">Vet</th>
-                        <th className="text-right py-2 text-green-400">Orig Amt</th>
-                        <th className="text-right py-2 text-green-400">Orig kcal</th>
-                        <th className="text-right py-2 text-green-400">Orig Eiwit</th>
-                        <th className="text-right py-2 text-green-400">Orig KH</th>
-                        <th className="text-right py-2 text-green-400">Orig Vet</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {(() => {
-                        const ls = originalPlanData.meals.weekly_plan[selectedDay]['lunch_snack'];
-                        return ls.ingredients.map((ingredient: any, idx: number) => {
-                          const key = `${selectedDay}_lunch_snack_${ingredient.name}`;
-                          const customAmount = (customAmounts as any)[key];
-                          let amountBase = (customAmount !== undefined ? customAmount : (ingredient.amount || 0));
-                          let amount = amountBase * scalingFactor;
-                          const unit = String(ingredient.unit || '').toLowerCase();
-                          let mult = 1;
-                          if (['per_piece','piece','pieces','per_stuk','stuk','stuks','per_plakje','plakje','plakjes','plak','per_plak','sneetje','per_sneetje','handje','per_handful'].includes(unit)) {
-                            amount = scalePiecesAmount(amountBase, scalingFactor);
-                            mult = amount;
-                          }
-                          else if (['per_100g','g','gram'].includes(unit)) mult = amount / 100;
-                          else if (['per_ml','ml'].includes(unit)) mult = amount / 100;
-                          else if (['per_tbsp','tbsp','eetlepel','el','per_eetlepel'].includes(unit)) mult = (amount * 15) / 100;
-                          else if (['per_tsp','tsp','theelepel','tl','per_theelepel'].includes(unit)) mult = (amount * 5) / 100;
-                          else if (['per_cup','cup','kop'].includes(unit)) mult = (amount * 240) / 100;
-                          else if (['per_30g'].includes(unit)) mult = (amount * 30) / 100;
-                          else mult = amount / 100;
-                          const ff = getFields(ingredient);
-                          const kc = ff.calories_per_100g * mult;
-                          const pr = ff.protein_per_100g * mult;
-                          const ch = ff.carbs_per_100g * mult;
-                          const ft = ff.fat_per_100g * mult;
-
-                          // Original 100kg (no scaling, no custom override) baselines
-                          let origAmt = (ingredient.amount || 0);
-                          let origMult = 1;
-                          if (['per_piece','stuk','stuks','per_plakje','plakje','plakjes','plak','per_plak','sneetje','per_sneetje','handje','per_handful'].includes(unit)) {
-                            origAmt = Math.max(1, Math.round(origAmt));
-                            origMult = origAmt;
-                          } else if (['per_100g','g','gram'].includes(unit)) {
-                            origMult = origAmt / 100;
-                          } else if (['per_ml','ml'].includes(unit)) {
-                            origMult = origAmt / 100;
-                          } else if (['per_tbsp','tbsp','eetlepel','el','per_eetlepel'].includes(unit)) {
-                            origMult = (origAmt * 15) / 100;
-                          } else if (['per_tsp','tsp','theelepel','tl','per_theelepel'].includes(unit)) {
-                            origMult = (origAmt * 5) / 100;
-                          } else if (['per_cup','cup','kop'].includes(unit)) {
-                            origMult = (origAmt * 240) / 100;
-                          } else if (['per_30g'].includes(unit)) {
-                            origMult = (origAmt * 30) / 100;
-                          } else {
-                            origMult = origAmt / 100;
-                          }
-                          const okc = ff.calories_per_100g * origMult;
-                          const opr = ff.protein_per_100g * origMult;
-                          const och = ff.carbs_per_100g * origMult;
-                          const oft = ff.fat_per_100g * origMult;
-                          return (
-                            <tr key={idx} className="border-b border-[#2A3A1A] last:border-b-0">
-                              <td className="py-2 text-white">{ingredient.name}</td>
-                              <td className="py-2 text-right">{amount}</td>
-                              <td className="py-2 text-right">{unit}</td>
-                              <td className="py-2 text-right">{mult.toFixed(3)}</td>
-                              <td className="py-2 text-right">{kc.toFixed(1)}</td>
-                              <td className="py-2 text-right">{pr.toFixed(1)}g</td>
-                              <td className="py-2 text-right">{ch.toFixed(1)}g</td>
-                              <td className="py-2 text-right">{ft.toFixed(1)}g</td>
-                              <td className="py-2 text-right text-green-400">{origAmt}</td>
-                              <td className="py-2 text-right text-green-400">{okc.toFixed(1)}</td>
-                              <td className="py-2 text-right text-green-400">{opr.toFixed(1)}g</td>
-                              <td className="py-2 text-right text-green-400">{och.toFixed(1)}g</td>
-                              <td className="py-2 text-right text-green-400">{oft.toFixed(1)}g</td>
-                            </tr>
-                          );
-                        });
-                      })()}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
-            {/* End Lunch Snack ingredient breakdown */}
           </div>
         )}
 
@@ -2307,7 +2711,8 @@ export default function NutritionPlanDetailPage() {
             }}
           />
         )}
-      </div>
+        </>
+      )}
     </div>
   );
 }

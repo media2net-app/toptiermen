@@ -123,7 +123,6 @@ const baseMenu = [
   { label: 'Challenges', icon: FireIcon, href: '/dashboard/mijn-challenges', onboardingStep: 3 },
   { label: 'Trainingsschemas', icon: AcademicCapIcon, href: '/dashboard/trainingsschemas', onboardingStep: 4, requiresTrainingAccess: true },
   { label: 'Voedingsplannen', icon: CalendarDaysIcon, href: '/dashboard/voedingsplannen-v2', onboardingStep: 5, requiresNutritionAccess: true },
-  { label: 'Voedingsplannen V3', icon: RocketLaunchIcon, href: '/dashboard/voedingsplannen-v3', onboardingStep: 5, requiresNutritionAccess: true },
   { label: 'Mind & Focus', icon: ChartBarIcon, href: '/dashboard/mind-focus', onboardingStep: 7 },
   { label: 'Mijn Mind & Focus', icon: ChartBarIcon, parent: 'Mind & Focus', href: '/dashboard/mind-focus', isSub: true, onboardingStep: 7 },
   { label: 'Focus Training', icon: TagIcon, parent: 'Mind & Focus', href: '/dashboard/mind-focus/focus-training', isSub: true, onboardingStep: 7 },
@@ -312,8 +311,8 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus, setIsMobileMenuOp
             isCurrentStep = item.label === 'Trainingsschemas';
           }
         } else if (actualCurrentStep === 5) {
-          // Premium/Lifetime tier: step 5 = Voedingsplannen of Voedingsplannen V3
-          isCurrentStep = item.label === 'Voedingsplannen' || item.label === 'Voedingsplannen V3';
+          // Premium/Lifetime tier: step 5 = Voedingsplannen
+          isCurrentStep = item.label === 'Voedingsplannen';
         } else {
           // For all other steps, use normal matching
           isCurrentStep = true;
@@ -719,8 +718,8 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
             isCurrentStep = item.label === 'Trainingsschemas';
           }
         } else if (actualCurrentStep === 5) {
-          // Premium/Lifetime tier: step 5 = Voedingsplannen of Voedingsplannen V3
-          isCurrentStep = item.label === 'Voedingsplannen' || item.label === 'Voedingsplannen V3';
+          // Premium/Lifetime tier: step 5 = Voedingsplannen
+          isCurrentStep = item.label === 'Voedingsplannen';
         } else {
           // For all other steps, use normal matching
           isCurrentStep = true;

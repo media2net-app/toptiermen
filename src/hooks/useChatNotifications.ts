@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
+import { playNotificationSound } from '@/utils/notificationSound';
 
 export interface ChatNotification {
   id: string;
@@ -94,6 +95,9 @@ export function useChatNotifications(
           };
 
           if (DEBUG) console.log('📨 Processing notification:', notification);
+
+          // Play notification sound for new message
+          playNotificationSound();
 
           // Call callback if provided
           if (onNewMessage) {

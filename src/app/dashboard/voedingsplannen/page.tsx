@@ -15,6 +15,7 @@ import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { useOnboardingV2 } from "@/contexts/OnboardingV2Context";
 import { useRouter } from 'next/navigation';
 import { useSubscription } from '@/hooks/useSubscription';
+import UpgradeModal from '@/components/UpgradeModal';
 import dynamic from 'next/dynamic';
 const DynamicPlanViewNew = dynamic(() => import('./components/DynamicPlanViewNew'), {
   ssr: false,
@@ -109,6 +110,7 @@ export default function VoedingsplannenPage() {
   const [showRequiredIntake, setShowRequiredIntake] = useState(false);
   const [viewingDynamicPlan, setViewingDynamicPlan] = useState<{planId: string, planName: string} | null>(null);
   const [showResetModal, setShowResetModal] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   // Unified Reset Plan click handler with native confirm fallback
   const handleResetClick = () => {
@@ -787,17 +789,13 @@ export default function VoedingsplannenPage() {
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <button
-                  onClick={() => {
-                    alert('Mocht je deze onderdelen willen neem dan contact op met Rick voor het upgraden van je pakket');
-                  }}
+                  onClick={() => setShowUpgradeModal(true)}
                   className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#0A0F0A] font-bold px-8 py-3 rounded-lg hover:from-[#A6C97B] hover:to-[#FFE55C] transition-all duration-200"
                 >
                   Upgrade naar Premium
                 </button>
                 <button
-                  onClick={() => {
-                    alert('Mocht je deze onderdelen willen neem dan contact op met Rick voor het upgraden van je pakket');
-                  }}
+                  onClick={() => setShowUpgradeModal(true)}
                   className="bg-gradient-to-r from-[#FFD700] to-[#8BAE5A] text-[#0A0F0A] font-bold px-8 py-3 rounded-lg hover:from-[#FFE55C] hover:to-[#A6C97B] transition-all duration-200"
                 >
                   Upgrade naar Lifetime
@@ -1432,6 +1430,13 @@ export default function VoedingsplannenPage() {
           )}
         </AnimatePresence>
       </div>
+
+      {/* Upgrade Modal */}
+      <UpgradeModal 
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        type="nutrition"
+      />
     </PageLayout>
   );
 }

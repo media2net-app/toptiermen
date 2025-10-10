@@ -12,32 +12,51 @@ export async function GET(request: NextRequest) {
 
     console.log('🔍 Fetching login data for user:', userId);
 
-    // ✅ PHASE 1.3: Parallel data fetching for better performance
-    const [profileResult, onboardingResult] = await Promise.all([
-      // Fetch profile data
-      supabaseAdmin
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single(),
-      
-      // Fetch onboarding status
-      supabaseAdmin
-        .from('user_onboarding_status')
-        .select('*')
-        .eq('user_id', userId)
-        .single()
-    ]);
+    // Fetch profile data
+    const profileResult = await supabaseAdmin
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
 
-    // Check for errors
+    // Check for profile errors
     if (profileResult.error) {
       console.error('❌ Profile fetch error:', profileResult.error);
       return NextResponse.json({ error: 'Failed to fetch profile' }, { status: 500 });
     }
 
+    // Try to fetch onboarding status from user_onboarding_status table (legacy)
+    // If it doesn't exist, we'll use the onboarding V2 API
+    let onboardingData: any = null;
+    
+    const onboardingResult = await supabaseAdmin
+      .from('user_onboarding_status')
+      .select('*')
+      .eq('user_id', userId)
+      .maybeSingle();
+
     if (onboardingResult.error) {
-      console.error('❌ Onboarding fetch error:', onboardingResult.error);
-      return NextResponse.json({ error: 'Failed to fetch onboarding status' }, { status: 500 });
+      console.warn('⚠️ user_onboarding_status table not found or error, using onboarding V2 data:', onboardingResult.error.message);
+    } else if (onboardingResult.data) {
+      onboardingData = onboardingResult.data;
+      console.log('✅ Found onboarding data in user_onboarding_status');
+    } else {
+      console.log('ℹ️ No data in user_onboarding_status, user may be using onboarding V2');
+    }
+
+    // If no legacy onboarding data, create a default one
+    if (!onboardingData) {
+      console.log('🔧 Creating default onboarding data for compatibility');
+      onboardingData = {
+        user_id: userId,
+        onboarding_completed: false,
+        welcome_video_shown: false,
+        goal_set: false,
+        missions_selected: false,
+        training_schema_selected: false,
+        nutrition_plan_selected: false,
+        challenge_started: false
+      };
     }
 
     // Determine admin status
@@ -45,22 +64,21 @@ export async function GET(request: NextRequest) {
     const isAdmin = profileResult.data.role === 'admin' || knownAdminEmails.includes(profileResult.data.email);
 
     // Calculate current onboarding step
-    const onboarding = onboardingResult.data;
     let currentStep: number | null = null;
     
-    if (!onboarding.onboarding_completed) {
-      if (!onboarding.welcome_video_shown) currentStep = 0;
-      else if (!onboarding.goal_set) currentStep = 1;
-      else if (!onboarding.missions_selected) currentStep = 2;
-      else if (!onboarding.training_schema_selected) currentStep = 3;
-      else if (!onboarding.nutrition_plan_selected) currentStep = 4;
-      else if (!onboarding.challenge_started) currentStep = 5;
+    if (!onboardingData.onboarding_completed) {
+      if (!onboardingData.welcome_video_shown) currentStep = 0;
+      else if (!onboardingData.goal_set) currentStep = 1;
+      else if (!onboardingData.missions_selected) currentStep = 2;
+      else if (!onboardingData.training_schema_selected) currentStep = 3;
+      else if (!onboardingData.nutrition_plan_selected) currentStep = 4;
+      else if (!onboardingData.challenge_started) currentStep = 5;
     }
 
     const loginData = {
       profile: profileResult.data,
       onboarding: {
-        ...onboarding,
+        ...onboardingData,
         currentStep
       },
       isAdmin,
@@ -71,7 +89,7 @@ export async function GET(request: NextRequest) {
 
     console.log('✅ Login data fetched successfully:', {
       profile: profileResult.data.email,
-      onboarding: onboarding.onboarding_completed,
+      onboarding: onboardingData.onboarding_completed,
       currentStep,
       isAdmin
     });

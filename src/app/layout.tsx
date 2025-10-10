@@ -12,10 +12,6 @@ import { Analytics } from '@vercel/analytics/next';
 
 const inter = Inter({ subsets: ['latin'] });
 
-// Client-only responsive debugger overlay (visible platform-wide)
-const ResponsiveDebugger = dynamic(() => import('@/components/ResponsiveDebugger'), { ssr: false });
-const OnboardingDebugger = dynamic(() => import('@/components/OnboardingDebugger'), { ssr: false });
-
 export const metadata: Metadata = {
   title: {
     default: 'Top Tier Men - Complete Lifestyle Transformation Platform',
@@ -106,12 +102,8 @@ export default function RootLayout({
           <div className="w-full max-w-[100vw] overflow-x-hidden">
             {children}
           </div>
-          {/* Onboarding debugger must be inside providers */}
-          <OnboardingDebugger />
         </OnboardingV2Provider>
           </SupabaseAuthProvider>
-          {/* Global debug overlay */}
-          <ResponsiveDebugger />
           {/* </V2StateProvider> */}
           <SpeedInsights />
           <Analytics />

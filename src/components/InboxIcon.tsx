@@ -12,6 +12,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import Link from 'next/link';
+import { playNotificationSound } from '@/utils/notificationSound';
 
 interface InboxMessage {
   id: string;
@@ -31,6 +32,8 @@ export default function InboxIcon() {
   const [showInbox, setShowInbox] = useState(false);
   const [loading, setLoading] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const previousUnreadCountRef = useRef<number>(0);
+  const isInitialLoadRef = useRef<boolean>(true);
 
   // Fetch messages when component mounts or user changes
   useEffect(() => {
@@ -54,6 +57,24 @@ export default function InboxIcon() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // Play notification sound when unread count increases
+  useEffect(() => {
+    // Skip on initial load
+    if (isInitialLoadRef.current) {
+      isInitialLoadRef.current = false;
+      previousUnreadCountRef.current = unreadCount;
+      return;
+    }
+
+    // Play sound if unread count increased (new messages)
+    if (unreadCount > previousUnreadCountRef.current) {
+      playNotificationSound();
+    }
+
+    // Update previous count
+    previousUnreadCountRef.current = unreadCount;
+  }, [unreadCount]);
 
   const fetchMessages = async () => {
     if (!user?.id) return;

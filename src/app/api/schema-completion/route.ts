@@ -285,6 +285,11 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       console.error('❌ Error fetching schema completion status:', error);
+      // If it's just a "no rows found" type error or missing foreign key, return empty array instead of 500
+      if (error.message?.includes('foreign') || error.code === 'PGRST116') {
+        console.log('ℹ️ No schema progress found for user (likely new user)');
+        return NextResponse.json({ success: true, schemas: [] });
+      }
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 

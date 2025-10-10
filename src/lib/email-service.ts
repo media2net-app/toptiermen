@@ -778,7 +778,7 @@ Met vriendelijke groet,
 Top Tier Men Team`
       },
       'account-credentials': {
-        subject: '🔐 Je Top Tier Men Accountgegevens - Platform Live!',
+        subject: '🔥 Welkom bij The Brotherhood - Je Account is Klaar!',
         html: `
           <div style="background: linear-gradient(135deg, #0F1419 0%, #1F2D17 100%); min-height: 100vh; padding: 40px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
             <div style="max-width: 600px; margin: 0 auto; background: #0F1419; border-radius: 16px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.3);">
@@ -789,7 +789,7 @@ Top Tier Men Team`
                        <span style="color: white; font-size: 24px; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">TOP TIER MEN</span>
                      </div>
                 <h1 style="color: white; font-size: 32px; font-weight: 700; margin: 0; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
-                  🚀 PLATFORM IS LIVE!
+                  🔥 WELKOM BIJ THE BROTHERHOOD
                 </h1>
                 <p style="color: rgba(255,255,255,0.95); font-size: 18px; margin: 12px 0 0 0; font-weight: 500;">
                   Je accountgegevens zijn hier
@@ -803,7 +803,7 @@ Top Tier Men Team`
                 </p>
                 
                 <p style="font-size: 16px; line-height: 1.6; margin: 0 0 24px 0;">
-                  Het moment is daar! Het Top Tier Men platform is nu live en je kunt direct aan de slag. Hier zijn je accountgegevens:
+                  Welkom bij The Brotherhood! Je account is klaar en je kunt direct aan de slag. Hier zijn je accountgegevens:
                 </p>
 
                 <!-- Account Details -->
@@ -824,13 +824,6 @@ Top Tier Men Team`
                       <strong style="color: #8BAE5A; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">E-mailadres:</strong>
                       <div style="color: #FFFFFF; font-size: 16px; font-weight: 600; margin-top: 4px;">
                         \${email}
-                      </div>
-                    </div>
-                    
-                    <div style="margin-bottom: 16px;">
-                      <strong style="color: #8BAE5A; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Gebruikersnaam:</strong>
-                      <div style="color: #FFFFFF; font-size: 16px; font-weight: 600; margin-top: 4px;">
-                        \${username}
                       </div>
                     </div>
                     
@@ -890,12 +883,6 @@ Top Tier Men Team`
                   </div>
                 </div>
 
-                <div style="text-align: center; margin: 40px 0 20px 0;">
-                  <a href="\${loginUrl}" style="display: inline-block; background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%); color: white; text-decoration: none; padding: 16px 32px; border-radius: 8px; font-weight: 700; font-size: 18px; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 6px 20px rgba(139, 174, 90, 0.4);">
-                    🚀 START JE TRANSFORMATIE
-                  </a>
-                </div>
-
                 <p style="font-size: 16px; line-height: 1.6; margin: 32px 0 0 0; color: #8BAE5A; font-weight: 600;">
                   Welkom in de broederschap!<br>
                   Het Top Tier Men Team
@@ -925,7 +912,6 @@ JE ACCOUNTGEGEVENS:
 
 Platform URL: \${platformUrl}
 E-mailadres: \${email}
-Gebruikersnaam: \${username}
 Tijdelijk Wachtwoord: \${tempPassword}
 Pakket: \${packageType}
 

@@ -1478,26 +1478,29 @@ export default function LessonDetailPage() {
     >
       <div className="w-full">
         {/* Navigation */}
-        <div className="flex items-center justify-between mb-6">
-          <button
-            onClick={() => {
-              console.log('🔄 Navigating to module overview...');
-              setNavigating(true);
-              router.push(`/dashboard/academy/${module.id}`);
-            }}
-            disabled={navigating}
-            className="flex items-center gap-2 text-[#8BAE5A] hover:text-[#B6C948] transition-colors disabled:opacity-50"
-          >
-            {navigating ? (
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#8BAE5A]"></div>
-            ) : (
-              "←"
-            )}
-            Terug naar module overzicht
-          </button>
-          
-          <div className="flex items-center gap-2 sm:gap-4">
-            {prevLesson && (
+        <div className="mb-6">
+          {/* Grid with 2 columns - Terug button left, Vorige/Volgende right */}
+          <div className="grid grid-cols-2 gap-3">
+            {/* Terug naar module overzicht - compacte knop links */}
+            <button
+              onClick={() => {
+                console.log('🔄 Navigating to module overview...');
+                setNavigating(true);
+                router.push(`/dashboard/academy/${module.id}`);
+              }}
+              disabled={navigating}
+              className="px-3 py-2 sm:px-4 sm:py-2 text-sm sm:text-base bg-[#232D1A] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {navigating ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#8BAE5A]"></div>
+              ) : (
+                "←"
+              )}
+              <span className="truncate">Terug naar overzicht</span>
+            </button>
+            
+            {/* Vorige les - compacte knop rechts (alleen als er een vorige les is) */}
+            {prevLesson ? (
               <button
                 onClick={() => {
                   console.log('🔄 Navigating to previous lesson...');
@@ -1521,58 +1524,65 @@ export default function LessonDetailPage() {
                   }, 50);
                 }}
                 disabled={navigating}
-                className="px-3 py-2 sm:px-4 sm:py-2 text-sm sm:text-base bg-[#232D1A] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors disabled:opacity-50 flex items-center gap-2"
+                className="px-3 py-2 sm:px-4 sm:py-2 text-sm sm:text-base bg-[#232D1A] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {navigating ? (
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#8BAE5A]"></div>
-                ) : null}
-                <span className="sm:inline">Vorige les</span>
+                ) : (
+                  "←"
+                )}
+                <span className="truncate">Vorige les</span>
               </button>
-            )}
-            
-            {nextLesson && (
-              <button
-                onClick={async () => {
-                  console.log('🔄 Next action triggered...');
-                  // If already navigating, force reset and continue
-                  if (navigating) {
-                    console.log('⚠️ Already navigating, forcing reset...');
-                    setNavigating(false);
-                    setLoading(false);
-                    setIsDataLoaded(false);
-                    setShowForceButton(false);
-                  }
-
-                  // Reset any stuck states before navigation
-                  setIsVideoLoading(false);
-                  setShowVideoOverlay(true);
-
-                  // If not completed and non-exam, complete first
-                  if (!completed && lesson.type !== 'exam') {
-                    try {
-                      // Fire-and-forget, do not block navigation
-                      void handleCompleteLesson();
-                    } catch (e) {
-                      console.warn('⚠️ Completing before navigate failed, proceeding to navigate');
-                    }
-                  }
-
-                  setNavigating(true);
-                  // Use a small delay to ensure state updates
-                  setTimeout(() => {
-                    router.push(`/dashboard/academy/${module.id}/${nextLesson.id}`);
-                  }, 50);
-                }}
-                disabled={navigating || (!completed && lesson.type !== 'exam' && saving)}
-                className="px-3 py-2 sm:px-4 sm:py-2 text-sm sm:text-base bg-[#8BAE5A] text-[#181F17] rounded-lg hover:bg-[#B6C948] transition-colors disabled:opacity-50 flex items-center gap-2"
-              >
-                {navigating ? (
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#181F17]"></div>
-                ) : null}
-                <span className="sm:inline">{!completed && lesson.type !== 'exam' ? 'Voltooi les, ga naar volgende les' : 'Volgende les'}</span>
-              </button>
+            ) : (
+              <div></div>
             )}
           </div>
+          
+          {/* Volgende les - full-width knop eronder */}
+          {nextLesson && (
+            <button
+              onClick={async () => {
+                console.log('🔄 Next action triggered...');
+                // If already navigating, force reset and continue
+                if (navigating) {
+                  console.log('⚠️ Already navigating, forcing reset...');
+                  setNavigating(false);
+                  setLoading(false);
+                  setIsDataLoaded(false);
+                  setShowForceButton(false);
+                }
+
+                // Reset any stuck states before navigation
+                setIsVideoLoading(false);
+                setShowVideoOverlay(true);
+
+                // If not completed and non-exam, complete first
+                if (!completed && lesson.type !== 'exam') {
+                  try {
+                    // Fire-and-forget, do not block navigation
+                    void handleCompleteLesson();
+                  } catch (e) {
+                    console.warn('⚠️ Completing before navigate failed, proceeding to navigate');
+                  }
+                }
+
+                setNavigating(true);
+                // Use a small delay to ensure state updates
+                setTimeout(() => {
+                  router.push(`/dashboard/academy/${module.id}/${nextLesson.id}`);
+                }, 50);
+              }}
+              disabled={navigating || (!completed && lesson.type !== 'exam' && saving)}
+              className="w-full mt-3 px-3 py-2 sm:px-4 sm:py-2 text-sm sm:text-base bg-[#8BAE5A] text-[#181F17] rounded-lg hover:bg-[#B6C948] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              <span className="truncate">{!completed && lesson.type !== 'exam' ? 'Voltooi & volgende' : 'Volgende les'}</span>
+              {navigating ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#181F17]"></div>
+              ) : (
+                "→"
+              )}
+            </button>
+          )}
         </div>
 
         {/* Custom Navigation with Hard Refresh */}
@@ -1701,7 +1711,8 @@ export default function LessonDetailPage() {
           />
         )}
 
-        {/* Ebook Download Section */}
+        {/* Ebook Download Section - Only show for non-exam lessons */}
+        {lesson.type !== 'exam' && (
         <div className="mt-8">
           <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-6">
             <div className="flex items-start space-x-4">
@@ -1816,30 +1827,32 @@ export default function LessonDetailPage() {
             </div>
           </div>
         </div>
+        )}
 
         {/* Navigation buttons - Only show for non-exam lessons */}
         {lesson.type !== 'exam' && (
-          <div className="mt-8 space-y-3">
-            {/* Terug naar overzicht - Full width op mobiel, normale breedte op desktop */}
-            <button
-              onClick={() => {
-                console.log('🔄 Navigating to module overview...');
-                setNavigating(true);
-                router.push(`/dashboard/academy/${module.id}`);
-              }}
-              disabled={navigating}
-              className="w-full sm:w-auto px-6 py-3 text-sm sm:text-base bg-[#232D1A] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
-            >
-              {navigating ? (
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#8BAE5A]"></div>
-              ) : (
-                "←"
-              )}
-              Terug naar overzicht
-            </button>
-
-            {/* Vorige/Volgende les - 2 kolommen op mobiel, ruimte tussen op desktop */}
-            <div className="grid grid-cols-2 gap-3 sm:flex sm:justify-between">
+          <div className="mt-8">
+            {/* Grid with 2 columns - Terug button left, Vorige/Volgende right */}
+            <div className="grid grid-cols-2 gap-3">
+              {/* Terug naar module overzicht - compacte knop links */}
+              <button
+                onClick={() => {
+                  console.log('🔄 Navigating to module overview...');
+                  setNavigating(true);
+                  router.push(`/dashboard/academy/${module.id}`);
+                }}
+                disabled={navigating}
+                className="px-3 py-2 sm:px-4 sm:py-2 text-sm sm:text-base bg-[#232D1A] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {navigating ? (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#8BAE5A]"></div>
+                ) : (
+                  "←"
+                )}
+                <span className="truncate">Terug naar overzicht</span>
+              </button>
+              
+              {/* Vorige les - compacte knop rechts (alleen als er een vorige les is) */}
               {prevLesson ? (
                 <button
                   onClick={() => {
@@ -1853,7 +1866,7 @@ export default function LessonDetailPage() {
                     }, 50);
                   }}
                   disabled={navigating}
-                  className="px-3 py-2 sm:px-6 sm:py-3 text-sm sm:text-base bg-[#232D1A] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="px-3 py-2 sm:px-4 sm:py-2 text-sm sm:text-base bg-[#232D1A] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   {navigating ? (
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#8BAE5A]"></div>
@@ -1863,48 +1876,47 @@ export default function LessonDetailPage() {
                   <span className="truncate">Vorige les</span>
                 </button>
               ) : (
-                <div className="hidden sm:block"></div>
-              )}
-              
-              {nextLesson ? (
-                <button
-                  onClick={async () => {
-                    console.log('🔄 Next action (bottom) triggered...');
-                    setIsVideoLoading(false);
-                    setShowVideoOverlay(true);
-
-                    if (!completed && lesson.type !== 'exam') {
-                      try {
-                        void handleCompleteLesson();
-                      } catch (e) {
-                        console.warn('⚠️ Completing before navigate failed, proceeding to navigate');
-                      }
-                    }
-
-                    setNavigating(true);
-                    
-                    setTimeout(() => {
-                      router.push(`/dashboard/academy/${module.id}/${nextLesson.id}`);
-                    }, 50);
-                  }}
-                  disabled={navigating || (!completed && lesson.type !== 'exam' && saving)}
-                  className="px-3 py-2 sm:px-6 sm:py-3 text-sm sm:text-base bg-[#8BAE5A] text-[#181F17] rounded-lg hover:bg-[#B6C948] transition-colors font-semibold disabled:opacity-50 flex items-center justify-center gap-2 col-span-2 sm:col-span-1"
-                >
-                  <span className="truncate">
-                    {(!completed && lesson.type !== 'exam')
-                      ? 'Voltooi & volgende'
-                      : 'Volgende les'}
-                  </span>
-                  {navigating ? (
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#181F17]"></div>
-                  ) : (
-                    "→"
-                  )}
-                </button>
-              ) : (
-                <div className="hidden sm:block"></div>
+                <div></div>
               )}
             </div>
+            
+            {/* Volgende les - full-width knop eronder */}
+            {nextLesson && (
+              <button
+                onClick={async () => {
+                  console.log('🔄 Next action (bottom) triggered...');
+                  setIsVideoLoading(false);
+                  setShowVideoOverlay(true);
+
+                  if (!completed && lesson.type !== 'exam') {
+                    try {
+                      void handleCompleteLesson();
+                    } catch (e) {
+                      console.warn('⚠️ Completing before navigate failed, proceeding to navigate');
+                    }
+                  }
+
+                  setNavigating(true);
+                  
+                  setTimeout(() => {
+                    router.push(`/dashboard/academy/${module.id}/${nextLesson.id}`);
+                  }, 50);
+                }}
+                disabled={navigating || (!completed && lesson.type !== 'exam' && saving)}
+                className="w-full mt-3 px-3 py-2 sm:px-4 sm:py-2 text-sm sm:text-base bg-[#8BAE5A] text-[#181F17] rounded-lg hover:bg-[#B6C948] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                <span className="truncate">
+                  {(!completed && lesson.type !== 'exam')
+                    ? 'Voltooi & volgende'
+                    : 'Volgende les'}
+                </span>
+                {navigating ? (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#181F17]"></div>
+                ) : (
+                  "→"
+                )}
+              </button>
+            )}
           </div>
         )}
       </div>

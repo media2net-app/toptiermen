@@ -95,6 +95,49 @@ export async function POST(request: Request) {
     
     console.log('💾 Using user identifier:', actualUserId);
     
+    // Check if frequency is changing - if so, reset training data
+    const { data: existingProfile } = await supabase
+      .from('training_profiles')
+      .select('training_frequency')
+      .eq('user_id', emailToLookup)
+      .single();
+    
+    const isFrequencyChanging = existingProfile && existingProfile.training_frequency !== training_frequency;
+    
+    if (isFrequencyChanging) {
+      console.log('🔄 Training frequency is changing from', existingProfile.training_frequency, 'to', training_frequency);
+      console.log('🗑️ Resetting all training data to start fresh...');
+      
+      // Get user UUID from email
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('email', emailToLookup)
+        .single();
+      
+      if (profileData?.id) {
+        // Delete all schema periods
+        await supabase
+          .from('user_schema_periods')
+          .delete()
+          .eq('user_id', profileData.id);
+        
+        // Delete all training day progress
+        await supabase
+          .from('user_training_day_progress')
+          .delete()
+          .eq('user_id', profileData.id);
+        
+        // Delete legacy training progress if exists
+        await supabase
+          .from('user_training_progress')
+          .delete()
+          .eq('user_id', profileData.id);
+        
+        console.log('✅ Training data reset complete');
+      }
+    }
+    
     const profileData = {
       user_id: emailToLookup, // Store email directly as user_id (TEXT field)
       training_goal,
@@ -139,7 +182,8 @@ export async function POST(request: Request) {
     
     return NextResponse.json({
       success: true,
-      profile: data
+      profile: data,
+      wasReset: isFrequencyChanging
     });
     
   } catch (error) {

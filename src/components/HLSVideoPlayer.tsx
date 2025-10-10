@@ -75,30 +75,47 @@ export default function HLSVideoPlayer({
           const effectiveType = (navigator as any)?.connection?.effectiveType as string | undefined;
           const isMobileViewport = typeof window !== 'undefined' ? window.matchMedia('(max-width: 640px)').matches : false;
           
-          // 🔧 MOBIEL OPTIMALISATIE: KLEINERE buffer voor directe start (net zoals PC)
-          const maxBufferLength = isMobileViewport ? 8 : 15; // Minder vooruit bufferen op mobiel
-          const maxMaxBufferLength = isMobileViewport ? 30 : 60; // Beperkte buffer capaciteit
+          // 🚀 MOBILE OPTIMALISATIE: Balans tussen snelle start en smooth playback
+          // Verhoog buffer voor smooth playback, maar hou initiële load laag
+          const maxBufferLength = isMobileViewport ? 20 : 30; // Genoeg buffer voor smooth playback
+          const maxMaxBufferLength = isMobileViewport ? 40 : 60; // Ruime max buffer voor stabiliteit
+          const backBufferLength = isMobileViewport ? 10 : 20; // Behoud back-buffer voor terugzoeken
+          
+          // Progressieve buffer strategy: start met weinig, bouw op tijdens playback
+          const initialMaxBufferLength = isMobileViewport ? 5 : 10; // Snelle start
 
           const hls = new Hls({
             // VOD tuning for responsive seeks
             lowLatencyMode: false,
             enableWorker: true,
             capLevelToPlayerSize: true,
-            backBufferLength: 20,
-            maxBufferLength,
+            backBufferLength,
+            maxBufferLength: initialMaxBufferLength, // Start met lage buffer voor snelle start
             maxMaxBufferLength,
-            maxBufferHole: 0.5,
-            maxStarvationDelay: 2,
-            nudgeMaxRetry: 3,
+            maxBufferHole: 0.5, // Accepteer kleine gaten zonder stall
+            maxStarvationDelay: 4, // Geef meer tijd voor buffering voordat stalling wordt gerapporteerd
+            nudgeMaxRetry: 5, // Meer retries voor betere recovery
             startPosition: -1,
             startLevel: -1, // Auto kwaliteit vanaf start
-            // ABR smoothing - zelfde als PC voor snelle keuze
-            abrEwmaFastVoD: 2.0,
-            abrEwmaSlowVoD: 9.0,
-            // Retry/timeout tuning
-            fragLoadingTimeOut: 8000,
-            fragLoadingRetryDelay: 500,
-            appendErrorMaxRetry: 2,
+            // ABR smoothing - agressiever op mobiel voor snelle aanpassing
+            abrEwmaFastVoD: isMobileViewport ? 3.0 : 2.0, // Snellere response op bandwidth changes
+            abrEwmaSlowVoD: isMobileViewport ? 7.0 : 9.0, // Snellere averaging
+            abrBandWidthFactor: 0.8, // Conservatief: 80% van gemeten bandwidth
+            abrBandWidthUpFactor: 0.7, // Voorzichtiger omhoog schalen
+            // Retry/timeout tuning - langere timeouts voor mobiel netwerk
+            fragLoadingTimeOut: isMobileViewport ? 12000 : 8000, // Meer tijd voor mobiele netwerken
+            fragLoadingMaxRetry: 6, // Meer retries
+            fragLoadingRetryDelay: 1000,
+            manifestLoadingMaxRetry: 4,
+            appendErrorMaxRetry: 3,
+            // Progressief laden met prefetch
+            progressive: true,
+            startFragPrefetch: true,
+            testBandwidth: true,
+            // Debug logging (production-safe)
+            debug: false,
+            // Bandwidth estimation
+            enableSoftwareAES: true, // Voor encrypted content
           });
           hlsRef.current = hls;
 
@@ -147,19 +164,49 @@ export default function HLSVideoPlayer({
               const ls = (hls.levels || []).map((l: any, idx: number) => ({ index: idx, height: l.height, bitrate: l.bitrate }));
               setLevels(ls);
               setCurrentLevel(hls.currentLevel ?? -1);
-              // Choose conservative start level ONLY on very slow networks
+              
+              // Smart start level selection gebaseerd op netwerk en device
               if (effectiveType && ['slow-2g','2g'].includes(effectiveType)) {
-                // pick lowest available level >= 360p
+                // Zeer trage netwerken: start met 360p of lager
                 const idx = ls.findIndex(l => (l.height || 0) >= 360);
                 const target = idx !== -1 ? idx : 0;
                 hls.autoLevelEnabled = false;
                 hls.currentLevel = target;
                 setCurrentLevel(target);
+              } else if (isMobileViewport && effectiveType === '3g') {
+                // 3G mobiel: start met 480p of lager voor snelle start
+                const idx = ls.findIndex(l => (l.height || 0) <= 480 && (l.height || 0) >= 360);
+                if (idx !== -1) {
+                  hls.autoLevelEnabled = false;
+                  hls.currentLevel = idx;
+                  setCurrentLevel(idx);
+                  // Na 10 seconden auto mode aanzetten voor upgrade
+                  setTimeout(() => {
+                    if (hlsRef.current) hlsRef.current.autoLevelEnabled = true;
+                  }, 10000);
+                }
+              } else if (isMobileViewport) {
+                // 4G/5G mobiel: start met 720p of lager voor balans
+                const idx = ls.findIndex(l => (l.height || 0) <= 720 && (l.height || 0) >= 480);
+                if (idx !== -1) {
+                  hls.currentLevel = idx;
+                  setCurrentLevel(idx);
+                }
               }
-              // 🔧 MOBIEL: Laat HLS.js auto kwaliteit kiezen, geen forcering
+              // Anders: laat HLS.js auto kwaliteit kiezen
             } catch {}
             
-            // 🔧 DIRECT STARTEN: Geen wachten op buffer, net zoals PC
+            // 🚀 PROGRESSIEVE BUFFER STRATEGY
+            // Na 5 seconden playback: verhoog max buffer voor smooth ervaring
+            setTimeout(() => {
+              if (hlsRef.current && !video.paused) {
+                try {
+                  hlsRef.current.config.maxBufferLength = maxBufferLength;
+                } catch {}
+              }
+            }, 5000);
+            
+            // Direct starten bij autoPlay
             if (autoPlay) {
               try { 
                 await video.play(); 
@@ -195,32 +242,35 @@ export default function HLSVideoPlayer({
 
     const onWaiting = () => {
       setIsBuffering(true);
-      // Stall watchdog: after 2500ms (meer geduld), auto downshift and nudge
+      // Stall watchdog: geef meer tijd op mobiel voor network variabiliteit
+      const stallDelay = isMobile ? 2000 : 2500;
       if (stallTimerRef.current) clearTimeout(stallTimerRef.current);
       stallTimerRef.current = setTimeout(() => {
         const hls = hlsRef.current;
         try {
           stallCountRef.current += 1;
-          // Prefer lowering one level; if auto enabled, disable to force stability
-          if (hls && typeof hls.currentLevel === 'number') {
+          // Alleen kwaliteit verlagen na meerdere stalls (niet bij eerste)
+          if (hls && typeof hls.currentLevel === 'number' && stallCountRef.current > 1) {
             if (hls.autoLevelEnabled) hls.autoLevelEnabled = false;
             const next = Math.max(0, (hls.currentLevel ?? 0) - 1);
             hls.currentLevel = next;
             setCurrentLevel(next);
           }
-          // Nudge decoder to skip small buffer holes
+          // Nudge decoder om kleine buffer holes over te slaan
           if (video && !video.paused) {
             const t = video.currentTime;
-            video.currentTime = t + 0.05;
+            video.currentTime = t + 0.1; // Iets grotere skip
           }
-          // Restart loading if it was paused
+          // Herstart loading als het gepauzeerd was
           hls?.startLoad?.();
         } catch {}
-      }, 2500);
+      }, stallDelay);
     };
     const onCanPlay = () => {
       setIsBuffering(false);
-      // After resume, restore auto-level if we previously forced a cap
+      if (stallTimerRef.current) clearTimeout(stallTimerRef.current);
+      // After resume, restore auto-level if we previously forced a cap (sneller op mobiel)
+      const restoreDelay = isMobile ? 1000 : 2000;
       if (restoreAutoTimerRef.current) clearTimeout(restoreAutoTimerRef.current);
       restoreAutoTimerRef.current = setTimeout(() => {
         try {
@@ -228,7 +278,15 @@ export default function HLSVideoPlayer({
             hlsRef.current.autoLevelEnabled = true;
           }
         } catch {}
-      }, 2000);
+      }, restoreDelay);
+    };
+    const onPlaying = () => {
+      setIsBuffering(false);
+      if (stallTimerRef.current) clearTimeout(stallTimerRef.current);
+      // Reset stall counter na 10 seconden smooth playback
+      setTimeout(() => {
+        stallCountRef.current = 0;
+      }, 10000);
     };
     const onSeeking = () => {
       setIsBuffering(true);
@@ -267,6 +325,7 @@ export default function HLSVideoPlayer({
 
     video.addEventListener('waiting', onWaiting);
     video.addEventListener('canplay', onCanPlay);
+    video.addEventListener('playing', onPlaying);
     video.addEventListener('seeking', onSeeking);
     video.addEventListener('seeked', onSeeked);
 
@@ -276,6 +335,7 @@ export default function HLSVideoPlayer({
       if (seekTimerRef.current) clearTimeout(seekTimerRef.current);
       video.removeEventListener('waiting', onWaiting);
       video.removeEventListener('canplay', onCanPlay);
+      video.removeEventListener('playing', onPlaying);
       video.removeEventListener('seeking', onSeeking);
       video.removeEventListener('seeked', onSeeked);
       try { hlsRef.current?.destroy?.(); } catch {}
@@ -293,8 +353,9 @@ export default function HLSVideoPlayer({
         autoPlay={autoPlay}
         muted={muted}
         playsInline
-        preload="metadata"
+        preload={isMobile ? "metadata" : "auto"}
         crossOrigin="anonymous"
+        webkit-playsinline="true"
       />
 
       {/* QoE overlay (debug) removed */}

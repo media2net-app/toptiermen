@@ -1877,8 +1877,8 @@ export default function VoedingsplannenV2Page() {
 
 
   const handlePlanView = (plan: NutritionPlan) => {
-    // Navigate to detail page using numeric ID to align with admin meals endpoint
-    const idToLoad = String(plan.id);
+    // Navigate to detail page using consistent ID logic (plan_id || id)
+    const idToLoad = String(plan.plan_id || plan.id);
     router.push(`/dashboard/voedingsplannen-v2/${idToLoad}`);
   };
 
@@ -1886,8 +1886,11 @@ export default function VoedingsplannenV2Page() {
     console.log('🔧 DEBUG: handlePlanSelect called with plan:', { name: plan.name, id: plan.plan_id || plan.id });
     console.log('🔧 DEBUG: Onboarding status:', { isCompleted, currentStep });
     
+    // Get consistent ID
+    const planId = plan.plan_id || plan.id;
+    
     // Set the selected plan ID for visual selection (always safe)
-    setSelectedPlanId(plan.plan_id || plan.id);
+    setSelectedPlanId(planId);
     
     // Persist selection for the user
     if (user?.id) {
@@ -1895,7 +1898,7 @@ export default function VoedingsplannenV2Page() {
         const res = await fetch('/api/nutrition-plan-select', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId: user.id, planId: plan.plan_id || plan.id })
+          body: JSON.stringify({ userId: user.id, planId })
         });
         if (!res.ok) {
           const txt = await res.text();
@@ -1919,8 +1922,9 @@ export default function VoedingsplannenV2Page() {
       return;
     }
 
-    // Normal flow (outside onboarding): open detail view
-    handlePlanView(plan);
+    // Normal flow (outside onboarding): navigate to detail page
+    const idToLoad = String(planId);
+    router.push(`/dashboard/voedingsplannen-v2/${idToLoad}`);
   };
 
   const handleBackToPlans = () => {

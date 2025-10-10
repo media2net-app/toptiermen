@@ -140,7 +140,7 @@ export async function POST(request: NextRequest) {
         
         const emailSuccess = await emailService.sendEmail(
           user.email,
-          '🔐 Je Top Tier Men Accountgegevens - Platform Live!',
+          '🔥 Welkom bij The Brotherhood - Je Account is Klaar!',
           'account-credentials',
           {
             name: user.full_name || user.display_name || 'Gebruiker',

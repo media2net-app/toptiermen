@@ -45,6 +45,7 @@ import SessionMonitor from '@/components/SessionMonitor';
 import AuthDebugPanel from '@/components/AuthDebugPanel';
 import SupportButton from '@/components/SupportButton';
 import { useChatNotifications } from '@/hooks/useChatNotifications';
+import { useOnlinePresence } from '@/hooks/useOnlinePresence';
 
 // Type definitions for menu items
 interface MenuItem {
@@ -332,6 +333,9 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  
+  // Track user online presence
+  useOnlinePresence();
 
   // Realtime chat notifications: increase unread counter when a new message arrives (not from self)
   useChatNotifications(

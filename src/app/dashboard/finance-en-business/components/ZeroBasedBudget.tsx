@@ -1,5 +1,7 @@
 "use client";
 import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { XMarkIcon } from '@heroicons/react/24/outline';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 
@@ -19,10 +21,20 @@ const defaultCategories: BudgetCategory[] = [
   { id: '6', name: 'Spaargeld', amount: 0, color: '#4ECDC4' },
 ];
 
+const predefinedColors = [
+  '#8BAE5A', '#FFD700', '#f0a14f', '#B6C948', 
+  '#FF6B6B', '#4ECDC4', '#9B59B6', '#E74C3C',
+  '#3498DB', '#F39C12', '#1ABC9C', '#E91E63'
+];
+
 export default function ZeroBasedBudget() {
   const [monthlyIncome, setMonthlyIncome] = useState(3000);
   const [categories, setCategories] = useState<BudgetCategory[]>(defaultCategories);
   const [remainingAmount, setRemainingAmount] = useState(monthlyIncome);
+  const [showAddCategoryModal, setShowAddCategoryModal] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [newCategoryAmount, setNewCategoryAmount] = useState<number>(0);
+  const [newCategoryColor, setNewCategoryColor] = useState(predefinedColors[0]);
 
   useEffect(() => {
     const totalAllocated = categories.reduce((sum, cat) => sum + cat.amount, 0);
@@ -35,14 +47,29 @@ export default function ZeroBasedBudget() {
     ));
   };
 
+  const openAddCategoryModal = () => {
+    setNewCategoryName('');
+    setNewCategoryAmount(0);
+    setNewCategoryColor(predefinedColors[0]);
+    setShowAddCategoryModal(true);
+  };
+
   const addCategory = () => {
+    if (!newCategoryName.trim()) {
+      alert('Geef de categorie een naam');
+      return;
+    }
+
     const newCategory: BudgetCategory = {
       id: Date.now().toString(),
-      name: 'Nieuwe Categorie',
-      amount: 0,
-      color: `hsl(${Math.random() * 360}, 70%, 60%)`
+      name: newCategoryName,
+      amount: newCategoryAmount,
+      color: newCategoryColor
     };
     setCategories(prev => [...prev, newCategory]);
+    setShowAddCategoryModal(false);
+    setNewCategoryName('');
+    setNewCategoryAmount(0);
   };
 
   const removeCategory = (id: string) => {
@@ -113,7 +140,7 @@ export default function ZeroBasedBudget() {
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold text-white">Budget Categorieën</h3>
             <button 
-              onClick={addCategory}
+              onClick={openAddCategoryModal}
               className="bg-[#8BAE5A] text-[#232D1A] px-3 py-1 rounded-lg text-sm font-semibold hover:bg-[#B6C948] transition-colors"
             >
               + Categorie
@@ -200,6 +227,127 @@ export default function ZeroBasedBudget() {
           </div>
         )}
       </div>
+
+      {/* Add Category Modal */}
+      <AnimatePresence>
+        {showAddCategoryModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowAddCategoryModal(false)}
+              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+            />
+
+            {/* Modal Content */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative bg-[#232D1A] rounded-2xl shadow-2xl border border-[#3A4D23] w-full max-w-md p-6 z-10"
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-bold text-[#B6C948]">Nieuwe Categorie</h3>
+                <button
+                  onClick={() => setShowAddCategoryModal(false)}
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  <XMarkIcon className="w-6 h-6" />
+                </button>
+              </div>
+
+              {/* Form */}
+              <div className="space-y-5">
+                {/* Category Name */}
+                <div>
+                  <label className="block text-[#8BAE5A] font-semibold mb-2">
+                    Categorie Naam
+                  </label>
+                  <input
+                    type="text"
+                    value={newCategoryName}
+                    onChange={(e) => setNewCategoryName(e.target.value)}
+                    placeholder="Bijv. Sportschool, Kleding, etc."
+                    className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-[#8BAE5A] transition-colors"
+                    autoFocus
+                  />
+                </div>
+
+                {/* Budget Amount */}
+                <div>
+                  <label className="block text-[#8BAE5A] font-semibold mb-2">
+                    Budget Bedrag (€)
+                  </label>
+                  <input
+                    type="number"
+                    value={newCategoryAmount === 0 ? '' : newCategoryAmount}
+                    onChange={(e) => setNewCategoryAmount(e.target.value === '' ? 0 : Number(e.target.value))}
+                    placeholder="0"
+                    min="0"
+                    className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-[#8BAE5A] transition-colors"
+                  />
+                </div>
+
+                {/* Color Picker */}
+                <div>
+                  <label className="block text-[#8BAE5A] font-semibold mb-3">
+                    Categorie Kleur
+                  </label>
+                  <div className="grid grid-cols-6 gap-3">
+                    {predefinedColors.map((color) => (
+                      <button
+                        key={color}
+                        onClick={() => setNewCategoryColor(color)}
+                        className={`w-10 h-10 rounded-lg transition-all ${
+                          newCategoryColor === color
+                            ? 'ring-2 ring-[#8BAE5A] ring-offset-2 ring-offset-[#232D1A] scale-110'
+                            : 'hover:scale-105'
+                        }`}
+                        style={{ backgroundColor: color }}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                {/* Preview */}
+                <div className="bg-[#181F17] rounded-lg p-4 border border-[#3A4D23]">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="w-4 h-4 rounded-full"
+                      style={{ backgroundColor: newCategoryColor }}
+                    />
+                    <span className="text-white font-semibold">
+                      {newCategoryName || 'Categorie Naam'}
+                    </span>
+                    <span className="ml-auto text-[#8BAE5A] font-mono">
+                      € {newCategoryAmount.toFixed(2)}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-3 pt-2">
+                  <button
+                    onClick={() => setShowAddCategoryModal(false)}
+                    className="flex-1 px-4 py-3 bg-[#181F17] text-white rounded-lg font-semibold hover:bg-[#3A4D23] transition-colors border border-[#3A4D23]"
+                  >
+                    Annuleren
+                  </button>
+                  <button
+                    onClick={addCategory}
+                    className="flex-1 px-4 py-3 bg-[#8BAE5A] text-[#232D1A] rounded-lg font-semibold hover:bg-[#B6C948] transition-colors"
+                  >
+                    Opslaan
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 } 

@@ -27,6 +27,7 @@ import { useSubscription } from '@/hooks/useSubscription';
 import { supabase } from '@/lib/supabase';
 import DynamicTrainingPlanView from './components/DynamicTrainingPlanView';
 import SchemaChangeWarningModal from '@/components/SchemaChangeWarningModal';
+import UpgradeModal from '@/components/UpgradeModal';
 
 interface TrainingSchema {
   id: string;
@@ -179,12 +180,13 @@ function TrainingschemasContent() {
   // New: centered modal to prompt user to start training profile
   const [showProfilePromptModal, setShowProfilePromptModal] = useState(false);
   const [showSchemaWarningModal, setShowSchemaWarningModal] = useState(false);
-  const [schemaChangeModalMode, setSchemaChangeModalMode] = useState<'warning' | 'completed'>('warning');
+  const [schemaChangeModalMode, setSchemaChangeModalMode] = useState<'warning' | 'completed' | 'profile'>('warning');
   const [nextSchemaLabel, setNextSchemaLabel] = useState<string | undefined>(undefined);
   const [schemaToChange, setSchemaToChange] = useState<string | null>(null);
   const [showSchemaChangeWarningModal, setShowSchemaChangeWarningModal] = useState(false);
   const [userTrainingProfile, setUserTrainingProfile] = useState<TrainingProfile | null>(null);
   const [showWarningModal, setShowWarningModal] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [showAllSchemas, setShowAllSchemas] = useState(false);
   const [selectedSchemaDetail, setSelectedSchemaDetail] = useState<TrainingSchema | null>(null);
   const [profileLoading, setProfileLoading] = useState(true);
@@ -232,11 +234,12 @@ function TrainingschemasContent() {
   // Auto-scroll to calculator whenever it opens (required profile prompt or manual open)
   useEffect(() => {
     if (showRequiredProfile || showCalculator) {
+      // Use longer timeout to ensure DOM is fully rendered and scrolling works properly
       setTimeout(() => {
         try {
           calculatorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         } catch {}
-      }, 100);
+      }, 400);
     }
   }, [showRequiredProfile, showCalculator]);
 
@@ -659,34 +662,21 @@ function TrainingschemasContent() {
                 equipment_type: data.profile.equipment_type
               });
             } else {
-              console.log('ℹ️ No training profile found');
-              if (!showOnboardingStep3) {
-                console.log('🔧 Creating basic profile for non-onboarding user');
-                await createBasicProfile();
-              }
+              console.log('ℹ️ No training profile found - will check onboarding before creating profile');
+              // Don't create profile here - let createBasicProfile handle the onboarding check
+              // This avoids duplicating the onboarding check logic
             }
           } catch (jsonError) {
             console.error('❌ Error parsing profile JSON:', jsonError);
-            if (!showOnboardingStep3) {
-              await createBasicProfile();
-            }
+            // Don't create profile here - let user fill form if in onboarding
           }
         } else {
           console.error('❌ Profile API error:', response.status, response.statusText);
-          if (!showOnboardingStep3) {
-            await createBasicProfile();
-          }
+          // Don't create profile here - let user fill form if in onboarding
         }
       } else {
         console.error('❌ Training profile promise rejected:', profileResult.reason);
-        console.log('🔄 Profile API failed, attempting to create basic profile...');
-        if (!showOnboardingStep3) {
-          try {
-            await createBasicProfile();
-          } catch (createError) {
-            console.error('❌ Failed to create basic profile:', createError);
-          }
-        }
+        console.log('ℹ️ Profile API failed - user will need to fill form manually if in onboarding');
       }
       
       // Process schema period
@@ -964,9 +954,21 @@ function TrainingschemasContent() {
     try {
       console.log('🔧 Creating basic training profile for user:', user?.email);
       
-      // Don't create automatic profile during onboarding step 3
+      // Check onboarding status directly to avoid race condition with showOnboardingStep3 state
+      console.log('📡 Checking onboarding status before creating profile...');
+      const onboardingResponse = await fetch(`/api/onboarding-v2?email=${user?.email}`);
+      if (onboardingResponse.ok) {
+        const onboardingData = await onboardingResponse.json();
+        if (onboardingData.success && !onboardingData.onboarding.isCompleted) {
+          console.log('🎯 User is in onboarding - not creating automatic profile, user should fill form manually');
+          setUserTrainingProfile(null);
+          return;
+        }
+      }
+      
+      // Additional check for showOnboardingStep3 state
       if (showOnboardingStep3) {
-        console.log('🎯 Onboarding step 3 active - not creating automatic profile, user should fill form manually');
+        console.log('🎯 Onboarding step 3 active (state check) - not creating automatic profile');
         setUserTrainingProfile(null);
         return;
       }
@@ -1093,13 +1095,25 @@ function TrainingschemasContent() {
           });
         } else {
           console.log('ℹ️ No training profile found');
-          // Don't create automatic profile during onboarding - let user fill form manually
+          // Check onboarding status directly before creating automatic profile
+          console.log('📡 Checking onboarding status before creating profile...');
+          const onboardingResponse = await fetch(`/api/onboarding-v2?email=${user?.email}`);
+          if (onboardingResponse.ok) {
+            const onboardingData = await onboardingResponse.json();
+            if (onboardingData.success && !onboardingData.onboarding.isCompleted) {
+              console.log('🎯 User is in onboarding - not creating automatic profile, user should fill form manually');
+              setUserTrainingProfile(null);
+              return;
+            }
+          }
+          
+          // Additional state check
           if (showOnboardingStep3) {
-            console.log('🎯 Onboarding step 3 active - not creating automatic profile');
+            console.log('🎯 Onboarding step 3 active (state check) - not creating automatic profile');
             setUserTrainingProfile(null);
           } else {
             console.log('🔧 Creating basic profile for non-onboarding user');
-          await createBasicProfile();
+            await createBasicProfile();
           }
         }
       } else {
@@ -1143,7 +1157,16 @@ function TrainingschemasContent() {
       
       if (response.ok && data.success) {
         console.log('✅ Training profile saved successfully');
-        toast.success('Je trainingsprofiel is opgeslagen!');
+        
+        // Show different message if data was reset due to frequency change
+        if (data.wasReset) {
+          toast.success('Je trainingsfrequentie is gewijzigd! Je training data is gereset en je begint opnieuw bij Schema 1.', {
+            duration: 5000,
+          });
+        } else {
+          toast.success('Je trainingsprofiel is opgeslagen!');
+        }
+        
         setUserTrainingProfile(data.profile);
         setShowRequiredProfile(false);
         setShowCalculator(false); // Hide calculator after saving
@@ -1159,6 +1182,11 @@ function TrainingschemasContent() {
 
         // Defer scroll until the available section is mounted
         setScrollToAvailablePending(true);
+        
+        // If data was reset, also reset the currentSchemaPeriod state
+        if (data.wasReset) {
+          setCurrentSchemaPeriod(null);
+        }
       } else {
         console.error('❌ Failed to save training profile:', data);
         toast.error(data.error || 'Failed to save training profile');
@@ -1285,6 +1313,13 @@ function TrainingschemasContent() {
         training_frequency: userTrainingProfile?.training_frequency?.toString() || '',
         equipment_type: userTrainingProfile?.equipment_type || 'gym'
       });
+      
+      // Scroll to calculator with longer timeout to ensure DOM is rendered
+      setTimeout(() => {
+        try {
+          calculatorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } catch {}
+      }, 400);
       
     } catch (error) {
       console.error('❌ Error handling profile edit confirmation:', error);
@@ -2066,47 +2101,6 @@ function TrainingschemasContent() {
             <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
             <h3 className="text-xl font-semibold text-white mb-2">Toegang controleren...</h3>
             <p className="text-gray-300 mb-6">We controleren je abonnement</p>
-            
-            {/* Hard Refresh Button */}
-            <div className="bg-[#232D1A] border border-[#3A4D23] rounded-xl p-6">
-              <div className="flex items-center justify-center mb-4">
-                <div className="w-12 h-12 bg-[#8BAE5A]/20 rounded-full flex items-center justify-center">
-                  <svg className="w-6 h-6 text-[#8BAE5A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
-                </div>
-              </div>
-              <h4 className="text-lg font-semibold text-white mb-2">Pagina laadt niet?</h4>
-              <p className="text-gray-300 text-sm mb-4">
-                Klik op onderstaande button als de pagina niet laadt, en dat hij daarna sowieso laadt
-              </p>
-              <div className="space-y-2">
-                <button
-                  onClick={() => {
-                    console.log('🔄 Schema period refresh button clicked');
-                    fetchCurrentSchemaPeriod();
-                  }}
-                  className="w-full bg-[#8BAE5A] text-[#232D1A] font-semibold px-4 py-2 rounded-lg hover:bg-[#7A9D4A] transition-colors flex items-center justify-center gap-2"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
-                  Schema Data Verversen
-                </button>
-                <button
-                  onClick={() => {
-                    console.log('🔄 Hard refresh button clicked - forcing page reload');
-                    window.location.reload();
-                  }}
-                  className="w-full bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#0A0F0A] font-bold px-6 py-3 rounded-lg hover:from-[#A6C97B] hover:to-[#FFE55C] transition-all duration-200 flex items-center justify-center gap-2"
-                >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-                Harde Refresh
-              </button>
-              </div>
-            </div>
           </div>
         </div>
       </PageLayout>
@@ -2157,17 +2151,13 @@ function TrainingschemasContent() {
               
               <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center">
                 <button
-                  onClick={() => {
-                    alert('Mocht je deze onderdelen willen neem dan contact op met Rick voor het upgraden van je pakket');
-                  }}
+                  onClick={() => setShowUpgradeModal(true)}
                   className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#0A0F0A] font-bold px-6 md:px-8 py-3 rounded-lg hover:from-[#A6C97B] hover:to-[#FFE55C] transition-all duration-200 text-sm md:text-base"
                 >
                   Upgrade naar Premium
                 </button>
                 <button
-                  onClick={() => {
-                    alert('Mocht je deze onderdelen willen neem dan contact op met Rick voor het upgraden van je pakket');
-                  }}
+                  onClick={() => setShowUpgradeModal(true)}
                   className="bg-gradient-to-r from-[#FFD700] to-[#8BAE5A] text-[#0A0F0A] font-bold px-6 md:px-8 py-3 rounded-lg hover:from-[#FFE55C] hover:to-[#A6C97B] transition-all duration-200 text-sm md:text-base"
                 >
                   Upgrade naar Lifetime
@@ -2257,17 +2247,17 @@ function TrainingschemasContent() {
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-8"
+            className="mb-6 sm:mb-8"
           >
-            <div className="bg-gradient-to-r from-[#8BAE5A]/10 to-[#8BAE5A]/5 border border-[#8BAE5A]/30 rounded-2xl p-4 sm:p-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
+            <div className="bg-gradient-to-r from-[#8BAE5A]/10 to-[#8BAE5A]/5 border border-[#8BAE5A]/30 rounded-xl sm:rounded-2xl p-3 sm:p-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 sm:mb-4 gap-2 sm:gap-3">
                 <div className="flex items-center gap-2 sm:gap-3">
-                  <div className="p-2 bg-[#8BAE5A]/20 rounded-lg">
-                    <ChartBarIcon className="h-5 w-5 sm:h-6 sm:w-6 text-[#8BAE5A]" />
+                  <div className="p-1.5 sm:p-2 bg-[#8BAE5A]/20 rounded-lg">
+                    <ChartBarIcon className="h-4 w-4 sm:h-6 sm:w-6 text-[#8BAE5A]" />
                   </div>
                   <div>
-                    <h3 className="text-lg sm:text-xl font-semibold text-white">Jouw Trainingsprofiel</h3>
-                    <p className="text-xs sm:text-sm text-gray-400">Gepersonaliseerd voor jouw doelen</p>
+                    <h3 className="text-base sm:text-xl font-semibold text-white">Jouw Trainingsprofiel</h3>
+                    <p className="text-[10px] sm:text-sm text-gray-400">Gepersonaliseerd voor jouw doelen</p>
                   </div>
                 </div>
                 <button
@@ -2275,6 +2265,7 @@ function TrainingschemasContent() {
                     // Check if user has an active schema period
                     if (currentSchemaPeriod) {
                       // Show warning modal instead of calculator
+                      setSchemaChangeModalMode('profile');
                       setShowSchemaChangeWarningModal(true);
                     } else {
                       // No active schema, proceed normally
@@ -2285,15 +2276,15 @@ function TrainingschemasContent() {
                         training_frequency: userTrainingProfile.training_frequency.toString(),
                         equipment_type: userTrainingProfile.equipment_type
                       });
-                      // Give the UI a tick to render and then scroll to the calculator
+                      // Give the UI time to render and then scroll to the calculator
                       setTimeout(() => {
                         try {
                           calculatorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                         } catch {}
-                      }, 100);
+                      }, 400);
                     }
                   }}
-                  className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors text-xs sm:text-sm font-medium"
+                  className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors text-[10px] sm:text-sm font-medium whitespace-nowrap"
                 >
                   <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -2302,39 +2293,39 @@ function TrainingschemasContent() {
                 </button>
               </div>
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                <div className="bg-[#1A1A1A]/50 rounded-lg p-3 sm:p-4 border border-gray-800">
-                  <div className="flex items-center gap-2 sm:gap-3 mb-2">
-                    <span className="text-lg sm:text-xl md:text-2xl">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
+                <div className="bg-[#1A1A1A]/50 rounded-lg p-2 sm:p-4 border border-gray-800">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <span className="text-base sm:text-xl md:text-2xl">
                       {trainingGoals.find(g => g.id === userTrainingProfile.training_goal)?.icon}
                     </span>
                     <div>
-                      <h4 className="text-xs sm:text-sm font-medium text-gray-400">Doel</h4>
-                      <p className="text-white font-semibold text-sm sm:text-base">
+                      <h4 className="text-[10px] sm:text-sm font-medium text-gray-400">Doel</h4>
+                      <p className="text-white font-semibold text-xs sm:text-base">
                         {trainingGoals.find(g => g.id === userTrainingProfile.training_goal)?.name}
                       </p>
                     </div>
                   </div>
                 </div>
                 
-                <div className="bg-[#1A1A1A]/50 rounded-lg p-3 sm:p-4 border border-gray-800">
-                  <div className="flex items-center gap-2 sm:gap-3 mb-2">
+                <div className="bg-[#1A1A1A]/50 rounded-lg p-2 sm:p-4 border border-gray-800">
+                  <div className="flex items-center gap-2 sm:gap-3">
                     <CalendarDaysIcon className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-[#8BAE5A]" />
                     <div>
-                      <h4 className="text-xs sm:text-sm font-medium text-gray-400">Frequentie</h4>
-                      <p className="text-white font-semibold text-sm sm:text-base">{userTrainingProfile.training_frequency}x per week</p>
+                      <h4 className="text-[10px] sm:text-sm font-medium text-gray-400">Frequentie</h4>
+                      <p className="text-white font-semibold text-xs sm:text-base">{userTrainingProfile.training_frequency}x per week</p>
                     </div>
                   </div>
                 </div>
                 
-                <div className="bg-[#1A1A1A]/50 rounded-lg p-3 sm:p-4 border border-gray-800 sm:col-span-2 lg:col-span-1">
-                  <div className="flex items-center gap-2 sm:gap-3 mb-2">
-                    <span className="text-lg sm:text-xl md:text-2xl">
+                <div className="bg-[#1A1A1A]/50 rounded-lg p-2 sm:p-4 border border-gray-800 sm:col-span-2 lg:col-span-1">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <span className="text-base sm:text-xl md:text-2xl">
                       {equipmentTypes.find(t => t.id === userTrainingProfile.equipment_type)?.icon}
                     </span>
                     <div>
-                      <h4 className="text-xs sm:text-sm font-medium text-gray-400">Locatie</h4>
-                      <p className="text-white font-semibold text-sm sm:text-base">
+                      <h4 className="text-[10px] sm:text-sm font-medium text-gray-400">Locatie</h4>
+                      <p className="text-white font-semibold text-xs sm:text-base">
                         {equipmentTypes.find(t => t.id === userTrainingProfile.equipment_type)?.name}
                       </p>
                     </div>
@@ -2349,55 +2340,55 @@ function TrainingschemasContent() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-8"
+            className="mb-6 sm:mb-8"
           >
-            <div className="bg-gradient-to-r from-[#8BAE5A]/10 to-[#8BAE5A]/5 border border-[#8BAE5A]/30 rounded-2xl p-4 sm:p-6">
-              <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
-                <div className="p-2 bg-[#8BAE5A]/20 rounded-lg">
-                  <CalendarDaysIcon className="h-5 w-5 sm:h-6 sm:w-6 text-[#8BAE5A]" />
+            <div className="bg-gradient-to-r from-[#8BAE5A]/10 to-[#8BAE5A]/5 border border-[#8BAE5A]/30 rounded-xl sm:rounded-2xl p-3 sm:p-6">
+              <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-6">
+                <div className="p-1.5 sm:p-2 bg-[#8BAE5A]/20 rounded-lg">
+                  <CalendarDaysIcon className="h-4 w-4 sm:h-6 sm:w-6 text-[#8BAE5A]" />
                 </div>
                 <div>
-                  <h3 className="text-lg sm:text-xl font-semibold text-white">Huidige Schema Periode</h3>
-                  <p className="text-xs sm:text-sm text-gray-400">8-weken trainingsperiode</p>
+                  <h3 className="text-base sm:text-xl font-semibold text-white">Huidige Schema Periode</h3>
+                  <p className="text-[10px] sm:text-sm text-gray-400">8-weken trainingsperiode</p>
                 </div>
               </div>
               
             {currentSchemaPeriod ? (
               <>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-                <div className="bg-[#232D1A]/50 border border-[#3A4D23] rounded-xl p-3 sm:p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-[#8BAE5A]">📅</span>
-                    <span className="text-sm font-medium text-gray-300">Startdatum</span>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
+                <div className="bg-[#232D1A]/50 border border-[#3A4D23] rounded-lg sm:rounded-xl p-2 sm:p-4">
+                  <div className="flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
+                    <span className="text-sm sm:text-base text-[#8BAE5A]">📅</span>
+                    <span className="text-[10px] sm:text-sm font-medium text-gray-300">Startdatum</span>
                   </div>
-                  <p className="text-white font-semibold">
+                  <p className="text-white font-semibold text-xs sm:text-base">
                     {new Date(currentSchemaPeriod.start_date).toLocaleDateString('nl-NL')}
                   </p>
                 </div>
                 
-                <div className="bg-[#232D1A]/50 border border-[#3A4D23] rounded-xl p-3 sm:p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-[#8BAE5A]">🏁</span>
-                    <span className="text-sm font-medium text-gray-300">Einddatum</span>
+                <div className="bg-[#232D1A]/50 border border-[#3A4D23] rounded-lg sm:rounded-xl p-2 sm:p-4">
+                  <div className="flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
+                    <span className="text-sm sm:text-base text-[#8BAE5A]">🏁</span>
+                    <span className="text-[10px] sm:text-sm font-medium text-gray-300">Einddatum</span>
                   </div>
-                  <p className="text-white font-semibold">
+                  <p className="text-white font-semibold text-xs sm:text-base">
                     {new Date(currentSchemaPeriod.end_date).toLocaleDateString('nl-NL')}
                   </p>
                 </div>
                 
-                <div className="bg-[#232D1A]/50 border border-[#3A4D23] rounded-xl p-3 sm:p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-[#8BAE5A]">📊</span>
-                    <span className="text-sm font-medium text-gray-300">Schema</span>
+                <div className="bg-[#232D1A]/50 border border-[#3A4D23] rounded-lg sm:rounded-xl p-2 sm:p-4">
+                  <div className="flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
+                    <span className="text-sm sm:text-base text-[#8BAE5A]">📊</span>
+                    <span className="text-[10px] sm:text-sm font-medium text-gray-300">Schema</span>
                   </div>
-                  <p className="text-white font-semibold">
+                  <p className="text-white font-semibold text-xs sm:text-base">
                     {currentSchemaPeriod.training_schemas?.name || 'Onbekend'}
                   </p>
                 </div>
               </div>
               
-              <div className="mt-4 p-3 bg-[#8BAE5A]/10 border border-[#8BAE5A]/30 rounded-lg">
-                <div className="flex items-center gap-2 text-[#8BAE5A] text-sm">
+              <div className="mt-2 sm:mt-4 p-2 sm:p-3 bg-[#8BAE5A]/10 border border-[#8BAE5A]/30 rounded-lg">
+                <div className="flex items-center gap-1.5 sm:gap-2 text-[#8BAE5A] text-[10px] sm:text-sm">
                   <span>ℹ️</span>
                   <span>Je volgt dit schema voor 8 weken. Na voltooiing kun je een nieuw schema selecteren.</span>
                 </div>
@@ -2405,40 +2396,40 @@ function TrainingschemasContent() {
               </>
             ) : (
               <>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-                  <div className="bg-[#232D1A]/50 border border-[#3A4D23] rounded-xl p-3 sm:p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-[#8BAE5A]">📅</span>
-                      <span className="text-sm font-medium text-gray-300">Startdatum</span>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
+                  <div className="bg-[#232D1A]/50 border border-[#3A4D23] rounded-lg sm:rounded-xl p-2 sm:p-4">
+                    <div className="flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
+                      <span className="text-sm sm:text-base text-[#8BAE5A]">📅</span>
+                      <span className="text-[10px] sm:text-sm font-medium text-gray-300">Startdatum</span>
             </div>
-                    <p className="text-gray-400 font-semibold">
+                    <p className="text-gray-400 font-semibold text-xs sm:text-base">
                       Kies eerst schema
                     </p>
                   </div>
                   
-                  <div className="bg-[#232D1A]/50 border border-[#3A4D23] rounded-xl p-3 sm:p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-[#8BAE5A]">🏁</span>
-                      <span className="text-sm font-medium text-gray-300">Einddatum</span>
+                  <div className="bg-[#232D1A]/50 border border-[#3A4D23] rounded-lg sm:rounded-xl p-2 sm:p-4">
+                    <div className="flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
+                      <span className="text-sm sm:text-base text-[#8BAE5A]">🏁</span>
+                      <span className="text-[10px] sm:text-sm font-medium text-gray-300">Einddatum</span>
                     </div>
-                    <p className="text-gray-400 font-semibold">
+                    <p className="text-gray-400 font-semibold text-xs sm:text-base">
                       Kies eerst schema
                     </p>
                   </div>
                   
-                  <div className="bg-[#232D1A]/50 border border-[#3A4D23] rounded-xl p-3 sm:p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-[#8BAE5A]">📊</span>
-                      <span className="text-sm font-medium text-gray-300">Schema</span>
+                  <div className="bg-[#232D1A]/50 border border-[#3A4D23] rounded-lg sm:rounded-xl p-2 sm:p-4">
+                    <div className="flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
+                      <span className="text-sm sm:text-base text-[#8BAE5A]">📊</span>
+                      <span className="text-[10px] sm:text-sm font-medium text-gray-300">Schema</span>
                     </div>
-                    <p className="text-gray-400 font-semibold">
+                    <p className="text-gray-400 font-semibold text-xs sm:text-base">
                       Kies eerst schema
                     </p>
                   </div>
                 </div>
                 
-                <div className="mt-4 p-3 bg-[#FFD700]/10 border border-[#FFD700]/30 rounded-lg">
-                  <div className="flex items-center gap-2 text-[#FFD700] text-sm">
+                <div className="mt-2 sm:mt-4 p-2 sm:p-3 bg-[#FFD700]/10 border border-[#FFD700]/30 rounded-lg">
+                  <div className="flex items-center gap-1.5 sm:gap-2 text-[#FFD700] text-[10px] sm:text-sm">
                     <span>💡</span>
                     <span>Selecteer een trainingsschema hieronder om je 8-weken trainingsperiode te starten.</span>
                   </div>
@@ -2455,18 +2446,18 @@ function TrainingschemasContent() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="mb-8"
+              className="mb-6 sm:mb-8"
               ref={calculatorRef}
             >
-              <div className="bg-gradient-to-r from-[#8BAE5A]/10 to-[#8BAE5A]/5 border border-[#8BAE5A]/30 rounded-2xl p-4 sm:p-6">
-                <div className="flex items-center justify-between mb-4 sm:mb-6">
+              <div className="bg-gradient-to-r from-[#8BAE5A]/10 to-[#8BAE5A]/5 border border-[#8BAE5A]/30 rounded-xl sm:rounded-2xl p-3 sm:p-6">
+                <div className="flex items-center justify-between mb-3 sm:mb-6">
                   <div className="flex items-center gap-2 sm:gap-3">
-                    <div className="p-2 bg-[#8BAE5A]/20 rounded-lg">
-                      <CalculatorIcon className="h-5 w-5 sm:h-6 sm:w-6 text-[#8BAE5A]" />
+                    <div className="p-1.5 sm:p-2 bg-[#8BAE5A]/20 rounded-lg">
+                      <CalculatorIcon className="h-4 w-4 sm:h-6 sm:w-6 text-[#8BAE5A]" />
                     </div>
                     <div>
-                      <h3 className="text-lg sm:text-xl font-semibold text-white">Trainingsprofiel Calculator</h3>
-                      <p className="text-xs sm:text-sm text-gray-400">Stel je persoonlijke trainingsvoorkeuren in</p>
+                      <h3 className="text-base sm:text-xl font-semibold text-white">Trainingsprofiel Calculator</h3>
+                      <p className="text-[10px] sm:text-sm text-gray-400">Stel je persoonlijke trainingsvoorkeuren in</p>
                     </div>
                   </div>
                   <button
@@ -2474,7 +2465,7 @@ function TrainingschemasContent() {
                       setShowRequiredProfile(false);
                       setShowCalculator(false);
                     }}
-                    className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+                    className="p-1.5 sm:p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors flex-shrink-0"
                   >
                     <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -2482,16 +2473,16 @@ function TrainingschemasContent() {
                   </button>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 sm:gap-4 md:gap-6">
                   {/* Training Goal */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-3 md:mb-4 flex items-center gap-2">
-                      <span className="text-base md:text-lg">🎯</span>
-                      <span className="text-sm md:text-base">Wat is je trainingsdoel?</span>
+                    <label className="block text-[11px] sm:text-sm font-medium text-gray-300 mb-2 sm:mb-3 md:mb-4 flex items-center gap-1.5 sm:gap-2">
+                      <span className="text-sm sm:text-base md:text-lg">🎯</span>
+                      <span className="text-[11px] sm:text-sm md:text-base">Wat is je trainingsdoel?</span>
                     </label>
-                    <div className="space-y-2 md:space-y-3">
+                    <div className="space-y-1.5 sm:space-y-2 md:space-y-3">
                       {trainingGoals.map((goal) => (
-                        <label key={goal.id} className={`flex items-start p-3 md:p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ${
+                        <label key={goal.id} className={`flex items-start p-2 sm:p-3 md:p-4 border-2 rounded-lg sm:rounded-xl cursor-pointer transition-all duration-200 ${
                           calculatorData.training_goal === goal.id 
                             ? 'border-[#8BAE5A] bg-[#8BAE5A]/10 shadow-lg shadow-[#8BAE5A]/20' 
                             : 'border-gray-700 hover:border-[#8BAE5A]/50 hover:bg-gray-800/50'
@@ -2502,15 +2493,15 @@ function TrainingschemasContent() {
                             value={goal.id}
                             checked={calculatorData.training_goal === goal.id}
                             onChange={(e) => setCalculatorData(prev => ({ ...prev, training_goal: e.target.value }))}
-                            className="mt-1 mr-4 h-4 w-4 text-[#8BAE5A] border-gray-300 focus:ring-[#8BAE5A]"
+                            className="mt-0.5 sm:mt-1 mr-2 sm:mr-4 h-3 w-3 sm:h-4 sm:w-4 text-[#8BAE5A] border-gray-300 focus:ring-[#8BAE5A]"
                           />
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 md:gap-3 mb-2">
-                              <span className="text-xl md:text-2xl">{goal.icon}</span>
-                              <div className="text-white font-semibold text-sm md:text-base">{goal.name}</div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 mb-1 sm:mb-2">
+                              <span className="text-base sm:text-xl md:text-2xl flex-shrink-0">{goal.icon}</span>
+                              <div className="text-white font-semibold text-xs sm:text-sm md:text-base truncate">{goal.name}</div>
                             </div>
-                            <div className="text-xs md:text-sm text-gray-300 mb-1">{goal.subtitle}</div>
-                            <div className="text-xs text-gray-500">{goal.description}</div>
+                            <div className="text-[10px] sm:text-xs md:text-sm text-gray-300 mb-0.5 sm:mb-1 line-clamp-1 sm:line-clamp-none">{goal.subtitle}</div>
+                            <div className="text-[10px] sm:text-xs text-gray-500 line-clamp-2 sm:line-clamp-none">{goal.description}</div>
                           </div>
                         </label>
                       ))}
@@ -2519,13 +2510,13 @@ function TrainingschemasContent() {
 
                   {/* Training Frequency */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-3 md:mb-4 flex items-center gap-2">
-                      <CalendarDaysIcon className="h-4 w-4 md:h-5 md:w-5 text-[#8BAE5A]" />
-                      <span className="text-sm md:text-base">Hoe vaak wil je per week trainen?</span>
+                    <label className="block text-[11px] sm:text-sm font-medium text-gray-300 mb-2 sm:mb-3 md:mb-4 flex items-center gap-1.5 sm:gap-2">
+                      <CalendarDaysIcon className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5 text-[#8BAE5A]" />
+                      <span className="text-[11px] sm:text-sm md:text-base">Hoe vaak wil je per week trainen?</span>
                     </label>
-                    <div className="space-y-2 md:space-y-3">
+                    <div className="space-y-1.5 sm:space-y-2 md:space-y-3">
                       {trainingFrequencies.map((freq) => (
-                        <label key={freq.id} className={`flex items-start p-3 md:p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ${
+                        <label key={freq.id} className={`flex items-start p-2 sm:p-3 md:p-4 border-2 rounded-lg sm:rounded-xl cursor-pointer transition-all duration-200 ${
                           calculatorData.training_frequency === freq.id.toString() 
                             ? 'border-[#8BAE5A] bg-[#8BAE5A]/10 shadow-lg shadow-[#8BAE5A]/20' 
                             : 'border-gray-700 hover:border-[#8BAE5A]/50 hover:bg-gray-800/50'
@@ -2536,12 +2527,12 @@ function TrainingschemasContent() {
                             value={freq.id}
                             checked={calculatorData.training_frequency === freq.id.toString()}
                             onChange={(e) => setCalculatorData(prev => ({ ...prev, training_frequency: e.target.value }))}
-                            className="mt-1 mr-4 h-4 w-4 text-[#8BAE5A] border-gray-300 focus:ring-[#8BAE5A]"
+                            className="mt-0.5 sm:mt-1 mr-2 sm:mr-4 h-3 w-3 sm:h-4 sm:w-4 text-[#8BAE5A] border-gray-300 focus:ring-[#8BAE5A]"
                           />
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 md:gap-3 mb-2">
-                              <CalendarDaysIcon className="h-4 w-4 md:h-5 md:w-5 text-[#8BAE5A]" />
-                              <div className="text-white font-semibold text-sm md:text-base">{freq.name}</div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 mb-1 sm:mb-2">
+                              <CalendarDaysIcon className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5 text-[#8BAE5A] flex-shrink-0" />
+                              <div className="text-white font-semibold text-xs sm:text-sm md:text-base truncate">{freq.name}</div>
                             </div>
                           </div>
                         </label>
@@ -2552,26 +2543,26 @@ function TrainingschemasContent() {
 
                   {/* Training Location - Only Gym Available */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-3 md:mb-4 flex items-center gap-2">
-                      <span className="text-base md:text-lg">🏋️</span>
-                      <span className="text-sm md:text-base">Waar ga je trainen?</span>
+                    <label className="block text-[11px] sm:text-sm font-medium text-gray-300 mb-2 sm:mb-3 md:mb-4 flex items-center gap-1.5 sm:gap-2">
+                      <span className="text-sm sm:text-base md:text-lg">🏋️</span>
+                      <span className="text-[11px] sm:text-sm md:text-base">Waar ga je trainen?</span>
                     </label>
-                    <div className="bg-[#8BAE5A]/10 border border-[#8BAE5A]/30 rounded-xl p-3 md:p-4">
-                      <div className="flex items-center gap-2 md:gap-3">
-                        <span className="text-xl md:text-2xl">🏋️</span>
-                        <div>
-                          <div className="text-white font-semibold text-sm md:text-base">Gym</div>
-                          <div className="text-xs md:text-sm text-gray-300">Volledige gym met alle apparaten</div>
+                    <div className="bg-[#8BAE5A]/10 border border-[#8BAE5A]/30 rounded-lg sm:rounded-xl p-2 sm:p-3 md:p-4">
+                      <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3">
+                        <span className="text-base sm:text-xl md:text-2xl flex-shrink-0">🏋️</span>
+                        <div className="min-w-0">
+                          <div className="text-white font-semibold text-xs sm:text-sm md:text-base">Gym</div>
+                          <div className="text-[10px] sm:text-xs md:text-sm text-gray-300">Volledige gym met alle apparaten</div>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                <div className="mt-4 sm:mt-6 md:mt-8 flex justify-center md:justify-end">
+                <div className="mt-3 sm:mt-6 md:mt-8 flex justify-center md:justify-end">
                   <button
                     onClick={calculateTrainingProfile}
-                    className="flex items-center gap-2 px-4 sm:px-6 md:px-8 py-2 sm:py-3 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold shadow-lg shadow-[#8BAE5A]/20 text-sm sm:text-base"
+                    className="flex items-center gap-1.5 sm:gap-2 px-4 sm:px-6 md:px-8 py-2 sm:py-3 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold shadow-lg shadow-[#8BAE5A]/20 text-xs sm:text-sm md:text-base"
                   >
                     <CheckIcon className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5" />
                     Profiel Opslaan
@@ -2598,33 +2589,6 @@ function TrainingschemasContent() {
                profileLoading ? 'Je trainingsprofiel wordt geladen' :
                trainingLoading ? 'Trainingsschemas worden geladen' : 'Even geduld...'}
             </p>
-            
-            {/* Hard Refresh Button for Loading States */}
-            <div className="bg-[#232D1A] border border-[#3A4D23] rounded-xl p-6 max-w-md mx-auto">
-              <div className="flex items-center justify-center mb-4">
-                <div className="w-10 h-10 bg-[#8BAE5A]/20 rounded-full flex items-center justify-center">
-                  <svg className="w-5 h-5 text-[#8BAE5A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
-                </div>
-              </div>
-              <h4 className="text-base font-semibold text-white mb-2">Pagina laadt niet?</h4>
-              <p className="text-gray-300 text-sm mb-4">
-                Klik op onderstaande button als de pagina niet laadt, en dat hij daarna sowieso laadt
-              </p>
-              <button
-                onClick={() => {
-                  console.log('🔄 Hard refresh button clicked during loading - forcing page reload');
-                  window.location.reload();
-                }}
-                className="w-full bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#0A0F0A] font-bold px-4 py-2 rounded-lg hover:from-[#A6C97B] hover:to-[#FFE55C] transition-all duration-200 flex items-center justify-center gap-2 text-sm"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-                Harde Refresh
-              </button>
-            </div>
           </div>
         )}
 
@@ -3152,21 +3116,34 @@ function TrainingschemasContent() {
       <SchemaChangeWarningModal
         isOpen={showSchemaChangeWarningModal}
         onClose={() => setShowSchemaChangeWarningModal(false)}
-        onConfirm={schemaChangeModalMode === 'completed'
-          ? async () => {
-              if (!schemaToChange) return;
-              await selectTrainingSchemaDirect(schemaToChange);
-              setSchemaToChange(null);
-              setShowSchemaChangeWarningModal(false);
-            }
-          : async () => {
-              await confirmSchemaChange();
-              setShowSchemaChangeWarningModal(false);
-            }
+        onConfirm={
+          schemaChangeModalMode === 'completed'
+            ? async () => {
+                if (!schemaToChange) return;
+                await selectTrainingSchemaDirect(schemaToChange);
+                setSchemaToChange(null);
+                setShowSchemaChangeWarningModal(false);
+              }
+            : schemaChangeModalMode === 'profile'
+            ? async () => {
+                await handleProfileEditWithWarning();
+                setShowSchemaChangeWarningModal(false);
+              }
+            : async () => {
+                await confirmSchemaChange();
+                setShowSchemaChangeWarningModal(false);
+              }
         }
         currentSchemaName={currentSchemaPeriod?.training_schemas?.name || 'Huidige Schema'}
-        mode={schemaChangeModalMode}
+        mode={schemaChangeModalMode === 'profile' ? 'warning' : schemaChangeModalMode}
         nextSchemaLabel={nextSchemaLabel}
+      />
+
+      {/* Upgrade Modal */}
+      <UpgradeModal 
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        type="training"
       />
     </PageLayout>
   );
