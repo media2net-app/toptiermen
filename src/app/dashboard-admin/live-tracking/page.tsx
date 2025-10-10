@@ -91,10 +91,10 @@ export default function LiveTrackingPage() {
   useEffect(() => {
     fetchUsers();
 
-    // Auto-refresh elke 10 seconden
+    // Auto-refresh elke 5 seconden voor sneller real-time updates
     const interval = setInterval(() => {
       fetchUsers();
-    }, 10000);
+    }, 5000);
 
     return () => clearInterval(interval);
   }, []);
@@ -394,9 +394,10 @@ export default function LiveTrackingPage() {
         </h3>
         <ul className="text-[#8BAE5A] text-sm space-y-2">
           <li>• Gebruikers worden als "online" gemarkeerd als ze actief waren in de laatste 5 minuten</li>
-          <li>• De data wordt automatisch elke 10 seconden ververst</li>
+          <li>• De data wordt automatisch elke 5 seconden ververst voor real-time updates</li>
           <li>• <strong>Laatste Login</strong>: Tijdstip wanneer gebruiker voor het laatst is ingelogd (last_login)</li>
           <li>• <strong>Laatst Actief</strong>: Meest recente activiteit op het platform (last_active)</li>
+          <li>• Heartbeat systeem update elke 30 seconden de activiteit van ingelogde gebruikers</li>
           <li>• Onboarding stappen: 1=Welkom video, 2=Basis info, 3=Training, 4=Voeding, 5=Afronding</li>
         </ul>
       </div>

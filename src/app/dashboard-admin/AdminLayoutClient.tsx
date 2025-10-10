@@ -47,6 +47,7 @@ import AuthDebugPanel from '@/components/AuthDebugPanel';
 import SupportButton from '@/components/SupportButton';
 import { useChatNotifications } from '@/hooks/useChatNotifications';
 import { useOnlinePresence } from '@/hooks/useOnlinePresence';
+import { useActivityHeartbeat } from '@/hooks/useActivityHeartbeat';
 
 // Type definitions for menu items
 interface MenuItem {
@@ -338,6 +339,9 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
   
   // Track user online presence
   useOnlinePresence();
+  
+  // 🔥 Activity Heartbeat - Updates last_active every 30 seconds for Live Tracking
+  useActivityHeartbeat(user?.id);
 
   // Realtime chat notifications: increase unread counter when a new message arrives (not from self)
   useChatNotifications(

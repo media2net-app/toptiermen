@@ -11,6 +11,7 @@ import { useDebug } from '@/contexts/DebugContext';
 import { useTestUser } from '@/hooks/useTestUser';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useMindFocusIntake } from '@/hooks/useMindFocusIntake';
+import { useActivityHeartbeat } from '@/hooks/useActivityHeartbeat';
 import OnboardingV2Modal from '@/components/OnboardingV2Modal';
 import { WorkoutSessionProvider, useWorkoutSession } from '@/contexts/WorkoutSessionContext';
 import FloatingWorkoutWidget from '@/components/FloatingWorkoutWidget';
@@ -1012,6 +1013,9 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
   // const { addNotification, setLoadingState } = useV2State();
   // const { trackFeatureUsage } = useV2Monitoring();
   // const { handleError } = useV2ErrorRecovery();
+  
+  // 🔥 Activity Heartbeat - Updates last_active every 30 seconds
+  useActivityHeartbeat(user?.id);
   
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
