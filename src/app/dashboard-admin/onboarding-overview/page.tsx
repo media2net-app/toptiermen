@@ -73,18 +73,16 @@ export default function OnboardingOverviewPage() {
     }
   }, [isAdmin]);
 
-  // Get step label
+  // Get step label (updated for new onboarding V2 flow)
   const getStepLabel = (step: number, completed: boolean) => {
     if (completed) return '✅ Voltooid';
     
     switch (step) {
-      case 0: return '🎬 Welkom Video';
-      case 1: return '🎯 Doel Omschrijven';
-      case 2: return '🎯 Missies Selecteren';
-      case 3: return '💪 Trainingsschema';
+      case 1: return '🎬 Welkom Video';
+      case 2: return '👤 Basis Informatie';
+      case 3: return '💪 Training & Doel';
       case 4: return '🍽️ Voedingsplan';
-      case 5: return '💬 Forum Introductie';
-      case 6: return '✅ Voltooid';
+      case 5: return '✅ Afronding';
       default: return `Stap ${step}`;
     }
   };

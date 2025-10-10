@@ -21,13 +21,37 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to fetch users' }, { status: 500 });
     }
 
-    // Fetch onboarding status for all users
+    // Fetch onboarding status for all users (from correct table!)
     const { data: onboardingData, error: onboardingError } = await supabaseAdmin
-      .from('user_onboarding_status')
+      .from('onboarding_status')
       .select('*');
 
     if (onboardingError) {
       console.error('Error fetching onboarding status:', onboardingError);
+      // If table doesn't exist yet, return empty data
+      if (onboardingError.code === '42P01') {
+        console.log('onboarding_status table not found, returning empty data');
+        return NextResponse.json({
+          users: users?.map(user => ({
+            id: user.id,
+            email: user.email,
+            role: user.role || 'member',
+            subscriptionTier: user.subscription_tier || 'basic',
+            subscriptionStatus: user.subscription_status || 'active',
+            createdAt: user.created_at,
+            onboardingCompleted: false,
+            currentStep: 1,
+            mainGoal: null,
+            status: '⏳ In Progress'
+          })) || [],
+          statistics: {
+            total: users?.length || 0,
+            completed: 0,
+            pending: users?.length || 0,
+            completionRate: 0
+          }
+        });
+      }
       return NextResponse.json({ error: 'Failed to fetch onboarding status' }, { status: 500 });
     }
 
@@ -55,28 +79,9 @@ export async function GET(request: NextRequest) {
       const onboarding = onboardingMap.get(user.id);
       const profile = profilesMap.get(user.id);
       
-      // Calculate actual current step based on completed steps
-      let actualCurrentStep = 0;
-      
-      if (onboarding) {
-        if (onboarding.onboarding_completed) {
-          actualCurrentStep = 6; // Completed
-        } else if (onboarding.challenge_started) {
-          actualCurrentStep = 6; // Forum Introductie (final step)
-        } else if (onboarding.nutrition_plan_selected) {
-          actualCurrentStep = 5; // Forum Introductie
-        } else if (onboarding.training_schema_selected) {
-          actualCurrentStep = 4; // Voedingsplan
-        } else if (onboarding.missions_selected) {
-          actualCurrentStep = 3; // Trainingsschema
-        } else if (onboarding.goal_set) {
-          actualCurrentStep = 2; // Missies Selecteren
-        } else if (onboarding.welcome_video_shown) {
-          actualCurrentStep = 1; // Doel Omschrijven
-        } else {
-          actualCurrentStep = 0; // Welkom Video
-        }
-      }
+      // Use current_step directly from new onboarding_status table
+      const actualCurrentStep = onboarding?.current_step || 1;
+      const isCompleted = onboarding?.onboarding_completed || false;
       
       return {
         id: user.id,
@@ -85,10 +90,10 @@ export async function GET(request: NextRequest) {
         subscriptionTier: user.subscription_tier || 'basic',
         subscriptionStatus: user.subscription_status || 'active',
         createdAt: user.created_at,
-        onboardingCompleted: onboarding?.onboarding_completed || false,
+        onboardingCompleted: isCompleted,
         currentStep: actualCurrentStep,
         mainGoal: profile?.main_goal || null,
-        status: onboarding?.onboarding_completed ? '✅ Voltooid' : '⏳ In Progress'
+        status: isCompleted ? '✅ Voltooid' : `⏳ Stap ${actualCurrentStep}`
       };
     }) || [];
 
