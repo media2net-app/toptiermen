@@ -144,37 +144,6 @@ export default function ProductenPage() {
 
   const fallbackProducts: Product[] = [
     {
-      id: '4',
-      name: 'Omega 3 Visolie',
-      description: 'Hooggedoseerde omega-3 visolie met EPA/DHA voor hart en brein',
-      short_description: 'Zuivere visolie | 1000mg | EPA/DHA',
-      price: 19.95,
-      original_price: 24.95,
-      image_url: 'https://images.unsplash.com/photo-1611077856336-b3a8e2aa6285?q=80&w=1200&auto=format&fit=crop',
-      gallery_images: [],
-      category_id: '1',
-      in_stock: true,
-      stock_quantity: 100,
-      sku: 'OMG3-001',
-      brand: 'TopTier Health',
-      rating: 4.7,
-      review_count: 128,
-      featured: true,
-      status: 'active',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      product_categories: undefined,
-      product_features: [],
-      product_benefits: [],
-      product_ingredients: [],
-      product_dosage: [],
-      product_affiliate_links: [
-        { id: 'aff-4-1', platform: 'Bol.com', affiliate_url: 'https://partner.bol.com/click/cam-omega3', is_primary: true },
-        { id: 'aff-4-2', platform: 'Amazon', affiliate_url: 'https://amzn.to/omega3-top-tier', is_primary: false },
-      ],
-      product_reviews: []
-    },
-    {
       id: '5',
       name: 'Testosteron Kit',
       description: 'Complete kit ter ondersteuning van testosteron: zink, magnesium en vitamine D3/K2',
