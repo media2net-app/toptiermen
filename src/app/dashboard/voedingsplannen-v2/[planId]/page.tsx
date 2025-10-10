@@ -1036,10 +1036,8 @@ export default function NutritionPlanDetailPage() {
         let mult = 1;
         if (isPieceUnit(unit)) {
           amount = scalePiecesAmount(base, scalingFactor);
-          const unitWeight = Number(
-            ingredient.unit_weight_g ?? ingredient.grams_per_unit ?? ingredient.weight_per_unit ?? ingredient.per_piece_grams ?? ingredient.slice_weight_g ?? ingredient.plakje_gram ?? ingredient.unit_weight
-          ) || 0;
-          mult = unitWeight > 0 ? (amount * unitWeight) / 100 : amount;
+          // 🔧 FIX: Voor piece units is calories_per_100g eigenlijk per piece!
+          mult = amount;
           fixed.cal += (Number(ingredient.calories_per_100g)||0) * mult;
           fixed.p   += (Number(ingredient.protein_per_100g)||0)  * mult;
           fixed.c   += (Number(ingredient.carbs_per_100g)||0)    * mult;
@@ -1112,10 +1110,8 @@ export default function NutritionPlanDetailPage() {
         let mult = 1;
         if (isPieceUnit(unit)) {
           amtUsed = scalePiecesAmount(base, scalingFactor);
-          const unitWeight = Number(
-            ingredient.unit_weight_g ?? ingredient.grams_per_unit ?? ingredient.weight_per_unit ?? ingredient.per_piece_grams ?? ingredient.slice_weight_g ?? ingredient.plakje_gram ?? ingredient.unit_weight
-          ) || 0;
-          mult = unitWeight > 0 ? (amtUsed * unitWeight) / 100 : amtUsed;
+          // 🔧 FIX: Voor piece units is calories_per_100g eigenlijk per piece!
+          mult = amtUsed;
         } else if (['per_100g','g','gram'].includes(unit)) {
           amtUsed = Math.round(amtBaseScaled * factorForAmount(unit));
           mult = amtUsed / 100;
@@ -1679,10 +1675,8 @@ export default function NutritionPlanDetailPage() {
                   let multiplier = 1;
                   if (isPieceUnit(unit)) {
                     amount = scalePiecesAmount(base, scalingFactor);
-                    const unitWeight = Number(
-                      ingredient.unit_weight_g ?? ingredient.grams_per_unit ?? ingredient.weight_per_unit ?? ingredient.per_piece_grams ?? ingredient.slice_weight_g ?? ingredient.plakje_gram ?? ingredient.unit_weight
-                    ) || 0;
-                    multiplier = unitWeight > 0 ? (amount * unitWeight) / 100 : amount;
+                    // 🔧 FIX: Voor piece units is calories_per_100g eigenlijk per piece!
+                    multiplier = amount;
                   } else if (['per_100g','g','gram'].includes(unit)) {
                     const f = getFields(ingredient);
                     const dens = { cal: f.calories_per_100g, p: f.protein_per_100g, c: f.carbs_per_100g, f: f.fat_per_100g };
@@ -1760,32 +1754,25 @@ export default function NutritionPlanDetailPage() {
                     }
                   });
                   
-                  // Calculate percentage this meal contributes
-                  const mealPercentage = {
-                    calories: baselineDayTotal.calories > 0 ? Number(mealData.nutrition.calories) / baselineDayTotal.calories : 0,
-                    protein: baselineDayTotal.protein > 0 ? Number(mealData.nutrition.protein) / baselineDayTotal.protein : 0,
-                    carbs: baselineDayTotal.carbs > 0 ? Number(mealData.nutrition.carbs) / baselineDayTotal.carbs : 0,
-                    fat: baselineDayTotal.fat > 0 ? Number(mealData.nutrition.fat) / baselineDayTotal.fat : 0,
-                  };
-                  
-                  // Apply percentage to scaled day totals (which may be optimized)
+                  // 🔧 FIX: Show TRUE meal totals, not "optimized" reduced values
+                  // Simply use the raw computed totals for this meal
                   return {
-                    calories: Math.round(dayTotals.calories * mealPercentage.calories),
-                    protein: Math.round((dayTotals.protein * mealPercentage.protein) * 10) / 10,
-                    carbs: Math.round((dayTotals.carbs * mealPercentage.carbs) * 10) / 10,
-                    fat: Math.round((dayTotals.fat * mealPercentage.fat) * 10) / 10,
+                    calories: Math.round(computedTotals.calories),
+                    protein: Math.round(computedTotals.protein * 10) / 10,
+                    carbs: Math.round(computedTotals.carbs * 10) / 10,
+                    fat: Math.round(computedTotals.fat * 10) / 10,
                   };
                 })();
                 
-                // Calculate ingredient adjustment factors
-                // If dayTotals were optimized, we need to adjust individual ingredients proportionally
-                // so their sum matches the optimized mealTotals
+                // 🔧 FIX: Adjustment factors misleiden gebruikers - altijd echte waarden tonen!
+                // Voorheen werden waarden met 33% gereduceerd om te passen bij "geoptimaliseerde" targets
+                // Dit was misleidend - gebruikers moeten weten wat ze ECHT eten
                 const ingredientAdjustmentFactors = {
-                  protein: computedTotals.protein > 0 ? mealTotals.protein / computedTotals.protein : 1,
-                  carbs: computedTotals.carbs > 0 ? mealTotals.carbs / computedTotals.carbs : 1,
-                  fat: computedTotals.fat > 0 ? mealTotals.fat / computedTotals.fat : 1,
-                  calories: computedTotals.calories > 0 ? mealTotals.calories / computedTotals.calories : 1,
-                    };
+                  protein: 1,  // Geen aanpassing meer
+                  carbs: 1,    // Geen aanpassing meer
+                  fat: 1,      // Geen aanpassing meer
+                  calories: 1, // Geen aanpassing meer
+                };
 
                 return (
                   <div key={mealType} className="bg-[#232D1A] rounded-lg border border-[#3A4D23] overflow-hidden">
@@ -1873,10 +1860,9 @@ export default function NutritionPlanDetailPage() {
                                 if (['per_piece','piece','pieces','per_stuk','stuk','stuks','per_plakje','plakje','plakjes','plak','per_plak','sneetje','per_sneetje','handje','per_handful'].includes(unit)) {
                                   // Discrete scaling: never show fractional pieces and never drop below 1 when base >= 1
                                   amount = scalePiecesAmount(amountBase, scalingFactor);
-                                  const unitWeight = Number(
-                                    ingredient.unit_weight_g ?? ingredient.grams_per_unit ?? ingredient.weight_per_unit ?? ingredient.per_piece_grams ?? ingredient.slice_weight_g ?? ingredient.plakje_gram ?? ingredient.unit_weight
-                                  ) || 0;
-                                  multiplier = unitWeight > 0 ? (amount * unitWeight) / 100 : amount;
+                                  // 🔧 FIX: Voor piece units is calories_per_100g eigenlijk per piece!
+                                  // Multiplier is simpelweg het aantal pieces
+                                  multiplier = amount;
                                 } else if (['per_100g','g','gram'].includes(unit)) {
                                   const f = getFields(ingredient); const dens = { cal: f.calories_per_100g, p: f.protein_per_100g, c: f.carbs_per_100g, f: f.fat_per_100g };
                                   const perAdj = computeBiasedAdjust(dens);
@@ -1916,7 +1902,7 @@ export default function NutritionPlanDetailPage() {
                                 }
                               }
 
-                              // Apply adjustment factors to match optimized meal totals
+                              // ✅ FIX V3: No adjustment factors - show TRUE values!
                               const ingredientCalories = ((Number(ingredient.calories_per_100g) || 0) * multiplier) * ingredientAdjustmentFactors.calories;
                               const ingredientProtein  = ((Number(ingredient.protein_per_100g)  || 0) * multiplier) * ingredientAdjustmentFactors.protein;
                               const ingredientCarbs    = ((Number(ingredient.carbs_per_100g)    || 0) * multiplier) * ingredientAdjustmentFactors.carbs;
@@ -2016,10 +2002,8 @@ export default function NutritionPlanDetailPage() {
                         const unit = String(ingredient.unit || '').toLowerCase();
                         if (['per_piece','piece','pieces','per_stuk','stuk','stuks','per_plakje','plakje','plakjes','plak','per_plak','sneetje','per_sneetje','handje','per_handful'].includes(unit)) {
                           amount = scalePiecesAmount(amountBase, scalingFactor);
-                          const unitWeight = Number(
-                            ingredient.unit_weight_g ?? ingredient.grams_per_unit ?? ingredient.weight_per_unit ?? ingredient.per_piece_grams ?? ingredient.slice_weight_g ?? ingredient.plakje_gram ?? ingredient.unit_weight
-                          ) || 0;
-                          multiplier = unitWeight > 0 ? (amount * unitWeight) / 100 : amount;
+                          // 🔧 FIX: Voor piece units is calories_per_100g eigenlijk per piece!
+                          multiplier = amount;
                         } else if (['per_100g','g','gram'].includes(unit)) {
                           const f = getFields(ingredient); const dens = { cal: f.calories_per_100g, p: f.protein_per_100g, c: f.carbs_per_100g, f: f.fat_per_100g };
                           const perAdj = computeBiasedAdjust(dens);
