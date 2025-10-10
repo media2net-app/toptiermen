@@ -220,21 +220,30 @@ const SocialFeedPage = () => {
       // Upload image if selected
       if (selectedImage) {
         setUploadingImage(true);
-        const formData = new FormData();
-        formData.append('file', selectedImage);
-        formData.append('folder', 'social-feed');
+        
+        // Generate unique filename
+        const fileExt = selectedImage.name.split('.').pop();
+        const fileName = `social-feed/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
 
-        const uploadResponse = await fetch('/api/upload/blob', {
-          method: 'POST',
-          body: formData,
-        });
+        // Upload to Supabase Storage
+        const { data, error: uploadError } = await supabase.storage
+          .from('social-media')
+          .upload(fileName, selectedImage, {
+            cacheControl: '3600',
+            upsert: false
+          });
 
-        if (!uploadResponse.ok) {
+        if (uploadError) {
+          console.error('Upload error:', uploadError);
           throw new Error('Foto upload mislukt');
         }
 
-        const { url } = await uploadResponse.json();
-        imageUrl = url;
+        // Get public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from('social-media')
+          .getPublicUrl(fileName);
+
+        imageUrl = publicUrl;
         setUploadingImage(false);
       }
       
@@ -571,11 +580,6 @@ const SocialFeedPage = () => {
                 >
                   <PhotoIcon className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                   <span>Foto</span>
-                </button>
-                <button className="flex items-center px-3 sm:px-4 py-2 text-xs sm:text-sm rounded-xl bg-[#232D1A] text-[#FFD700] border border-[#3A4D23] hover:bg-[#3A4D23] transition-colors">
-                  <MapPinIcon className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                  <span className="hidden sm:inline">Check-in</span>
-                  <span className="sm:hidden">Locatie</span>
                 </button>
                 <button 
                   onClick={createPost}
