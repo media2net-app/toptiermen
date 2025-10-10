@@ -21,12 +21,8 @@ function LoginPageContent() {
   const searchParams = useSearchParams();
   const { user, profile, isLoading: authLoading, login, isAdmin, getRedirectPath } = useAuth();
   const loading = authLoading; // Use actual auth loading state
-  // Announcement modal visibility
-  const [showAnnouncement, setShowAnnouncement] = useState(false);
   // Login debugger visibility
   const [showLoginDebugger, setShowLoginDebugger] = useState(false);
-  // Countdown timer state
-  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
   
   // Helper: Aggressive client cleanup (storage + cookies) to fix Safari re-login issues
   const clearClientAuth = () => {
@@ -77,8 +73,6 @@ function LoginPageContent() {
   // ✅ FIX: Ensure client-side hydration consistency
   useEffect(() => {
     setLoginState(prev => ({ ...prev, isClient: true }));
-    // Show the announcement modal on first mount of the login page
-    setShowAnnouncement(true);
     // Enable Login Debugger based on query or localStorage
     try {
       const q = searchParams?.get('login_debug');
@@ -140,35 +134,6 @@ function LoginPageContent() {
     isSendingReset: false
   });
   const [resetMessage, setResetMessage] = useState("");
-
-  // ✅ COUNTDOWN TIMER: Calculate time until launch (10 October 20:00 Amsterdam)
-  useEffect(() => {
-    const calculateTimeLeft = () => {
-      // Target: 10 October 2025, 20:00 Amsterdam time (Europe/Amsterdam)
-      const launchDate = new Date('2025-10-10T20:00:00+02:00'); // +02:00 for Amsterdam timezone in October
-      const now = new Date();
-      const difference = launchDate.getTime() - now.getTime();
-
-      if (difference > 0) {
-        const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((difference / (1000 * 60 * 60)) % 24);
-        const minutes = Math.floor((difference / 1000 / 60) % 60);
-        const seconds = Math.floor((difference / 1000) % 60);
-        
-        setTimeLeft({ days, hours, minutes, seconds });
-      } else {
-        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-      }
-    };
-
-    // Initial calculation
-    calculateTimeLeft();
-
-    // Update every second
-    const interval = setInterval(calculateTimeLeft, 1000);
-
-    return () => clearInterval(interval);
-  }, []);
 
   // ✅ PHASE 1: Hydration safety - set isClient after mount
   useEffect(() => {
@@ -860,62 +825,6 @@ function LoginPageContent() {
             </div>
           </div>
         </div>
-      )}
-
-      {/* Announcement Modal: Platform in testing, live on 10 October */}
-      {loginState.isClient && (
-        <ModalBase
-          isOpen={showAnnouncement}
-          onClose={() => setShowAnnouncement(false)}
-          zIndexClassName="z-50"
-          className="bg-[#232D1A] rounded-2xl p-6 sm:p-8 border border-[#3A4D23] shadow-2xl"
-        >
-          <div className="text-center">
-            <div className="w-16 h-16 bg-[#8BAE5A]/20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-[#8BAE5A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">Belangrijk bericht</h3>
-            <p className="text-[#8BAE5A] text-sm sm:text-base mb-4">
-              Het platform wordt momenteel getest. We gaan live in:
-            </p>
-            
-            {/* Countdown Timer */}
-            <div className="grid grid-cols-4 gap-2 sm:gap-4 mb-4">
-              <div className="bg-[#232D1A] rounded-lg p-2 sm:p-3 border border-[#3A4D23]">
-                <div className="text-2xl sm:text-3xl font-bold text-[#B6C948]">{timeLeft.days}</div>
-                <div className="text-[#8BAE5A] text-xs sm:text-sm">Dagen</div>
-              </div>
-              <div className="bg-[#232D1A] rounded-lg p-2 sm:p-3 border border-[#3A4D23]">
-                <div className="text-2xl sm:text-3xl font-bold text-[#B6C948]">{timeLeft.hours}</div>
-                <div className="text-[#8BAE5A] text-xs sm:text-sm">Uren</div>
-              </div>
-              <div className="bg-[#232D1A] rounded-lg p-2 sm:p-3 border border-[#3A4D23]">
-                <div className="text-2xl sm:text-3xl font-bold text-[#B6C948]">{timeLeft.minutes}</div>
-                <div className="text-[#8BAE5A] text-xs sm:text-sm">Min</div>
-              </div>
-              <div className="bg-[#232D1A] rounded-lg p-2 sm:p-3 border border-[#3A4D23]">
-                <div className="text-2xl sm:text-3xl font-bold text-[#B6C948]">{timeLeft.seconds}</div>
-                <div className="text-[#8BAE5A] text-xs sm:text-sm">Sec</div>
-              </div>
-            </div>
-            
-            <p className="text-[#B6C948] text-sm sm:text-base font-semibold mb-2">
-              📅 10 oktober 2025 om 20:00
-            </p>
-            <p className="text-[#8BAE5A] text-xs sm:text-sm">Bedankt voor je begrip!</p>
-            <div className="mt-6">
-              <button
-                type="button"
-                onClick={() => setShowAnnouncement(false)}
-                className="px-5 py-2 rounded-lg bg-[#8BAE5A] text-[#181F17] font-semibold hover:bg-[#A6C97B] transition-colors border border-[#8BAE5A]/40"
-              >
-                Begrepen
-              </button>
-            </div>
-          </div>
-        </ModalBase>
       )}
     </div>
   );
