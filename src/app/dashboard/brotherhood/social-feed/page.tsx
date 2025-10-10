@@ -64,6 +64,11 @@ const SocialFeedPage = () => {
   const [loadingComments, setLoadingComments] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showPostEmojiPicker, setShowPostEmojiPicker] = useState(false);
+  // Foto upload state
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   // Auto-focus/scroll for comment modal
   const commentModalRef = useRef<HTMLDivElement | null>(null);
   const commentTextareaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -84,6 +89,42 @@ const SocialFeedPage = () => {
   const addEmojiToPost = (emoji: string) => {
     setNewPost(prev => prev + emoji);
     setShowPostEmojiPicker(false);
+  };
+
+  // Handle image selection
+  const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Alleen afbeeldingen zijn toegestaan');
+      return;
+    }
+
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('Afbeelding is te groot (max 10MB)');
+      return;
+    }
+
+    setSelectedImage(file);
+    
+    // Create preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // Remove selected image
+  const removeImage = () => {
+    setSelectedImage(null);
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   // Fetch posts from database
@@ -174,18 +215,42 @@ const SocialFeedPage = () => {
 
     try {
       setPosting(true);
+      let imageUrl = null;
+
+      // Upload image if selected
+      if (selectedImage) {
+        setUploadingImage(true);
+        const formData = new FormData();
+        formData.append('file', selectedImage);
+        formData.append('folder', 'social-feed');
+
+        const uploadResponse = await fetch('/api/upload/blob', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!uploadResponse.ok) {
+          throw new Error('Foto upload mislukt');
+        }
+
+        const { url } = await uploadResponse.json();
+        imageUrl = url;
+        setUploadingImage(false);
+      }
       
       const { error } = await supabase
         .from('social_posts')
         .insert({
           user_id: user.id,
           content: newPost.trim(),
-          post_type: 'text'
+          post_type: 'text',
+          image_url: imageUrl
         });
 
       if (error) throw error;
 
       setNewPost('');
+      removeImage();
       toast.success('Post succesvol geplaatst!');
       fetchPosts(); // Refresh posts
     } catch (error) {
@@ -193,6 +258,7 @@ const SocialFeedPage = () => {
       toast.error('Fout bij het plaatsen van post');
     } finally {
       setPosting(false);
+      setUploadingImage(false);
     }
   };
 
@@ -465,13 +531,46 @@ const SocialFeedPage = () => {
                   </div>
                 </div>
               )}
+
+              {/* Image Preview */}
+              {imagePreview && (
+                <div className="mt-3 relative">
+                  <img 
+                    src={imagePreview} 
+                    alt="Preview" 
+                    className="w-full h-48 object-cover rounded-xl"
+                  />
+                  <button
+                    onClick={removeImage}
+                    className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                  >
+                    <XMarkIcon className="w-4 h-4" />
+                  </button>
+                  {uploadingImage && (
+                    <div className="absolute inset-0 bg-black/50 rounded-xl flex items-center justify-center">
+                      <div className="text-white text-sm">Uploaden...</div>
+                    </div>
+                  )}
+                </div>
+              )}
               
               {/* Action buttons */}
               <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-3 sm:mt-4">
-                <button className="flex items-center px-3 sm:px-4 py-2 text-xs sm:text-sm rounded-xl bg-[#232D1A] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#3A4D23] transition-colors">
+                {/* Hidden file input */}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageSelect}
+                  className="hidden"
+                />
+                <button 
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploadingImage}
+                  className="flex items-center px-3 sm:px-4 py-2 text-xs sm:text-sm rounded-xl bg-[#232D1A] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#3A4D23] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
                   <PhotoIcon className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                  <span className="hidden sm:inline">Foto/Video</span>
-                  <span className="sm:hidden">Foto</span>
+                  <span>Foto</span>
                 </button>
                 <button className="flex items-center px-3 sm:px-4 py-2 text-xs sm:text-sm rounded-xl bg-[#232D1A] text-[#FFD700] border border-[#3A4D23] hover:bg-[#3A4D23] transition-colors">
                   <MapPinIcon className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
@@ -577,6 +676,17 @@ const SocialFeedPage = () => {
               <div className="mb-3 sm:mb-4 text-[#E1CBB3] text-sm sm:text-base whitespace-pre-wrap">
                 {post.content}
               </div>
+
+              {/* Post image */}
+              {post.image_url && (
+                <div className="mb-3 sm:mb-4">
+                  <img 
+                    src={post.image_url} 
+                    alt="Post" 
+                    className="w-full h-auto max-h-96 object-cover rounded-xl"
+                  />
+                </div>
+              )}
 
               {/* Post tags */}
               {post.tags && post.tags.length > 0 && (
@@ -697,7 +807,16 @@ const SocialFeedPage = () => {
                   <span className="text-xs text-[#8BAE5A] mt-1 block">{timeAgo(selectedPost.created_at)}</span>
                 </div>
               </div>
-              <p className="text-[#E1CBB3] text-base">{selectedPost.content}</p>
+              <p className="text-[#E1CBB3] text-base mb-4">{selectedPost.content}</p>
+              
+              {/* Post image in modal */}
+              {selectedPost.image_url && (
+                <img 
+                  src={selectedPost.image_url} 
+                  alt="Post" 
+                  className="w-full h-auto max-h-64 object-cover rounded-xl"
+                />
+              )}
             </div>
 
             {/* Comments List */}
