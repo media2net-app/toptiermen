@@ -730,34 +730,6 @@ const SocialFeedPage = () => {
                   <span className="text-lg sm:text-xl">💬</span>
                   <span className="text-xs sm:text-sm">{post.comments_count} Reacties</span>
                 </button>
-
-                {/* Additional like types */}
-                <div className="flex gap-1 sm:gap-2">
-                  <button 
-                    onClick={() => toggleLike(post.id, 'fire')}
-                    className={`p-1 sm:p-2 rounded-lg hover:bg-[#3A4D23] transition-colors ${
-                      post.user_liked && post.user_like_type === 'fire' ? 'text-[#FFD700]' : ''
-                    }`}
-                  >
-                    🔥
-                  </button>
-                  <button 
-                    onClick={() => toggleLike(post.id, 'respect')}
-                    className={`p-1 sm:p-2 rounded-lg hover:bg-[#3A4D23] transition-colors ${
-                      post.user_liked && post.user_like_type === 'respect' ? 'text-[#FFD700]' : ''
-                    }`}
-                  >
-                    🙏
-                  </button>
-                  <button 
-                    onClick={() => toggleLike(post.id, 'love')}
-                    className={`p-1 sm:p-2 rounded-lg hover:bg-[#3A4D23] transition-colors ${
-                      post.user_liked && post.user_like_type === 'love' ? 'text-[#FFD700]' : ''
-                    }`}
-                  >
-                    ❤️
-                  </button>
-                </div>
               </div>
             </div>
           ))
