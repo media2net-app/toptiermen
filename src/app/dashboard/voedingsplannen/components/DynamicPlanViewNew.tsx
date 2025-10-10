@@ -1302,8 +1302,6 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
         </div>
       </div>
 
-      )}
-
       <div className="max-w-7xl mx-auto p-6 space-y-6">
         {/* Plan-Specific Macro Breakdown */}
         {(planData.planPercentages || planData.planTargets) && (

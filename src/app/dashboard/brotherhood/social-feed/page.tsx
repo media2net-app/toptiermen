@@ -215,7 +215,7 @@ const SocialFeedPage = () => {
 
     try {
       setPosting(true);
-      let imageUrl = null;
+      let imageUrl: string | null = null;
 
       // Upload image if selected
       if (selectedImage) {
