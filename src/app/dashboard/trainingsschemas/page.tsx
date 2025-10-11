@@ -802,9 +802,14 @@ function TrainingschemasContent() {
       // Auto-retry for network errors (max 2 retries)
       if (retryCount < 2 && (error instanceof TypeError || error instanceof Error)) {
         console.log(`🔄 Auto-retry ${retryCount + 1}/2 in 3 seconds...`);
+        // CRITICAL FIX: Reset loading states before retry
+        setTrainingLoading(false);
+        setProfileLoading(false);
         setTimeout(() => {
           loadAllData(retryCount + 1);
         }, 3000);
+        // Clear timeout before return
+        clearTimeout(overallTimeout);
         return;
       }
       
@@ -1887,19 +1892,16 @@ function TrainingschemasContent() {
       // Shorter timeout for quicker recovery
       const timeoutId = setTimeout(() => {
         console.log('⚠️ Loading timeout reached (8s), forcing reset');
-        if (trainingSchemas.length > 0) {
-          console.log('🔄 FORCE: We have training schemas data, resetting loading state');
-          setTrainingLoading(false);
-        } else {
-          console.log('🔄 FORCE: No training schemas data, retrying with fallback');
-          // Fallback to sequential loading if parallel loading failed
-          fetchTrainingSchemas();
-          fetchUserTrainingProfile();
-        }
         
-        if (userTrainingProfile) {
-          console.log('🔄 FORCE: We have training profile data, resetting loading state');
-          setProfileLoading(false);
+        // CRITICAL FIX: Always reset both loading states to prevent infinite loading
+        console.log('🔄 FORCE: Resetting both loading states');
+        setTrainingLoading(false);
+        setProfileLoading(false);
+        
+        // If we don't have data, show error message
+        if (trainingSchemas.length === 0 && !userTrainingProfile) {
+          console.log('⚠️ No data loaded after timeout');
+          setTrainingError('Loading duurde te lang. Ververs de pagina om opnieuw te proberen.');
         }
       }, 8000); // 8 second timeout
 
