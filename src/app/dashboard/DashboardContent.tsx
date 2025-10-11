@@ -119,6 +119,7 @@ const baseMenu = [
   { label: 'Persoonlijke dashboard', icon: HomeIcon, parent: 'Dashboard', href: '/dashboard', isSub: true, onboardingStep: 1 },
   { label: 'Mijn Profiel', icon: UserCircleIcon, parent: 'Dashboard', href: '/dashboard/mijn-profiel', isSub: true, onboardingStep: 1 },
   { label: 'Mijn Trainingen', icon: AcademicCapIcon, parent: 'Dashboard', href: '/dashboard/mijn-trainingen', isSub: true, onboardingStep: 1 },
+  { label: 'Mijn Voeding', icon: CalendarDaysIcon, parent: 'Dashboard', href: '/dashboard/voedingsplannen-v2', isSub: true, onboardingStep: 1 },
   { label: 'Finance & Business', icon: CurrencyDollarIcon, href: '/dashboard/finance-en-business', onboardingStep: 7 },
   { label: 'Academy', icon: FireIcon, href: '/dashboard/academy', onboardingStep: 7 },
   { label: 'Challenges', icon: FireIcon, href: '/dashboard/mijn-challenges', onboardingStep: 3 },
