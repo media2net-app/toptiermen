@@ -212,7 +212,15 @@ export default function MijnTrainingen() {
       console.log('🔄 Loading training data for user:', user.id);
       console.log('📊 Current completedWeeks before load:', completedWeeks.length);
       
-      const response = await fetch(`/api/user-training-schema?userId=${user.id}`);
+      // Add timestamp for cache busting + no-store option
+      const timestamp = new Date().getTime();
+      const response = await fetch(`/api/user-training-schema?userId=${user.id}&t=${timestamp}`, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache'
+        }
+      });
       const data = await response.json();
       
       console.log('📊 Training data received:', data);
@@ -233,7 +241,14 @@ export default function MijnTrainingen() {
       if (data.hasActiveSchema && data.schema?.id) {
         try {
           console.log('📅 Loading week completions...');
-          const weekResponse = await fetch(`/api/week-completion?userId=${user.id}&schemaId=${data.schema.id}`);
+          const weekTimestamp = new Date().getTime();
+          const weekResponse = await fetch(`/api/week-completion?userId=${user.id}&schemaId=${data.schema.id}&t=${weekTimestamp}`, {
+            cache: 'no-store',
+            headers: {
+              'Cache-Control': 'no-cache, no-store, must-revalidate',
+              'Pragma': 'no-cache'
+            }
+          });
           const weekData = await weekResponse.json();
           
           if (weekData.success && weekData.completions) {
