@@ -189,26 +189,31 @@ export default function MijnTrainingen() {
       return;
     }
     
+    // Check access once
+    const hasTrainingAccess = hasAccess('training');
+    
     // For premium/admin users, load training data
-    if (user && (hasAccess('training') || isAdmin)) {
+    if (user && (hasTrainingAccess || isAdmin)) {
       loadTrainingData();
     } else if (user) {
       // User loaded but no access
       setLoading(false);
     }
-  }, [user, subscriptionLoading, isBasic, isAdmin, hasAccess]);
+  }, [user, subscriptionLoading, isBasic, isAdmin]); // CRITICAL FIX: Removed hasAccess from dependencies to prevent infinite loop
 
   // Refresh data when page becomes visible (e.g., after returning from workout)
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (!document.hidden && user && (hasAccess('training') || isAdmin) && !subscriptionLoading) {
+      const hasTrainingAccess = hasAccess('training');
+      if (!document.hidden && user && (hasTrainingAccess || isAdmin) && !subscriptionLoading) {
         console.log('🔄 Page became visible, refreshing training data');
         loadTrainingData();
       }
     };
 
     const handleFocus = () => {
-      if (user && (hasAccess('training') || isAdmin) && !subscriptionLoading) {
+      const hasTrainingAccess = hasAccess('training');
+      if (user && (hasTrainingAccess || isAdmin) && !subscriptionLoading) {
         console.log('🔄 Page focused, refreshing training data');
         loadTrainingData();
       }
@@ -221,7 +226,20 @@ export default function MijnTrainingen() {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('focus', handleFocus);
     };
-  }, [user, hasAccess, isAdmin, subscriptionLoading]);
+  }, [user, isAdmin, subscriptionLoading]); // CRITICAL FIX: Removed hasAccess from dependencies
+
+  // CRITICAL: Safety mechanism to prevent stuck loading states
+  useEffect(() => {
+    if (loading) {
+      const timeoutId = setTimeout(() => {
+        console.log('⚠️ Loading timeout reached (10s), forcing reset');
+        setLoading(false);
+        toast.error('Loading duurde te lang. Ververs de pagina om opnieuw te proberen.');
+      }, 10000); // 10 second timeout
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [loading]);
 
   const loadTrainingData = async () => {
     if (!user) return;
