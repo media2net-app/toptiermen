@@ -41,8 +41,21 @@ export default function InboxIcon() {
       fetchMessages();
       
       // Set up polling for new messages every 30 seconds
-      const interval = setInterval(fetchMessages, 120000); // OPTIMIZED: Changed from 30s to 2min
+      const interval = setInterval(fetchMessages, 30000); // Poll every 30 seconds
       return () => clearInterval(interval);
+    }
+  }, [user?.id]);
+
+  // Listen for messagesRead event from inbox page
+  useEffect(() => {
+    const handleMessagesRead = () => {
+      console.log('📖 Messages read event received, refreshing inbox...');
+      fetchMessages();
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('messagesRead', handleMessagesRead);
+      return () => window.removeEventListener('messagesRead', handleMessagesRead);
     }
   }, [user?.id]);
 

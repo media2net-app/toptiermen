@@ -241,7 +241,17 @@ export default function Inbox() {
         body: JSON.stringify({ conversationId, userId: user?.id })
       });
       
-      if (!response.ok) {
+      if (response.ok) {
+        const data = await response.json();
+        console.log(`✅ Marked ${data.markedCount || 0} messages as read`);
+        
+        // Dispatch custom event to notify InboxIcon to refresh
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('messagesRead', { 
+            detail: { conversationId, userId: user?.id } 
+          }));
+        }
+      } else {
         console.error('Error marking messages as read');
       }
     } catch (error) {
