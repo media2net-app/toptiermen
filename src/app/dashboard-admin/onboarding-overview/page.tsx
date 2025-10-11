@@ -8,6 +8,8 @@ interface UserOnboarding {
   id: string;
   email: string;
   role: string;
+  subscriptionTier: string;
+  subscriptionStatus: string;
   createdAt: string;
   onboardingCompleted: boolean;
   currentStep: number;
@@ -74,15 +76,22 @@ export default function OnboardingOverviewPage() {
   }, [isAdmin]);
 
   // Get step label (updated for new onboarding V2 flow)
-  const getStepLabel = (step: number, completed: boolean) => {
+  const getStepLabel = (step: number, completed: boolean, subscriptionTier?: string) => {
     if (completed) return '✅ Voltooid';
     
+    const isBasic = subscriptionTier?.toLowerCase() === 'basic';
+    
     switch (step) {
-      case 1: return '🎬 Welkom Video';
-      case 2: return '👤 Basis Informatie';
-      case 3: return '💪 Training & Doel';
-      case 4: return '🍽️ Voedingsplan';
-      case 5: return '✅ Afronding';
+      case 1: return '🎬 Welkomstvideo';
+      case 2: return '🎯 Hoofddoel Instellen';
+      case 3: return '🔥 Uitdagingen Selecteren';
+      case 4: 
+        if (isBasic) return '⏭️ Overgeslagen (Basic)';
+        return '💪 Trainingsschema Kiezen';
+      case 5: 
+        if (isBasic) return '⏭️ Overgeslagen (Basic)';
+        return '🍽️ Voedingsplan Selecteren';
+      case 6: return '💬 Forum Introductie';
       default: return `Stap ${step}`;
     }
   };
@@ -239,6 +248,9 @@ export default function OnboardingOverviewPage() {
                     Gebruiker
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                    Tier
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                     Rol
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
@@ -273,6 +285,17 @@ export default function OnboardingOverviewPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                        user.subscriptionTier?.toLowerCase() === 'premium' 
+                          ? 'bg-[#FFD700]/20 text-[#FFD700]' 
+                          : user.subscriptionTier?.toLowerCase() === 'lifetime'
+                          ? 'bg-purple-500/20 text-purple-400'
+                          : 'bg-gray-500/20 text-gray-400'
+                      }`}>
+                        {user.subscriptionTier?.toUpperCase() || 'BASIC'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                         user.role?.toLowerCase() === 'admin' 
                           ? 'bg-red-100 text-red-800' 
                           : 'bg-[#8BAE5A]/20 text-[#8BAE5A]'
@@ -290,7 +313,7 @@ export default function OnboardingOverviewPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                      {getStepLabel(user.currentStep, user.onboardingCompleted)}
+                      {getStepLabel(user.currentStep, user.onboardingCompleted, user.subscriptionTier)}
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-sm text-gray-300 max-w-xs truncate">

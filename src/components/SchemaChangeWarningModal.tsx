@@ -27,26 +27,45 @@ export default function SchemaChangeWarningModal({
   nextSchemaLabel
 }: SchemaChangeWarningModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
-  // Ensure modal is fully visible (centered) and lock body scroll while open
+  // Auto-scroll and focus when modal opens (mobile + desktop friendly)
   useEffect(() => {
     if (!isOpen) {
+      // Restore body scroll when modal closes
       if (typeof document !== 'undefined') document.body.style.overflow = '';
       return;
     }
+    
+    // Lock body scroll when modal is open
     if (typeof document !== 'undefined') document.body.style.overflow = 'hidden';
-    if (typeof window !== 'undefined') {
+    
+    // Enhanced auto-scroll and focus with longer delay for mobile
+    const timeoutId = window.setTimeout(() => {
       try {
+        // First scroll window to top
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } catch {}
-    }
-    const id = window.setTimeout(() => {
+      
       try {
-        modalRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
-        modalRef.current?.focus();
+        // Then scroll modal into view (important for mobile)
+        modalRef.current?.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center', 
+          inline: 'center' 
+        });
       } catch {}
-    }, 100);
-    return () => window.clearTimeout(id);
+      
+      try {
+        // Focus the confirm button for better UX
+        buttonRef.current?.focus();
+      } catch {}
+    }, 150); // Increased delay for mobile rendering
+    
+    return () => {
+      window.clearTimeout(timeoutId);
+      if (typeof document !== 'undefined') document.body.style.overflow = '';
+    };
   }, [isOpen]);
 
   return (
@@ -154,6 +173,7 @@ export default function SchemaChangeWarningModal({
                 Annuleren
               </button>
               <button
+                ref={buttonRef}
                 onClick={onConfirm}
                 className={
                   mode === 'warning'
