@@ -136,7 +136,7 @@ const baseMenu = [
   { label: 'Leden', icon: UsersIcon, parent: 'Brotherhood', href: '/dashboard/brotherhood/leden', isSub: true, onboardingStep: 7 },
   { label: 'Boekenkamer', icon: BookOpenIcon, href: '/dashboard/boekenkamer', onboardingStep: 7, adminOnly: false },
   { label: 'Badges & Rangen', icon: StarIcon, href: '/dashboard/badges-en-rangen', onboardingStep: 7 },
-  { label: 'Producten', icon: ShoppingBagIcon, href: '/dashboard/producten', onboardingStep: 7 },
+  // { label: 'Producten', icon: ShoppingBagIcon, href: '/dashboard/producten', onboardingStep: 7 }, // Tijdelijk uitgeschakeld - pagina nog in ontwikkeling
   { label: 'Mentorship & Coaching', icon: ChatBubbleLeftRightIcon, href: '/dashboard/mentorship-en-coaching', onboardingStep: 7 },
 ];
 
