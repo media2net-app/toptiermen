@@ -463,11 +463,6 @@ function ExamComponent({
                     />
                     <span className="flex-1">
                       {option}
-                      {optionIndex === question.correct_answer && (
-                        <span className="ml-2 inline-flex items-center text-xs px-2 py-0.5 rounded bg-green-900/40 text-green-300 border border-green-700/40">
-                          (juiste antwoord)
-                        </span>
-                      )}
                     </span>
                   </label>
                 ))}
