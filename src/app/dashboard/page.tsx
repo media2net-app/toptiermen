@@ -670,6 +670,49 @@ export default function Dashboard() {
               </div>
             </Link>
 
+            {/* Mijn Voeding */}
+            <Link href="/dashboard/voedingsplannen-v2" className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-4 sm:p-6 text-left transition-transform duration-300 sm:hover:scale-105 hover:shadow-2xl hover:border-[#8BAE5A]/50 cursor-pointer block">
+              <div className="flex items-center justify-between mb-3 sm:mb-4 min-w-0">
+                <h3 className="text-lg sm:text-xl font-bold text-white">Mijn Voeding</h3>
+                <svg className="w-6 h-6 text-[#8BAE5A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+              </div>
+              <div className="space-y-2 sm:space-y-3">
+                {activeNutritionPlan ? (
+                  <>
+                    <div className="text-left">
+                      <div className="text-xs sm:text-sm text-[#8BAE5A] mb-1">Actief plan:</div>
+                      <div className="text-white font-semibold text-sm sm:text-base truncate">
+                        {activeNutritionPlan.title}
+                      </div>
+                    </div>
+                    <div className="w-full h-2 bg-[#3A4D23]/40 rounded-full">
+                      <div 
+                        className="h-2 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] rounded-full transition-all duration-700" 
+                        style={{ width: '60%' }}
+                      ></div>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="text-left">
+                      <div className="text-xs sm:text-sm text-[#8BAE5A] mb-1">Plan status:</div>
+                      <div className="text-white font-semibold text-sm sm:text-base">
+                        Geen plan geselecteerd
+                      </div>
+                    </div>
+                    <div className="w-full h-2 bg-[#3A4D23]/40 rounded-full">
+                      <div 
+                        className="h-2 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] rounded-full transition-all duration-700" 
+                        style={{ width: '0%' }}
+                      ></div>
+                    </div>
+                  </>
+                )}
+              </div>
+            </Link>
+
             {/* Mind & Focus */}
             <Link href="/dashboard/mind-focus" className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-4 sm:p-6 text-left transition-transform duration-300 sm:hover:scale-105 hover:shadow-2xl hover:border-[#8BAE5A]/50 cursor-pointer block">
               <div className="flex items-center justify-between mb-3 sm:mb-4 min-w-0">
