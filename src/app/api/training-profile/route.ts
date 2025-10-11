@@ -95,17 +95,18 @@ export async function POST(request: Request) {
     
     console.log('💾 Using user identifier:', actualUserId);
     
-    // Check if frequency is changing - if so, reset training data
+    // Check if profile exists - if so, ALWAYS reset training data (fresh start)
     const { data: existingProfile } = await supabase
       .from('training_profiles')
-      .select('training_frequency')
+      .select('training_frequency, training_goal, equipment_type')
       .eq('user_id', emailToLookup)
       .single();
     
-    const isFrequencyChanging = existingProfile && existingProfile.training_frequency !== training_frequency;
-    
-    if (isFrequencyChanging) {
-      console.log('🔄 Training frequency is changing from', existingProfile.training_frequency, 'to', training_frequency);
+    // ALWAYS reset if profile exists (user wants to start fresh with Schema 1)
+    if (existingProfile) {
+      console.log('🔄 Training profile is being updated - resetting all training data for fresh start');
+      console.log('📊 Previous profile:', existingProfile);
+      console.log('📊 New profile:', { training_goal, training_frequency, equipment_type });
       console.log('🗑️ Resetting all training data to start fresh...');
       
       // Get user UUID from email
@@ -116,7 +117,7 @@ export async function POST(request: Request) {
         .single();
       
       if (profileData?.id) {
-        // Delete all schema periods
+        // Delete all schema periods (removes active schema selection)
         await supabase
           .from('user_schema_periods')
           .delete()
@@ -134,7 +135,13 @@ export async function POST(request: Request) {
           .delete()
           .eq('user_id', profileData.id);
         
-        console.log('✅ Training data reset complete');
+        // Delete week completions
+        await supabase
+          .from('user_week_completions')
+          .delete()
+          .eq('user_id', profileData.id);
+        
+        console.log('✅ Training data reset complete - user can now select Schema 1 again');
       }
     }
     
@@ -183,7 +190,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       success: true,
       profile: data,
-      wasReset: isFrequencyChanging
+      wasReset: !!existingProfile // Always true if profile was updated
     });
     
   } catch (error) {

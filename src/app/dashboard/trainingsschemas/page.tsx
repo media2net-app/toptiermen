@@ -1163,13 +1163,13 @@ function TrainingschemasContent() {
       if (response.ok && data.success) {
         console.log('✅ Training profile saved successfully');
         
-        // Show different message if data was reset due to frequency change
+        // Show message - if profile existed, data was reset
         if (data.wasReset) {
-          toast.success('Je trainingsfrequentie is gewijzigd! Je training data is gereset en je begint opnieuw bij Schema 1.', {
-            duration: 5000,
+          toast.success('Je trainingsprofiel is bijgewerkt! Je huidige schema is verwijderd en je kunt nu Schema 1 opnieuw selecteren.', {
+            duration: 6000,
           });
         } else {
-          toast.success('Je trainingsprofiel is opgeslagen!');
+          toast.success('Je trainingsprofiel is aangemaakt! Selecteer nu je eerste schema.');
         }
         
         setUserTrainingProfile(data.profile);
