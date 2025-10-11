@@ -49,14 +49,21 @@ export async function POST(request: NextRequest) {
     let resetError: any = null;
     
     // First try user_training_day_progress (if it exists)
-    const { error: dayProgressError } = await supabase
+    const { data: updatedRows, error: dayProgressError } = await supabase
       .from('user_training_day_progress')
       .update({ 
         completed: false,
         completed_at: null
       })
       .eq('user_id', userId)
-      .in('schema_day_id', schemaDayIds);
+      .in('schema_day_id', schemaDayIds)
+      .select('id, schema_day_id, completed'); // Select to see what was updated
+    
+    console.log('📊 [RESET API] Update result:', {
+      updatedRowsCount: updatedRows?.length || 0,
+      updatedRows: updatedRows,
+      error: dayProgressError
+    });
     
     if (dayProgressError) {
       console.log('⚠️ [RESET API] user_training_day_progress table not found, trying user_training_progress:', {
@@ -85,11 +92,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to reset training week' }, { status: 500 });
     }
 
+    // Log success with details
     console.log('✅ [RESET API] Training week reset successfully for user:', userId, 'schema:', schemaId);
+    console.log('✅ [RESET API] Reset', updatedRows?.length || 0, 'days');
 
     return NextResponse.json({ 
       success: true,
-      message: 'Training week reset successfully'
+      message: 'Training week reset successfully',
+      resetCount: updatedRows?.length || 0,
+      resetDays: updatedRows?.map((row: any) => row.schema_day_id) || []
     });
 
   } catch (error) {

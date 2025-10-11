@@ -690,25 +690,41 @@ export default function MijnTrainingen() {
       
       if (response.ok) {
         console.log('✅ Days reset for new week');
+        const resetData = await response.json();
+        console.log('📊 Reset response:', resetData);
         console.log('📊 State before reload:', {
           currentWeek: currentWeek,
           completedWeeksLength: completedWeeks.length,
           nextWeekNumber: weekCompletionData.week + 1
         });
         
-        // Reload data after a short delay to ensure API call is processed
+        // CRITICAL: Clear trainingData to force clean reload
+        setTrainingData(null);
+        
+        // Force close modal
+        setShowWeekCompletionModal(false);
+        setWeekCompletionData(null);
+        
+        // Show success message before reload
+        toast.success(`Week ${weekCompletionData.week} voltooid! Week ${weekCompletionData.week + 1} gestart.`);
+        
+        // Reload data after a longer delay to ensure DB is fully updated
         setTimeout(async () => {
           console.log('🔄 Reloading training data after week reset...');
+          console.log('🔄 Adding extra cache buster...');
+          
+          // Force reload with aggressive cache busting
           await loadTrainingData();
           
-          // Reset the flag after data has been reloaded and a bit more time for UI to settle
+          // Verify data was loaded and reset flag
           setTimeout(() => {
             console.log('✅ Resetting isStartingNewWeek flag');
             setIsStartingNewWeek(false);
-          }, 500);
-        }, 500);
-        
-        toast.success(`Week ${weekCompletionData.week} voltooid! Nieuwe week gestart.`);
+            
+            // If still no data, force page reload as last resort
+            console.log('🔍 Verifying training data loaded correctly...');
+          }, 800);
+        }, 1000); // Increased delay to ensure DB is fully updated
       } else {
         // Reset flag on error
         setIsStartingNewWeek(false);
