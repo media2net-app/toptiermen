@@ -185,7 +185,7 @@ const SocialFeedPage = () => {
             .select('like_type')
             .eq('post_id', post.id)
             .eq('user_id', user?.id)
-            .single();
+            .maybeSingle(); // Use maybeSingle() to avoid 406 error when no like exists
 
           return {
             ...post,
