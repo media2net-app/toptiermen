@@ -1006,13 +1006,13 @@ export default function MijnTrainingen() {
                 <div className="text-center lg:text-right mt-4 lg:mt-0">
                   <div className="bg-[#0F1419]/50 rounded-xl p-3 sm:p-4 md:p-6">
                     <div className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-[#8BAE5A] mb-1 sm:mb-2">
-                      {progress.completed_days}/{progress.total_days}
+                      {days ? days.filter((d: any) => d.isCompleted).length : progress.completed_days}/{progress.total_days}
                     </div>
                     <div className="text-xs sm:text-sm text-gray-400 mb-3 sm:mb-4">Dagen voltooid</div>
                     <div className="w-full sm:w-40 md:w-48 h-2 sm:h-3 bg-[#3A4D23] rounded-full overflow-hidden">
                       <motion.div 
                         initial={{ width: 0 }}
-                        animate={{ width: `${(progress.completed_days / progress.total_days) * 100}%` }}
+                        animate={{ width: `${days ? (days.filter((d: any) => d.isCompleted).length / progress.total_days) * 100 : (progress.completed_days / progress.total_days) * 100}%` }}
                         transition={{ duration: 1, delay: 0.5 }}
                         className="h-full bg-gradient-to-r from-[#8BAE5A] to-[#FFD700]"
                       />
