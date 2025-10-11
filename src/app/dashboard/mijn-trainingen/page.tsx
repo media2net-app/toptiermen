@@ -17,12 +17,14 @@ import {
   AcademicCapIcon,
   StarIcon,
   EyeIcon,
-  PencilIcon
+  PencilIcon,
+  SparklesIcon
 } from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { useWorkoutSession } from '@/contexts/WorkoutSessionContext';
+import { useSubscription } from '@/hooks/useSubscription';
 import PageLayout from '@/components/PageLayout';
 import PreWorkoutModal from '../trainingscentrum/PreWorkoutModal';
 
@@ -82,6 +84,7 @@ interface TrainingData {
 export default function MijnTrainingen() {
   const { user } = useSupabaseAuth();
   const { stopWorkout } = useWorkoutSession();
+  const { hasAccess, isBasic, loading: subscriptionLoading, isAdmin } = useSubscription();
   const router = useRouter();
   const [trainingData, setTrainingData] = useState<TrainingData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -174,22 +177,38 @@ export default function MijnTrainingen() {
   }, [showWeekCompletionModal]);
 
   useEffect(() => {
-    if (user) {
-      loadTrainingData();
+    // Wait for subscription data to load
+    if (subscriptionLoading) {
+      return;
     }
-  }, [user]);
+    
+    // For basic users, skip loading training data and just mark as not loading
+    if (isBasic && !isAdmin) {
+      console.log('🚫 Basic user detected, skipping training data load');
+      setLoading(false);
+      return;
+    }
+    
+    // For premium/admin users, load training data
+    if (user && (hasAccess('training') || isAdmin)) {
+      loadTrainingData();
+    } else if (user) {
+      // User loaded but no access
+      setLoading(false);
+    }
+  }, [user, subscriptionLoading, isBasic, isAdmin, hasAccess]);
 
   // Refresh data when page becomes visible (e.g., after returning from workout)
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (!document.hidden && user) {
+      if (!document.hidden && user && (hasAccess('training') || isAdmin) && !subscriptionLoading) {
         console.log('🔄 Page became visible, refreshing training data');
         loadTrainingData();
       }
     };
 
     const handleFocus = () => {
-      if (user) {
+      if (user && (hasAccess('training') || isAdmin) && !subscriptionLoading) {
         console.log('🔄 Page focused, refreshing training data');
         loadTrainingData();
       }
@@ -202,7 +221,7 @@ export default function MijnTrainingen() {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('focus', handleFocus);
     };
-  }, [user]);
+  }, [user, hasAccess, isAdmin, subscriptionLoading]);
 
   const loadTrainingData = async () => {
     if (!user) return;
@@ -325,7 +344,7 @@ export default function MijnTrainingen() {
         }
       }
 
-      // Sync DB progress with week completions (only increase)
+      // Sync DB progress with week completions (only increase) - OPTIMIZED: No reload, just update locally
       try {
         if (data.hasActiveSchema && data.schema?.id) {
           const weeksArr = (effectiveCompletedWeeks || completedWeeks) as any[];
@@ -334,7 +353,8 @@ export default function MijnTrainingen() {
           const targetCompletedDays = weeksCount * freqFromDays;
           const currentCompletedDays = Number(data?.progress?.completed_days || 0);
           if (targetCompletedDays > currentCompletedDays && user?.email) {
-            await fetch('/api/admin/set-training-progress', {
+            // Fire and forget - update in background without blocking UI
+            fetch('/api/admin/set-training-progress', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
@@ -342,9 +362,12 @@ export default function MijnTrainingen() {
                 completedDays: targetCompletedDays,
                 training_frequency: freqFromDays,
               })
-            });
-            // Reload after short delay to reflect new totals
-            setTimeout(() => { loadTrainingData(); }, 400);
+            }).catch(err => console.log('⚠️ Background sync failed:', err));
+            
+            // Update local state immediately for better UX
+            if (data.progress) {
+              data.progress.completed_days = targetCompletedDays;
+            }
           }
         }
       } catch (syncErr) {
@@ -705,7 +728,8 @@ export default function MijnTrainingen() {
     }
   };
 
-  if (loading) {
+  // Show loading only while subscription is loading
+  if (loading || subscriptionLoading) {
     return (
       <PageLayout title="Mijn Trainingen">
         <div className="min-h-screen bg-gradient-to-br from-[#0F1419] to-[#1A1F2E] p-6">
@@ -718,6 +742,99 @@ export default function MijnTrainingen() {
             </div>
                   </div>
       </div>
+      </PageLayout>
+    );
+  }
+
+  // Show upgrade screen for basic users (without loading delay)
+  if (isBasic && !isAdmin) {
+    return (
+      <PageLayout title="Mijn Trainingen">
+        <div className="min-h-screen bg-gradient-to-br from-[#0F1419] to-[#1A1F2E] p-6">
+          <div className="max-w-4xl mx-auto">
+            {/* Header */}
+            <div className="text-center mb-12">
+              <h1 className="text-4xl font-bold text-white mb-4">Mijn Trainingen</h1>
+              <p className="text-[#8BAE5A] text-lg">Persoonlijke trainingsschema's en gepersonaliseerde begeleiding</p>
+            </div>
+
+            {/* Upgrade Required */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border-2 border-[#E33412]/30 rounded-2xl p-12 text-center shadow-2xl"
+            >
+              <div className="mb-8">
+                <div className="w-24 h-24 bg-gradient-to-br from-[#E33412]/20 to-[#8BAE5A]/20 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse">
+                  <SparklesIcon className="w-12 h-12 text-[#E33412]" />
+                </div>
+                <h2 className="text-3xl font-bold text-white mb-4">Upgrade naar Premium</h2>
+                <p className="text-gray-300 text-lg mb-4 max-w-2xl mx-auto">
+                  Persoonlijke trainingsschema's zijn alleen beschikbaar voor Premium leden
+                </p>
+                <p className="text-gray-400 text-base max-w-2xl mx-auto">
+                  Krijg toegang tot gepersonaliseerde 8-week trainingsschema's, voortgang tracking, en professionele workout begeleiding
+                </p>
+              </div>
+
+              <div className="space-y-6">
+                <button
+                  onClick={() => router.push('/pakketten')}
+                  className="inline-flex items-center px-10 py-5 bg-gradient-to-r from-[#E33412] to-[#8BAE5A] text-white font-bold text-xl rounded-xl hover:from-[#c72d10] hover:to-[#7A9D4A] transition-all duration-200 shadow-lg hover:shadow-2xl transform hover:scale-105"
+                >
+                  <SparklesIcon className="w-6 h-6 mr-3" />
+                  Upgrade naar Premium
+                </button>
+                
+                <div className="text-sm text-gray-400">
+                  <p>Krijg direct toegang tot alle premium features</p>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Premium Benefits */}
+            <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="bg-[#181F17] border border-[#8BAE5A]/30 rounded-xl p-6 text-center"
+              >
+                <div className="w-12 h-12 bg-[#8BAE5A]/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <CalendarIcon className="w-6 h-6 text-[#8BAE5A]" />
+                </div>
+                <h3 className="text-lg font-semibold text-white mb-2">8-Week Schema's</h3>
+                <p className="text-gray-400 text-sm">Volledige trainingsschema's afgestemd op jouw doel</p>
+              </motion.div>
+              
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="bg-[#181F17] border border-[#8BAE5A]/30 rounded-xl p-6 text-center"
+              >
+                <div className="w-12 h-12 bg-[#FFD700]/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <ChartBarIcon className="w-6 h-6 text-[#FFD700]" />
+                </div>
+                <h3 className="text-lg font-semibold text-white mb-2">Voortgang Tracking</h3>
+                <p className="text-gray-400 text-sm">Volg je prestaties en progressie realtime</p>
+              </motion.div>
+              
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="bg-[#181F17] border border-[#E33412]/30 rounded-xl p-6 text-center"
+              >
+                <div className="w-12 h-12 bg-[#E33412]/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <VideoCameraIcon className="w-6 h-6 text-[#E33412]" />
+                </div>
+                <h3 className="text-lg font-semibold text-white mb-2">Video Uitleg</h3>
+                <p className="text-gray-400 text-sm">Professionele demonstraties per oefening</p>
+              </motion.div>
+            </div>
+          </div>
+        </div>
       </PageLayout>
     );
   }
