@@ -584,16 +584,10 @@ export default function OnboardingV2Modal({ isOpen }: OnboardingV2ModalProps) {
     if (step === 0) {
       go('/dashboard');
     } else if (step === 1) {
-      // CRITICAL: Check tier and navigate accordingly
-      // Basic users: skip challenges/training/nutrition → go directly to Brotherhood/Forum (step 6)
-      // Premium users: continue to challenges (step 2)
-      if (isBasic && !isAdmin) {
-        console.log('🎯 Basic user - redirecting to Brotherhood/Forum after video');
-        go('/dashboard/brotherhood/forum');
-      } else {
-        console.log('🎯 Premium user - redirecting to Challenges after video');
-        go('/dashboard/mijn-challenges');
-      }
+      // Both Basic and Premium users go to Challenges after video
+      // Basic users will skip training/nutrition steps later in the flow
+      console.log('🎯 Redirecting to Challenges after video (works for both Basic and Premium)');
+      go('/dashboard/mijn-challenges');
     } else if (step === 5) {
       go('/dashboard');
     }
