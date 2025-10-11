@@ -76,6 +76,7 @@ const SocialFeedPage = () => {
   // Delete confirmation
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [postToDelete, setPostToDelete] = useState<string | null>(null);
+  const deleteModalRef = useRef<HTMLDivElement | null>(null);
 
   // Popular emojis for quick access
   const popularEmojis = [
@@ -294,6 +295,17 @@ const SocialFeedPage = () => {
       return () => window.clearTimeout(id);
     }
   }, [commentModalOpen]);
+
+  // Auto-scroll and focus when delete modal opens (mobile-friendly)
+  useEffect(() => {
+    if (deleteConfirmOpen) {
+      const id = window.setTimeout(() => {
+        try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch {}
+        try { deleteModalRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch {}
+      }, 120);
+      return () => window.clearTimeout(id);
+    }
+  }, [deleteConfirmOpen]);
 
   // Fetch comments for a post
   const fetchComments = async (postId: string) => {
@@ -969,7 +981,7 @@ const SocialFeedPage = () => {
       {/* Delete Confirmation Modal */}
       {deleteConfirmOpen && postToDelete && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-[#232D1A] rounded-2xl shadow-2xl border border-red-500/30 max-w-md w-full p-6">
+          <div ref={deleteModalRef} className="bg-[#232D1A] rounded-2xl shadow-2xl border border-red-500/30 max-w-md w-full p-6">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-12 h-12 bg-red-900/30 rounded-full flex items-center justify-center flex-shrink-0">
                 <TrashIcon className="w-6 h-6 text-red-400" />
