@@ -14,7 +14,8 @@ import {
   HandThumbUpIcon,
   StarIcon,
   XMarkIcon,
-  FaceSmileIcon
+  FaceSmileIcon,
+  TrashIcon
 } from '@heroicons/react/24/outline';
 
 interface Comment {
@@ -51,7 +52,7 @@ interface Post {
 }
 
 const SocialFeedPage = () => {
-  const { user, profile } = useSupabaseAuth();
+  const { user, profile, isAdmin } = useSupabaseAuth();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [newPost, setNewPost] = useState('');
@@ -72,6 +73,9 @@ const SocialFeedPage = () => {
   // Auto-focus/scroll for comment modal
   const commentModalRef = useRef<HTMLDivElement | null>(null);
   const commentTextareaRef = useRef<HTMLTextAreaElement | null>(null);
+  // Delete confirmation
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [postToDelete, setPostToDelete] = useState<string | null>(null);
 
   // Popular emojis for quick access
   const popularEmojis = [
@@ -419,6 +423,40 @@ const SocialFeedPage = () => {
     }
   };
 
+  // Delete post (Admin only)
+  const handleDeletePost = async (postId: string) => {
+    if (!isAdmin) {
+      toast.error('Alleen admins kunnen posts verwijderen');
+      return;
+    }
+
+    try {
+      // Delete the post (this will cascade delete likes and comments due to foreign key constraints)
+      const { error } = await supabase
+        .from('social_posts')
+        .delete()
+        .eq('id', postId);
+
+      if (error) throw error;
+
+      // Remove post from state
+      setPosts(posts.filter(p => p.id !== postId));
+      
+      toast.success('Post succesvol verwijderd');
+      setDeleteConfirmOpen(false);
+      setPostToDelete(null);
+    } catch (error) {
+      console.error('Error deleting post:', error);
+      toast.error('Fout bij het verwijderen van post');
+    }
+  };
+
+  // Open delete confirmation
+  const openDeleteConfirm = (postId: string) => {
+    setPostToDelete(postId);
+    setDeleteConfirmOpen(true);
+  };
+
   // Get post type icon
   const getPostTypeIcon = (postType: string) => {
     switch (postType) {
@@ -674,6 +712,16 @@ const SocialFeedPage = () => {
                     {timeAgo(post.created_at)}
                   </span>
                 </div>
+                {/* Admin delete button */}
+                {isAdmin && (
+                  <button
+                    onClick={() => openDeleteConfirm(post.id)}
+                    className="p-2 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded-lg transition-colors flex-shrink-0"
+                    title="Post verwijderen (Admin)"
+                  >
+                    <TrashIcon className="w-5 h-5" />
+                  </button>
+                )}
               </div>
 
               {/* Post content */}
@@ -913,6 +961,45 @@ const SocialFeedPage = () => {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirmOpen && postToDelete && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-[#232D1A] rounded-2xl shadow-2xl border border-red-500/30 max-w-md w-full p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 bg-red-900/30 rounded-full flex items-center justify-center flex-shrink-0">
+                <TrashIcon className="w-6 h-6 text-red-400" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-white">Post verwijderen</h3>
+                <p className="text-sm text-gray-400">Admin actie</p>
+              </div>
+            </div>
+            
+            <p className="text-[#E1CBB3] mb-6">
+              Weet je zeker dat je deze post wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.
+            </p>
+            
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setDeleteConfirmOpen(false);
+                  setPostToDelete(null);
+                }}
+                className="flex-1 px-4 py-2 bg-[#3A4D23] text-white rounded-lg hover:bg-[#4A5D33] transition-colors"
+              >
+                Annuleren
+              </button>
+              <button
+                onClick={() => postToDelete && handleDeletePost(postToDelete)}
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-semibold"
+              >
+                Verwijderen
+              </button>
             </div>
           </div>
         </div>
