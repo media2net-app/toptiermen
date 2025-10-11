@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -248,6 +248,10 @@ function FinanceDashboardContent() {
     targetDate: '',
     category: 'sparen'
   });
+  
+  // Refs for modal focus and scroll
+  const addGoalModalRef = useRef<HTMLDivElement>(null);
+  const addGoalFirstInputRef = useRef<HTMLInputElement>(null);
 
   // Fetch financial profile on component mount
   useEffect(() => {
@@ -278,6 +282,32 @@ function FinanceDashboardContent() {
 
     fetchFinancialProfile();
   }, [user?.id]);
+
+  // Auto-scroll and focus when Add Goal modal opens
+  useEffect(() => {
+    if (showAddGoalModal) {
+      // Small delay to ensure modal is rendered
+      setTimeout(() => {
+        // Scroll modal into view (works for mobile and desktop)
+        if (addGoalModalRef.current) {
+          addGoalModalRef.current.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center' 
+          });
+        }
+        
+        // Focus first input field
+        if (addGoalFirstInputRef.current) {
+          addGoalFirstInputRef.current.focus();
+        }
+        
+        // Also scroll window to top on mobile for better UX
+        if (typeof window !== 'undefined') {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      }, 100);
+    }
+  }, [showAddGoalModal]);
 
   const updateGoalProgress = async (goalId: string, currentAmount: number) => {
     try {
@@ -980,7 +1010,10 @@ function FinanceDashboardContent() {
       {/* Add Goal Modal */}
       {showAddGoalModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
-          <div className="bg-[#232D1A] border border-[#3A4D23] rounded-xl p-4 sm:p-6 max-w-md w-full">
+          <div 
+            ref={addGoalModalRef}
+            className="bg-[#232D1A] border border-[#3A4D23] rounded-xl p-4 sm:p-6 max-w-md w-full"
+          >
             <div className="flex justify-between items-center mb-4 sm:mb-6">
               <h3 className="text-xl font-bold text-white">
                 Nieuw Financieel Doel Toevoegen
@@ -1007,6 +1040,7 @@ function FinanceDashboardContent() {
                   Doel Naam
                 </label>
                 <input
+                  ref={addGoalFirstInputRef}
                   type="text"
                   value={newGoal.title}
                   onChange={(e) => updateNewGoal('title', e.target.value)}
