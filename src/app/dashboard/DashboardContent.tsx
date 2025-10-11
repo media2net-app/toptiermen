@@ -207,11 +207,6 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus, setIsMobileMenuOp
     if (item.adminOnly && user?.email !== 'rick@toptiermen.eu' && user?.email !== 'chiel@media2net.nl') {
       return false;
     }
-    // TEMP: Only show Mind & Focus to chiel@media2net.nl
-    const isMindFocusItem = item.label === 'Mind & Focus' || item.parent === 'Mind & Focus';
-    if (isMindFocusItem && user?.email !== 'chiel@media2net.nl') {
-      return false;
-    }
     // HARD GATE visibility: if onboarding not completed and on step 6, only show Brotherhood > Forum
     if (!(actualOnboardingStatus?.onboarding_completed ?? isCompleted) && actualCurrentStep === 6) {
       if (!('parent' in item)) {
