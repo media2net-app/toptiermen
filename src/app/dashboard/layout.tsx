@@ -12,7 +12,7 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { SessionRecovery } from '@/components/SessionRecovery';
 import { SessionTimeoutWarning } from '@/components/SessionTimeoutWarning';
 import DashboardContent from './DashboardContent';
-import { useOnlinePresence } from '@/hooks/useOnlinePresence';
+// import { useOnlinePresence } from '@/hooks/useOnlinePresence'; // TIJDELIJK UITGESCHAKELD - veroorzaakt 500 errors
 
 // Force dynamic rendering to prevent navigator errors
 export const dynamic = 'force-dynamic';
@@ -24,7 +24,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [userProfile, setUserProfile] = useState<any>(null);
   
   // Track user online presence
-  useOnlinePresence();
+  // useOnlinePresence(); // TIJDELIJK UITGESCHAKELD - veroorzaakt 500 errors op live (user_online_status tabel bestaat niet)
 
   // 2.0.1: All 2.0.1 functionality DISABLED to prevent crashes
   // const {

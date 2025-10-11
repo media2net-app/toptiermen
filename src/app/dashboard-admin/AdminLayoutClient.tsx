@@ -46,7 +46,7 @@ import SessionMonitor from '@/components/SessionMonitor';
 import AuthDebugPanel from '@/components/AuthDebugPanel';
 import SupportButton from '@/components/SupportButton';
 import { useChatNotifications } from '@/hooks/useChatNotifications';
-import { useOnlinePresence } from '@/hooks/useOnlinePresence';
+// import { useOnlinePresence } from '@/hooks/useOnlinePresence'; // TIJDELIJK UITGESCHAKELD - veroorzaakt 500 errors
 import { useActivityHeartbeat } from '@/hooks/useActivityHeartbeat';
 
 // Type definitions for menu items
@@ -338,7 +338,7 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
   const [unreadCount, setUnreadCount] = useState(0);
   
   // Track user online presence
-  useOnlinePresence();
+  // useOnlinePresence(); // TIJDELIJK UITGESCHAKELD - veroorzaakt 500 errors op live (user_online_status tabel bestaat niet)
   
   // 🔥 Activity Heartbeat - Updates last_active every 30 seconds for Live Tracking
   useActivityHeartbeat(user?.id);
