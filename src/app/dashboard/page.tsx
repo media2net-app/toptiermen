@@ -37,6 +37,7 @@ interface DashboardStats {
     weeklySessions: number;
     progress: number;
     schemaName?: string;
+    schemaNummer?: number;
     completedDaysThisWeek?: number;
     currentWeek?: number;
     totalWeeks?: number;
@@ -621,10 +622,15 @@ export default function Dashboard() {
                 <DumbbellIcon className="w-6 h-6 text-[#8BAE5A]" />
               </div>
               <div className="space-y-2 sm:space-y-3">
-                {/* Schema naam */}
+                {/* Schema nummer en naam */}
                 {stats?.training.schemaName && (
                   <div className="text-left">
-                    <div className="text-xs sm:text-sm text-[#8BAE5A] mb-1">Actief schema:</div>
+                    <div className="text-xs sm:text-sm text-[#8BAE5A] mb-1">Schema:</div>
+                    {stats.training.schemaNummer && (
+                      <div className="text-[#8BAE5A] font-bold text-xs mb-1">
+                        Schema {stats.training.schemaNummer}
+                      </div>
+                    )}
                     <div className="text-white font-semibold text-sm sm:text-base truncate">
                       {stats.training.schemaName}
                     </div>

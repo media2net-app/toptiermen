@@ -877,84 +877,84 @@ export default function MijnTrainingen() {
   if (!trainingData?.hasActiveSchema) {
     return (
       <PageLayout title="Mijn Trainingen">
-        <div className="min-h-screen bg-gradient-to-br from-[#0F1419] to-[#1A1F2E] p-6">
+        <div className="min-h-screen bg-gradient-to-br from-[#0F1419] to-[#1A1F2E] p-3 sm:p-4 md:p-6">
           <div className="max-w-4xl mx-auto">
             {/* Header */}
-            <div className="text-center mb-12">
-              <h1 className="text-4xl font-bold text-white mb-4">Mijn Trainingen</h1>
-              <p className="text-[#8BAE5A] text-lg">Persoonlijke trainingsschema's en voortgang</p>
+            <div className="text-center mb-8 sm:mb-12">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-3 sm:mb-4 px-2">Mijn Trainingen</h1>
+              <p className="text-[#8BAE5A] text-sm sm:text-base md:text-lg px-2">Persoonlijke trainingsschema's en voortgang</p>
             </div>
 
             {/* Lock State */}
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-2xl p-12 text-center shadow-xl"
+              className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-2xl p-4 sm:p-6 md:p-8 lg:p-12 text-center shadow-xl"
             >
-              <div className="mb-8">
-                <div className="w-24 h-24 bg-[#3A4D23] rounded-full flex items-center justify-center mx-auto mb-6">
-                  <LockClosedIcon className="w-12 h-12 text-[#8BAE5A]" />
+              <div className="mb-6 sm:mb-8">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-[#3A4D23] rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
+                  <LockClosedIcon className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-[#8BAE5A]" />
                 </div>
-                <h2 className="text-3xl font-bold text-white mb-4">Geen Actief Trainingsschema</h2>
-                <p className="text-gray-400 text-lg mb-8 max-w-2xl mx-auto">
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-3 sm:mb-4 px-2">Geen Actief Trainingsschema</h2>
+                <p className="text-gray-400 text-sm sm:text-base md:text-lg mb-6 sm:mb-8 max-w-2xl mx-auto px-2">
                   Je hebt nog geen trainingsschema geselecteerd. Ga naar het trainingscentrum om een schema te kiezen dat bij jou past.
                 </p>
               </div>
 
-              <div className="space-y-6">
+              <div className="space-y-4 sm:space-y-6">
                 <button
                   onClick={goToTrainingscentrum}
-                  className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-bold text-lg rounded-xl hover:from-[#7A9D4A] hover:to-[#e0903f] transition-all duration-200 shadow-lg hover:shadow-xl"
+                  className="inline-flex items-center px-4 py-3 sm:px-6 sm:py-3 md:px-8 md:py-4 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-bold text-sm sm:text-base md:text-lg rounded-xl hover:from-[#7A9D4A] hover:to-[#e0903f] transition-all duration-200 shadow-lg hover:shadow-xl"
                 >
-                  <ArrowRightIcon className="w-6 h-6 mr-2" />
+                  <ArrowRightIcon className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 mr-2" />
                   Ga naar Trainingscentrum
                 </button>
                 
-                <div className="text-sm text-gray-500">
+                <div className="text-xs sm:text-sm text-gray-500 px-2">
                   <p>Kies een schema dat past bij jouw doelen en niveau</p>
                 </div>
               </div>
             </motion.div>
 
             {/* Benefits */}
-            <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="mt-8 sm:mt-12 grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className="bg-[#181F17] border border-[#3A4D23]/30 rounded-xl p-6 text-center"
+                className="bg-[#181F17] border border-[#3A4D23]/30 rounded-xl p-4 sm:p-6 text-center"
               >
-                <div className="w-12 h-12 bg-[#8BAE5A]/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <CalendarIcon className="w-6 h-6 text-[#8BAE5A]" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#8BAE5A]/20 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                  <CalendarIcon className="w-5 h-5 sm:w-6 sm:h-6 text-[#8BAE5A]" />
                 </div>
-                <h3 className="text-lg font-semibold text-white mb-2">Gestructureerde Training</h3>
-                <p className="text-gray-400 text-sm">Volg een bewezen schema met duidelijke doelen en progressie</p>
+                <h3 className="text-base sm:text-lg font-semibold text-white mb-2">Gestructureerde Training</h3>
+                <p className="text-gray-400 text-xs sm:text-sm">Volg een bewezen schema met duidelijke doelen en progressie</p>
               </motion.div>
               
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="bg-[#181F17] border border-[#3A4D23]/30 rounded-xl p-6 text-center"
+                className="bg-[#181F17] border border-[#3A4D23]/30 rounded-xl p-4 sm:p-6 text-center"
               >
-                <div className="w-12 h-12 bg-[#FFD700]/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <ChartBarIcon className="w-6 h-6 text-[#FFD700]" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#FFD700]/20 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                  <ChartBarIcon className="w-5 h-5 sm:w-6 sm:h-6 text-[#FFD700]" />
                 </div>
-                <h3 className="text-lg font-semibold text-white mb-2">Voortgang Tracking</h3>
-                <p className="text-gray-400 text-sm">Houd je prestaties bij en zie je vooruitgang over tijd</p>
+                <h3 className="text-base sm:text-lg font-semibold text-white mb-2">Voortgang Tracking</h3>
+                <p className="text-gray-400 text-xs sm:text-sm">Houd je prestaties bij en zie je vooruitgang over tijd</p>
               </motion.div>
               
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="bg-[#181F17] border border-[#3A4D23]/30 rounded-xl p-6 text-center"
+                className="bg-[#181F17] border border-[#3A4D23]/30 rounded-xl p-4 sm:p-6 text-center"
               >
-                <div className="w-12 h-12 bg-[#f0a14f]/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <PlayIcon className="w-6 h-6 text-[#f0a14f]" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#f0a14f]/20 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                  <PlayIcon className="w-5 h-5 sm:w-6 sm:h-6 text-[#f0a14f]" />
                 </div>
-                <h3 className="text-lg font-semibold text-white mb-2">Direct Starten</h3>
-                <p className="text-gray-400 text-sm">Begin direct met trainen zodra je schema is geselecteerd</p>
+                <h3 className="text-base sm:text-lg font-semibold text-white mb-2">Direct Starten</h3>
+                <p className="text-gray-400 text-xs sm:text-sm">Begin direct met trainen zodra je schema is geselecteerd</p>
               </motion.div>
             </div>
           </div>
@@ -1022,13 +1022,13 @@ export default function MijnTrainingen() {
                 <div className="text-center lg:text-right mt-4 lg:mt-0">
                   <div className="bg-[#0F1419]/50 rounded-xl p-3 sm:p-4 md:p-6">
                     <div className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-[#8BAE5A] mb-1 sm:mb-2">
-                      {days ? days.filter((d: any) => d.isCompleted).length : progress.completed_days}/{progress.total_days}
+                      {progress.completed_days}/{progress.total_days}
                     </div>
                     <div className="text-xs sm:text-sm text-gray-400 mb-3 sm:mb-4">Dagen voltooid</div>
                     <div className="w-full sm:w-40 md:w-48 h-2 sm:h-3 bg-[#3A4D23] rounded-full overflow-hidden">
                       <motion.div 
                         initial={{ width: 0 }}
-                        animate={{ width: `${days ? (days.filter((d: any) => d.isCompleted).length / progress.total_days) * 100 : (progress.completed_days / progress.total_days) * 100}%` }}
+                        animate={{ width: `${(progress.completed_days / progress.total_days) * 100}%` }}
                         transition={{ duration: 1, delay: 0.5 }}
                         className="h-full bg-gradient-to-r from-[#8BAE5A] to-[#FFD700]"
                       />

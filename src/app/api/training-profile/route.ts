@@ -102,9 +102,15 @@ export async function POST(request: Request) {
       .eq('user_id', emailToLookup)
       .single();
     
-    // ALWAYS reset if profile exists (user wants to start fresh with Schema 1)
-    if (existingProfile) {
-      console.log('🔄 Training profile is being updated - resetting all training data for fresh start');
+    // Check if profile has actually changed - only reset if it has
+    const hasActuallyChanged = existingProfile && (
+      existingProfile.training_goal !== training_goal ||
+      existingProfile.training_frequency !== training_frequency ||
+      existingProfile.equipment_type !== equipment_type
+    );
+
+    if (hasActuallyChanged) {
+      console.log('🔄 Training profile HAS CHANGED - resetting all training data for fresh start');
       console.log('📊 Previous profile:', existingProfile);
       console.log('📊 New profile:', { training_goal, training_frequency, equipment_type });
       console.log('🗑️ Resetting all training data to start fresh...');
@@ -117,32 +123,65 @@ export async function POST(request: Request) {
         .single();
       
       if (profileData?.id) {
+        console.log('🗑️ Starting complete data wipe for user:', profileData.id);
+        
         // Delete all schema periods (removes active schema selection)
-        await supabase
+        const { error: e1 } = await supabase
           .from('user_schema_periods')
           .delete()
           .eq('user_id', profileData.id);
+        console.log(e1 ? `  ⚠️ user_schema_periods: ${e1.message}` : '  ✅ user_schema_periods cleared');
         
         // Delete all training day progress
-        await supabase
+        const { error: e2 } = await supabase
           .from('user_training_day_progress')
           .delete()
           .eq('user_id', profileData.id);
+        console.log(e2 ? `  ⚠️ user_training_day_progress: ${e2.message}` : '  ✅ user_training_day_progress cleared');
         
         // Delete legacy training progress if exists
-        await supabase
+        const { error: e3 } = await supabase
           .from('user_training_progress')
           .delete()
           .eq('user_id', profileData.id);
+        console.log(e3 ? `  ⚠️ user_training_progress: ${e3.message}` : '  ✅ user_training_progress cleared');
         
-        // Delete week completions
-        await supabase
+        // Delete week completions (may not exist, suppress error)
+        const { error: e4 } = await supabase
           .from('user_week_completions')
           .delete()
           .eq('user_id', profileData.id);
+        if (e4 && e4.code !== 'PGRST204' && e4.code !== '42P01') {
+          console.log(`  ⚠️ user_week_completions: ${e4.message}`);
+        } else {
+          console.log('  ✅ user_week_completions cleared');
+        }
         
-        console.log('✅ Training data reset complete - user can now select Schema 1 again');
+        // 🔴 KRITIEKE: Delete ALL schema progress (removes ALL completion and unlock status!)
+        const { error: e5 } = await supabase
+          .from('user_training_schema_progress')
+          .delete()
+          .eq('user_id', profileData.id);
+        console.log(e5 ? `  ❌ CRITICAL: user_training_schema_progress: ${e5.message}` : '  ✅ user_training_schema_progress cleared (ALL SCHEMAS RESET)');
+        
+        // Clear selected schema from profiles
+        const { error: e6 } = await supabase
+          .from('profiles')
+          .update({ selected_schema_id: null })
+          .eq('id', profileData.id);
+        console.log(e6 ? `  ⚠️ profiles.selected_schema_id: ${e6.message}` : '  ✅ selected_schema_id cleared');
+        
+        console.log('\n🎯 COMPLETE RESET PERFORMED:');
+        console.log('   ✅ All schema progress deleted (no completed schemas remain)');
+        console.log('   ✅ All training day progress deleted');
+        console.log('   ✅ All schema periods deleted');
+        console.log('   ✅ Selected schema cleared');
+        console.log('   ✅ User will start fresh with ONLY Schema 1 unlocked');
+        console.log('   🔄 Frontend should clear localStorage cache\n');
       }
+    } else if (existingProfile) {
+      console.log('ℹ️  Training profile unchanged - no reset needed');
+      console.log('📊 Existing profile:', existingProfile);
     }
     
     const profileData = {
@@ -190,7 +229,13 @@ export async function POST(request: Request) {
     return NextResponse.json({
       success: true,
       profile: data,
-      wasReset: !!existingProfile // Always true if profile was updated
+      resetPerformed: !!hasActuallyChanged,
+      clearCache: !!hasActuallyChanged, // Signal frontend to clear localStorage
+      message: hasActuallyChanged 
+        ? '🔄 Trainingsprofiel bijgewerkt! Alle oude data is gewist. Je begint opnieuw met Schema 1.' 
+        : existingProfile
+        ? 'Trainingsprofiel ongewijzigd'
+        : 'Trainingsprofiel aangemaakt'
     });
     
   } catch (error) {

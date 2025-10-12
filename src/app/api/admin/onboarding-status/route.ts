@@ -21,16 +21,16 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to fetch users' }, { status: 500 });
     }
 
-    // Fetch onboarding status for all users (from correct table!)
+    // Fetch onboarding status for all users (from CORRECT table!)
     const { data: onboardingData, error: onboardingError } = await supabaseAdmin
-      .from('onboarding_status')
+      .from('user_onboarding_status')
       .select('*');
 
     if (onboardingError) {
       console.error('Error fetching onboarding status:', onboardingError);
       // If table doesn't exist yet, return empty data
       if (onboardingError.code === '42P01') {
-        console.log('onboarding_status table not found, returning empty data');
+        console.log('user_onboarding_status table not found, returning empty data');
         return NextResponse.json({
           users: users?.map(user => ({
             id: user.id,
@@ -74,13 +74,35 @@ export async function GET(request: NextRequest) {
 
 
     
+    // Helper function to calculate current step from user_onboarding_status
+    const calculateCurrentStep = (onboarding: any, profile: any) => {
+      // If no onboarding record, check profile for legacy data
+      if (!onboarding) {
+        // Legacy users: if they have a main_goal, they at least completed step 2
+        if (profile?.main_goal && profile.main_goal.trim() !== '') {
+          return 2; // They set a goal
+        }
+        return 1; // Default to step 1
+      }
+      
+      // New users with onboarding records
+      if (onboarding.onboarding_completed) return 7; // Completed
+      if (onboarding.challenge_started) return 6;
+      if (onboarding.nutrition_plan_selected) return 5;
+      if (onboarding.training_schema_selected) return 4;
+      if (onboarding.missions_selected) return 3;
+      if (onboarding.goal_set) return 2;
+      if (onboarding.welcome_video_shown) return 2;
+      return 1;
+    };
+
     // Transform data for better readability
     const usersWithStatus = users?.map(user => {
       const onboarding = onboardingMap.get(user.id);
       const profile = profilesMap.get(user.id);
       
-      // Use current_step directly from new onboarding_status table
-      const actualCurrentStep = onboarding?.current_step || 1;
+      // Calculate current step from user_onboarding_status fields + legacy fallback
+      const actualCurrentStep = calculateCurrentStep(onboarding, profile);
       const isCompleted = onboarding?.onboarding_completed || false;
       
       return {

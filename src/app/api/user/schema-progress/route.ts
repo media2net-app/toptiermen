@@ -16,24 +16,34 @@ export async function GET(request: NextRequest) {
 
     console.log('🔍 Fetching schema progress for user:', userId);
 
-    // Get user's training profile to determine which schemas they should have access to
-    const { data: profile, error: profileError } = await supabase
-      .from('user_training_profiles')
-      .select('training_goal, training_frequency, equipment_type')
-      .eq('user_id', userId)
+    // First get user email from profiles
+    const { data: userProfile, error: userProfileError } = await supabase
+      .from('profiles')
+      .select('email, selected_schema_id')
+      .eq('id', userId)
       .single();
+
+    const userEmail = userProfile?.email;
+
+    // Get user's training profile to determine which schemas they should have access to
+    // training_profiles uses email as user_id (not UUID)
+    let profile: any = null;
+    let profileError: any = null;
+    
+    if (userEmail) {
+      const result = await supabase
+        .from('training_profiles')
+        .select('training_goal, training_frequency, equipment_type')
+        .eq('user_id', userEmail)
+        .single();
+      profile = result.data;
+      profileError = result.error;
+    }
 
     const hasProfile = !profileError && !!profile;
     if (!hasProfile) {
       console.log('⚠️ No training profile found for user, proceeding with defaults');
     }
-
-    // Also fetch selected schema from profiles
-    const { data: userProfile, error: userProfileError } = await supabase
-      .from('profiles')
-      .select('selected_schema_id')
-      .eq('id', userId)
-      .single();
 
     // Get user's schema progress for the current training goal
     let progressQuery = supabase
@@ -45,7 +55,7 @@ export async function GET(request: NextRequest) {
         current_day,
         started_at,
         completed_at,
-        training_schemas!inner(
+        training_schemas!fk_user_training_schema_progress_schema_id(
           id,
           name,
           schema_nummer,
@@ -105,9 +115,9 @@ export async function GET(request: NextRequest) {
       
       if (schema1Progress) {
         // Compute weeks from completed_days respecting training_frequency
-        const totalDays1 = (schema1Progress.total_days ?? schema1Progress.completed_days ?? 0) as number;
+        const completedDays1 = (schema1Progress.completed_days ?? 0) as number;
         // If completed_at is set, treat as 8 weeks completed
-        const weeksCompleted = schema1Progress.completed_at ? 8 : Math.floor(totalDays1 / freq);
+        const weeksCompleted = schema1Progress.completed_at ? 8 : Math.floor(completedDays1 / freq);
         
         if (weeksCompleted >= 8) {
           unlockedSchemas[2] = true;
@@ -118,8 +128,8 @@ export async function GET(request: NextRequest) {
             return ts && ts.schema_nummer === 2;
           });
           if (schema2Progress) {
-            const totalDays2 = (schema2Progress.total_days ?? schema2Progress.completed_days ?? 0) as number;
-            const schema2WeeksCompleted = schema2Progress.completed_at ? 8 : Math.floor(totalDays2 / freq);
+            const completedDays2 = (schema2Progress.completed_days ?? 0) as number;
+            const schema2WeeksCompleted = schema2Progress.completed_at ? 8 : Math.floor(completedDays2 / freq);
             if (schema2WeeksCompleted >= 8) {
               unlockedSchemas[3] = true;
             }
@@ -147,8 +157,9 @@ export async function GET(request: NextRequest) {
           training_goal: ts.training_goal,
           equipment_type: ts.equipment_type,
         } : null;
-        const totalDays = (selectedRow.total_days ?? selectedRow.completed_days ?? 0) as number;
-        const weeksCompleted = selectedRow.completed_at ? 8 : Math.floor(totalDays / freq);
+        const completedDays = (selectedRow.completed_days ?? 0) as number;
+        const totalDays = (selectedRow.total_days ?? 0) as number;
+        const weeksCompleted = selectedRow.completed_at ? 8 : Math.floor(completedDays / freq);
         progress = {
           completed_days: selectedRow.completed_days ?? 0,
           total_days: totalDays,

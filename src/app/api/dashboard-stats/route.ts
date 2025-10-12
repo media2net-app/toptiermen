@@ -292,6 +292,7 @@ async function fetchTrainingStats(userId: string) {
         weeklySessions: 0,
         progress: 0,
         schemaName: undefined,
+        schemaNummer: null,
         completedDaysThisWeek: 0,
         currentWeek: 0,
         totalWeeks: 8
@@ -308,6 +309,7 @@ async function fetchTrainingStats(userId: string) {
         weeklySessions: 0,
         progress: 0,
         schemaName: undefined,
+        schemaNummer: null,
         completedDaysThisWeek: 0,
         currentWeek: 0,
         totalWeeks: 8
@@ -330,6 +332,7 @@ async function fetchTrainingStats(userId: string) {
         weeklySessions: 0,
         progress: 0,
         schemaName: undefined,
+        schemaNummer: null,
         completedDaysThisWeek: 0,
         currentWeek: 0,
         totalWeeks: 8
@@ -337,7 +340,8 @@ async function fetchTrainingStats(userId: string) {
     }
 
     const weeklySessions = schemaDays?.length || 0;
-    const totalDays = 56; // 8 weeks standard
+    const totalWeeks = 8;
+    const totalDays = weeklySessions * totalWeeks; // e.g., 4 days/week * 8 weeks = 32 days
 
     console.log('✅ Active schema found:', {
       schemaName: schema.name,
@@ -346,31 +350,49 @@ async function fetchTrainingStats(userId: string) {
       schemaDaysCount: schemaDays?.length || 0
     });
 
-    // Calculate current day and progress based on schema period start date
-    const startDate = new Date(schemaPeriod.start_date);
-    const today = new Date();
-    const daysDiff = Math.floor((today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-    const currentDay = Math.min(Math.max(daysDiff + 1, 1), totalDays);
-    const progress = Math.round((currentDay / totalDays) * 100);
-
-    // Calculate current week (1-8)
-    const currentWeek = Math.ceil(currentDay / 7);
-    const totalWeeks = 8;
+    // Get total completed days from user_training_schema_progress (not just unique days)
+    let completedTrainingDays = 0;
     
-    // Calculate completed days this week
-    const daysInCurrentWeek = Math.min(7, totalDays - (currentWeek - 1) * 7);
-    const completedDaysThisWeek = Math.min(currentDay - (currentWeek - 1) * 7, daysInCurrentWeek);
+    const { data: schemaProgress, error: schemaProgressError } = await supabaseAdmin
+      .from('user_training_schema_progress')
+      .select('completed_days')
+      .eq('user_id', userId)
+      .eq('schema_id', schemaPeriod.training_schema_id)
+      .single();
+
+    if (!schemaProgressError && schemaProgress) {
+      completedTrainingDays = schemaProgress.completed_days || 0;
+    }
+
+    // Calculate current week based on completed trainings
+    // Each week requires weeklySessions completions
+    const completedWeeks = Math.floor(completedTrainingDays / weeklySessions);
+    const currentWeek = Math.min(completedWeeks + 1, totalWeeks);
+    const completedDaysThisWeek = completedTrainingDays % weeklySessions;
+    
+    // Calculate progress based on actual completed days
+    const progress = totalDays > 0 ? Math.round((completedTrainingDays / totalDays) * 100) : 0;
+
+    console.log('📊 Training progress calculated:', {
+      completedTrainingDays,
+      completedWeeks,
+      currentWeek,
+      completedDaysThisWeek,
+      weeklySessions
+    });
 
     return {
       hasActiveSchema: true,
-      currentDay,
+      currentDay: completedTrainingDays + 1, // Next day to train
       totalDays,
       weeklySessions,
       progress: Math.min(progress, 100),
       schemaName: schema.name,
+      schemaNummer: schema.schema_nummer || null,
       completedDaysThisWeek: Math.max(0, completedDaysThisWeek),
       currentWeek: Math.min(currentWeek, totalWeeks),
-      totalWeeks
+      totalWeeks,
+      completedDays: completedTrainingDays
     };
   } catch (error) {
     console.error('❌ Error fetching training stats:', error);
@@ -381,6 +403,7 @@ async function fetchTrainingStats(userId: string) {
       weeklySessions: 0,
       progress: 0,
       schemaName: undefined,
+      schemaNummer: null,
       completedDaysThisWeek: 0,
       currentWeek: 0,
       totalWeeks: 8

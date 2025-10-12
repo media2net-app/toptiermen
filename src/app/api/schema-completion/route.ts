@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
       const { data: schema1Data, error: schema1Error } = await supabaseAdmin
         .from('user_training_schema_progress')
         .select(`
-          training_schemas!inner(
+          training_schemas!fk_user_training_schema_progress_schema_id(
             training_goal,
             equipment_type
           )
@@ -83,8 +83,12 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Failed to fetch schema details' }, { status: 500 });
       }
 
-      const trainingGoal = schema1Data.training_schemas[0]?.training_goal;
-      const equipmentType = schema1Data.training_schemas[0]?.equipment_type;
+      // Handle both array and object response from Supabase
+      const schemaInfo = Array.isArray(schema1Data.training_schemas) 
+        ? schema1Data.training_schemas[0] 
+        : schema1Data.training_schemas;
+      const trainingGoal = schemaInfo?.training_goal;
+      const equipmentType = schemaInfo?.equipment_type;
 
       console.log('🎯 Looking for Schema 2 with:', { trainingGoal, equipmentType });
 
@@ -159,7 +163,7 @@ export async function POST(request: NextRequest) {
       const { data: schema2Meta, error: schema2MetaErr } = await supabaseAdmin
         .from('user_training_schema_progress')
         .select(`
-          training_schemas!inner(
+          training_schemas!fk_user_training_schema_progress_schema_id(
             training_goal,
             equipment_type
           )
@@ -173,8 +177,12 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Failed to fetch schema details' }, { status: 500 });
       }
 
-      const trainingGoal = (schema2Meta as any).training_schemas?.[0]?.training_goal;
-      const equipmentType = (schema2Meta as any).training_schemas?.[0]?.equipment_type;
+      // Handle both array and object response from Supabase
+      const schema2Info = Array.isArray((schema2Meta as any).training_schemas) 
+        ? (schema2Meta as any).training_schemas[0] 
+        : (schema2Meta as any).training_schemas;
+      const trainingGoal = schema2Info?.training_goal;
+      const equipmentType = schema2Info?.equipment_type;
 
       console.log('🎯 Looking for Schema 3 with:', { trainingGoal, equipmentType });
 
@@ -272,7 +280,7 @@ export async function GET(request: NextRequest) {
       .from('user_training_schema_progress')
       .select(`
         *,
-        training_schemas!inner(
+        training_schemas!fk_user_training_schema_progress_schema_id(
           id,
           name,
           schema_nummer,
@@ -280,8 +288,7 @@ export async function GET(request: NextRequest) {
           equipment_type
         )
       `)
-      .eq('user_id', userId)
-      .order('training_schemas.schema_nummer');
+      .eq('user_id', userId);
 
     if (error) {
       console.error('❌ Error fetching schema completion status:', error);

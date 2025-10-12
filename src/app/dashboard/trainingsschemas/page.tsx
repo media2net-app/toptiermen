@@ -137,11 +137,14 @@ const trainingFrequencies = [
 ];
 
 function TrainingschemasContent() {
-  const { user, loading: authLoading } = useSupabaseAuth();
+  const { user, loading: authLoading, profile, isAdmin } = useSupabaseAuth();
   const { isCompleted, currentStep: onboardingStep, completeStep, showLoadingOverlay, loadingText, loadingProgress } = useOnboardingV2();
   const { hasAccess, loading: subscriptionLoading } = useSubscription();
   const router = useRouter();
   const searchParams = useSearchParams();
+  
+  // DEBUG: Admin-only toggle to simulate Basic user view
+  const [debugSimulateBasic, setDebugSimulateBasic] = useState(false);
   // Ref to the continue button section for auto-scroll during onboarding
   const continueRef = useRef<HTMLDivElement | null>(null);
   const trainingNextBtnId = 'onb-training-next-btn';
@@ -555,14 +558,15 @@ function TrainingschemasContent() {
               training_goal,
               equipment_type,
               schema_nummer,
-              training_schema_days (
+              training_schema_days!inner (
                 day_number
               )
             `)
             .eq('status', 'published')
-            .order('created_at', { ascending: false }),
+            .order('schema_nummer', { ascending: true })
+            .limit(20),
           new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('Training schemas query timeout')), 15000)
+            setTimeout(() => reject(new Error('Training schemas query timeout')), 12000)
           )
         ]),
         
@@ -598,10 +602,19 @@ function TrainingschemasContent() {
             console.log('🔄 Attempting fallback schema loading...');
             const { data: fallbackData, error: fallbackError } = await supabase
               .from('training_schemas')
-              .select('*')
+              .select(`
+                id,
+                name,
+                training_goal,
+                equipment_type,
+                schema_nummer,
+                training_schema_days!inner (
+                  day_number
+                )
+              `)
               .eq('status', 'published')
-              .order('created_at', { ascending: false })
-              .limit(50);
+              .order('schema_nummer', { ascending: true })
+              .limit(20);
             
             if (!fallbackError && fallbackData) {
               allSchemas = fallbackData;
@@ -624,10 +637,19 @@ function TrainingschemasContent() {
           console.log('🔄 Attempting fallback schema loading after promise rejection...');
           const { data: fallbackData, error: fallbackError } = await supabase
             .from('training_schemas')
-            .select('*')
+            .select(`
+              id,
+              name,
+              training_goal,
+              equipment_type,
+              schema_nummer,
+              training_schema_days!inner (
+                day_number
+              )
+            `)
             .eq('status', 'published')
-            .order('created_at', { ascending: false })
-            .limit(50);
+            .order('schema_nummer', { ascending: true })
+            .limit(20);
           
           if (!fallbackError && fallbackData) {
             allSchemas = fallbackData;
@@ -887,63 +909,56 @@ function TrainingschemasContent() {
       console.log(`  ✅ "${schema.name}" - Schema ${schema.schema_nummer} (${schema.training_goal}, ${schema.equipment_type}, ${schema.training_schema_days?.length || 0} days)`);
     });
     
-    // OPTIMIZED: Use Map for faster deduplication
-    const uniqueMatchesMap = new Map<number, TrainingSchema>();
-    primaryMatches.forEach(schema => {
-      if (schema.schema_nummer && !uniqueMatchesMap.has(schema.schema_nummer)) {
-        uniqueMatchesMap.set(schema.schema_nummer, schema);
-      }
-    });
+    // NEW APPROACH: Explicitly look for Schema 1, 2, AND 3
+    // This ensures we ALWAYS show all 3 schemas if they exist
+    const schema1 = primaryMatches.find(s => s.schema_nummer === 1);
+    const schema2 = primaryMatches.find(s => s.schema_nummer === 2);
+    const schema3 = primaryMatches.find(s => s.schema_nummer === 3);
     
-    const uniqueMatches = Array.from(uniqueMatchesMap.values());
+    console.log('🔍 Looking for specific schema numbers:');
+    console.log(`  Schema 1: ${schema1 ? '✅ Found' : '❌ Not found'}`);
+    console.log(`  Schema 2: ${schema2 ? '✅ Found' : '❌ Not found'}`);
+    console.log(`  Schema 3: ${schema3 ? '✅ Found' : '❌ Not found'}`);
     
-    console.log(`🎯 Unique matches after deduplication: ${uniqueMatches.length}`);
+    // Build result array with Schema 1, 2, 3 in order (skip nulls)
+    let result: TrainingSchema[] = [];
+    if (schema1) result.push(schema1);
+    if (schema2) result.push(schema2);
+    if (schema3) result.push(schema3);
     
-    // Sort by schema number to ensure consistent ordering (1, 2, 3)
-    const sortedMatches = uniqueMatches.sort((a, b) => {
-      const aNum = a.schema_nummer || 0;
-      const bNum = b.schema_nummer || 0;
-      return aNum - bNum;
-    });
+    console.log(`🎯 Initial result: ${result.length} schemas`);
     
-    // Take first 3 schemas (should be Schema 1, 2, 3)
-    let result = sortedMatches.slice(0, 3);
-    
-    console.log(`🎯 Final result: ${result.length} schemas`);
-    result.forEach((schema, index) => {
-      console.log(`  ${index + 1}. Schema ${schema.schema_nummer}: "${schema.name}" (${schema.training_goal}, ${schema.equipment_type}, ${schema.training_schema_days?.length || 0} days) - Status: ${schema.status}`);
-    });
-    
-    // If we don't have enough matches, show what we have with clear messaging
-    if (result.length === 0) {
-      console.log('⚠️ No matches found, showing fallback schemas');
-      // Fallback to goal only (any frequency, any equipment)
-      const fallbackMatches = schemas.filter(schema => {
-        const goalMatch = schema.training_goal === dbGoal;
-        return goalMatch;
-      });
+    // CRITICAL FIX: If we have less than 3 schemas, try to fill with other frequencies for same goal+equipment
+    if (result.length < 3) {
+      console.log(`⚠️ Only ${result.length} schemas found for ${profile.training_frequency}x per week. Trying fallback...`);
       
-      // Deduplicate and sort
-      const uniqueFallback = fallbackMatches.reduce((acc, schema) => {
-        const existing = acc.find(s => s.schema_nummer === schema.schema_nummer);
-        if (!existing) {
-          acc.push(schema);
+      // Get schema numbers we already have
+      const existingNumbers = result.map(s => s.schema_nummer);
+      console.log(`📊 Already have schemas: ${existingNumbers.join(', ') || 'none'}`);
+      
+      // Try to find missing schemas with ANY frequency but same goal + equipment
+      const allMatchesAnyFreq = schemas.filter(schema => 
+        schema.training_goal === dbGoal && 
+        schema.equipment_type === profile.equipment_type
+      );
+      
+      console.log(`🔍 Found ${allMatchesAnyFreq.length} schemas for ${dbGoal} + ${profile.equipment_type} (any frequency)`);
+      
+      // Try to fill missing schema numbers
+      for (let schemaNum = 1; schemaNum <= 3; schemaNum++) {
+        if (!existingNumbers.includes(schemaNum)) {
+          const missingSchema = allMatchesAnyFreq.find(s => s.schema_nummer === schemaNum);
+          if (missingSchema) {
+            console.log(`✅ Found fallback Schema ${schemaNum} with ${missingSchema.training_schema_days?.length || 0} days`);
+            result.push(missingSchema);
+          } else {
+            console.log(`❌ No Schema ${schemaNum} found for ${dbGoal} + ${profile.equipment_type}`);
+          }
         }
-        return acc;
-      }, [] as TrainingSchema[]);
-      
-      result = uniqueFallback.sort((a, b) => (a.schema_nummer || 0) - (b.schema_nummer || 0)).slice(0, 3);
-    } else if (result.length < 3) {
-      console.log(`⚠️ Only ${result.length} matches found for ${profile.training_frequency}x per week ${dbGoal}`);
-      console.log('📝 This is expected if the database doesn\'t have all 3 schemas for this frequency');
-      
-      // Show a helpful message to the user about available schemas
-      if (result.length === 1) {
-        console.log(`ℹ️ Only Schema ${result[0].schema_nummer} is available for ${profile.training_frequency}x per week ${dbGoal}`);
-      } else if (result.length === 2) {
-        const schemaNumbers = result.map(s => s.schema_nummer).sort();
-        console.log(`ℹ️ Only Schemas ${schemaNumbers.join(' and ')} are available for ${profile.training_frequency}x per week ${dbGoal}`);
       }
+      
+      // Sort by schema_nummer to ensure 1, 2, 3 order
+      result = result.sort((a, b) => (a.schema_nummer || 0) - (b.schema_nummer || 0));
     }
     
     console.log('✅ Final filtered schemas:', result.length);
@@ -1163,9 +1178,34 @@ function TrainingschemasContent() {
       if (response.ok && data.success) {
         console.log('✅ Training profile saved successfully');
         
+        // Check if cache should be cleared (profile was changed and data was reset)
+        if (data.clearCache || data.resetPerformed) {
+          console.log('🔄 Profile changed - clearing localStorage cache...');
+          try {
+            // Clear all training-related localStorage items
+            const keysToRemove: string[] = [];
+            for (let i = 0; i < localStorage.length; i++) {
+              const key = localStorage.key(i);
+              if (key && (
+                key.includes('completedWeeks_') || 
+                key.includes('training_') || 
+                key.includes('workout_') ||
+                key.includes('schema_') ||
+                key.includes('ttm_focus_')
+              )) {
+                keysToRemove.push(key);
+              }
+            }
+            keysToRemove.forEach(key => localStorage.removeItem(key));
+            console.log('✅ Cleared', keysToRemove.length, 'localStorage items');
+          } catch (error) {
+            console.log('⚠️ Warning: Could not clear localStorage:', error);
+          }
+        }
+        
         // Show message - if profile existed, data was reset
-        if (data.wasReset) {
-          toast.success('Je trainingsprofiel is bijgewerkt! Je huidige schema is verwijderd en je kunt nu Schema 1 opnieuw selecteren.', {
+        if (data.resetPerformed || data.wasReset) {
+          toast.success('🔄 Trainingsprofiel bijgewerkt! Alle oude data is gewist. Je begint opnieuw met Schema 1.', {
             duration: 6000,
           });
         } else {
@@ -1188,9 +1228,11 @@ function TrainingschemasContent() {
         // Defer scroll until the available section is mounted
         setScrollToAvailablePending(true);
         
-        // If data was reset, also reset the currentSchemaPeriod state
-        if (data.wasReset) {
+        // If data was reset, also reset the currentSchemaPeriod state and clear unlock status
+        if (data.resetPerformed || data.wasReset) {
           setCurrentSchemaPeriod(null);
+          setUnlockedSchemas({ 1: true, 2: false, 3: false }); // Reset to only Schema 1 unlocked
+          console.log('🔒 Reset unlock status - only Schema 1 available');
         }
       } else {
         console.error('❌ Failed to save training profile:', data);
@@ -1889,9 +1931,10 @@ function TrainingschemasContent() {
   // CRITICAL: Safety mechanism to prevent stuck loading states
   useEffect(() => {
     if (trainingLoading || profileLoading) {
-      // Shorter timeout for quicker recovery
+      // Extended timeout to allow proper data loading (35 seconds - longer than overall timeout)
+      // This acts as a final safety net, not as primary timeout
       const timeoutId = setTimeout(() => {
-        console.log('⚠️ Loading timeout reached (8s), forcing reset');
+        console.log('⚠️ Safety timeout reached (35s), forcing reset');
         
         // CRITICAL FIX: Always reset both loading states to prevent infinite loading
         console.log('🔄 FORCE: Resetting both loading states');
@@ -1903,7 +1946,7 @@ function TrainingschemasContent() {
           console.log('⚠️ No data loaded after timeout');
           setTrainingError('Loading duurde te lang. Ververs de pagina om opnieuw te proberen.');
         }
-      }, 8000); // 8 second timeout
+      }, 35000); // 35 second timeout - longer than overall timeout (30s) to act as safety net only
 
       return () => clearTimeout(timeoutId);
     }
@@ -2109,8 +2152,10 @@ function TrainingschemasContent() {
     );
   }
 
-  // Check access permissions for training schemas
-  if (!hasAccess('training')) {
+  // Check access permissions for training schemas (with debug override)
+  const effectiveHasAccess = debugSimulateBasic ? false : hasAccess('training');
+  
+  if (!effectiveHasAccess) {
     return (
       <PageLayout title="Trainingsschemas">
         <div className="w-full p-6">
@@ -2174,6 +2219,22 @@ function TrainingschemasContent() {
 
   return (
     <PageLayout title="Trainingsschemas">
+      {/* DEBUG: Admin-only toggle to simulate Basic user view */}
+      {isAdmin && (
+        <div className="fixed top-20 right-4 z-50">
+          <button
+            onClick={() => setDebugSimulateBasic(!debugSimulateBasic)}
+            className={`px-4 py-2 rounded-lg font-medium text-sm shadow-lg transition-all ${
+              debugSimulateBasic 
+                ? 'bg-red-500 text-white hover:bg-red-600' 
+                : 'bg-blue-500 text-white hover:bg-blue-600'
+            }`}
+          >
+            {debugSimulateBasic ? '🔴 DEBUG: Basic User View' : '🔵 DEBUG: Normal View'}
+          </button>
+        </div>
+      )}
+      
       {/* Show onboarding UI only if onboarding is not completed */}
       {!isCompleted && <OnboardingV2Progress />}
       {!isCompleted && <OnboardingNotice />}
