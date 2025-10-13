@@ -7,7 +7,6 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/lib/supabase';
 import { EnvelopeIcon, LockClosedIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import ModalBase from '@/components/ui/ModalBase';
-import LoginDebugger from '@/components/LoginDebugger';
 
 // Simplified configuration
 const LOGIN_CONFIG = {
@@ -21,8 +20,6 @@ function LoginPageContent() {
   const searchParams = useSearchParams();
   const { user, profile, isLoading: authLoading, login, isAdmin, getRedirectPath } = useAuth();
   const loading = authLoading; // Use actual auth loading state
-  // Login debugger visibility
-  const [showLoginDebugger, setShowLoginDebugger] = useState(false);
   
   // Helper: Aggressive client cleanup (storage + cookies) to fix Safari re-login issues
   const clearClientAuth = () => {
@@ -73,12 +70,6 @@ function LoginPageContent() {
   // ✅ FIX: Ensure client-side hydration consistency
   useEffect(() => {
     setLoginState(prev => ({ ...prev, isClient: true }));
-    // Enable Login Debugger based on query or localStorage
-    try {
-      const q = searchParams?.get('login_debug');
-      const ls = typeof window !== 'undefined' ? localStorage.getItem('ttm:login_debug') : null;
-      if (q === '1' || ls === '1') setShowLoginDebugger(true);
-    } catch {}
   }, []);
   
   // Ref to prevent multiple redirects
@@ -691,25 +682,6 @@ function LoginPageContent() {
         </div>
       </div>
 
-      {/* Login Debugger toggle button */}
-      <button
-        type="button"
-        onClick={() => {
-          const next = !showLoginDebugger;
-          setShowLoginDebugger(next);
-          try { localStorage.setItem('ttm:login_debug', next ? '1' : '0'); } catch {}
-        }}
-        className="fixed bottom-4 right-4 z-40 px-3 py-2 rounded bg-red-700 text-white text-xs hover:bg-red-600 border border-red-400 shadow-lg"
-        aria-label="Toggle Login Debugger"
-      >
-        {showLoginDebugger ? 'Hide Login Debugger' : 'Show Login Debugger'}
-      </button>
-
-      {/* Login Debugger overlay */}
-      <LoginDebugger isVisible={showLoginDebugger} onToggle={() => {
-        setShowLoginDebugger(false);
-        try { localStorage.setItem('ttm:login_debug', '0'); } catch {}
-      }} />
 
       {/* Loading Overlay */}
       {loginState.isClient && loginState.showLoadingOverlay && (

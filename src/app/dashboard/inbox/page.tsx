@@ -144,6 +144,16 @@ export default function Inbox() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatMessages]);
 
+  // Auto-scroll to bottom when a conversation is selected
+  useEffect(() => {
+    if (selectedConversation && chatMessages.length > 0) {
+      // Small delay to ensure messages are rendered
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    }
+  }, [selectedConversation]);
+
   const fetchConversations = async () => {
     try {
       setLoading(true);
@@ -221,6 +231,11 @@ export default function Inbox() {
         setConversations(prev => prev.map(conv => 
           conv.id === conversationId ? { ...conv, unreadCount: 0 } : conv
         ));
+        
+        // Auto-scroll to bottom after messages are loaded
+        setTimeout(() => {
+          messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        }, 150);
       } else {
         console.error('Error fetching messages:', data.error);
         // Fallback to empty messages if API fails

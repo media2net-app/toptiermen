@@ -516,7 +516,7 @@ export default function Dashboard() {
             <div>
               <h1 className="text-2xl sm:text-3xl md:text-5xl lg:text-7xl font-black uppercase tracking-tight mb-2 text-white leading-tight">
                 {getGreeting()},<br />
-                <span className="text-[#8BAE5A] break-words">{profile?.full_name || 'Gebruiker'}</span>!
+                <span className="text-[#8BAE5A] break-words">{profile?.display_name || profile?.full_name || 'Gebruiker'}</span>!
               </h1>
               <p className="text-white text-sm sm:text-lg my-2 sm:my-4">Jouw persoonlijke Top Tier Men dashboard</p>
             </div>

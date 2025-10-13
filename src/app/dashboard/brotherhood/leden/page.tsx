@@ -187,7 +187,6 @@ export default function LedenOverzicht() {
   const [notification, setNotification] = useState<string | null>(null);
   const notificationTimeout = useRef<NodeJS.Timeout | null>(null);
   const [onlineCount, setOnlineCount] = useState(0);
-  const [refreshing, setRefreshing] = useState(false);
 
   // Fetch real members data
   useEffect(() => {
@@ -277,11 +276,7 @@ export default function LedenOverzicht() {
 
   const fetchMembers = async (isRefresh = false) => {
     try {
-      if (isRefresh) {
-        setRefreshing(true);
-      } else {
-        setLoading(true);
-      }
+      setLoading(true);
       setError(null);
 
       // Use the API endpoint to get enriched members data (now includes badges)
@@ -309,7 +304,6 @@ export default function LedenOverzicht() {
       setError('Er is een fout opgetreden bij het laden van de leden.');
     } finally {
       setLoading(false);
-      setRefreshing(false);
     }
   };
 
@@ -424,21 +418,6 @@ export default function LedenOverzicht() {
               </span>
             </div>
           </div>
-          <button
-            onClick={() => fetchMembers(true)}
-            disabled={refreshing}
-            className="flex items-center gap-2 px-4 py-2 bg-[#8BAE5A] hover:bg-[#7A9D4A] disabled:bg-[#3A4D23] disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors text-sm"
-          >
-            <svg 
-              className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} 
-              fill="none" 
-              stroke="currentColor" 
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-            {refreshing ? 'Verversen...' : 'Verversen'}
-          </button>
         </div>
       </div>
       {/* Filters & Search */}

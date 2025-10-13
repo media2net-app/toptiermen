@@ -667,10 +667,13 @@ export default function MijnProfiel() {
   }, [loading, user, profile]);
 
   const updateProfile = async (updates: Partial<UserProfile>, opts: { silent?: boolean } = {}) => {
-    if (!profile) return;
+    if (!profile || !user) return;
 
+    console.log('🔄 Updating profile with:', updates);
+    
     if (!opts.silent) setSaving(true);
     try {
+      // First try direct Supabase update
       const { data, error } = await supabase
         .from('profiles')
         .update(updates)
@@ -678,10 +681,35 @@ export default function MijnProfiel() {
         .select()
         .single();
 
+      console.log('📊 Profile update result:', { data, error });
+
       if (error) {
-        console.error('Error updating profile:', error);
-        if (!opts.silent) toast.error('Er is een fout opgetreden bij het opslaan');
+        console.log('⚠️ Direct Supabase update failed, trying API route...', error);
+        
+        // Fallback to API route
+        const response = await fetch('/api/profile/update', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...updates, userId: user.id })
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to update profile via API');
+        }
+
+        const apiData = await response.json();
+        console.log('✅ Profile updated via API:', apiData);
+        
+        if (apiData.profile) {
+          setProfile(apiData.profile);
+          if (!opts.silent) {
+            toast.success('Profiel succesvol bijgewerkt!');
+            setEditingField(null);
+          }
+        }
       } else {
+        console.log('✅ Profile updated successfully:', data);
         setProfile(data);
         if (!opts.silent) {
           toast.success('Profiel succesvol bijgewerkt!');
@@ -689,8 +717,8 @@ export default function MijnProfiel() {
         }
       }
     } catch (error) {
-      console.error('Error:', error);
-      if (!opts.silent) toast.error('Er is een fout opgetreden');
+      console.error('❌ Catch error:', error);
+      if (!opts.silent) toast.error(`Er is een fout opgetreden: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       if (!opts.silent) setSaving(false);
     }
@@ -702,7 +730,12 @@ export default function MijnProfiel() {
   };
 
   const saveEdit = async () => {
-    if (!editingField || !editValue.trim()) return;
+    if (!editingField || !editValue.trim()) {
+      console.log('❌ Cannot save: missing field or empty value', { editingField, editValue });
+      return;
+    }
+
+    console.log('💾 Saving edit:', { editingField, editValue: editValue.trim() });
 
     const updates: Partial<UserProfile> = {};
     (updates as any)[editingField] = editValue.trim();
@@ -1229,35 +1262,7 @@ export default function MijnProfiel() {
               <div className="px-3 sm:px-4 md:px-6 lg:px-8 space-y-3 sm:space-y-4">
                 <div>
                   <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-white mb-1 sm:mb-2 leading-tight">
-                    {editingField === 'display_name' ? (
-                      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
-                        <input
-                          type="text"
-                          value={editValue}
-                          onChange={(e) => setEditValue(e.target.value)}
-                          className="flex-1 bg-[#181F17] text-white px-3 py-2 rounded-lg border border-[#8BAE5A] focus:outline-none focus:border-[#FFD700] text-base sm:text-lg md:text-xl lg:text-2xl w-full sm:w-auto"
-                          placeholder="Display naam"
-                        />
-                        <div className="flex gap-2">
-                          <button onClick={saveEdit} disabled={saving} className="text-[#8BAE5A] hover:text-[#FFD700] p-1">
-                            <CheckIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                          </button>
-                          <button onClick={cancelEdit} className="text-red-400 hover:text-red-300 p-1">
-                            <XMarkIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                        <span className="break-words">{profile.display_name || profile.full_name}</span>
-                        <button 
-                          onClick={() => startEditing('display_name', profile.display_name || profile.full_name)}
-                          className="text-[#8BAE5A] hover:text-[#FFD700] opacity-0 group-hover:opacity-100 transition-opacity p-1 self-start sm:self-center"
-                        >
-                          <PencilIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                        </button>
-                      </div>
-                    )}
+                    <span className="break-words">{profile.display_name || profile.full_name || 'Gebruiker'}</span>
                   </h2>
                   <p className="text-[#8BAE5A] text-sm sm:text-base break-all sm:break-normal">{profile.email}</p>
                 </div>
@@ -1273,6 +1278,91 @@ export default function MijnProfiel() {
                   <span className="inline-block bg-[#3A4D23] text-[#8BAE5A] px-2.5 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-semibold">
                     {userBadges.length} badges
                   </span>
+                </div>
+              </div>
+              
+              {/* Naam Instellingen */}
+              <div className="space-y-3 sm:space-y-4">
+                <h3 className="text-base sm:text-lg font-semibold text-white">Naam Instellingen</h3>
+                
+                {/* Display Naam */}
+                <div className="space-y-2">
+                  <label className="text-sm sm:text-base text-[#8BAE5A] font-medium">Weergavenaam (voor dashboard)</label>
+                  {editingField === 'display_name' ? (
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                      <input
+                        type="text"
+                        value={editValue}
+                        onChange={(e) => setEditValue(e.target.value)}
+                        className="flex-1 bg-[#181F17] text-white px-3 py-2 rounded-lg border border-[#8BAE5A] focus:outline-none focus:border-[#FFD700] text-sm sm:text-base w-full sm:w-auto"
+                        placeholder="Weergavenaam"
+                      />
+                      <div className="flex gap-2">
+                        <button onClick={saveEdit} disabled={saving} className="text-[#8BAE5A] hover:text-[#FFD700] p-1">
+                          <CheckIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                        </button>
+                        <button onClick={cancelEdit} className="text-red-400 hover:text-red-300 p-1">
+                          <XMarkIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                      <span className="text-white text-sm sm:text-base break-words">
+                        {profile.display_name || profile.full_name || 'Geen naam ingesteld'}
+                      </span>
+                      <button 
+                        onClick={() => startEditing('display_name', profile.display_name || profile.full_name || '')}
+                        className="text-[#8BAE5A] hover:text-[#FFD700] transition-colors p-1 self-start sm:self-center"
+                        title="Bewerk weergavenaam"
+                      >
+                        <PencilIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                      </button>
+                    </div>
+                  )}
+                  <p className="text-[#8BAE5A]/70 text-xs sm:text-sm italic">
+                    Deze naam wordt getoond in je dashboard welkomstmelding
+                  </p>
+                </div>
+                
+                {/* Volledige Naam */}
+                <div className="space-y-2">
+                  <label className="text-sm sm:text-base text-[#8BAE5A] font-medium">Volledige Naam</label>
+                  {editingField === 'full_name' ? (
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                      <input
+                        type="text"
+                        value={editValue}
+                        onChange={(e) => setEditValue(e.target.value)}
+                        className="flex-1 bg-[#181F17] text-white px-3 py-2 rounded-lg border border-[#8BAE5A] focus:outline-none focus:border-[#FFD700] text-sm sm:text-base w-full sm:w-auto"
+                        placeholder="Volledige naam"
+                      />
+                      <div className="flex gap-2">
+                        <button onClick={saveEdit} disabled={saving} className="text-[#8BAE5A] hover:text-[#FFD700] p-1">
+                          <CheckIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                        </button>
+                        <button onClick={cancelEdit} className="text-red-400 hover:text-red-300 p-1">
+                          <XMarkIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                      <span className="text-white text-sm sm:text-base break-words">
+                        {profile.full_name || 'Geen volledige naam ingesteld'}
+                      </span>
+                      <button 
+                        onClick={() => startEditing('full_name', profile.full_name || '')}
+                        className="text-[#8BAE5A] hover:text-[#FFD700] transition-colors p-1 self-start sm:self-center"
+                        title="Bewerk volledige naam"
+                      >
+                        <PencilIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                      </button>
+                    </div>
+                  )}
+                  <p className="text-[#8BAE5A]/70 text-xs sm:text-sm italic">
+                    Je officiële naam (gebruikt als fallback voor weergavenaam)
+                  </p>
                 </div>
               </div>
             
