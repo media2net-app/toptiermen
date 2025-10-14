@@ -128,7 +128,7 @@ export async function GET(request: NextRequest) {
       .from('forum_posts')
       .select('*')
       .eq('topic_id', topic_id)
-      .order('created_at', { ascending: true });
+      .order('created_at', { ascending: false });
 
     if (postsError) {
       console.error('❌ API: Error fetching posts:', postsError);

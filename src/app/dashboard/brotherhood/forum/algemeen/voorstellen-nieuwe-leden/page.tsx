@@ -205,7 +205,7 @@ const VoorstellenTopicPage = () => {
 
       // Update posts state directly instead of refetching
       console.log('🔄 Adding new post to state...');
-      setPosts(prevPosts => [...prevPosts, result.post]);
+      setPosts(prevPosts => [result.post, ...prevPosts]);
       setNewPostContent('');
       setHasPosted(true);
       
