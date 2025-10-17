@@ -12,33 +12,25 @@ export default function OneToOneOfferPage() {
 
   // Schattingen (uren) - Totaal 12 uur, max 1.5 uur per taak
   const estimates = {
-    intakeForm: 1.5,
-    notesBasic: 1,
-    notesAdvanced: 1,
-    sessionsPlanning: 1,
-    sessionsHistory: 1,
-    goalsBasic: 1,
-    goalsTracking: 1,
+    intakeForm: 1,
+    notesSystem: 2,
+    sessionsSystem: 2,
+    goalsSystem: 2,
     coachOverview: 1.5,
-    nutritionBasic: 1,
-    nutritionAdvanced: 1,
-    trainingBasic: 0.5,
-    challengesBasic: 0.5,
+    nutritionPlans: 2,
+    trainingPlans: 0.5,
+    challengesSystem: 1,
   } as const;
 
   const lineItems = [
     { title: 'Intake formulier - Cliënt vult persoonlijke gegevens in', hours: estimates.intakeForm },
-    { title: 'Notities basis - Eenvoudige berichten uitwisselen', hours: estimates.notesBasic },
-    { title: 'Notities geavanceerd - Rich text en bestanden delen', hours: estimates.notesAdvanced },
-    { title: 'Afspraken plannen - Sessies inplannen en beheren', hours: estimates.sessionsPlanning },
-    { title: 'Afspraken geschiedenis - Overzicht van eerdere sessies', hours: estimates.sessionsHistory },
-    { title: 'Doelen basis - Doelen stellen en beschrijven', hours: estimates.goalsBasic },
-    { title: 'Doelen tracking - Voortgang bijhouden en updates', hours: estimates.goalsTracking },
+    { title: 'Notities systeem - Berichten uitwisselen met rich text en bestanden', hours: estimates.notesSystem },
+    { title: 'Afspraken systeem - Sessies plannen en geschiedenis bekijken', hours: estimates.sessionsSystem },
+    { title: 'Doelen systeem - Doelen stellen en voortgang bijhouden', hours: estimates.goalsSystem },
     { title: 'Coach overzicht - Dashboard met alle cliënten', hours: estimates.coachOverview },
-    { title: 'Voedingsplannen basis - Eenvoudige plannen maken', hours: estimates.nutritionBasic },
-    { title: 'Voedingsplannen geavanceerd - Gedetailleerde macro\'s en recepten', hours: estimates.nutritionAdvanced },
-    { title: 'Trainingsplannen - Persoonlijke trainingsschema\'s maken', hours: estimates.trainingBasic },
-    { title: 'Uitdagingen - Persoonlijke challenges instellen', hours: estimates.challengesBasic },
+    { title: 'Voedingsplannen - Persoonlijke plannen met macro\'s en recepten', hours: estimates.nutritionPlans },
+    { title: 'Trainingsplannen - Persoonlijke trainingsschema\'s maken', hours: estimates.trainingPlans },
+    { title: 'Uitdagingen - Persoonlijke challenges instellen', hours: estimates.challengesSystem },
   ].map((i) => ({ ...i, subtotal: i.hours * rate }));
 
   const subtotal = lineItems.reduce((s, i) => s + i.subtotal, 0);
@@ -81,14 +73,14 @@ export default function OneToOneOfferPage() {
           <div className="bg-[#232D1A] border border-[#3A4D23] rounded-2xl p-6">
             <h3 className="text-lg font-semibold mb-2">Wat wordt er gebouwd (12 uur totaal)</h3>
             <ul className="text-sm text-gray-300 space-y-1">
-              <li>- Intake formulier: 1.5 uur (Cliënt vult persoonlijke gegevens in)</li>
-              <li>- Notities systeem: 2 uur (Basis + geavanceerde berichten uitwisselen)</li>
-              <li>- Afspraken systeem: 2 uur (Plannen + geschiedenis bekijken)</li>
-              <li>- Doelen systeem: 2 uur (Doelen stellen + voortgang bijhouden)</li>
+              <li>- Intake formulier: 1 uur (Cliënt vult persoonlijke gegevens in)</li>
+              <li>- Notities systeem: 2 uur (Berichten uitwisselen met rich text en bestanden)</li>
+              <li>- Afspraken systeem: 2 uur (Sessies plannen en geschiedenis bekijken)</li>
+              <li>- Doelen systeem: 2 uur (Doelen stellen en voortgang bijhouden)</li>
               <li>- Coach overzicht: 1.5 uur (Dashboard met alle cliënten)</li>
-              <li>- Voedingsplannen: 2 uur (Basis + geavanceerde plannen maken)</li>
+              <li>- Voedingsplannen: 2 uur (Persoonlijke plannen met macro's en recepten)</li>
               <li>- Trainingsplannen: 0.5 uur (Persoonlijke trainingsschema's maken)</li>
-              <li>- Uitdagingen: 0.5 uur (Persoonlijke challenges instellen)</li>
+              <li>- Uitdagingen: 1 uur (Persoonlijke challenges instellen)</li>
             </ul>
           </div>
           <div className="bg-[#232D1A] border border-[#3A4D23] rounded-2xl p-6">
