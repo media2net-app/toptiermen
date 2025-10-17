@@ -46,6 +46,10 @@ const CategoryPage = ({ params }: { params: { slug: string } }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [userProfiles, setUserProfiles] = useState<{ [key: string]: UserProfile }>({});
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [topicToDelete, setTopicToDelete] = useState<ForumTopic | null>(null);
+  const [deleting, setDeleting] = useState(false);
   
   // New Topic modal state
   const [showNewTopic, setShowNewTopic] = useState(false);
@@ -55,10 +59,54 @@ const CategoryPage = ({ params }: { params: { slug: string } }) => {
   const modalRef = useRef<HTMLDivElement | null>(null);
   const titleRef = useRef<HTMLInputElement | null>(null);
 
+  // Inline validation flags
+  const isTitleInvalid = (() => {
+    const len = topicTitle.trim().length;
+    if (len === 0) return false; // don't show red hint before typing
+    return len < 5 || len > 120;
+  })();
+  const isContentInvalid = (() => {
+    const len = topicContent.trim().length;
+    if (len === 0) return false;
+    return len < 10 || len > 5000;
+  })();
+
   useEffect(() => {
     console.log('🔄 Category page mounted, fetching data for slug:', params.slug);
     fetchCategoryAndTopics();
   }, [params.slug]);
+
+  // Load admin flag for current user
+  useEffect(() => {
+    const allowlist = new Set<string>(['chiel@media2net.nl','rick@media2net.nl']);
+    const userEmailRaw = (user as any)?.email || (user as any)?.user_metadata?.email;
+    const userEmail = typeof userEmailRaw === 'string' ? userEmailRaw.toLowerCase() : undefined;
+    // Short-circuit: allowlisted emails are admins immediately
+    const isAllowlisted = userEmail ? allowlist.has(userEmail) : false;
+    if (isAllowlisted) {
+      setIsAdmin(true);
+    }
+    const run = async () => {
+      try {
+        if (!user?.id) { if (!userEmail) setIsAdmin(false); return; }
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('is_admin, role, email')
+          .eq('id', user.id)
+          .single();
+        console.log('🔐 Admin check:', { userId: user.id, email: userEmail, data, error });
+        const emailRaw = userEmail || (data as any)?.email;
+        const email = typeof emailRaw === 'string' ? emailRaw.toLowerCase() : undefined;
+        const isAllow = email ? allowlist.has(email) : false;
+        const flag = Boolean((data as any)?.is_admin) || (data as any)?.role === 'admin' || isAllow;
+        setIsAdmin(!!flag);
+      } catch (e) {
+        const fallbackAllow = userEmail ? allowlist.has(userEmail) : false;
+        setIsAdmin(fallbackAllow);
+      }
+    };
+    run();
+  }, [user?.id]);
 
   // Auto-focus when modal opens
   useEffect(() => {
@@ -271,6 +319,31 @@ const CategoryPage = ({ params }: { params: { slug: string } }) => {
     }
   };
 
+  // Delete selected topic (admin only)
+  const deleteTopic = async () => {
+    if (!topicToDelete) return;
+    try {
+      setDeleting(true);
+      const res = await fetch('/api/admin/forum/delete-topic', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ topic_id: topicToDelete.id })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data?.success) {
+        throw new Error(data?.error || 'Verwijderen mislukt');
+      }
+      toast.success('Topic verwijderd');
+      setShowDeleteModal(false);
+      setTopicToDelete(null);
+      await fetchCategoryAndTopics();
+    } catch (e: any) {
+      toast.error(e?.message || 'Kon topic niet verwijderen');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('nl-NL', {
@@ -380,16 +453,17 @@ const CategoryPage = ({ params }: { params: { slug: string } }) => {
       {/* Topics List */}
       <div className="space-y-3 sm:space-y-4">
         {topics.map((topic) => (
-          <Link 
-            key={topic.id} 
-            href={`/dashboard/brotherhood/forum/${category.slug}/thread/${topic.id}`}
-            className="block bg-[#232D1A]/90 rounded-xl lg:rounded-2xl shadow-lg lg:shadow-xl border border-[#3A4D23]/40 p-4 sm:p-6 hover:shadow-2xl hover:-translate-y-1 hover:border-[#FFD700] transition-all cursor-pointer no-underline"
-          >
+          <div key={topic.id} className="bg-[#232D1A]/90 rounded-xl lg:rounded-2xl shadow-lg lg:shadow-xl border border-[#3A4D23]/40 p-4 sm:p-6">
             <div className="flex items-start gap-3 sm:gap-4">
               <div className="flex-1">
-                <h3 className="text-base sm:text-lg font-bold text-white mb-2 hover:text-[#FFD700] transition-colors line-clamp-2">
-                  {topic.title}
-                </h3>
+                <Link 
+                  href={`/dashboard/brotherhood/forum/${category.slug}/thread/${topic.id}`}
+                  className="block no-underline"
+                >
+                  <h3 className="text-base sm:text-lg font-bold text-white mb-2 hover:text-[#FFD700] transition-colors line-clamp-2">
+                    {topic.title}
+                  </h3>
+                </Link>
                 <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-xs sm:text-sm text-[#8BAE5A] mb-3">
                   <span>Door {topic.author.first_name} {topic.author.last_name}</span>
                   <span className="hidden sm:inline">•</span>
@@ -410,8 +484,17 @@ const CategoryPage = ({ params }: { params: { slug: string } }) => {
                   </span>
                 </div>
               </div>
+              {isAdmin && (
+                <button
+                  onClick={() => { setTopicToDelete(topic); setShowDeleteModal(true); }}
+                  className="ml-3 px-3 py-1.5 bg-red-600/20 border border-red-500/30 text-red-400 rounded hover:bg-red-600/30 text-xs"
+                  title="Verwijder topic"
+                >
+                  Verwijderen
+                </button>
+              )}
             </div>
-          </Link>
+          </div>
         ))}
       </div>
 
@@ -426,6 +509,39 @@ const CategoryPage = ({ params }: { params: { slug: string } }) => {
           >
             Start Eerste Topic
           </button>
+        </div>
+      )}
+
+      {/* Delete Topic Modal */}
+      {showDeleteModal && topicToDelete && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div
+            ref={modalRef}
+            tabIndex={-1}
+            className="bg-[#232D1A] border border-[#3A4D23] rounded-2xl w-full max-w-md text-white overflow-hidden"
+          >
+            <div className="flex items-center justify-between p-4 border-b border-[#3A4D23]">
+              <h3 className="text-lg font-bold">Verwijder topic</h3>
+              <button onClick={() => setShowDeleteModal(false)} className="px-2 py-1 rounded hover:bg-[#3A4D23] transition-colors">✕</button>
+            </div>
+            <div className="p-4 space-y-4">
+              <p className="text-sm text-[#8BAE5A]">Weet je zeker dat je het topic "{topicToDelete.title}" wilt verwijderen?</p>
+            </div>
+            <div className="p-4 border-t border-[#3A4D23] flex justify-end gap-2">
+              <button 
+                onClick={() => setShowDeleteModal(false)} 
+                className="px-4 py-2 bg-[#3A4D23] rounded-lg hover:bg-[#4A5D33] transition-colors"
+              >
+                Annuleren
+              </button>
+              <button 
+                onClick={deleteTopic} 
+                className="px-5 py-2 rounded-lg bg-red-600/20 border border-red-500/30 text-red-400 hover:bg-red-600/30 transition-colors"
+              >
+                Verwijderen
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -455,7 +571,9 @@ const CategoryPage = ({ params }: { params: { slug: string } }) => {
                   maxLength={120}
                 />
                 <div className="flex justify-between mt-1">
-                  <span className="text-xs text-gray-400">Minimaal 5, maximaal 120 karakters</span>
+                  <span className={`text-xs ${isTitleInvalid ? 'text-red-400' : 'text-gray-400'}`}>
+                    {isTitleInvalid ? 'Titel is te kort (min. 5) of te lang (max. 120)' : 'Minimaal 5, maximaal 120 karakters'}
+                  </span>
                   <span className={`text-xs ${topicTitle.length > 120 ? 'text-red-400' : 'text-gray-400'}`}>
                     {topicTitle.length}/120
                   </span>
@@ -473,7 +591,9 @@ const CategoryPage = ({ params }: { params: { slug: string } }) => {
                   maxLength={5000}
                 />
                 <div className="flex justify-between mt-1">
-                  <span className="text-xs text-gray-400">Minimaal 10, maximaal 5000 karakters</span>
+                  <span className={`text-xs ${isContentInvalid ? 'text-red-400' : 'text-gray-400'}`}>
+                    {isContentInvalid ? 'Bericht is te kort (min. 10) of te lang (max. 5000)' : 'Minimaal 10, maximaal 5000 karakters'}
+                  </span>
                   <span className={`text-xs ${topicContent.length > 5000 ? 'text-red-400' : 'text-gray-400'}`}>
                     {topicContent.length}/5000
                   </span>
@@ -498,7 +618,7 @@ const CategoryPage = ({ params }: { params: { slug: string } }) => {
               </button>
               <button 
                 onClick={createTopic} 
-                disabled={submitting || !topicTitle.trim() || !topicContent.trim()}
+                disabled={submitting || !topicTitle.trim() || !topicContent.trim() || isTitleInvalid || isContentInvalid}
                 className="px-5 py-2 rounded-lg bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-semibold hover:from-[#B6C948] hover:to-[#8BAE5A] disabled:opacity-60 disabled:cursor-not-allowed transition-all"
               >
                 {submitting ? 'Plaatsen...' : 'Plaatsen'}

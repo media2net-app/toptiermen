@@ -26,10 +26,12 @@ const ForumOverview = () => {
   const [loading, setLoading] = useState(true);
   const [isClient, setIsClient] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [unanswered, setUnanswered] = useState<Array<{ id: number; title: string; href: string; author: string; created_at: string }>>([]);
 
   useEffect(() => {
     setIsClient(true);
     fetchCategories();
+    fetchUnanswered();
   }, []);
 
   const fetchCategories = async () => {
@@ -55,6 +57,20 @@ const ForumOverview = () => {
       setCategories([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchUnanswered = async () => {
+    try {
+      const res = await fetch('/api/forum/unanswered?limit=3', { cache: 'no-cache' });
+      const json = await res.json().catch(() => ({}));
+      if (res.ok && (json as any)?.success && Array.isArray((json as any).topics)) {
+        setUnanswered((json as any).topics);
+      } else {
+        setUnanswered([]);
+      }
+    } catch {
+      setUnanswered([]);
     }
   };
 
@@ -168,9 +184,17 @@ const ForumOverview = () => {
         <div className="bg-[#232D1A]/90 rounded-2xl shadow-xl border border-[#3A4D23]/40 p-4 sm:p-5">
           <h3 className="text-base sm:text-lg font-bold text-white mb-3">Onbeantwoorde Vragen</h3>
           <ul className="text-[#8BAE5A] text-xs sm:text-sm space-y-2">
-            <li><span className="inline-block w-2 h-2 bg-[#FFD700] rounded-full mr-2 align-middle"></span>Hoe herstel je sneller na een zware training?</li>
-            <li><span className="inline-block w-2 h-2 bg-[#FFD700] rounded-full mr-2 align-middle"></span>Wat is de beste manier om te starten met beleggen?</li>
-            <li><span className="inline-block w-2 h-2 bg-[#FFD700] rounded-full mr-2 align-middle"></span>Welke boeken raden jullie aan voor focus?</li>
+            {unanswered.length === 0 ? (
+              <li className="text-gray-400">Geen onbeantwoorde vragen gevonden.</li>
+            ) : (
+              unanswered.map((t) => (
+                <li key={t.id}>
+                  <span className="inline-block w-2 h-2 bg-[#FFD700] rounded-full mr-2 align-middle"></span>
+                  <a href={t.href} className="hover:text-[#FFD700] text-white font-medium">{t.title}</a>
+                  <span className="text-[#8BAE5A]"> — door {t.author}</span>
+                </li>
+              ))
+            )}
           </ul>
         </div>
       </aside>

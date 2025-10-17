@@ -22,12 +22,15 @@ interface Comment {
   id: string;
   content: string;
   created_at: string;
+  parent_comment_id?: string | null;
   user: {
     id: string;
     full_name: string;
     avatar_url?: string;
     rank?: string;
   };
+  likes_count?: number;
+  user_liked?: boolean;
 }
 
 interface Post {
@@ -73,6 +76,10 @@ const SocialFeedPage = () => {
   // Auto-focus/scroll for comment modal
   const commentModalRef = useRef<HTMLDivElement | null>(null);
   const commentTextareaRef = useRef<HTMLTextAreaElement | null>(null);
+  // Reply to comment state
+  const [replyingToId, setReplyingToId] = useState<string | null>(null);
+  const [replyText, setReplyText] = useState('');
+  const [replying, setReplying] = useState(false);
   // Delete confirmation
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [postToDelete, setPostToDelete] = useState<string | null>(null);
@@ -332,6 +339,23 @@ const SocialFeedPage = () => {
         usersMap.set(user.id, user);
       });
 
+      // Fetch likes for these comments in one go
+      const commentIds = commentsData.map((c: any) => c.id);
+      let likesMap = new Map<string, { count: number; likedByMe: boolean }>();
+      if (commentIds.length > 0) {
+        const { data: likesData, error: likesError } = await supabase
+          .from('social_comment_likes')
+          .select('comment_id, user_id')
+          .in('comment_id', commentIds);
+        if (!likesError && Array.isArray(likesData)) {
+          likesData.forEach((row: any) => {
+            const key = row.comment_id as string;
+            const prev = likesMap.get(key) || { count: 0, likedByMe: false };
+            likesMap.set(key, { count: prev.count + 1, likedByMe: prev.likedByMe || row.user_id === user?.id });
+          });
+        }
+      }
+
       const commentsWithUsers = commentsData.map(comment => ({
         ...comment,
         user: usersMap.get(comment.user_id) || {
@@ -339,7 +363,9 @@ const SocialFeedPage = () => {
           full_name: 'Unknown User',
           avatar_url: null,
           rank: 'Member'
-        }
+        },
+        likes_count: likesMap.get(comment.id)?.count || 0,
+        user_liked: likesMap.get(comment.id)?.likedByMe || false
       }));
 
       setComments(commentsWithUsers);
@@ -385,6 +411,72 @@ const SocialFeedPage = () => {
       toast.error('Fout bij het plaatsen van reactie');
     } finally {
       setCommenting(false);
+    }
+  };
+
+  // Add reply to a specific parent comment
+  const addReply = async (parentId: string) => {
+    if (!replyText?.trim() || !user || !selectedPost) return;
+    try {
+      setReplying(true);
+      const { error } = await supabase
+        .from('social_comments')
+        .insert({
+          post_id: selectedPost.id,
+          user_id: user.id,
+          parent_comment_id: parentId,
+          content: replyText.trim()
+        });
+      if (error) throw error;
+      setReplyText('');
+      setReplyingToId(null);
+      await fetchComments(selectedPost.id);
+      setPosts((prev) => prev.map((p) => p.id === selectedPost.id ? { ...p, comments_count: p.comments_count + 1 } : p));
+    } catch (error) {
+      console.error('Error adding reply:', error);
+      toast.error('Fout bij het plaatsen van antwoord');
+    } finally {
+      setReplying(false);
+    }
+  };
+
+  // Toggle like (boks) on a comment (one per user)
+  const toggleCommentLike = async (commentId: string) => {
+    if (!user || !selectedPost) return;
+    try {
+      const target = comments.find((c) => c.id === commentId);
+      if (!target) return;
+
+      if (target.user_liked) {
+        const { error } = await supabase
+          .from('social_comment_likes')
+          .delete()
+          .eq('comment_id', commentId)
+          .eq('user_id', user.id);
+        if (error) throw error;
+        setComments((prev) =>
+          prev.map((c) =>
+            c.id === commentId
+              ? { ...c, user_liked: false, likes_count: Math.max((c.likes_count || 1) - 1, 0) }
+              : c
+          )
+        );
+      } else {
+        const { error } = await supabase
+          .from('social_comment_likes')
+          .insert({ comment_id: commentId, user_id: user.id });
+        if (error) throw error;
+        setComments((prev) =>
+          prev.map((c) =>
+            c.id === commentId
+              ? { ...c, user_liked: true, likes_count: (c.likes_count || 0) + 1 }
+              : c
+          )
+        );
+      }
+    } catch (error) {
+      console.error('Error toggling comment like:', error);
+      toast.error('Kon boks niet verwerken');
     }
   };
 
@@ -868,7 +960,10 @@ const SocialFeedPage = () => {
                   <p className="text-[#8BAE5A]/70 text-sm">Wees de eerste om te reageren!</p>
                 </div>
               ) : (
-                comments.map((comment) => (
+                // Render nested: parents first, then their children indented
+                comments
+                  .filter((c) => !c.parent_comment_id)
+                  .map((comment) => (
                   <div key={comment.id} className="flex gap-3">
                     {comment.user.avatar_url ? (
                       <Image 
@@ -891,6 +986,91 @@ const SocialFeedPage = () => {
                         <span className="text-xs text-[#8BAE5A]">{timeAgo(comment.created_at)}</span>
                       </div>
                       <p className="text-[#E1CBB3] text-sm">{comment.content}</p>
+                      <div className="mt-2 flex items-center gap-3 text-[#8BAE5A]">
+                        <button
+                          onClick={() => toggleCommentLike(comment.id)}
+                          className={`flex items-center gap-1 px-2 py-1 rounded-lg hover:text-[#FFD700] transition-colors ${comment.user_liked ? 'text-[#FFD700]' : ''}`}
+                          title="Geef een boks"
+                        >
+                          <span className="text-base">👊</span>
+                          <span className="text-xs">{comment.likes_count || 0}</span>
+                        </button>
+                        <button
+                          onClick={() => {
+                            setReplyingToId(comment.id);
+                            setReplyText('');
+                          }}
+                          className="text-xs px-2 py-1 rounded-lg hover:text-[#FFD700] transition-colors"
+                        >
+                          Beantwoorden
+                        </button>
+                      </div>
+
+                      {/* Reply editor for this comment */}
+                      {replyingToId === comment.id && (
+                        <div className="mt-3">
+                          <textarea
+                            value={replyText}
+                            onChange={(e) => setReplyText(e.target.value)}
+                            placeholder="Schrijf een antwoord..."
+                            className="w-full bg-[#232D1A] border border-[#3A4D23] rounded-xl p-2 text-white placeholder-[#8BAE5A] text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+                            rows={2}
+                            maxLength={500}
+                          />
+                          <div className="flex justify-between items-center mt-2">
+                            <span className="text-xs text-[#8BAE5A]">{replyText.length}/500</span>
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => setReplyingToId(null)}
+                                className="px-3 py-1 bg-[#3A4D23] text-white rounded-lg hover:bg-[#4A5D33] transition-colors text-xs"
+                              >Annuleren</button>
+                              <button
+                                onClick={() => addReply(comment.id)}
+                                disabled={!replyText.trim() || replying}
+                                className="px-3 py-1 bg-[#8BAE5A] text-[#181F17] rounded-lg hover:bg-[#B6C948] transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs"
+                              >{replying ? 'Plaatst...' : 'Plaatsen'}</button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Children replies */}
+                      {comments.filter((c) => c.parent_comment_id === comment.id).map((child) => (
+                        <div key={child.id} className="mt-4 ml-10 flex gap-3">
+                          {child.user.avatar_url ? (
+                            <Image 
+                              src={child.user.avatar_url} 
+                              alt={child.user.full_name} 
+                              width={24} 
+                              height={24} 
+                              className="w-6 h-6 rounded-full border border-[#8BAE5A] object-cover flex-shrink-0" 
+                            />
+                          ) : (
+                            <div className="w-6 h-6 rounded-full border border-[#8BAE5A] bg-[#8BAE5A] flex items-center justify-center flex-shrink-0">
+                              <span className="text-[#232D1A] font-bold text-[10px]">
+                                {child.user.full_name?.charAt(0)?.toUpperCase() || 'U'}
+                              </span>
+                            </div>
+                          )}
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="font-semibold text-white text-sm">{child.user.full_name}</span>
+                              <span className="text-xs text-[#8BAE5A]">{timeAgo(child.created_at)}</span>
+                            </div>
+                            <p className="text-[#E1CBB3] text-sm">{child.content}</p>
+                            <div className="mt-2 flex items-center gap-3 text-[#8BAE5A]">
+                              <button
+                                onClick={() => toggleCommentLike(child.id)}
+                                className={`flex items-center gap-1 px-2 py-1 rounded-lg hover:text-[#FFD700] transition-colors ${child.user_liked ? 'text-[#FFD700]' : ''}`}
+                                title="Geef een boks"
+                              >
+                                <span className="text-base">👊</span>
+                                <span className="text-xs">{child.likes_count || 0}</span>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 ))

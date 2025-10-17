@@ -23,7 +23,8 @@ export async function GET(_req: NextRequest) {
           title,
           created_at,
           author_id,
-          reply_count
+          reply_count,
+          last_reply_at
         )
       `)
       .order('order_index', { ascending: true });
@@ -34,38 +35,72 @@ export async function GET(_req: NextRequest) {
       return NextResponse.json({ error: categoriesError.message }, { status: 500 });
     }
 
-    // Collect author ids
+    // Collect possible author ids (topic authors)
     const authorIds = new Set<string>();
     (categoriesData || []).forEach((cat: any) => {
       (cat.forum_topics || []).forEach((t: any) => t?.author_id && authorIds.add(t.author_id));
     });
 
-    // Fetch profiles for authors (optional)
+    // Later we may also fetch last reply authors (post authors)
     let profilesMap: Record<string, { id: string; full_name: string; avatar_url?: string }> = {};
     if (authorIds.size > 0) {
-      const { data: profiles, error: profilesError } = await supabaseAdmin
+      const { data: profiles } = await supabaseAdmin
         .from('profiles')
         .select('id, full_name, avatar_url')
         .in('id', Array.from(authorIds));
-      if (!profilesError && profiles) {
-        profiles.forEach((p) => { profilesMap[p.id] = p; });
-      }
+      (profiles || []).forEach((p: any) => { profilesMap[p.id] = p; });
     }
 
     // Build payload
-    const processed = (categoriesData || []).map((category: any) => {
+    const processed = [] as any[];
+    for (const category of (categoriesData || [])) {
       const topics = category.forum_topics || [];
       const topicsCount = topics.length;
       const postsCount = topics.reduce((sum: number, t: any) => sum + 1 + (t.reply_count || 0), 0);
-      const lastTopic = topics.length > 0 ? [...topics].sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0] : null;
 
-      const lastPost = lastTopic ? {
-        title: lastTopic.title,
-        author: profilesMap[lastTopic.author_id]?.full_name || 'User',
-        time: lastTopic.created_at,
-      } : null;
+      // Determine last activity topic using last_reply_at if present
+      const lastTopic = topics.length > 0
+        ? [...topics].sort((a: any, b: any) => {
+            const ta = new Date(a.last_reply_at || a.created_at).getTime();
+            const tb = new Date(b.last_reply_at || b.created_at).getTime();
+            return tb - ta;
+          })[0]
+        : null;
 
-      return {
+      let lastPost: any = null;
+      if (lastTopic) {
+        let authorId = lastTopic.author_id;
+        let time = lastTopic.created_at;
+        // If replies exist, fetch the real last post author and time
+        if ((lastTopic.reply_count || 0) > 0) {
+          const { data: lastPosts } = await supabaseAdmin
+            .from('forum_posts')
+            .select('author_id, created_at')
+            .eq('topic_id', lastTopic.id)
+            .order('created_at', { ascending: false })
+            .limit(1);
+          if (lastPosts && lastPosts.length > 0) {
+            authorId = lastPosts[0].author_id;
+            time = lastPosts[0].created_at;
+            // ensure profile loaded
+            if (authorId && !profilesMap[authorId]) {
+              const { data: prof } = await supabaseAdmin
+                .from('profiles')
+                .select('id, full_name')
+                .eq('id', authorId)
+                .single();
+              if (prof) profilesMap[prof.id] = prof as any;
+            }
+          }
+        }
+        lastPost = {
+          title: lastTopic.title,
+          author: profilesMap[authorId]?.full_name || 'User',
+          time,
+        };
+      }
+
+      processed.push({
         id: category.id,
         name: category.name,
         description: category.description,
@@ -74,8 +109,8 @@ export async function GET(_req: NextRequest) {
         topics_count: topicsCount,
         posts_count: postsCount,
         last_post: lastPost,
-      };
-    });
+      });
+    }
 
     return NextResponse.json({ categories: processed });
   } catch (e: any) {

@@ -10,11 +10,29 @@ export async function GET(request: NextRequest) {
     // Get userId from email if not provided directly
     let actualUserId = userId;
     if (!actualUserId && email) {
-      const { data: userData, error: userError } = await supabaseAdmin
+      // Try exact match first
+      let { data: userData, error: userError } = await supabaseAdmin
         .from('profiles')
         .select('id')
         .eq('email', email)
         .single();
+      
+      // If not found, try case-insensitive search
+      if (userError && email) {
+        console.log('Profile not found with exact email, trying case-insensitive search for:', email);
+        const { data: caseInsensitiveData, error: caseInsensitiveError } = await supabaseAdmin
+          .from('profiles')
+          .select('id')
+          .ilike('email', email)
+          .single();
+        
+        if (!caseInsensitiveError) {
+          userData = caseInsensitiveData;
+          userError = null;
+          console.log('✅ Found profile with case-insensitive search');
+        }
+      }
+      
       if (userError || !userData) {
         return NextResponse.json({ error: 'User not found' }, { status: 404 });
       }
@@ -61,11 +79,29 @@ export async function POST(request: NextRequest) {
     // Get userId from email if not provided directly
     let actualUserId = userId;
     if (!actualUserId && email) {
-      const { data: userData, error: userError } = await supabaseAdmin
+      // Try exact match first
+      let { data: userData, error: userError } = await supabaseAdmin
         .from('profiles')
         .select('id')
         .eq('email', email)
         .single();
+      
+      // If not found, try case-insensitive search
+      if (userError && email) {
+        console.log('Profile not found with exact email, trying case-insensitive search for:', email);
+        const { data: caseInsensitiveData, error: caseInsensitiveError } = await supabaseAdmin
+          .from('profiles')
+          .select('id')
+          .ilike('email', email)
+          .single();
+        
+        if (!caseInsensitiveError) {
+          userData = caseInsensitiveData;
+          userError = null;
+          console.log('✅ Found profile with case-insensitive search');
+        }
+      }
+      
       if (userError || !userData) {
         return NextResponse.json({ error: 'User not found' }, { status: 404 });
       }

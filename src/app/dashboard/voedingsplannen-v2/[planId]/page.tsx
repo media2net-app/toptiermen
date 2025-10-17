@@ -133,6 +133,11 @@ export default function NutritionPlanDetailPage() {
     return Math.max(0.5, Math.min(1.5, rawFactor));
   }, [userProfile?.weight, userProfile?.activity_level, userProfile?.fitness_goal]);
 
+  // Print handler
+  const handlePrint = useCallback(() => {
+    try { window.print(); } catch {}
+  }, []);
+
   // Reset modal state when component mounts
   useEffect(() => {
     setShowIngredientModal(false);
@@ -1209,7 +1214,7 @@ export default function NutritionPlanDetailPage() {
   const showLoadingModal = loadingOriginal || (!originalPlanData && !error);
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] text-white">
+    <div className="min-h-screen bg-[#0A0A0A] text-white app-print-root">
       {/* Loading Modal - Render first so it shows immediately */}
       {showLoadingModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
@@ -1370,7 +1375,16 @@ export default function NutritionPlanDetailPage() {
                 )}
                 
                 {/* Title - full width */}
-                <h1 className="text-2xl font-bold">{selectedPlan?.name ?? 'Voedingsplan'}</h1>
+                <div className="flex items-center justify-between gap-3">
+                  <h1 className="text-2xl font-bold">{selectedPlan?.name ?? 'Voedingsplan'}</h1>
+                  <button
+                    onClick={handlePrint}
+                    className="shrink-0 px-3 py-1.5 bg-[#232D1A] hover:bg-[#2A2A2A] rounded-lg text-sm text-gray-300 hover:text-white print:hidden"
+                    title="Print"
+                  >
+                    Print
+                  </button>
+                </div>
                 
                 {/* Locked banner */}
                 {isPlanLocked && (
@@ -1411,6 +1425,17 @@ export default function NutritionPlanDetailPage() {
                     </div>
                   </div>
                 )}
+
+                {/* Print button on desktop */}
+                <div className="order-3 flex items-center">
+                  <button
+                    onClick={handlePrint}
+                    className="px-4 py-2 bg-[#232D1A] hover:bg-[#2A2A2A] rounded-lg transition-colors text-sm text-gray-300 hover:text-white whitespace-nowrap print:hidden"
+                    title="Print"
+                  >
+                    Print
+                  </button>
+                </div>
               </div>
               
               <p className="text-gray-400">{selectedPlan?.description ?? ''}</p>
@@ -1455,8 +1480,8 @@ export default function NutritionPlanDetailPage() {
                    userProfile.fitness_goal === 'spiermassa' ? 'Spiermassa' : 'Onderhoud'}
                 </span>
                 <span className="hidden sm:inline">
-                {userProfile.fitness_goal === 'droogtrainen' ? 'Droogtrainen (-500 kcal)' : 
-                 userProfile.fitness_goal === 'spiermassa' ? 'Spiermassa (+500 kcal)' : 'Onderhoud'}
+                {userProfile.fitness_goal === 'droogtrainen' ? 'Droogtrainen' : 
+                 userProfile.fitness_goal === 'spiermassa' ? 'Spiermassa' : 'Onderhoud'}
                 </span>
               </p>
             </div>
@@ -2697,6 +2722,149 @@ export default function NutritionPlanDetailPage() {
         )}
         </>
       )}
-    </div>
+        {/* Print-only simple weekly layout */}
+        <div className="print-only hidden">
+          <div style={{ padding: 16, fontFamily: 'system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial', color: '#000' }}>
+            {(() => {
+              const week = (originalPlanData as any)?.meals?.weekly_plan || {} as Record<string, any>;
+              const dayOrder = ['maandag','dinsdag','woensdag','donderdag','vrijdag','zaterdag','zondag'];
+              const dayLabel: Record<string,string> = { maandag:'Maandag', dinsdag:'Dinsdag', woensdag:'Woensdag', donderdag:'Donderdag', vrijdag:'Vrijdag', zaterdag:'Zaterdag', zondag:'Zondag' };
+              const mealOrder = ['ontbijt','ochtend_snack','lunch','lunch_snack','diner','avond_snack'];
+              const mealLabel: Record<string,string> = { ontbijt:'Ontbijt', ochtend_snack:'Ochtend snack', lunch:'Lunch', lunch_snack:'Lunch snack', diner:'Diner', avond_snack:'Avond snack' } as any;
+              const renderRows: JSX.Element[] = [];
+              const unitLabel = (u: string) => {
+                const x = String(u||'').toLowerCase();
+                if (x==='per_100g' || x==='g' || x==='gram') return 'g';
+                if (x==='per_ml' || x==='ml') return 'ml';
+                if (x.startsWith('per_piece') || x==='piece' || x==='stuk' || x==='stuks' || x==='pieces') return 'stuk';
+                if (x==='per_plakje' || x==='plakje' || x==='plakjes') return 'plakje';
+                if (['per_tbsp','tbsp','eetlepel','el','per_eetlepel'].includes(x)) return 'eetlepel';
+                if (['per_tsp','tsp','theelepel','tl','per_theelepel'].includes(x)) return 'theelepel';
+                if (['per_cup','cup','kop'].includes(x)) return 'kop';
+                return x || 'g';
+              };
+              dayOrder.forEach((dayKey) => {
+                const day = week[dayKey];
+                renderRows.push(
+                  <div key={dayKey} className="print-day" style={{ marginTop: 8 }}>
+                    {/* Header per page */}
+                    <div style={{ marginBottom: 6 }}>
+                      <img src="/logo_white-full.svg" alt="Top Tier Men" style={{ maxWidth: 160, width: '100%', height: 'auto', filter: 'invert(1)' }} />
+                    </div>
+                    <div style={{ fontSize: 14, fontWeight: 700, margin: '2px 0 4px 0' }}>{selectedPlan?.name ?? 'Voedingsplan'}</div>
+                    {/* User profile and macros summary */}
+                    <div style={{ marginBottom: 6 }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 6, fontSize: 11 }}>
+                        <div>
+                          <div style={{ color: '#555', fontSize: 10, lineHeight: 1.1 }}>Gewicht</div>
+                          <div style={{ fontWeight: 700 }}>{userProfile?.weight ?? '-'} kg</div>
+                        </div>
+                        <div>
+                          <div style={{ color: '#555', fontSize: 10, lineHeight: 1.1 }}>Activiteitsniveau</div>
+                          <div style={{ fontWeight: 700 }}>
+                            {userProfile?.activity_level === 'sedentary' ? 'Zittend (Licht actief)' :
+                             userProfile?.activity_level === 'very_active' ? 'Lopend (Zeer actief)' : 'Staand (Matig actief)'}
+                          </div>
+                        </div>
+                        <div>
+                          <div style={{ color: '#555', fontSize: 10, lineHeight: 1.1 }}>Fitness Doel</div>
+                          <div style={{ fontWeight: 700 }}>
+                            {userProfile?.fitness_goal === 'droogtrainen' ? 'Droogtrainen' :
+                             userProfile?.fitness_goal === 'spiermassa' ? 'Spiermassa' : 'Onderhoud'}
+                          </div>
+                        </div>
+                      </div>
+                      <div style={{ marginTop: 6 }}>
+                        <div style={{ color: '#000', fontWeight: 700, marginBottom: 3 }}>Jouw Calorieën & Macro's</div>
+                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                          <thead>
+                            <tr>
+                              <th style={{ textAlign: 'left', fontSize: 10, borderBottom: '1px solid #000', padding: '1px 0' }}>Type</th>
+                              <th style={{ textAlign: 'right', fontSize: 10, borderBottom: '1px solid #000', padding: '1px 0' }}>Waarde</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td style={{ fontSize: 10, padding: '1px 0' }}>Calorieën</td>
+                              <td style={{ fontSize: 10, padding: '1px 0', textAlign: 'right' }}>{Math.round((personalizedMacros as any)?.calories || 0)} kcal</td>
+                            </tr>
+                            <tr>
+                              <td style={{ fontSize: 10, padding: '1px 0' }}>Eiwit</td>
+                              <td style={{ fontSize: 10, padding: '1px 0', textAlign: 'right' }}>{Math.round(((personalizedMacros as any)?.protein || 0) * 10) / 10} g</td>
+                            </tr>
+                            <tr>
+                              <td style={{ fontSize: 10, padding: '1px 0' }}>Koolhydraten</td>
+                              <td style={{ fontSize: 10, padding: '1px 0', textAlign: 'right' }}>{Math.round(((personalizedMacros as any)?.carbs || 0) * 10) / 10} g</td>
+                            </tr>
+                            <tr>
+                              <td style={{ fontSize: 10, padding: '1px 0' }}>Vet</td>
+                              <td style={{ fontSize: 10, padding: '1px 0', textAlign: 'right' }}>{Math.round(((personalizedMacros as any)?.fat || 0) * 10) / 10} g</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                    <div style={{ fontWeight: 700, marginBottom: 4 }}>{dayLabel[dayKey] || dayKey}</div>
+                    {day ? (
+                      mealOrder.filter(k => day[k]).map((mk) => {
+                        const meal = day[mk];
+                        const ings = Array.isArray(meal?.ingredients) ? meal.ingredients : [];
+                        if (!ings.length) return null;
+                        return (
+                          <div key={mk} style={{ marginBottom: 6 }}>
+                            <div style={{ fontWeight: 600, fontSize: 12, marginBottom: 2 }}>{mealLabel[mk] || mk}</div>
+                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                              <thead>
+                                <tr>
+                                  <th style={{ textAlign: 'left', fontSize: 11, borderBottom: '1px solid #ccc', padding: '2px 0' }}>Ingredient</th>
+                                  <th style={{ textAlign: 'right', fontSize: 11, borderBottom: '1px solid #ccc', padding: '2px 0' }}>Hoeveelheid</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {ings.map((ing: any, i: number) => (
+                                  <tr key={i}>
+                                    <td style={{ fontSize: 11, padding: '2px 0' }}>{ing.name}</td>
+                                    <td style={{ fontSize: 11, padding: '2px 0', textAlign: 'right' }}>
+                                      {Number(ing.amount || 0)} {unitLabel(ing.unit)}
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <div style={{ fontSize: 12, color: '#000' }}>Geen data</div>
+                    )}
+                  </div>
+                );
+              });
+              return renderRows;
+            })()}
+          </div>
+        </div>
+
+        {/* Print CSS: only show simplified layout on print, force white background, and one page per day */}
+        <style jsx global>{`
+          @media print {
+            html, body { background: #ffffff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            /* Hide everything by default without affecting layout ancestors by collapsing height */
+            body * { visibility: hidden !important; height: 0 !important; overflow: hidden !important; }
+            /* Reveal print container and allow natural flow for pagination */
+            .print-only, .print-only * { visibility: visible !important; height: auto !important; overflow: visible !important; }
+            .print-only { display: block !important; position: static !important; width: 100% !important; padding: 6mm 12mm 12mm 12mm !important; color: #000 !important; margin: 0 !important; }
+            .print-only * { color: #000 !important; background: transparent !important; box-shadow: none !important; }
+            /* Allow tables to split across pages to prevent pagination collapse */
+            .print-only table { page-break-inside: auto; break-inside: auto; }
+            .print-only table th, .print-only table td { border-color: #000 !important; }
+            /* One page per day */
+            .print-day { break-after: page !important; page-break-after: always !important; }
+            .print-day:not(:first-child) { break-before: page !important; page-break-before: always !important; }
+            .print-day:last-child { break-after: auto !important; page-break-after: auto !important; }
+          }
+        `}</style>
+      </div>
   );
 }

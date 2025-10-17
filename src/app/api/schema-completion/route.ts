@@ -65,11 +65,13 @@ export async function POST(request: NextRequest) {
     if (schemaData.schema_nummer === 1) {
       console.log('🔓 Unlocking Schema 2...');
       
-      // Find Schema 2 for the same training goal and equipment type
+      // Find Schema 2 for the same training goal, equipment type, and frequency (by day count)
+      // 1) Get goal/equipment of completed schema
       const { data: schema1Data, error: schema1Error } = await supabaseAdmin
         .from('user_training_schema_progress')
         .select(`
           training_schemas!fk_user_training_schema_progress_schema_id(
+            id,
             training_goal,
             equipment_type
           )
@@ -90,19 +92,39 @@ export async function POST(request: NextRequest) {
       const trainingGoal = schemaInfo?.training_goal;
       const equipmentType = schemaInfo?.equipment_type;
 
+      // 2) Count day count (frequency) of the completed schema
+      let targetDayCount = 1;
+      try {
+        const { data: dayRows } = await supabaseAdmin
+          .from('training_schema_days')
+          .select('id')
+          .eq('schema_id', schemaId as any);
+        targetDayCount = Math.max(1, dayRows?.length || 1);
+      } catch {}
+
       console.log('🎯 Looking for Schema 2 with:', { trainingGoal, equipmentType });
 
-      // Find Schema 2
-      const { data: schema2Data, error: schema2Error } = await supabaseAdmin
+      // 3) Find Schema 2 candidates and select one matching the day count
+      const { data: schema2List, error: schema2ListErr } = await supabaseAdmin
         .from('training_schemas')
-        .select('id, name')
+        .select('id, name, status')
         .eq('schema_nummer', 2)
         .eq('training_goal', trainingGoal)
-        .eq('equipment_type', equipmentType)
-        .single();
+        .eq('equipment_type', equipmentType);
 
-      if (schema2Error) {
+      if (schema2ListErr || !schema2List || schema2List.length === 0) {
         console.log('⚠️ Schema 2 not found or not available yet');
+        // Even if schema 2 is missing, ensure no other schemas remain active
+        try {
+          await supabaseAdmin
+            .from('user_training_schema_progress')
+            .update({ completed_at: completionDate })
+            .eq('user_id', userId)
+            .neq('schema_id', schemaId)
+            .is('completed_at', null);
+        } catch (e) {
+          console.warn('⚠️ Could not mark other schemas as completed (no schema 2):', e);
+        }
         return NextResponse.json({ 
           success: true, 
           message: 'Schema 1 completed, but Schema 2 not available yet',
@@ -111,17 +133,29 @@ export async function POST(request: NextRequest) {
         });
       }
 
-      console.log('✅ Schema 2 found:', schema2Data);
+      // Choose schema 2 that matches frequency by day count
+      let chosenSchema2: any | null = null;
+      for (const cand of schema2List) {
+        try {
+          const { data: dc } = await supabaseAdmin
+            .from('training_schema_days')
+            .select('id')
+            .eq('schema_id', cand.id);
+          const count = dc?.length || 0;
+          if (count === targetDayCount) { chosenSchema2 = cand; break; }
+        } catch {}
+      }
+      if (!chosenSchema2) chosenSchema2 = schema2List[0];
+
+      console.log('✅ Schema 2 chosen:', chosenSchema2);
 
       // Create a new progress entry for Schema 2 (unlocked but not started)
       const { data: newProgressData, error: newProgressError } = await supabaseAdmin
         .from('user_training_schema_progress')
         .insert({
           user_id: userId,
-          schema_id: schema2Data.id,
+          schema_id: chosenSchema2.id,
           current_day: 1,
-          total_days_completed: 0,
-          total_workouts_completed: 0,
           started_at: new Date().toISOString(),
           completed_at: null
         })
@@ -135,10 +169,22 @@ export async function POST(request: NextRequest) {
 
       console.log('🎉 Schema 2 unlocked successfully:', newProgressData);
 
+      // Ensure only one active schema remains: mark all others as completed
+      try {
+        await supabaseAdmin
+          .from('user_training_schema_progress')
+          .update({ completed_at: completionDate })
+          .eq('user_id', userId)
+          .not('schema_id', 'in', [schemaId, chosenSchema2.id] as any)
+          .is('completed_at', null);
+      } catch (e) {
+        console.warn('⚠️ Could not mark other schemas as completed after unlocking schema 2:', e);
+      }
+
       // Set user's selected schema to Schema 2 so frontend loads it by default
       const { error: profileUpdateError } = await supabaseAdmin
         .from('profiles')
-        .update({ selected_schema_id: schema2Data.id, updated_at: new Date().toISOString() })
+        .update({ selected_schema_id: chosenSchema2.id, updated_at: new Date().toISOString() })
         .eq('id', userId);
 
       if (profileUpdateError) {
@@ -150,8 +196,8 @@ export async function POST(request: NextRequest) {
         message: 'Schema 1 completed and Schema 2 unlocked',
         schema1Completed: true,
         schema2Unlocked: true,
-        schema2Id: schema2Data.id,
-        schema2Name: schema2Data.name
+        schema2Id: chosenSchema2.id,
+        schema2Name: chosenSchema2.name
       });
     }
 

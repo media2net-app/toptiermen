@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 
+// Disable caching and ensure this runs dynamically so admin sees freshest data
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function GET(request: NextRequest) {
   try {
     // Fetch all users
@@ -9,6 +13,7 @@ export async function GET(request: NextRequest) {
       .select(`
         id,
         email,
+        full_name,
         role,
         subscription_tier,
         subscription_status,
@@ -21,10 +26,30 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to fetch users' }, { status: 500 });
     }
 
-    // Fetch onboarding status for all users (from CORRECT table!)
+    // Define filtering helpers to align with members-data logic and real member definition
+    const isTestUser = (profile: any) => {
+      const email = (profile?.email || '').toLowerCase();
+      const name = (profile?.full_name || '').toLowerCase();
+      return (
+        email.includes('test') ||
+        name.includes('test') ||
+        email.includes('onboarding.') ||
+        email.includes('final.') ||
+        email.includes('premium.test') ||
+        email.includes('basic.test') ||
+        email.includes('v2.test') ||
+        email.includes('v3.test')
+      );
+    };
+
+    // Filter to real members: only exclude test/demo accounts; include admins and all subscription statuses
+    const filteredUsers = (users || []).filter((u: any) => !isTestUser(u));
+
+    // Fetch onboarding status for all filtered users (from CORRECT table!)
     const { data: onboardingData, error: onboardingError } = await supabaseAdmin
       .from('user_onboarding_status')
-      .select('*');
+      .select('*')
+      .order('created_at', { ascending: false });
 
     if (onboardingError) {
       console.error('Error fetching onboarding status:', onboardingError);
@@ -32,7 +57,7 @@ export async function GET(request: NextRequest) {
       if (onboardingError.code === '42P01') {
         console.log('user_onboarding_status table not found, returning empty data');
         return NextResponse.json({
-          users: users?.map(user => ({
+          users: filteredUsers.map(user => ({
             id: user.id,
             email: user.email,
             role: user.role || 'member',
@@ -43,11 +68,11 @@ export async function GET(request: NextRequest) {
             currentStep: 1,
             mainGoal: null,
             status: '⏳ In Progress'
-          })) || [],
+          })),
           statistics: {
-            total: users?.length || 0,
+            total: filteredUsers.length,
             completed: 0,
-            pending: users?.length || 0,
+            pending: filteredUsers.length,
             completionRate: 0
           }
         });
@@ -55,22 +80,38 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to fetch onboarding status' }, { status: 500 });
     }
 
-    // Fetch profiles for main goals
+    // Fetch profiles for main goals (primary source)
     const { data: profiles, error: profilesError } = await supabaseAdmin
       .from('profiles')
       .select('id, main_goal');
 
+    // Fetch legacy users table for main_goal (fallback source)
+    let legacyUsers: Array<{ id: string; main_goal: string | null }> | null = null;
+    try {
+      const { data: legacy, error: legacyErr } = await supabaseAdmin
+        .from('users')
+        .select('id, main_goal');
+      if (!legacyErr) legacyUsers = legacy as any;
+    } catch {}
+
     // Create a map of onboarding data by user_id
-    const onboardingMap = new Map();
+    const onboardingMap = new Map<string, any>();
+    // onboardingData is ordered newest-first, so keep the first occurrence per user
     onboardingData?.forEach(item => {
-      onboardingMap.set(item.user_id, item);
+      if (!onboardingMap.has(item.user_id)) {
+        onboardingMap.set(item.user_id, item);
+      }
     });
 
     // Create a map of profiles by user_id
-    const profilesMap = new Map();
+    const profilesMap = new Map<string, { id: string; main_goal: string | null }>();
     profiles?.forEach(profile => {
-      profilesMap.set(profile.id, profile);
+      profilesMap.set(profile.id, { id: profile.id, main_goal: profile.main_goal });
     });
+
+    // Create a map of legacy users by id for main_goal fallback
+    const legacyUsersMap = new Map<string, { id: string; main_goal: string | null }>();
+    legacyUsers?.forEach(u => legacyUsersMap.set(u.id, u));
 
 
     
@@ -97,9 +138,10 @@ export async function GET(request: NextRequest) {
     };
 
     // Transform data for better readability
-    const usersWithStatus = users?.map(user => {
+    const usersWithStatus = filteredUsers.map(user => {
       const onboarding = onboardingMap.get(user.id);
       const profile = profilesMap.get(user.id);
+      const legacy = legacyUsersMap.get(user.id);
       
       // Calculate current step from user_onboarding_status fields + legacy fallback
       const actualCurrentStep = calculateCurrentStep(onboarding, profile);
@@ -114,10 +156,15 @@ export async function GET(request: NextRequest) {
         createdAt: user.created_at,
         onboardingCompleted: isCompleted,
         currentStep: actualCurrentStep,
-        mainGoal: profile?.main_goal || null,
+        mainGoal: (() => {
+          const primary = profile?.main_goal?.trim();
+          if (primary) return primary;
+          const fallback = legacy?.main_goal?.trim();
+          return fallback && fallback.length > 0 ? fallback : null;
+        })(),
         status: isCompleted ? '✅ Voltooid' : `⏳ Stap ${actualCurrentStep}`
       };
-    }) || [];
+    });
 
     // Calculate statistics
     const totalUsers = usersWithStatus.length;

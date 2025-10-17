@@ -145,6 +145,10 @@ function TrainingschemasContent() {
   
   // DEBUG: Admin-only toggle to simulate Basic user view
   const [debugSimulateBasic, setDebugSimulateBasic] = useState(false);
+  // Admin-only unlock debug panel
+  const [adminDebugOpen, setAdminDebugOpen] = useState(false);
+  const [adminCompletionData, setAdminCompletionData] = useState<any | null>(null);
+  const [adminCompletionError, setAdminCompletionError] = useState<string | null>(null);
   // Ref to the continue button section for auto-scroll during onboarding
   const continueRef = useRef<HTMLDivElement | null>(null);
   const trainingNextBtnId = 'onb-training-next-btn';
@@ -155,6 +159,8 @@ function TrainingschemasContent() {
   const [highlightAvailable, setHighlightAvailable] = useState(false);
   // Scroll intent after saving profile to ensure we scroll after mount
   const [scrollToAvailablePending, setScrollToAvailablePending] = useState(false);
+  // Abort controller for schema period fetch to prevent overlapping requests
+  const schemaPeriodAbortRef = useRef<AbortController | null>(null);
 
   // DEBUG: Enhanced logging (moved after state declarations)
   
@@ -256,12 +262,51 @@ function TrainingschemasContent() {
     return () => window.removeEventListener('keydown', onKey);
   }, [showProfilePromptModal]);
 
-  // Auto-open modal when there is no profile (and not loading)
+  // Auto-open modal when there is no profile (and not loading) ONLY if no active schema period
   useEffect(() => {
-    if (!profileLoading && !userTrainingProfile && !showRequiredProfile && !showCalculator) {
+    if (!profileLoading && !userTrainingProfile && !currentSchemaPeriod && !showRequiredProfile && !showCalculator) {
       setShowProfilePromptModal(true);
     }
-  }, [profileLoading, userTrainingProfile, showRequiredProfile, showCalculator]);
+  }, [profileLoading, userTrainingProfile, currentSchemaPeriod, showRequiredProfile, showCalculator]);
+
+  // If an active schema period exists, ensure profile prompts are closed/hidden
+  useEffect(() => {
+    if (currentSchemaPeriod) {
+      setShowProfilePromptModal(false);
+      setShowRequiredProfile(false);
+      setShowCalculator(false);
+    }
+  }, [currentSchemaPeriod]);
+
+  // Admin debug panel: load completion data when opened
+  useEffect(() => {
+    const loadAdminCompletion = async () => {
+      if (!adminDebugOpen || !user?.id) return;
+      try {
+        const res = await fetch(`/api/schema-completion?userId=${user.id}`, { cache: 'no-store' });
+        const json = await res.json();
+        if (res.ok) {
+          setAdminCompletionData(json);
+          setAdminCompletionError(null);
+        } else {
+          setAdminCompletionError(json?.error || 'Unknown error');
+        }
+      } catch (e: any) {
+        setAdminCompletionError(e?.message || 'Failed to load');
+      }
+    };
+    loadAdminCompletion();
+  }, [adminDebugOpen, user?.id]);
+
+  // Auto-open admin unlock debug panel via URL param: ?unlockDebug=1
+  useEffect(() => {
+    try {
+      const flag = searchParams?.get('unlockDebug');
+      if (flag === '1') {
+        setAdminDebugOpen(true);
+      }
+    } catch {}
+  }, [searchParams]);
 
   // When profile and filtered schemas are ready and a scroll is pending, perform the scroll
   useEffect(() => {
@@ -314,7 +359,11 @@ function TrainingschemasContent() {
     
     try {
       setSchemaPeriodLoading(true);
-      const response = await fetch(`/api/training-schema-period?userId=${user.id}`);
+      // Abort any in-flight request before starting a new one
+      try { schemaPeriodAbortRef.current?.abort(); } catch {}
+      const controller = new AbortController();
+      schemaPeriodAbortRef.current = controller;
+      const response = await fetch(`/api/training-schema-period?userId=${user.id}`, { signal: controller.signal });
       const result = await response.json();
       
       console.log('📡 fetchCurrentSchemaPeriod: API response:', result);
@@ -349,6 +398,10 @@ function TrainingschemasContent() {
         setCurrentSchemaPeriod(null);
       }
     } catch (error) {
+      if ((error as any)?.name === 'AbortError') {
+        console.log('⏹️ fetchCurrentSchemaPeriod aborted');
+        return;
+      }
       console.error('❌ Error fetching schema period:', error);
       setCurrentSchemaPeriod(null);
     } finally {
@@ -356,18 +409,7 @@ function TrainingschemasContent() {
     }
   };
 
-  // Refresh schema period data when user comes back to the page
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible' && user?.id) {
-        console.log('🔄 Page became visible, refreshing schema period data...');
-        fetchCurrentSchemaPeriod();
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, [user?.id]);
+  
 
   // Fetch user's schema progress to determine which schemas are unlocked
   const fetchSchemaProgress = async (userId: string) => {
@@ -439,7 +481,7 @@ function TrainingschemasContent() {
             day_number
           )
         `)
-        .eq('status', 'published')
+        .in('status', ['published', 'coming_soon'])
         .order('created_at', { ascending: false });
       
       const queryTime = Date.now() - startTime;
@@ -491,7 +533,7 @@ function TrainingschemasContent() {
           
           filteredSchemas = fallbackSchemas.slice(0, 3);
           console.log('🎯 Onboarding: Using fallback schemas (spiermassa + gym, prefer 3-day)');
-          console.log('📊 Fallback schemas:', filteredSchemas.map(s => `${s.name} (${s.training_schema_days?.length || 0} days)`));
+          console.log('📊 Fallback schemas:', fallbackSchemas.map(s => `${s.name} (${s.training_schema_days?.length || 0} days)`));
         }
       }
       
@@ -528,7 +570,7 @@ function TrainingschemasContent() {
       setTrainingLoading(false);
       setProfileLoading(false);
       setTrainingError('Loading duurde te lang. Probeer de pagina te verversen.');
-    }, 30000); // 30 second overall timeout
+    }, 15000); // reduced overall timeout
     
     try {
       setTrainingLoading(true);
@@ -558,11 +600,11 @@ function TrainingschemasContent() {
               training_goal,
               equipment_type,
               schema_nummer,
-              training_schema_days!inner (
+              training_schema_days (
                 day_number
               )
             `)
-            .eq('status', 'published')
+            .in('status', ['published', 'coming_soon'])
             .order('schema_nummer', { ascending: true })
             .limit(20),
           new Promise((_, reject) => 
@@ -570,8 +612,8 @@ function TrainingschemasContent() {
           )
         ]),
         
-        // Load training profile with timeout
-        fetchWithTimeout(`/api/training-profile?userId=${user.email}`, 10000),
+        // Load training profile with timeout (use UUID)
+        fetchWithTimeout(`/api/training-profile?userId=${user.id}`, 10000),
         
         // Load current schema period with timeout
         fetchWithTimeout(`/api/training-schema-period?userId=${user.id}`, 10000),
@@ -608,11 +650,11 @@ function TrainingschemasContent() {
                 training_goal,
                 equipment_type,
                 schema_nummer,
-                training_schema_days!inner (
+                training_schema_days (
                   day_number
                 )
               `)
-              .eq('status', 'published')
+              .in('status', ['published', 'coming_soon'])
               .order('schema_nummer', { ascending: true })
               .limit(20);
             
@@ -643,11 +685,11 @@ function TrainingschemasContent() {
               training_goal,
               equipment_type,
               schema_nummer,
-              training_schema_days!inner (
+              training_schema_days (
                 day_number
               )
             `)
-            .eq('status', 'published')
+            .in('status', ['published', 'coming_soon'])
             .order('schema_nummer', { ascending: true })
             .limit(20);
           
@@ -684,9 +726,37 @@ function TrainingschemasContent() {
                 equipment_type: data.profile.equipment_type
               });
             } else {
-              console.log('ℹ️ No training profile found - will check onboarding before creating profile');
-              // Don't create profile here - let createBasicProfile handle the onboarding check
-              // This avoids duplicating the onboarding check logic
+              console.log('ℹ️ No training profile found by UUID - attempting fallback by email...');
+              // Fallback: try fetching by email if UUID lookup returned nothing
+              if (user?.email) {
+                try {
+                  const emailResp = await fetch(`/api/training-profile?userId=${encodeURIComponent(user.email)}`);
+                  if (emailResp.ok) {
+                    const emailData = await emailResp.json();
+                    if (emailData.success && emailData.profile) {
+                      userProfile = emailData.profile;
+                      setUserTrainingProfile(emailData.profile);
+                      console.log('✅ Training profile loaded via email fallback:', emailData.profile);
+                      setCalculatorData({
+                        training_goal: emailData.profile.training_goal,
+                        training_frequency: emailData.profile.training_frequency.toString(),
+                        equipment_type: emailData.profile.equipment_type
+                      });
+                    } else {
+                      console.log('ℹ️ No training profile found via email fallback');
+                    }
+                  } else {
+                    console.log('⚠️ Email fallback response status:', emailResp.status);
+                  }
+                } catch (fbErr) {
+                  console.log('⚠️ Email fallback failed:', fbErr);
+                }
+              } else {
+                console.log('ℹ️ No email available for fallback');
+              }
+              if (!userProfile) {
+                console.log('ℹ️ Still no training profile - will check onboarding before creating profile');
+              }
             }
           } catch (jsonError) {
             console.error('❌ Error parsing profile JSON:', jsonError);
@@ -760,13 +830,17 @@ function TrainingschemasContent() {
           if (data.success && data.schemas) {
             // Create a map of schema completion status
             const completionStatus: Record<string, boolean> = {};
+            const numberCompletion: Record<number, boolean> = {};
             data.schemas.forEach((schema: any) => {
               if (schema.completed_at) {
                 completionStatus[schema.schema_id] = true;
+                const num = schema.training_schemas?.schema_nummer ?? schema.training_schemas?.[0]?.schema_nummer;
+                if (typeof num === 'number') numberCompletion[num] = true;
               }
             });
             setSchemaCompletionStatus(completionStatus);
-            console.log('✅ Schema completion status loaded:', completionStatus);
+            setSchemaNumberCompletion(numberCompletion);
+            console.log('✅ Schema completion status loaded:', { byId: completionStatus, byNumber: numberCompletion });
           }
         } else {
           console.log('⚠️ Schema completion API error:', response.status);
@@ -785,6 +859,8 @@ function TrainingschemasContent() {
       setAllTrainingSchemas(allSchemas);
       
       if (userProfile && allSchemas.length > 0) {
+        // Debug: log availability for this profile
+        try { debugLogSchemaAvailability(allSchemas as any, userProfile); } catch {}
         const filtered = filterSchemasByProfile(allSchemas, userProfile);
         setTrainingSchemas(filtered);
         console.log('🎯 Applied filtering:', filtered.length, 'schemas');
@@ -859,6 +935,23 @@ function TrainingschemasContent() {
       'outdoor': 'Buiten'
     };
     return displayMapping[dbValue] || dbValue;
+  };
+
+  // Compute a consistent, descriptive schema title from goal and days count
+  const getSchemaComputedTitle = (schema: TrainingSchema, profile?: TrainingProfile): string => {
+    try {
+      const goalLabel = getDisplayName(schema.training_goal);
+      // Prefer actual days count from schema; fallback to profile frequency if needed
+      const days = (schema.training_schema_days?.length || 0) || (profile?.training_frequency || 0);
+      const daysPart = days > 0 ? `${days} dagen per week` : 'schema';
+      const equip = schema.equipment_type ? getDisplayName(schema.equipment_type) : '';
+      // Only include equipment if it’s not Gym to keep titles concise
+      const equipPart = equip && equip.toLowerCase() !== 'gym' ? `${equip} ` : '';
+      return `${goalLabel} ${equipPart}${daysPart}`.trim();
+    } catch {
+      // Fallback to original name if anything goes wrong
+      return schema.name;
+    }
   };
 
   const filterSchemasByProfile = (schemas: TrainingSchema[], profile: TrainingProfile) => {
@@ -936,23 +1029,24 @@ function TrainingschemasContent() {
       const existingNumbers = result.map(s => s.schema_nummer);
       console.log(`📊 Already have schemas: ${existingNumbers.join(', ') || 'none'}`);
       
-      // Try to find missing schemas with ANY frequency but same goal + equipment
-      const allMatchesAnyFreq = schemas.filter(schema => 
+      // Try to find missing schemas with the SAME frequency (goal + equipment + frequency)
+      const sameFreqMatches = schemas.filter(schema => 
         schema.training_goal === dbGoal && 
-        schema.equipment_type === profile.equipment_type
+        schema.equipment_type === profile.equipment_type &&
+        (schema.training_schema_days?.length || 0) === profile.training_frequency
       );
       
-      console.log(`🔍 Found ${allMatchesAnyFreq.length} schemas for ${dbGoal} + ${profile.equipment_type} (any frequency)`);
+      console.log(`🔍 Found ${sameFreqMatches.length} same-frequency schemas for ${dbGoal} + ${profile.equipment_type} (${profile.training_frequency}x/week)`);
       
-      // Try to fill missing schema numbers
+      // Try to fill missing schema numbers from same-frequency pool only
       for (let schemaNum = 1; schemaNum <= 3; schemaNum++) {
         if (!existingNumbers.includes(schemaNum)) {
-          const missingSchema = allMatchesAnyFreq.find(s => s.schema_nummer === schemaNum);
+          const missingSchema = sameFreqMatches.find(s => s.schema_nummer === schemaNum);
           if (missingSchema) {
-            console.log(`✅ Found fallback Schema ${schemaNum} with ${missingSchema.training_schema_days?.length || 0} days`);
+            console.log(`✅ Found fallback Schema ${schemaNum} with ${missingSchema.training_schema_days?.length || 0} days (same frequency)`);
             result.push(missingSchema);
           } else {
-            console.log(`❌ No Schema ${schemaNum} found for ${dbGoal} + ${profile.equipment_type}`);
+            console.log(`❌ No same-frequency Schema ${schemaNum} found for ${dbGoal} + ${profile.equipment_type}`);
           }
         }
       }
@@ -961,12 +1055,50 @@ function TrainingschemasContent() {
       result = result.sort((a, b) => (a.schema_nummer || 0) - (b.schema_nummer || 0));
     }
     
+    // FINAL GUARANTEE: If still missing any of Schema 1–3, synthesize placeholders (coming soon)
+    if (result.length < 3) {
+      const haveNums = new Set((result.map(s => s.schema_nummer).filter(Boolean) as number[]));
+      const missing: number[] = [];
+      for (let n = 1; n <= 3; n++) if (!haveNums.has(n)) missing.push(n);
+      if (missing.length) {
+        console.log('🧩 Synthesizing placeholder schemas for missing:', missing);
+        const placeholders: TrainingSchema[] = missing.map((n) => ({
+          id: `placeholder-${dbGoal}-${profile.training_frequency}x-${n}`,
+          name: `Schema ${n} (binnenkort)` as string,
+          training_goal: dbGoal as any,
+          equipment_type: profile.equipment_type,
+          schema_nummer: n,
+          status: 'coming_soon',
+          training_schema_days: Array.from({ length: profile.training_frequency }).map((_, i) => ({
+            day_number: i + 1,
+          })) as any
+        }));
+        result = [...result, ...placeholders].sort((a, b) => (a.schema_nummer || 0) - (b.schema_nummer || 0));
+      }
+    }
+    
     console.log('✅ Final filtered schemas:', result.length);
     result.forEach((schema, index) => {
       console.log(`  ${index + 1}. Schema ${schema.schema_nummer}: "${schema.name}" (${schema.training_goal}, ${schema.equipment_type}, ${schema.training_schema_days?.length || 0} days) - Status: ${schema.status}`);
     });
     
     return result;
+  };
+
+  const debugLogSchemaAvailability = (schemas: TrainingSchema[], profile: TrainingProfile) => {
+    try {
+      const freq = profile.training_frequency;
+      const goal = profile.training_goal;
+      const equip = profile.equipment_type;
+      const sameGoalEquip = schemas.filter(s => s.training_goal === goal && s.equipment_type === equip);
+      const sameFreq = sameGoalEquip.filter(s => (s.training_schema_days?.length || 0) === freq);
+      const numsAll = sameGoalEquip.map(s => s.schema_nummer).filter(Boolean).sort();
+      const numsFreq = sameFreq.map(s => s.schema_nummer).filter(Boolean).sort();
+      const hasS1 = !!sameFreq.find(s => s.schema_nummer === 1);
+      const hasS2 = !!sameFreq.find(s => s.schema_nummer === 2);
+      const hasS3 = !!sameFreq.find(s => s.schema_nummer === 3);
+      console.log('[DEBUG] Schema availability:', { goal, equip, freq, totalSameGoalEquip: sameGoalEquip.length, totalSameFreq: sameFreq.length, numbersSameGoalEquip: numsAll, numbersSameFreq: numsFreq, hasS1, hasS2, hasS3 });
+    } catch {}
   };
 
   // OPTIMIZED: Create basic profile function with enhanced debugging
@@ -1099,7 +1231,7 @@ function TrainingschemasContent() {
       console.log('🔍 Fetching training profile for user:', user.email);
       
       // First try to get existing training profile
-      const response = await fetch(`/api/training-profile?userId=${user.email}`);
+      const response = await fetch(`/api/training-profile?userId=${user.id}`);
       
       if (response.ok) {
         const data = await response.json();
@@ -1114,7 +1246,30 @@ function TrainingschemasContent() {
             equipment_type: data.profile.equipment_type
           });
         } else {
-          console.log('ℹ️ No training profile found');
+          console.log('ℹ️ No training profile found by UUID - trying email fallback');
+          // Fallback by email
+          if (user?.email) {
+            try {
+              const emailResp = await fetch(`/api/training-profile?userId=${encodeURIComponent(user.email)}`);
+              if (emailResp.ok) {
+                const emailData = await emailResp.json();
+                if (emailData.success && emailData.profile) {
+                  setUserTrainingProfile(emailData.profile);
+                  console.log('✅ Training profile loaded via email fallback:', emailData.profile);
+                  setCalculatorData({
+                    training_goal: emailData.profile.training_goal,
+                    training_frequency: emailData.profile.training_frequency.toString(),
+                    equipment_type: emailData.profile.equipment_type
+                  });
+                  // Stop further onboarding-based creation flow since profile exists
+                  return;
+                }
+              }
+            } catch (fbErr) {
+              console.log('⚠️ Email fallback failed:', fbErr);
+            }
+          }
+          console.log('ℹ️ Still no training profile after fallback');
           // Check onboarding status directly before creating automatic profile
           console.log('📡 Checking onboarding status before creating profile...');
           const onboardingResponse = await fetch(`/api/onboarding-v2?email=${user?.email}`);
@@ -1186,13 +1341,7 @@ function TrainingschemasContent() {
             const keysToRemove: string[] = [];
             for (let i = 0; i < localStorage.length; i++) {
               const key = localStorage.key(i);
-              if (key && (
-                key.includes('completedWeeks_') || 
-                key.includes('training_') || 
-                key.includes('workout_') ||
-                key.includes('schema_') ||
-                key.includes('ttm_focus_')
-              )) {
+              if (key && (key.includes('completedWeeks_') || key.includes('training_') || key.includes('workout_'))) {
                 keysToRemove.push(key);
               }
             }
@@ -1389,16 +1538,26 @@ function TrainingschemasContent() {
         // If the current schema is completed (8/8), consider next-step flow
         const isCurrentCompleted = !!schemaCompletionStatus[currentSchemaPeriod.training_schema_id];
         if (isCurrentCompleted) {
-          // Determine target schema number label and unlocked state
+          // Determine target schema number and completion-based unlock
           const target = allTrainingSchemas.find(s => s.id === schemaId);
           const targetNum = target?.schema_nummer || undefined;
-          const isUnlocked = typeof targetNum === 'number' ? !!unlockedSchemas[targetNum] : true;
+          const unlockedByCompletion = (targetNum === 2 && !!schemaNumberCompletion[1]) || (targetNum === 3 && !!schemaNumberCompletion[2]);
+          const isUnlocked = typeof targetNum === 'number' ? (!!unlockedSchemas[targetNum] || unlockedByCompletion) : true;
           if (!isUnlocked) {
             console.log('🔒 Target schema appears locked; preventing completed modal');
             toast.error('Dit schema is nog vergrendeld. Rond je huidige schema volledig af.');
             return;
           }
-          // Show completed confirmation modal (explicit)
+          // If user is transitioning to the immediate next schema (e.g., 1 -> 2), this is a progression, not a change.
+          // Bypass the warning modal and select directly to keep previous progress intact.
+          const currentSchemaNum = (currentSchemaPeriod as any)?.training_schemas?.schema_nummer as number | undefined;
+          const isNextInSequence = typeof currentSchemaNum === 'number' && typeof targetNum === 'number' && targetNum === currentSchemaNum + 1;
+          if (unlockedByCompletion && isNextInSequence) {
+            console.log('✅ Progression to next schema detected, selecting directly without warning modal');
+            await selectTrainingSchemaDirect(schemaId);
+            return;
+          }
+          // Otherwise show completed confirmation modal for explicit user confirmation
           setSchemaToChange(schemaId);
           setSchemaChangeModalMode('completed');
           setNextSchemaLabel(targetNum ? `Schema ${targetNum}` : undefined);
@@ -1509,23 +1668,14 @@ function TrainingschemasContent() {
         const endDate = new Date(data.data.schema_end_date).toLocaleDateString('nl-NL');
         toast.success(`Trainingsschema geselecteerd! 8-weken periode gestart: ${startDate} - ${endDate}`);
 
-        // Only redirect to Mijn trainingen if NOT in onboarding
-        if (isCompleted && !showOnboardingStep3) {
-          console.log('🔄 Redirecting to Mijn trainingen...');
-          // Direct redirect without delay
-          router.push('/dashboard/mijn-trainingen');
+        // Onboarding behavior: redirect to next onboarding step instead of Mijn Trainingen
+        if (!isCompleted) {
+          try { await completeStep(3); } catch {}
+          router.push('/dashboard/voedingsplannen-v2');
         } else {
-          // Small delay to ensure the continue button is rendered before scrolling
-          setTimeout(() => {
-            const nextStepButton = document.querySelector('[data-next-step-button]') as HTMLElement | null;
-            if (nextStepButton) {
-              console.log('🎯 Auto-scrolling to next step button...');
-              nextStepButton.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            } else {
-              // Fallback to container ref
-              continueRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-          }, 300);
+          // Normal flow: redirect to Mijn Trainingen
+          console.log('🔄 Redirecting to Mijn trainingen...');
+          router.push('/dashboard/mijn-trainingen');
         }
       } else {
         toast.error(data.error || 'Failed to select training schema');
@@ -2097,6 +2247,13 @@ function TrainingschemasContent() {
     }
   }, [currentSchemaPeriod, user, fetchUserProfile]);
 
+  // Debug: whenever profile or full schema list changes, log availability
+  useEffect(() => {
+    if (userTrainingProfile && allTrainingSchemas.length > 0) {
+      try { debugLogSchemaAvailability(allTrainingSchemas as any, userTrainingProfile); } catch {}
+    }
+  }, [userTrainingProfile, allTrainingSchemas]);
+
   // Progressieve loading states
   if (authLoading) {
     return (
@@ -2221,67 +2378,22 @@ function TrainingschemasContent() {
     <PageLayout title="Trainingsschemas">
       {/* DEBUG: Admin-only toggle to simulate Basic user view */}
       {isAdmin && (
-        <div className="fixed top-20 right-4 z-50">
+        <div className="fixed top-20 right-4 z-50 flex gap-2">
           <button
             onClick={() => setDebugSimulateBasic(!debugSimulateBasic)}
-            className={`px-4 py-2 rounded-lg font-medium text-sm shadow-lg transition-all ${
-              debugSimulateBasic 
-                ? 'bg-red-500 text-white hover:bg-red-600' 
+            className={`px-3 py-1 rounded shadow ${debugSimulateBasic
+                ? 'bg-red-500 text-white hover:bg-red-600'
                 : 'bg-blue-500 text-white hover:bg-blue-600'
             }`}
           >
             {debugSimulateBasic ? '🔴 DEBUG: Basic User View' : '🔵 DEBUG: Normal View'}
           </button>
-        </div>
-      )}
-      
-      {/* Show onboarding UI only if onboarding is not completed */}
-      {!isCompleted && <OnboardingV2Progress />}
-      {!isCompleted && <OnboardingNotice />}
-      
-      {/* Continue to Voedingsplannen Modal - focus-driven */}
-      {userTrainingProfile && trainingSchemas.length > 0 && !isCompleted && selectedTrainingSchema && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
-          <div
-            ref={continueRef}
-            className="relative w-full max-w-md bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/50 rounded-2xl p-5 shadow-2xl"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="next-step-training"
+          <button
+            onClick={() => setAdminDebugOpen(v => !v)}
+            className={`px-3 py-1 rounded shadow ${adminDebugOpen ? 'bg-amber-600 text-white' : 'bg-amber-500 text-white hover:bg-amber-600'}`}
           >
-            <div className="flex items-start gap-3 mb-3">
-              <div className="p-2 bg-[#8BAE5A]/20 rounded-lg">
-                <CheckIcon className="h-5 w-5 sm:h-6 sm:w-6 text-[#8BAE5A]" />
-              </div>
-              <div>
-                <h3 id="next-step-training" className="text-base sm:text-lg font-semibold text-white">Trainingsschema Geselecteerd!</h3>
-                <p className="text-xs sm:text-sm text-gray-300">Je bent klaar voor de volgende stap</p>
-              </div>
-            </div>
-            <button
-              data-next-step-button
-              id={trainingNextBtnId}
-              autoFocus
-              onClick={async () => {
-                try {
-                  await completeStep(3); // Database step 3 = SELECT_TRAINING for UI step 4
-                  router.push('/dashboard/voedingsplannen-v2');
-                } catch (error) {
-                  toast.error('Er is een fout opgetreden bij het voltooien van de stap');
-                }
-              }}
-              className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold shadow-lg shadow-[#8BAE5A]/20 text-sm sm:text-base"
-            >
-              <span>Volgende Stap</span>
-              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-            <p className="mt-3 text-xs sm:text-sm text-gray-400 text-center">
-              Je kunt later altijd terugkomen om je trainingsschema te wijzigen
-            </p>
-          </div>
+            {adminDebugOpen ? '🛠️ Hide Unlock Debug' : '🛠️ Show Unlock Debug'}
+          </button>
         </div>
       )}
       
@@ -2304,6 +2416,39 @@ function TrainingschemasContent() {
                 </p>
               </div>
 
+              {/* Admin Unlock Debug Panel */}
+              {isAdmin && adminDebugOpen && (
+                <div className="mb-4 p-3 rounded border border-amber-700/40 bg-amber-900/20 text-amber-100">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-semibold">Unlock Debug</h4>
+                    <span className="text-xs opacity-75">{user?.email}</span>
+                  </div>
+                  <div className="mt-2 text-sm space-y-1">
+                    <p>Profile freq: <b>{userTrainingProfile?.training_frequency ?? 'n/a'}</b></p>
+                    <p>Current period: <b>{(currentSchemaPeriod as any)?.schema?.name ?? 'n/a'}</b></p>
+                    <p>Available schemas: <b>{trainingSchemas.length}</b></p>
+                    {adminCompletionError && <p className="text-red-300">Completion error: {adminCompletionError}</p>}
+                    {adminCompletionData && (
+                      <>
+                        {(() => {
+                          try {
+                            const s1 = (adminCompletionData.schemas || []).find((s: any) => (s.training_schemas?.schema_nummer ?? s.training_schemas?.[0]?.schema_nummer) === 1);
+                            const completedAt = s1?.completed_at;
+                            return <p>Schema 1 completed_at: <b>{completedAt || 'null'}</b></p>;
+                          } catch { return null; }
+                        })()}
+                        {(() => {
+                          try {
+                            const hasS2 = trainingSchemas.some(s => s.schema_nummer === 2);
+                            return <p>Schema 2 present: <b>{hasS2 ? 'yes' : 'no'}</b></p>;
+                          } catch { return null; }
+                        })()}
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
+
 
         {/* User Training Profile Summary */}
         {userTrainingProfile && (
@@ -2325,27 +2470,9 @@ function TrainingschemasContent() {
                 </div>
                 <button
                   onClick={() => {
-                    // Check if user has an active schema period
-                    if (currentSchemaPeriod) {
-                      // Show warning modal instead of calculator
-                      setSchemaChangeModalMode('profile');
-                      setShowSchemaChangeWarningModal(true);
-                    } else {
-                      // No active schema, proceed normally
-                      setShowCalculator(true);
-                      // Pre-fill calculator with current profile data
-                      setCalculatorData({
-                        training_goal: userTrainingProfile.training_goal,
-                        training_frequency: userTrainingProfile.training_frequency.toString(),
-                        equipment_type: userTrainingProfile.equipment_type
-                      });
-                      // Give the UI time to render and then scroll to the calculator
-                      setTimeout(() => {
-                        try {
-                          calculatorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        } catch {}
-                      }, 400);
-                    }
+                    // Always show schema change warning modal for consistent UX
+                    setSchemaChangeModalMode('profile');
+                    setShowSchemaChangeWarningModal(true);
                   }}
                   className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors text-[10px] sm:text-sm font-medium whitespace-nowrap"
                 >
@@ -2805,16 +2932,19 @@ function TrainingschemasContent() {
                   const isSchema2 = schema.schema_nummer === 2;
                   const isSchema3 = schema.schema_nummer === 3;
                   
-                  // Progressive unlocking: Schema 1 is always unlocked, Schema 2 unlocks after 8 weeks of Schema 1, Schema 3 unlocks after 8 weeks of Schema 2
-                  // Schema 1 is always unlocked, even if it's a placeholder
+                  // Progressive unlocking: lock state may change over time.
+                  // Consider completion-based unlocking: Schema 2 unlocks when Schema 1 completed; Schema 3 unlocks when Schema 2 completed
+                  const num = schema.schema_nummer || 1;
                   const isPlaceholder = schema.status === 'coming_soon';
-                  const isLockedBase = schema.schema_nummer === 1 ? false : (isPlaceholder || !unlockedSchemas[schema.schema_nummer || 1]);
-                  
+                  const unlockedByCompletion = (num === 2 && !!schemaNumberCompletion[1]) || (num === 3 && !!schemaNumberCompletion[2]);
+                  // Treat 'coming_soon' as a lock ONLY if not unlocked by completion (so user can continue the journey)
+                  const isLockedBase = num === 1 ? false : (((isPlaceholder && !unlockedByCompletion)) || !(unlockedSchemas[num] || unlockedByCompletion));
+
                   // Check if schema is completed (by id OR by schema_nummer fallback)
                   const completedByNumber = (() => {
                     if (!schema.schema_nummer) return false;
-                    if (schema.schema_nummer === 1) return !!schemaNumberCompletion[1] || !!unlockedSchemas[2];
-                    if (schema.schema_nummer === 2) return !!schemaNumberCompletion[2] || !!unlockedSchemas[3]; // treat schema 2 as completed if schema 3 is unlocked
+                    if (schema.schema_nummer === 1) return !!schemaNumberCompletion[1];
+                    if (schema.schema_nummer === 2) return !!schemaNumberCompletion[2];
                     return !!schemaNumberCompletion[schema.schema_nummer];
                   })();
                   const isCompleted = !!schemaCompletionStatus[schema.id] || completedByNumber;
@@ -2823,11 +2953,11 @@ function TrainingschemasContent() {
                   // - Completed Schema 1 may not be re-selected
                   // - Schema 3 only selectable when Schema 2 is completed
                   const schema2Id = trainingSchemas.find(s => s.schema_nummer === 2)?.id;
-                  const isSchema2Completed = (schema2Id ? !!schemaCompletionStatus[schema2Id] : false) || !!schemaNumberCompletion[2] || !!unlockedSchemas[3];
+                  const isSchema2Completed = (schema2Id ? !!schemaCompletionStatus[schema2Id] : false) || !!schemaNumberCompletion[2];
                   const blockCompletedSchema1 = isSchema1 && isCompleted; // disable click for completed schema 1
                   const blockSchema3Until2Done = isSchema3 && !isSchema2Completed; // lock schema 3 until 2 completed
                   const isDisabled = isLockedBase || blockCompletedSchema1 || blockSchema3Until2Done;
-                  const isStyledLocked = isLockedBase || blockSchema3Until2Done; // styling/banner only for real locks, not completed schema 1
+                  const isStyledLocked = isLockedBase || blockSchema3Until2Done; // styling/banner for real locks
                   
                   // Treat selection highlight only if not completed
                   const isSelectedActive = selectedTrainingSchema === schema.id && !isCompleted;
@@ -2850,7 +2980,12 @@ function TrainingschemasContent() {
                         </div>
                         <div>
                           <h3 className={`text-sm sm:text-base md:text-lg font-semibold ${isStyledLocked ? 'text-gray-500' : 'text-white'}`}>
-                            {schema.name}
+                            {(() => {
+                              const computedTitle = getSchemaComputedTitle(schema, userTrainingProfile || undefined);
+                              if (isSchema2 && unlockedByCompletion) return `${computedTitle} (Beschikbaar)`;
+                              if (isPlaceholder) return `${computedTitle} (binnenkort)`;
+                              return computedTitle;
+                            })()}
                             {isCompleted && (
                               <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-500/20 text-green-400 border border-green-500/30">
                                 ✅ Voltooid
@@ -2891,14 +3026,15 @@ function TrainingschemasContent() {
                         <div className="flex items-center gap-2 text-gray-400 text-xs sm:text-sm">
                           <span className="text-yellow-500">🔒</span>
                           <span>
-                            {isPlaceholder
+                            {(isSchema2 && unlockedByCompletion)
+                              ? 'Nu beschikbaar (na voltooiing Schema 1)'
+                              : isPlaceholder
                               ? 'Binnenkort beschikbaar'
-                              : isSchema2 
+                              : isSchema2
                               ? 'Vergrendeld - Voltooi Schema 1 eerst'
                               : isSchema3 
                               ? 'Vergrendeld - Voltooi Schema 2 eerst'
-                              : 'Vergrendeld - Voltooi vorig schema eerst'
-                            }
+                              : 'Vergrendeld'}
                           </span>
                         </div>
                       </div>
@@ -2942,13 +3078,15 @@ function TrainingschemasContent() {
                               : 'bg-[#3A4D23] text-white hover:bg-[#4A5D33]'
                           }`}
                         >
-                          {isPlaceholder
+                          {(isSchema2 && unlockedByCompletion && !isDisabled)
+                            ? 'Selecteer'
+                            : isPlaceholder
                             ? 'Binnenkort'
                             : isDisabled
                             ? (isCompleted && (isSchema1 || isSchema2) ? 'Voltooid' : 'Vergrendeld')
                             : isCompleted
                             ? 'Voltooid'
-                            : (isSelectedActive ? 'Actief' : 'Selecteer Schema')}
+                            : isSelectedActive ? 'Actief' : 'Selecteer Schema'}
                         </button>
                         <button
                           onClick={() => !isDisabled && handlePrintSchema(schema.id)}
@@ -2958,7 +3096,7 @@ function TrainingschemasContent() {
                               ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
                               : 'bg-[#1E3A8A] text-white hover:bg-[#1E40AF]'
                           }`}
-                          title={isPlaceholder ? 'Binnenkort beschikbaar' : isStyledLocked ? 'Vergrendeld' : 'Print schema'}
+                          title={(isSchema2 && unlockedByCompletion) ? 'Nu beschikbaar' : (isPlaceholder ? 'Binnenkort beschikbaar' : isStyledLocked ? 'Vergrendeld' : 'Print schema')}
                         >
                           <PrinterIcon className="w-4 h-4" />
                         </button>

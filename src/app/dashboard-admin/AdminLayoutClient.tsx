@@ -158,6 +158,7 @@ const SidebarContent = ({ pathname }: { pathname: string }) => {
       type: 'section',
       items: [
         { label: 'Ledenbeheer', icon: UserGroupIcon, href: '/dashboard-admin/ledenbeheer' },
+        { label: '1:1 Coaching', icon: UsersIcon, href: '/dashboard-admin/one-to-one', badge: 'NEW' },
         { label: 'Test gebruikers', icon: UserIcon, href: '/dashboard-admin/test-gebruikers' },
         { label: 'Bug Meldingen', icon: BugAntIcon, href: '/dashboard-admin/bug-meldingen', badge: 'NEW' },
         { label: 'Affiliate Beheer', icon: FireIcon, href: '/dashboard-admin/affiliate-beheer' },
@@ -173,7 +174,8 @@ const SidebarContent = ({ pathname }: { pathname: string }) => {
           badge: 'NEW'
         },
         { label: 'Leden Activiteiten', icon: ClockIcon, href: '/dashboard-admin/leden-activiteiten', badge: 'NEW' },
-        { label: 'Taken', icon: ListBulletIcon, href: '/dashboard-admin/taken', badge: 'NEW' }
+        { label: 'Taken', icon: ListBulletIcon, href: '/dashboard-admin/taken', badge: 'NEW' },
+        { label: 'Weektaken', icon: ListBulletIcon, href: '/dashboard-admin/weektaken' }
       ]
     },
     { 
@@ -231,6 +233,7 @@ const SidebarContent = ({ pathname }: { pathname: string }) => {
       label: 'DATABASE',
       type: 'section',
       items: [
+        { label: 'Database Data Leden', icon: UserGroupIcon, href: '/dashboard-admin/database-data-leden', badge: 'NEW' },
         { label: 'Trainingschemas', icon: DocumentTextIcon, href: '/dashboard-admin/database/trainingschemas', badge: 'NEW' },
         { label: 'Ebook Scraper', icon: BookOpenIcon, href: '/dashboard-admin/database/ebook-scraper', badge: 'NEW' },
       ]

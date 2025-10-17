@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 // import { useV2State } from '@/contexts/V2StateContext';
 // import { useV2Monitoring } from '@/lib/v2-monitoring';
 // import { useV2ErrorRecovery } from '@/lib/v2-error-recovery';
@@ -21,6 +22,8 @@ export const revalidate = 0;
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
+  const { profile } = useSupabaseAuth();
   const [userProfile, setUserProfile] = useState<any>(null);
   
   // Track user online presence
@@ -107,6 +110,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     setUserProfile(user);
 
   }, [user, isLoading, router, setUserProfile]);
+
+  // 1:1 client guard: route to custom dashboard
+  useEffect(() => {
+    if (!profile?.id) return;
+    const p = pathname || '';
+    const isOneToOne = (profile as any)?.is_one_to_one === true;
+    if (!isOneToOne) return;
+    const allowed = p.startsWith('/dashboard/one-to-one') || p.startsWith('/dashboard/academy');
+    if (!allowed) {
+      router.push('/dashboard/one-to-one');
+    }
+  }, [profile?.id, (profile as any)?.is_one_to_one, pathname, router]);
 
   // 2.0.1: Handle authentication errors - DISABLED
   // useEffect(() => {

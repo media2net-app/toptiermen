@@ -1,7 +1,9 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import { toast } from 'react-hot-toast';
 
 // Force dynamic rendering to prevent navigator errors
 export const dynamic = 'force-dynamic';
@@ -46,6 +48,7 @@ interface ForumCategory {
 }
 
 const ThreadPage = ({ params }: { params: { slug: string; id: string } }) => {
+  const router = useRouter();
   const [category, setCategory] = useState<ForumCategory | null>(null);
   const [topic, setTopic] = useState<ForumTopic | null>(null);
   const [posts, setPosts] = useState<ForumPost[]>([]);
@@ -56,6 +59,9 @@ const ThreadPage = ({ params }: { params: { slug: string; id: string } }) => {
   const [submitting, setSubmitting] = useState(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [showOnboardingCompletion, setShowOnboardingCompletion] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     console.log('🔄 Thread page mounted, fetching data for category:', params.slug, 'topic ID:', params.id);
@@ -93,6 +99,52 @@ const ThreadPage = ({ params }: { params: { slug: string; id: string } }) => {
       }, 500); // Small delay to ensure the popup is rendered
     }
   }, []);
+
+  // Determine admin rights (allowlist + profile flags)
+  useEffect(() => {
+    const allowlist = new Set<string>(['chiel@media2net.nl','rick@media2net.nl']);
+    const userEmail = currentUser?.email?.toLowerCase();
+    if (userEmail && allowlist.has(userEmail)) {
+      setIsAdmin(true);
+    }
+    const run = async () => {
+      try {
+        if (!currentUser?.id) { if (!userEmail) setIsAdmin(false); return; }
+        const { data } = await supabase
+          .from('profiles')
+          .select('is_admin, role, email')
+          .eq('id', currentUser.id)
+          .single();
+        const email = (userEmail || (data as any)?.email || '').toLowerCase();
+        const flag = Boolean((data as any)?.is_admin) || (data as any)?.role === 'admin' || (email && allowlist.has(email));
+        setIsAdmin(flag);
+      } catch {
+        setIsAdmin(Boolean(userEmail && allowlist.has(userEmail)));
+      }
+    };
+    run();
+  }, [currentUser?.id, currentUser?.email]);
+
+  const deleteTopic = async () => {
+    if (!topic) return;
+    try {
+      setDeleting(true);
+      const res = await fetch('/api/admin/forum/delete-topic', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ topic_id: topic.id })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data?.success) throw new Error(data?.error || 'Verwijderen mislukt');
+      toast.success('Topic verwijderd');
+      setShowDeleteModal(false);
+      router.push(`/dashboard/brotherhood/forum/${params.slug}`);
+    } catch (e: any) {
+      toast.error(e?.message || 'Kon topic niet verwijderen');
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   const fetchCurrentUser = async () => {
     try {
@@ -664,6 +716,15 @@ const ThreadPage = ({ params }: { params: { slug: string; id: string } }) => {
           </div>
           <div className="flex items-center gap-3 sm:gap-4">
             <span>💬 {posts.length} reacties</span>
+            {isAdmin && (
+              <button
+                onClick={() => setShowDeleteModal(true)}
+                className="px-3 py-1.5 bg-red-600/20 border border-red-500/30 text-red-400 rounded hover:bg-red-600/30"
+                title="Verwijder topic"
+              >
+                Verwijderen
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -720,6 +781,25 @@ const ThreadPage = ({ params }: { params: { slug: string; id: string } }) => {
             </div>
           </>
         )}
+
+      {/* Delete Topic Modal */}
+      {showDeleteModal && topic && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#232D1A] border border-[#3A4D23] rounded-2xl w-full max-w-md text-white overflow-hidden">
+            <div className="p-4 border-b border-[#3A4D23] font-bold">Topic verwijderen</div>
+            <div className="p-4 text-sm text-gray-200">
+              Weet je zeker dat je dit topic wilt verwijderen?<br/>
+              <span className="text-[#B6C948] font-semibold">{topic.title}</span>
+            </div>
+            <div className="p-4 border-t border-[#3A4D23] flex justify-end gap-2">
+              <button onClick={() => setShowDeleteModal(false)} className="px-4 py-2 bg-[#3A4D23] rounded-lg hover:bg-[#4A5D33]">Annuleren</button>
+              <button onClick={deleteTopic} disabled={deleting} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-60">
+                {deleting ? 'Verwijderen...' : 'Verwijder'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       </div>
 
       {/* Posts */}

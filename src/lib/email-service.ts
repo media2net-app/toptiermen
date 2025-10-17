@@ -785,9 +785,7 @@ Top Tier Men Team`
               
               <!-- Header -->
               <div style="background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%); padding: 40px 30px; text-align: center;">
-                     <div style="width: 200px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto; border: 2px solid rgba(255,255,255,0.2);">
-                       <span style="color: white; font-size: 24px; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">TOP TIER MEN</span>
-                     </div>
+                <img src="https://platform.toptiermen.eu/logo_white-full.svg" alt="Top Tier Men" style="width: 200px; height: auto; display: block; margin: 0 auto 20px auto; border-radius: 8px;" />
                 <h1 style="color: white; font-size: 32px; font-weight: 700; margin: 0; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
                   🔥 WELKOM BIJ THE BROTHERHOOD
                 </h1>
@@ -830,13 +828,13 @@ Top Tier Men Team`
                     <div style="margin-bottom: 16px;">
                       <strong style="color: #8BAE5A; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Tijdelijk Wachtwoord:</strong>
                       <div style="color: #FFFFFF; font-size: 16px; font-weight: 600; margin-top: 4px; background: rgba(255,255,255,0.1); padding: 8px 12px; border-radius: 6px; font-family: monospace;">
-                        \${tempPassword}
+                        ${(variables.tempPassword ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
                       </div>
                     </div>
                     
                     <div style="margin-bottom: 16px;">
                       <strong style="color: #8BAE5A; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Pakket:</strong>
-                      <div style="color: #B6C948; font-size: 16px; font-weight: 600; margin-top: 4px;">
+                      <div style=\"color: #B6C948; font-size: 16px; font-weight: 600; margin-top: 4px;\">
                         \${packageType}
                       </div>
                     </div>

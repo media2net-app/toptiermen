@@ -64,6 +64,17 @@ export default function Inbox() {
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
   const [showNotificationSettings, setShowNotificationSettings] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = (smooth: boolean = true) => {
+    try {
+      const container = messagesContainerRef.current;
+      if (container) {
+        container.scrollTop = container.scrollHeight;
+      }
+      messagesEndRef.current?.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto' });
+    } catch {}
+  };
 
   // Set up real-time notifications
   const { isOnline } = useChatNotifications(
@@ -84,6 +95,7 @@ export default function Inbox() {
         };
         
         setChatMessages(prev => [...prev, newMessage]);
+        setTimeout(() => scrollToBottom(true), 50);
       }
       
       // OPTIMIZED: Update specific conversation instead of refetching all
@@ -141,16 +153,13 @@ export default function Inbox() {
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    scrollToBottom(true);
   }, [chatMessages]);
 
   // Auto-scroll to bottom when a conversation is selected
   useEffect(() => {
     if (selectedConversation && chatMessages.length > 0) {
-      // Small delay to ensure messages are rendered
-      setTimeout(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-      }, 100);
+      setTimeout(() => scrollToBottom(true), 100);
     }
   }, [selectedConversation]);
 
@@ -234,7 +243,7 @@ export default function Inbox() {
         
         // Auto-scroll to bottom after messages are loaded
         setTimeout(() => {
-          messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+          scrollToBottom(true);
         }, 150);
       } else {
         console.error('Error fetching messages:', data.error);
@@ -296,6 +305,7 @@ export default function Inbox() {
       if (response.ok) {
         // Add new message to chat
         setChatMessages(prev => [...prev, data.message]);
+        setTimeout(() => scrollToBottom(true), 50);
         
         // Update the selected conversation with the new last message
         if (selectedConversation) {
@@ -645,7 +655,7 @@ export default function Inbox() {
                 </div>
 
                 {/* Chat Messages */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                <div className="flex-1 overflow-y-auto p-4 space-y-4" ref={messagesContainerRef}>
                   {chatMessages.map((msg) => (
                     <div
                       key={msg.id}

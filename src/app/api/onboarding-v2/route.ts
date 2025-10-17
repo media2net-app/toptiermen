@@ -27,14 +27,30 @@ export async function GET(request: NextRequest) {
 
     console.log('🔍 Onboarding V2 - Getting status for:', email);
 
-    // Get user profile
-    const { data: profile, error: profileError } = await supabase
+    // Get user profile - try exact match first, then case-insensitive
+    let { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('id, email, full_name, package_type, role')
       .eq('email', email)
       .single();
 
-    if (profileError) {
+    // If not found with exact match, try case-insensitive search
+    if (profileError && email) {
+      console.log('Profile not found with exact email, trying case-insensitive search for:', email);
+      const { data: caseInsensitiveProfile, error: caseInsensitiveError } = await supabase
+        .from('profiles')
+        .select('id, email, full_name, package_type, role')
+        .ilike('email', email)
+        .single();
+      
+      if (!caseInsensitiveError) {
+        profile = caseInsensitiveProfile;
+        profileError = null;
+        console.log('✅ Found profile with case-insensitive search:', profile.email);
+      }
+    }
+
+    if (profileError || !profile) {
       console.error('❌ Profile error:', profileError);
       return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
     }
@@ -170,14 +186,30 @@ export async function POST(request: NextRequest) {
 
     console.log('📝 Onboarding V2 - Updating step:', { email, step, action });
 
-    // Get user profile
-    const { data: profile, error: profileError } = await supabase
+    // Get user profile - try exact match first, then case-insensitive
+    let { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('id, email, full_name, package_type, role')
       .eq('email', email)
       .single();
 
-    if (profileError) {
+    // If not found with exact match, try case-insensitive search
+    if (profileError && email) {
+      console.log('Profile not found with exact email, trying case-insensitive search for:', email);
+      const { data: caseInsensitiveProfile, error: caseInsensitiveError } = await supabase
+        .from('profiles')
+        .select('id, email, full_name, package_type, role')
+        .ilike('email', email)
+        .single();
+      
+      if (!caseInsensitiveError) {
+        profile = caseInsensitiveProfile;
+        profileError = null;
+        console.log('✅ Found profile with case-insensitive search:', profile.email);
+      }
+    }
+
+    if (profileError || !profile) {
       return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
     }
 
@@ -201,6 +233,26 @@ export async function POST(request: NextRequest) {
 
     // Handle different actions
     switch (action) {
+      case 'reset_onboarding':
+        // Delete existing onboarding status to force restart
+        if (onboardingStatus) {
+          const { error: deleteError } = await supabase
+            .from('user_onboarding_status')
+            .delete()
+            .eq('id', onboardingStatus.id);
+          
+          if (deleteError) {
+            console.error('❌ Error deleting onboarding status:', deleteError);
+            return NextResponse.json({ error: 'Failed to reset onboarding status' }, { status: 500 });
+          }
+        }
+        
+        console.log('✅ Onboarding V2 reset for user:', email);
+        return NextResponse.json({
+          success: true,
+          message: 'Onboarding reset successfully'
+        });
+        
       case 'complete_step':
         switch (step) {
           case ONBOARDING_STEPS.WELCOME_VIDEO.id:

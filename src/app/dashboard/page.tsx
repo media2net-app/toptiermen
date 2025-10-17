@@ -38,6 +38,7 @@ interface DashboardStats {
     progress: number;
     schemaName?: string;
     schemaNummer?: number;
+    completedDays?: number;
     completedDaysThisWeek?: number;
     currentWeek?: number;
     totalWeeks?: number;
@@ -647,12 +648,12 @@ export default function Dashboard() {
                   </div>
                 )}
                 
-                {/* Dagen deze week */}
-                {stats?.training.completedDaysThisWeek !== undefined && stats?.training.weeklySessions && (
+                {/* Dagen voltooid (totaal schema) */}
+                {stats?.training.completedDays !== undefined && stats?.training.totalDays !== undefined && (
                   <div className="text-left">
-                    <div className="text-xs sm:text-sm text-[#8BAE5A] mb-1">Dagen deze week:</div>
+                    <div className="text-xs sm:text-sm text-[#8BAE5A] mb-1">Dagen voltooid:</div>
                     <div className="text-white font-semibold text-sm sm:text-base">
-                      {stats.training.completedDaysThisWeek}/{stats.training.weeklySessions}
+                      {stats.training.completedDays}/{stats.training.totalDays}
                     </div>
                   </div>
                 )}

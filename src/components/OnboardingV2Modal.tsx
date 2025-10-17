@@ -212,7 +212,11 @@ const WelcomeVideoStep = ({ onComplete }: { onComplete: () => void }) => {
       {/* Primary next button when video finished */}
       {videoWatched && (
         <button
-          onClick={onComplete}
+          onClick={() => {
+            console.log('🎬 WelcomeVideoStep: Volgende Stap button clicked');
+            console.log('🎬 WelcomeVideoStep: onComplete function:', onComplete);
+            onComplete();
+          }}
           className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] hover:from-[#7A9E4A] hover:to-[#E6C200] text-white px-6 py-3 sm:px-8 sm:py-4 rounded-lg font-bold text-sm sm:text-lg transition-all duration-300 transform hover:scale-105 shadow-lg"
         >
           Volgende Stap →
@@ -571,17 +575,25 @@ export default function OnboardingV2Modal({ isOpen }: OnboardingV2ModalProps) {
   }
 
   const handleStepComplete = async (step: number, data?: any) => {
+    console.log('🎬 OnboardingV2Modal: handleStepComplete called with step:', step, 'data:', data);
     let success = false;
     try {
+      console.log('🎬 OnboardingV2Modal: Calling completeStep...');
       success = await completeStep(step, data);
+      console.log('🎬 OnboardingV2Modal: completeStep result:', success);
     } catch (e) {
-      console.error('Onboarding step complete error:', e);
+      console.error('🎬 OnboardingV2Modal: Onboarding step complete error:', e);
     }
 
     // Always navigate to the intended next UI location, even if API failed.
     // The dashboard will re-sync onboarding state and show the correct next step.
-    const go = (path: string) => setTimeout(() => router.push(path), 80);
+    const go = (path: string) => {
+      console.log('🎬 OnboardingV2Modal: Navigating to:', path);
+      setTimeout(() => router.push(path), 80);
+    };
+    
     if (step === 0) {
+      console.log('🎬 OnboardingV2Modal: Step 0 - redirecting to dashboard');
       go('/dashboard');
     } else if (step === 1) {
       // Both Basic and Premium users go to Challenges after video
@@ -589,10 +601,12 @@ export default function OnboardingV2Modal({ isOpen }: OnboardingV2ModalProps) {
       console.log('🎯 Redirecting to Challenges after video (works for both Basic and Premium)');
       go('/dashboard/mijn-challenges');
     } else if (step === 5) {
+      console.log('🎬 OnboardingV2Modal: Step 5 - redirecting to dashboard');
       go('/dashboard');
     }
 
     if (!success) {
+      console.log('🎬 OnboardingV2Modal: Step completion failed, showing error toast');
       toast.error('Stap geactiveerd, synchroniseren met server...');
     }
   };

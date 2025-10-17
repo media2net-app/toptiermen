@@ -167,7 +167,7 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus, setIsMobileMenuOp
   
   // Use onboardingStatus from props if available, otherwise fallback to context
   const actualOnboardingStatus = onboardingStatus || { current_step: currentStep, onboarding_completed: isCompleted };
-  const { user, isAdmin } = useSupabaseAuth();
+  const { user, isAdmin, profile } = useSupabaseAuth();
   const { hasAccess } = useSubscription();
   
   const safePathname = pathname || '';
@@ -182,6 +182,13 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus, setIsMobileMenuOp
   const isLoggingOut = !user; // Check if user is null (logged out)
   const effectiveLoading = isLoading || isLoggingOut;
   const mobileMenu = useMemo(() => getMenu(onboardingCompleted, effectiveLoading), [onboardingCompleted, effectiveLoading]);
+  const isOneToOne = (profile as any)?.is_one_to_one === true;
+  const oneToOneMenu = useMemo(() => (
+    [
+      { label: 'Dashboard', icon: HomeIcon, href: '/dashboard/one-to-one' },
+      { label: 'Academy', icon: FireIcon, href: '/dashboard/academy' },
+    ]
+  ), []);
   const DEBUG = process.env.NEXT_PUBLIC_DEBUG === '1';
   if (DEBUG) console.log('🔍 MobileSidebarContent menu calculation:', {
     actualOnboardingStatus: actualOnboardingStatus?.onboarding_completed,
@@ -192,14 +199,15 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus, setIsMobileMenuOp
   });
 
   // HARD GATE (mobile): If onboarding not completed and on step 6, show only Brotherhood > Forum
-  const mobileGatedMenu = (!onboardingCompleted && actualCurrentStep === 6)
+  const baseMenuForRender = isOneToOne ? oneToOneMenu : mobileMenu;
+  const mobileGatedMenu = (!onboardingCompleted && actualCurrentStep === 6 && !isOneToOne)
     ? mobileMenu.filter((item) => {
         if (!('parent' in item)) {
           return item.label === 'Brotherhood';
         }
         return item.parent === 'Brotherhood' && item.label === 'Forum';
       })
-    : mobileMenu;
+    : baseMenuForRender;
 
 
   // Function to check if a menu item should be visible based on subscription tier and admin status
@@ -209,7 +217,7 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus, setIsMobileMenuOp
       return false;
     }
     // HARD GATE visibility: if onboarding not completed and on step 6, only show Brotherhood > Forum
-    if (!(actualOnboardingStatus?.onboarding_completed ?? isCompleted) && actualCurrentStep === 6) {
+    if (!isOneToOne && !(actualOnboardingStatus?.onboarding_completed ?? isCompleted) && actualCurrentStep === 6) {
       if (!('parent' in item)) {
         return item.label === 'Brotherhood';
       }
@@ -353,7 +361,7 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus, setIsMobileMenuOp
 
   // Auto-open submenu if current page is a submenu item
   useEffect(() => {
-    const currentItem = getMenu(actualOnboardingStatus?.onboarding_completed || isCompleted).find(item => item.href === safePathname);
+    const currentItem = (isOneToOne ? baseMenuForRender : getMenu(actualOnboardingStatus?.onboarding_completed || isCompleted)).find((item: any) => item.href === safePathname);
     if (currentItem && 'parent' in currentItem) {
       if (currentItem.parent === 'Dashboard') {
         setOpenDashboard(true);
@@ -385,7 +393,7 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus, setIsMobileMenuOp
           // Special case for step 6: Brotherhood should be active when on forum pages
           // Special case for Dashboard: should be active when on dashboard or its subpages
           const isActive = !isCompleted 
-            ? (safePathname === item.href && item.onboardingStep === actualCurrentStep) ||
+            ? (safePathname === item.href && (item as any).onboardingStep === actualCurrentStep) ||
               (actualCurrentStep === 6 && item.label === 'Brotherhood') ||
               (item.label === 'Dashboard' && (safePathname === '/dashboard' || safePathname.startsWith('/dashboard/mijn-profiel') || safePathname.startsWith('/dashboard/mijn-trainingen')))
             : item.label === 'Dashboard' 
@@ -409,7 +417,7 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus, setIsMobileMenuOp
             }
             const hasActiveSubItem = subItems.some(sub => 
               !(actualOnboardingStatus?.onboarding_completed ?? isCompleted)
-                ? (sub.href === safePathname && sub.onboardingStep === actualCurrentStep) ||
+                ? (sub.href === safePathname && (sub as any).onboardingStep === actualCurrentStep) ||
                   (actualCurrentStep === 6 && sub.label === 'Forum')
                 : sub.href === safePathname
             );
@@ -452,7 +460,7 @@ const MobileSidebarContent = ({ onLinkClick, onboardingStatus, setIsMobileMenuOp
                     >
                       {subItems.map(sub => {
                         const isSubActive = !isCompleted 
-                          ? (safePathname === sub.href && sub.onboardingStep === actualCurrentStep) ||
+                          ? (safePathname === sub.href && (sub as any).onboardingStep === actualCurrentStep) ||
                             (actualCurrentStep === 6 && sub.label === 'Forum')
                           : safePathname === sub.href;
                         const isHighlighted = false; // highlightedMenu not available in V2
@@ -599,7 +607,7 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
   }, [onboardingStatus, actualOnboardingStatus, isCompleted, currentStep, isLoading]);
   
   // const { trackFeatureUsage } = useV2Monitoring();
-  const { user, isAdmin } = useSupabaseAuth();
+  const { user, isAdmin, profile } = useSupabaseAuth();
   const { hasAccess } = useSubscription();
   
   const safePathname = pathname || '';
@@ -798,7 +806,38 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
         return item.parent === 'Brotherhood' && item.label === 'Forum';
       })
     : sidebarMenu;
+
+  // 1:1 dedicated sidebar (desktop): only Dashboard and Academy
+  const isOneToOneDesktop = (profile as any)?.is_one_to_one === true;
+  const oneToOneMenuDesktop = useMemo(() => ([
+    { label: 'Dashboard', icon: HomeIcon, href: '/dashboard/one-to-one' },
+    { label: 'Academy', icon: FireIcon, href: '/dashboard/academy' },
+    { label: 'Progressie', icon: ChartBarIcon, href: '/dashboard/one-to-one/progress' },
+  ]), []);
   
+  // Render 1:1 minimal menu when applicable
+  if (isOneToOneDesktop) {
+    return (
+      <nav className="flex flex-col gap-2">
+        {oneToOneMenuDesktop.map((item) => {
+          const isActive = (pathname || '') === item.href;
+          return (
+            <Link
+              key={item.label}
+              href={item.href}
+              className={`grid grid-cols-[auto_1fr] items-center gap-4 px-4 py-3 rounded-xl font-bold uppercase text-xs tracking-wide transition-all duration-500 font-figtree ${
+                isActive ? 'bg-[#8BAE5A] text-black shadow-lg' : 'text-white hover:text-[#8BAE5A] hover:bg-[#3A4D23]/50'
+              } ${collapsed ? 'justify-center px-2' : ''}`}
+            >
+              <item.icon className={`w-6 h-6 ${isActive ? 'text-white' : 'text-[#8BAE5A]'}`} />
+              {!collapsed && <span className="truncate">{item.label}</span>}
+            </Link>
+          );
+        })}
+      </nav>
+    );
+  }
+
   return (
     <nav className="flex flex-col gap-2">
       {gatedMenu.map((item) => {
@@ -1428,17 +1467,22 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
                   <div className="flex items-center gap-2">
                     <p className="text-[#8BAE5A] text-xs">
                       {(() => {
+                        const isOneToOne = (profile as any)?.is_one_to_one === true;
+                        if (isOneToOne) return '1:1 Coaching';
                         const metadataRole = ((user as any)?.user_metadata?.role as string | undefined) || undefined;
                         const effectiveRole = (profile?.role || metadataRole || '').toLowerCase();
-                        
                         if (effectiveRole === 'admin') return 'Admin';
                         if (effectiveRole === 'test') return 'Test';
                         if (user?.email?.toLowerCase().includes('test')) return 'Test';
                         return 'Lid';
-                      })()} 
+                      })()}
                     </p>
-                    <span className="text-gray-400 text-xs">•</span>
-                    <SubscriptionTier />
+                    {((profile as any)?.is_one_to_one === true) ? null : (
+                      <>
+                        <span className="text-gray-400 text-xs">•</span>
+                        <SubscriptionTier />
+                      </>
+                    )}
                   </div>
                 </div>
               )}

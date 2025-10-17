@@ -362,13 +362,16 @@ export default function MijnTrainingen() {
         }
       }
 
-      // Sync DB progress with week completions (only increase) - OPTIMIZED: No reload, just update locally
+      // Sync DB progress with week completions + current week's completed days (only increase) - OPTIMIZED: No reload, just update locally
       try {
         if (data.hasActiveSchema && data.schema?.id) {
           const weeksArr = (effectiveCompletedWeeks || completedWeeks) as any[];
           const weeksCount = Array.isArray(weeksArr) ? weeksArr.length : 0;
           const freqFromDays = Math.max(1, (data.days?.length || 0) || 1);
-          const targetCompletedDays = weeksCount * freqFromDays;
+          // Count currently completed days in the active (in-progress) week
+          const daysCompletedThisWeek = (data.days || []).filter((d: any) => !!d.isCompleted).length;
+          // Total completed days = completed full weeks + completed days in current week
+          const targetCompletedDays = (weeksCount * freqFromDays) + daysCompletedThisWeek;
           const currentCompletedDays = Number(data?.progress?.completed_days || 0);
           if (targetCompletedDays > currentCompletedDays && user?.email) {
             // Fire and forget - update in background without blocking UI
@@ -383,9 +386,28 @@ export default function MijnTrainingen() {
             }).catch(err => console.log('⚠️ Background sync failed:', err));
             
             // Update local state immediately for better UX
+            // 1) Update the local variable used in this function
             if (data.progress) {
               data.progress.completed_days = targetCompletedDays;
             }
+            // 2) Also update React state so UI reflects the new count without waiting for reload
+            setTrainingData(prev => {
+              const base = prev ?? data;
+              const baseProgress = base?.progress ?? data.progress ?? {
+                current_day: 1,
+                completed_days: 0,
+                total_days: freqFromDays * 8,
+                started_at: new Date().toISOString(),
+                is_active: true
+              };
+              return {
+                ...base,
+                progress: {
+                  ...baseProgress,
+                  completed_days: targetCompletedDays
+                }
+              } as any;
+            });
           }
         }
       } catch (syncErr) {
@@ -763,6 +785,25 @@ export default function MijnTrainingen() {
   };
 
   // Show loading only while subscription is loading
+  // Special case: when starting a new week, show a dedicated loader to prevent UI flicker
+  if (isStartingNewWeek) {
+    return (
+      <PageLayout title="Mijn Trainingen">
+        <div className="min-h-screen bg-gradient-to-br from-[#0F1419] to-[#1A1F2E] p-6">
+          <div className="max-w-6xl mx-auto">
+            <div className="flex items-center justify-center min-h-[60vh]">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
+                <p className="text-[#8BAE5A]">Nieuwe week wordt klaargezet...</p>
+                <p className="text-gray-400 text-sm mt-1">We resetten je trainingsdagen en laden je voortgang opnieuw</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </PageLayout>
+    );
+  }
+
   if (loading || subscriptionLoading) {
     return (
       <PageLayout title="Mijn Trainingen">

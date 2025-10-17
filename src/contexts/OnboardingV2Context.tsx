@@ -100,6 +100,10 @@ export function OnboardingV2Provider({ children }: { children: React.ReactNode }
 
   // Load onboarding status with enhanced loading state management
   const loadOnboardingStatus = async () => {
+    console.log('🔍 OnboardingV2Context: loadOnboardingStatus called');
+    console.log('🔍 OnboardingV2Context: user object:', user);
+    console.log('🔍 OnboardingV2Context: user.email:', user?.email);
+    
     if (!user?.email) {
       console.log('🔍 No user email, setting loading to false');
       setIsLoading(false);
@@ -167,13 +171,23 @@ export function OnboardingV2Provider({ children }: { children: React.ReactNode }
 
   // Complete a step
   const completeStep = async (step: number, data?: any): Promise<boolean> => {
-    if (!user?.email) return false;
+    console.log('🎬 OnboardingV2Context: completeStep called with step:', step, 'data:', data);
+    console.log('🎬 OnboardingV2Context: user object:', user);
+    console.log('🎬 OnboardingV2Context: user email:', user?.email);
+    console.log('🎬 OnboardingV2Context: user.id:', user?.id);
+    
+    if (!user?.email) {
+      console.log('🎬 OnboardingV2Context: No user email, returning false');
+      return false;
+    }
 
     try {
       // Start loading sequence
       const stepTitle = getStepTitle(step);
+      console.log('🎬 OnboardingV2Context: Starting loading sequence for step:', step, 'title:', stepTitle);
       startLoadingSequence(step, stepTitle);
 
+      console.log('🎬 OnboardingV2Context: Making API request to /api/onboarding-v2');
       const response = await fetch('/api/onboarding-v2', {
         method: 'POST',
         headers: {
@@ -187,7 +201,9 @@ export function OnboardingV2Provider({ children }: { children: React.ReactNode }
         }),
       });
 
+      console.log('🎬 OnboardingV2Context: API response status:', response.status);
       const result = await response.json();
+      console.log('🎬 OnboardingV2Context: API response result:', result);
 
       if (result.success) {
         console.log('✅ Step completed:', step);

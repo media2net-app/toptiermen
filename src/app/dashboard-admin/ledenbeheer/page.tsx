@@ -89,6 +89,8 @@ export default function Ledenbeheer() {
     rank: 'Rookie',
     status: 'active',
     package_type: 'Basic Tier',
+    is_one_to_one: false,
+    coach_email: 'rick@toptiermen.eu',
     password: '',
     confirmPassword: ''
   });
@@ -123,6 +125,37 @@ export default function Ledenbeheer() {
         // Optionally redirect to dashboard or refresh the page
         window.location.href = '/dashboard';
       }
+    }
+  };
+
+  // Send account credentials to a single user
+  const handleSendAccountCredentialsSingle = async (email: string) => {
+    try {
+      setIsLoading(true);
+      const res = await fetch('/api/admin/send-account-credentials', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ testMode: false, email })
+      });
+      const result = await res.json().catch(() => ({}));
+      if (res.ok && result?.success) {
+        toast.success(`Accountgegevens verstuurd naar ${email}`, {
+          position: 'top-right',
+          duration: 4000,
+        });
+      } else {
+        toast.error(result?.error || 'Kon accountgegevens niet versturen', {
+          position: 'top-right',
+          duration: 5000,
+        });
+      }
+    } catch (e) {
+      toast.error('Er is een fout opgetreden bij het versturen', {
+        position: 'top-right',
+        duration: 5000,
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -602,6 +635,23 @@ export default function Ledenbeheer() {
           duration: 3000,
         });
 
+        // If marked as 1:1, toggle the flag and assign coach via API
+        try {
+          if (newUserData.is_one_to_one) {
+            await fetch('/api/admin/one-to-one/toggle', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                user_email: newUserData.email,
+                is_one_to_one: true,
+                coach_email: newUserData.coach_email || 'rick@toptiermen.eu'
+              })
+            });
+          }
+        } catch (e) {
+          console.warn('Failed to toggle 1:1 for new user (non-blocking):', e);
+        }
+
         // Reset form and close modal
         setNewUserData({
           email: '',
@@ -610,6 +660,8 @@ export default function Ledenbeheer() {
           rank: 'Rookie',
           status: 'active',
           package_type: 'Basic Tier',
+          is_one_to_one: false,
+          coach_email: 'rick@toptiermen.eu',
           password: '',
           confirmPassword: ''
         });
@@ -1021,8 +1073,9 @@ export default function Ledenbeheer() {
   const tableHeaders = ['Selecteer', 'Lid', 'Email', 'Verwijder', 'Type', 'Rang', 'Status', 'Punten', 'Missies', 'Pakket', 'Betalingsstatus', 'Lid sinds', 'Laatste activiteit'];
 
   const renderActions = (item: any) => {
-    // Find member by email (item[1] is the email)
-    const member = currentMembers.find(m => m.email === item[1]);
+    // Find member by email (item[2] is the email in tableData)
+    const memberEmail = item && Array.isArray(item) ? item[2] : undefined;
+    const member = currentMembers.find(m => m.email === memberEmail);
     if (!member) return null;
 
     return (
@@ -1050,6 +1103,14 @@ export default function Ledenbeheer() {
           icon={<KeyIcon className="w-4 h-4" />}
         >
           🔐 Reset
+        </AdminButton>
+        <AdminButton
+          variant="secondary"
+          size="sm"
+          onClick={() => handleSendAccountCredentialsSingle(member.email)}
+          icon={<EnvelopeIcon className="w-4 h-4" />}
+        >
+          📧 Stuur accountgegevens
         </AdminButton>
         <AdminButton
           variant="primary"
@@ -2022,6 +2083,41 @@ export default function Ledenbeheer() {
                     </option>
                   ))}
                 </select>
+              </div>
+
+              {/* 1:1 Klant Toggle */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    1:1 Klant
+                  </label>
+                  <div className="flex items-center gap-3">
+                    <input
+                      id="one-to-one-toggle"
+                      type="checkbox"
+                      checked={newUserData.is_one_to_one}
+                      onChange={(e) => setNewUserData({ ...newUserData, is_one_to_one: e.target.checked })}
+                      className="w-5 h-5 rounded border-[#3A4D23] bg-[#181F17] text-[#8BAE5A] focus:ring-[#8BAE5A]"
+                    />
+                    <label htmlFor="one-to-one-toggle" className="text-sm text-gray-300">
+                      Markeer als 1:1 klant (custom dashboard)
+                    </label>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Coach (voor 1:1)
+                  </label>
+                  <select
+                    value={newUserData.coach_email}
+                    onChange={(e) => setNewUserData({ ...newUserData, coach_email: e.target.value })}
+                    className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+                    disabled={!newUserData.is_one_to_one}
+                  >
+                    <option value="rick@toptiermen.eu">Rick (rick@toptiermen.eu)</option>
+                    <option value="chiel@media2net.nl">Chiel (chiel@media2net.nl)</option>
+                  </select>
+                </div>
               </div>
 
 
