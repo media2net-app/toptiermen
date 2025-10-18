@@ -2,10 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { FaCheck, FaArrowRight, FaUsers, FaDumbbell, FaBrain, FaChartLine, FaCrown, FaStar, FaGift, FaBook, FaTools, FaComments, FaBullseye, FaTrophy, FaBookOpen, FaChevronLeft, FaChevronRight, FaClock } from 'react-icons/fa';
+import { FaCheck, FaArrowRight, FaUsers, FaDumbbell, FaBrain, FaChartLine, FaCrown, FaStar, FaGift, FaBook, FaTools, FaComments, FaBullseye, FaTrophy, FaBookOpen, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { PlayIcon } from '@heroicons/react/24/outline';
 import CheckoutSection from '@/components/CheckoutSection';
-import PrelaunchCountdown from '@/components/PrelaunchCountdown';
 
 interface VideoPlayerProps {
   src: string;
@@ -272,13 +271,6 @@ export default function MaandelijksPage() {
               {packageData.badge || 'Premium'}
             </div>
 
-            {/* Countdown */}
-            <div className="mb-8">
-              <PrelaunchCountdown 
-                endDate={new Date(Date.now() + 5 * 24 * 60 * 60 * 1000)} // 5 days from now
-                className="text-base"
-              />
-            </div>
 
             {/* Title with Navigation */}
             <div className="flex items-center justify-center space-x-4 sm:space-x-6 md:space-x-8 mb-6">
@@ -400,12 +392,6 @@ export default function MaandelijksPage() {
                   <span className="text-2xl font-bold text-white">
                     €{formatPrice(packageData.monthlyPrice)} per maand
                   </span>
-                </div>
-                <div className="flex flex-col items-center space-y-3 mb-4">
-                  <PrelaunchCountdown 
-                    endDate={new Date(Date.now() + 5 * 24 * 60 * 60 * 1000)} // 5 days from now
-                    className="text-sm"
-                  />
                 </div>
               </div>
               <p className="text-[#D1D5DB] mb-4">
