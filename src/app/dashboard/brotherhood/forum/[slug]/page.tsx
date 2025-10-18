@@ -191,31 +191,6 @@ const CategoryPage = ({ params }: { params: { slug: string } }) => {
     }
   };
 
-  const fetchUserProfiles = async (userIds: string[]) => {
-    try {
-      console.log('👤 Fetching user profiles for:', userIds);
-      const { data: profiles, error } = await supabase
-        .from('profiles')
-        .select('id, full_name, avatar_url')
-        .in('id', userIds);
-
-      if (error) {
-        console.error('❌ Error fetching profiles:', error);
-        return {};
-      }
-
-      const profilesMap: { [key: string]: UserProfile } = {};
-      profiles?.forEach(profile => {
-        profilesMap[profile.id] = profile;
-      });
-
-      console.log('✅ User profiles fetched:', profilesMap);
-      return profilesMap;
-    } catch (error) {
-      console.error('❌ Error fetching profiles:', error);
-      return {};
-    }
-  };
 
   const fetchCategoryAndTopics = async () => {
     try {
@@ -223,94 +198,26 @@ const CategoryPage = ({ params }: { params: { slug: string } }) => {
       setLoading(true);
       setError(null);
 
-      // First, get the category by slug
-      const { data: categoryData, error: categoryError } = await supabase
-        .from('forum_categories')
-        .select('*')
-        .eq('slug', params.slug)
-        .single();
-
-      if (categoryError) {
-        console.error('❌ Error fetching category:', categoryError);
-        setError(`Category niet gevonden: ${categoryError.message}`);
-        return;
-      }
-
-      console.log('✅ Category data received:', categoryData);
-      setCategory(categoryData);
-
-      // Then fetch topics for this category
-      const { data: topicsData, error: topicsError } = await supabase
-        .from('forum_topics')
-        .select(`
-          id,
-          title,
-          created_at,
-          last_reply_at,
-          reply_count,
-          view_count,
-          author_id
-        `)
-        .eq('category_id', categoryData.id)
-        .order('created_at', { ascending: false });
-
-      if (topicsError) {
-        console.error('❌ Error fetching topics:', topicsError);
-        setError(`Error fetching topics: ${topicsError.message}`);
-        return;
-      }
-
-      console.log('✅ Topics data received:', topicsData);
-
-      if (!topicsData || topicsData.length === 0) {
-        console.log('⚠️ No topics found');
-        setTopics([]);
-        setLoading(false);
-        return;
-      }
-
-      // Collect all user IDs
-      const userIds = new Set<string>();
-      topicsData.forEach(topic => {
-        if (topic.author_id) userIds.add(topic.author_id);
+      const res = await fetch(`/api/forum/topics?category_slug=${encodeURIComponent(params.slug)}`, {
+        cache: 'no-cache'
       });
 
-      console.log('👥 Unique user IDs found:', Array.from(userIds));
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || `HTTP ${res.status}`);
+      }
 
-      // Fetch user profiles
-      const profiles = await fetchUserProfiles(Array.from(userIds));
-      setUserProfiles(profiles);
+      const data = await res.json();
+      
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to fetch data');
+      }
 
-      // Helper function to get author info
-      const getAuthorInfo = (authorId: string) => {
-        const profile = profiles[authorId];
-        if (profile) {
-          const nameParts = profile.full_name.split(' ');
-          return {
-            first_name: nameParts[0] || 'User',
-            last_name: nameParts.slice(1).join(' ') || '',
-            avatar_url: profile.avatar_url
-          };
-        }
-        return {
-          first_name: 'User',
-          last_name: '',
-          avatar_url: undefined
-        };
-      };
+      console.log('✅ API data received:', data);
+      setCategory(data.category);
+      setTopics(data.topics);
+      setUserProfiles(data.userProfiles);
 
-      const processedTopics = topicsData.map((topic: any) => ({
-        id: topic.id,
-        title: topic.title,
-        created_at: topic.created_at,
-        last_reply_at: topic.last_reply_at,
-        reply_count: topic.reply_count || 0,
-        view_count: topic.view_count || 0,
-        author: getAuthorInfo(topic.author_id)
-      }));
-
-      console.log('✅ Processed topics:', processedTopics);
-      setTopics(processedTopics);
     } catch (error) {
       console.error('❌ Error in fetchCategoryAndTopics:', error);
       setError(`Unexpected error: ${error instanceof Error ? error.message : 'Unknown error'}`);

@@ -84,7 +84,29 @@ type ActivityEngagementRow = {
   isActive: boolean;
 };
 
-type TabType = 'trainingschemas' | 'voedingsplannen' | 'academy-progress' | 'activity-engagement';
+type LoginSessionRow = {
+  id: string;
+  userId: string;
+  email: string | null;
+  fullName: string | null;
+  userType: string;
+  role: string;
+  subscriptionTier: string;
+  sessionStart: string;
+  lastActivity: string;
+  lastActivityFormatted: string;
+  sessionDuration: number;
+  pageVisits: number;
+  status: string;
+  currentPage: string | null;
+  userAgent: string | null;
+  ipAddress: string | null;
+  accountAge: number | null;
+  isActive: boolean;
+  isOnline: boolean;
+};
+
+type TabType = 'trainingschemas' | 'voedingsplannen' | 'academy-progress' | 'activity-engagement' | 'login-sessions';
 
 export default function DatabaseDataLedenPage() {
   const [activeTab, setActiveTab] = useState<TabType>('trainingschemas');
@@ -92,6 +114,7 @@ export default function DatabaseDataLedenPage() {
   const [nutritionRows, setNutritionRows] = useState<NutritionPlanRow[]>([]);
   const [academyRows, setAcademyRows] = useState<AcademyProgressRow[]>([]);
   const [activityRows, setActivityRows] = useState<ActivityEngagementRow[]>([]);
+  const [loginSessionRows, setLoginSessionRows] = useState<LoginSessionRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -139,6 +162,17 @@ export default function DatabaseDataLedenPage() {
     }
   };
 
+  const loadLoginSessionData = async () => {
+    try {
+      const res = await fetch('/api/admin/database/login-sessions', { cache: 'no-store' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setLoginSessionRows(data.rows || []);
+    } catch (e: any) {
+      console.error('Error loading login session data:', e);
+    }
+  };
+
   const load = async () => {
     try {
       setLoading(true);
@@ -147,7 +181,8 @@ export default function DatabaseDataLedenPage() {
         loadTrainingData(), 
         loadNutritionData(), 
         loadAcademyData(), 
-        loadActivityData()
+        loadActivityData(),
+        loadLoginSessionData()
       ]);
     } catch (e: any) {
       setError(e?.message || 'Fout bij laden');
@@ -236,6 +271,16 @@ export default function DatabaseDataLedenPage() {
           }`}
         >
           Activity & Engagement
+        </button>
+        <button
+          onClick={() => setActiveTab('login-sessions')}
+          className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+            activeTab === 'login-sessions'
+              ? 'bg-[#8BAE5A] text-[#181F17]'
+              : 'text-[#B6C948] hover:text-[#8BAE5A]'
+          }`}
+        >
+          Login Sessies
         </button>
       </div>
 
@@ -376,6 +421,62 @@ export default function DatabaseDataLedenPage() {
                   })}
                 </tbody>
               </>
+            ) : activeTab === 'login-sessions' ? (
+              <>
+                <thead className="bg-[#232D1A] text-[#8BAE5A]">
+                  <tr>
+                    <th className="px-4 py-3 text-left">Email</th>
+                    <th className="px-4 py-3 text-left">Naam</th>
+                    <th className="px-4 py-3 text-left">Type</th>
+                    <th className="px-4 py-3 text-left">Rol</th>
+                    <th className="px-4 py-3 text-left">Status</th>
+                    <th className="px-4 py-3 text-left">Laatste Activiteit</th>
+                    <th className="px-4 py-3 text-left">Sessie Duur</th>
+                    <th className="px-4 py-3 text-left">Pagina's</th>
+                    <th className="px-4 py-3 text-left">Huidige Pagina</th>
+                    <th className="px-4 py-3 text-left">IP Adres</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#2B3820] text-[#B6C948]">
+                  {loginSessionRows.map((r) => {
+                    const statusColor = r.isOnline ? 'bg-green-600 text-white' : 
+                                       r.isActive ? 'bg-yellow-600 text-white' : 
+                                       'bg-gray-600 text-white';
+                    
+                    const statusText = r.isOnline ? 'Online' : 
+                                      r.isActive ? 'Actief' : 
+                                      'Offline';
+                    
+                    const userTypeColor = r.userType === 'admin' ? 'bg-red-600 text-white' :
+                                         r.userType === 'rick' ? 'bg-blue-600 text-white' :
+                                         r.userType === 'chiel' ? 'bg-purple-600 text-white' :
+                                         'bg-gray-600 text-white';
+                    
+                    return (
+                      <tr key={r.id} className="hover:bg-[#1A2318]">
+                        <td className="px-4 py-2">{r.email}</td>
+                        <td className="px-4 py-2">{r.fullName || '-'}</td>
+                        <td className="px-4 py-2">
+                          <span className={`px-2 py-1 rounded text-xs ${userTypeColor}`}>
+                            {r.userType}
+                          </span>
+                        </td>
+                        <td className="px-4 py-2">{r.role}</td>
+                        <td className="px-4 py-2">
+                          <span className={`px-2 py-1 rounded text-xs ${statusColor}`}>
+                            {statusText}
+                          </span>
+                        </td>
+                        <td className="px-4 py-2">{r.lastActivityFormatted}</td>
+                        <td className="px-4 py-2">{r.sessionDuration > 0 ? `${r.sessionDuration}m` : '-'}</td>
+                        <td className="px-4 py-2">{r.pageVisits}</td>
+                        <td className="px-4 py-2">{r.currentPage || '-'}</td>
+                        <td className="px-4 py-2">{r.ipAddress || '-'}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </>
             ) : (
               <>
                 <thead className="bg-[#232D1A] text-[#8BAE5A]">
@@ -429,6 +530,8 @@ export default function DatabaseDataLedenPage() {
             ? (nutritionRows.length === 0 ? 'Geen voedingsplan data gevonden.' : `${nutritionRows.length} gebruikers gevonden.`)
             : activeTab === 'academy-progress'
             ? (academyRows.length === 0 ? 'Geen academy progress data gevonden.' : `${academyRows.length} gebruikers gevonden.`)
+            : activeTab === 'login-sessions'
+            ? (loginSessionRows.length === 0 ? 'Geen login sessie data gevonden.' : `${loginSessionRows.length} sessies gevonden.`)
             : (activityRows.length === 0 ? 'Geen activity data gevonden.' : `${activityRows.length} gebruikers gevonden.`)
           }
         </div>
