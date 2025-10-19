@@ -26,6 +26,7 @@ const ForumOverview = () => {
   const [loading, setLoading] = useState(true);
   const [isClient, setIsClient] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [initialLoad, setInitialLoad] = useState(true);
   const [unanswered, setUnanswered] = useState<Array<{ id: number; title: string; href: string; author: string; created_at: string }>>([]);
 
   useEffect(() => {
@@ -57,6 +58,7 @@ const ForumOverview = () => {
       setCategories([]);
     } finally {
       setLoading(false);
+      setInitialLoad(false);
     }
   };
 
@@ -85,19 +87,32 @@ const ForumOverview = () => {
     return `${Math.floor(diffInMinutes / 1440)} dagen geleden`;
   };
 
-  if (!isClient || loading) {
+  if (!isClient || (loading && initialLoad)) {
     return (
-      <div className="flex flex-col md:flex-row gap-8 md:gap-12 max-w-7xl mx-auto w-full px-2 sm:px-4 md:px-0">
-        <div className="flex-1">
-          <div className="animate-pulse">
-            <div className="h-8 bg-gray-700 rounded mb-6"></div>
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="bg-[#232D1A]/90 rounded-2xl p-6 mb-6">
-                <div className="h-6 bg-gray-700 rounded mb-4"></div>
-                <div className="h-4 bg-gray-700 rounded mb-2"></div>
-                <div className="h-4 bg-gray-700 rounded w-2/3"></div>
-              </div>
-            ))}
+      <div className="w-full min-h-screen bg-[#0A0F0A]">
+        <div className="flex flex-col lg:flex-row gap-4 lg:gap-8 xl:gap-12 max-w-7xl mx-auto w-full px-2 sm:px-4 md:px-6 lg:px-8 py-10">
+          <div className="flex-1">
+            <div className="animate-pulse">
+              <div className="h-8 bg-[#3A4D23]/30 rounded mb-6"></div>
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="bg-[#232D1A]/90 rounded-2xl p-6 mb-6 border border-[#3A4D23]/20">
+                  <div className="h-6 bg-[#3A4D23]/30 rounded mb-4"></div>
+                  <div className="h-4 bg-[#3A4D23]/20 rounded mb-2"></div>
+                  <div className="h-4 bg-[#3A4D23]/20 rounded w-2/3"></div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="lg:w-80">
+            <div className="animate-pulse">
+              <div className="h-8 bg-[#3A4D23]/30 rounded mb-6"></div>
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="bg-[#232D1A]/90 rounded-2xl p-4 mb-4 border border-[#3A4D23]/20">
+                  <div className="h-4 bg-[#3A4D23]/30 rounded mb-2"></div>
+                  <div className="h-3 bg-[#3A4D23]/20 rounded w-3/4"></div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>

@@ -139,79 +139,57 @@ const SocialFeedPage = () => {
     }
   };
 
-  // Fetch posts from database
+  // Fetch posts from database via API
   const fetchPosts = async () => {
     try {
       setLoading(true);
-      console.log('🔍 Fetching social posts...');
+      console.log('🔍 Fetching social posts via API...');
       
-      // Get posts with user info, likes count, and comments count
-      const { data: postsData, error: postsError } = await supabase
-        .from('social_posts')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (postsError) {
-        console.error('❌ Error fetching posts:', postsError);
-        throw postsError;
-      }
-
-      console.log('✅ Posts fetched:', postsData?.length || 0);
-
-      // Get user data for all posts
-      const userIds = Array.from(new Set(postsData.map(post => post.user_id)));
-      const { data: usersData } = await supabase
-        .from('profiles')
-        .select('id, full_name, avatar_url, rank')
-        .in('id', userIds);
-
-      // Create a map for quick user lookup
-      const usersMap = new Map();
-      usersData?.forEach(user => {
-        usersMap.set(user.id, user);
+      const response = await fetch('/api/social-feed/posts', {
+        cache: 'no-cache',
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
 
-      // Get likes count and user's like status for each post
-      const postsWithStats = await Promise.all(
-        postsData.map(async (post) => {
-          // Get likes count
-          const { count: likesCount } = await supabase
-            .from('social_likes')
-            .select('*', { count: 'exact', head: true })
-            .eq('post_id', post.id);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
 
-          // Get comments count
-          const { count: commentsCount } = await supabase
-            .from('social_comments')
-            .select('*', { count: 'exact', head: true })
-            .eq('post_id', post.id);
+      const data = await response.json();
 
-          // Check if current user liked this post
-          const { data: userLike } = await supabase
-            .from('social_likes')
-            .select('like_type')
-            .eq('post_id', post.id)
-            .eq('user_id', user?.id)
-            .maybeSingle(); // Use maybeSingle() to avoid 406 error when no like exists
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to fetch posts');
+      }
 
-          return {
-            ...post,
-            user: usersMap.get(post.user_id) || { 
-              id: post.user_id, 
-              full_name: 'Unknown User', 
-              avatar_url: null, 
-              rank: 'Member' 
-            },
-            likes_count: likesCount || 0,
-            comments_count: commentsCount || 0,
-            user_liked: !!userLike,
-            user_like_type: userLike?.like_type
-          };
-        })
-      );
+      console.log('✅ Posts fetched via API:', data.posts?.length || 0);
 
-      setPosts(postsWithStats);
-      console.log('✅ Posts processed and set:', postsWithStats.length);
+      // Update user like status for current user
+      if (user && data.posts) {
+        const postsWithUserLikes = await Promise.all(
+          data.posts.map(async (post: any) => {
+            // Check if current user liked this post
+            const { data: userLike } = await supabase
+              .from('social_likes')
+              .select('like_type')
+              .eq('post_id', post.id)
+              .eq('user_id', user.id)
+              .maybeSingle();
+
+            return {
+              ...post,
+              user_liked: !!userLike,
+              user_like_type: userLike?.like_type || null
+            };
+          })
+        );
+
+        setPosts(postsWithUserLikes);
+        console.log('✅ Posts with user likes processed:', postsWithUserLikes.length);
+      } else {
+        setPosts(data.posts || []);
+        console.log('✅ Posts set (no user context):', data.posts?.length || 0);
+      }
     } catch (error) {
       console.error('❌ Error fetching posts:', error);
       toast.error('Fout bij het laden van posts');
@@ -752,9 +730,28 @@ const SocialFeedPage = () => {
       {/* Feed List */}
       <section className="space-y-4 sm:space-y-6">
         {loading ? (
-          <div className="bg-[#232D1A]/80 rounded-xl shadow-xl border border-[#3A4D23]/40 p-8 text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
-            <p className="text-[#8BAE5A]">Posts laden...</p>
+          <div className="space-y-4 sm:space-y-6">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="bg-[#232D1A]/80 rounded-xl shadow-xl border border-[#3A4D23]/40 p-4 sm:p-6">
+                <div className="animate-pulse">
+                  <div className="flex items-start gap-3 sm:gap-4 mb-4">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#3A4D23]/30 rounded-full"></div>
+                    <div className="flex-1">
+                      <div className="h-4 bg-[#3A4D23]/30 rounded w-1/4 mb-2"></div>
+                      <div className="h-3 bg-[#3A4D23]/20 rounded w-1/6"></div>
+                    </div>
+                  </div>
+                  <div className="space-y-2 mb-4">
+                    <div className="h-4 bg-[#3A4D23]/30 rounded"></div>
+                    <div className="h-4 bg-[#3A4D23]/30 rounded w-3/4"></div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="h-8 bg-[#3A4D23]/20 rounded w-16"></div>
+                    <div className="h-8 bg-[#3A4D23]/20 rounded w-20"></div>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         ) : posts.length === 0 ? (
           <div className="bg-[#232D1A]/80 rounded-xl shadow-xl border border-[#3A4D23]/40 p-8 text-center">

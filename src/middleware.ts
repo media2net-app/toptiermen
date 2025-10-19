@@ -12,13 +12,15 @@ export async function middleware(req: NextRequest) {
   // - Onboarding pages should always be accessible
   // - Ebook static pages should always be accessible
   // - Onboarding API routes should be accessible for unauthenticated users
+  // - Affiliate links should be accessible for unauthenticated users
   if (path.startsWith('/onboarding') || 
       path.startsWith('/ebooksv2') || 
       path.startsWith('/api/onboarding-v2') ||
       path.startsWith('/api/mind-focus/intake-status') ||
       path.startsWith('/api/activity-log') ||
       path.startsWith('/api/nutrition-plan-active') ||
-      path.startsWith('/api/forum-posts')) {
+      path.startsWith('/api/forum-posts') ||
+      path.startsWith('/ref/')) {
     return res;
   }
   

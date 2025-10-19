@@ -110,9 +110,28 @@ export default function MijnProfiel() {
   const [editingAffiliateCode, setEditingAffiliateCode] = useState(false);
   const [newAffiliateCode, setNewAffiliateCode] = useState('');
   const [savingAffiliateCode, setSavingAffiliateCode] = useState(false);
+
+  const [clickStats, setClickStats] = useState({
+    totalClicks: 0,
+    clicksLast30Days: 0,
+    clicksLast7Days: 0
+  });
+  
+  const [detailedClicks, setDetailedClicks] = useState<any[]>([]);
+  const [loadingDetailedClicks, setLoadingDetailedClicks] = useState(false);
+  
+  const [affiliateStats, setAffiliateStats] = useState({
+    totalClicks: 0,
+    clicksLast30Days: 0,
+    totalReferrals: 0,
+    activeReferrals: 0,
+    totalEarned: 0,
+    monthlyEarnings: 0,
+    lastReferral: null
+  });
   
   // Base site URL for affiliate link rendering
-  const siteBaseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://toptiermen.eu';
+  const siteBaseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://platform.toptiermen.eu';
   
   // Push notification states
   const [pushSubscription, setPushSubscription] = useState<any>(null);
@@ -201,7 +220,11 @@ export default function MijnProfiel() {
       fetchBadgesAndRanks().finally(() => setLoadedVoortgang(true));
     }
     if (activeTab === 'affiliate' && !loadedAffiliate) {
-      fetchAffiliateData().finally(() => setLoadedAffiliate(true));
+      fetchAffiliateData().then(() => {
+        fetchClickStats();
+        fetchDetailedClicks();
+        fetchAffiliateStats();
+      }).finally(() => setLoadedAffiliate(true));
     }
     if (activeTab === 'privacy' && !loadedPushState) {
       fetchPushSubscription().finally(() => setLoadedPushState(true));
@@ -373,6 +396,71 @@ export default function MijnProfiel() {
         status: 'inactive'
       });
       setNewAffiliateCode(affiliateCode);
+    }
+  };
+
+  const fetchClickStats = async () => {
+    if (!affiliateData.affiliate_code) return;
+
+    try {
+      console.log('Fetching click stats for affiliate code:', affiliateData.affiliate_code);
+      
+      const response = await fetch(`/api/affiliate/clicks?code=${encodeURIComponent(affiliateData.affiliate_code)}`);
+      const data = await response.json();
+
+      if (data.success) {
+        setClickStats(data.stats);
+        console.log('Click stats fetched:', data.stats);
+      } else {
+        console.error('Error fetching click stats:', data.error);
+      }
+    } catch (error) {
+      console.error('Error fetching click stats:', error);
+    }
+  };
+
+  const fetchDetailedClicks = async () => {
+    if (!affiliateData.affiliate_code) return;
+
+    try {
+      setLoadingDetailedClicks(true);
+      console.log('Fetching detailed clicks for affiliate code:', affiliateData.affiliate_code);
+      
+      const response = await fetch(`/api/affiliate/clicks-detail?code=${encodeURIComponent(affiliateData.affiliate_code)}&limit=50`);
+      const data = await response.json();
+
+      if (data.success) {
+        setDetailedClicks(data.clicks);
+        console.log('Detailed clicks fetched:', data.clicks.length);
+      } else {
+        console.error('Error fetching detailed clicks:', data.error);
+        setDetailedClicks([]);
+      }
+    } catch (error) {
+      console.error('Error fetching detailed clicks:', error);
+      setDetailedClicks([]);
+    } finally {
+      setLoadingDetailedClicks(false);
+    }
+  };
+
+  const fetchAffiliateStats = async () => {
+    if (!affiliateData.affiliate_code) return;
+
+    try {
+      console.log('Fetching comprehensive affiliate stats for:', affiliateData.affiliate_code);
+      
+      const response = await fetch(`/api/affiliate/stats?code=${encodeURIComponent(affiliateData.affiliate_code)}`);
+      const data = await response.json();
+
+      if (data.success) {
+        setAffiliateStats(data.stats);
+        console.log('Affiliate stats fetched:', data.stats);
+      } else {
+        console.error('Error fetching affiliate stats:', data.error);
+      }
+    } catch (error) {
+      console.error('Error fetching affiliate stats:', error);
     }
   };
 
@@ -1819,16 +1907,16 @@ export default function MijnProfiel() {
             </div>
 
               {/* Affiliate Stats - Enhanced Responsive */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 sm:gap-4">
                 <div className="bg-[#181F17] rounded-lg p-3 sm:p-4">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-[#8BAE5A] text-xs sm:text-sm">Totaal Verdiend</span>
-                    <span className="text-white font-semibold text-sm sm:text-base">€{affiliateData.total_earned}</span>
+                    <span className="text-white font-semibold text-sm sm:text-base">€{affiliateStats.totalEarned}</span>
                   </div>
                   <div className="w-full bg-[#232D1A] rounded-full h-2">
                     <div 
                       className="bg-[#8BAE5A] h-2 rounded-full transition-all duration-300" 
-                      style={{ width: `${Math.min((affiliateData.total_earned / 100) * 100, 100)}%` }}
+                      style={{ width: `${Math.min((affiliateStats.totalEarned / 100) * 100, 100)}%` }}
                     ></div>
                   </div>
                 </div>
@@ -1836,12 +1924,12 @@ export default function MijnProfiel() {
                 <div className="bg-[#181F17] rounded-lg p-3 sm:p-4">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-[#8BAE5A] text-xs sm:text-sm">Aantal Referrals</span>
-                    <span className="text-white font-semibold text-sm sm:text-base">{affiliateData.total_referrals}</span>
+                    <span className="text-white font-semibold text-sm sm:text-base">{affiliateStats.totalReferrals}</span>
                   </div>
                   <div className="w-full bg-[#232D1A] rounded-full h-2">
                     <div 
                       className="bg-[#8BAE5A] h-2 rounded-full transition-all duration-300" 
-                      style={{ width: `${Math.min((affiliateData.total_referrals / 10) * 100, 100)}%` }}
+                      style={{ width: `${Math.min((affiliateStats.totalReferrals / 10) * 100, 100)}%` }}
                     ></div>
                   </div>
                 </div>
@@ -1849,12 +1937,12 @@ export default function MijnProfiel() {
                 <div className="bg-[#181F17] rounded-lg p-3 sm:p-4">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-[#8BAE5A] text-xs sm:text-sm">Actieve Referrals</span>
-                    <span className="text-white font-semibold text-sm sm:text-base">{affiliateData.active_referrals}</span>
+                    <span className="text-white font-semibold text-sm sm:text-base">{affiliateStats.activeReferrals}</span>
                   </div>
                   <div className="w-full bg-[#232D1A] rounded-full h-2">
                     <div 
                       className="bg-[#8BAE5A] h-2 rounded-full transition-all duration-300" 
-                      style={{ width: `${affiliateData.total_referrals > 0 ? (affiliateData.active_referrals / affiliateData.total_referrals) * 100 : 0}%` }}
+                      style={{ width: `${affiliateStats.totalReferrals > 0 ? (affiliateStats.activeReferrals / affiliateStats.totalReferrals) * 100 : 0}%` }}
                     ></div>
                   </div>
                 </div>
@@ -1862,15 +1950,141 @@ export default function MijnProfiel() {
                 <div className="bg-[#181F17] rounded-lg p-3 sm:p-4">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-[#8BAE5A] text-xs sm:text-sm">Maandelijkse Inkomsten</span>
-                    <span className="text-white font-semibold text-sm sm:text-base">€{affiliateData.monthly_earnings}</span>
+                    <span className="text-white font-semibold text-sm sm:text-base">€{affiliateStats.monthlyEarnings}</span>
                   </div>
                   <div className="w-full bg-[#232D1A] rounded-full h-2">
                     <div 
                       className="bg-[#8BAE5A] h-2 rounded-full transition-all duration-300" 
-                      style={{ width: `${Math.min((affiliateData.monthly_earnings / 50) * 100, 100)}%` }}
+                      style={{ width: `${Math.min((affiliateStats.monthlyEarnings / 50) * 100, 100)}%` }}
                     ></div>
                   </div>
                 </div>
+                
+                {/* Click Statistics */}
+                <div className="bg-[#181F17] rounded-lg p-3 sm:p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[#8BAE5A] text-xs sm:text-sm">Totaal Kliks</span>
+                    <span className="text-white font-semibold text-sm sm:text-base">{affiliateStats.totalClicks}</span>
+                  </div>
+                  <div className="w-full bg-[#232D1A] rounded-full h-2">
+                    <div 
+                      className="bg-[#8BAE5A] h-2 rounded-full transition-all duration-300" 
+                      style={{ width: `${Math.min((affiliateStats.totalClicks / 100) * 100, 100)}%` }}
+                    ></div>
+                  </div>
+                </div>
+                
+                <div className="bg-[#181F17] rounded-lg p-3 sm:p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[#8BAE5A] text-xs sm:text-sm">Kliks (30d)</span>
+                    <span className="text-white font-semibold text-sm sm:text-base">{affiliateStats.clicksLast30Days}</span>
+                  </div>
+                  <div className="w-full bg-[#232D1A] rounded-full h-2">
+                    <div 
+                      className="bg-[#8BAE5A] h-2 rounded-full transition-all duration-300" 
+                      style={{ width: `${Math.min((affiliateStats.clicksLast30Days / 50) * 100, 100)}%` }}
+                    ></div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Detailed Clicks Table */}
+              <div className="bg-[#181F17] rounded-lg p-3 sm:p-4 md:p-6">
+                <div className="flex items-center justify-between mb-3 sm:mb-4">
+                  <h3 className="text-sm sm:text-base md:text-lg font-semibold text-white">Gedetailleerde Clicks</h3>
+                  <button
+                    onClick={() => {
+                      fetchDetailedClicks();
+                      fetchAffiliateStats();
+                    }}
+                    disabled={loadingDetailedClicks}
+                    className="text-[#8BAE5A] hover:text-[#FFD700] transition-colors p-1"
+                    title="Ververs alle affiliate data"
+                  >
+                    {loadingDetailedClicks ? (
+                      <div className="w-4 h-4 border-2 border-[#8BAE5A] border-t-transparent rounded-full animate-spin"></div>
+                    ) : (
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
+                    )}
+                  </button>
+                </div>
+
+                {loadingDetailedClicks ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
+                    <p className="text-[#8BAE5A] text-sm">Clicks laden...</p>
+                  </div>
+                ) : detailedClicks.length === 0 ? (
+                  <div className="text-center py-8">
+                    <div className="w-12 h-12 bg-[#232D1A] rounded-full flex items-center justify-center mx-auto mb-4">
+                      <svg className="w-6 h-6 text-[#8BAE5A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                    </div>
+                    <p className="text-[#8BAE5A] text-sm">Nog geen clicks geregistreerd</p>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-[#3A4D23]/30">
+                          <th className="text-left py-3 px-2 text-[#8BAE5A] font-medium">Datum & Tijd</th>
+                          <th className="text-left py-3 px-2 text-[#8BAE5A] font-medium">IP Adres</th>
+                          <th className="text-left py-3 px-2 text-[#8BAE5A] font-medium">Browser</th>
+                          <th className="text-left py-3 px-2 text-[#8BAE5A] font-medium">Device</th>
+                          <th className="text-left py-3 px-2 text-[#8BAE5A] font-medium">Referrer</th>
+                          <th className="text-left py-3 px-2 text-[#8BAE5A] font-medium">Type</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {detailedClicks.map((click, index) => (
+                          <tr key={click.id} className="border-b border-[#3A4D23]/20 hover:bg-[#232D1A]/30 transition-colors">
+                            <td className="py-3 px-2 text-white">
+                              <div className="text-xs">
+                                {new Date(click.clicked_at).toLocaleDateString('nl-NL')}
+                              </div>
+                              <div className="text-[#8BAE5A] text-xs">
+                                {new Date(click.clicked_at).toLocaleTimeString('nl-NL')}
+                              </div>
+                            </td>
+                            <td className="py-3 px-2 text-white text-xs font-mono">
+                              {click.ip_address || 'N/A'}
+                            </td>
+                            <td className="py-3 px-2 text-white text-xs">
+                              {click.browser}
+                            </td>
+                            <td className="py-3 px-2 text-white text-xs">
+                              {click.device}
+                            </td>
+                            <td className="py-3 px-2 text-white text-xs">
+                              {click.referrer}
+                            </td>
+                            <td className="py-3 px-2">
+                              <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                                click.is_test 
+                                  ? 'bg-yellow-900/30 text-yellow-400 border border-yellow-800/30' 
+                                  : 'bg-green-900/30 text-green-400 border border-green-800/30'
+                              }`}>
+                                {click.is_test ? 'Test' : 'Echt'}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+
+                {detailedClicks.length > 0 && (
+                  <div className="mt-4 text-center">
+                    <p className="text-[#8BAE5A] text-xs">
+                      Totaal {detailedClicks.length} clicks geregistreerd
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* Marketing Materials - Enhanced Responsive */}

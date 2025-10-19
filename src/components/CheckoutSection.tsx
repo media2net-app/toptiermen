@@ -53,6 +53,7 @@ export default function CheckoutSection({
   });
   const [discountApplied, setDiscountApplied] = useState(false);
   const [discountError, setDiscountError] = useState('');
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   const isLifetime = packageId === 'lifetime';
   
@@ -136,40 +137,93 @@ export default function CheckoutSection({
       return;
     }
 
+    // Check if terms are accepted
+    if (!termsAccepted) {
+      alert('Je moet akkoord gaan met de algemene voorwaarden om door te gaan');
+      return;
+    }
+
     setIsProcessing(true);
     try {
-      console.log('💳 Creating prelaunch Mollie payment...');
+      // Check if this is a monthly payment (6 months with monthly frequency)
+      const isMonthlyPayment = billingPeriod === '6months' && paymentFrequency === 'monthly';
       
-      const response = await fetch('/api/payments/create-payment-prelaunch', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          packageId: packageId,
-          billingPeriod: billingPeriod,
-          paymentFrequency: paymentFrequency,
-          customerName: formData.name,
-          customerEmail: formData.email,
-          discountCode: discountApplied ? formData.discountCode.trim().toUpperCase() : null
-        }),
-      });
-
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.error || 'Payment creation failed');
-      }
-      
-      if (data.checkoutUrl) {
-        console.log('✅ Prelaunch Mollie payment created:', data.checkoutUrl);
-        console.log('💰 Package info:', data.packageInfo);
-        console.log('🔄 Redirecting to Mollie checkout...');
+      if (isMonthlyPayment) {
+        console.log('💳 Creating monthly SEPA payment...');
         
-        // Redirect to Mollie checkout
-        window.location.href = data.checkoutUrl;
+        const response = await fetch('/api/checkout/create-monthly-payment', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            packageId: packageId,
+            billingPeriod: billingPeriod,
+            customerName: formData.name,
+            customerEmail: formData.email
+          }),
+        });
+
+        const data = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(data.error || 'Monthly payment creation failed');
+        }
+        
+        if (data.checkoutUrl) {
+          console.log('✅ Monthly SEPA payment created:', data.checkoutUrl);
+          console.log('💰 Package info:', data.packageInfo);
+          console.log('🔄 Redirecting to SEPA checkout...');
+          
+          // Store payment ID for status checking
+          if (data.paymentId) {
+            sessionStorage.setItem('lastPaymentId', data.paymentId);
+          }
+          
+          // Redirect to Mollie checkout
+          window.location.href = data.checkoutUrl;
+        } else {
+          throw new Error('No payment URL received from Mollie');
+        }
       } else {
-        throw new Error('No payment URL received from Mollie');
+        console.log('💳 Creating prelaunch Mollie payment...');
+        
+        const response = await fetch('/api/payments/create-payment-prelaunch', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            packageId: packageId,
+            billingPeriod: billingPeriod,
+            paymentFrequency: paymentFrequency,
+            customerName: formData.name,
+            customerEmail: formData.email,
+            discountCode: discountApplied ? formData.discountCode.trim().toUpperCase() : null
+          }),
+        });
+
+        const data = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(data.error || 'Payment creation failed');
+        }
+        
+        if (data.checkoutUrl) {
+          console.log('✅ Prelaunch Mollie payment created:', data.checkoutUrl);
+          console.log('💰 Package info:', data.packageInfo);
+          console.log('🔄 Redirecting to Mollie checkout...');
+          
+          // Store payment ID for status checking
+          if (data.paymentId) {
+            sessionStorage.setItem('lastPaymentId', data.paymentId);
+          }
+          
+          // Redirect to Mollie checkout
+          window.location.href = data.checkoutUrl;
+        } else {
+          throw new Error('No payment URL received from Mollie');
+        }
       }
     } catch (error) {
       console.error('Payment error:', error);
@@ -231,8 +285,39 @@ export default function CheckoutSection({
                   <FaCheck className="w-5 h-5 text-[#8BAE5A] flex-shrink-0" />
                   <span className="text-white">Mollie betalingsbeveiliging</span>
                 </div>
+                <div className="flex items-center gap-3">
+                  <FaCheck className="w-5 h-5 text-[#8BAE5A] flex-shrink-0" />
+                  <span className="text-white">SEPA incasso voor maandelijkse betalingen</span>
+                </div>
               </div>
             </div>
+
+            {/* SEPA Information */}
+            {billingPeriod === '6months' && paymentFrequency === 'monthly' && (
+              <div className="bg-[#1A2313] rounded-2xl p-8 border border-[#3A4D23]/30">
+                <h4 className="text-xl font-semibold text-white mb-6 flex items-center gap-3">
+                  <FaCreditCard className="w-6 h-6 text-[#8BAE5A]" />
+                  SEPA Incasso
+                </h4>
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <FaCheck className="w-5 h-5 text-[#8BAE5A] flex-shrink-0" />
+                    <span className="text-white">Automatische maandelijkse incasso</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <FaCheck className="w-5 h-5 text-[#8BAE5A] flex-shrink-0" />
+                    <span className="text-white">Geen extra kosten</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <FaCheck className="w-5 h-5 text-[#8BAE5A] flex-shrink-0" />
+                    <span className="text-white">Je kunt altijd opzeggen</span>
+                  </div>
+                  <div className="text-sm text-[#8BAE5A]/70 mt-4">
+                    Bij maandelijkse betaling wordt er automatisch elke maand €{formatPrice(pricing.monthlyPrice)} van je rekening afgeschreven via SEPA incasso (indien beschikbaar in je land).
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Checkout Form */}
@@ -438,6 +523,11 @@ export default function CheckoutSection({
                         <div className="text-xs sm:text-sm text-[#8BAE5A]">
                           {billingPeriod === '12months' ? 'Niet beschikbaar' : `€${formatPrice(pricing.monthlyPrice)} per maand`}
                         </div>
+                        {billingPeriod !== '12months' && (
+                          <div className="text-xs text-[#8BAE5A]/70 mt-1">
+                            via SEPA incasso (indien beschikbaar)
+                          </div>
+                        )}
                       </div>
                     </button>
 
@@ -497,10 +587,35 @@ export default function CheckoutSection({
               </div>
             </div>
 
+            {/* Terms and Conditions */}
+            <div className="mb-8">
+              <div className="flex items-start space-x-3">
+                <input
+                  type="checkbox"
+                  id="terms"
+                  checked={termsAccepted}
+                  onChange={(e) => setTermsAccepted(e.target.checked)}
+                  className="mt-1 w-5 h-5 text-[#8BAE5A] bg-[#232D1A] border-[#3A4D23] rounded focus:ring-[#8BAE5A] focus:ring-2"
+                />
+                <label htmlFor="terms" className="text-sm text-[#B6C948] leading-relaxed">
+                  Ik ga akkoord met de{' '}
+                  <a 
+                    href="/algemene-voorwaarden" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-[#8BAE5A] hover:text-[#B6C948] underline"
+                  >
+                    algemene voorwaarden
+                  </a>
+                  {' '}en begrijp dat bij maandelijkse betalingen een betaalverplichting geldt voor de volledige abonnementsperiode zonder herroepingsrecht.
+                </label>
+              </div>
+            </div>
+
             {/* Payment Button */}
             <button
               onClick={handlePayment}
-              disabled={isProcessing || !formData.name.trim() || !formData.email.trim()}
+              disabled={isProcessing || !formData.name.trim() || !formData.email.trim() || !termsAccepted}
               className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold py-4 px-8 rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all duration-300 flex items-center justify-center gap-3 text-lg hover:shadow-lg hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-orange-400/20 to-orange-500/20 animate-pulse"></div>
