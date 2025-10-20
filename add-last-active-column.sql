@@ -14,7 +14,7 @@ SET last_active = updated_at
 WHERE last_active IS NULL AND updated_at IS NOT NULL;
 
 -- If updated_at is also NULL, use created_at
-UPDATE profiles 
+UPDATE Kiprofiles 
 SET last_active = created_at 
 WHERE last_active IS NULL;
 

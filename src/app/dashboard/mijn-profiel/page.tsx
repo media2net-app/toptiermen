@@ -130,6 +130,9 @@ export default function MijnProfiel() {
     lastReferral: null
   });
   
+  const [affiliatePurchases, setAffiliatePurchases] = useState<any[]>([]);
+  const [loadingPurchases, setLoadingPurchases] = useState(false);
+  
   // Base site URL for affiliate link rendering
   const siteBaseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://platform.toptiermen.eu';
   
@@ -220,10 +223,13 @@ export default function MijnProfiel() {
       fetchBadgesAndRanks().finally(() => setLoadedVoortgang(true));
     }
     if (activeTab === 'affiliate' && !loadedAffiliate) {
-      fetchAffiliateData().then(() => {
-        fetchClickStats();
-        fetchDetailedClicks();
-        fetchAffiliateStats();
+      fetchAffiliateData().then((affiliateCode) => {
+        if (affiliateCode) {
+          fetchClickStats(affiliateCode);
+          fetchDetailedClicks(affiliateCode);
+          fetchAffiliateStats(affiliateCode);
+          fetchAffiliatePurchases(affiliateCode);
+        }
       }).finally(() => setLoadedAffiliate(true));
     }
     if (activeTab === 'privacy' && !loadedPushState) {
@@ -332,7 +338,7 @@ export default function MijnProfiel() {
   };
 
   const fetchAffiliateData = async () => {
-    if (!user) return;
+    if (!user) return null;
 
     try {
       console.log('Fetching affiliate data for user:', user.id);
@@ -352,10 +358,12 @@ export default function MijnProfiel() {
         .eq('id', user.id)
         .single();
 
+      let affiliateCode;
+
       if (error) {
         console.error('Error fetching affiliate data:', error);
         // Fallback to generated data if profile doesn't exist
-        const affiliateCode = `${profile?.full_name?.toUpperCase().replace(/\s+/g, '') || 'USER'}${user.id.slice(-6)}`;
+        affiliateCode = `${profile?.full_name?.toUpperCase().replace(/\s+/g, '') || 'USER'}${user.id.slice(-6)}`;
         console.log('Using fallback affiliate code:', affiliateCode);
         setAffiliateData({
           affiliate_code: affiliateCode,
@@ -366,13 +374,13 @@ export default function MijnProfiel() {
           status: 'inactive'
         });
         setNewAffiliateCode(affiliateCode);
-        return;
+        return affiliateCode;
       }
 
       console.log('Fetched affiliate data:', profileData);
 
       // Use real data from database
-      const affiliateCode = profileData.affiliate_code || `${profile?.full_name?.toUpperCase().replace(/\s+/g, '') || 'USER'}${user.id.slice(-6)}`;
+      affiliateCode = profileData.affiliate_code || `${profile?.full_name?.toUpperCase().replace(/\s+/g, '') || 'USER'}${user.id.slice(-6)}`;
       setAffiliateData({
         affiliate_code: affiliateCode,
         total_referrals: profileData.total_referrals || 0,
@@ -383,6 +391,7 @@ export default function MijnProfiel() {
       });
 
       setNewAffiliateCode(affiliateCode);
+      return affiliateCode;
     } catch (error) {
       console.error('Error fetching affiliate data:', error);
       // Set fallback data on error
@@ -399,13 +408,14 @@ export default function MijnProfiel() {
     }
   };
 
-  const fetchClickStats = async () => {
-    if (!affiliateData.affiliate_code) return;
+  const fetchClickStats = async (affiliateCode?: string) => {
+    const codeToUse = affiliateCode || affiliateData.affiliate_code;
+    if (!codeToUse) return;
 
     try {
-      console.log('Fetching click stats for affiliate code:', affiliateData.affiliate_code);
+      console.log('Fetching click stats for affiliate code:', codeToUse);
       
-      const response = await fetch(`/api/affiliate/clicks?code=${encodeURIComponent(affiliateData.affiliate_code)}`);
+      const response = await fetch(`/api/affiliate/clicks?code=${encodeURIComponent(codeToUse)}`);
       const data = await response.json();
 
       if (data.success) {
@@ -419,14 +429,15 @@ export default function MijnProfiel() {
     }
   };
 
-  const fetchDetailedClicks = async () => {
-    if (!affiliateData.affiliate_code) return;
+  const fetchDetailedClicks = async (affiliateCode?: string) => {
+    const codeToUse = affiliateCode || affiliateData.affiliate_code;
+    if (!codeToUse) return;
 
     try {
       setLoadingDetailedClicks(true);
-      console.log('Fetching detailed clicks for affiliate code:', affiliateData.affiliate_code);
+      console.log('Fetching detailed clicks for affiliate code:', codeToUse);
       
-      const response = await fetch(`/api/affiliate/clicks-detail?code=${encodeURIComponent(affiliateData.affiliate_code)}&limit=50`);
+      const response = await fetch(`/api/affiliate/clicks-detail?code=${encodeURIComponent(codeToUse)}&limit=50`);
       const data = await response.json();
 
       if (data.success) {
@@ -444,13 +455,14 @@ export default function MijnProfiel() {
     }
   };
 
-  const fetchAffiliateStats = async () => {
-    if (!affiliateData.affiliate_code) return;
+  const fetchAffiliateStats = async (affiliateCode?: string) => {
+    const codeToUse = affiliateCode || affiliateData.affiliate_code;
+    if (!codeToUse) return;
 
     try {
-      console.log('Fetching comprehensive affiliate stats for:', affiliateData.affiliate_code);
+      console.log('Fetching comprehensive affiliate stats for:', codeToUse);
       
-      const response = await fetch(`/api/affiliate/stats?code=${encodeURIComponent(affiliateData.affiliate_code)}`);
+      const response = await fetch(`/api/affiliate/stats?code=${encodeURIComponent(codeToUse)}`);
       const data = await response.json();
 
       if (data.success) {
@@ -461,6 +473,30 @@ export default function MijnProfiel() {
       }
     } catch (error) {
       console.error('Error fetching affiliate stats:', error);
+    }
+  };
+
+  const fetchAffiliatePurchases = async (affiliateCode?: string) => {
+    const codeToUse = affiliateCode || affiliateData.affiliate_code;
+    if (!codeToUse) return;
+
+    try {
+      setLoadingPurchases(true);
+      console.log('Fetching affiliate purchases for:', codeToUse);
+      
+      const response = await fetch(`/api/affiliate/purchases?code=${encodeURIComponent(codeToUse)}`);
+      const data = await response.json();
+
+      if (data.success) {
+        setAffiliatePurchases(data.purchases);
+        console.log('Affiliate purchases fetched:', data.purchases);
+      } else {
+        console.error('Error fetching affiliate purchases:', data.error);
+      }
+    } catch (error) {
+      console.error('Error fetching affiliate purchases:', error);
+    } finally {
+      setLoadingPurchases(false);
     }
   };
 
@@ -1911,7 +1947,7 @@ export default function MijnProfiel() {
                 <div className="bg-[#181F17] rounded-lg p-3 sm:p-4">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-[#8BAE5A] text-xs sm:text-sm">Totaal Verdiend</span>
-                    <span className="text-white font-semibold text-sm sm:text-base">€{affiliateStats.totalEarned}</span>
+                    <span className="text-white font-semibold text-sm sm:text-base">€{Number(affiliateStats.totalEarned).toFixed(2)}</span>
                   </div>
                   <div className="w-full bg-[#232D1A] rounded-full h-2">
                     <div 
@@ -1950,7 +1986,7 @@ export default function MijnProfiel() {
                 <div className="bg-[#181F17] rounded-lg p-3 sm:p-4">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-[#8BAE5A] text-xs sm:text-sm">Maandelijkse Inkomsten</span>
-                    <span className="text-white font-semibold text-sm sm:text-base">€{affiliateStats.monthlyEarnings}</span>
+                    <span className="text-white font-semibold text-sm sm:text-base">€{Number(affiliateStats.monthlyEarnings).toFixed(2)}</span>
                   </div>
                   <div className="w-full bg-[#232D1A] rounded-full h-2">
                     <div 
@@ -2180,6 +2216,98 @@ export default function MijnProfiel() {
                     </div>
                   </div>
                 </div>
+              </div>
+
+              {/* Affiliate Purchases Table */}
+              <div className="bg-[#181F17] rounded-lg p-3 sm:p-4 md:p-6">
+                <div className="flex items-center justify-between mb-3 sm:mb-4">
+                  <h3 className="text-sm sm:text-base md:text-lg font-semibold text-white">Aankopen via jouw Link</h3>
+                  <button
+                    onClick={() => fetchAffiliatePurchases()}
+                    disabled={loadingPurchases}
+                    className="text-[#8BAE5A] hover:text-[#FFD700] transition-colors p-1"
+                    title="Ververs aankopen"
+                  >
+                    {loadingPurchases ? (
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#8BAE5A]"></div>
+                    ) : (
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
+                    )}
+                  </button>
+                </div>
+
+                {loadingPurchases ? (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#8BAE5A]"></div>
+                    <span className="ml-3 text-[#8BAE5A]">Aankopen laden...</span>
+                  </div>
+                ) : affiliatePurchases.length > 0 ? (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-[#3A4D23]">
+                          <th className="text-left py-2 px-2 text-[#8BAE5A] font-semibold">Klant</th>
+                          <th className="text-left py-2 px-2 text-[#8BAE5A] font-semibold">Pakket</th>
+                          <th className="text-left py-2 px-2 text-[#8BAE5A] font-semibold">Periode</th>
+                          <th className="text-right py-2 px-2 text-[#8BAE5A] font-semibold">Bedrag</th>
+                          <th className="text-right py-2 px-2 text-[#8BAE5A] font-semibold">Commissie</th>
+                          <th className="text-left py-2 px-2 text-[#8BAE5A] font-semibold">Datum</th>
+                          <th className="text-center py-2 px-2 text-[#8BAE5A] font-semibold">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {affiliatePurchases.map((purchase) => (
+                          <tr key={purchase.id} className="border-b border-[#3A4D23]/50 hover:bg-[#232D1A]/50">
+                            <td className="py-2 px-2 text-white">
+                              <div>
+                                <div className="font-medium">{purchase.customer_name}</div>
+                                <div className="text-xs text-[#8BAE5A]">{purchase.customer_email}</div>
+                              </div>
+                            </td>
+                            <td className="py-2 px-2 text-white">{purchase.package_name}</td>
+                            <td className="py-2 px-2 text-white text-xs">{purchase.billing_period}</td>
+                            <td className="py-2 px-2 text-white text-right">
+                              <div>€{purchase.amount_incl_vat}</div>
+                              <div className="text-xs text-[#8BAE5A]">(€{purchase.amount_excl_vat} excl. BTW)</div>
+                            </td>
+                            <td className="py-2 px-2 text-[#FFD700] text-right font-semibold">€{Number(purchase.commission).toFixed(2)}</td>
+                            <td className="py-2 px-2 text-white text-xs">
+                              {new Date(purchase.paid_at).toLocaleDateString('nl-NL', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                year: 'numeric'
+                              })}
+                            </td>
+                            <td className="py-2 px-2 text-center">
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                purchase.status === 'paid' 
+                                  ? 'bg-green-500/20 text-green-400' 
+                                  : purchase.status === 'pending'
+                                  ? 'bg-yellow-500/20 text-yellow-400'
+                                  : 'bg-red-500/20 text-red-400'
+                              }`}>
+                                {purchase.status === 'paid' ? 'Betaald' : 
+                                 purchase.status === 'pending' ? 'In behandeling' : 
+                                 'Onbetaald'}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <div className="w-16 h-16 bg-[#3A4D23] rounded-full flex items-center justify-center mx-auto mb-4">
+                      <svg className="w-8 h-8 text-[#8BAE5A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                      </svg>
+                    </div>
+                    <p className="text-[#8BAE5A] text-sm">Nog geen aankopen via jouw affiliate link. Deel je link om te beginnen!</p>
+                  </div>
+                )}
               </div>
             </div>
           )}

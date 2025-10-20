@@ -527,6 +527,52 @@ export default function Dashboard() {
             </div>
           </div>
 
+          {/* Admin Notice */}
+          {isAdmin && (
+            <div className="mb-6 sm:mb-8">
+              <div className="bg-gradient-to-r from-[#8BAE5A] to-[#B6C948] border border-[#8BAE5A]/30 rounded-xl p-4 sm:p-6 shadow-lg">
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <h3 className="text-white font-bold text-lg sm:text-xl">Eerste virtuele bijeenkomst via Zoom</h3>
+                      <span className="bg-white/20 text-white text-xs px-2 py-1 rounded-full font-medium">
+                        Alleen zichtbaar voor admins
+                      </span>
+                    </div>
+                    <div className="space-y-3">
+                      <p className="text-white/90 text-sm sm:text-base">
+                        <strong>Broeders,</strong> we organiseren onze eerste virtuele brotherhood meeting! Dit is een unieke kans om samen te komen en te groeien.
+                      </p>
+                      <div className="bg-white/10 rounded-lg p-3">
+                        <h4 className="text-white font-semibold text-sm sm:text-base mb-2">Wat kunnen jullie verwachten:</h4>
+                        <ul className="text-white/90 text-sm space-y-1">
+                          <li>• <strong>Lancering van TTM:</strong> We bespreken de toekomst van Top Tier Men</li>
+                          <li>• <strong>Brotherhood connectie:</strong> Kennismaken en ervaringen delen</li>
+                          <li>• <strong>Q&A sessie:</strong> Stel jullie vragen over het platform</li>
+                          <li>• <strong>Feedback moment:</strong> Jullie input over het TTM platform</li>
+                          <li>• <strong>Samen groeien:</strong> Tips en strategieën uitwisselen</li>
+                        </ul>
+                      </div>
+                      <p className="text-white/80 text-xs sm:text-sm">
+                        Meer details over datum, tijd en Zoom link volgen binnenkort via email.
+                      </p>
+                    </div>
+                  </div>
+                  <button className="text-white/80 hover:text-white transition-colors p-1 flex-shrink-0">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Badges Display */}
           <div className="mb-6 sm:mb-8">
             <BadgeDisplay 
@@ -677,48 +723,6 @@ export default function Dashboard() {
               </div>
             </Link>
 
-            {/* Mijn Voeding */}
-            <Link href="/dashboard/voedingsplannen-v2" className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-4 sm:p-6 text-left transition-transform duration-300 sm:hover:scale-105 hover:shadow-2xl hover:border-[#8BAE5A]/50 cursor-pointer block">
-              <div className="flex items-center justify-between mb-3 sm:mb-4 min-w-0">
-                <h3 className="text-lg sm:text-xl font-bold text-white">Mijn Voeding</h3>
-                <svg className="w-6 h-6 text-[#8BAE5A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-              </div>
-              <div className="space-y-2 sm:space-y-3">
-                {activeNutritionPlan ? (
-                  <>
-                    <div className="text-left">
-                      <div className="text-xs sm:text-sm text-[#8BAE5A] mb-1">Actief plan:</div>
-                      <div className="text-white font-semibold text-sm sm:text-base truncate">
-                        {activeNutritionPlan.title}
-                      </div>
-                    </div>
-                    <div className="w-full h-2 bg-[#3A4D23]/40 rounded-full">
-                      <div 
-                        className="h-2 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] rounded-full transition-all duration-700" 
-                        style={{ width: '60%' }}
-                      ></div>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div className="text-left">
-                      <div className="text-xs sm:text-sm text-[#8BAE5A] mb-1">Plan status:</div>
-                      <div className="text-white font-semibold text-sm sm:text-base">
-                        Geen plan geselecteerd
-                      </div>
-                    </div>
-                    <div className="w-full h-2 bg-[#3A4D23]/40 rounded-full">
-                      <div 
-                        className="h-2 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] rounded-full transition-all duration-700" 
-                        style={{ width: '0%' }}
-                      ></div>
-                    </div>
-                  </>
-                )}
-              </div>
-            </Link>
 
             {/* Mind & Focus */}
             <Link href="/dashboard/mind-focus" className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-4 sm:p-6 text-left transition-transform duration-300 sm:hover:scale-105 hover:shadow-2xl hover:border-[#8BAE5A]/50 cursor-pointer block">

@@ -94,8 +94,8 @@ export async function GET(req: NextRequest) {
       clicksLast30Days: clicksLast30Days || 0,
       totalReferrals,
       activeReferrals,
-      totalEarned: Math.round(totalEarned * 100) / 100, // Round to 2 decimals
-      monthlyEarnings: Math.round(monthlyEarnings * 100) / 100,
+      totalEarned: parseFloat(totalEarned.toFixed(2)), // Round to 2 decimals
+      monthlyEarnings: parseFloat(monthlyEarnings.toFixed(2)),
       lastReferral: lastReferral ? {
         date: lastReferral.paid_at || lastReferral.created_at,
         amount: lastReferral.amount_incl_vat,
